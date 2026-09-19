@@ -1,0 +1,79 @@
+# =============================================================================
+# .gitignore — Tutor TDS (Raiz do Monorepo)
+# Gerado pela Onda 0 — Auditoria Técnica
+# =============================================================================
+
+# ── SEGREDOS E CREDENCIAIS ────────────────────────────────────────────────────
+# NUNCA versionar segredos, keystore, chaves privadas ou variáveis de ambiente.
+android/key.properties
+android/upload-keystore.jks
+**/*.jks
+**/*.keystore
+**/.env
+**/.env.*
+!**/.env.example
+!**/.dev.vars.example
+**/config/production.json
+**/.dev.vars
+.env.deploy
+
+# Certificado de implantação (chave pública pode ser versionada separadamente)
+deployment_cert.der
+upload_cert.der
+
+# ── FLUTTER / DART ────────────────────────────────────────────────────────────
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/.dart_tool/
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
+**/build/
+**/coverage/
+**/.flutter-plugins
+
+# ── ANDROID ──────────────────────────────────────────────────────────────────
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/local.properties
+**/*.ap_
+**/*.class
+
+# Arquivos de release gerados
+**/*.aab
+**/*.apk
+**/web_build*.tar.gz
+
+# ── NODE / WEB / CLOUDFLARE WORKER ───────────────────────────────────────────
+**/node_modules/
+**/dist/
+**/.wrangler/
+**/.vite/
+
+# ── SISTEMA OPERACIONAL ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# ── IDEs E EDITORES ───────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# ── LOGS E TEMPORÁRIOS ────────────────────────────────────────────────────────
+*.log
+**/tmp/
+**/temp/
+flutter_01.log
+
+# ── ARQUIVOS BINÁRIOS GRANDES (não pertencem ao Git) ─────────────────────────
+CartilhasTDS*.apk
+Tutor-TDS-*.aab
+Tutor-TDS-*.zip
