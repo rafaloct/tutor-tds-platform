@@ -17,6 +17,7 @@ import '../features/certificates/presentation/certificate_wallet_screen.dart';
 import '../features/study_progress/study_progress_repository.dart';
 import '../widgets/study_resume_card.dart';
 import '../widgets/tds_wait_experience.dart';
+import '../widgets/tds_brand_stripe.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -301,7 +302,7 @@ class _LearningHeaderState extends State<_LearningHeader> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _BrandStripe(),
+            const TdsBrandStripe(),
             const SizedBox(height: 18),
             Text(
               greeting,
@@ -516,25 +517,6 @@ class _SupportersBanner extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _BrandStripe extends StatelessWidget {
-  const _BrandStripe();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 4,
-      child: Row(
-        children: [
-          Expanded(child: ColoredBox(color: Color(0xFF093AF4))),
-          Expanded(child: ColoredBox(color: Color(0xFFFF341B))),
-          Expanded(child: ColoredBox(color: Color(0xFFF6D846))),
-          Expanded(child: ColoredBox(color: Color(0xFF18D010))),
-        ],
       ),
     );
   }

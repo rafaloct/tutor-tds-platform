@@ -6,6 +6,7 @@ import 'onboarding_screen.dart';
 import 'privacy_screen.dart';
 import '../services/privacy_preferences.dart';
 import '../widgets/responsive_body.dart';
+import '../widgets/tds_brand_stripe.dart';
 import '../features/certificates/data/certificate_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -132,7 +133,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           ),
                         ),
                       ),
-                      const _BrandStripe(),
+                      const TdsBrandStripe(),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 26, 24, 28),
                         child: Form(
@@ -251,25 +252,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BrandStripe extends StatelessWidget {
-  const _BrandStripe();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 4,
-      child: Row(
-        children: [
-          Expanded(child: ColoredBox(color: Color(0xFF093AF4))),
-          Expanded(child: ColoredBox(color: Color(0xFFFF341B))),
-          Expanded(child: ColoredBox(color: Color(0xFFF6D846))),
-          Expanded(child: ColoredBox(color: Color(0xFF18D010))),
-        ],
       ),
     );
   }

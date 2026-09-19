@@ -143,3 +143,12 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Estados corrompidos ou incompatíveis são ignorados com fallback seguro para o início da cartilha.
 - Escritas de progresso são serializadas para preservar a ordem mesmo durante navegação rápida.
 - Validação: `flutter analyze` sem achados e suíte completa com 19 testes aprovados.
+
+### Configuração explícita das atividades
+
+- A assinatura cromática TDS foi consolidada em um componente baseado nos tokens de `AppTheme`.
+- Flashcards, quiz e simulado agora exibem fonte, dificuldade e quantidade antes da chamada de IA.
+- Resumos exibem fonte e tamanho antes da geração.
+- Os controles têm rolagem horizontal segura em telas estreitas e teste de interação.
+- O contrato de geração é testado para garantir o envio de fonte, dificuldade e quantidade.
+- Validação: `flutter analyze` sem achados e 21 testes aprovados.

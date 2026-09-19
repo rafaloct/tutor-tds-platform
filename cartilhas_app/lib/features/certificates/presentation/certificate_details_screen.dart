@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/certificate_service.dart';
 import '../models/certificate_record.dart';
+import '../../../widgets/tds_brand_stripe.dart';
 
 class CertificateDetailsScreen extends StatefulWidget {
   final CertificateRecord certificate;
@@ -68,7 +69,7 @@ class _CertificateDetailsScreenState extends State<CertificateDetailsScreen> {
                     clipBehavior: Clip.antiAlias,
                     child: Column(
                       children: [
-                        const _BrandStripe(),
+                        const TdsBrandStripe(height: 5),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
                           child: Column(
@@ -280,25 +281,6 @@ class _InfoRow extends StatelessWidget {
             child: Text(label, style: Theme.of(context).textTheme.labelLarge),
           ),
           Expanded(child: Text(value)),
-        ],
-      ),
-    );
-  }
-}
-
-class _BrandStripe extends StatelessWidget {
-  const _BrandStripe();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 5,
-      child: Row(
-        children: [
-          Expanded(child: ColoredBox(color: Color(0xFF093AF4))),
-          Expanded(child: ColoredBox(color: Color(0xFFFF341B))),
-          Expanded(child: ColoredBox(color: Color(0xFFF6D846))),
-          Expanded(child: ColoredBox(color: Color(0xFF18D010))),
         ],
       ),
     );

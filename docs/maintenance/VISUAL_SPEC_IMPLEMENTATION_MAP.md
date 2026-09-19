@@ -16,7 +16,7 @@ Fonte: `Tutor_TDS_Especificacao_Visual_Manutencao_v1.pdf`, 34 páginas.
 
 ## Incremento 1 - fundação visual segura
 
-1. Criar tokens/componentes compartilhados do design system.
+1. ~~Criar tokens/componentes compartilhados do design system.~~ Concluído com `AppTheme`, assinatura cromática, espera, retomada e controles de geração compartilhados.
 2. ~~Implementar `TDSWaitExperience` e substituir spinners vazios.~~ Concluído em 2026-09-19 nas telas Home, Tutor IA e materiais de estudo.
 3. ~~Tornar cabeçalho/composer do Tutor contextuais.~~ Concluído em 2026-09-19 com rótulo do conteúdo e orientação de entrada por modo.
 4. ~~Adicionar ações iniciais úteis e continuidade de estudo.~~ Concluído em 2026-09-19 com explicação simples, exemplo prático, prática com feedback e retomada local da cartilha.
@@ -30,8 +30,8 @@ O progresso da cartilha é persistido no aparelho por curso. A Home mostra a pr�
 
 ## Incremento 2 - aprendizagem contextual
 
-1. Mover dificuldade para configuração da atividade.
-2. Adicionar quantidade/fonte antes de gerar flashcards, quiz, resumo e simulado.
+1. ~~Mover dificuldade para configuração da atividade.~~ Concluído em painel explícito antes da geração.
+2. ~~Adicionar quantidade/fonte antes de gerar flashcards, quiz, resumo e simulado.~~ Concluído; resumo usa tamanho em lugar de contagem de itens.
 3. Exibir progresso, autoavaliação e origem dos cartões.
 4. Estruturar feedback de quiz com fonte e próxima ação.
 5. Persistir resumo/tentativa e suportar retomada offline.

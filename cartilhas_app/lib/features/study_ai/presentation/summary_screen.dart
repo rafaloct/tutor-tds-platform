@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../data/study_ai_service.dart';
 import '../models/study_models.dart';
 import 'study_async_view.dart';
+import 'study_generation_controls.dart';
 import 'study_material_controller.dart';
 
 class SummaryScreen extends StatefulWidget {
@@ -60,20 +61,23 @@ class _SummaryScreenState extends State<SummaryScreen> {
         minimum: const EdgeInsets.symmetric(horizontal: 4),
         child: Column(
           children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-              child: SegmentedButton<SummaryLength>(
-                segments: SummaryLength.values
-                    .map(
-                      (value) =>
-                          ButtonSegment(value: value, label: Text(value.label)),
-                    )
-                    .toList(),
-                selected: {_length},
-                onSelectionChanged: (selection) =>
-                    setState(() => _length = selection.first),
-              ),
+            StudyConfigurationPanel(
+              source: widget.topic,
+              controls: [
+                SegmentedButton<SummaryLength>(
+                  segments: SummaryLength.values
+                      .map(
+                        (value) => ButtonSegment(
+                          value: value,
+                          label: Text(value.label),
+                        ),
+                      )
+                      .toList(),
+                  selected: {_length},
+                  onSelectionChanged: (selection) =>
+                      setState(() => _length = selection.first),
+                ),
+              ],
             ),
             Expanded(
               child: AnimatedBuilder(

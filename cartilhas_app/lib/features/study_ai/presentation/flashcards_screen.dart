@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/study_ai_service.dart';
 import '../models/study_models.dart';
 import 'study_async_view.dart';
+import 'study_generation_controls.dart';
 import 'study_material_controller.dart';
 
 class FlashcardsScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
   final StudyMaterialController<FlashcardDeck> _controller =
       StudyMaterialController();
   StudyDifficulty _difficulty = StudyDifficulty.intermediate;
+  int _count = 8;
   int _index = 0;
   bool _showBack = false;
   final Set<int> _difficult = {};
@@ -39,6 +41,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
       () => context.read<StudyAiService>().generateFlashcards(
         topic: widget.topic,
         difficulty: _difficulty,
+        count: _count,
       ),
     );
   }
@@ -75,9 +78,29 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
         minimum: const EdgeInsets.symmetric(horizontal: 4),
         child: Column(
           children: [
-            _DifficultySelector(
-              value: _difficulty,
-              onChanged: (value) => setState(() => _difficulty = value),
+            StudyConfigurationPanel(
+              source: widget.topic,
+              controls: [
+                SegmentedButton<StudyDifficulty>(
+                  segments: StudyDifficulty.values
+                      .map(
+                        (value) => ButtonSegment(
+                          value: value,
+                          label: Text(value.label),
+                        ),
+                      )
+                      .toList(),
+                  selected: {_difficulty},
+                  onSelectionChanged: (selection) =>
+                      setState(() => _difficulty = selection.first),
+                ),
+                StudyCountSelector(
+                  value: _count,
+                  options: const [5, 8, 12],
+                  onChanged: (value) => setState(() => _count = value),
+                  label: 'Cartões',
+                ),
+              ],
             ),
             Expanded(
               child: AnimatedBuilder(
@@ -210,30 +233,6 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DifficultySelector extends StatelessWidget {
-  const _DifficultySelector({required this.value, required this.onChanged});
-
-  final StudyDifficulty value;
-  final ValueChanged<StudyDifficulty> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-      child: SegmentedButton<StudyDifficulty>(
-        segments: StudyDifficulty.values
-            .map(
-              (value) => ButtonSegment(value: value, label: Text(value.label)),
-            )
-            .toList(),
-        selected: {value},
-        onSelectionChanged: (selection) => onChanged(selection.first),
       ),
     );
   }

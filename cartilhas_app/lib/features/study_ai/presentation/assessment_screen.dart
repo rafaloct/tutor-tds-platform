@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../data/study_ai_service.dart';
 import '../models/study_models.dart';
 import 'study_async_view.dart';
+import 'study_generation_controls.dart';
 import 'study_material_controller.dart';
 
 enum AssessmentMode { quiz, exam }
@@ -24,6 +25,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   final StudyMaterialController<AssessmentDeck> _controller =
       StudyMaterialController();
   StudyDifficulty _difficulty = StudyDifficulty.intermediate;
+  late int _count;
   final Map<int, int> _answers = {};
   int _index = 0;
   bool _finished = false;
@@ -31,6 +33,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   int _remainingSeconds = 0;
 
   bool get _isExam => widget.mode == AssessmentMode.exam;
+
+  @override
+  void initState() {
+    super.initState();
+    _count = _isExam ? 10 : 5;
+  }
 
   @override
   void dispose() {
@@ -50,8 +58,16 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     final service = context.read<StudyAiService>();
     await _controller.generate(
       () => _isExam
-          ? service.generateExam(topic: widget.topic, difficulty: _difficulty)
-          : service.generateQuiz(topic: widget.topic, difficulty: _difficulty),
+          ? service.generateExam(
+              topic: widget.topic,
+              difficulty: _difficulty,
+              count: _count,
+            )
+          : service.generateQuiz(
+              topic: widget.topic,
+              difficulty: _difficulty,
+              count: _count,
+            ),
     );
     if (!mounted || !_isExam) return;
     final deck = _controller.state.data;
@@ -109,20 +125,29 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         minimum: const EdgeInsets.symmetric(horizontal: 4),
         child: Column(
           children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-              child: SegmentedButton<StudyDifficulty>(
-                segments: StudyDifficulty.values
-                    .map(
-                      (value) =>
-                          ButtonSegment(value: value, label: Text(value.label)),
-                    )
-                    .toList(),
-                selected: {_difficulty},
-                onSelectionChanged: (selection) =>
-                    setState(() => _difficulty = selection.first),
-              ),
+            StudyConfigurationPanel(
+              source: widget.topic,
+              controls: [
+                SegmentedButton<StudyDifficulty>(
+                  segments: StudyDifficulty.values
+                      .map(
+                        (value) => ButtonSegment(
+                          value: value,
+                          label: Text(value.label),
+                        ),
+                      )
+                      .toList(),
+                  selected: {_difficulty},
+                  onSelectionChanged: (selection) =>
+                      setState(() => _difficulty = selection.first),
+                ),
+                StudyCountSelector(
+                  value: _count,
+                  options: _isExam ? const [10, 15, 20] : const [5, 8, 10],
+                  onChanged: (value) => setState(() => _count = value),
+                  label: 'Questões',
+                ),
+              ],
             ),
             Expanded(
               child: AnimatedBuilder(
