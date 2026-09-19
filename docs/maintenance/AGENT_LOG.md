@@ -152,3 +152,10 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Os controles têm rolagem horizontal segura em telas estreitas e teste de interação.
 - O contrato de geração é testado para garantir o envio de fonte, dificuldade e quantidade.
 - Validação: `flutter analyze` sem achados e 21 testes aprovados.
+
+### Autoavaliação dos cartões
+
+- A sessão de flashcards mostra a cartilha de origem junto ao material gerado.
+- As escolhas “Eu lembrei” e “Revisar novamente” agora mantêm contadores mutuamente consistentes.
+- O estado é apresentado em componente acessível e coberto por widget test.
+- Validação: `flutter analyze` sem achados e 22 testes aprovados.

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../data/study_ai_service.dart';
 import '../models/study_models.dart';
+import 'flashcard_review_status.dart';
 import 'study_async_view.dart';
 import 'study_generation_controls.dart';
 import 'study_material_controller.dart';
@@ -24,6 +25,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
   int _index = 0;
   bool _showBack = false;
   final Set<int> _difficult = {};
+  final Set<int> _remembered = {};
 
   @override
   void dispose() {
@@ -36,6 +38,7 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
       _index = 0;
       _showBack = false;
       _difficult.clear();
+      _remembered.clear();
     });
     _controller.generate(
       () => context.read<StudyAiService>().generateFlashcards(
@@ -56,14 +59,16 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
   }
 
   void _rate(bool difficult, int length) {
-    if (difficult) {
-      _difficult.add(_index);
-    } else {
-      _difficult.remove(_index);
-    }
-    final order = _reviewOrder(length).toList(growable: false);
-    final currentPosition = order.indexOf(_index);
     setState(() {
+      if (difficult) {
+        _difficult.add(_index);
+        _remembered.remove(_index);
+      } else {
+        _difficult.remove(_index);
+        _remembered.add(_index);
+      }
+      final order = _reviewOrder(length).toList(growable: false);
+      final currentPosition = order.indexOf(_index);
       _index = order[(currentPosition + 1) % order.length];
       _showBack = false;
     });
@@ -146,6 +151,12 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
               ),
               const SizedBox(height: 10),
               LinearProgressIndicator(value: (_index + 1) / deck.items.length),
+              const SizedBox(height: 12),
+              FlashcardReviewStatus(
+                source: widget.topic,
+                remembered: _remembered.length,
+                toReview: _difficult.length,
+              ),
               const SizedBox(height: 20),
               Semantics(
                 button: true,
@@ -226,10 +237,6 @@ class _FlashcardsScreenState extends State<FlashcardsScreen> {
                 icon: const Icon(Icons.refresh),
                 label: const Text('Gerar novos cartões'),
               ),
-              if (_difficult.isNotEmpty)
-                Text(
-                  '${_difficult.length} cartão(ões) marcado(s) para revisão',
-                ),
             ],
           ),
         ),
