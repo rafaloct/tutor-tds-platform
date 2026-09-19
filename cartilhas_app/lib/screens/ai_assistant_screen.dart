@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/anything_llm_service.dart';
+import '../widgets/tds_wait_experience.dart';
 
 class AIAssistantScreen extends StatefulWidget {
   final String initialContext;
@@ -122,9 +123,12 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             ),
           ),
           if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
+            const TdsWaitExperience(
+              title: 'Tutor preparando a resposta',
+              status: 'Consultando o material educacional...',
+              localTip:
+                  'Você pode conferir informações importantes diretamente na cartilha.',
+              compact: true,
             ),
           _buildInput(),
         ],

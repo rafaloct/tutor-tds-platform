@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../services/anything_llm_service.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
+import '../widgets/tds_wait_experience.dart';
 import 'guide_screen.dart';
 import '../models/chat_message.dart';
 import '../genui/genui_renderer.dart';
@@ -341,23 +342,12 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
             ),
           ),
           if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Tutor pensando...',
-                    style: TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
-                ],
-              ),
+            const TdsWaitExperience(
+              title: 'Tutor preparando a resposta',
+              status: 'Consultando o contexto da sua trilha...',
+              localTip:
+                  'Enquanto isso, pense em um exemplo da sua realidade para comparar com a explicação.',
+              compact: true,
             ),
           _buildInput(),
         ],

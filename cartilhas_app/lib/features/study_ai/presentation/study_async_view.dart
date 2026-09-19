@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/tds_wait_experience.dart';
 import 'study_material_controller.dart';
 
 class StudyAsyncView<T> extends StatelessWidget {
@@ -11,6 +12,10 @@ class StudyAsyncView<T> extends StatelessWidget {
     required this.idleTitle,
     required this.idleDescription,
     this.generateLabel = 'Gerar com IA',
+    this.loadingTitle = 'Preparando seu material',
+    this.loadingDescription = 'Organizando o conteúdo selecionado...',
+    this.localTip =
+        'Enquanto isso, tente lembrar os conceitos principais desta cartilha.',
   });
 
   final StudyLoadState<T> state;
@@ -19,19 +24,17 @@ class StudyAsyncView<T> extends StatelessWidget {
   final String idleTitle;
   final String idleDescription;
   final String generateLabel;
+  final String loadingTitle;
+  final String loadingDescription;
+  final String localTip;
 
   @override
   Widget build(BuildContext context) {
     return switch (state.status) {
-      StudyLoadStatus.loading => const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Preparando seu material...'),
-          ],
-        ),
+      StudyLoadStatus.loading => TdsWaitExperience(
+        title: loadingTitle,
+        status: loadingDescription,
+        localTip: localTip,
       ),
       StudyLoadStatus.ready => readyBuilder(context, state.data as T),
       StudyLoadStatus.failure => _EmptyStudyState(

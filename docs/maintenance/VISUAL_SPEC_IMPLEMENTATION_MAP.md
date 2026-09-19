@@ -17,10 +17,12 @@ Fonte: `Tutor_TDS_Especificacao_Visual_Manutencao_v1.pdf`, 34 páginas.
 ## Incremento 1 - fundação visual segura
 
 1. Criar tokens/componentes compartilhados do design system.
-2. Implementar `TDSWaitExperience` e substituir spinners vazios.
+2. ~~Implementar `TDSWaitExperience` e substituir spinners vazios.~~ Concluído em 2026-09-19 nas telas Home, Tutor IA e materiais de estudo.
 3. Tornar cabeçalho/composer do Tutor contextuais.
 4. Adicionar ações iniciais úteis e continuidade de estudo.
 5. Cobrir os componentes com widget tests e feature flags.
+
+O componente de espera usa mensagens e dicas locais, sem nova chamada de IA e sem porcentagem artificial. O comportamento foi coberto por widget test.
 
 ## Incremento 2 - aprendizagem contextual
 

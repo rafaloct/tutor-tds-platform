@@ -120,3 +120,10 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Log de aproximadamente 235,9 GB exige correção controlada.
 - Firewall/bindings exigem plano e rollback antes de alteração.
 - Backup de aplicação ainda não foi demonstrado.
+
+### Primeiro incremento visual seguro
+
+- Criado o componente compartilhado `TdsWaitExperience` com região semântica acessível, skeleton estático e dica pedagógica local.
+- Substituídos spinners vazios na Home, no Tutor IA legado, no Tutor GenUI e nos materiais de estudo.
+- Nenhuma chamada de IA foi adicionada e nenhuma porcentagem fictícia é exibida.
+- Validação: `flutter analyze` sem achados e suíte completa com 15 testes aprovados.

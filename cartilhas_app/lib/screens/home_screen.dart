@@ -14,6 +14,7 @@ import 'genui_assistant_screen.dart';
 import 'settings_screen.dart';
 import '../features/study_ai/presentation/study_hub_screen.dart';
 import '../features/certificates/presentation/certificate_wallet_screen.dart';
+import '../widgets/tds_wait_experience.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -141,7 +142,12 @@ class HomeScreen extends StatelessWidget {
         future: _loadCartilhas(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const TdsWaitExperience(
+              title: 'Organizando seus cursos',
+              status: 'Carregando a biblioteca disponível neste aparelho...',
+              localTip:
+                  'As cartilhas instaladas continuam disponíveis mesmo com conexão instável.',
+            );
           } else if (snapshot.hasError) {
             return Center(
               child: Text('Erro ao carregar cartilhas: ${snapshot.error}'),
