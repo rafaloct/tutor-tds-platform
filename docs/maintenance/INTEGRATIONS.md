@@ -136,7 +136,7 @@ O arquivo `android/upload-keystore.jks` e `key.properties` estão protegidos pel
 2. rsync dos arquivos web para a VPS
 3. POST na API do Dokploy para redeploy do compose
 
-**⚠️ Auditoria completa da VPS PENDENTE** — necessita autorização SSH.
+**Auditoria somente leitura concluída em 2026-09-19.** A topologia confirmada, os riscos e as pendências estão em `docs/infrastructure/`.
 
 ---
 

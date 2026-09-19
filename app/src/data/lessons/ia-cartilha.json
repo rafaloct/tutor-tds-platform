@@ -1,0 +1,47 @@
+{
+  "id": "ia-cartilha",
+  "title": "Inteligência Artificial e Inclusão Digital",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Conversa de Varanda sobre IA",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Que bom ter você por aqui. Sou o seu TUTOR VIZINHO do programa TDS. Vamos conversar um pouco sobre essa tal de Inteligência Artificial que o povo tanto fala?"
+        },
+        {
+          "type": "bot",
+          "content": "A IA não é bicho de sete cabeças não. Sabe quando você olha a previsão do tempo no celular antes de decidir se vai plantar sua roça de mandioca? Ou quando o YouTube já te mostra aquele vídeo de moda de viola que você gosta? Pois é, isso já é a IA agindo!"
+        },
+        {
+          "type": "question",
+          "content": "Você já sentiu que o seu celular parece que adivinha o que você quer ver?",
+          "options": [
+            { "label": "Sim, o tempo todo!", "value": "sim", "feedback": "ISSO MESMO! É a tecnologia tentando te ajudar a achar o que você gosta mais rápido." },
+            { "label": "Não muito...", "value": "nao", "feedback": "OLHA, às vezes ela é bem discreta, mas está sempre lá nos bastidores facilitando as coisas." }
+          ]
+        },
+        {
+          "type": "bot",
+          "content": "A IA serve para o bem de todos, ajudando desde quem vende galinha caipira na feira até quem cuida de grandes plantações no nosso Tocantins. Quer ver um exemplo de como ela pode te ajudar no seu dia a dia?"
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Nossos Grupos",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Antes de seguir, sabia que temos um grupo no ZAP só para falar disso? É o GRUPO DE IA E INCLUSÃO DIGITAL. Se quiser entrar e trocar uma ideia com o pessoal, o link é este: https://chat.whatsapp.com/LxELmBRh6mm3Ttx3pLY6At"
+        },
+        {
+          "type": "bot",
+          "content": "Lembrando que se precisar de ajuda de uma pessoa de verdade, você pode chamar nosso SUPORTE HUMANO no número: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

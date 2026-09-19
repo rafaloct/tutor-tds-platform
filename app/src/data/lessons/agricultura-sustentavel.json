@@ -1,0 +1,43 @@
+{
+  "id": "agricultura-sustentavel",
+  "title": "Agricultura Sustentável",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Cuidando da nossa Terra",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Tudo certo? Sou o seu TUTOR VIZINHO e hoje vamos conversar sobre como cuidar da nossa terra para ela produzir sempre com saúde."
+        },
+        {
+          "type": "bot",
+          "content": "A AGRICULTURA SUSTENTÁVEL é o jeito de plantar respeitando a natureza. Sabe quando a gente usa as folhas secas para cobrir o solo e manter a umidade? Ou quando planta várias coisas juntas para uma ajudar a outra? Isso é cuidar do futuro!"
+        },
+        {
+          "type": "question",
+          "content": "Você já percebeu que a terra fica mais 'fresca' quando está coberta com palha ou folhas?",
+          "options": [
+            { "label": "Sim, com certeza!", "value": "sim", "feedback": "EXATAMENTE! A palha protege o solo do sol forte e mantém a água para as plantas." },
+            { "label": "Nunca tinha notado.", "value": "nao", "feedback": "POIS OLHA, faça esse teste na sua horta. Você vai ver como as plantas crescem mais bonitas!" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Planejamento Produtivo",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Se quiser aprender mais sobre como planejar sua roça de um jeito que a terra não canse, entra no nosso GRUPO DE PLANEJAMENTO PRODUTIVO: https://chat.whatsapp.com/E3nFjqaUvpc7HoMGqe17yR"
+        },
+        {
+          "type": "bot",
+          "content": "Dúvidas? Chama no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

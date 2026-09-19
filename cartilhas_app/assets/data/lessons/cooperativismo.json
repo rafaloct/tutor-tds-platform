@@ -1,0 +1,146 @@
+{
+  "id": "cooperativismo",
+  "title": "Cooperativismo e Crédito",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1oet1ol6TD2bvW3hYuqWew_8NVAuaxBKo/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Trabalhar Junto é mais Forte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Hoje vamos falar de algo muito poderoso: trabalhar junto com outros. Sabe o mutirão para colher a mandioca ou limpar o pasto? Isso já é o começo do COOPERATIVISMO! Quando a gente se une, consegue comprar mais barato e vender por um preço melhor."
+        },
+        {
+          "type": "bot",
+          "content": "Dois conceitos importantes: ASSOCIATIVISMO — quando pessoas se juntam para resolver um problema coletivo sem foco direto no lucro (como uma associação de moradores). COOPERATIVISMO — quando pessoas se unem para produzir, comprar ou vender JUNTOS e dividem os resultados de forma justa."
+        },
+        {
+          "type": "question",
+          "content": "Você já participou de algum mutirão ou grupo de ajuda entre vizinhos?",
+          "options": [
+            {
+              "label": "Sim, já participei!",
+              "value": "sim",
+              "feedback": "ISSO AÍ! Então você já sabe que 'uma mão lava a outra e as duas lavam o rosto'. Você já tem a mentalidade cooperativista. Vamos ver como formalizar isso para ganhar mais!"
+            },
+            {
+              "label": "Ainda não.",
+              "value": "nao",
+              "feedback": "POIS OLHA, trabalhar sozinho é muito mais difícil e caro. Vamos ver como a união facilita a vida e aumenta os ganhos de todos os envolvidos!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cooperativa",
+      "title": "O que é uma Cooperativa",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "COOPERATIVA é uma empresa que pertence a todos os seus membros — os cooperados. Cada membro tem um voto, independente de quanto investiu. Os resultados (chamados de SOBRAS) são divididos proporcionalmente à participação de cada um. Não é o dono que fica com o lucro — todos ficam."
+        },
+        {
+          "type": "bot",
+          "content": "PRINCÍPIOS DO COOPERATIVISMO: (1) Adesão voluntária e livre. (2) Gestão democrática — um membro, um voto. (3) Participação econômica dos membros. (4) Autonomia e independência. (5) Educação, formação e informação. (6) Cooperação entre cooperativas. (7) Interesse pela comunidade."
+        },
+        {
+          "type": "bot",
+          "content": "VANTAGENS práticas: Comprar sementes, fertilizantes e equipamentos em grupo custa muito menos. Vender em conjunto garante volume para acessar mercados maiores. Dividir máquinas e custos reduz o gasto de cada um. Acessar crédito mais facilmente com a cooperativa como garantia."
+        },
+        {
+          "type": "question",
+          "content": "Como se chama o resultado positivo (lucro) em uma cooperativa?",
+          "options": [
+            {
+              "label": "Sobras",
+              "value": "a",
+              "feedback": "CERTO! Em cooperativas, o resultado positivo é chamado de SOBRAS — não de lucro — porque é dividido entre todos os cooperados proporcionalmente à sua participação. Não fica só com o dono, porque todos são donos!"
+            },
+            {
+              "label": "Dividendos",
+              "value": "b",
+              "feedback": "Dividendos é o termo usado em empresas de capital privado. Em cooperativas, o resultado positivo se chama SOBRAS, pois é o que 'sobrou' depois de cobrir todos os custos, e é distribuído entre os cooperados de forma proporcional à participação de cada um."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mercado",
+      "title": "Acesso a Mercados Públicos",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "PAA (Programa de Aquisição de Alimentos) e PNAE (Programa Nacional de Alimentação Escolar) são programas do governo que compram diretamente de agricultores familiares organizados em cooperativas ou associações. O PNAE exige que 30% dos alimentos das escolas venham da agricultura familiar."
+        },
+        {
+          "type": "bot",
+          "content": "Para acessar esses mercados, a cooperativa precisa estar formalizada (CNPJ), com DAP (Declaração de Aptidão ao Pronaf) dos membros, e registrada na prefeitura ou órgão competente. Parece burocrático, mas a cooperativa ajuda cada membro a passar por isso junto."
+        },
+        {
+          "type": "question",
+          "content": "Qual programa exige que 30% dos alimentos das escolas públicas venham da agricultura familiar?",
+          "options": [
+            {
+              "label": "PNAE",
+              "value": "a",
+              "feedback": "CORRETO! O PNAE — Programa Nacional de Alimentação Escolar — determina que pelo menos 30% dos recursos devem ser usados na compra de alimentos da agricultura familiar. Cooperativas organizadas têm prioridade nesse processo de compra!"
+            },
+            {
+              "label": "PAA",
+              "value": "b",
+              "feedback": "O PAA também é importante, mas a regra dos 30% é do PNAE (Programa Nacional de Alimentação Escolar). Ambos são programas federais que compram de agricultores familiares, e a cooperativa ajuda a acessar os dois."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "constituicao",
+      "title": "Como Montar uma Cooperativa",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Para constituir uma cooperativa são necessários no mínimo 20 membros. Os passos principais: (1) Reunião de fundação com todos os interessados. (2) Elaboração e aprovação do Estatuto Social. (3) Eleição da diretoria e do conselho fiscal. (4) Registro na Junta Comercial e na Receita Federal. (5) Abertura de conta bancária."
+        },
+        {
+          "type": "bot",
+          "content": "DICA PRÁTICA: Antes de formalizar, comece com uma ASSOCIAÇÃO informal. Reúna os vizinhos, testem comprar e vender juntos, construam confiança. Quando o grupo estiver organizado e funcionando, aí sim formalizem como cooperativa. A confiança entre os membros é a base de tudo."
+        },
+        {
+          "type": "question",
+          "content": "Qual é o número mínimo de membros para constituir uma cooperativa?",
+          "options": [
+            {
+              "label": "20 membros",
+              "value": "a",
+              "feedback": "CORRETO! A Lei do Cooperativismo (Lei 5.764/71) exige no mínimo 20 membros fundadores para constituir uma cooperativa. Mas antes de chegar lá, você pode começar com uma associação informal e ir crescendo com o grupo."
+            },
+            {
+              "label": "5 membros",
+              "value": "b",
+              "feedback": "O mínimo legal para cooperativa é 20 membros. Para associações, o número pode ser menor. Mas não se preocupe — comece reunindo os vizinhos interessados, prove que funciona, e o grupo vai crescer naturalmente."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer saber como montar um grupo forte na sua comunidade? Entre no nosso GRUPO DE CRÉDITO E COOPERATIVISMO: https://chat.whatsapp.com/LUPEWSRTwO6GGWCsTt7BpE"
+        },
+        {
+          "type": "bot",
+          "content": "Se tiver dúvida sobre como começar, chame no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# Ignora tudo exceto o que o Dockerfile precisa
+*
+
+# Permite apenas os arquivos necessários
+!Dockerfile
+!nginx.conf
+!build/web/**

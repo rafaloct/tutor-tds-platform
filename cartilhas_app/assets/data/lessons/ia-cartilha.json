@@ -1,0 +1,150 @@
+{
+  "id": "ia-cartilha",
+  "title": "Inteligência Artificial e Inclusão Digital",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1vjwT_uoi_tw2rmSL2Y4kldjkqo5P-n4f/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "O que é Inteligência Artificial?",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá! Você já percebeu que o celular sugere a próxima palavra quando você está digitando? Ou que o aplicativo do banco identifica se uma compra é suspeita? Isso é INTELIGÊNCIA ARTIFICIAL (IA) — e ela já faz parte do seu dia a dia sem você perceber."
+        },
+        {
+          "type": "bot",
+          "content": "IA é quando um computador aprende a fazer tarefas que normalmente precisariam de inteligência humana: reconhecer imagens, entender o que você fala, traduzir idiomas, tomar decisões. A diferença para um programa comum é que a IA APRENDE com os dados — quanto mais ela usa, melhor fica."
+        },
+        {
+          "type": "question",
+          "content": "Qual desses exemplos é um uso de IA no dia a dia?",
+          "options": [
+            {
+              "label": "Celular que reconhece sua voz para pesquisar",
+              "value": "a",
+              "feedback": "CORRETO! O assistente de voz do celular (Google, Siri, Alexa) usa IA para entender o que você diz e buscar a informação certa. Isso é Processamento de Linguagem Natural (PLN) — uma das tecnologias de IA mais usadas no mundo."
+            },
+            {
+              "label": "Calculadora que soma números",
+              "value": "b",
+              "feedback": "A calculadora não é IA — ela apenas executa operações programadas. IA vai além: aprende com dados, identifica padrões e melhora com o tempo. Um exemplo real de IA é o reconhecimento de voz no celular ou o filtro de spam do e-mail."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tipos",
+      "title": "Tipos de IA e como Funcionam",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "APRENDIZADO DE MÁQUINA (Machine Learning): a IA aprende com exemplos. Você mostra milhares de fotos de cachorros e gatos, ela aprende a diferençar. Depois, quando vê uma foto nova, consegue dizer o que é. É assim que funciona o reconhecimento de imagens nas redes sociais."
+        },
+        {
+          "type": "bot",
+          "content": "IA GENERATIVA: tipo de IA que CRIA conteúdo novo. O ChatGPT escreve textos. O Midjourney cria imagens. O Gemini responde perguntas complexas. São ferramentas que você pode usar agora mesmo, no celular, muitas vezes de graça, para ajudar no trabalho e nos estudos."
+        },
+        {
+          "type": "bot",
+          "content": "CHATBOT: programa que simula uma conversa humana. Quando você manda mensagem para o banco pelo WhatsApp e recebe resposta automática — isso é um chatbot. Muitas empresas usam para atender clientes 24 horas por dia. Você pode criar um para o seu negócio também!"
+        },
+        {
+          "type": "question",
+          "content": "O que é IA Generativa?",
+          "options": [
+            {
+              "label": "IA que cria textos, imagens e conteúdo novo",
+              "value": "a",
+              "feedback": "EXATO! IA Generativa é a que CRIA conteúdo novo: textos (ChatGPT, Gemini), imagens (DALL-E, Midjourney), músicas, vídeos. Você pode usar hoje para escrever textos de venda, criar imagens de produtos, montar roteiros de vídeo. São ferramentas poderosas e muitas são gratuitas!"
+            },
+            {
+              "label": "IA que só calcula números",
+              "value": "b",
+              "feedback": "Não. IA que calcula é um sistema tradicional de computação. IA Generativa é muito mais poderosa: ela CRIA conteúdo novo — textos, imagens, músicas, vídeos — a partir das instruções que você dá. O ChatGPT e o Gemini são exemplos que você pode usar agora."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tocantins",
+      "title": "IA no Contexto Tocantinense",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "O Governo Federal lançou o PBIA — Plano Brasileiro de Inteligência Artificial — com R$23 bilhões de investimento até 2028. Um dos projetos é o ATER DIGITAL: assistência técnica rural por chatbot para orientar agricultores por WhatsApp ou aplicativo. A IA pode chegar à sua roça."
+        },
+        {
+          "type": "bot",
+          "content": "FERRAMENTAS DE IA que você pode usar AGORA no celular (muitas são gratuitas): ChatGPT (chat.openai.com) — responde perguntas, escreve textos, cria roteiros. Google Gemini — similar ao ChatGPT integrado ao Google. CapCut — edição de vídeo com IA. Canva — criação de artes com sugestões automáticas."
+        },
+        {
+          "type": "bot",
+          "content": "CUIDADOS IMPORTANTES: A IA pode errar — sempre verifique informações importantes antes de agir. A IA aprende com dados e pode ter vieses — dados de outras regiões podem não refletir a realidade do Tocantins. LGPD: seus dados pessoais são protegidos — não compartilhe documentos ou informações sensíveis com IAs desconhecidas."
+        },
+        {
+          "type": "question",
+          "content": "Qual cuidado é essencial ao usar ferramentas de IA?",
+          "options": [
+            {
+              "label": "Verificar as informações antes de tomar decisões",
+              "value": "a",
+              "feedback": "MUITO IMPORTANTE! A IA pode errar — ela não é infalível. Sempre verifique informações críticas em fontes confiáveis antes de agir. Use a IA como um assistente que ajuda, não como uma verdade absoluta. Especialmente para decisões de saúde, financeiras ou legais."
+            },
+            {
+              "label": "Confiar em tudo que a IA responde",
+              "value": "b",
+              "feedback": "Cuidado! A IA comete erros — às vezes apresenta informações incorretas com muita confiança (fenômeno chamado de 'alucinação'). Sempre verifique informações importantes em fontes confiáveis. Use a IA como um auxiliar, não como autoridade máxima."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pratica",
+      "title": "Usando IA no Seu Trabalho",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "EXEMPLOS PRÁTICOS para agricultores e empreendedores: (1) Peça ao ChatGPT para escrever uma legenda para foto do produto. (2) Use o Canva com IA para criar cartazes de venda. (3) Use o Google para identificar pragas em plantas (tire uma foto e pergunte). (4) Peça à IA para criar uma lista de gastos e receitas."
+        },
+        {
+          "type": "bot",
+          "content": "COMO FAZER UMA BOA PERGUNTA PARA A IA (prompt): Seja específico. Em vez de perguntar 'Como plantar feijão?', pergunte 'Quais são as 3 melhores práticas para plantar feijão no cerrado tocantinense durante a seca?'. Quanto mais contexto você der, melhor será a resposta."
+        },
+        {
+          "type": "question",
+          "content": "Como melhorar as respostas de uma ferramenta de IA?",
+          "options": [
+            {
+              "label": "Fazendo perguntas mais detalhadas e específicas",
+              "value": "a",
+              "feedback": "CORRETO! Quanto mais contexto e detalhes você der, melhor a IA consegue te ajudar. 'Como vender meu produto?' é uma pergunta vaga. 'Quais são 5 estratégias para vender mel de abelha nativa para consumidores em Palmas pelo Instagram?' é muito mais específica e vai gerar respostas muito mais úteis."
+            },
+            {
+              "label": "Fazendo perguntas curtas e simples",
+              "value": "b",
+              "feedback": "Perguntas muito vagas geram respostas genéricas. A chave está nos detalhes: conte quem você é, onde está, o que produz e o que precisa. Quanto mais contexto você der à IA, mais útil e precisa será a resposta dela."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer aprender mais sobre tecnologia e como usá-la no seu negócio? Entre no nosso GRUPO DE TECNOLOGIA E INCLUSÃO DIGITAL: https://chat.whatsapp.com/GFKVzJMdW0v0XpQvLEuWJW"
+        },
+        {
+          "type": "bot",
+          "content": "Dúvidas sobre como usar esses aplicativos? Fale no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

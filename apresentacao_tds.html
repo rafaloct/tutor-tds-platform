@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Cartilhas TDS — Guia do Usuário</title>
+  <style>
+    :root {
+      --verde: #1A6B3C;
+      --verde-escuro: #145530;
+      --verde-claro: #E8F5E9;
+      --azul: #1565C0;
+      --azul-claro: #E3F2FD;
+      --amarelo: #FFF9C4;
+      --cinza: #f5f5f5;
+      --texto: #212121;
+      --texto-sec: #555;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fafafa; color: var(--texto); }
+
+    /* ── CAPA ── */
+    .capa {
+      background: linear-gradient(160deg, var(--verde) 0%, #145530 100%);
+      color: white; padding: 80px 40px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh;
+    }
+    .capa-icone { font-size: 5em; margin-bottom: 20px; }
+    .capa h1 { font-size: 2.8em; font-weight: 800; margin-bottom: 14px; line-height: 1.2; }
+    .capa .sub { font-size: 1.2em; opacity: 0.9; margin-bottom: 28px; max-width: 600px; line-height: 1.7; }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 36px; }
+    .chip { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 20px; padding: 6px 16px; font-size: 0.85em; }
+    .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 700px; width: 100%; margin-top: 10px; }
+    .nav-grid a {
+      background: white; color: var(--verde); text-decoration: none;
+      padding: 12px 10px; border-radius: 10px; font-weight: 600; font-size: 0.9em;
+      transition: transform 0.15s, box-shadow 0.15s; text-align: center;
+    }
+    .nav-grid a:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    @media (max-width: 600px) { .nav-grid { grid-template-columns: 1fr 1fr; } }
+
+    /* ── SEÇÃO ── */
+    .secao { max-width: 1200px; margin: 0 auto; padding: 64px 24px; }
+    .sep { border: none; border-top: 3px solid var(--verde-claro); margin: 0; }
+
+    .secao-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 36px; padding-bottom: 16px;
+      border-bottom: 3px solid var(--verde);
+    }
+    .secao-num {
+      background: var(--verde); color: white; width: 52px; height: 52px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3em; font-weight: 800; flex-shrink: 0;
+    }
+    .secao-header h2 { font-size: 1.7em; color: var(--verde); }
+    .secao-header .tag { font-size: 0.85em; color: #888; margin-top: 3px; }
+
+    /* ── LAYOUT DUPLO ── */
+    .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; margin-bottom: 36px; }
+    .duo.reverse { direction: rtl; }
+    .duo.reverse > * { direction: ltr; }
+    @media (max-width: 820px) { .duo { grid-template-columns: 1fr; } .duo.reverse { direction: ltr; } }
+
+    /* ── SCREENSHOTS ── */
+    .ss-wrap {
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.14); border: 1px solid #ddd; background: #fff;
+    }
+    .ss-wrap img { width: 100%; display: block; }
+    .ss-cap { background: #f0f0f0; padding: 8px 14px; font-size: 0.8em; color: #666; text-align: center; }
+
+    /* Galeria de screenshots múltiplos */
+    .galeria { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .galeria.tres { grid-template-columns: 1fr 1fr 1fr; }
+    @media (max-width: 700px) { .galeria, .galeria.tres { grid-template-columns: 1fr; } }
+
+    /* ── TUTORIAL ── */
+    .tutorial { display: flex; flex-direction: column; gap: 18px; }
+    .intro { background: var(--verde-claro); border-left: 4px solid var(--verde); border-radius: 8px; padding: 16px 20px; }
+    .intro p { font-size: 1.02em; line-height: 1.7; }
+
+    .passo { display: flex; gap: 14px; align-items: flex-start; }
+    .passo-n {
+      background: var(--azul); color: white; width: 30px; height: 30px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.82em; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+    }
+    .passo-t strong { display: block; font-size: 0.95em; margin-bottom: 3px; }
+    .passo-t span { font-size: 0.9em; color: var(--texto-sec); line-height: 1.55; }
+
+    .dica { background: var(--amarelo); border-left: 4px solid #F9A825; border-radius: 8px; padding: 12px 16px; font-size: 0.9em; line-height: 1.6; }
+    .dica strong { color: #E65100; }
+    .info { background: var(--azul-claro); border-left: 4px solid var(--azul); border-radius: 8px; padding: 12px 16px; font-size: 0.9em; line-height: 1.6; }
+
+    /* ── LARGURA TOTAL ── */
+    .full { margin-bottom: 24px; }
+
+    /* ── RODAPÉ ── */
+    footer { background: var(--verde); color: white; text-align: center; padding: 36px 20px; font-size: 0.9em; }
+    footer a { color: #A5D6A7; }
+    .topo-link { display: block; text-align: center; margin: 40px 0 0; padding: 14px;
+                 background: var(--cinza); border-radius: 8px; color: var(--verde);
+                 text-decoration: none; font-weight: 600; font-size: 0.95em; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════ CAPA ════════════════════════════════════════════════════ -->
+<section class="capa" id="topo">
+  <div class="capa-icone">📚</div>
+  <h1>App Cartilhas Digitais TDS</h1>
+  <p class="sub">Guia completo — todas as telas e recursos explicados passo a passo,
+  pensado para usuários do CadÚnico que vão usar o app no Chromebook ou celular.</p>
+  <div class="chip-list">
+    <span class="chip">Territórios de Desenvolvimento Social</span>
+    <span class="chip">Tocantins · 2026</span>
+    <span class="chip">9 Cartilhas educativas</span>
+    <span class="chip">Tutor de Inteligência Artificial</span>
+    <span class="chip">Compatível com Chromebook</span>
+  </div>
+  <nav class="nav-grid">
+    <a href="#s01">1. Primeiro acesso</a>
+    <a href="#s02">2. Lista de cartilhas</a>
+    <a href="#s03">3. Como usar o app</a>
+    <a href="#s04">4. Glossário</a>
+    <a href="#s05">5. Sobre o Programa</a>
+    <a href="#s06">6. Meu Cadastro</a>
+    <a href="#s07">7. Suporte TDS</a>
+    <a href="#s08">8. Estudando no app</a>
+    <a href="#s09">9. Tutor de IA</a>
+  </nav>
+</section>
+
+<!-- ═══════ 01 WELCOME ══════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s01">
+  <div class="secao-header">
+    <div class="secao-num">1</div>
+    <div>
+      <h2>Primeiro acesso — Cadastro inicial</h2>
+      <div class="tag">Aparece somente na primeira vez que você abre o app</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div>
+      <div class="ss-wrap">
+        <img src="screenshots/01_welcome.png" alt="Tela de boas-vindas">
+        <div class="ss-cap">Tela inicial — campos em branco esperando seus dados</div>
+      </div>
+    </div>
+    <div class="tutorial">
+      <div class="intro"><p>Na primeira vez que você abrir o app, aparece esta tela pedindo seus dados.
+      É rápido — só precisa ser feito <strong>uma única vez</strong>. Depois disso o app abre direto na lista de cartilhas.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>Nome completo</strong>
+        <span>Escreva o seu nome como está no RG ou CPF.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>WhatsApp (com DDD)</strong>
+        <span>Digite só os números — o app coloca os parênteses e o traço automaticamente. Ex: 63 99999-1234.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>CPF</strong>
+        <span>Digite os 11 números — o app formata sozinho com pontos e traço.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">4</div><div class="passo-t">
+        <strong>Toque em "Entrar"</strong>
+        <span>O app salva seus dados e abre a lista de cartilhas. Pronto!</span>
+      </div></div>
+      <div class="dica"><strong>Para que serve o cadastro?</strong><br>
+      Seus dados são usados para emitir o <strong>certificado de conclusão</strong>. Nenhuma informação é enviada para fora do programa TDS.</div>
+      <div class="info"><strong>No Chromebook:</strong> use o teclado físico para preencher. Pressione <strong>Tab</strong> para ir ao próximo campo e <strong>Enter</strong> para confirmar o cadastro.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 02 HOME ═══════════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s02">
+  <div class="secao-header">
+    <div class="secao-num">2</div>
+    <div>
+      <h2>Tela Principal — Lista de Cartilhas</h2>
+      <div class="tag">Aparece após o login — grade com as 9 cartilhas</div>
+    </div>
+  </div>
+
+  <div class="full">
+    <div class="ss-wrap">
+      <img src="screenshots/02_home.png" alt="Tela Principal">
+      <div class="ss-cap">Grade de 2 colunas adaptada para Chromebook — mostra todas as 9 cartilhas de uma só vez</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="tutorial">
+      <div class="intro"><p>Esta é a tela central do app. Aqui estão todas as <strong>9 cartilhas</strong> do Programa TDS,
+      cada uma com um tema diferente — de Agricultura a Educação Financeira.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>Tocar em uma cartilha</strong>
+        <span>Clique no nome da cartilha para abrir e começar a estudar em formato de conversa interativa.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Botão azul "PDF"</strong>
+        <span>Abre a versão completa da cartilha em PDF no navegador — você pode salvar ou imprimir.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Ícones no canto superior direito</strong>
+        <span>Os 5 ícones dão acesso a: 📖 Glossário · ❓ Como usar · ℹ️ Sobre · 🎧 Suporte · 👤 Cadastro.</span>
+      </div></div>
+    </div>
+    <div>
+      <div class="dica" style="margin-bottom:14px;"><strong>Cartilhas disponíveis:</strong><br>
+      • Agricultura Sustentável<br>• Atendimento ao Cliente<br>• Audiovisual para o Dia a Dia<br>
+      • Cooperativismo e Crédito<br>• Economia do Lar<br>• Educação Financeira<br>
+      • Inspeção e Certificação (SIM/SIMA)<br>• Inteligência Artificial e Inclusão Digital<br>
+      • SAF — Sistemas Agroflorestais</div>
+      <div class="info"><strong>Layout Chromebook:</strong> No Chromebook (tela grande), as cartilhas aparecem em 2 colunas para facilitar a visualização. No celular aparecem em lista simples.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 03 GUIDE ══════════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s03">
+  <div class="secao-header">
+    <div class="secao-num">3</div>
+    <div>
+      <h2>Como usar o App TDS</h2>
+      <div class="tag">Toque no ícone ❓ no topo da tela principal</div>
+    </div>
+  </div>
+
+  <div class="galeria" style="margin-bottom:28px;">
+    <div class="ss-wrap">
+      <img src="screenshots/03_guide.png" alt="Como usar — parte superior">
+      <div class="ss-cap">Parte de cima — explicações sobre o app e o Tutor de IA</div>
+    </div>
+    <div class="ss-wrap">
+      <img src="screenshots/03b_guide_passos.png" alt="Como usar — passo a passo">
+      <div class="ss-cap">Parte de baixo — passo a passo rápido com 7 etapas numeradas</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="tutorial">
+      <div class="intro"><p>Esta tela é o manual do usuário dentro do próprio app. Explica todas as funções
+      com linguagem simples. Ideal para quem é novato no app.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>O que são as Cartilhas</strong>
+        <span>Explica que as cartilhas são materiais educativos criados pela UFT e IPEX com exemplos do Tocantins.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Para que serve este app</strong>
+        <span>O app transforma as cartilhas em conversas interativas — como um vizinho explicando o conteúdo.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Como usar com a cartilha física</strong>
+        <span>Guia de 5 passos para usar o app junto com a cartilha impressa ou em PDF.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">4</div><div class="passo-t">
+        <strong>Como obter o Certificado</strong>
+        <span>Explica que o certificado é liberado ao terminar todos os conteúdos e responder as perguntas.</span>
+      </div></div>
+    </div>
+    <div class="tutorial">
+      <div class="passo"><div class="passo-n">5</div><div class="passo-t">
+        <strong>Passo a passo rápido (parte de baixo)</strong>
+        <span>Role a tela para baixo para ver os 7 passos numerados com ícones explicando o fluxo completo do app.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">6</div><div class="passo-t">
+        <strong>Botão verde "Falar com a equipe TDS"</strong>
+        <span>No final da tela, um botão verde abre as opções de contato com a equipe (Chat ou WhatsApp).</span>
+      </div></div>
+      <div class="dica"><strong>Dica:</strong> Se você nunca usou um app educativo antes,
+      comece por esta tela. Ela mostra o caminho completo em menos de 2 minutos de leitura.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 04 GLOSSARY ════════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s04">
+  <div class="secao-header">
+    <div class="secao-num">4</div>
+    <div>
+      <h2>Glossário TDS</h2>
+      <div class="tag">Toque no ícone 📖 no topo da tela principal</div>
+    </div>
+  </div>
+
+  <div class="galeria tres" style="margin-bottom:28px;">
+    <div class="ss-wrap">
+      <img src="screenshots/04_glossary.png" alt="Glossário — todos os termos">
+      <div class="ss-cap">Visão geral — mais de 100 termos de todas as cartilhas</div>
+    </div>
+    <div class="ss-wrap">
+      <img src="screenshots/04b_glossary_filtro.png" alt="Glossário — filtrado">
+      <div class="ss-cap">Filtrado por "Economia do Lar" — mostra só os termos desta cartilha</div>
+    </div>
+    <div class="ss-wrap">
+      <img src="screenshots/04c_glossary_busca.png" alt="Glossário — busca">
+      <div class="ss-cap">Busca por palavra — encontra definições em todas as cartilhas</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="tutorial">
+      <div class="intro"><p>O Glossário reúne os termos importantes de todas as cartilhas. Se você não entendeu
+      uma palavra, consulte aqui antes de perguntar ao Tutor de IA.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>Ver todos os termos</strong>
+        <span>Ao abrir, o glossário mostra todos os termos em ordem alfabética com suas definições simplificadas.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Buscar uma palavra</strong>
+        <span>Toque na caixa "Buscar termo ou definição..." e escreva a palavra. A lista filtra automaticamente enquanto você digita.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Filtrar por cartilha</strong>
+        <span>Os botões coloridos abaixo da busca deixam você ver só os termos de uma cartilha específica.
+        Ex: toque em "Economia do Lar" para ver apenas os 13 termos desta cartilha.</span>
+      </div></div>
+    </div>
+    <div class="tutorial">
+      <div class="passo"><div class="passo-n">4</div><div class="passo-t">
+        <strong>Perguntar à IA sobre um termo</strong>
+        <span>Cada carta tem um botão "Perguntar à IA". Toque nele para o tutor explicar o conceito com exemplos da sua realidade no Tocantins.</span>
+      </div></div>
+      <div class="dica"><strong>Exemplo prático:</strong> Você está estudando a cartilha de Agricultura
+      Sustentável e não entende o que é "Agroecossistema". Abra o Glossário, filtre por "Agricultura Sustentável"
+      e encontre a definição em linguagem simples.</div>
+      <div class="info">O número de termos exibidos aparece ao lado do título.
+      "109 termos" = total. "13 termos" = filtrando por uma cartilha específica.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 05 ABOUT ══════════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s05">
+  <div class="secao-header">
+    <div class="secao-num">5</div>
+    <div>
+      <h2>Sobre o Programa TDS</h2>
+      <div class="tag">Toque no ícone ℹ️ no topo da tela principal</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="ss-wrap">
+      <img src="screenshots/05_about.png" alt="Sobre o Programa">
+      <div class="ss-cap">Descrição do programa TDS com logos das instituições realizadoras e apoiadoras</div>
+    </div>
+    <div class="tutorial">
+      <div class="intro"><p>Esta tela apresenta o <strong>Programa Territórios de Desenvolvimento Social</strong>
+      e as instituições responsáveis pelas cartilhas e pelo app.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>O que é o Programa TDS</strong>
+        <span>O TDS apoia pequenos produtores, microempreendedores e jovens do Tocantins com formação técnica,
+        inclusão produtiva e acesso a conhecimento.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Realização: IPEX e UFT</strong>
+        <span><strong>IPEX</strong> (Instituto de Pesquisa e Extensão) e <strong>UFT</strong> (Universidade Federal do Tocantins) são os responsáveis pelo conteúdo das cartilhas.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Apoio: FAPTO e CDR</strong>
+        <span><strong>FAPTO</strong> (Fundação de Apoio Científico) e <strong>CDR</strong> (Centro de Desenvolvimento Regional) apoiam o programa financeiramente.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">4</div><div class="passo-t">
+        <strong>Links dos institutos</strong>
+        <span>Toque em qualquer logo para acessar o site oficial de cada instituição.</span>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 06 CADUNICO ════════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s06">
+  <div class="secao-header">
+    <div class="secao-num">6</div>
+    <div>
+      <h2>Meu Cadastro</h2>
+      <div class="tag">Toque no ícone 👤+ no topo da tela principal</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="ss-wrap">
+      <img src="screenshots/06_cadunico.png" alt="Meu Cadastro">
+      <div class="ss-cap">Formulário de cadastro com os dados do aluno já preenchidos para atualização</div>
+    </div>
+    <div class="tutorial">
+      <div class="intro"><p>Aqui você pode ver e atualizar seus dados cadastrais.
+      Essas informações aparecem automaticamente no certificado de conclusão das cartilhas.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>Dados já aparecem preenchidos</strong>
+        <span>Ao abrir, o formulário já mostra o nome, WhatsApp e CPF que você cadastrou na primeira vez.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Atualizar algum dado</strong>
+        <span>Toque no campo que quer corrigir, apague o texto antigo e escreva o novo. Depois toque em "Salvar Cadastro".</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Confirmar a atualização</strong>
+        <span>Após salvar, o app mostra uma mensagem "Dados cadastrados com sucesso!" e volta para a tela anterior.</span>
+      </div></div>
+      <div class="dica"><strong>Importante para o certificado:</strong> Use o nome <strong>completo</strong>
+      exatamente como está no CPF. É esse nome que vai aparecer no certificado emitido pelo programa TDS.</div>
+      <div class="info"><strong>Este cadastro é separado do CadÚnico do governo.</strong>
+      Ele serve apenas para identificar o aluno no programa TDS e emitir o certificado de conclusão das cartilhas.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 07 SUPPORT ════════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s07">
+  <div class="secao-header">
+    <div class="secao-num">7</div>
+    <div>
+      <h2>Suporte TDS — Ajuda humana</h2>
+      <div class="tag">Toque no ícone 🎧 no topo da tela principal</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="ss-wrap">
+      <img src="screenshots/07_support.png" alt="Suporte TDS carregando">
+      <div class="ss-cap">Tela de suporte abrindo — "Abrindo suporte..." indica que está conectando ao chat</div>
+    </div>
+    <div class="tutorial">
+      <div class="intro"><p>O Suporte TDS conecta você diretamente com a equipe humana do programa.
+      Quando o Tutor de IA não resolve sua dúvida, use esta função para falar com uma pessoa real.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>Toque no ícone 🎧</strong>
+        <span>O app começa a conectar e mostra "Abrindo suporte...". Aguarde alguns segundos — é normal.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Escolha o canal de atendimento</strong>
+        <span>Uma janela aparece com duas opções: <strong>Chat no App</strong> (conversa em tempo real) ou <strong>WhatsApp</strong> (+55 63 9301-0823).</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Seus dados são enviados automaticamente</strong>
+        <span>O nome e CPF do seu cadastro já aparecem para a equipe TDS, facilitando o atendimento.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">4</div><div class="passo-t">
+        <strong>Se não conectar — sem internet</strong>
+        <span>Se aparecer "Não foi possível conectar", verifique sua conexão com a internet e toque em "Tentar novamente".</span>
+      </div></div>
+      <div class="dica"><strong>Quando usar o suporte:</strong> perguntas sobre o certificado,
+      problemas com o app, dúvidas sobre o programa TDS, ou para saber quando há eventos presenciais.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 08 CHAT EXPERIENCE ════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s08">
+  <div class="secao-header">
+    <div class="secao-num">8</div>
+    <div>
+      <h2>Estudando com a Cartilha — Passo a passo interativo</h2>
+      <div class="tag">Abre ao tocar em uma cartilha na tela principal</div>
+    </div>
+  </div>
+
+  <div class="galeria" style="margin-bottom:12px;">
+    <div class="ss-wrap">
+      <img src="screenshots/08a_chat_start.png" alt="Início da cartilha">
+      <div class="ss-cap">1. Início — o "Tutor Vizinho" se apresenta e explica o tema</div>
+    </div>
+    <div class="ss-wrap">
+      <img src="screenshots/08b_chat_continued.png" alt="Cartilha avançando">
+      <div class="ss-cap">2. Avançando — novo conteúdo aparece após tocar em "Continuar"</div>
+    </div>
+  </div>
+  <div class="galeria" style="margin-bottom:28px;">
+    <div class="ss-wrap">
+      <img src="screenshots/08d_chat_question.png" alt="Pergunta com resposta">
+      <div class="ss-cap">3. Pergunta interativa — o aluno respondeu "Solo cansado ou fraco" e recebeu feedback</div>
+    </div>
+    <div class="ss-wrap">
+      <img src="screenshots/08e_chat_answered.png" alt="Após responder">
+      <div class="ss-cap">4. Após responder — conversa continua com mais explicações</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="tutorial">
+      <div class="intro"><p>Dentro da cartilha, o conteúdo é apresentado como uma <strong>conversa</strong>
+      — o "Tutor Vizinho" explica os assuntos em linguagem simples,
+      como se fosse um vizinho experiente ensinando você.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>Barra de progresso verde (topo)</strong>
+        <span>Mostra quanto da cartilha você já estudou. Vai enchendo à medida que você avança.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Botão verde "Continuar" (fundo)</strong>
+        <span>Após ler a mensagem do tutor, toque em "Continuar" para ver o próximo conteúdo.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Perguntas com opções de resposta</strong>
+        <span>Em alguns momentos aparecem botões de resposta. Toque na opção que você acha correta —
+        o app mostra se você acertou e explica o motivo.</span>
+      </div></div>
+    </div>
+    <div class="tutorial">
+      <div class="passo"><div class="passo-n">4</div><div class="passo-t">
+        <strong>Botão 🤖 azul (canto inferior direito)</strong>
+        <span>A qualquer momento, toque neste botão para chamar o Tutor de IA e tirar dúvidas
+        sobre o conteúdo que está estudando.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">5</div><div class="passo-t">
+        <strong>Certificado ao final</strong>
+        <span>Ao terminar todos os conteúdos e responder todas as perguntas corretamente,
+        aparece um botão verde "Solicitar Certificado". Toque nele para solicitar.</span>
+      </div></div>
+      <div class="dica"><strong>Não precisa terminar de uma vez!</strong>
+      O app guarda seu progresso automaticamente. Feche o app quando quiser e volte depois —
+      o conteúdo continua de onde você parou.</div>
+      <div class="info"><strong>Sem internet?</strong> O conteúdo das cartilhas funciona sem internet.
+      Só o Tutor de IA e o Suporte precisam de conexão.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 09 AI TUTOR ════════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" id="s09">
+  <div class="secao-header">
+    <div class="secao-num">9</div>
+    <div>
+      <h2>Tutor de IA — Seu Assistente Inteligente</h2>
+      <div class="tag">Ícone 🤖 dentro de cada cartilha · Também no Glossário</div>
+    </div>
+  </div>
+
+  <div class="galeria tres" style="margin-bottom:12px;">
+    <div class="ss-wrap">
+      <img src="screenshots/09a_ai_initial.png" alt="Tutor de IA — inicial">
+      <div class="ss-cap">Estado inicial — tutor se apresenta e aguarda sua pergunta</div>
+    </div>
+    <div class="ss-wrap">
+      <img src="screenshots/09c_ai_response.png" alt="Tutor de IA — com resposta">
+      <div class="ss-cap">Conversa ativa — pergunta do aluno (azul) e resposta do tutor (branco)</div>
+    </div>
+    <div class="ss-wrap">
+      <img src="screenshots/09d_ai_minha_realidade.png" alt="Tutor de IA — Minha Realidade">
+      <div class="ss-cap">Modo "Minha Realidade" (roxo) — tutor adapta as respostas à sua situação pessoal</div>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="tutorial">
+      <div class="intro"><p>O Tutor de IA é como ter um professor particular disponível a qualquer hora.
+      Ele foi treinado com o conteúdo das cartilhas TDS e responde suas dúvidas de forma simples e adaptada à realidade do Tocantins.</p></div>
+      <div class="passo"><div class="passo-n">1</div><div class="passo-t">
+        <strong>Digitar a pergunta</strong>
+        <span>Toque no campo de texto na parte inferior ("Fale ou digite...") e escreva sua dúvida. Pressione Enter ou toque no ícone de enviar ➤.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">2</div><div class="passo-t">
+        <strong>Usar a voz 🎤</strong>
+        <span>Toque no ícone de microfone verde e fale sua pergunta. O app transcreve sua voz e envia automaticamente.
+        Útil para quem tem dificuldade de digitar.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">3</div><div class="passo-t">
+        <strong>Ouvir a resposta 🔊</strong>
+        <span>Cada resposta do tutor tem um ícone 🔊 no canto direito. Toque nele para ouvir a resposta em voz alta —
+        muito útil para quem tem dificuldade de leitura.</span>
+      </div></div>
+    </div>
+    <div class="tutorial">
+      <div class="passo"><div class="passo-n">4</div><div class="passo-t">
+        <strong>Modo "Geral" vs. "Minha Realidade"</strong>
+        <span>O chip no topo muda o modo:<br>
+        🟢 <strong>Geral</strong> — explica o conteúdo como está nas cartilhas.<br>
+        🟣 <strong>Minha Realidade</strong> — o tutor pergunta sobre sua situação (tem terra? tem renda?) e adapta as respostas ao que é <strong>viável pra você</strong>.</span>
+      </div></div>
+      <div class="passo"><div class="passo-n">5</div><div class="passo-t">
+        <strong>Ajuda humana</strong>
+        <span>O botão "Ajuda humana" conecta você com a equipe TDS caso o tutor não resolva sua dúvida.</span>
+      </div></div>
+      <div class="dica"><strong>Exemplos de perguntas para o Tutor:</strong><br>
+      "O que é compostagem?"<br>
+      "Como faço para vender minha produção?"<br>
+      "Qual a diferença entre SAF e roça comum?"<br>
+      "Como organizar o dinheiro da família?"<br>
+      "O que eu preciso para formalizar meu negócio?"</div>
+      <div class="info"><strong>No Chromebook:</strong> o microfone pode precisar de permissão.
+      Se aparecer uma janela pedindo permissão, clique em "Permitir" para usar o recurso de voz.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ RESUMO FINAL ═══════════════════════════════════════════════ -->
+<hr class="sep">
+<section class="secao" style="text-align:center;">
+  <h2 style="color:var(--verde); font-size:1.8em; margin-bottom:20px;">Resumo — 7 passos para usar o app</h2>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; text-align:left; margin-bottom:40px;">
+    <div style="background:var(--verde-claro); border-radius:10px; padding:16px;">
+      <strong style="color:var(--verde);">1️⃣ Cadastre-se</strong>
+      <p style="font-size:0.9em; margin-top:6px; color:var(--texto-sec);">Nome, WhatsApp e CPF — só uma vez, na primeira abertura do app.</p>
+    </div>
+    <div style="background:var(--verde-claro); border-radius:10px; padding:16px;">
+      <strong style="color:var(--verde);">2️⃣ Escolha uma cartilha</strong>
+      <p style="font-size:0.9em; margin-top:6px; color:var(--texto-sec);">Toque no nome da cartilha que quer estudar. Baixe o PDF se quiser a versão impressa.</p>
+    </div>
+    <div style="background:var(--verde-claro); border-radius:10px; padding:16px;">
+      <strong style="color:var(--verde);">3️⃣ Leia e avance</strong>
+      <p style="font-size:0.9em; margin-top:6px; color:var(--texto-sec);">Toque em "Continuar" para ver cada parte do conteúdo no seu ritmo.</p>
+    </div>
+    <div style="background:var(--verde-claro); border-radius:10px; padding:16px;">
+      <strong style="color:var(--verde);">4️⃣ Responda as perguntas</strong>
+      <p style="font-size:0.9em; margin-top:6px; color:var(--texto-sec);">Quando aparecerem botões de resposta, escolha a opção que achar certa.</p>
+    </div>
+    <div style="background:var(--verde-claro); border-radius:10px; padding:16px;">
+      <strong style="color:var(--verde);">5️⃣ Tire dúvidas com o Tutor 🤖</strong>
+      <p style="font-size:0.9em; margin-top:6px; color:var(--texto-sec);">A qualquer momento, toque no ícone azul 🤖 para perguntar ao Tutor de IA.</p>
+    </div>
+    <div style="background:var(--verde-claro); border-radius:10px; padding:16px;">
+      <strong style="color:var(--verde);">6️⃣ Solicite o certificado 🏆</strong>
+      <p style="font-size:0.9em; margin-top:6px; color:var(--texto-sec);">Ao concluir a cartilha, toque em "Solicitar Certificado". A equipe TDS recebe automaticamente.</p>
+    </div>
+    <div style="background:var(--verde-claro); border-radius:10px; padding:16px;">
+      <strong style="color:var(--verde);">7️⃣ Precisa de ajuda? 🎧</strong>
+      <p style="font-size:0.9em; margin-top:6px; color:var(--texto-sec);">Toque em 🎧 para falar com a equipe TDS via Chat no App ou WhatsApp.</p>
+    </div>
+  </div>
+  <a href="#topo" class="topo-link">↑ Voltar ao início</a>
+</section>
+
+<!-- ═══════ RODAPÉ ════════════════════════════════════════════════════ -->
+<footer>
+  <p><strong>App Cartilhas Digitais TDS</strong> · Programa Territórios de Desenvolvimento Social e Inclusão Produtiva</p>
+  <p style="margin-top:10px; opacity:0.85;">
+    Realização: IPEX — Instituto de Pesquisa e Extensão &amp; UFT — Universidade Federal do Tocantins<br>
+    Apoio: FAPTO &amp; CDR · Tocantins, Brasil · 2026
+  </p>
+  <p style="margin-top:10px;"><a href="https://ead.ipexdesenvolvimento.cloud">ead.ipexdesenvolvimento.cloud</a></p>
+</footer>
+
+</body>
+</html>

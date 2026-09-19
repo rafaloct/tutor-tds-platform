@@ -1,0 +1,100 @@
+════════════════════════════════════════════════════════════════════
+  CERTIFICADO DE AUTORIA — CARTILHAS TDS APP
+  Programa de Computador · Versão 1.0.0
+════════════════════════════════════════════════════════════════════
+
+IDENTIFICAÇÃO DA OBRA
+─────────────────────
+Nome do Software   : Cartilhas TDS — Tutor Digital do Programa TDS
+Versão             : 1.0.0
+Data de Emissão    : 2026-06-01
+Plataforma         : Android (APK) · Flutter/Dart
+Linguagem          : Dart 3.x · Flutter 3.x
+
+TITULARIDADE
+─────────────────────
+Instituição        : IPEX — Instituto de Pesquisa e Extensão de
+                     Desenvolvimento Regional do Centro Norte Brasileiro
+Programa           : TDS — Territórios de Desenvolvimento Social e
+                     Inclusão Produtiva
+Parceiros          : UFT (Universidade Federal do Tocantins)
+                     FAPTO (Fundação de Apoio Científico e Tecnológico)
+                     CDR (Centro de Desenvolvimento Regional)
+                     Governo Federal — Programa TDS
+
+ARQUIVO EXECUTÁVEL (APK)
+─────────────────────────
+Arquivo            : CartilhasTDS_v1.0.0_2026-06-01.apk
+Tamanho            : 56 MB
+Data de Build      : 2026-06-01 10:42:46 -0300
+
+Hash SHA-256 (APK) :
+494858768ff37984168e8cfb9a2745dc3ee250c859f7aa9eb6b73593be49954d
+
+Hash SHA-1 (APK)   :
+97bfd726b7b90af2e1672ec68cb5b0777bd18d73
+
+Hash MD5 (APK)     :
+ddffaf8c93fc2e3ac60e1ea41fd85754
+
+CÓDIGO-FONTE
+─────────────────────
+Arquivos Dart      : 22 arquivos
+Linhas de código   : 2.932 linhas
+Diretório raiz     : cartilhas_app/lib/
+
+Hash SHA-256 (código-fonte agregado):
+59a0d622e79923997a3482c262d22a4794f65e415d7819e1bf15d665afa9f851
+
+ARQUITETURA DO SISTEMA
+─────────────────────
+Frontend           : Flutter (Android / multiplataforma)
+Backend de IA      : AnythingLLM (RAG sobre 9 cartilhas TDS em PDF)
+Analytics          : Google Sheets via Apps Script
+Suporte            : Chatwoot (self-hosted)
+Protocolo de UI    : ATUI — Agentic UI Protocol (proprietário)
+
+FUNCIONALIDADES PRINCIPAIS
+─────────────────────────
+· Tutor de IA contextualizado (RAG) com 9 cartilhas TDS
+· Experiência interativa por cartilha com questões e feedback
+· Glossário com 130+ termos oficiais das cartilhas
+· Certificado de conclusão por e-mail (automático)
+· Chat de suporte humano via Chatwoot + WhatsApp
+· Analytics de funil (cadastro → início → conclusão)
+· Download das cartilhas em PDF (Google Drive)
+· Modo "Minha Realidade" (tutor adaptativo)
+· Acessibilidade: TTS (texto em voz) + STT (voz para texto)
+· Interface generativa ATUI (componentes gerados pela IA)
+
+CONTEÚDO EDUCACIONAL EMBARCADO
+─────────────────────────────
+As seguintes cartilhas do Programa TDS 2026 estão incorporadas:
+1. Agricultura Sustentável (Agroecologia, SAF, Irrigação)
+2. Atendimento ao Cliente
+3. Audiovisual para o Dia a Dia
+4. Cooperativismo e Crédito
+5. Economia do Lar
+6. Educação Financeira
+7. Inteligência Artificial e Inclusão Digital
+8. Sistemas Agroflorestais (SAF)
+9. Inspeção e Certificação (SIM/SIMA)
+
+Autores das cartilhas: Cleiton Silva Ferreira Milagres,
+Juliana Aguiar Melo, Waldecy Rodrigues, Gabriela Mariano Mendonça,
+Claumerson Borges Rodrigues, Thiago Bezerra Moreira e colaboradores.
+
+VERIFICAÇÃO DE INTEGRIDADE
+─────────────────────────
+Para verificar que o APK não foi alterado, execute:
+
+  Linux/Mac:  sha256sum CartilhasTDS_v1.0.0_2026-06-01.apk
+  Windows:    certutil -hashfile CartilhasTDS_v1.0.0_2026-06-01.apk SHA256
+
+O resultado deve ser:
+494858768ff37984168e8cfb9a2745dc3ee250c859f7aa9eb6b73593be49954d
+
+════════════════════════════════════════════════════════════════════
+  Este documento serve como comprovação técnica de autoria e pode
+  ser utilizado como evidência em processo de registro no INPI.
+════════════════════════════════════════════════════════════════════

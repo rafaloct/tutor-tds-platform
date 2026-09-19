@@ -120,14 +120,14 @@ systemctl restart sshd
 
 | Etapa | Status |
 |---|---|
-| Gerar chave `tutor_tds_vps` | ⏳ Pendente — aguarda autorização do usuário |
-| Instalar chave pública na VPS | ⏳ Pendente |
-| Configurar `~/.ssh/config` | ⏳ Pendente |
-| Validar acesso SSH | ⏳ Pendente |
+| Gerar chave `tutor_tds_vps` | ✅ Concluído |
+| Instalar chave pública na VPS | ✅ Concluído |
+| Configurar acesso local | ✅ Chave dedicada validada |
+| Validar acesso SSH | ✅ `BatchMode` como root funcional em 2026-09-19 |
 | Criar usuário `tdsdeploy` | ⏳ Pendente |
 | Bloquear login root | ⏳ Pendente |
 | Desativar auth por senha | ⏳ Pendente |
-| Auditoria completa da VPS | ⏳ Pendente |
+| Auditoria somente leitura da VPS | ✅ Concluída |
 
 ---
 

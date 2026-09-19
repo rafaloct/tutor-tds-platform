@@ -1,0 +1,223 @@
+{
+  "id": "agricultura-sustentavel",
+  "title": "Agricultura Sustentável",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1EIoyoCKBQAlvyGZU-7ATNylY18SIyb4m/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Boas-vindas",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Sou o TUTOR VIZINHO do programa TDS. Hoje vamos conversar sobre Agricultura Sustentável — como plantar respeitando a natureza e garantir renda para sua família."
+        },
+        {
+          "type": "bot",
+          "content": "Esta cartilha aborda três grandes temas: AGROECOLOGIA (produzir com equilíbrio entre natureza e produção), SISTEMAS AGROFLORESTAIS — os SAFs — (combinar árvores, roças e animais no mesmo espaço) e IRRIGAÇÃO DE BAIXO CUSTO (levar água para a roça gastando pouco)."
+        },
+        {
+          "type": "question",
+          "content": "Para você, qual é o maior desafio na sua roça hoje?",
+          "options": [
+            {
+              "label": "Falta de água na seca",
+              "value": "agua",
+              "feedback": "POIS É! A irrigação de baixo custo que vamos estudar pode te ajudar bastante nisso. Vamos em frente!"
+            },
+            {
+              "label": "Solo cansado ou fraco",
+              "value": "solo",
+              "feedback": "ENTENDO! As práticas agroecológicas como compostagem e adubação verde são exatamente o que vai recuperar seu solo. Continua!"
+            },
+            {
+              "label": "Pouca diversidade de produtos",
+              "value": "diversidade",
+              "feedback": "QUE BOM que você já pensa nisso! Os SAFs vão te mostrar como plantar várias coisas juntas e gerar mais renda. Vamos nessa!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agroecologia",
+      "title": "Agroecologia no Cerrado",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "A AGROECOLOGIA é uma forma de produzir alimentos buscando equilíbrio entre produção, natureza e qualidade de vida. Ela incentiva práticas como: rotação de culturas, diversidade de plantios, conservação da vegetação nativa, uso de adubação orgânica e proteção do solo e da água."
+        },
+        {
+          "type": "bot",
+          "content": "No Cerrado tocantinense, produzir com sustentabilidade é essencial. Os solos do Cerrado são naturalmente ácidos e podem ter baixa fertilidade sem manejo adequado. A região tem período seco bem definido com altas temperaturas — por isso é tão importante cuidar do solo e da água."
+        },
+        {
+          "type": "bot",
+          "content": "Cerca de 77% dos estabelecimentos agrícolas do Brasil são de agricultura familiar. Ela gera renda para 40% da população economicamente ativa. A agroecologia fortalece essa agricultura familiar, gerando autonomia, reduzindo o uso de agrotóxicos e aumentando a segurança alimentar."
+        },
+        {
+          "type": "question",
+          "content": "A adubação verde ajuda a melhorar a fertilidade do solo e pode reduzir processos de erosão. Isso é:",
+          "options": [
+            {
+              "label": "Verdadeiro",
+              "value": "v",
+              "feedback": "PARABÉNS, você acertou! A adubação verde contribui para proteger o solo, aumentar matéria orgânica e melhorar sua fertilidade, além de ajudar na conservação da umidade e redução da erosão."
+            },
+            {
+              "label": "Falso",
+              "value": "f",
+              "feedback": "Na verdade é VERDADEIRO! A adubação verde cobre o solo com plantas que depois são incorporadas, melhorando a fertilidade e protegendo contra erosão e ressecamento."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "praticas",
+      "title": "Práticas Agroecológicas",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "COMPOSTAGEM: transformar resíduos orgânicos em adubo natural. Para criar sua composteira, escolha um local plano e inicie com uma base de 20 cm de palha. Adicione resíduos orgânicos no centro, cobrindo sempre com matéria seca. Revire periodicamente para garantir a decomposição correta. É simples e barata!"
+        },
+        {
+          "type": "bot",
+          "content": "CONSÓRCIO DE CULTURAS: plantio esperto de duas ou mais culturas no mesmo espaço. Exemplos práticos: Milho + Feijão + Abóbora (o milho tutora o feijão, o feijão fixa nitrogênio, a abóbora cobre a terra mantendo a umidade). Mandioca com Feijão ou Milho. Alface + Cebolinha + Coentro (o coentro ainda espanta insetos!)."
+        },
+        {
+          "type": "bot",
+          "content": "PRODUTOS ALTERNATIVOS NATURAIS para controle de pragas: Extrato de Neem (controla pulgões, lagartas e mosca-branca). Extrato de Alho (repelente e antifúngico). Extrato de Pimenta (repelente natural). Calda Bordalesa (mistura de sulfato de cobre + cal para doenças fúngicas). São mais baratos e não prejudicam a saúde."
+        },
+        {
+          "type": "question",
+          "content": "Qual consórcio de culturas é clássico e completo na agroecologia?",
+          "options": [
+            {
+              "label": "Milho + Feijão + Abóbora",
+              "value": "a",
+              "feedback": "ISSO MESMO! O milho faz de tutor para o feijão, o feijão fixa nitrogênio no solo e a abóbora cobre a terra mantendo a umidade e evitando ervas daninhas. Cada planta ajuda a outra!"
+            },
+            {
+              "label": "Soja + Trigo + Milho",
+              "value": "b",
+              "feedback": "Não exatamente. Esse é um sistema mais convencional. O consórcio clássico agroecológico é Milho + Feijão + Abóbora, onde cada planta desempenha um papel diferente em benefício das outras."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "politicas",
+      "title": "Políticas Públicas e Comercialização",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Programas públicos como o PAA (Programa de Aquisição de Alimentos) e o PNAE (Programa Nacional de Alimentação Escolar) compram alimentos diretamente de pequenos produtores. O PNAE exige que pelo menos 30% dos alimentos das escolas públicas sejam da agricultura familiar. Isso é uma grande oportunidade!"
+        },
+        {
+          "type": "bot",
+          "content": "Além da venda direta, práticas agroecológicas agregam valor aos produtos. Alimentos associados à qualidade e produção sustentável conquistam novos mercados. Cooperativas e associações facilitam o acesso a mercados institucionais e melhoram a logística de venda."
+        },
+        {
+          "type": "question",
+          "content": "Qual porcentagem mínima dos alimentos das escolas públicas deve vir da agricultura familiar pelo PNAE?",
+          "options": [
+            {
+              "label": "30%",
+              "value": "a",
+              "feedback": "CORRETO! O PNAE determina que no mínimo 30% dos recursos repassados pelo governo para alimentação escolar devem ser usados na compra de alimentos da agricultura familiar. Isso representa uma grande oportunidade de mercado para você!"
+            },
+            {
+              "label": "10%",
+              "value": "b",
+              "feedback": "O número certo é 30%! O PNAE obriga que pelo menos 30% dos alimentos das escolas públicas venham da agricultura familiar. Isso é muito mais que 10% e representa uma grande oportunidade de venda garantida."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "saf",
+      "title": "Sistemas Agroflorestais (SAFs)",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "SAF é um sistema que combina ÁRVORES + CULTIVOS AGRÍCOLAS e às vezes ANIMAIS no mesmo espaço. O objetivo é aproveitar as interações entre eles de forma ecológica e econômica. Tipos principais: Silviagrícola (árvores + roça), Silvipastoril (árvores + pasto + animais), Agrossilvipastoril (os três juntos) e Quintais Agroflorestais (próximo à casa)."
+        },
+        {
+          "type": "bot",
+          "content": "BENEFÍCIOS AMBIENTAIS dos SAFs: conserva o solo e combate a desertificação, restaura a fertilidade, gera sombra e microclima, cria corredores ecológicos, aumenta a biodiversidade, conserva rios e água subterrânea, e produz durante todo o ano sem uso de veneno."
+        },
+        {
+          "type": "bot",
+          "content": "Para implantar um SAF, primeiro faça um 'retrato' da área: tamanho, tipo de solo, espécies existentes, mão de obra disponível, formas de escoar a produção. Escolha espécies nativas adaptadas ao ambiente local junto com culturas de ciclo curto (mandioca, milho, feijão) para gerar renda enquanto as árvores crescem."
+        },
+        {
+          "type": "question",
+          "content": "O que é um Sistema Agroflorestal Silvipastoril?",
+          "options": [
+            {
+              "label": "Combina árvores, pasto e criação de animais",
+              "value": "a",
+              "feedback": "PERFEITO! O sistema silvipastoril integra árvores, pastagens e animais (como bois e cavalos). As árvores oferecem sombra para o rebanho, melhoram o solo e podem produzir madeira ou frutos. É um sistema completo!"
+            },
+            {
+              "label": "Planta só árvores para madeira",
+              "value": "b",
+              "feedback": "Não. Silvipastoril integra ÁRVORES + PASTO + ANIMAIS. As árvores dão sombra para o gado, melhoram o solo com suas folhas e raízes, e ainda podem produzir madeira, frutos ou outros produtos florestais."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "irrigacao",
+      "title": "Irrigação de Baixo Custo",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Nos períodos de seca, a irrigação pode ser a diferença entre perder ou salvar a produção. Antes de instalar qualquer sistema, verifique: você tem uma fonte de água próxima (rio, represa, lagoa)? A área não está muito alta em relação à fonte? Você tem autorização legal para usar a água? Esses pontos são essenciais."
+        },
+        {
+          "type": "bot",
+          "content": "GOTEJAMENTO: sistema que libera água lentamente próximo às raízes. Usa menos água, evita doenças nas folhas e é eficiente. Pode ser caseiro com garrafas PET furadas. MICROASPERSÃO: distribui água em pequenas gotas como uma chuva leve, ótima para hortaliças. GRAVIDADE: funciona sem motobomba quando a fonte de água fica mais alta que a roça."
+        },
+        {
+          "type": "bot",
+          "content": "SISTEMA CASEIRO DE GOTEJAMENTO: (1) Defina o local e meça a área. (2) Identifique a fonte de água. (3) Calcule a quantidade de tubos necessários. (4) Instale o reservatório elevado (pode ser uma caixa d'água pequena). (5) Conecte as mangueiras com furinhos próximo às plantas. Baixo custo e alta eficiência!"
+        },
+        {
+          "type": "question",
+          "content": "Qual é a vantagem principal do sistema de irrigação por gotejamento?",
+          "options": [
+            {
+              "label": "Usa menos água e entrega direto na raiz",
+              "value": "a",
+              "feedback": "EXATO! O gotejamento é o sistema mais eficiente porque coloca a água diretamente onde a planta precisa — na raiz — sem desperdiçar com evaporação ou molhar as folhas. Usa até 50% menos água que a irrigação por aspersão."
+            },
+            {
+              "label": "É o sistema mais barato de instalar",
+              "value": "b",
+              "feedback": "O gotejamento não é necessariamente o mais barato de instalar, mas é o mais eficiente no uso da água. Sua grande vantagem é entregar água diretamente na raiz da planta, reduzindo o desperdício e prevenindo doenças."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer continuar aprendendo e trocar experiências com outros produtores? Entre no nosso GRUPO DE PLANEJAMENTO PRODUTIVO no WhatsApp: https://chat.whatsapp.com/E3nFjqaUvpc7HoMGqe17yR"
+        },
+        {
+          "type": "bot",
+          "content": "Dúvidas sobre a cartilha ou sobre o programa TDS? Fale com o SUPORTE diretamente: wa.me/5563993010823. Estamos aqui para te ajudar!"
+        }
+      ]
+    }
+  ]
+}

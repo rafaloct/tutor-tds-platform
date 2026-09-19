@@ -1,0 +1,43 @@
+{
+  "id": "atendimento-cliente",
+  "title": "Atendimento ao Público",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Acolhendo o Cliente",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Como vai essa força? Sou o seu TUTOR VIZINHO e hoje vamos aprender como tratar bem quem vem comprar o nosso produto ou serviço."
+        },
+        {
+          "type": "bot",
+          "content": "Sabe quando você vai na feira e aquele feirante te recebe com um sorriso, te explica tudo direitinho e você sai de lá feliz com a sua compra? Isso é um bom ATENDIMENTO AO PÚBLICO!"
+        },
+        {
+          "type": "question",
+          "content": "Você já voltou a comprar em um lugar só porque foi muito bem tratado?",
+          "options": [
+            { "label": "Sim, com certeza!", "value": "sim", "feedback": "VIU SÓ? O segredo de vender mais não é só o preço, é o jeito que a gente trata as pessoas." },
+            { "label": "Não ligo muito para isso.", "value": "nao", "feedback": "OLHA, pode até parecer que não importa, mas um cliente bem tratado sempre volta e ainda traz os amigos!" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo de Atendimento",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Se quiser aprender mais dicas de como encantar seus clientes, entra no nosso GRUPO DE ATENDIMENTO: https://chat.whatsapp.com/LoT3LU5E3hQ0H3fMs2jZ96"
+        },
+        {
+          "type": "bot",
+          "content": "Qualquer coisa, é só chamar a gente no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

@@ -176,12 +176,12 @@ WelcomeScreen (cadastro + LGPD)
 
 - **IP:** 46.202.150.132
 - **Orquestração:** Dokploy
-- **Serviços em execução (inferido):**
-  - AnythingLLM (LLM + RAG sobre cartilhas)
-  - Nginx servindo PWA Flutter
-  - Container Docker gerenciado via Dokploy
+- **Serviços confirmados em 2026-09-19:**
+  - AnythingLLM do Tutor TDS e uma segunda instância RAG
+  - Nginx em container servindo a aplicação web
+  - Dokploy, Traefik, PostgreSQL, Redis, Ollama, Chatwoot e serviços auxiliares
 - **Deploy atual:** rsync + Dokploy API (via `deploy_dokploy.sh`)
-- **Auditoria direta da VPS:** PENDENTE (requer autorização SSH)
+- **Auditoria direta da VPS:** concluída em modo somente leitura; ver `docs/infrastructure/`.
 
 ### Cloudflare Worker — `tutor-tds-gateway`
 
@@ -208,7 +208,7 @@ Segredos gerenciados no Cloudflare (não expostos):
 |---|---|---|
 | `user_name` | Nome do participante | Moderada |
 | `user_phone` | WhatsApp do participante | Alta |
-| `user_cpf` | CPF (mascarado na UI) | Alta — nunca vai ao servidor sem hash |
+| `user_cpf` | CPF (mascarado na UI) | Alta — o analytics legado ainda o envia em texto puro ao Apps Script |
 | `privacy_consent` | Booleano de consentimento | Controle de analytics |
 | `onboarding_seen_v1` | Booleano de tutorial visto | Baixa |
 | `certificates` | JSON lista de CertificateRecord | Moderada (nome + curso, sem CPF) |

@@ -1,0 +1,180 @@
+{
+  "id": "educacao-financeira",
+  "title": "Educação Financeira",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1dwHJKEctoaz0qZ2Lf2LKvsaFXiP7W3lE/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Por que cuidar do dinheiro?",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Sou o TUTOR VIZINHO e hoje vamos falar de um assunto sério: o nosso suado dinheirinho. Sabe quando você vende uma saca de milho ou umas galinhas e, antes do mês acabar, o dinheiro já sumiu? Isso acontece com muita gente — e tem solução!"
+        },
+        {
+          "type": "bot",
+          "content": "EDUCAÇÃO FINANCEIRA é o conjunto de conhecimentos, habilidades e atitudes para cuidar melhor do dinheiro. Não importa se você ganha pouco ou muito — quem organiza as finanças vive melhor. O primeiro passo é saber EXATAMENTE quanto entra e quanto sai do seu bolso todo mês."
+        },
+        {
+          "type": "question",
+          "content": "Você já sentiu que o dinheiro acaba antes do mês terminar?",
+          "options": [
+            {
+              "label": "Sim, todo mês!",
+              "value": "sim",
+              "feedback": "CALMA! Não se desespere. O primeiro passo é entender para onde ele está indo. Vamos montar um orçamento simples que vai te ajudar a ver tudo claramente."
+            },
+            {
+              "label": "Geralmente sobra um pouco.",
+              "value": "nao",
+              "feedback": "QUE BOM! Você já está no caminho certo. Vamos aprender a fazer esse 'pouco' render ainda mais com planejamento e poupança."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orcamento",
+      "title": "Montando seu Orçamento",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "ORÇAMENTO FAMILIAR é anotar tudo que ENTRA (renda: salário, venda de produtos, benefícios sociais, bicos) e tudo que SAI (despesas: comida, luz, água, aluguel, escola, saúde). Quando o que sai é maior que o que entra, há DÉFICIT — e é aí que as dívidas aparecem."
+        },
+        {
+          "type": "bot",
+          "content": "DESPESAS FIXAS são os gastos que se repetem todo mês com valor parecido: aluguel, energia elétrica, água, parcela de empréstimo. DESPESAS VARIÁVEIS mudam todo mês: comida, remédio, transporte, roupas. Conhecer os dois tipos ajuda a saber onde você pode economizar."
+        },
+        {
+          "type": "bot",
+          "content": "COMO MONTAR SEU ORÇAMENTO: (1) Anote toda renda do mês. (2) Liste todas as despesas fixas. (3) Estime as despesas variáveis. (4) Subtraia as despesas da renda. Se sobrar, guarde. Se faltar, corte o que não é essencial. Pode ser numa caderneta, numa tabela ou no celular."
+        },
+        {
+          "type": "question",
+          "content": "O que são despesas variáveis?",
+          "options": [
+            {
+              "label": "Gastos que mudam de valor a cada mês",
+              "value": "a",
+              "feedback": "CORRETO! Despesas variáveis são exatamente essas: comida, remédio, transporte — gastos que mudam dependendo do mês. São mais difíceis de controlar, mas possível com planejamento."
+            },
+            {
+              "label": "Gastos que se repetem com o mesmo valor",
+              "value": "b",
+              "feedback": "Não, esses são as despesas FIXAS (aluguel, luz, parcela). As despesas VARIÁVEIS são aquelas que mudam de valor todo mês, como alimentação, remédios e transporte."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "credito",
+      "title": "Crédito e Juros",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "CRÉDITO é usar dinheiro agora para pagar depois. Pode ser empréstimo bancário, cartão de crédito, fiado no mercado ou compra parcelada. Pode ajudar em emergências, mas o principal risco é usar sem planejamento — quando não há controle, surgem as dívidas."
+        },
+        {
+          "type": "bot",
+          "content": "JUROS são o custo extra que você paga ao usar crédito. Quanto mais tempo demorar para pagar, maiores os juros. O cartão de crédito rotativo no Brasil tem uma das taxas mais altas do mundo. Entender os juros é essencial para proteger sua renda. Se vai parcelar, calcule o valor total que vai pagar."
+        },
+        {
+          "type": "bot",
+          "content": "PARA USAR O CRÉDITO COM RESPONSABILIDADE: (1) Avalie se você realmente precisa. (2) Verifique se as parcelas cabem no orçamento. (3) Compare as taxas de juros em diferentes lugares. (4) Evite o cartão rotativo. (5) Lembre-se: crédito não é dinheiro extra — é dinheiro que você vai pagar depois com juros."
+        },
+        {
+          "type": "question",
+          "content": "Qual é o maior risco do uso do crédito?",
+          "options": [
+            {
+              "label": "Comprometer a renda futura com dívidas",
+              "value": "a",
+              "feedback": "EXATAMENTE! Quando se usa crédito sem planejamento, a renda futura fica comprometida com parcelas e juros, criando um ciclo de endividamento difícil de sair. Por isso é tão importante avaliar antes de contratar qualquer crédito."
+            },
+            {
+              "label": "Ter o nome no cadastro de bons pagadores",
+              "value": "b",
+              "feedback": "Na verdade, o risco é o contrário: usar crédito sem planejamento pode levar à inadimplência e ter o nome em cadastros de MAUS pagadores (como o SPC e Serasa), dificultando acesso a crédito no futuro."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poupanca",
+      "title": "Poupança e Metas",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "POUPAR não é só para quem ganha muito. É guardar uma parte — mesmo que pequena — do que você ganha todo mês antes de gastar. Uma dica prática: quando receber, separe primeiro o que vai poupar. O que sobrar é o que você gasta. Não o contrário."
+        },
+        {
+          "type": "bot",
+          "content": "METAS FINANCEIRAS ajudam a ter foco. Divida em: CURTO PRAZO (até 1 ano) — reserva de emergência para imprevistos como doença ou conserto urgente. MÉDIO PRAZO (1-3 anos) — comprar um equipamento, reformar a casa. LONGO PRAZO (mais de 3 anos) — aposentadoria, terra própria, educação dos filhos."
+        },
+        {
+          "type": "question",
+          "content": "Qual é a recomendação básica sobre poupar dinheiro?",
+          "options": [
+            {
+              "label": "Guardar primeiro antes de gastar",
+              "value": "a",
+              "feedback": "PERFEITO! Esse é o segredo: ao receber qualquer dinheiro, separe imediatamente o valor que vai poupar — mesmo que seja R$10. O que sobrar é o que você pode gastar. Quem tenta poupar 'o que sobrar no final do mês' geralmente não poupa nada."
+            },
+            {
+              "label": "Guardar só quando sobrar dinheiro",
+              "value": "b",
+              "feedback": "Essa é a armadilha mais comum: quem tenta guardar o que sobra geralmente nunca sobra nada. O correto é PRIMEIRO guardar uma parte — mesmo que pequena — e depois organizar os gastos com o restante."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "precificacao",
+      "title": "Precificação do seu Trabalho",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "PRECIFICAÇÃO é calcular o preço justo do que você produz ou do serviço que presta. Muita gente cobra barato demais e acaba trabalhando no prejuízo sem perceber. Para calcular o preço certo: some todos os custos de produção (sementes, adubo, embalagem, transporte) + o valor do seu trabalho + uma margem de lucro."
+        },
+        {
+          "type": "bot",
+          "content": "FÓRMULA BÁSICA: Preço de Venda = Custo Total + Lucro Desejado. Exemplo: se você gastou R$50 para produzir 10 kg de farinha, o custo é R$5/kg. Se quiser 30% de lucro, o preço mínimo é R$6,50/kg. Muitos produtores esquecem de incluir o custo do próprio trabalho — essa é uma grande armadilha."
+        },
+        {
+          "type": "question",
+          "content": "Por que muitos produtores vendem no prejuízo sem perceber?",
+          "options": [
+            {
+              "label": "Não incluem o valor do próprio trabalho no custo",
+              "value": "a",
+              "feedback": "EXATO! Esse é o erro mais comum. O produtor calcula semente, adubo e transporte, mas esquece de incluir o valor do seu próprio trabalho. Se você teria que pagar alguém para fazer o que você faz, esse valor precisa entrar no custo de produção."
+            },
+            {
+              "label": "Vendem muito caro para os clientes",
+              "value": "b",
+              "feedback": "Na verdade, o problema mais comum é o contrário — vender muito barato, porque não calculam corretamente os custos. O erro mais frequente é não incluir o valor do próprio trabalho no preço final."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer continuar aprendendo sobre educação financeira e gestão do seu negócio? Entre no nosso GRUPO DE FINANÇAS no WhatsApp: https://chat.whatsapp.com/IYQatWLFGXj8QWGLbHLe1f"
+        },
+        {
+          "type": "bot",
+          "content": "Dúvidas? Fale com o nosso SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

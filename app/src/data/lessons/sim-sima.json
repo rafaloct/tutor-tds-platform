@@ -1,0 +1,43 @@
+{
+  "id": "sim-sima",
+  "title": "Inspeção e Certificação (SIM/SIMA)",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Venda com Segurança",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Ei, meu vizinho! Como tá a lida? Sou o seu TUTOR VIZINHO e hoje vamos falar sobre como deixar seus produtos 'dentro da lei' para vender muito mais."
+        },
+        {
+          "type": "bot",
+          "content": "Sabe aquele queijo gostoso ou o ovo de galinha caipira que você produz? Para vender eles no mercado ou na feira da cidade, é preciso ter um selo que mostre que o produto é limpo e seguro. É aí que entram o SIM e o SIMA!"
+        },
+        {
+          "type": "question",
+          "content": "Você já teve dificuldade de vender algum produto por não ter um selo de inspeção?",
+          "options": [
+            { "label": "Sim, já tive problemas.", "value": "sim", "feedback": "OLHA, o selo é como se fosse o documento de identidade do seu produto. Sem ele, fica difícil crescer." },
+            { "label": "Nunca tentei vender em mercados.", "value": "nao", "feedback": "POIS SAIBA que com o selo você pode vender para muito mais gente e ganhar um preço melhor!" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Comunidade TDS",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer saber como conseguir esse selo para o seu produto? Entra na nossa COMUNIDADE TDS no zap e pergunta para a gente: https://chat.whatsapp.com/GKwC01VJIzt9HZ4apo2BC6"
+        },
+        {
+          "type": "bot",
+          "content": "Se precisar de ajuda para regularizar seu negócio, chama no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

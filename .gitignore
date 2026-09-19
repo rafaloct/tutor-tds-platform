@@ -77,3 +77,16 @@ flutter_01.log
 CartilhasTDS*.apk
 Tutor-TDS-*.aab
 Tutor-TDS-*.zip
+/*.pdf
+*.mp4
+*.mp3
+
+# Artefatos gerados e capturas locais
+.claude/
+screenshots/
+extracted_content/
+materiais_playstore_2026/media/
+materiais_playstore_2026/prints_playstore/
+cartilhas_app/release/pitch/
+home_screen.png
+log.txt

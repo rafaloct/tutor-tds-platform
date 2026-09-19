@@ -1,0 +1,150 @@
+{
+  "id": "economia-lar",
+  "title": "Economia do Lar",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/180gptw_rGSTa9bvK7v6YYhIrFn846ifo/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Conforto e Organização em Casa",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá! Hoje vamos falar de algo muito próximo da sua vida: a ECONOMIA DO LAR. Não é só sobre dinheiro — é sobre como organizar a casa para gastar menos energia, viver com mais conforto e usar os recursos de forma mais inteligente."
+        },
+        {
+          "type": "bot",
+          "content": "Esta cartilha aborda dois grandes temas: CONFORTO AMBIENTAL (como o sol, o vento e a posição da casa afetam o calor e a ventilação) e ORGANIZAÇÃO DO LAR (como otimizar os espaços, reduzir desperdícios e criar soluções simples com recursos locais)."
+        },
+        {
+          "type": "question",
+          "content": "O que você gostaria de melhorar na sua casa?",
+          "options": [
+            {
+              "label": "Diminuir o calor dentro de casa",
+              "value": "a",
+              "feedback": "ÓTIMA ESCOLHA! A orientação solar e a ventilação cruzada são as principais ferramentas para isso. Vamos aprender como o posicionamento das janelas e a presença de árvores podem reduzir significativamente a temperatura interna da casa."
+            },
+            {
+              "label": "Organizar melhor os espaços",
+              "value": "b",
+              "feedback": "PERFEITO! Vamos ver como pequenas mudanças na organização dos cômodos, uso de móveis multifuncionais e soluções criativas com materiais acessíveis podem transformar um espaço pequeno em um ambiente funcional e agradável."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "solar",
+      "title": "Orientação Solar e Ventilação",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "ORIENTAÇÃO SOLAR: a posição da casa em relação ao sol determina quanto calor ela recebe. No Brasil, o NORTE e OESTE recebem mais sol da tarde (mais quentes). O SUL recebe menos sol direto (mais frescos). O LESTE recebe sol da manhã. Saber isso ajuda a posicionar janelas, quartos e cômodos de descanso."
+        },
+        {
+          "type": "bot",
+          "content": "VENTILAÇÃO CRUZADA: para a casa ficar fresca naturalmente, o vento precisa entrar por um lado e sair pelo outro. Janelas opostas criam corrente de ar. Uma janela próxima ao chão (onde o ar fresco entra) e outra próxima ao teto (onde o ar quente sai) criam uma ventilação natural muito eficiente."
+        },
+        {
+          "type": "bot",
+          "content": "PROTEÇÃO SOLAR: BEIRAL largo protege as paredes e janelas do sol direto. Árvores do lado oeste da casa fazem sombra no período mais quente do dia. PAREDE VERDE (plantas trepadeiras ou suportes verticais com plantas) cria isolamento natural e reduz até 8°C a temperatura da parede."
+        },
+        {
+          "type": "question",
+          "content": "Qual posição da casa recebe mais sol da tarde e fica mais quente no Brasil?",
+          "options": [
+            {
+              "label": "Fachada oeste",
+              "value": "a",
+              "feedback": "CORRETO! A face oeste da casa recebe o sol da tarde — que é mais intenso e dura mais horas. Por isso, janelas, quartos e áreas de descanso voltados para o oeste tendem a ser mais quentes. A solução é usar beiral largo, plantas ou elementos de sombreamento nessa face."
+            },
+            {
+              "label": "Fachada sul",
+              "value": "b",
+              "feedback": "A face sul é geralmente a mais fresca no Brasil, pois recebe menos sol direto. A fachada mais quente é a OESTE — que pega o sol da tarde, o mais intenso do dia. Ao planejar ou reformar uma casa, privilegiar dormitórios na face sul ou leste ajuda a manter o conforto térmico."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "organizacao",
+      "title": "Organização e Soluções Práticas",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "CIRCULAÇÃO: espaço livre para movimentação dentro da casa. Um erro comum é colocar muita mobília em espaços pequenos, dificultando a circulação e deixando o ambiente abafado. A regra: priorize espaço para circular. Menos móveis, mais mobilidade e ventilação."
+        },
+        {
+          "type": "bot",
+          "content": "MÓVEIS MULTIFUNCIONAIS: soluções que ocupam menos espaço e servem para mais de uma função. Exemplos práticos e de baixo custo: cama com gavetas embaixo (guarda roupas), banco com baú (guarda itens), prateleiras de caixotes de madeira (organiza e decora), mesa dobrável (serve e se guarda)."
+        },
+        {
+          "type": "bot",
+          "content": "HORTA AUTOIRRIGÁVEL: sistema simples feito com garrafas PET que mantém a terra úmida automaticamente por reservatório de água. Você não precisa regar todo dia! Pode ser feita no quintal, na varanda ou até na janela. Produz temperos, alface, cebolinha sem gastar quase nada."
+        },
+        {
+          "type": "question",
+          "content": "O que é um móvel multifuncional?",
+          "options": [
+            {
+              "label": "Móvel que serve para mais de uma finalidade",
+              "value": "a",
+              "feedback": "CORRETO! Móveis multifuncionais otimizam o espaço — especialmente importante em casas menores. Uma cama com gavetas serve de guarda-roupa. Um banco com baú guarda itens e serve de assento. Uma mesa dobrável libera espaço quando não está em uso. São soluções inteligentes e geralmente de baixo custo."
+            },
+            {
+              "label": "Móvel muito grande e caro",
+              "value": "b",
+              "feedback": "Ao contrário! Móveis multifuncionais são geralmente MENORES e mais eficientes — ocupam menos espaço físico mas servem para mais funções. São perfeitos para otimizar casas pequenas sem gastar muito: cama com gavetas, banco-baú, prateleiras de caixotes, mesas dobráveis."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "energia",
+      "title": "Economia de Energia e Água",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "ILUMINAÇÃO NATURAL: posicionar janelas estrategicamente reduz o uso de lâmpadas durante o dia. Um simples tubo de PVC com garrafa PET ou espelho pode redirecionar a luz do sol para cômodos escuros — é a chamada 'lampada de Moser' — zero custo de energia, funciona durante o dia."
+        },
+        {
+          "type": "bot",
+          "content": "REAPROVEITAMENTO DE MATERIAIS: paletes de madeira viram móveis, mesas e bancos. Garrafas PET viram hortas e copos. Caixas de papelão viram organizadores. Além de economizar dinheiro, reduz o lixo produzido. Cada material tem uma segunda vida útil se você souber olhar para ele de forma criativa."
+        },
+        {
+          "type": "question",
+          "content": "Como a iluminação natural pode reduzir gastos com energia elétrica?",
+          "options": [
+            {
+              "label": "Posicionando janelas corretamente para aproveitar a luz do sol",
+              "value": "a",
+              "feedback": "EXATAMENTE! Janelas bem posicionadas permitem que a luz natural ilumine os cômodos durante o dia, reduzindo o uso de lâmpadas. Uma técnica simples e gratuita é posicionar espelhos para redirecionar a luz solar para cantos mais escuros — sem gastar nada em energia."
+            },
+            {
+              "label": "Pintando as paredes de cores escuras",
+              "value": "b",
+              "feedback": "Ao contrário! Paredes claras (branco, bege, amarelo claro) refletem mais a luz natural e deixam o ambiente mais iluminado sem precisar de lâmpadas. Cores escuras absorvem a luz e deixam o ambiente mais escuro, aumentando a necessidade de iluminação artificial."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer trocar ideias sobre como melhorar sua casa e economizar? Entre no nosso GRUPO DE ECONOMIA DO LAR: https://chat.whatsapp.com/HvUoK5RY5Fc8PajEd0k3G8"
+        },
+        {
+          "type": "bot",
+          "content": "Dúvidas sobre construção ou reforma sustentável? Fale no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

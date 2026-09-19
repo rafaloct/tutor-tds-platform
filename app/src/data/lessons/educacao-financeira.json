@@ -1,0 +1,43 @@
+{
+  "id": "educacao-financeira",
+  "title": "Educação Financeira",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Cuidando do seu Dinheiro",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Como estão as coisas? Sou o seu TUTOR VIZINHO e hoje vamos falar de um assunto sério: o nosso suado dinheirinho."
+        },
+        {
+          "type": "bot",
+          "content": "Sabe quando você vende uma saca de milho ou umas galinhas e, antes do mês acabar, o dinheiro já sumiu e você nem viu para onde foi? Pois é, isso acontece com muita gente!"
+        },
+        {
+          "type": "question",
+          "content": "Você já sentiu que o seu dinheiro acaba antes do mês?",
+          "options": [
+            { "label": "Sim, todo mês!", "value": "sim", "feedback": "CALMA! Não se desespere. O primeiro passo é entender para onde ele está indo." },
+            { "label": "Geralmente sobra um pouco.", "value": "nao", "feedback": "QUE BOM! Você já está no caminho certo. Vamos aprender a fazer esse 'pouco' render mais?" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo de Finanças",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Se quiser aprender a organizar melhor as contas da casa e da roça, entra no nosso GRUPO DE EDUCAÇÃO FINANCEIRA no zap: https://chat.whatsapp.com/FiJnYSFaOurC7MmBdgqh8P"
+        },
+        {
+          "type": "bot",
+          "content": "Precisando de ajuda, pode chamar no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "id": "saf",
+  "title": "Sistemas Agroflorestais (SAF)",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1H-DpKPxnqwUjOUZfX6UDc5ewiOX-wijY/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "O que é um SAF?",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, vizinho! Você já viu uma floresta? Nela crescem árvores grandes, médias e pequenas, plantas rasteiras e animais — tudo junto, em harmonia. O SAF — Sistema Agroflorestal — imita exatamente essa organização da natureza, mas PRODUZINDO ALIMENTOS E RENDA para sua família."
+        },
+        {
+          "type": "bot",
+          "content": "No SAF, você planta ÁRVORES junto com sua ROÇA e às vezes com ANIMAIS. As plantas se ajudam: árvores dão sombra, retêm água no solo, nutrem a terra com suas folhas. A roça gera renda rápida enquanto as árvores crescem. É o sistema mais completo e sustentável que existe para a agricultura familiar."
+        },
+        {
+          "type": "question",
+          "content": "O que um SAF imita da natureza?",
+          "options": [
+            {
+              "label": "A diversidade e organização de uma floresta",
+              "value": "a",
+              "feedback": "PERFEITO! O SAF se inspira na floresta, onde várias espécies coexistem e se beneficiam mutuamente. Ao imitar esse equilíbrio na roça, você cria um sistema produtivo mais resiliente, que precisa de menos insumos externos e produz durante o ano todo."
+            },
+            {
+              "label": "O plantio de uma única cultura em fileiras",
+              "value": "b",
+              "feedback": "Não — isso seria monocultura, o oposto do SAF. O SAF se inspira na FLORESTA: diversidade de espécies, diferentes tamanhos e ciclos, onde cada planta contribui para o equilíbrio do sistema. Essa diversidade é o que torna o SAF mais resiliente e produtivo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beneficios",
+      "title": "Benefícios do SAF",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "BENEFÍCIOS AMBIENTAIS: conserva e melhora o solo, restaura áreas degradadas, cria sombra e microclima, aumenta a biodiversidade, conserva rios e água subterrânea, e mitiga as mudanças climáticas capturando carbono. Sua roça vira uma pequena floresta produtiva!"
+        },
+        {
+          "type": "bot",
+          "content": "BENEFÍCIOS ECONÔMICOS: diversifica a renda ao longo do ano (não depende de uma única colheita), reduz custos com adubos (as árvores fertilizam o solo), aumenta o valor da terra, cria novos mercados (mel, frutas nativas, madeira), e reduz riscos de perda total — se uma cultura vai mal, outras compensam."
+        },
+        {
+          "type": "bot",
+          "content": "PLACENTA FINANCEIRA: uma técnica SAF onde, junto com as mudinhas de árvores (que demoram para dar retorno), você planta milho, feijão, abóbora e mandioca. Essas culturas rápidas geram renda imediata enquanto as árvores crescem. O dinheiro não para — como uma placenta que nutre o bebê até ele estar pronto."
+        },
+        {
+          "type": "question",
+          "content": "O que é a técnica da 'Placenta Financeira' no SAF?",
+          "options": [
+            {
+              "label": "Plantar culturas rápidas junto com as mudas de árvores para gerar renda imediata",
+              "value": "a",
+              "feedback": "EXATO! Essa é uma das estratégias mais inteligentes do SAF: enquanto as árvores (que demoram anos para produzir) estão crescendo, culturas de ciclo curto como milho, feijão e mandioca geram renda imediata. O agricultor não precisa esperar anos para ver retorno financeiro."
+            },
+            {
+              "label": "Plantar somente árvores frutíferas e esperar a colheita",
+              "value": "b",
+              "feedback": "Não — esperar só pelas árvores geraria um problema financeiro nos primeiros anos. A Placenta Financeira é justamente a solução: plantar culturas de renda rápida (feijão, milho, mandioca) JUNTO com as mudas de árvores para garantir renda enquanto o sistema amadurece."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implantacao",
+      "title": "Como Implantar seu SAF",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "PASSO 1 — DIAGNÓSTICO DA ÁREA: qual o tamanho? Que tipo de solo? Tem água disponível? Quais espécies já existem? Qual é a mão de obra disponível? Como vai escoar a produção? Existe alguma política pública disponível na região? Esse 'retrato' inicial evita muitos erros."
+        },
+        {
+          "type": "bot",
+          "content": "PASSO 2 — ESCOLHA DAS ESPÉCIES: priorize espécies nativas adaptadas ao Cerrado tocantinense. Frutíferas: Caju, Manga, Banana, Acerola, Cupuaçu, Pequi, Murici. Árvores de extrativismo: Babaçu, Castanha-do-Pará, Barú. Culturas de ciclo curto: Mandioca, Milho, Feijão, Melancia, Quiabo. Pense em ESTRATOS: rasteiro, baixo, médio e alto."
+        },
+        {
+          "type": "bot",
+          "content": "PASSO 3 — MANEJO: as podas ajudam as plantas a crescerem saudáveis — poda de formação (início), poda de limpeza (galhos secos), poda drástica (para renovação). A capina seletiva remove só as invasoras prejudiciais, mantendo o material vegetal no solo para nutri-lo. O material podado vira adubo!"
+        },
+        {
+          "type": "question",
+          "content": "Quais culturas são ideais para gerar renda rápida nas entrelinhas do SAF?",
+          "options": [
+            {
+              "label": "Milho, feijão, mandioca e abóbora",
+              "value": "a",
+              "feedback": "CORRETO! Essas culturas de ciclo curto são perfeitas para as entrelinhas do SAF nos primeiros anos. Elas geram renda enquanto as árvores crescem, ainda contribuem com a cobertura do solo e alguns (como o feijão) fixam nitrogênio, nutrindo as outras plantas do sistema."
+            },
+            {
+              "label": "Eucalipto e soja",
+              "value": "b",
+              "feedback": "Eucalipto e soja não são indicados para SAF. O eucalipto pode competir muito com outras espécies e a soja exige monocultura. Para as entrelinhas do SAF, as culturas ideais são as de ciclo curto como milho, feijão, mandioca, abóbora e melancia — que geram renda rápida e ainda beneficiam o sistema."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer aprender mais sobre como montar seu SAF? Entre no nosso GRUPO DE AGROFLORESTA: https://chat.whatsapp.com/L6S3bJdXs7v1PzQZ5NSKDC"
+        },
+        {
+          "type": "bot",
+          "content": "Dúvidas sobre seu sistema? Fale no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

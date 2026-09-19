@@ -35,7 +35,7 @@ HomeScreen
 - `privacy_consent` → SharedPreferences
 - `onboarding_seen_v1` → SharedPreferences
 
-**Dados que NUNCA vão ao servidor:** CPF (exceto hasheado para anti-duplicata na emissão de certificado)
+**Estado real do CPF:** na emissão de certificado, o CPF é usado apenas para gerar um HMAC e não é persistido no KV. Entretanto, o fluxo legado de analytics envia o CPF em texto puro ao Google Apps Script. Esse fluxo deve ser substituído de forma compatível na Onda 1.
 
 ---
 

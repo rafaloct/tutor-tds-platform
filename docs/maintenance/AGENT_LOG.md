@@ -97,3 +97,26 @@ Sem o SSH, iniciar o **projeto da API Tutor TDS** (Onda 1) com:
 ---
 
 _Adicionar nova entrada para cada sessão ou conjunto significativo de alterações._
+
+---
+
+## [2026-09-19] - Consolidação autônoma da Onda 0
+
+**Agente:** Codex
+
+### Concluído
+
+- Leitura integral da especificação visual de 34 páginas.
+- Validação independente da documentação criada pelo Antigravity.
+- Correção da contradição sobre CPF no fluxo legado do Google Apps Script.
+- Instalação isolada do Flutter 3.44.9/Dart 3.12.2 e criação do junction `C:\Dev\tutor-tds`.
+- `flutter analyze` sem achados; 14 testes Flutter e 14 testes do gateway aprovados.
+- Acesso SSH dedicado validado e auditoria somente leitura da VPS concluída.
+- Provider do Tutor confirmado como OpenRouter/Gemini; DeepSeek proibido no plano e não ativo no AnythingLLM do app.
+- Topologia, riscos, backups e fluxo de deploy documentados.
+
+### Bloqueios de produção
+
+- Log de aproximadamente 235,9 GB exige correção controlada.
+- Firewall/bindings exigem plano e rollback antes de alteração.
+- Backup de aplicação ainda não foi demonstrado.

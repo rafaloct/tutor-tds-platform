@@ -1,181 +1,87 @@
-# Tutor TDS — Inventário da VPS
+# Tutor TDS - Inventário da VPS
 
-> **Documento de Infraestrutura**
-> Data: 2026-09-19
-> **STATUS: PENDENTE — Auditoria SSH ainda não realizada**
+> Auditoria somente leitura realizada em 2026-09-19. Nenhum serviço, firewall, volume ou dado foi alterado.
 
----
+## Resumo
 
-## Dados Conhecidos (Pré-Auditoria)
-
-| Campo | Valor |
+| Item | Estado confirmado |
 |---|---|
-| IP | 46.202.150.132 |
-| Provedor | Hostinger |
-| Orquestrador | Dokploy |
-| Painel HTTP | http://46.202.150.132 |
-| Acesso SSH | Requer configuração (ver SSH_ACCESS.md) |
+| Host | `srv1533541` |
+| Sistema | Ubuntu 24.04.4 LTS, kernel 6.8.0-90 |
+| CPU | 8 vCPU AMD EPYC 9354P |
+| Memória | 31 GiB; aproximadamente 23 GiB disponíveis |
+| Swap | 4 GiB; 3,4 GiB em uso no momento da auditoria |
+| Disco raiz | 387 GiB; 319 GiB usados (83%); 68 GiB livres |
+| Timezone | UTC, NTP sincronizado |
+| Docker | 29.3.1 |
+| Docker Compose | 5.1.1 |
+| Dokploy | 0.29.1, saudável |
+| Proxy principal | Traefik 3.6.7 |
+| Acesso | chave ED25519 dedicada, root em `BatchMode` |
 
----
+## Serviços relevantes confirmados
 
-## Itens a Inventariar (via SSH)
+- `anythingllm`: RAG usado pelo app, saudável, porta 3001 publicada.
+- `cartilhastds-anythingllmwithweaviate-...-weaviate-1`: banco vetorial Weaviate.
+- `compose-copy-redundant-alarm-18gsr7-cartilhas-web-1`: web/PWA em Nginx.
+- `kreativ-tds-sync`: sincronização TDS, saudável.
+- `kreativ-lms-lite-api` e `projeto-tds-lms-lite-dashboard-1`: API e painel LMS existentes.
+- `kreativ-postgres`: PostgreSQL/pgvector 16, saudável.
+- `kreativ-rag` e `kreativ-ollama`: segunda pilha RAG interna.
+- `dokploy`, `dokploy-postgres`, `dokploy-redis` e `dokploy-traefik`.
+- Chatwoot, n8n, Evolution API, WordPress/MySQL/Redis, PocketBase e serviços Frappe.
 
-Execute estes comandos após a primeira conexão. **Somente leitura — não alterar serviços.**
+O servidor é compartilhado por vários projetos. Nenhum container ou modelo deve ser removido supondo que pertence apenas ao Tutor TDS.
 
-### Sistema
+## IA e requisito sem DeepSeek
 
-```bash
-uname -a
-cat /etc/os-release
-uptime
-timedatectl
-whoami
-id
-```
+| Instância | Provider ativo | Modelo preferencial |
+|---|---|---|
+| `anythingllm` | OpenRouter | `google/gemini-2.5-flash-lite` |
+| `kreativ-rag` | OpenRouter | `liquid/lfm-2.5-1.2b-thinking:free` |
 
-### Recursos
+O Ollama público possui `deepseek-v3.1:671b-cloud` baixado, mas ele não está selecionado em nenhuma das duas instâncias AnythingLLM auditadas. O Tutor TDS deve manter allowlist sem DeepSeek. A remoção do modelo não foi feita porque a VPS é compartilhada.
 
-```bash
-df -h
-free -h
-lsblk
-nproc
-cat /proc/cpuinfo | grep "model name" | head -1
-```
+## Rede e exposição
 
-### Usuários e Acesso
+O UFW está inativo e a chain `INPUT` do nftables aceita tráfego por padrão. Foram observadas escutas públicas, entre outras, em:
 
-```bash
-cat /etc/passwd | grep -v nologin
-lastlog
-who
-```
+`22`, `25`, `80`, `110`, `143`, `443`, `587`, `631`, `993`, `995`, `2377`, `3000`, `3001`, `7946`, `8090` e `11434`.
 
-### Rede e Portas
+Riscos prioritários:
 
-```bash
-ss -tulpn
-ip addr
-cat /etc/hosts
-```
+1. AnythingLLM (`3001`), Ollama (`11434`), PocketBase (`8090`) e Dokploy (`3000`) estão publicados em todas as interfaces.
+2. Portas de Docker Swarm (`2377` e `7946`) aparecem em escuta ampla.
+3. O firewall do host não restringe explicitamente esses acessos.
 
-### Firewall
+Não alterar firewall ou bindings antes de mapear dependências, testar um segundo acesso SSH e preparar rollback.
 
-```bash
-ufw status verbose
-iptables -L -n 2>/dev/null || nft list ruleset 2>/dev/null
-```
+## Risco crítico de disco e logs
 
-### Docker
+- Um log JSON do container `kreativ-postgres` mede aproximadamente **235,9 GB**.
+- `logrotate.service` falhou com `No space left on device` durante a rotação.
+- O disco raiz está em 83% e o crescimento do log pode esgotá-lo.
 
-```bash
-docker --version
-docker compose version
-docker ps -a
-docker images
-docker volume ls
-docker network ls
-docker stats --no-stream
-```
+A correção exige janela controlada: preservar amostra para diagnóstico, configurar rotação Docker (`max-size`/`max-file`), validar o motivo do volume de logs e somente então truncar/arquivar o arquivo com autorização.
 
-### Dokploy
+## Serviços systemd com falha
 
-```bash
-# Verificar instalação
-ls /etc/dokploy/ 2>/dev/null
-curl -s http://localhost:3000/api/health 2>/dev/null
-# Ou verificar via painel web
-```
+- `logrotate.service`: falha por falta de espaço durante cópia do log Docker.
+- `nginx.service`: falha ao ocupar a porta 80, já utilizada por outro processo Nginx. O tráfego web continua atendido, mas há conflito de responsabilidade entre Nginx do host e Traefik/containers.
 
-### Serviços systemd
+## Backups
 
-```bash
-systemctl --failed
-systemctl list-units --type=service --state=running
-```
+- `/backup` e `/backups` não existem.
+- `/var/backups` contém apenas backups padrão do sistema (dpkg/apt), cerca de 3,1 MB.
+- Não foi confirmada rotina de backup dos volumes Docker, bancos, AnythingLLM ou aplicações.
+- Snapshots da Hostinger não foram auditados pelo shell.
 
-### Logs Recentes
+Conclusão: backup de aplicação e restauração permanecem não demonstrados.
 
-```bash
-journalctl -n 50 --no-pager
-docker logs $(docker ps -q | head -1) --tail=20 2>/dev/null
-```
+## Ações seguras seguintes
 
-### Cron Jobs
-
-```bash
-crontab -l
-ls /etc/cron.d/
-ls /etc/cron.daily/
-ls /etc/cron.weekly/
-```
-
-### Backups
-
-```bash
-# Verificar se existe backup local
-ls /backup/ 2>/dev/null
-ls /var/backup/ 2>/dev/null
-# Verificar agendamento de snapshot na Hostinger (via painel web)
-```
-
----
-
-## Resultado da Auditoria
-
-_Preencher após executar os comandos acima._
-
-### Sistema Operacional
-- OS: _pendente_
-- Kernel: _pendente_
-- Uptime: _pendente_
-- Timezone: _pendente_
-
-### Recursos
-- CPU: _pendente_
-- RAM Total: _pendente_
-- RAM Livre: _pendente_
-- Disco Total: _pendente_
-- Disco Usado: _pendente_
-- Swap: _pendente_
-
-### Serviços Docker em Execução
-_pendente_
-
-### Portas Abertas
-_pendente_
-
-### Dokploy
-- Versão: _pendente_
-- Projetos encontrados: _pendente_
-- Composes encontrados: _pendente_
-
-### Volumes Importantes
-_pendente_
-
-### Firewall
-_pendente_
-
-### Backups
-_pendente_
-
----
-
-## Mapa de Serviços (após auditoria)
-
-_Substituir pelo diagrama real quando a auditoria for concluída._
-
-```
-Internet
-   |
-   ▼
-[Nginx / Dokploy Reverse Proxy]
-   |
-   ├── PWA Flutter (porta 80/443)
-   ├── AnythingLLM (porta interna)
-   └── Outros serviços (a identificar)
-```
-
----
-
-_Este documento deve ser preenchido completamente após a primeira conexão SSH autorizada._
+1. Corrigir crescimento de logs em janela aprovada.
+2. Inventariar dependências das portas publicadas e propor fechamento gradual.
+3. Criar backups versionados de PostgreSQL, volumes AnythingLLM e configuração Dokploy.
+4. Criar `tdsdeploy`, testar segunda sessão e somente depois revisar acesso root.
+5. Separar staging e produção antes das migrations da Onda 1.

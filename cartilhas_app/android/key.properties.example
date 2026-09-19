@@ -1,0 +1,4 @@
+storePassword=ALTERE_AQUI
+keyPassword=ALTERE_AQUI
+keyAlias=upload
+storeFile=../upload-keystore.jks

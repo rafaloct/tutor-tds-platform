@@ -12,6 +12,13 @@
 A versão 1.2.0+11 está em produção e atende participantes reais do Programa TDS/Tocantins.
 Cada etapa de migração deve ser incremental, reversível e testada fora de produção antes de ser aplicada.
 
+### Restrição de IA
+
+- DeepSeek não será usado pelo Tutor TDS, diretamente nem por roteamento automático.
+- A instância AnythingLLM do app foi auditada em 2026-09-19 e usa OpenRouter com `google/gemini-2.5-flash-lite`.
+- Um modelo DeepSeek está apenas instalado no Ollama compartilhado da VPS; não está selecionado pelo Tutor TDS e não deve ser removido sem confirmar dependências de outros projetos.
+- Qualquer troca futura de modelo deve usar allowlist explícita e teste em staging.
+
 ---
 
 ## Estado Atual (Baseline)
@@ -79,7 +86,7 @@ sync_log
 
 #### 1.2 — API REST Tutor TDS
 
-**Stack preferencial:** FastAPI (Python) ou Node.js/Express (TypeScript)
+**Stack adotada para a primeira implementação:** FastAPI (Python), SQLAlchemy e Alembic. A decisão evita manter duas alternativas abertas durante a execução e será validada em staging.
 **Deploy:** Container Docker no Dokploy (VPS)
 **Porta interna:** 8000 (proxy reverso via Nginx/Dokploy)
 

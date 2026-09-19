@@ -1,0 +1,43 @@
+{
+  "id": "cooperativismo",
+  "title": "Cooperativismo e Crédito",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Trabalhando Junto",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Ei, meu vizinho! Tudo bem? Sou o seu TUTOR VIZINHO e hoje vamos falar sobre como a gente pode ser mais forte quando trabalha junto com os outros."
+        },
+        {
+          "type": "bot",
+          "content": "Sabe aquele mutirão para colher a mandioca ou para limpar o pasto? Isso já é o começo do COOPERATIVISMO! Quando a gente se une, consegue comprar coisas mais baratas e vender o que produz por um preço melhor."
+        },
+        {
+          "type": "question",
+          "content": "Você já participou de algum mutirão ou grupo de ajuda entre vizinhos?",
+          "options": [
+            { "label": "Sim, já participei!", "value": "sim", "feedback": "ISSO AÍ! Então você já sabe que 'uma mão lava a outra' e as duas lavam o rosto." },
+            { "label": "Ainda não.", "value": "nao", "feedback": "POIS OLHA, trabalhar sozinho é muito mais difícil. Vamos ver como a união facilita a vida?" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo de Crédito e Cooperativismo",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer saber como montar um grupo forte na sua comunidade? Entra no nosso GRUPO DE CRÉDITO E COOPERATIVISMO: https://chat.whatsapp.com/LUPEWSRTwO6GGWCsTt7BpE"
+        },
+        {
+          "type": "bot",
+          "content": "Se tiver dúvida sobre como começar, chama no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

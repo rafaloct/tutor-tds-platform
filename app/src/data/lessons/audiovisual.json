@@ -1,0 +1,43 @@
+{
+  "id": "audiovisual",
+  "title": "Audiovisual para o Dia a Dia",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Mostre seu Trabalho",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Ei, meu vizinho! Tudo na paz? Sou o seu TUTOR VIZINHO e hoje vamos aprender a usar esse celular que tá na sua mão para mostrar a beleza do seu trabalho para todo mundo."
+        },
+        {
+          "type": "bot",
+          "content": "O AUDIOVISUAL é só um nome chique para dizer que a gente junta imagem e som. Sabe quando você grava um vídeo das suas galinhas ou do milho bonito que colheu? Isso já é AUDIOVISUAL!"
+        },
+        {
+          "type": "question",
+          "content": "Você já pensou em gravar um vídeo para mostrar o que você produz na sua terra?",
+          "options": [
+            { "label": "Sim, já pensei!", "value": "sim", "feedback": "MARAVILHA! O vídeo é um santo remédio para aumentar as vendas." },
+            { "label": "Ainda não.", "value": "nao", "feedback": "SEM PROBLEMAS! Vamos aprender que com um celular simples você já faz coisa muito bonita." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Comunidade Audiovisual",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Gostou da ideia? Temos um grupo no ZAP só para quem quer aprender a gravar vídeos melhores. Entra lá no GRUPO DE ÁUDIO VISUAL: https://chat.whatsapp.com/Ep3np7OXVNo009bJFmuvkD"
+        },
+        {
+          "type": "bot",
+          "content": "Se tiver qualquer dúvida, é só chamar a gente no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

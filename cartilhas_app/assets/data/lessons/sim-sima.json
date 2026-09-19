@@ -1,0 +1,150 @@
+{
+  "id": "sim-sima",
+  "title": "Inspeção e Certificação (SIM/SIMA)",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1nlOUG9xT8WRsj3oFNl7LqTiaSjHx0aVl/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Por que regularizar sua produção?",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá! Você produz queijo, mel, carne, ovos, geleias ou outros alimentos de origem animal? Sabia que para vender legalmente esses produtos você precisa de um SELO DE INSPEÇÃO? Sem ele, você pode ser multado e ter a produção apreendida."
+        },
+        {
+          "type": "bot",
+          "content": "O SIM (Serviço de Inspeção Municipal) e o SIMA (Sistema de Inspeção Municipal Articulado) são os caminhos para regularizar sua produção, vender com segurança e acessar mercados melhores — incluindo as escolas públicas pelo PNAE e restaurantes da cidade."
+        },
+        {
+          "type": "question",
+          "content": "Por que regularizar a produção de alimentos de origem animal é importante?",
+          "options": [
+            {
+              "label": "Para poder vender legalmente e acessar mercados maiores",
+              "value": "a",
+              "feedback": "CORRETO! A regularização permite vender em supermercados, para escolas (PNAE), restaurantes e feiras formais. Além disso, o processo melhora as práticas de higiene e qualidade, o que valoriza seu produto e fideliza clientes."
+            },
+            {
+              "label": "Só é importante para grandes fazendas",
+              "value": "b",
+              "feedback": "Ao contrário! A regularização é ainda mais importante para pequenos produtores, pois abre portas para mercados que antes eram inacessíveis: escolas públicas (PNAE), restaurantes, cooperativas de consumo. E a agroindústria familiar tem processos de regularização simplificados, criados especialmente para o pequeno produtor."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sim",
+      "title": "O que é o SIM",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "SIM — Serviço de Inspeção Municipal: fiscaliza a produção de alimentos de origem animal no município. Se você quer vender apenas dentro do seu município, o SIM é o que você precisa. É gerenciado pela Prefeitura e tem requisitos mais acessíveis para pequenos produtores."
+        },
+        {
+          "type": "bot",
+          "content": "SIMA — Sistema Municipal de Inspeção Articulado: integra vários municípios para padronizar a inspeção. Com o SIMA, você pode vender para outros municípios do estado. É como uma 'aliança' entre prefeituras que amplia o mercado disponível para o pequeno produtor."
+        },
+        {
+          "type": "bot",
+          "content": "SISBI-POA: Sistema Brasileiro de Inspeção de Produtos de Origem Animal. Com ele, você pode vender em todo o país. Exige mais requisitos, mas abre todo o mercado nacional. O caminho natural é: começar com SIM → avançar para SIMA → quando o negócio crescer, buscar o SISBI."
+        },
+        {
+          "type": "question",
+          "content": "Qual serviço de inspeção permite vender em todo o município onde o produtor está?",
+          "options": [
+            {
+              "label": "SIM — Serviço de Inspeção Municipal",
+              "value": "a",
+              "feedback": "CORRETO! O SIM é o ponto de entrada para regularização. Permite vender dentro do próprio município, tem requisitos mais acessíveis e é gerenciado pela Prefeitura. É o primeiro passo para quem está começando a formalizar sua produção."
+            },
+            {
+              "label": "SIMA — Sistema Municipal Articulado",
+              "value": "b",
+              "feedback": "O SIMA é o passo seguinte ao SIM! Enquanto o SIM permite vender no próprio município, o SIMA — que integra vários municípios — permite ampliar a área de comercialização para outros municípios do estado. Comece pelo SIM e evolua para o SIMA quando estiver pronto."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bpf",
+      "title": "Boas Práticas de Fabricação",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "BPF — Boas Práticas de Fabricação: conjunto de procedimentos que garantem higiene e qualidade na produção. São obrigatórias para obter qualquer selo de inspeção. Os pilares são: higiene pessoal (lavar as mãos, usar touca e avental), higiene das instalações, controle de pragas e qualidade da água utilizada."
+        },
+        {
+          "type": "bot",
+          "content": "HIGIENIZAÇÃO correta: use solução de água sanitária diluída para superfícies. Equipamentos e utensílios devem ser lavados antes e após o uso. Alimentos perecíveis precisam de temperatura controlada: refrigerados abaixo de 4°C, congelados abaixo de -18°C. Cada produto tem seu prazo de validade — respeite-o."
+        },
+        {
+          "type": "bot",
+          "content": "ROTULAGEM: a embalagem precisa ter: nome do produto, ingredientes, peso/volume, data de fabricação e validade, identificação do produtor (nome e endereço), número do serviço de inspeção (SIM, SIMA ou SISBI). A etiqueta correta transmite confiança para o consumidor e atende à legislação."
+        },
+        {
+          "type": "question",
+          "content": "Qual é a temperatura correta para armazenar alimentos refrigerados?",
+          "options": [
+            {
+              "label": "Abaixo de 4°C",
+              "value": "a",
+              "feedback": "CORRETO! Alimentos perecíveis refrigerados (queijo, leite, carnes) devem ser mantidos abaixo de 4°C para inibir o crescimento de bactérias. Já os alimentos congelados precisam estar abaixo de -18°C. O controle correto de temperatura é fundamental para garantir a segurança alimentar."
+            },
+            {
+              "label": "Abaixo de 10°C",
+              "value": "b",
+              "feedback": "A temperatura segura para refrigeração é mais rigorosa: abaixo de 4°C. Entre 4°C e 60°C é a chamada 'zona de perigo', onde as bactérias se multiplicam rapidamente. Manter o alimento abaixo de 4°C é essencial para garantir a qualidade e a segurança do produto."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mercado",
+      "title": "Acessando Mercados Formais",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Com o SIM regularizado, você pode acessar: Feiras livres municipais, Mercados e minimercados locais, Programas institucionais como PNAE (escolas) e PAA. O PNAE é especialmente importante — garante compra regular a preço justo. Para acessar, é preciso ter DAP (Declaração de Aptidão ao Pronaf) e estar registrado na prefeitura."
+        },
+        {
+          "type": "bot",
+          "content": "COMO SE ORGANIZAR: (1) Reúna a documentação necessária (RG, CPF, comprovante de endereço, DAP). (2) Procure a Secretaria de Agricultura do seu município. (3) Solicite orientação técnica para adequar sua instalação. (4) Inscreva-se no processo de regularização. (5) Após aprovação, emita seu primeiro lote com o selo oficial."
+        },
+        {
+          "type": "question",
+          "content": "Qual documento é necessário para um produtor familiar acessar o PNAE?",
+          "options": [
+            {
+              "label": "DAP — Declaração de Aptidão ao Pronaf",
+              "value": "a",
+              "feedback": "EXATO! A DAP comprova que você é agricultor familiar e é o documento base para acessar vários programas públicos, incluindo o PNAE. Para obter a DAP, procure o sindicato rural, a EMATER ou a Secretaria de Agricultura do seu município."
+            },
+            {
+              "label": "Contrato social de empresa",
+              "value": "b",
+              "feedback": "Não — o produtor familiar não precisa ser empresa. O documento necessário é a DAP (Declaração de Aptidão ao Pronaf), que comprova que você é agricultor familiar. É gratuita e pode ser obtida no sindicato rural, na EMATER ou na Secretaria de Agricultura."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer saber mais sobre regularização e comercialização? Entre no nosso GRUPO DE PRODUÇÃO E VENDA: https://chat.whatsapp.com/L4JHnhRfGXR8nNqM0rQEQS"
+        },
+        {
+          "type": "bot",
+          "content": "Para orientações sobre o processo de regularização no seu município, fale no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

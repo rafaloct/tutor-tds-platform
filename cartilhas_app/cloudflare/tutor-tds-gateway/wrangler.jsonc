@@ -1,0 +1,14 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tutor-tds-gateway",
+	"main": "src/index.js",
+	"compatibility_date": "2026-08-11",
+	"workers_dev": true,
+	"keep_vars": true,
+	"kv_namespaces": [
+		{
+			"binding": "CERTIFICATES",
+			"id": "7d13364e03a44e22ae568ecd50629a65"
+		}
+	]
+}

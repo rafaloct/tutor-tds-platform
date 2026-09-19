@@ -1,0 +1,391 @@
+<!-- ════════════════════════════════════════════════════════
+     CARTILHAS TDS — Página WordPress
+     Cole este bloco no editor do WordPress:
+     Adicionar bloco → "HTML Personalizado"
+     ════════════════════════════════════════════════════════ -->
+
+<style>
+/* ── Reset & Base ─────────────────────────────────────────── */
+.tds-page { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; line-height: 1.6; }
+.tds-page * { box-sizing: border-box; }
+.tds-page a { color: #1565C0; }
+
+/* ── Cores TDS ────────────────────────────────────────────── */
+:root {
+  --verde:    #1A6B3C;
+  --azul:     #1565C0;
+  --amarelo:  #F9A825;
+  --vermelho: #C62828;
+  --cinza-bg: #F5F5F5;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.tds-hero {
+  background: linear-gradient(135deg, #1A6B3C 0%, #1565C0 100%);
+  color: white;
+  padding: 60px 20px 50px;
+  text-align: center;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+.tds-hero img { height: 80px; margin-bottom: 20px; filter: brightness(0) invert(1); }
+.tds-hero h1 { font-size: 2rem; margin: 0 0 10px; font-weight: 700; }
+.tds-hero p  { font-size: 1.1rem; opacity: .9; max-width: 600px; margin: 0 auto 30px; }
+
+/* ── Botão Download ───────────────────────────────────────── */
+.tds-btn-download {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #F9A825; color: #1a1a1a;
+  font-weight: 700; font-size: 1.1rem;
+  padding: 16px 36px; border-radius: 50px;
+  text-decoration: none; transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.tds-btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,.35); color: #1a1a1a; text-decoration: none; }
+.tds-btn-download svg  { width: 24px; height: 24px; flex-shrink: 0; }
+
+.tds-version { color: rgba(255,255,255,.7); font-size: .85rem; margin-top: 14px; }
+
+/* ── Seção Funcionalidades ────────────────────────────────── */
+.tds-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 48px;
+}
+.tds-card {
+  background: white; border-radius: 12px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-top: 4px solid var(--verde);
+}
+.tds-card.azul   { border-top-color: var(--azul);     }
+.tds-card.amar   { border-top-color: var(--amarelo);  }
+.tds-card.verm   { border-top-color: var(--vermelho); }
+.tds-card .icon  { font-size: 2rem; margin-bottom: 10px; }
+.tds-card h3     { font-size: 1rem; margin: 0 0 8px; color: #1a1a1a; }
+.tds-card p      { font-size: .9rem; color: #555; margin: 0; }
+
+/* ── Título de seção ──────────────────────────────────────── */
+.tds-section-title {
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--verde); margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--amarelo);
+  display: inline-block;
+}
+
+/* ── Guia de uso ──────────────────────────────────────────── */
+.tds-guide-step {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: white; border-radius: 12px;
+  padding: 20px; margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.07);
+}
+.tds-step-num {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: var(--verde); color: white;
+  font-weight: 700; font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.tds-guide-step h4 { margin: 0 0 4px; font-size: 1rem; color: #1a1a1a; }
+.tds-guide-step p  { margin: 0; font-size: .9rem; color: #555; }
+
+/* ── Accordion FAQ ────────────────────────────────────────── */
+.tds-faq { margin-bottom: 48px; }
+.tds-faq details {
+  background: white; border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.07);
+  margin-bottom: 10px; overflow: hidden;
+}
+.tds-faq summary {
+  padding: 16px 20px; cursor: pointer;
+  font-weight: 600; font-size: .95rem; color: var(--verde);
+  list-style: none; display: flex; justify-content: space-between; align-items: center;
+}
+.tds-faq summary::after  { content: "+"; font-size: 1.4rem; color: var(--amarelo); }
+.tds-faq details[open] summary::after { content: "−"; }
+.tds-faq .faq-body { padding: 0 20px 16px; font-size: .9rem; color: #444; line-height: 1.7; }
+
+/* ── Instalação ───────────────────────────────────────────── */
+.tds-install {
+  background: #E8F5E9; border-radius: 12px;
+  padding: 28px; margin-bottom: 40px;
+  border-left: 5px solid var(--verde);
+}
+.tds-install h3 { margin: 0 0 16px; color: var(--verde); }
+.tds-install ol  { margin: 0; padding-left: 20px; color: #333; }
+.tds-install li  { margin-bottom: 8px; font-size: .95rem; }
+.tds-install code {
+  background: rgba(0,0,0,.08); padding: 2px 6px;
+  border-radius: 4px; font-size: .85rem;
+}
+
+/* ── Requisitos ───────────────────────────────────────────── */
+.tds-req {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px;
+}
+.tds-req-item {
+  background: white; border-radius: 8px; padding: 10px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  font-size: .9rem; color: #333;
+  display: flex; align-items: center; gap: 8px;
+}
+.tds-req-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--verde); flex-shrink: 0; }
+
+/* ── Apoiadores ───────────────────────────────────────────── */
+.tds-partners {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: center; gap: 24px;
+  padding: 32px 20px; background: white;
+  border-radius: 12px; margin-bottom: 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.tds-partners img { height: 50px; object-fit: contain; filter: grayscale(20%); }
+
+/* ── Rodapé ───────────────────────────────────────────────── */
+.tds-footer {
+  text-align: center; padding: 24px; background: #1A6B3C;
+  color: white; border-radius: 12px; font-size: .85rem;
+}
+.tds-footer a { color: #F9A825; }
+
+/* ── Responsivo ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .tds-hero h1  { font-size: 1.5rem; }
+  .tds-features { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="tds-page">
+
+  <!-- ── HERO ─────────────────────────────────────────────── -->
+  <section class="tds-hero">
+    <img src="https://ead.ipexdesenvolvimento.cloud/wp-content/themes/tds-child-theme/assets/logos/logo-ipex.png"
+         alt="Logo TDS" onerror="this.style.display='none'">
+    <h1>📱 Cartilhas TDS — Tutor Digital</h1>
+    <p>Aprenda no seu ritmo, com exemplos da sua realidade. Nove trilhas de formação em Agricultura, Finanças, Cooperativismo e muito mais — direto no seu celular.</p>
+
+    <a class="tds-btn-download"
+       href="https://drive.google.com/uc?export=download&id=COLE_O_ID_DO_APK_AQUI"
+       download="CartilhasTDS_v1.0.0.apk">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 9h-4V3H9v6H5l7 7 7-7zm-8 2V5h2v6h1.17L12 13.17 9.83 11H11zm-6 7h14v2H5v-2z"/>
+      </svg>
+      Baixar App (Android)
+    </a>
+
+    <p class="tds-version">Versão 1.0.0 · Android 8.0+ · 56 MB · Gratuito</p>
+  </section>
+
+  <!-- ── FUNCIONALIDADES ──────────────────────────────────── -->
+  <h2 class="tds-section-title">O que o app oferece</h2>
+
+  <div class="tds-features">
+    <div class="tds-card">
+      <div class="icon">📚</div>
+      <h3>9 Trilhas de Aprendizagem</h3>
+      <p>Agricultura, SAF, Finanças, Cooperativismo, Audiovisual, IA, Atendimento, Economia do Lar e SIM/SIMA.</p>
+    </div>
+    <div class="tds-card azul">
+      <div class="icon">🤖</div>
+      <h3>Tutor de IA</h3>
+      <p>Assistente inteligente treinado com o conteúdo das cartilhas. Responde dúvidas com exemplos do Tocantins.</p>
+    </div>
+    <div class="tds-card amar">
+      <div class="icon">🏆</div>
+      <h3>Certificado de Conclusão</h3>
+      <p>Ao concluir cada trilha, solicite seu certificado — enviado automaticamente ao administrador do programa.</p>
+    </div>
+    <div class="tds-card verm">
+      <div class="icon">📖</div>
+      <h3>Glossário Completo</h3>
+      <p>130+ termos oficiais de todas as cartilhas, com busca por palavra ou por tema, e aprofundamento via IA.</p>
+    </div>
+    <div class="tds-card azul">
+      <div class="icon">📄</div>
+      <h3>Download das Cartilhas</h3>
+      <p>Cada trilha tem botão para baixar o PDF completo da cartilha e ler offline ou imprimir.</p>
+    </div>
+    <div class="tds-card">
+      <div class="icon">🎧</div>
+      <h3>Suporte Humano</h3>
+      <p>Fale com a equipe TDS pelo chat direto no app ou via WhatsApp — atendimento real, não apenas robô.</p>
+    </div>
+    <div class="tds-card amar">
+      <div class="icon">🎙️</div>
+      <h3>Acessibilidade</h3>
+      <p>Use a voz para fazer perguntas ao tutor (microfone) e ouça as respostas em áudio (texto em voz).</p>
+    </div>
+    <div class="tds-card">
+      <div class="icon">🌱</div>
+      <h3>Modo "Minha Realidade"</h3>
+      <p>O tutor pergunta sobre sua situação e adapta as orientações ao que é viável para você.</p>
+    </div>
+  </div>
+
+  <!-- ── GUIA DE INSTALAÇÃO ────────────────────────────────── -->
+  <h2 class="tds-section-title">Como instalar o app</h2>
+
+  <div class="tds-install">
+    <h3>📲 Instalação passo a passo (Android)</h3>
+    <ol>
+      <li><strong>Libere a instalação de apps externos:</strong> Acesse <code>Configurações → Segurança → Fontes desconhecidas</code> e ative. Em Xiaomi/Redmi: <code>Configurações → Privacidade → Instalar apps desconhecidos</code>.</li>
+      <li><strong>Baixe o APK:</strong> Toque no botão amarelo <em>"Baixar App"</em> acima. O arquivo será salvo na pasta Downloads do celular.</li>
+      <li><strong>Instale:</strong> Abra a notificação de download (ou vá em Gerenciador de Arquivos → Downloads) e toque no arquivo <code>CartilhasTDS_v1.0.0.apk</code>.</li>
+      <li><strong>Confirme:</strong> Toque em <strong>"Instalar"</strong> na tela de confirmação do Android. Aguarde alguns segundos.</li>
+      <li><strong>Pronto!</strong> Abra o app <em>Cartilhas TDS</em>, cadastre seu nome, WhatsApp e CPF e escolha sua primeira trilha.</li>
+    </ol>
+  </div>
+
+  <!-- ── REQUISITOS ────────────────────────────────────────── -->
+  <h2 class="tds-section-title">Requisitos do dispositivo</h2>
+
+  <div class="tds-req">
+    <div class="tds-req-item"><span class="dot"></span> Android 8.0 ou superior</div>
+    <div class="tds-req-item"><span class="dot"></span> 100 MB de espaço livre</div>
+    <div class="tds-req-item"><span class="dot"></span> Conexão à internet (Wi-Fi ou dados)</div>
+    <div class="tds-req-item"><span class="dot"></span> Microfone (opcional, para voz)</div>
+    <div class="tds-req-item"><span class="dot"></span> Qualquer celular Android básico</div>
+  </div>
+
+  <!-- ── GUIA COMPLETO DE USO ──────────────────────────────── -->
+  <h2 class="tds-section-title">Guia completo de uso</h2>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">1</div>
+    <div>
+      <h4>Cadastro inicial</h4>
+      <p>Na primeira abertura, preencha seu <strong>Nome completo</strong>, <strong>WhatsApp</strong> e <strong>CPF</strong>. Esses dados identificam você no sistema e são usados apenas para o certificado. Você faz isso uma única vez.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">2</div>
+    <div>
+      <h4>Escolha uma trilha de aprendizagem</h4>
+      <p>Na tela inicial aparecem as 9 cartilhas disponíveis. Toque em qualquer uma para começar. Cada cartilha tem entre 4 e 7 seções temáticas — você pode começar do início ou continuar de onde parou.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">3</div>
+    <div>
+      <h4>Avance pelo conteúdo</h4>
+      <p>O conteúdo aparece em formato de conversa. Toque em <strong>"Continuar"</strong> para avançar. Quando aparecerem opções de resposta, escolha a que melhor descreve sua situação — o tutor dá um feedback imediato e explica o porquê.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">4</div>
+    <div>
+      <h4>Baixe o PDF da cartilha</h4>
+      <p>Na tela inicial, cada cartilha tem um botão azul <strong>"PDF"</strong>. Toque nele para abrir a versão completa no Google Drive — você pode ler, salvar no celular ou imprimir para usar durante as aulas presenciais.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">5</div>
+    <div>
+      <h4>Pergunte ao Tutor de IA</h4>
+      <p>A qualquer momento, toque no botão azul 🤖 (canto inferior direito) para abrir o Tutor de IA. Digite sua dúvida ou use o microfone para falar. O tutor responde com base exclusivamente nas cartilhas TDS — sem inventar informações.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">6</div>
+    <div>
+      <h4>Use o Modo "Minha Realidade"</h4>
+      <p>No Tutor de IA, toque no chip <strong>"Geral"</strong> no topo para ativar o modo <strong>"Minha Realidade"</strong>. O tutor vai perguntar sobre sua situação (tem terra? tem renda?) e adaptar as orientações ao que é viável para você especificamente.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">7</div>
+    <div>
+      <h4>Consulte o Glossário</h4>
+      <p>Toque no ícone 📖 no topo da tela inicial para acessar o Glossário com 130+ termos das cartilhas. Filtre por tema (Agricultura, Finanças, Cooperativismo…) ou busque qualquer palavra. Cada termo tem um botão para aprofundar com o tutor.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">8</div>
+    <div>
+      <h4>Solicite seu Certificado</h4>
+      <p>Após responder todas as questões de uma cartilha, ao chegar no final aparece o botão <strong>"Solicitar Certificado"</strong>. Toque nele — a equipe TDS receberá a confirmação automaticamente e você terá o registro da conclusão.</p>
+    </div>
+  </div>
+
+  <div class="tds-guide-step">
+    <div class="tds-step-num">9</div>
+    <div>
+      <h4>Fale com a equipe TDS</h4>
+      <p>Toque no ícone 🎧 no topo ou no botão <strong>"Ajuda humana"</strong> para falar com a equipe TDS. Você pode escolher o <strong>Chat no App</strong> (direto, sem sair do aplicativo) ou o <strong>WhatsApp</strong> (+55 63 9301-0823).</p>
+    </div>
+  </div>
+
+  <!-- ── FAQ ───────────────────────────────────────────────── -->
+  <h2 class="tds-section-title">Perguntas frequentes</h2>
+
+  <div class="tds-faq">
+    <details>
+      <summary>O app é gratuito?</summary>
+      <div class="faq-body">Sim, completamente gratuito. Não há pagamentos, assinaturas ou compras dentro do aplicativo. É um benefício do Programa TDS para os participantes.</div>
+    </details>
+    <details>
+      <summary>Precisa de internet para usar?</summary>
+      <div class="faq-body">Sim, o Tutor de IA precisa de conexão para funcionar. O conteúdo das cartilhas e o glossário carregam localmente (sem internet), mas as respostas do tutor e o suporte requerem conexão Wi-Fi ou dados móveis.</div>
+    </details>
+    <details>
+      <summary>Funciona em iPhone (iOS)?</summary>
+      <div class="faq-body">A versão atual é apenas para Android. O aplicativo foi desenvolvido para atender ao público do Programa TDS, que majoritariamente usa dispositivos Android. Uma versão iOS pode ser disponibilizada futuramente.</div>
+    </details>
+    <details>
+      <summary>Meus dados estão seguros?</summary>
+      <div class="faq-body">Sim. Os dados coletados (nome, WhatsApp e CPF) são usados exclusivamente para fins educacionais — geração de certificados e acompanhamento do programa. As informações são armazenadas de forma segura e não são compartilhadas com terceiros.</div>
+    </details>
+    <details>
+      <summary>O certificado tem validade legal?</summary>
+      <div class="faq-body">O certificado é emitido pelo Programa TDS / IPEX / UFT e comprova a conclusão da trilha de formação. Sua validade é reconhecida no âmbito do programa. Para fins específicos (emprego, concursos), recomendamos verificar a aceitação no contexto desejado.</div>
+    </details>
+    <details>
+      <summary>Posso usar a cartilha física junto com o app?</summary>
+      <div class="faq-body">Sim — e é altamente recomendado! Leia um bloco da cartilha impressa, depois abra o mesmo tema no app para fixar o conteúdo com as questões interativas. Quando tiver dúvida sobre algo que leu, use o Tutor de IA para explicar com outras palavras.</div>
+    </details>
+    <details>
+      <summary>Como atualizar o app quando sair uma nova versão?</summary>
+      <div class="faq-body">Baixe o novo APK nesta página e instale por cima do anterior — os dados do seu cadastro são preservados. Não é necessário desinstalar o app antigo.</div>
+    </details>
+  </div>
+
+  <!-- ── APOIADORES ────────────────────────────────────────── -->
+  <h2 class="tds-section-title">Realização e Apoio</h2>
+
+  <div class="tds-partners">
+    <img src="https://ead.ipexdesenvolvimento.cloud/wp-content/themes/tds-child-theme/assets/logos/logo-ipex.png"
+         alt="IPEX" title="IPEX — Instituto de Pesquisa e Extensão">
+    <img src="https://ead.ipexdesenvolvimento.cloud/wp-content/themes/tds-child-theme/assets/logos/logo-uft.png"
+         alt="UFT" title="Universidade Federal do Tocantins">
+    <img src="https://ead.ipexdesenvolvimento.cloud/wp-content/themes/tds-child-theme/assets/logos/logo-fapto.png"
+         alt="FAPTO" title="Fundação de Apoio Científico e Tecnológico do Tocantins">
+    <img src="https://ead.ipexdesenvolvimento.cloud/wp-content/themes/tds-child-theme/assets/logos/logo-cdr.png"
+         alt="CDR" title="Centro de Desenvolvimento Regional">
+  </div>
+
+  <!-- ── RODAPÉ ────────────────────────────────────────────── -->
+  <div class="tds-footer">
+    <p><strong>Cartilhas TDS v1.0.0</strong> · Programa TDS 2026 · Tocantins, Brasil</p>
+    <p>IPEX — UFT — FAPTO — CDR · <a href="https://ead.ipexdesenvolvimento.cloud">ead.ipexdesenvolvimento.cloud</a></p>
+    <p style="margin-top:10px;opacity:.8;font-size:.8rem;">
+      Dúvidas: <a href="https://wa.me/5563993010823">WhatsApp +55 63 9301-0823</a> ·
+      E-mail: <a href="mailto:tdsdados@gmail.com">tdsdados@gmail.com</a>
+    </p>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     INSTRUÇÃO: Substitua COLE_O_ID_DO_APK_AQUI pelo ID
+     do arquivo no Google Drive (ex: 1AbCdEfG...).
+     O ID está na URL do Drive após /d/
+     ════════════════════════════════════════════════════════ -->

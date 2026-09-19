@@ -1,0 +1,58 @@
+# Mapa de Implementação da Especificação Visual
+
+Fonte: `Tutor_TDS_Especificacao_Visual_Manutencao_v1.pdf`, 34 páginas.
+
+## Já existente ou parcialmente atendido
+
+| Requisito | Estado no código |
+|---|---|
+| Microfone sob demanda | implementado em `genui_assistant_screen.dart`; permissão ocorre após toque |
+| Turnos em bolhas | implementado no Tutor IA |
+| Resumo em seções | implementado em visão geral, pontos-chave, exemplos e perguntas |
+| Quiz com feedback imediato | implementado |
+| Simulado com cronômetro | implementado |
+| Certificados verificáveis | implementado via Cloudflare KV/HMAC |
+| Layout responsivo básico | implementado em Home e Central de Estudos |
+
+## Incremento 1 - fundação visual segura
+
+1. Criar tokens/componentes compartilhados do design system.
+2. Implementar `TDSWaitExperience` e substituir spinners vazios.
+3. Tornar cabeçalho/composer do Tutor contextuais.
+4. Adicionar ações iniciais úteis e continuidade de estudo.
+5. Cobrir os componentes com widget tests e feature flags.
+
+## Incremento 2 - aprendizagem contextual
+
+1. Mover dificuldade para configuração da atividade.
+2. Adicionar quantidade/fonte antes de gerar flashcards, quiz, resumo e simulado.
+3. Exibir progresso, autoavaliação e origem dos cartões.
+4. Estruturar feedback de quiz com fonte e próxima ação.
+5. Persistir resumo/tentativa e suportar retomada offline.
+
+## Incremento 3 - Home e dados remotos
+
+1. Home deve mostrar próxima ação, pendências e progresso.
+2. `CourseRepository` consulta API e mantém assets como fallback offline.
+3. Cada retomada/conclusão emite LearningEvent idempotente.
+4. Interface varia por papel somente depois de RBAC no backend.
+
+## Incremento 4 - novas superfícies
+
+- Classroom do professor.
+- Monitor por exceção.
+- Evidence Engine.
+- Creator/vídeo com finalidade pedagógica.
+
+Essas telas dependem do backend, eventos, RBAC e contratos da Onda 1; não devem ser protótipos desconectados da fonte de dados.
+
+## Ordem de implementação
+
+```text
+componentes compartilhados
+  -> contratos/API e eventos
+  -> Home e aprendizagem
+  -> Classroom/evidência
+  -> Creator/comercial
+  -> freeze e QA
+```

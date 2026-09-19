@@ -130,12 +130,33 @@ await prefs.setString('user_cpf', _cpfController.text);
 
 ---
 
-### 🟡 Auditoria direta da VPS não realizada
+### 🔴 Log Docker de aproximadamente 235,9 GB
 
-**Risco:** O estado real dos serviços, configuração do firewall, versões e possíveis vulnerabilidades da VPS 46.202.150.132 são desconhecidos.
+**Risco:** O log JSON do container `kreativ-postgres` ocupa a maior parte do disco e já causou falha do `logrotate` por falta de espaço.
 
-**Ação necessária:** Acesso SSH → auditoria de leitura → inventário completo.
-Ver [SSH_ACCESS.md](../infrastructure/SSH_ACCESS.md).
+**Ação necessária:** janela controlada para preservar amostra, identificar a origem, configurar rotação Docker e somente depois reduzir o arquivo com autorização.
+
+---
+
+### 🟠 Serviços administrativos e de dados publicados
+
+**Risco:** UFW inativo, política INPUT permissiva e portas como 3000, 3001, 8090 e 11434 publicadas em todas as interfaces.
+
+**Ação necessária:** mapear consumidores, limitar bindings e aplicar firewall gradualmente, sempre com segundo acesso SSH e rollback testado.
+
+---
+
+### 🟠 Backup de aplicação não demonstrado
+
+**Risco:** não foram encontrados dumps ou cópias locais de bancos/volumes; `/var/backups` contém apenas dados padrão do sistema.
+
+**Ação necessária:** definir RPO/RTO, automatizar backup externo e testar restauração em staging.
+
+---
+
+### ✅ AnythingLLM ativo não usa DeepSeek
+
+A instância `anythingllm` usada pelo app está em OpenRouter com `google/gemini-2.5-flash-lite`. Há um modelo DeepSeek baixado em um Ollama compartilhado, mas ele não está selecionado pelo Tutor TDS. A restrição sem DeepSeek foi adicionada ao plano.
 
 ---
 
@@ -180,7 +201,10 @@ O CORS limita origens no browser, mas não protege clientes nativos ou curl.
 | Sem autenticação JWT no servidor | 🟠 Alto | Resolver na Onda 1 |
 | CPF em plaintext no SharedPreferences | 🟡 Médio | Avaliar na Onda 1 |
 | Rate limiting webhook ausente | 🟡 Médio | Resolver na Onda 1 |
-| VPS não auditada | 🟡 Médio | Pendente SSH |
+| Log Docker com aproximadamente 235,9 GB | 🔴 Crítico | Correção controlada pendente |
+| Serviços internos publicados / firewall permissivo | 🟠 Alto | Hardening planejado |
+| Backup de aplicação não demonstrado | 🟠 Alto | Implementar e testar |
+| AnythingLLM sem DeepSeek ativo | ✅ OK | Provider/model confirmados |
 | .env.deploy com credenciais locais | 🟡 Médio | Boa prática: usar CI secrets |
 | Play Integrity não implementada | 🟢 Baixo | Pós Onda 5 |
 | Auth de origem no Worker | 🟢 Baixo | Melhoria futura |

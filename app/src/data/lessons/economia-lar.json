@@ -1,0 +1,43 @@
+{
+  "id": "economia-lar",
+  "title": "Economia do Lar",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Casa Fresquinha",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, meu vizinho! Como vai o calor por aí? Sou o seu TUTOR VIZINHO e hoje vamos aprender como deixar nossa casa mais gostosa de morar sem gastar muito dinheiro."
+        },
+        {
+          "type": "bot",
+          "content": "Sabe por que algumas casas são mais frescas e claras que outras? É tudo questão de saber onde o sol bate e de onde vem o vento. Pequenos ajustes na casa podem ajudar muito na saúde da família!"
+        },
+        {
+          "type": "question",
+          "content": "Você sente que sua casa fica muito abafada durante a tarde?",
+          "options": [
+            { "label": "Sim, muito abafada!", "value": "sim", "feedback": "CALMA! Existem truques simples, como plantar uma árvore no lugar certo ou mudar uma janela, que fazem milagre." },
+            { "label": "Não, é boa.", "value": "nao", "feedback": "MARAVILHA! Você provavelmente já aproveita bem o vento e a sombra do nosso Tocantins." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Comunidade TDS",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer mais dicas de como organizar sua casa e economizar energia? Entra na nossa COMUNIDADE TDS no zap: https://chat.whatsapp.com/GKwC01VJIzt9HZ4apo2BC6"
+        },
+        {
+          "type": "bot",
+          "content": "Se precisar de qualquer orientação, chama no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

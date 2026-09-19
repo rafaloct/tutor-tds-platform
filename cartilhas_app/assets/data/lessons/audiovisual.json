@@ -1,0 +1,150 @@
+{
+  "id": "audiovisual",
+  "title": "Audiovisual para o Dia a Dia",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1fPAdXQDn7Hult1XYzJtFY3TNDNJtA6Kq/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "O Poder do Vídeo",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá! Hoje vamos falar de algo que você provavelmente já usa todo dia sem perceber: o AUDIOVISUAL. Vídeos no celular, fotos de produtos, lives de venda — tudo isso é audiovisual. E você pode usar isso para divulgar seu trabalho, vender mais e comunicar sua mensagem para muito mais pessoas."
+        },
+        {
+          "type": "bot",
+          "content": "AUDIOVISUAL é tudo que junta imagem e som para passar uma mensagem. Não precisa de câmera profissional: o celular que está no seu bolso já é suficiente para criar conteúdo de qualidade. O que importa é saber COMO usar."
+        },
+        {
+          "type": "question",
+          "content": "Você já gravou um vídeo para mostrar ou vender algo?",
+          "options": [
+            {
+              "label": "Sim, já gravei!",
+              "value": "sim",
+              "feedback": "ÓTIMO! Então você já tem experiência. Agora vamos aprender técnicas para deixar seus vídeos ainda melhores — com melhor imagem, áudio e impacto."
+            },
+            {
+              "label": "Não, nunca tentei.",
+              "value": "nao",
+              "feedback": "SEM PROBLEMA! Todo especialista já foi iniciante. Vamos começar do zero e você vai ver que é mais simples do que parece. Ao final desta cartilha você estará pronto para gravar seus primeiros vídeos!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "preproducao",
+      "title": "Pré-produção: Planejando o Vídeo",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "ROTEIRO é o planejamento escrito do que vai acontecer no vídeo: o que falar, em qual ordem, onde filmar. Antes de apertar o botão de gravar, responda: Qual é o objetivo do vídeo? Quem é o público? Qual mensagem precisa chegar? Com essas respostas, escreva os pontos principais que quer abordar."
+        },
+        {
+          "type": "bot",
+          "content": "STORYBOARD é o rascunho visual das cenas — pode ser só um esboço de onde a câmera vai estar e o que vai aparecer. Não precisa saber desenhar. Basta indicar: 'Cena 1 — mostro o produto de perto. Cena 2 — explico como funciona. Cena 3 — mostro o resultado final.'"
+        },
+        {
+          "type": "bot",
+          "content": "CHECKLIST antes de gravar: (1) Bateria do celular carregada? (2) Espaço de armazenamento disponível? (3) Local escolhido com boa iluminação? (4) Sem barulho de fundo? (5) Roteiro revisado? (6) O que vai aparecer no fundo da câmera está organizado?"
+        },
+        {
+          "type": "question",
+          "content": "Qual é o primeiro passo para fazer um bom vídeo?",
+          "options": [
+            {
+              "label": "Escrever um roteiro com o que vai falar",
+              "value": "a",
+              "feedback": "PERFEITO! O roteiro é a base de tudo. Um vídeo bem planejado fica muito mais profissional do que um gravado na hora sem preparação. Mesmo que seja só um papel com os pontos principais, já faz enorme diferença no resultado final."
+            },
+            {
+              "label": "Comprar uma câmera profissional",
+              "value": "b",
+              "feedback": "O celular já é suficiente! O que mais importa é o PLANEJAMENTO — um bom roteiro vale mais que qualquer equipamento caro. Vídeos bem planejados gravados no celular superam vídeos mal planejados gravados em câmeras profissionais."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tecnicas",
+      "title": "Conceitos Técnicos Essenciais",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "ENQUADRAMENTO: como posicionar a câmera. PLANO ABERTO mostra o ambiente completo (ótimo para mostrar a fazenda, a horta). PLANO MÉDIO mostra a pessoa da cintura para cima (ideal para explicações). CLOSE mostra o rosto ou um detalhe de perto (produtos, texturas)."
+        },
+        {
+          "type": "bot",
+          "content": "ILUMINAÇÃO: a luz natural é sua melhor amiga. Grave perto de uma janela ou do lado de fora num dia nublado (luz difusa). Evite gravar com o sol direto nas costas ou de frente para o sol. Uma regra básica: o mais importante é que o rosto ou o produto esteja bem iluminado."
+        },
+        {
+          "type": "bot",
+          "content": "ÁUDIO: o som ruim é o maior problema dos vídeos amadores. Dicas: grave em ambientes silenciosos, longe de ventiladores, televisores e ruas movimentadas. Fale em voz clara e um pouco mais devagar que o normal. Se possível, use um fone de ouvido com microfone — já melhora muito a qualidade do som."
+        },
+        {
+          "type": "question",
+          "content": "Sobre angulação e movimento de câmera, qual alternativa está correta?",
+          "options": [
+            {
+              "label": "Ajudam a valorizar o produto e deixar o vídeo mais interessante",
+              "value": "c",
+              "feedback": "CORRETO! A posição e o movimento da câmera comunicam informações sem palavras. Um CLOSE valoriza detalhes do produto. Um PAN (movimento lateral) apresenta um ambiente. Um TILT (movimento vertical) revela algo de baixo para cima. Usar bem essas técnicas torna o vídeo muito mais profissional."
+            },
+            {
+              "label": "Não fazem diferença na qualidade do vídeo",
+              "value": "a",
+              "feedback": "Fazem sim uma grande diferença! A posição e o movimento da câmera mudam completamente a percepção de qualidade do vídeo. Um close valoriza detalhes do produto, um plano aberto apresenta o ambiente. Use as diferentes posições para contar a história do seu trabalho."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edicao",
+      "title": "Edição e Publicação",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "PÓS-PRODUÇÃO é a edição do vídeo: cortar partes desnecessárias, adicionar música de fundo, inserir textos e legenda, ajustar o brilho e contraste. Aplicativos gratuitos para celular: CapCut (muito fácil, em português), InShot, ou o editor nativo do Instagram/TikTok."
+        },
+        {
+          "type": "bot",
+          "content": "ONDE PUBLICAR: Instagram Reels e Stories para alcançar clientes locais. WhatsApp Business para enviar aos clientes cadastrados. YouTube para vídeos mais longos e educativos. TikTok para alcançar público novo. Facebook para comunidades locais. Escolha 1 ou 2 plataformas e seja consistente."
+        },
+        {
+          "type": "question",
+          "content": "Qual aspecto técnico mais prejudica a qualidade de um vídeo?",
+          "options": [
+            {
+              "label": "Áudio ruim com muito barulho de fundo",
+              "value": "a",
+              "feedback": "EXATO! Pesquisas mostram que o áudio de má qualidade incomoda mais o espectador do que a imagem. Pessoas toleram uma imagem um pouco tremida, mas desistem rapidamente de um vídeo com áudio ruim. Priorize gravar em ambiente silencioso!"
+            },
+            {
+              "label": "Imagem em baixa resolução",
+              "value": "b",
+              "feedback": "Surpreendentemente, o áudio é mais crítico que a resolução da imagem! As pessoas toleram uma imagem um pouco menor ou menos nítida, mas desistem de um vídeo com barulho de fundo ou voz difícil de entender. Priorize sempre o áudio primeiro."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer compartilhar seus vídeos e aprender mais com outros criadores? Entre no nosso GRUPO DE AUDIOVISUAL: https://chat.whatsapp.com/GcNuCatq1Bn2UmqHUzxRj6"
+        },
+        {
+          "type": "bot",
+          "content": "Precisa de ajuda com seu conteúdo? Fale no SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

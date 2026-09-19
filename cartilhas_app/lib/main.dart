@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'screens/welcome_screen.dart';
+import 'config/app_config.dart';
+import 'services/anything_llm_service.dart';
+import 'services/theme_controller.dart';
+import 'theme/app_theme.dart';
+import 'features/study_ai/data/study_ai_service.dart';
+import 'features/certificates/data/certificate_service.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ),
+  );
+  runApp(const CartilhasApp());
+}
+
+class CartilhasApp extends StatefulWidget {
+  const CartilhasApp({super.key});
+
+  @override
+  State<CartilhasApp> createState() => _CartilhasAppState();
+}
+
+class _CartilhasAppState extends State<CartilhasApp> {
+  late final ThemeController _themeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeController = ThemeController()..load();
+  }
+
+  @override
+  void dispose() {
+    _themeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _themeController),
+        Provider(
+          create: (_) =>
+              AnythingLLMService(gatewayUrl: AppConfig.tutorGatewayUrl),
+        ),
+        Provider(
+          create: (_) => StudyAiService(gatewayUrl: AppConfig.tutorGatewayUrl),
+          dispose: (_, service) => service.dispose(),
+        ),
+        Provider(
+          create: (_) =>
+              CertificateService(gatewayUrl: AppConfig.tutorGatewayUrl),
+          dispose: (_, service) => service.dispose(),
+        ),
+      ],
+      child: Consumer<ThemeController>(
+        builder: (context, themeController, _) => MaterialApp(
+          title: 'Tutor TDS',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: themeController.themeMode,
+          locale: const Locale('pt', 'BR'),
+          supportedLocales: const [Locale('pt', 'BR')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          builder: (context, child) => ColoredBox(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: SafeArea(
+              top: false,
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
+          home: const WelcomeScreen(),
+        ),
+      ),
+    );
+  }
+}

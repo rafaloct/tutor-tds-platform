@@ -1,0 +1,150 @@
+{
+  "id": "atendimento-cliente",
+  "title": "Atendimento ao Cliente",
+  "author": "TDS 2026",
+  "downloadUrl": "https://drive.google.com/file/d/1fwUY22DnXLUqa4yOYGOssepOO8HXbSM9/view",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Por que Atender Bem?",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá! Atender bem não é um dom de poucas pessoas — é uma habilidade que pode ser aprendida, exercitada e aperfeiçoada. Um bom atendimento faz o cliente voltar, indicar para outros e se tornar fiel ao seu negócio. Um atendimento ruim faz o cliente ir embora e ainda falar mal."
+        },
+        {
+          "type": "bot",
+          "content": "ATENDIMENTO AO PÚBLICO é o conjunto de ações para receber, ouvir, orientar, informar e ajudar as pessoas. Pode ser na venda de produtos na feira, num serviço de artesanato, numa cooperativa ou até no atendimento por WhatsApp. As regras são as mesmas em qualquer lugar."
+        },
+        {
+          "type": "question",
+          "content": "O que acontece com um cliente que é mal atendido?",
+          "options": [
+            {
+              "label": "Vai embora e ainda fala mal do negócio",
+              "value": "a",
+              "feedback": "EXATAMENTE! Pesquisas mostram que um cliente insatisfeito conta a experiência ruim para em média 9 a 15 pessoas. Já um cliente bem atendido conta para cerca de 3 a 5. O bom atendimento é o melhor marketing que existe!"
+            },
+            {
+              "label": "Geralmente volta na próxima vez",
+              "value": "b",
+              "feedback": "Infelizmente não. Um cliente mal atendido raramente volta — e ainda conta a experiência ruim para outros. É por isso que o atendimento de qualidade é tão importante: manter um cliente fiel custa muito menos do que conquistar um novo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pilares",
+      "title": "Os Pilares do Bom Atendimento",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "ESCUTA ATIVA: ouvir com atenção verdadeira, sem interromper, buscando entender o que a pessoa realmente precisa. Olhe nos olhos (ou use respostas atenciosas no WhatsApp), não fique distraído com o celular ou outras coisas enquanto o cliente fala."
+        },
+        {
+          "type": "bot",
+          "content": "EMPATIA: se colocar no lugar do cliente. Pense: 'Se eu fosse o cliente, como eu gostaria de ser tratado?' Isso não significa dar desconto sempre — significa entender a necessidade real da pessoa e tentar ajudar da melhor forma possível."
+        },
+        {
+          "type": "bot",
+          "content": "COMUNICAÇÃO CLARA: fale de um jeito que qualquer pessoa entenda. Evite termos técnicos que o cliente não conhece. Se perceber que ficou confuso, mude a explicação. A regra de ouro: se a pessoa não entendeu, o problema é de quem explicou, não de quem ouviu."
+        },
+        {
+          "type": "question",
+          "content": "O que é escuta ativa?",
+          "options": [
+            {
+              "label": "Ouvir com atenção total, sem interromper",
+              "value": "a",
+              "feedback": "CORRETO! Escuta ativa é uma habilidade fundamental: prestar atenção total ao que o cliente está dizendo, sem interromper e sem se distrair. Quem pratica escuta ativa entende melhor o cliente e resolve os problemas com mais eficiência."
+            },
+            {
+              "label": "Responder rapidamente antes do cliente terminar",
+              "value": "b",
+              "feedback": "Ao contrário! Interromper o cliente é um erro grave de atendimento. Escuta ativa significa deixar o cliente falar completamente, demonstrar interesse, e só então responder com atenção ao que foi dito."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "momentos",
+      "title": "Momentos Críticos do Atendimento",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "PRIMEIRO CONTATO: é o mais importante. O cliente forma uma opinião sobre você nos primeiros 30 segundos. Cumprimente com simpatia, diga seu nome, mostre que está disponível para ajudar. Uma saudação calorosa já faz grande diferença."
+        },
+        {
+          "type": "bot",
+          "content": "MOMENTO DA RECLAMAÇÃO: é uma oportunidade! Um cliente que reclama ainda está dando uma chance ao seu negócio. Ouça sem se defender, peça desculpas pelo inconveniente, proponha uma solução e cumpra o que prometer. Resolver bem uma reclamação gera mais fidelidade que nunca ter tido problema."
+        },
+        {
+          "type": "bot",
+          "content": "CLIENTE DIFÍCIL: mantenha a calma mesmo que o cliente esteja nervoso. Não eleve o tom de voz. Diga 'Entendo seu ponto de vista' antes de explicar a situação. Se não conseguir resolver sozinho, chame alguém que possa ajudar. Nunca discuta com o cliente."
+        },
+        {
+          "type": "question",
+          "content": "Como tratar uma reclamação de cliente de forma correta?",
+          "options": [
+            {
+              "label": "Ouvir, pedir desculpas e propor solução",
+              "value": "a",
+              "feedback": "PERFEITO! Esse é o padrão de ouro: (1) Ouça sem interromper. (2) Valide o sentimento do cliente. (3) Peça desculpas pelo inconveniente. (4) Proponha uma solução concreta. (5) Cumpra o que prometeu. Um cliente que teve uma reclamação bem resolvida frequentemente se torna mais fiel do que aquele que nunca reclamou!"
+            },
+            {
+              "label": "Explicar por que o cliente está errado",
+              "value": "b",
+              "feedback": "Isso é o que NÃO fazer! Mesmo que o cliente esteja errado, discutir e tentar provar isso só piora a situação. O certo é ouvir com calma, pedir desculpas pelo inconveniente e buscar uma solução que satisfaça o cliente."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qualidade",
+      "title": "Compromisso com a Qualidade",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "CLIENTE FIEL é aquele que volta sempre porque confia na qualidade do atendimento e do produto. Conquistar um novo cliente custa em média 5 a 7 vezes mais do que manter um cliente existente. Por isso, investir no pós-venda é tão importante quanto a venda em si."
+        },
+        {
+          "type": "bot",
+          "content": "CÓDIGO DE DEFESA DO CONSUMIDOR (CDC): você precisa conhecer para evitar problemas. O cliente tem direito a: informação clara sobre preços e condições, produto conforme anunciado, troca ou devolução em caso de defeito, prazo para arrependimento em compras online. Respeitar esses direitos evita conflitos e processos."
+        },
+        {
+          "type": "question",
+          "content": "Por que manter um cliente fiel é mais importante do que conquistar novos clientes?",
+          "options": [
+            {
+              "label": "Custa muito menos e ele já confia no seu trabalho",
+              "value": "a",
+              "feedback": "EXATO! Conquistar um novo cliente custa em média 5 a 7 vezes mais do que manter um cliente existente. Clientes fiéis gastam mais, reclamam menos, indicam para outros e dão feedback valioso. É o ativo mais precioso de qualquer negócio."
+            },
+            {
+              "label": "Não faz diferença, todos os clientes são iguais",
+              "value": "b",
+              "feedback": "Faz muita diferença! Clientes fiéis são o coração de qualquer negócio sustentável. Eles gastam mais, reclamam menos, indicam amigos e conhecidos, e são muito mais baratos de manter do que conquistar novos clientes."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Grupo e Suporte",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Quer continuar aprimorando suas habilidades de atendimento? Entre no nosso GRUPO DE EMPREENDEDORISMO: https://chat.whatsapp.com/Ksulqr3LGSZ2Pr5E04UXit"
+        },
+        {
+          "type": "bot",
+          "content": "Dúvidas ou situações difíceis no seu negócio? Fale com nosso SUPORTE: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}
