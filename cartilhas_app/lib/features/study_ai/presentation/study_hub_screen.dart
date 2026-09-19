@@ -65,7 +65,9 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         description: 'Gere pontos-chave, exemplos e perguntas de revisão.',
         icon: Icons.summarize_outlined,
         color: colors.primary,
-        onTap: () => _open(SummaryScreen(topic: _selected.title)),
+        onTap: () => _open(
+          SummaryScreen(courseId: _selected.id, topic: _selected.title),
+        ),
       ),
       _StudyResource(
         title: 'Simulado com IA',

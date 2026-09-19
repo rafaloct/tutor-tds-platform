@@ -166,3 +166,14 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - A orientação muda na última questão para encaminhar o estudante ao resultado e à revisão.
 - O bloco usa região semântica dinâmica e não realiza chamada adicional de IA.
 - Validação: `flutter analyze` sem achados e 23 testes aprovados.
+
+### Persistência e retomada offline de resumos
+
+- Criado o repositório local `StudySummaryRepository` e modelo `SavedStudySummary` sobre SharedPreferences.
+- Armazenados ID/título da cartilha, tamanho selecionado, conteúdo estruturado e data da síntese.
+- Ao abrir a tela de resumo, se houver resumo salvo, o estudante pode escolher entre "Abrir último resumo" ou "Gerar novo resumo".
+- Nenhuma chamada de IA é disparada automaticamente ao abrir a tela.
+- Corrupção de dados locais é tratada com fallback seguro para a tela inicial.
+- Exibição de cabeçalho informativo de conteúdo offline quando visualizando material salvo.
+- Coberto por testes unitários de repositório/serialização e testes de widget da tela de resumo.
+- Validação: `flutter analyze` sem achados e 30 testes aprovados.

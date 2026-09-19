@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 enum StudyDifficulty { basic, intermediate, advanced }
@@ -134,6 +136,73 @@ class StudySummary {
     reviewQuestions: _stringList(json['reviewQuestions']),
   );
 
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'overview': overview,
+    'keyPoints': keyPoints,
+    'practicalExamples': practicalExamples,
+    'reviewQuestions': reviewQuestions,
+  };
+
   static List<String> _stringList(Object? value) =>
       (value as List<dynamic>? ?? const []).whereType<String>().toList();
+}
+
+@immutable
+class SavedStudySummary {
+  const SavedStudySummary({
+    required this.courseId,
+    required this.topic,
+    required this.length,
+    required this.summary,
+    required this.createdAt,
+  });
+
+  final String courseId;
+  final String topic;
+  final SummaryLength length;
+  final StudySummary summary;
+  final DateTime createdAt;
+
+  Map<String, dynamic> toJson() => {
+    'courseId': courseId,
+    'topic': topic,
+    'length': length.name,
+    'summary': summary.toJson(),
+    'createdAt': createdAt.toUtc().toIso8601String(),
+  };
+
+  static SavedStudySummary? tryParse(String? source) {
+    if (source == null || source.trim().isEmpty) return null;
+    try {
+      final dynamic json = jsonDecode(source);
+      if (json is! Map<String, dynamic>) return null;
+      final courseId = json['courseId'] as String? ?? '';
+      final topic = json['topic'] as String? ?? courseId;
+      final lengthName = json['length'] as String?;
+      final length = SummaryLength.values.firstWhere(
+        (v) => v.name == lengthName,
+        orElse: () => SummaryLength.quick,
+      );
+      final summaryJson = json['summary'];
+      if (summaryJson is! Map<String, dynamic>) return null;
+      final summary = StudySummary.fromJson(summaryJson);
+      final createdAtRaw = json['createdAt'] as String?;
+      final createdAt = createdAtRaw != null
+          ? DateTime.tryParse(createdAtRaw)
+          : null;
+      if (createdAt == null || (courseId.isEmpty && topic.isEmpty)) {
+        return null;
+      }
+      return SavedStudySummary(
+        courseId: courseId.isNotEmpty ? courseId : topic,
+        topic: topic.isNotEmpty ? topic : courseId,
+        length: length,
+        summary: summary,
+        createdAt: createdAt.isUtc ? createdAt.toLocal() : createdAt,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 }

@@ -34,4 +34,14 @@ class StudyMaterialController<T> extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void setData(T data) {
+    _state = StudyLoadState(status: StudyLoadStatus.ready, data: data);
+    notifyListeners();
+  }
+
+  void reset() {
+    _state = const StudyLoadState();
+    notifyListeners();
+  }
 }

@@ -11,6 +11,7 @@ class StudyAsyncView<T> extends StatelessWidget {
     required this.readyBuilder,
     required this.idleTitle,
     required this.idleDescription,
+    this.idleBuilder,
     this.generateLabel = 'Gerar com IA',
     this.loadingTitle = 'Preparando seu material',
     this.loadingDescription = 'Organizando o conteúdo selecionado...',
@@ -21,6 +22,7 @@ class StudyAsyncView<T> extends StatelessWidget {
   final StudyLoadState<T> state;
   final VoidCallback onGenerate;
   final Widget Function(BuildContext context, T data) readyBuilder;
+  final WidgetBuilder? idleBuilder;
   final String idleTitle;
   final String idleDescription;
   final String generateLabel;
@@ -44,13 +46,16 @@ class StudyAsyncView<T> extends StatelessWidget {
         actionLabel: 'Tentar novamente',
         onAction: onGenerate,
       ),
-      _ => _EmptyStudyState(
-        icon: Icons.auto_awesome_outlined,
-        title: idleTitle,
-        description: idleDescription,
-        actionLabel: generateLabel,
-        onAction: onGenerate,
-      ),
+      _ =>
+        idleBuilder != null
+            ? idleBuilder!(context)
+            : _EmptyStudyState(
+                icon: Icons.auto_awesome_outlined,
+                title: idleTitle,
+                description: idleDescription,
+                actionLabel: generateLabel,
+                onAction: onGenerate,
+              ),
     };
   }
 }

@@ -34,7 +34,8 @@ O progresso da cartilha é persistido no aparelho por curso. A Home mostra a pr�
 2. ~~Adicionar quantidade/fonte antes de gerar flashcards, quiz, resumo e simulado.~~ Concluído; resumo usa tamanho em lugar de contagem de itens.
 3. ~~Exibir progresso, autoavaliação e origem dos cartões.~~ Concluído com contador, barra de progresso, origem e totais “lembrei”/“para revisar”.
 4. ~~Estruturar feedback de quiz com fonte e próxima ação.~~ Concluído com correção, explicação, cartilha de origem e orientação contextual.
-5. Persistir resumo/tentativa e suportar retomada offline.
+5. Persistir resumo/tentativa e suportar retomada offline (resumos offline concluídos com `StudySummaryRepository`, `SavedStudySummary` e tela `SummaryScreen` com opções de retomar ou regerar).
+
 
 ## Incremento 3 - Home e dados remotos
 
