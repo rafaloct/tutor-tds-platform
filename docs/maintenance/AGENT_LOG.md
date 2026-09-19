@@ -127,3 +127,11 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Substituídos spinners vazios na Home, no Tutor IA legado, no Tutor GenUI e nos materiais de estudo.
 - Nenhuma chamada de IA foi adicionada e nenhuma porcentagem fictícia é exibida.
 - Validação: `flutter analyze` sem achados e suíte completa com 15 testes aprovados.
+
+### Tutor contextual e início orientado
+
+- Cabeçalho e campo de mensagem agora identificam o conteúdo em estudo e o modo da conversa.
+- Adicionadas três ações iniciais locais: explicação simples, exemplo prático do Tocantins e prática com feedback.
+- Removido o envio automático de contexto ao abrir o Tutor; a primeira chamada ocorre somente após ação explícita do estudante.
+- Bloqueado envio concorrente enquanto uma resposta está em andamento.
+- Validação: `flutter analyze` sem achados e suíte completa com 16 testes aprovados.

@@ -996,6 +996,7 @@ class _TermCard extends StatelessWidget {
                       initialContext:
                           'O aluno quer entender melhor o conceito de "${term.term}" da cartilha de ${term.cartilha}. '
                           'Explique de forma simples e com exemplos práticos do Tocantins.',
+                      contextLabel: term.term,
                     ),
                   ),
                 ),

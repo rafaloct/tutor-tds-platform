@@ -10,6 +10,7 @@ import '../services/anything_llm_service.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
+import '../widgets/tutor_conversation_starter.dart';
 import 'guide_screen.dart';
 import '../models/chat_message.dart';
 import '../genui/genui_renderer.dart';
@@ -17,8 +18,13 @@ import '../genui/atui_parser.dart';
 
 class GenUIAssistantScreen extends StatefulWidget {
   final String initialContext;
+  final String? contextLabel;
 
-  const GenUIAssistantScreen({super.key, this.initialContext = ''});
+  const GenUIAssistantScreen({
+    super.key,
+    this.initialContext = '',
+    this.contextLabel,
+  });
 
   @override
   State<GenUIAssistantScreen> createState() => _GenUIAssistantScreenState();
@@ -185,22 +191,20 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   }
 
   void _addInitialMessage() {
-    setState(() {
-      _messages.add(
-        ChatMessage(
-          role: 'bot',
-          text: 'Olá! Sou seu tutor de IA. Como posso te ajudar hoje?',
-        ),
-      );
-    });
-    if (widget.initialContext.isNotEmpty) {
-      Future.microtask(() => _sendMessage(widget.initialContext, true));
-    }
+    final label = widget.contextLabel?.trim();
+    _messages.add(
+      ChatMessage(
+        role: 'bot',
+        text: label != null && label.isNotEmpty
+            ? 'Estou com você em "$label". Escolha uma sugestão ou escreva sua dúvida.'
+            : 'Olá! Sou seu tutor das cartilhas TDS. Escolha uma sugestão ou escreva sua dúvida.',
+      ),
+    );
   }
 
   void _sendMessage([String? message, bool hidden = false]) async {
     final text = message ?? _controller.text.trim();
-    if (text.isEmpty || !mounted) return;
+    if (text.isEmpty || !mounted || _isLoading) return;
 
     setState(() {
       if (!hidden) _messages.add(ChatMessage(role: 'user', text: text));
@@ -294,13 +298,31 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   @override
   Widget build(BuildContext context) {
     final isAdaptiveMode = _chatMode == 'Minha Realidade';
+    final contextLabel = widget.contextLabel?.trim();
+    final hasContext = contextLabel != null && contextLabel.isNotEmpty;
+    final showStarter = _messages.length == 1 && !_isLoading;
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
             Image.asset('assets/logos/logo_tds.png', height: 28),
             const SizedBox(width: 8),
-            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Tutor TDS'),
+                  if (hasContext)
+                    Text(
+                      contextLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                ],
+              ),
+            ),
             GestureDetector(
               onTap: _toggleMode,
               child: Tooltip(
@@ -335,9 +357,16 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
               maxWidth: 860,
               child: ListView.builder(
                 controller: _scrollController,
-                itemCount: _messages.length,
-                itemBuilder: (context, index) =>
-                    _buildMessageBubble(_messages[index]),
+                itemCount: _messages.length + (showStarter ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == _messages.length) {
+                    return TutorConversationStarter(
+                      contextLabel: contextLabel,
+                      onSelected: _sendMessage,
+                    );
+                  }
+                  return _buildMessageBubble(_messages[index]);
+                },
               ),
             ),
           ),
@@ -417,6 +446,14 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   }
 
   Widget _buildInput() {
+    final contextLabel = widget.contextLabel?.trim();
+    final hintText = _isListening
+        ? 'Estou ouvindo...'
+        : _chatMode == 'Minha Realidade'
+        ? 'Conte sua situação ou faça uma pergunta...'
+        : contextLabel != null && contextLabel.isNotEmpty
+        ? 'Pergunte sobre $contextLabel...'
+        : 'Pergunte sobre uma cartilha...';
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 8, 12),
       decoration: BoxDecoration(
@@ -437,7 +474,7 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),
               decoration: InputDecoration(
-                hintText: 'Fale ou digite...',
+                hintText: hintText,
                 isDense: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -461,6 +498,7 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.send),
+            tooltip: 'Enviar pergunta',
             onPressed: _isLoading ? null : () => _sendMessage(),
           ),
         ],

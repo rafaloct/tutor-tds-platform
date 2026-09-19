@@ -40,6 +40,7 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         onTap: () => _open(
           GenUIAssistantScreen(
             initialContext: 'Quero estudar a cartilha: ${_selected.title}.',
+            contextLabel: _selected.title,
           ),
         ),
       ),

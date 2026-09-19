@@ -384,8 +384,10 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    GenUIAssistantScreen(initialContext: widget.cartilha.title),
+                builder: (_) => GenUIAssistantScreen(
+                  initialContext: widget.cartilha.title,
+                  contextLabel: widget.cartilha.title,
+                ),
               ),
             ),
             child: const Icon(Icons.psychology, color: Colors.white),
