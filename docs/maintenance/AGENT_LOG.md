@@ -159,3 +159,10 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - As escolhas “Eu lembrei” e “Revisar novamente” agora mantêm contadores mutuamente consistentes.
 - O estado é apresentado em componente acessível e coberto por widget test.
 - Validação: `flutter analyze` sem achados e 22 testes aprovados.
+
+### Feedback pedagógico do quiz
+
+- O retorno imediato reúne acerto/erro, explicação, cartilha de origem e próxima ação.
+- A orientação muda na última questão para encaminhar o estudante ao resultado e à revisão.
+- O bloco usa região semântica dinâmica e não realiza chamada adicional de IA.
+- Validação: `flutter analyze` sem achados e 23 testes aprovados.

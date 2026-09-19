@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../data/study_ai_service.dart';
 import '../models/study_models.dart';
+import 'assessment_feedback_card.dart';
 import 'study_async_view.dart';
 import 'study_generation_controls.dart';
 import 'study_material_controller.dart';
@@ -228,27 +229,11 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                   ),
                 ),
               if (!_isExam && selected != null) ...[
-                Card.filled(
-                  color: selected == question.correctIndex
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.errorContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          selected == question.correctIndex
-                              ? 'Resposta correta!'
-                              : 'Vamos revisar',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(question.explanation),
-                      ],
-                    ),
-                  ),
+                AssessmentFeedbackCard(
+                  isCorrect: selected == question.correctIndex,
+                  explanation: question.explanation,
+                  source: widget.topic,
+                  isLastQuestion: safeIndex == deck.items.length - 1,
                 ),
                 const SizedBox(height: 12),
               ],
