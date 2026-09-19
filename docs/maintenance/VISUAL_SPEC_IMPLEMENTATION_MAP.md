@@ -19,12 +19,14 @@ Fonte: `Tutor_TDS_Especificacao_Visual_Manutencao_v1.pdf`, 34 páginas.
 1. Criar tokens/componentes compartilhados do design system.
 2. ~~Implementar `TDSWaitExperience` e substituir spinners vazios.~~ Concluído em 2026-09-19 nas telas Home, Tutor IA e materiais de estudo.
 3. ~~Tornar cabeçalho/composer do Tutor contextuais.~~ Concluído em 2026-09-19 com rótulo do conteúdo e orientação de entrada por modo.
-4. ~~Adicionar ações iniciais úteis.~~ Concluído em 2026-09-19 com explicação simples, exemplo prático e prática com feedback. Continuidade de estudo permanece pendente.
+4. ~~Adicionar ações iniciais úteis e continuidade de estudo.~~ Concluído em 2026-09-19 com explicação simples, exemplo prático, prática com feedback e retomada local da cartilha.
 5. Cobrir os componentes com widget tests e feature flags.
 
 O componente de espera usa mensagens e dicas locais, sem nova chamada de IA e sem porcentagem artificial. O comportamento foi coberto por widget test.
 
 O Tutor não envia mais o contexto automaticamente ao abrir a tela. O contexto prepara a conversa localmente; a chamada de IA só ocorre após uma ação explícita do estudante.
+
+O progresso da cartilha é persistido no aparelho por curso. A Home mostra a próxima ação e a experiência restaura seção, mensagem, perguntas respondidas e conclusão sem depender de rede.
 
 ## Incremento 2 - aprendizagem contextual
 

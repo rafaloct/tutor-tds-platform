@@ -6,12 +6,14 @@ import 'package:provider/provider.dart';
 import '../models/cartilha.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
+import '../widgets/tds_wait_experience.dart';
 import 'genui_assistant_screen.dart';
 import '../services/data_sync_service.dart';
 import '../services/privacy_preferences.dart';
 import '../features/certificates/data/certificate_service.dart';
 import '../features/certificates/models/certificate_record.dart';
 import '../features/certificates/presentation/certificate_details_screen.dart';
+import '../features/study_progress/study_progress_repository.dart';
 import 'cadunico_screen.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
@@ -28,11 +30,14 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
   int _currentMessageIndex = 0;
   bool _showOptions = false;
   bool _isCompleted = false;
+  bool _isInitializing = true;
   CertificateRecord? _certificate;
   bool _issuingCertificate = false;
   int _questionsAnswered = 0;
   final ScrollController _scrollController = ScrollController();
   final FlutterTts _tts = FlutterTts();
+  static const _progressRepository = StudyProgressRepository();
+  Future<void> _progressSaveQueue = Future<void>.value();
 
   int get _totalQuestions => widget.cartilha.sections
       .expand((s) => s.messages)
@@ -54,8 +59,80 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
     _tts.setLanguage('pt-BR');
     _tts.setSpeechRate(0.48);
     DataSyncService.logEvent('STARTED', widget.cartilha.title);
-    _displayNextMessage();
+    _initializeExperience();
     _loadExistingCertificate();
+  }
+
+  Future<void> _initializeExperience() async {
+    final saved = await _progressRepository.load(widget.cartilha.id);
+    if (!mounted) return;
+
+    final sections = widget.cartilha.sections;
+    var sectionIndex = saved?.sectionIndex ?? 0;
+    if (sectionIndex < 0 || sectionIndex >= sections.length) sectionIndex = 0;
+    var messageIndex = saved?.messageIndex ?? 0;
+    if (messageIndex < 0 ||
+        messageIndex >= sections[sectionIndex].messages.length) {
+      messageIndex = 0;
+    }
+    final currentMessage = sections[sectionIndex].messages[messageIndex];
+    final questionsAnswered = _bounded(
+      saved?.questionsAnswered ?? 0,
+      _totalQuestions,
+    );
+
+    setState(() {
+      _currentSectionIndex = sectionIndex;
+      _currentMessageIndex = messageIndex;
+      _questionsAnswered = questionsAnswered;
+      _isCompleted = saved?.isCompleted ?? false;
+      _showOptions = saved?.showOptions ?? currentMessage.type != 'bot';
+      if (_isCompleted) {
+        _visibleMessages.add(_completionMessage());
+      } else {
+        if (saved != null) {
+          _visibleMessages.add(
+            Message(
+              type: 'bot',
+              content: 'Você retomou esta cartilha de onde parou.',
+            ),
+          );
+        }
+        _visibleMessages.add(currentMessage);
+      }
+      _isInitializing = false;
+    });
+    _saveProgress();
+  }
+
+  int _bounded(int value, int maximum) {
+    if (value < 0) return 0;
+    if (value > maximum) return maximum;
+    return value;
+  }
+
+  Message _completionMessage() => Message(
+    type: 'bot',
+    content: _earnedCertificate
+        ? '🎉 Parabéns! Você concluiu toda a cartilha e respondeu às perguntas. '
+              'Quando quiser, emita seu certificado verificável pelo botão abaixo.'
+        : '✅ Você chegou ao fim do conteúdo! Para solicitar o certificado, '
+              'volte e responda ${_totalQuestions == 1 ? 'a questão' : 'as questões'} da cartilha.',
+  );
+
+  void _saveProgress() {
+    final snapshot = StudyProgress(
+      courseId: widget.cartilha.id,
+      sectionIndex: _currentSectionIndex,
+      messageIndex: _currentMessageIndex,
+      questionsAnswered: _questionsAnswered,
+      showOptions: _showOptions,
+      isCompleted: _isCompleted,
+      updatedAt: DateTime.now(),
+    );
+    _progressSaveQueue = _progressSaveQueue.then(
+      (_) => _progressRepository.save(snapshot),
+    );
   }
 
   @override
@@ -77,6 +154,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
         _visibleMessages.add(msg);
         _showOptions = (msg.type != 'bot');
       });
+      _saveProgress();
       _scrollToBottom();
     }
   }
@@ -96,17 +174,10 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
       // Fim real do conteúdo — adiciona mensagem de conclusão no chat
       setState(() {
         _isCompleted = true;
-        _visibleMessages.add(
-          Message(
-            type: 'bot',
-            content: _earnedCertificate
-                ? '🎉 Parabéns! Você concluiu toda a cartilha e respondeu às perguntas. '
-                      'Quando quiser, emita seu certificado verificável pelo botão abaixo.'
-                : '✅ Você chegou ao fim do conteúdo! Para solicitar o certificado, '
-                      'volte e responda ${_totalQuestions == 1 ? 'a questão' : 'as questões'} da cartilha.',
-          ),
-        );
+        _showOptions = false;
+        _visibleMessages.add(_completionMessage());
       });
+      _saveProgress();
       _scrollToBottom();
     }
   }
@@ -130,14 +201,12 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
         if (!mounted) return;
         setState(() {
           _visibleMessages.add(Message(type: 'bot', content: feedback));
-          _currentMessageIndex++;
         });
+        _saveProgress();
         _scrollToBottom();
-        _displayNextMessage();
       });
     } else {
-      setState(() => _currentMessageIndex++);
-      _displayNextMessage();
+      _saveProgress();
     }
   }
 
@@ -296,46 +365,54 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Column(
-        children: [
-          LinearProgressIndicator(
-            value: _progress,
-            backgroundColor: Colors.grey[200],
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF093AF4)),
-            minHeight: 4,
-          ),
-          Expanded(
-            child: ResponsiveBody(
-              maxWidth: 860,
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-                itemCount: _visibleMessages.length,
-                itemBuilder: (context, index) =>
-                    _buildBubble(_visibleMessages[index]),
-              ),
-            ),
-          ),
-          if (!_isCompleted && _showOptions)
-            _buildOptions()
-          else if (!_isCompleted)
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 860),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: ElevatedButton(
-                    onPressed: _advance,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
+      body: _isInitializing
+          ? const TdsWaitExperience(
+              title: 'Retomando seu estudo',
+              status: 'Localizando seu último ponto nesta cartilha...',
+              localTip: 'Seu progresso fica salvo neste aparelho.',
+            )
+          : Column(
+              children: [
+                LinearProgressIndicator(
+                  value: _progress,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color(0xFF093AF4),
+                  ),
+                  minHeight: 4,
+                ),
+                Expanded(
+                  child: ResponsiveBody(
+                    maxWidth: 860,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                      itemCount: _visibleMessages.length,
+                      itemBuilder: (context, index) =>
+                          _buildBubble(_visibleMessages[index]),
                     ),
-                    child: const Text('Continuar'),
                   ),
                 ),
-              ),
+                if (!_isCompleted && _showOptions)
+                  _buildOptions()
+                else if (!_isCompleted)
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 860),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: ElevatedButton(
+                          onPressed: _advance,
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 48),
+                          ),
+                          child: const Text('Continuar'),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
       // FABs empilhados — tutor sempre visível, certificado aparece ao concluir
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,

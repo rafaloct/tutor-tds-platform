@@ -135,3 +135,11 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Removido o envio automático de contexto ao abrir o Tutor; a primeira chamada ocorre somente após ação explícita do estudante.
 - Bloqueado envio concorrente enquanto uma resposta está em andamento.
 - Validação: `flutter analyze` sem achados e suíte completa com 16 testes aprovados.
+
+### Continuidade local de estudo
+
+- Persistência local por cartilha para seção, mensagem, estado da pergunta, respostas acumuladas e conclusão.
+- A Home agora apresenta a última cartilha como próxima ação, com progresso e retomada direta.
+- Estados corrompidos ou incompatíveis são ignorados com fallback seguro para o início da cartilha.
+- Escritas de progresso são serializadas para preservar a ordem mesmo durante navegação rápida.
+- Validação: `flutter analyze` sem achados e suíte completa com 19 testes aprovados.

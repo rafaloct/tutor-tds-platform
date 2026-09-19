@@ -14,6 +14,8 @@ import 'genui_assistant_screen.dart';
 import 'settings_screen.dart';
 import '../features/study_ai/presentation/study_hub_screen.dart';
 import '../features/certificates/presentation/certificate_wallet_screen.dart';
+import '../features/study_progress/study_progress_repository.dart';
+import '../widgets/study_resume_card.dart';
 import '../widgets/tds_wait_experience.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -160,6 +162,15 @@ class HomeScreen extends StatelessWidget {
           return Column(
             children: [
               _LearningHeader(
+                cartilhas: cartilhas,
+                onResumeTap: (cartilha) async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatExperienceScreen(cartilha: cartilha),
+                    ),
+                  );
+                },
                 onStudyTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -194,12 +205,16 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _LearningHeader extends StatefulWidget {
+  final List<Cartilha> cartilhas;
+  final Future<void> Function(Cartilha cartilha) onResumeTap;
   final VoidCallback onStudyTap;
   final VoidCallback onTutorTap;
   final VoidCallback onGuideTap;
   final VoidCallback onCertificatesTap;
 
   const _LearningHeader({
+    required this.cartilhas,
+    required this.onResumeTap,
     required this.onStudyTap,
     required this.onTutorTap,
     required this.onGuideTap,
@@ -212,22 +227,66 @@ class _LearningHeader extends StatefulWidget {
 
 class _LearningHeaderState extends State<_LearningHeader> {
   String _firstName = '';
+  StudyProgress? _lastProgress;
 
   @override
   void initState() {
     super.initState();
-    SharedPreferences.getInstance().then((prefs) {
-      final name = (prefs.getString('user_name') ?? '').trim();
-      if (mounted) {
-        setState(() => _firstName = name.isEmpty ? '' : name.split(' ').first);
-      }
+    _loadLocalState();
+  }
+
+  Future<void> _loadLocalState() async {
+    final results = await Future.wait<Object?>([
+      SharedPreferences.getInstance(),
+      const StudyProgressRepository().loadLast(),
+    ]);
+    if (!mounted) return;
+    final prefs = results[0]! as SharedPreferences;
+    final name = (prefs.getString('user_name') ?? '').trim();
+    setState(() {
+      _firstName = name.isEmpty ? '' : name.split(' ').first;
+      _lastProgress = results[1] as StudyProgress?;
     });
+  }
+
+  Cartilha? get _lastCartilha {
+    final progress = _lastProgress;
+    if (progress == null) return null;
+    for (final cartilha in widget.cartilhas) {
+      if (cartilha.id == progress.courseId) return cartilha;
+    }
+    return null;
+  }
+
+  double _progressFor(Cartilha cartilha, StudyProgress progress) {
+    if (progress.isCompleted) return 1;
+    final total = cartilha.sections.fold<int>(
+      0,
+      (sum, section) => sum + section.messages.length,
+    );
+    if (total == 0) return 0;
+    var visited = 0;
+    for (
+      var index = 0;
+      index < progress.sectionIndex && index < cartilha.sections.length;
+      index++
+    ) {
+      visited += cartilha.sections[index].messages.length;
+    }
+    visited += progress.messageIndex + 1;
+    return (visited / total).clamp(0, 1);
+  }
+
+  Future<void> _resume(Cartilha cartilha) async {
+    await widget.onResumeTap(cartilha);
+    await _loadLocalState();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final greeting = _firstName.isEmpty ? 'Olá!' : 'Olá, $_firstName!';
+    final lastCartilha = _lastCartilha;
 
     return Container(
       width: double.infinity,
@@ -256,6 +315,13 @@ class _LearningHeaderState extends State<_LearningHeader> {
               'O que você quer aprender hoje?',
               style: TextStyle(color: colors.onSurfaceVariant),
             ),
+            if (lastCartilha != null && _lastProgress != null)
+              StudyResumeCard(
+                courseTitle: lastCartilha.title,
+                progress: _progressFor(lastCartilha, _lastProgress!),
+                isCompleted: _lastProgress!.isCompleted,
+                onPressed: () => _resume(lastCartilha),
+              ),
             const SizedBox(height: 14),
             Wrap(
               spacing: 10,
