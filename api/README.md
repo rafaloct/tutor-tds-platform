@@ -30,6 +30,26 @@ Endpoints iniciais:
   idempotentes.
 - `GET /events`: lista somente eventos do usuário autenticado, com filtro por
   curso e paginação limitada a 100 itens.
+- `POST /admin/institutions`: cria uma instituição (somente administrador).
+- `POST /admin/programs`: cria programa ligado a uma instituição.
+- `POST /admin/programs/{id}/courses/{course_id}`: oferta curso no programa.
+- `POST /admin/programs/{id}/memberships`: associa usuário e função ao programa.
+- `POST /admin/enrollments`: matricula somente quando participação e oferta existem.
+- `GET /admin/hierarchy`: consulta a hierarquia institucional configurada.
+
+Antes de usar os endpoints administrativos pela primeira vez, crie o primeiro
+administrador no terminal interativo do container. CPF e senha são solicitados
+sem aparecerem no comando nem serem gravados no repositório:
+
+```powershell
+docker compose exec api python -m app.bootstrap_admin `
+  --name "Administrador Tutor TDS" `
+  --phone "63999990000"
+```
+
+O bootstrap é repetível com as mesmas credenciais e não duplica a conta. Em
+automação sem terminal, `BOOTSTRAP_ADMIN_CPF` e `BOOTSTRAP_ADMIN_PASSWORD`
+podem ser injetadas apenas durante a execução e removidas em seguida.
 
 Para carregar ou atualizar explicitamente as cartilhas locais:
 

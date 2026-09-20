@@ -14,6 +14,7 @@ from .config import Settings
 from .database import Database
 from .events import router as events_router
 from .models import Course
+from .organizations import router as organizations_router
 
 
 def create_app(
@@ -41,6 +42,7 @@ def create_app(
     application.state.settings = resolved
     application.include_router(auth_router)
     application.include_router(events_router)
+    application.include_router(organizations_router)
 
     @application.exception_handler(RequestValidationError)
     async def validation_error(

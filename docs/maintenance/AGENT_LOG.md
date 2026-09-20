@@ -359,3 +359,18 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   instituição/programa legado, sem descartar ou deixar registros órfãos.
 - Validação: upgrade, backfill e downgrade exercitados; SQL PostgreSQL gerado
   offline; 23 testes Python aprovados e `compileall` concluído.
+
+### Operação administrativa da hierarquia
+
+- Adicionados endpoints protegidos por função global `admin` para criar
+  instituições e programas, ofertar cursos, associar usuários com função local
+  e matricular somente quando oferta e participação ativa existem.
+- `GET /admin/hierarchy` permite auditar a configuração institucional sem
+  consultar o PostgreSQL manualmente.
+- Criado bootstrap repetível do primeiro administrador. CPF e senha são lidos
+  de prompt oculto ou variáveis transitórias, nunca de argumentos de linha de
+  comando nem de valores versionados.
+- O README documenta a sequência operacional para container local ou futuro
+  console do Dokploy; nenhuma conexão remota foi necessária nesta etapa.
+- Validação: 26 testes Python aprovados, `compileall` e
+  `docker compose config --quiet` concluídos.
