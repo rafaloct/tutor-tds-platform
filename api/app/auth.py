@@ -9,18 +9,29 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import jwt
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, Field, SecretStr
 from pwdlib import PasswordHash
 from pwdlib.exceptions import UnknownHashError
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .config import Settings
 from .database import Database
-from .models import SessionToken, User
+from .models import (
+    CertificateReference,
+    ClassEnrollment,
+    ClassMonitor,
+    Classroom,
+    Enrollment,
+    LearningEventRecord,
+    ProgramMembership,
+    SessionToken,
+    SyncLog,
+    User,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 password_hash = PasswordHash.recommended()
@@ -101,7 +112,11 @@ def access_claims(
 ) -> dict[str, str]:
     service, session = _service(request)
     try:
-        return service.decode_access(_bearer_token(authorization))
+        claims = service.decode_access(_bearer_token(authorization))
+        user = session.get(User, claims["sub"])
+        if user is None or user.role != claims["role"]:
+            raise _unauthorized()
+        return claims
     finally:
         session.close()
 
@@ -136,6 +151,60 @@ def me(
         if user is None:
             raise _unauthorized()
         return _public_user(user)
+    finally:
+        session.close()
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_me(
+    request: Request,
+    claims: dict[str, str] = Depends(require_roles("student")),
+) -> Response:
+    """Remove a conta do estudante e todos os dados transacionais associados."""
+    database: Database = request.app.state.database
+    session = Session(database.engine)
+    user_id = claims["sub"]
+    try:
+        # Contas de equipe não podem ser apagadas por este fluxo de autoatendimento.
+        # A checagem também protege dados inconsistentes que tenham sido promovidos
+        # sem a atualização correspondente da função global.
+        if session.scalar(select(Classroom.id).where(Classroom.teacher_id == user_id)):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Conta vinculada a uma turma. Solicite a exclusão à equipe TDS.",
+            )
+
+        event_ids = select(LearningEventRecord.event_id).where(
+            LearningEventRecord.user_id == user_id
+        )
+        session.execute(delete(SyncLog).where(SyncLog.event_id.in_(event_ids)))
+        session.execute(
+            delete(LearningEventRecord).where(LearningEventRecord.user_id == user_id)
+        )
+        session.execute(
+            delete(CertificateReference).where(CertificateReference.user_id == user_id)
+        )
+        session.execute(
+            delete(ClassEnrollment).where(ClassEnrollment.user_id == user_id)
+        )
+        session.execute(delete(ClassMonitor).where(ClassMonitor.user_id == user_id))
+        session.execute(delete(Enrollment).where(Enrollment.user_id == user_id))
+        session.execute(
+            delete(ProgramMembership).where(ProgramMembership.user_id == user_id)
+        )
+        session.execute(delete(SessionToken).where(SessionToken.user_id == user_id))
+        session.execute(delete(User).where(User.id == user_id))
+        session.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except HTTPException:
+        session.rollback()
+        raise
+    except IntegrityError as error:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A conta possui vínculos que exigem atendimento da equipe TDS.",
+        ) from error
     finally:
         session.close()
 

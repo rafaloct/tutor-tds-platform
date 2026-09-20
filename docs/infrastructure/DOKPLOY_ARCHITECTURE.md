@@ -30,6 +30,13 @@ Internet
 - Não remover imagens, volumes, modelos ou redes por nome sem rastrear o consumidor.
 - Não usar diretamente o PostgreSQL existente como banco transacional do novo backend sem isolamento, backup e teste de capacidade.
 
+## API Tutor TDS publicada
+
+Em 2026-09-20, a API passou a rodar em compose isolado em
+`/opt/tutor-tds-api`, ligada à rede externa `dokploy-network` somente no serviço
+HTTP. O PostgreSQL dedicado permanece na rede interna. O Traefik publica
+`https://ead.ipexdesenvolvimento.cloud/tutor-api` e as duas páginas de política.
+
 ## Staging proposto
 
 Criar um projeto Dokploy separado, rede separada e banco/schema separado. Publicar apenas via Traefik com TLS e health check. O staging deve receber migrations e validação antes de produção.

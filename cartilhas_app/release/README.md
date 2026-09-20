@@ -1,12 +1,22 @@
 # Artefatos de release
 
-`Tutor-TDS-1.2.0+11-signed.aab` é o bundle de produção atual. Ele foi gerado
-com `config/production.json`, contém apenas a URL HTTPS do gateway e está
-assinado com a chave de upload cujo SHA-256 é
-`16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50`.
-Envie-o somente depois que esse certificado aparecer como chave de upload
-aceita na Play Console.
+## Atual
 
-`Tutor-TDS-1.1.0+10-unsigned.aab` é um artefato de validação, compilado sem
-credenciais de serviços e sem chave de upload. Ele não deve ser enviado à Play
-Console.
+`Tutor-TDS-1.3.0+12-signed.aab` é o bundle candidato à Play Console.
+
+- tamanho: `63.044.125` bytes;
+- SHA-256: `8c1981323f446505e62901f875d609dafb8b3be652174a41bc4e47b22504fdd1`;
+- pacote: `com.tutortds_cartilhas`;
+- versão: `1.3.0` (`versionCode 12`);
+- target SDK: 36;
+- alinhamento nativo: 16 KB;
+- assinatura: chave de upload correspondente a `android/upload_certificate.pem`.
+
+Não envie o `.jks`, `key.properties` nem `config/production.json`. Antes do
+upload, confirme na Play Console que o certificado público versionado é a chave
+de upload aceita e siga `PLAY_CONSOLE_CHECKLIST.md`.
+
+## Históricos
+
+Os bundles 1.1.0+10 e 1.2.0+11 permanecem apenas como histórico. O artefato
+1.1.0+10 é não assinado e nunca deve ser enviado.

@@ -1,12 +1,17 @@
 # Fluxo de Deploy
 
-## Atual
+## Atual da API Tutor TDS
 
 ```text
-build local --> rsync/artefato --> Dokploy --> produção
+testes locais --> cópia controlada para /opt/tutor-tds-api
+  --> docker compose build --> migration Alembic --> health check
+  --> smoke test externo --> backup lógico diário
 ```
 
-O fluxo atual não demonstra staging, testes obrigatórios ou rollback automatizado.
+O deploy de 2026-09-20 usa compose isolado e Traefik/Dokploy como proxy, mas
+ainda não possui promoção por imagem imutável nem staging automatizado. O
+rollback de código é reconstruir a revisão anterior; migrations destrutivas
+continuam proibidas sem backup e autorização.
 
 ## Alvo
 

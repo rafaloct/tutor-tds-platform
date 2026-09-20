@@ -175,6 +175,57 @@ void main() {
     expect(store.value?.refreshToken, 'refresh-current');
   });
 
+  test('exclusão usa Bearer e limpa a sessão segura', () async {
+    final store = MemoryTokenStore()
+      ..value = const AuthTokens(
+        accessToken: 'access-current',
+        refreshToken: 'refresh-current',
+      );
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((request) async {
+        expect(request.method, 'DELETE');
+        expect(request.url.path, '/auth/me');
+        expect(request.headers['Authorization'], 'Bearer access-current');
+        return http.Response('', 204);
+      }),
+      tokenStore: store,
+    );
+
+    expect(await repository.hasSession(), isTrue);
+    await repository.deleteAccount();
+
+    expect(store.value, isNull);
+    expect(store.clears, 1);
+    expect(await repository.hasSession(), isFalse);
+  });
+
+  test('exclusão com vínculo preserva a sessão e orienta suporte', () async {
+    final store = MemoryTokenStore()
+      ..value = const AuthTokens(
+        accessToken: 'access-current',
+        refreshToken: 'refresh-current',
+      );
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((_) async => http.Response('{}', 409)),
+      tokenStore: store,
+    );
+
+    await expectLater(
+      repository.deleteAccount(),
+      throwsA(
+        isA<AuthException>().having(
+          (error) => error.message,
+          'message',
+          contains('suporte TDS'),
+        ),
+      ),
+    );
+    expect(store.value, isNotNull);
+    expect(store.clears, 0);
+  });
+
   test('requisições simultâneas compartilham uma única renovação', () async {
     final store = MemoryTokenStore()
       ..value = const AuthTokens(

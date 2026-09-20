@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.main import create_app
-from app.models import Base, SessionToken, User
+from app.models import Base, LearningEventRecord, SessionToken, User
 
 CPF = "123.456.789-09"
 PASSWORD = "uma-senha-forte-2026"
@@ -135,6 +135,45 @@ def test_valid_access_token_returns_only_public_user_fields() -> None:
     assert response.status_code == 200
     assert set(response.json()) == {"id", "name", "role"}
     assert CPF not in response.text
+
+
+def test_student_can_delete_account_events_sessions_and_revoke_access() -> None:
+    client, app = make_client()
+    with client:
+        registered = client.post("/auth/register", json=registration_payload()).json()
+        headers = {"Authorization": f"Bearer {registered['access_token']}"}
+        created_event = client.post(
+            "/events",
+            headers=headers,
+            json={
+                "event_id": "delete-account:page-viewed",
+                "event_type": "page_viewed",
+                "course_id": "_app",
+                "session_id": "delete-account",
+                "occurred_at": "2026-09-20T12:00:00Z",
+                "payload": {"page_id": "settings"},
+            },
+        )
+        deleted = client.delete("/auth/me", headers=headers)
+        access_after_delete = client.get("/auth/me", headers=headers)
+        refresh_after_delete = client.post(
+            "/auth/refresh",
+            json={"refresh_token": registered["refresh_token"]},
+        )
+
+        with Session(app.state.database.engine) as session:
+            assert session.scalar(select(func.count()).select_from(User)) == 0
+            assert session.scalar(select(func.count()).select_from(SessionToken)) == 0
+            assert (
+                session.scalar(select(func.count()).select_from(LearningEventRecord))
+                == 0
+            )
+
+    assert created_event.status_code == 201
+    assert deleted.status_code == 204
+    assert deleted.content == b""
+    assert access_after_delete.status_code == 401
+    assert refresh_after_delete.status_code == 401
 
 
 def test_application_refuses_to_start_without_auth_secrets() -> None:

@@ -43,10 +43,20 @@ void main(List<String> arguments) {
   }
 
   final rawApi = config['TUTOR_API_URL'];
-  if (rawApi is String && rawApi.trim().isNotEmpty) {
-    final api = Uri.tryParse(rawApi);
-    if (api == null || api.scheme != 'https' || api.host.isEmpty) {
-      stderr.writeln('TUTOR_API_URL deve ser vazia ou uma URL HTTPS válida.');
+  final api = rawApi is String ? Uri.tryParse(rawApi) : null;
+  if (api == null || api.scheme != 'https' || api.host.isEmpty) {
+    stderr.writeln(
+      'TUTOR_API_URL deve ser uma URL HTTPS válida; conta e analytics não podem ficar desconectados em produção.',
+    );
+    exitCode = 1;
+    return;
+  }
+
+  for (final key in const ['PRIVACY_POLICY_URL', 'ACCOUNT_DELETION_URL']) {
+    final rawValue = config[key];
+    final value = rawValue is String ? Uri.tryParse(rawValue) : null;
+    if (value == null || value.scheme != 'https' || value.host.isEmpty) {
+      stderr.writeln('$key deve ser uma URL HTTPS pública e válida.');
       exitCode = 1;
       return;
     }

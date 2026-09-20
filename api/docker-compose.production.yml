@@ -1,0 +1,92 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tutor_tds
+      POSTGRES_USER: tutor_tds
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?configure POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tutor_tds -d tutor_tds"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - tutor_tds_api_db:/var/lib/postgresql/data
+    networks:
+      - internal
+    logging: &bounded-logging
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://tutor_tds:${POSTGRES_PASSWORD}@db:5432/tutor_tds
+      ALLOWED_ORIGINS: https://cartilhas.ipexdesenvolvimento.cloud
+      JWT_SECRET: ${JWT_SECRET:?configure JWT_SECRET}
+      CPF_PEPPER: ${CPF_PEPPER:?configure CPF_PEPPER}
+      ACCESS_TOKEN_MINUTES: 15
+      REFRESH_TOKEN_DAYS: 30
+    command: >-
+      sh -c "alembic upgrade head &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)
+      interval: 15s
+      timeout: 6s
+      retries: 10
+      start_period: 20s
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./seed:/seed:ro
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.tutor-tds-api.entrypoints: websecure
+      traefik.http.routers.tutor-tds-api.rule: Host(`ead.ipexdesenvolvimento.cloud`) && PathPrefix(`/tutor-api`)
+      traefik.http.routers.tutor-tds-api.tls: "true"
+      traefik.http.routers.tutor-tds-api.tls.certresolver: letsencrypt
+      traefik.http.routers.tutor-tds-api.middlewares: tutor-tds-api-strip
+      traefik.http.middlewares.tutor-tds-api-strip.stripprefix.prefixes: /tutor-api
+      traefik.http.services.tutor-tds-api.loadbalancer.server.port: "8000"
+    networks:
+      - internal
+      - dokploy-network
+    logging: *bounded-logging
+
+  policy-web:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./public:/usr/share/nginx/html:ro
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.tutor-tds-policy.entrypoints: websecure
+      traefik.http.routers.tutor-tds-policy.rule: Host(`cartilhas.ipexdesenvolvimento.cloud`) && (Path(`/privacy.html`) || Path(`/account-deletion.html`))
+      traefik.http.routers.tutor-tds-policy.priority: "200"
+      traefik.http.routers.tutor-tds-policy.tls: "true"
+      traefik.http.routers.tutor-tds-policy.tls.certresolver: letsencrypt
+      traefik.http.services.tutor-tds-policy.loadbalancer.server.port: "80"
+    networks:
+      - dokploy-network
+    logging: *bounded-logging
+
+volumes:
+  tutor_tds_api_db:
+
+networks:
+  internal:
+    internal: true
+  dokploy-network:
+    external: true

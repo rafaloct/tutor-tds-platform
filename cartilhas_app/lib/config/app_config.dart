@@ -9,6 +9,17 @@ class AppConfig {
   /// catálogo continua vindo integralmente dos assets do aplicativo.
   static const tutorApiUrl = String.fromEnvironment('TUTOR_API_URL');
 
+  static const privacyPolicyUrl = String.fromEnvironment(
+    'PRIVACY_POLICY_URL',
+    defaultValue: 'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html',
+  );
+
+  static const accountDeletionUrl = String.fromEnvironment(
+    'ACCOUNT_DELETION_URL',
+    defaultValue:
+        'https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html',
+  );
+
   static const playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.tutortds_cartilhas';
 }

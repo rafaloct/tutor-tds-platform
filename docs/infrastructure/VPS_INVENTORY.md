@@ -1,6 +1,6 @@
 # Tutor TDS - Inventário da VPS
 
-> Auditoria somente leitura realizada em 2026-09-19. Nenhum serviço, firewall, volume ou dado foi alterado.
+> Auditoria inicial realizada em 2026-09-19; atualização produtiva da API Tutor TDS em 2026-09-20.
 
 ## Resumo
 
@@ -27,6 +27,10 @@
 - `kreativ-tds-sync`: sincronização TDS, saudável.
 - `kreativ-lms-lite-api` e `projeto-tds-lms-lite-dashboard-1`: API e painel LMS existentes.
 - `kreativ-postgres`: PostgreSQL/pgvector 16, saudável.
+- `tutor-tds-api-api-1`: API transacional Tutor TDS, publicada por Traefik em
+  `/tutor-api`, com health check.
+- `tutor-tds-api-db-1`: PostgreSQL 16 dedicado à API, sem porta publicada.
+- `tutor-tds-api-policy-web-1`: páginas públicas de privacidade e exclusão.
 - `kreativ-rag` e `kreativ-ollama`: segunda pilha RAG interna.
 - `dokploy`, `dokploy-postgres`, `dokploy-redis` e `dokploy-traefik`.
 - Chatwoot, n8n, Evolution API, WordPress/MySQL/Redis, PocketBase e serviços Frappe.
@@ -75,6 +79,11 @@ A correção exige janela controlada: preservar amostra para diagnóstico, confi
 - `/var/backups` contém apenas backups padrão do sistema (dpkg/apt), cerca de 3,1 MB.
 - Não foi confirmada rotina de backup dos volumes Docker, bancos, AnythingLLM ou aplicações.
 - Snapshots da Hostinger não foram auditados pelo shell.
+
+A nova base `tutor-tds-api-db-1` possui dump lógico diário às 03:20 UTC, retenção
+local de 14 dias e primeiro backup validado com `gzip -t`. Esse controle cobre
+somente a nova API; cópia externa e restauração em staging ainda não foram
+demonstradas.
 
 Conclusão: backup de aplicação e restauração permanecem não demonstrados.
 

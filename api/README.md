@@ -26,6 +26,8 @@ Endpoints iniciais:
 - `POST /auth/login`: autentica CPF e senha.
 - `POST /auth/refresh`: rotaciona o refresh token de uso único.
 - `GET /auth/me`: valida o access token e retorna apenas dados públicos.
+- `DELETE /auth/me`: exclui a conta do estudante e seus dados transacionais,
+  incluindo sessões, matrículas, eventos, analytics e referências de certificado.
 - `POST /events`: recebe aprendizagem e telemetria tipada (`page_viewed`,
   `resource_opened`, `feature_used`) de forma autenticada e idempotente. O
   payload de telemetria aceita somente um identificador técnico estável.
@@ -82,3 +84,11 @@ staging ou produção.
 
 Antes de qualquer staging, substitua as credenciais locais, configure TLS pelo
 proxy do Dokploy e execute backup/restore do banco de teste.
+
+## Produção na VPS
+
+`docker-compose.production.yml` publica a API por Traefik em
+`https://ead.ipexdesenvolvimento.cloud/tutor-api`, mantém o PostgreSQL em rede
+interna e serve as páginas públicas de privacidade/exclusão no domínio do app.
+O arquivo `.env` produtivo permanece somente na VPS, com permissão restrita, e
+deve definir `POSTGRES_PASSWORD`, `JWT_SECRET` e `CPF_PEPPER` independentes.

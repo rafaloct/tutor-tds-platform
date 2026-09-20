@@ -1,0 +1,36 @@
+import 'dart:io';
+
+import 'package:cartilhas_app/features/auth/data/account_data_deletion_service.dart';
+import 'package:cartilhas_app/features/certificates/data/certificate_repository.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  test('apaga preferências e a carteira privada de certificados', () async {
+    SharedPreferences.setMockInitialValues({
+      'user_name': 'Pessoa de Teste',
+      'learning_events:pending:v1': '[]',
+    });
+    final documents = await Directory.systemTemp.createTemp(
+      'tutor-tds-account-delete-',
+    );
+    addTearDown(() async {
+      if (await documents.exists()) await documents.delete(recursive: true);
+    });
+    final repository = CertificateRepository(
+      documentsDirectoryProvider: () async => documents,
+    );
+    final certificates = await repository.certificatesDirectory();
+    await File(
+      '${certificates.path}${Platform.pathSeparator}private.pdf',
+    ).writeAsString('private certificate');
+
+    await AccountDataDeletionService(
+      certificateRepository: repository,
+    ).deleteLocalData();
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getKeys(), isEmpty);
+    expect(await certificates.exists(), isFalse);
+  });
+}

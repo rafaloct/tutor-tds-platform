@@ -69,6 +69,11 @@ class CertificateRepository {
     return null;
   }
 
+  Future<void> deleteAll() async {
+    final directory = await certificatesDirectory();
+    if (await directory.exists()) await directory.delete(recursive: true);
+  }
+
   Future<void> _writeIndex(List<CertificateRecord> records) async {
     final directory = await certificatesDirectory();
     final index = File('${directory.path}${Platform.pathSeparator}index.json');

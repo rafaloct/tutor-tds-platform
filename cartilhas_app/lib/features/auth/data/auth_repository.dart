@@ -30,6 +30,8 @@ class AuthRepository {
 
   bool get isConfigured => apiUrl.trim().isNotEmpty;
 
+  Future<bool> hasSession() async => (await _readTokens()) != null;
+
   Future<AuthSession> register({
     required String name,
     required String cpf,
@@ -73,6 +75,32 @@ class AuthRepository {
       rethrow;
     } on Object {
       throw const AuthException('Não foi possível validar sua conta agora.');
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      final response = await authorized(
+        (accessToken) => _client
+            .delete(
+              _uri('/auth/me'),
+              headers: {'Authorization': 'Bearer $accessToken'},
+            )
+            .timeout(const Duration(seconds: 12)),
+      );
+      if (response.statusCode != 204) {
+        if (response.statusCode == 409) {
+          throw const AuthException(
+            'Esta conta possui vínculos de equipe. Solicite a exclusão ao suporte TDS.',
+          );
+        }
+        throw const AuthException('Não foi possível excluir sua conta agora.');
+      }
+      await _tokenStore.clear();
+    } on AuthException {
+      rethrow;
+    } on Object {
+      throw const AuthException('Não foi possível excluir sua conta agora.');
     }
   }
 
