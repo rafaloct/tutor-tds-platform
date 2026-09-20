@@ -153,7 +153,7 @@ WelcomeScreen (cadastro + LGPD)
 
 | Funcionalidade | Onda | Prioridade |
 |---|---|---|
-| API REST centralizada (PostgreSQL) | Onda 1 | Alta |
+| API REST centralizada publicada (PostgreSQL) | Onda 1 | Alta |
 | Autenticação JWT com RBAC | Onda 1 | Alta |
 | Cursos dinâmicos (sem rebuild APK) | Onda 2 | Alta |
 | LearningEvents persistidos no servidor | Onda 2 | Alta |
@@ -167,6 +167,15 @@ WelcomeScreen (cadastro + LGPD)
 | Creator Studio | Onda 4 | Baixa |
 | Ledger financeiro | Onda 4 | Baixa |
 | Integração de pagamentos | Onda 4 | Baixa |
+
+### Fundação local da API (ainda não publicada)
+
+A Onda 1 possui agora um projeto FastAPI isolado em `api/`, com SQLAlchemy,
+Alembic, Docker Compose para PostgreSQL 16 e os endpoints iniciais
+`GET /health` e `GET /courses`. A migration inicial cobre institutions,
+programs, users, sessions, enrollments, learning_events, certificates e
+sync_log. Essa base foi validada apenas localmente; staging, autenticação,
+worker e publicação continuam pendentes.
 
 ---
 

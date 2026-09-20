@@ -218,3 +218,20 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Falhas remotas usam primeiro o último cache válido e depois os nove assets embarcados.
 - A validação de produção rejeita `TUTOR_API_URL` não HTTPS quando houver valor.
 - Validação: configuração de exemplo aprovada e suíte Flutter completa com 43 testes.
+
+### Fundação local da API Tutor TDS
+
+- Criado o projeto `api/` com FastAPI, SQLAlchemy, Alembic e configuração por ambiente.
+- A migration inicial cria as tabelas mínimas da Onda 1: institutions, programs,
+  users, sessions, enrollments, learning_events, certificates e sync_log, além
+  do catálogo de courses.
+- `GET /health` consulta de fato o banco; `GET /courses` entrega somente cursos
+  ativos no contrato esperado pelo Flutter.
+- Docker Compose local fornece PostgreSQL 16 e executa migrations antes da API.
+- Upgrade e downgrade foram exercitados em SQLite temporário; o modelo ORM e a
+  migration possuem o mesmo conjunto de tabelas.
+- Validação local: 3 testes Python aprovados, bytecode compilado e
+  `docker compose config` válido.
+- O SQL PostgreSQL foi gerado offline; o teste integrado em container ficou
+  pendente porque o daemon do Docker Desktop local não estava em execução.
+- Nenhuma publicação, conexão com staging ou alteração na VPS foi realizada.

@@ -83,6 +83,10 @@ Tutor-TDS-*.zip
 
 # Artefatos gerados e capturas locais
 .claude/
+api/.venv/
+api/.pytest_cache/
+api/**/__pycache__/
+api/*.egg-info/
 screenshots/
 extracted_content/
 materiais_playstore_2026/media/
