@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import jwt
-from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, Field, SecretStr
 from pwdlib import PasswordHash
@@ -94,11 +94,25 @@ def refresh(payload: RefreshRequest, request: Request) -> TokenResponse:
         session.close()
 
 
-@router.get("/me", response_model=PublicUser)
-def me(request: Request, authorization: str | None = Header(default=None)) -> PublicUser:
+def access_claims(
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> dict[str, str]:
     service, session = _service(request)
     try:
-        claims = service.decode_access(_bearer_token(authorization))
+        return service.decode_access(_bearer_token(authorization))
+    finally:
+        session.close()
+
+
+@router.get("/me", response_model=PublicUser)
+def me(
+    request: Request,
+    claims: dict[str, str] = Depends(access_claims),
+) -> PublicUser:
+    database: Database = request.app.state.database
+    session = Session(database.engine)
+    try:
         user = session.get(User, claims["sub"])
         if user is None:
             raise _unauthorized()

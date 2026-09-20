@@ -260,3 +260,15 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Erros de validação foram sanitizados para não repetir valores recebidos.
 - Validação local: 14 testes Python aprovados, `compileall`, SQL PostgreSQL
   offline e configuração Compose aprovados.
+
+### Ingestão autenticada de LearningEvents
+
+- Criados `POST /events` e `GET /events`, ambos protegidos por access token.
+- `user_id` é derivado exclusivamente do JWT e nunca aceito no payload.
+- Retries idênticos retornam sucesso sem duplicar; colisões de conteúdo ou de
+  outro usuário retornam 409.
+- A listagem é isolada por estudante, aceita filtro de curso e limita a página
+  a no máximo 100 eventos.
+- Apenas `lesson_started` e `lesson_completed` são aceitos nesta etapa; o worker
+  do Google Sheets e a transmissão da fila Flutter continuam desativados.
+- Validação local: 19 testes Python aprovados e bytecode compilado.

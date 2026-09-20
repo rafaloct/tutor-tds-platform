@@ -182,6 +182,11 @@ duração e refresh token opaco com rotação. CPF é armazenado somente como
 HMAC-SHA256 com pepper e senhas usam Argon2id. A integração dessa autenticação
 com o Flutter ainda não foi iniciada.
 
+A API também recebe e lista LearningEvents autenticados. A identidade vem
+sempre do access token, o `event_id` é idempotente e as consultas são isoladas
+por estudante. A fila Flutter permanece somente local até a integração de
+autenticação no aplicativo.
+
 ---
 
 ## Componentes de Infraestrutura

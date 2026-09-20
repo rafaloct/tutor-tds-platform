@@ -26,6 +26,10 @@ Endpoints iniciais:
 - `POST /auth/login`: autentica CPF e senha.
 - `POST /auth/refresh`: rotaciona o refresh token de uso único.
 - `GET /auth/me`: valida o access token e retorna apenas dados públicos.
+- `POST /events`: recebe `lesson_started` e `lesson_completed` autenticados e
+  idempotentes.
+- `GET /events`: lista somente eventos do usuário autenticado, com filtro por
+  curso e paginação limitada a 100 itens.
 
 Para carregar ou atualizar explicitamente as cartilhas locais:
 

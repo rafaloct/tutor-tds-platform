@@ -25,37 +25,35 @@ ESTADO ATUAL VALIDADO
 - Commit a947068: Flutter consulta TUTOR_API_URL com cache e fallback local.
 - Commit 34b328e: fila local idempotente de LearningEvents.
 - Commit f295f14: retomada offline de quiz/simulado.
-- API local: 14 testes Python aprovados; migrations upgrade/downgrade aprovadas em SQLite;
+- API local: 19 testes Python aprovados; migrations upgrade/downgrade aprovadas em SQLite;
   SQL PostgreSQL gerado offline; docker compose config válido.
 - Autenticação local concluída: registro, login, refresh rotativo e `/auth/me`,
   com CPF em HMAC-SHA256, senha Argon2id e erros de validação sanitizados.
+- Ingestão autenticada concluída: POST/GET `/events`, idempotência e isolamento
+  por estudante.
 - Flutter: baseline de 43 testes e flutter analyze limpo no último fechamento.
 - Docker Desktop estava instalado, mas o daemon não estava rodando. Não marque teste
   integrado PostgreSQL como concluído sem executá-lo de fato.
 
-PRÓXIMA FATIA: INGESTÃO AUTENTICADA DE LEARNING EVENTS
-Implemente em api/ uma fatia pequena e revisável para:
-1. POST /events protegido por Bearer access token.
-2. Aceitar exatamente o contrato Flutter: event_id, event_type, course_id,
-   session_id e occurred_at.
-3. Derivar user_id exclusivamente do claim sub; nunca aceitar user_id do cliente.
-4. Permitir inicialmente lesson_started e lesson_completed.
-5. Tornar event_id idempotente: o mesmo evento do mesmo usuário deve retornar
-   sucesso sem criar segunda linha; colisão entre usuários deve ser rejeitada.
-6. GET /events?course_id=... protegido, limitado ao usuário autenticado, com
-   paginação e limite máximo seguro.
-7. Não iniciar ainda o worker do Google Sheets.
+PRÓXIMA FATIA: CLIENTE DE AUTENTICAÇÃO FLUTTER
+Implemente no Flutter uma fundação pequena e revisável para:
+1. AuthRepository para register, login, refresh e `/auth/me` usando TUTOR_API_URL.
+2. Armazenar access e refresh tokens somente com flutter_secure_storage.
+3. Nunca salvar senha em nenhum armazenamento.
+4. Renovar access token uma vez após 401 e impedir loops de refresh.
+5. API vazia deve manter exatamente o comportamento offline atual.
+6. Não alterar ainda WelcomeScreen, Google Apps Script, Chatwoot ou certificados.
 
 TESTES MÍNIMOS
-- requisição sem token ou com token expirado é 401;
-- evento válido persiste com user_id do token;
-- retry do mesmo event_id permanece com uma linha;
-- event_type desconhecido é 422 sem ecoar payload sensível;
-- um estudante não consegue listar eventos de outro;
-- filtros e paginação possuem testes de limite.
+- tokens nunca aparecem em SharedPreferences;
+- register/login/refresh interpretam sucesso e erros genéricos sem ecoar senha;
+- 401 dispara no máximo um refresh e repete a requisição uma vez;
+- refresh rejeitado limpa somente tokens da API;
+- TUTOR_API_URL vazia não gera chamada de rede.
 
 LIMITES DE ESCOPO
-- Não sincronizar ainda a fila Flutter nesta mesma fatia.
+- Não mudar ainda o fluxo visual de onboarding/login.
+- Não sincronizar a fila de eventos nesta mesma fatia.
 - Não implementar o worker do Google Sheets.
 - Não iniciar deploy ou staging.
 - Se uma biblioteca de segurança for adicionada, fixe intervalo de versão no
@@ -66,6 +64,6 @@ VALIDAÇÃO E ENTREGA
 - Rode testes focados, depois todos os testes de api/ e compileall.
 - Rode git diff --check e busca de padrões de segredo antes do commit.
 - Atualize docs/maintenance/AGENT_LOG.md com evidências reais e pendências.
-- Faça um commit pequeno com mensagem: feat: ingest authenticated learning events
+- Faça um commit pequeno com mensagem: feat: add Flutter auth client foundation
 - Termine com git status limpo e informe commit, testes e limitações.
 ```
