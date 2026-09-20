@@ -87,6 +87,11 @@ def test_admin_builds_and_reads_complete_program_hierarchy() -> None:
             f"/admin/programs/{program_id}/courses/course-1",
             headers=headers,
         )
+        workload = client.put(
+            f"/admin/programs/{program_id}/courses/course-1/workload",
+            json={"planned_hours": 36.5},
+            headers=headers,
+        )
         membership = client.post(
             f"/admin/programs/{program_id}/memberships",
             json={"user_id": student["user"]["id"], "role": "student"},
@@ -125,6 +130,8 @@ def test_admin_builds_and_reads_complete_program_hierarchy() -> None:
     assert institution.status_code == 201
     assert program.status_code == 201
     assert offered.status_code == 201
+    assert workload.status_code == 200
+    assert workload.json()["planned_hours"] == 36.5
     assert membership.status_code == 201
     assert enrollment.status_code == 201
     assert duplicate.status_code == 409

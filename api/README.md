@@ -33,6 +33,8 @@ Endpoints iniciais:
 - `POST /admin/institutions`: cria uma instituição (somente administrador).
 - `POST /admin/programs`: cria programa ligado a uma instituição.
 - `POST /admin/programs/{id}/courses/{course_id}`: oferta curso no programa.
+- `PUT /admin/programs/{id}/courses/{course_id}/workload`: configura a carga
+  horária planejada daquela oferta.
 - `POST /admin/programs/{id}/memberships`: associa usuário e função ao programa.
 - `POST /admin/enrollments`: matricula somente quando participação e oferta existem.
 - `GET /admin/hierarchy`: consulta a hierarquia institucional configurada.
@@ -41,6 +43,8 @@ Endpoints iniciais:
 - `POST /admin/classes/{id}/monitors/{user_id}`: associa monitor do programa.
 - `GET /classes/{id}`: entrega a turma somente ao administrador, professor ou
   monitor associado.
+- `GET /users/{id}/hours?course_id=...`: consolida uso ativo e horas validadas
+  para o próprio estudante ou sua equipe pedagógica autorizada.
 
 Antes de usar os endpoints administrativos pela primeira vez, crie o primeiro
 administrador no terminal interativo do container. CPF e senha são solicitados

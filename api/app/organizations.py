@@ -68,6 +68,11 @@ class EnrollmentResponse(EnrollmentCreate):
     status: str
 
 
+class WorkloadUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    planned_hours: float = Field(gt=0, le=10_000)
+
+
 class ProgramHierarchy(ProgramResponse):
     course_ids: list[str]
     memberships: list[MembershipResponse]
@@ -144,6 +149,28 @@ def offer_course(
         session.add(ProgramCourse(program_id=program_id, course_id=course_id))
         _commit(session, "Não foi possível vincular o curso.")
         return {"program_id": program_id, "course_id": course_id}
+
+
+@router.put("/programs/{program_id}/courses/{course_id}/workload")
+def update_workload(
+    program_id: str,
+    course_id: str,
+    payload: WorkloadUpdate,
+    request: Request,
+    _: dict[str, str] = Depends(admin_claims),
+) -> dict[str, float | str]:
+    database: Database = request.app.state.database
+    with Session(database.engine) as session:
+        link = session.get(ProgramCourse, (program_id, course_id))
+        if link is None:
+            raise HTTPException(status_code=404, detail="Oferta de curso não encontrada.")
+        link.planned_seconds = round(payload.planned_hours * 60 * 60)
+        session.commit()
+        return {
+            "program_id": program_id,
+            "course_id": course_id,
+            "planned_hours": link.planned_seconds / 3600,
+        }
 
 
 @router.post(

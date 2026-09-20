@@ -390,3 +390,22 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   não recebem a lista da turma.
 - Validação: 27 testes Python aprovados, migration com upgrade/downgrade,
   `compileall` e SQL PostgreSQL offline concluídos.
+
+### Backend do controle de carga horária
+
+- A migration `20260920_0005` adiciona carga planejada por oferta de curso e
+  vincula eventos de atividade à matrícula correspondente.
+- `study_activity` aceita somente intervalos de 1 a 60 segundos e o servidor
+  calcula `validated_seconds`; o cliente não pode informar tempo validado.
+- Intervalos sobrepostos do mesmo estudante e curso são descontados mesmo se
+  vierem de sessões distintas. O PostgreSQL bloqueia a matrícula durante o
+  cálculo para evitar dupla validação em requisições concorrentes.
+- `GET /users/{id}/hours` retorna `planned_hours`, `validated_hours` e
+  `active_usage`. Estudante vê os próprios dados; professor e monitor somente
+  os estudantes de suas turmas; administrador possui acesso global.
+- A carga planejada de cada programa/curso pode ser configurada pela API
+  administrativa, sem alteração de código.
+- Pendente: o Flutter ainda precisa medir interação real e enfileirar
+  `study_activity`; tela apenas aberta não gera tempo no backend atual.
+- Validação: 29 testes Python aprovados, `compileall`, upgrade/downgrade e SQL
+  PostgreSQL offline concluídos.

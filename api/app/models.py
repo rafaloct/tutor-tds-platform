@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -80,6 +81,9 @@ class ProgramCourse(Base):
     )
     course_id: Mapped[str] = mapped_column(
         ForeignKey("courses.id"), primary_key=True
+    )
+    planned_seconds: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=40 * 60 * 60
     )
     program: Mapped[Program] = relationship(back_populates="course_links")
     course: Mapped[Course] = relationship(back_populates="program_links")
@@ -290,6 +294,7 @@ class LearningEventRecord(Base):
 
     event_id: Mapped[str] = mapped_column(String(180), primary_key=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    enrollment_id: Mapped[str | None] = mapped_column(ForeignKey("enrollments.id"))
     course_id: Mapped[str] = mapped_column(String(120), nullable=False)
     event_type: Mapped[str] = mapped_column(String(64), nullable=False)
     session_id: Mapped[str] = mapped_column(String(160), nullable=False)
@@ -297,6 +302,8 @@ class LearningEventRecord(Base):
         DateTime(timezone=True), nullable=False
     )
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    active_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    validated_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     sync_status: Mapped[str] = mapped_column(
         String(24), nullable=False, default="pending"
     )

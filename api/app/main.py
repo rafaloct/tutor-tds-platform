@@ -15,6 +15,7 @@ from .classrooms import router as classroom_router
 from .config import Settings
 from .database import Database
 from .events import router as events_router
+from .hours import router as hours_router
 from .models import Course
 from .organizations import router as organizations_router
 
@@ -47,6 +48,7 @@ def create_app(
     application.include_router(organizations_router)
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
+    application.include_router(hours_router)
 
     @application.exception_handler(RequestValidationError)
     async def validation_error(

@@ -1,20 +1,20 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .auth import require_roles
 from .database import Database
-from .models import LearningEventRecord
+from .models import Enrollment, LearningEventRecord
 
 router = APIRouter(prefix="/events", tags=["events"])
-EventType = Literal["lesson_started", "lesson_completed"]
+EventType = Literal["lesson_started", "lesson_completed", "study_activity"]
 student_claims = require_roles("student")
 
 
@@ -26,6 +26,7 @@ class EventCreate(BaseModel):
     course_id: str = Field(min_length=1, max_length=120)
     session_id: str = Field(min_length=1, max_length=160)
     occurred_at: datetime
+    active_seconds: int | None = Field(default=None, ge=1, le=60)
 
     @field_validator("occurred_at")
     @classmethod
@@ -34,9 +35,18 @@ class EventCreate(BaseModel):
             raise ValueError("occurred_at deve conter fuso horário")
         return value.astimezone(timezone.utc)
 
+    @model_validator(mode="after")
+    def require_activity_duration(self) -> "EventCreate":
+        if self.event_type == "study_activity" and self.active_seconds is None:
+            raise ValueError("study_activity exige active_seconds")
+        if self.event_type != "study_activity" and self.active_seconds is not None:
+            raise ValueError("active_seconds é exclusivo de study_activity")
+        return self
+
 
 class EventResponse(EventCreate):
     sync_status: str
+    validated_seconds: int
 
 
 class EventPage(BaseModel):
@@ -61,14 +71,23 @@ def create_event(
             response.status_code = 200
             return _serialize(existing)
 
+        enrollment = _resolve_enrollment(session, claims["sub"], payload)
+        validated_seconds = _validated_seconds(
+            session,
+            user_id=claims["sub"],
+            payload=payload,
+        )
         record = LearningEventRecord(
             event_id=payload.event_id,
             user_id=claims["sub"],
+            enrollment_id=enrollment.id if enrollment is not None else None,
             course_id=payload.course_id,
             event_type=payload.event_type,
             session_id=payload.session_id,
             occurred_at=payload.occurred_at,
             payload={},
+            active_seconds=payload.active_seconds or 0,
+            validated_seconds=validated_seconds,
             sync_status="pending",
         )
         session.add(record)
@@ -124,6 +143,7 @@ def _same_event(record: LearningEventRecord, payload: EventCreate) -> bool:
         and record.event_type == payload.event_type
         and record.session_id == payload.session_id
         and occurred_at.astimezone(timezone.utc) == payload.occurred_at
+        and record.active_seconds == (payload.active_seconds or 0)
     )
 
 
@@ -137,5 +157,72 @@ def _serialize(record: LearningEventRecord) -> EventResponse:
         course_id=record.course_id,
         session_id=record.session_id,
         occurred_at=occurred_at,
+        active_seconds=record.active_seconds or None,
         sync_status=record.sync_status,
+        validated_seconds=record.validated_seconds,
     )
+
+
+def _resolve_enrollment(
+    session: Session,
+    user_id: str,
+    payload: EventCreate,
+) -> Enrollment | None:
+    statement = select(Enrollment).where(
+        Enrollment.user_id == user_id,
+        Enrollment.course_id == payload.course_id,
+        Enrollment.status == "active",
+    )
+    if payload.event_type == "study_activity":
+        # Serializa o cálculo por matrícula no PostgreSQL para que dois eventos
+        # concorrentes não validem o mesmo intervalo antes do commit.
+        statement = statement.with_for_update()
+    records = session.scalars(
+        statement
+    ).all()
+    if payload.event_type == "study_activity" and len(records) != 1:
+        raise HTTPException(
+            status_code=422,
+            detail="Atividade exige uma única matrícula ativa para o curso.",
+        )
+    return records[0] if len(records) == 1 else None
+
+
+def _validated_seconds(
+    session: Session,
+    *,
+    user_id: str,
+    payload: EventCreate,
+) -> int:
+    if payload.event_type != "study_activity" or payload.active_seconds is None:
+        return 0
+    interval_end = payload.occurred_at
+    interval_start = interval_end - timedelta(seconds=payload.active_seconds)
+    candidates = session.scalars(
+        select(LearningEventRecord).where(
+            LearningEventRecord.user_id == user_id,
+            LearningEventRecord.course_id == payload.course_id,
+            LearningEventRecord.event_type == "study_activity",
+            LearningEventRecord.occurred_at > interval_start,
+            LearningEventRecord.occurred_at
+            <= interval_end + timedelta(seconds=60),
+        )
+    ).all()
+    overlaps: list[tuple[datetime, datetime]] = []
+    for record in candidates:
+        existing_end = record.occurred_at
+        if existing_end.tzinfo is None:
+            existing_end = existing_end.replace(tzinfo=timezone.utc)
+        existing_start = existing_end - timedelta(seconds=record.active_seconds)
+        start = max(interval_start, existing_start)
+        end = min(interval_end, existing_end)
+        if end > start:
+            overlaps.append((start, end))
+    covered = 0.0
+    cursor: datetime | None = None
+    for start, end in sorted(overlaps):
+        effective_start = max(start, cursor) if cursor is not None else start
+        if end > effective_start:
+            covered += (end - effective_start).total_seconds()
+        cursor = max(cursor, end) if cursor is not None else end
+    return max(0, payload.active_seconds - round(covered))
