@@ -177,3 +177,26 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Exibição de cabeçalho informativo de conteúdo offline quando visualizando material salvo.
 - Coberto por testes unitários de repositório/serialização e testes de widget da tela de resumo.
 - Validação: `flutter analyze` sem achados e 30 testes aprovados.
+
+---
+
+## [2026-09-20] - Retomada offline de avaliações
+
+**Agentes:** Antigravity e Codex
+
+### Concluído
+
+- Criados `AssessmentAttempt` e `AssessmentAttemptRepository` para quiz e simulado.
+- A tentativa mantém cartilha, modo, dificuldade, questões geradas, respostas, posição, cronômetro, pontuação, temas de revisão e datas.
+- Tentativas em andamento são retomadas sem nova chamada de IA; resultados concluídos também podem ser reabertos offline.
+- A Home compara as datas locais e prioriza a próxima ação mais recente entre cartilha e avaliação.
+- Corrigido o seletor de quantidade para aceitar decks cujo total retornado difere das opções predefinidas.
+- Gravações rápidas e atualizações do cronômetro são serializadas para impedir sobrescrita por estado antigo.
+- Testes ajustados para rolagem real da avaliação e para títulos que aparecem tanto na próxima ação quanto no catálogo.
+
+### Validação
+
+- `flutter analyze --no-pub`: sem achados.
+- Suíte Flutter completa: 37 testes aprovados.
+- Nenhuma chamada automática de IA foi adicionada.
+- VPS e produção não foram alteradas.

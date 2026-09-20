@@ -57,7 +57,11 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         icon: Icons.quiz_outlined,
         color: colors.secondary,
         onTap: () => _open(
-          AssessmentScreen(topic: _selected.title, mode: AssessmentMode.quiz),
+          AssessmentScreen(
+            courseId: _selected.id,
+            topic: _selected.title,
+            mode: AssessmentMode.quiz,
+          ),
         ),
       ),
       _StudyResource(
@@ -75,7 +79,11 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         icon: Icons.assignment_outlined,
         color: colors.error,
         onTap: () => _open(
-          AssessmentScreen(topic: _selected.title, mode: AssessmentMode.exam),
+          AssessmentScreen(
+            courseId: _selected.id,
+            topic: _selected.title,
+            mode: AssessmentMode.exam,
+          ),
         ),
       ),
     ];

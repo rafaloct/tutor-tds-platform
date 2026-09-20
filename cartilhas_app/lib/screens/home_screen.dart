@@ -13,6 +13,9 @@ import 'chatwoot_screen.dart';
 import 'genui_assistant_screen.dart';
 import 'settings_screen.dart';
 import '../features/study_ai/presentation/study_hub_screen.dart';
+import '../features/study_ai/data/assessment_attempt_repository.dart';
+import '../features/study_ai/models/study_models.dart';
+import '../features/study_ai/presentation/assessment_screen.dart';
 import '../features/certificates/presentation/certificate_wallet_screen.dart';
 import '../features/study_progress/study_progress_repository.dart';
 import '../widgets/study_resume_card.dart';
@@ -229,6 +232,7 @@ class _LearningHeader extends StatefulWidget {
 class _LearningHeaderState extends State<_LearningHeader> {
   String _firstName = '';
   StudyProgress? _lastProgress;
+  AssessmentAttempt? _lastAttempt;
 
   @override
   void initState() {
@@ -240,6 +244,7 @@ class _LearningHeaderState extends State<_LearningHeader> {
     final results = await Future.wait<Object?>([
       SharedPreferences.getInstance(),
       const StudyProgressRepository().loadLast(),
+      const AssessmentAttemptRepository().loadLast(),
     ]);
     if (!mounted) return;
     final prefs = results[0]! as SharedPreferences;
@@ -247,7 +252,18 @@ class _LearningHeaderState extends State<_LearningHeader> {
     setState(() {
       _firstName = name.isEmpty ? '' : name.split(' ').first;
       _lastProgress = results[1] as StudyProgress?;
+      _lastAttempt = results[2] as AssessmentAttempt?;
     });
+  }
+
+  bool get _shouldShowAttempt {
+    final attempt = _lastAttempt;
+    if (attempt == null) return false;
+    final progress = _lastProgress;
+    if (progress == null) return true;
+    if (!attempt.isCompleted && progress.isCompleted) return true;
+    if (attempt.isCompleted && !progress.isCompleted) return false;
+    return attempt.updatedAt.isAfter(progress.updatedAt);
   }
 
   Cartilha? get _lastCartilha {
@@ -288,6 +304,7 @@ class _LearningHeaderState extends State<_LearningHeader> {
     final colors = Theme.of(context).colorScheme;
     final greeting = _firstName.isEmpty ? 'Olá!' : 'Olá, $_firstName!';
     final lastCartilha = _lastCartilha;
+    final attempt = _lastAttempt;
 
     return Container(
       width: double.infinity,
@@ -316,7 +333,35 @@ class _LearningHeaderState extends State<_LearningHeader> {
               'O que você quer aprender hoje?',
               style: TextStyle(color: colors.onSurfaceVariant),
             ),
-            if (lastCartilha != null && _lastProgress != null)
+            if (_shouldShowAttempt && attempt != null)
+              StudyResumeCard(
+                courseTitle: attempt.topic,
+                progress: attempt.totalQuestions > 0
+                    ? (attempt.answers.length / attempt.totalQuestions).clamp(
+                        0,
+                        1,
+                      )
+                    : 0,
+                isCompleted: attempt.isCompleted,
+                actionLabel: attempt.isCompleted
+                    ? 'Rever resultado (${attempt.mode.label})'
+                    : 'Continuar ${attempt.mode.label.toLowerCase()}',
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AssessmentScreen(
+                        courseId: attempt.courseId,
+                        topic: attempt.topic,
+                        mode: attempt.mode,
+                        initialAttempt: attempt,
+                      ),
+                    ),
+                  );
+                  await _loadLocalState();
+                },
+              )
+            else if (lastCartilha != null && _lastProgress != null)
               StudyResumeCard(
                 courseTitle: lastCartilha.title,
                 progress: _progressFor(lastCartilha, _lastProgress!),

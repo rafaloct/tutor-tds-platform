@@ -7,12 +7,14 @@ class StudyResumeCard extends StatelessWidget {
     required this.progress,
     required this.isCompleted,
     required this.onPressed,
+    this.actionLabel,
   });
 
   final String courseTitle;
   final double progress;
   final bool isCompleted;
   final VoidCallback onPressed;
+  final String? actionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,10 @@ class StudyResumeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isCompleted ? 'Rever cartilha' : 'Continuar estudando',
+                      actionLabel ??
+                          (isCompleted
+                              ? 'Rever cartilha'
+                              : 'Continuar estudando'),
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: colors.onPrimaryContainer,
                       ),
