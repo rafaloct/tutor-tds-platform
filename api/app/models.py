@@ -3,8 +3,18 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    ForeignKeyConstraint,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -28,6 +38,10 @@ class Course(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    program_links: Mapped[list["ProgramCourse"]] = relationship(
+        back_populates="course"
+    )
+    enrollments: Mapped[list["Enrollment"]] = relationship(back_populates="course")
 
 
 class Institution(Base):
@@ -35,6 +49,7 @@ class Institution(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     name: Mapped[str] = mapped_column(String(240), nullable=False)
+    programs: Mapped[list["Program"]] = relationship(back_populates="institution")
 
 
 class Program(Base):
@@ -45,6 +60,27 @@ class Program(Base):
         ForeignKey("institutions.id"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(240), nullable=False)
+    institution: Mapped[Institution] = relationship(back_populates="programs")
+    course_links: Mapped[list["ProgramCourse"]] = relationship(
+        back_populates="program"
+    )
+    memberships: Mapped[list["ProgramMembership"]] = relationship(
+        back_populates="program"
+    )
+    enrollments: Mapped[list["Enrollment"]] = relationship(back_populates="program")
+
+
+class ProgramCourse(Base):
+    __tablename__ = "program_courses"
+
+    program_id: Mapped[str] = mapped_column(
+        ForeignKey("programs.id"), primary_key=True
+    )
+    course_id: Mapped[str] = mapped_column(
+        ForeignKey("courses.id"), primary_key=True
+    )
+    program: Mapped[Program] = relationship(back_populates="course_links")
+    course: Mapped[Course] = relationship(back_populates="program_links")
 
 
 class User(Base):
@@ -56,6 +92,26 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(240), nullable=False)
     password_digest: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(32), nullable=False, default="student")
+    program_memberships: Mapped[list["ProgramMembership"]] = relationship(
+        back_populates="user"
+    )
+    enrollments: Mapped[list["Enrollment"]] = relationship(back_populates="user")
+
+
+class ProgramMembership(Base):
+    __tablename__ = "program_memberships"
+
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    program_id: Mapped[str] = mapped_column(
+        ForeignKey("programs.id"), primary_key=True
+    )
+    role: Mapped[str] = mapped_column(String(32), nullable=False, default="student")
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="active")
+    joined_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    user: Mapped[User] = relationship(back_populates="program_memberships")
+    program: Mapped[Program] = relationship(back_populates="memberships")
 
 
 class SessionToken(Base):
@@ -77,9 +133,30 @@ class SessionToken(Base):
 
 class Enrollment(Base):
     __tablename__ = "enrollments"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["program_id", "course_id"],
+            ["program_courses.program_id", "program_courses.course_id"],
+            name="fk_enrollments_program_course",
+        ),
+        ForeignKeyConstraint(
+            ["user_id", "program_id"],
+            ["program_memberships.user_id", "program_memberships.program_id"],
+            name="fk_enrollments_program_membership",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "program_id",
+            "course_id",
+            name="uq_enrollments_user_program_course",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    program_id: Mapped[str] = mapped_column(
+        ForeignKey("programs.id"), nullable=False
+    )
     course_id: Mapped[str] = mapped_column(ForeignKey("courses.id"), nullable=False)
     status: Mapped[str] = mapped_column(
         String(24), nullable=False, default="active"
@@ -87,6 +164,9 @@ class Enrollment(Base):
     enrolled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    user: Mapped[User] = relationship(back_populates="enrollments")
+    program: Mapped[Program] = relationship(back_populates="enrollments")
+    course: Mapped[Course] = relationship(back_populates="enrollments")
 
 
 class CertificateReference(Base):

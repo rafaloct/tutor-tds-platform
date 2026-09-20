@@ -345,3 +345,17 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Testes parametrizados demonstram a distinção entre `student`, `teacher`,
   `monitor` e `admin` sem depender de infraestrutura ou credenciais externas.
 - Validação: 22 testes Python aprovados e `compileall` concluído.
+
+### Integridade da hierarquia institucional
+
+- A hierarquia agora liga explicitamente instituição, programa, oferta de
+  curso, participação do usuário no programa e matrícula.
+- A função organizacional passou a existir na associação usuário-programa,
+  permitindo que a mesma pessoa participe de programas distintos sem depender
+  apenas da função global da conta.
+- Novas matrículas exigem simultaneamente uma oferta do curso pelo programa e
+  uma participação do usuário naquele programa, com unicidade por tripla.
+- A migration `20260920_0003` retroassocia matrículas preexistentes a uma
+  instituição/programa legado, sem descartar ou deixar registros órfãos.
+- Validação: upgrade, backfill e downgrade exercitados; SQL PostgreSQL gerado
+  offline; 23 testes Python aprovados e `compileall` concluído.
