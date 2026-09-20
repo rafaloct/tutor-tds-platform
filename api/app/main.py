@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
@@ -55,18 +55,24 @@ def create_app(
             records = session.scalars(
                 select(Course).where(Course.active.is_(True)).order_by(Course.title)
             ).all()
-        payload: list[dict[str, object]] = []
-        for record in records:
-            item = dict(record.content)
-            item.update(
-                id=record.id,
-                title=record.title,
-                author=record.author,
-            )
-            payload.append(item)
-        return {"courses": payload}
+        return {"courses": [_serialize_course(record) for record in records]}
+
+    @application.get("/courses/{course_id}")
+    def course(course_id: str, request: Request) -> dict[str, object]:
+        db: Database = request.app.state.database
+        with Session(db.engine) as session:
+            record = session.get(Course, course_id)
+            if record is None or not record.active:
+                raise HTTPException(status_code=404, detail="Curso não encontrado.")
+            return _serialize_course(record)
 
     return application
+
+
+def _serialize_course(record: Course) -> dict[str, object]:
+    item = dict(record.content)
+    item.update(id=record.id, title=record.title, author=record.author)
+    return item
 
 
 app = create_app()

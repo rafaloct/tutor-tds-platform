@@ -235,3 +235,12 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - O SQL PostgreSQL foi gerado offline; o teste integrado em container ficou
   pendente porque o daemon do Docker Desktop local não estava em execução.
 - Nenhuma publicação, conexão com staging ou alteração na VPS foi realizada.
+
+### Importação do catálogo para a API
+
+- Adicionado importador explícito e idempotente de cartilhas JSON, sem carga
+  automática no boot da API.
+- Os nove assets atuais foram validados e importados em banco efêmero (`9/9`).
+- Criado `GET /courses/{id}`, que omite cursos inativos e responde 404 para IDs
+  inexistentes.
+- Validação local ampliada para 6 testes Python aprovados.

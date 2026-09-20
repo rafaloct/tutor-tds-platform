@@ -57,3 +57,37 @@ def test_courses_returns_only_active_records_in_app_contract() -> None:
     courses = response.json()["courses"]
     assert [item["id"] for item in courses] == ["a", "z"]
     assert courses[0]["sections"] == []
+
+
+def test_course_detail_hides_missing_and_inactive_records() -> None:
+    client, app = make_client()
+    with Session(app.state.database.engine) as session:
+        session.add_all(
+            [
+                Course(
+                    id="active",
+                    title="Curso ativo",
+                    author="TDS",
+                    active=True,
+                    content={"sections": [], "thumbnailUrl": "cover.png"},
+                ),
+                Course(
+                    id="draft",
+                    title="Rascunho",
+                    author="TDS",
+                    active=False,
+                    content={"sections": []},
+                ),
+            ]
+        )
+        session.commit()
+
+    with client:
+        response = client.get("/courses/active")
+        draft = client.get("/courses/draft")
+        missing = client.get("/courses/missing")
+
+    assert response.status_code == 200
+    assert response.json()["thumbnailUrl"] == "cover.png"
+    assert draft.status_code == 404
+    assert missing.status_code == 404
