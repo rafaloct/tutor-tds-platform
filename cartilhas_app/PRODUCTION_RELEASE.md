@@ -21,6 +21,11 @@ gateway público e guarda a credencial de servidor.
 Copie `config/production.example.json` para `config/production.json` e informe
 a URL HTTPS criada pela Cloudflare. O arquivo real está ignorado pelo Git.
 
+`TUTOR_API_URL` é opcional nesta fase. Deixe-a vazia enquanto a API transacional
+não estiver publicada e validada; nesse estado, o catálogo continua usando os
+assets locais. Quando configurada, deve ser HTTPS e o app usa cache remoto e
+fallback para os mesmos assets em caso de indisponibilidade.
+
 O aplicativo não lê mais `ANYTHING_LLM_API_KEY`, `OPENAI_API_KEY` ou outra
 chave de modelo. Antes de cada build de produção, execute:
 

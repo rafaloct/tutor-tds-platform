@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../config/app_config.dart';
+import '../features/courses/data/course_repository.dart';
 import '../models/cartilha.dart';
 import 'chat_experience_screen.dart';
 import 'cadunico_screen.dart';
@@ -23,34 +23,13 @@ import '../widgets/tds_wait_experience.dart';
 import '../widgets/tds_brand_stripe.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.courseLoader});
 
-  Future<List<Cartilha>> _loadCartilhas() async {
-    final List<String> cartilhaPaths = [
-      'assets/data/lessons/agricultura-sustentavel.json',
-      'assets/data/lessons/atendimento-cliente.json',
-      'assets/data/lessons/audiovisual.json',
-      'assets/data/lessons/cooperativismo.json',
-      'assets/data/lessons/economia-lar.json',
-      'assets/data/lessons/educacao-financeira.json',
-      'assets/data/lessons/ia-cartilha.json',
-      'assets/data/lessons/saf.json',
-      'assets/data/lessons/sim-sima.json',
-    ];
+  final Future<List<Cartilha>> Function()? courseLoader;
 
-    List<Cartilha> cartilhas = [];
-    for (String path in cartilhaPaths) {
-      try {
-        final String response = await rootBundle.loadString(path);
-        final data = json.decode(response);
-        cartilhas.add(Cartilha.fromJson(data));
-      } catch (e) {
-        debugPrint('Erro ao carregar $path: $e');
-      }
-    }
-    cartilhas.sort((a, b) => a.title.compareTo(b.title));
-    return cartilhas;
-  }
+  Future<List<Cartilha>> _loadCartilhas() =>
+      courseLoader?.call() ??
+      CourseRepository(apiUrl: AppConfig.tutorApiUrl).fetchAll();
 
   @override
   Widget build(BuildContext context) {

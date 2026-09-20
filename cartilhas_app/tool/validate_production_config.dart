@@ -42,6 +42,16 @@ void main(List<String> arguments) {
     return;
   }
 
+  final rawApi = config['TUTOR_API_URL'];
+  if (rawApi is String && rawApi.trim().isNotEmpty) {
+    final api = Uri.tryParse(rawApi);
+    if (api == null || api.scheme != 'https' || api.host.isEmpty) {
+      stderr.writeln('TUTOR_API_URL deve ser vazia ou uma URL HTTPS válida.');
+      exitCode = 1;
+      return;
+    }
+  }
+
   stdout.writeln(
     'Configuração de produção validada: nenhum segredo de IA será compilado.',
   );

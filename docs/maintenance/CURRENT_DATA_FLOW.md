@@ -71,7 +71,14 @@ ChatExperienceScreen (seleção de cartilha)
 8. Sistemas Agroflorestais — SAF (3 perguntas)
 9. Inspeção e Certificação — SIM/SIMA (4 perguntas)
 
-**Limitação atual:** novos cursos requerem rebuild e republicação do APK.
+**Catálogo remoto preparado:** `CourseRepository` consulta `GET /courses`
+somente quando `TUTOR_API_URL` está configurada. Uma resposta válida é mantida
+em cache; falha da API usa o cache e depois os nove assets locais. Enquanto a
+API não existir, não há chamada de rede e o comportamento permanece local.
+
+**Limitação atual:** a API ainda não foi publicada; portanto, novos cursos em
+produção continuam exigindo rebuild até `TUTOR_API_URL` apontar para um ambiente
+validado.
 
 ### Fila local de LearningEvents
 

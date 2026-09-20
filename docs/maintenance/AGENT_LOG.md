@@ -209,3 +209,12 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - O payload local não contém nome, telefone ou CPF e ainda não é transmitido para nenhum servidor.
 - O Google Apps Script legado permanece isolado e inalterado até a API autenticada estar disponível.
 - Validação: `flutter analyze --no-pub` sem achados e 40 testes aprovados.
+
+### Catálogo remoto com fallback offline
+
+- A Home passou a usar `CourseRepository` em vez de carregar diretamente uma lista fixa de assets.
+- `TUTOR_API_URL` é opcional: vazia não gera chamada de rede e preserva o comportamento atual.
+- Quando configurado, o cliente consulta `GET /courses`, valida catálogo não vazio, salva cache e ordena os cursos.
+- Falhas remotas usam primeiro o último cache válido e depois os nove assets embarcados.
+- A validação de produção rejeita `TUTOR_API_URL` não HTTPS quando houver valor.
+- Validação: configuração de exemplo aprovada e suíte Flutter completa com 43 testes.

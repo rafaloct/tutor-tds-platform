@@ -1,4 +1,5 @@
 {
   "TUTOR_GATEWAY_URL": "https://tutor-tds-gateway.tdsipex.workers.dev",
+  "TUTOR_API_URL": "",
   "TDS_ANALYTICS_WEBHOOK_URL": "https://SEU_ENDPOINT_HTTPS"
 }

@@ -9,6 +9,10 @@ class AppConfig {
     'TDS_ANALYTICS_WEBHOOK_URL',
   );
 
+  /// API transacional do Tutor TDS. Enquanto não estiver configurada, o
+  /// catálogo continua vindo integralmente dos assets do aplicativo.
+  static const tutorApiUrl = String.fromEnvironment('TUTOR_API_URL');
+
   static const playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.tutortds_cartilhas';
 }
