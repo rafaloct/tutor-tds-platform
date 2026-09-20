@@ -53,15 +53,22 @@ A evolução só avança para a próxima onda quando **todos** os critérios da 
 - [ ] Cursos locais do APK funcionam como fallback quando API retorna vazio
 
 ### LearningEvents
-- [ ] Evento `lesson_started` é registrado no banco com latência ≤ 5s
-- [ ] Evento gerado offline é salvo localmente e sincronizado ao reconectar
-- [ ] Evento duplicado (retry) é ignorado (idempotência por `event_id`)
-- [ ] Fila local de eventos não cresce indefinidamente (limite de tentativas)
+- [ ] Evento `lesson_started` é registrado no banco com latência ≤ 5s em produção
+- [x] Evento gerado offline é salvo localmente e sincronizado ao reconectar
+- [x] Evento duplicado (retry) é ignorado (idempotência por `event_id`)
+- [x] Fila local é limitada e telemetria nunca expulsa eventos pedagógicos
+
+### Analytics de Uso
+- [x] Todas as navegações do app usam IDs estáveis de página
+- [x] Recursos e funcionalidades geram eventos tipados na mesma fila offline
+- [x] Payload rejeita texto livre, CPF, nome, telefone e campos extras
+- [x] Consentimento negado não persiste telemetria de uso
+- [x] Resumo da API respeita aluno, professor/monitor da turma e administrador
 
 ### 40 Horas
-- [ ] Endpoint `/users/:id/hours` retorna `planned_hours`, `validated_hours`, `active_usage`
-- [ ] `active_usage` não conta tela aberta sem interação (previne fraude de tempo)
-- [ ] Professor consegue ver carga horária individual de cada aluno
+- [x] Endpoint `/users/:id/hours` retorna `planned_hours`, `validated_hours`, `active_usage`
+- [x] `active_usage` não conta tela aberta sem interação (previne fraude de tempo)
+- [x] Professor consegue ver carga horária individual de cada aluno
 
 ---
 

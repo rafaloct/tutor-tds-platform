@@ -36,9 +36,9 @@ Qualquer novo curso, módulo, aula ou atualização de conteúdo exige:
 
 ---
 
-## 2. Ausência de Banco Relacional Centralizado 🔴
+## 2. Banco Relacional Centralizado 🟡 Implementado, deploy pendente
 
-**Problema:** Não existe banco de dados centralizado. Dados transacionais residem em:
+**Situação original:** não existia banco de dados centralizado. Dados transacionais residiam em:
 - Google Sheets (analytics e lista de alunos)
 - SharedPreferences local do dispositivo (progresso, certificados)
 - Cloudflare KV (certificados verificáveis)
@@ -55,11 +55,14 @@ Qualquer novo curso, módulo, aula ou atualização de conteúdo exige:
 - API REST Tutor TDS com migrations versionadas
 - Migração progressiva dos dados do Sheets para o banco
 
+**Estado atual:** modelos, migrations e PostgreSQL via Docker estão prontos;
+falta publicar e validar backup/restore na VPS.
+
 ---
 
-## 3. Sem Autenticação Real no Servidor 🔴
+## 3. Autenticação Real no Servidor 🟡 Implementada, deploy pendente
 
-**Problema:** O aplicativo não possui sistema de autenticação JWT. O usuário é identificado apenas por `user_name` no SharedPreferences local.
+**Situação original:** o aplicativo não possuía autenticação JWT.
 
 **Impacto:**
 - Impossível implementar RBAC (student, teacher, monitor, admin)
@@ -72,11 +75,15 @@ Qualquer novo curso, módulo, aula ou atualização de conteúdo exige:
 - JWT com refresh token
 - RBAC no backend (não confiar no Flutter para autorização)
 
+**Estado atual:** access/refresh tokens, Argon2id e RBAC estão implementados e
+cobertos por testes; falta publicação na VPS.
+
 ---
 
-## 4. LearningEvents Não Persistidos no Servidor 🔴
+## 4. LearningEvents Persistidos no Servidor ✅ Implementado
 
-**Problema:** Não existe registro de eventos de aprendizagem (`lesson_started`, `lesson_completed`, `quiz_submitted`, etc.) em banco controlado pela plataforma.
+**Situação original:** não existia registro de eventos de aprendizagem em
+banco controlado pela plataforma.
 
 **Impacto:**
 - Impossível validar 40h de carga horária com rastreabilidade
@@ -88,6 +95,9 @@ Qualquer novo curso, módulo, aula ou atualização de conteúdo exige:
 - Tabela `learning_events` no banco PostgreSQL
 - Offline queue local com sync posterior
 - Idempotência via `event_id` UUID gerado no cliente
+
+**Estado atual:** implementado com fila offline, autenticação, idempotência,
+atividade validada e telemetria tipada.
 
 ---
 
@@ -126,16 +136,11 @@ Qualquer novo curso, módulo, aula ou atualização de conteúdo exige:
 
 ---
 
-## 7. CPF em Plaintext para Google Apps Script 🟠
+## 7. CPF em Plaintext para Google Apps Script ✅ Resolvido
 
-**Problema:** O `DataSyncService` envia CPF sem hash para o webhook do Google Apps Script, que o armazena na planilha.
-
-**Impacto:** Risco de conformidade com a LGPD.
-
-**Solução (Onda 1):**
-- Enviar apenas HMAC-SHA256 do CPF para identificação
-- Ou remover CPF completamente dos eventos analíticos
-- Migrar analytics para a API Tutor TDS
+**Resolvido em 2026-09-20:** `DataSyncService` e a variável do webhook foram
+removidos do Flutter. A telemetria autenticada aceita somente IDs técnicos
+tipados e não acessa nome, telefone ou CPF.
 
 ---
 
@@ -192,12 +197,10 @@ Não existe log estruturado com correlação de eventos, rastreabilidade de erro
 
 ---
 
-## 13. Dependência do Google Apps Script 🟢
+## 13. Dependência do Google Apps Script ✅ Resolvida no Flutter
 
-**Problema:** A operação atual depende de uma conta Google pessoal (`tdsdados@gmail.com`).
-Se a conta for suspensa ou o script revogar permissões, o analytics para completamente.
-
-**Solução (Onda 1):** Migrar analytics para a API Tutor TDS. Manter Sheets como espelho, não como fonte primária.
+O Flutter não chama mais o Apps Script. Analytics usa a API Tutor TDS; o
+script permanece somente como artefato histórico.
 
 ---
 
@@ -212,21 +215,21 @@ Se a conta for suspensa ou o script revogar permissões, o analytics para comple
 ## Resumo da Dívida Técnica por Onda
 
 ### Onda 1 — Obrigatório resolver
-- [ ] Banco relacional (PostgreSQL)
-- [ ] API REST centralizada
-- [ ] Autenticação JWT + RBAC
+- [x] Banco relacional (PostgreSQL) preparado para deploy
+- [x] API REST centralizada implementada
+- [x] Autenticação JWT + RBAC implementada
 - [ ] Deploy automatizado (CI/CD)
 - [ ] Ambiente de staging
-- [ ] CPF → hash no analytics
+- [x] Remover CPF e demais dados pessoais do analytics
 
 ### Onda 2 — Evolução de produto
 - [ ] Catálogo de cursos dinâmico via API
-- [ ] LearningEvents persistidos no servidor
-- [ ] Offline sync com fila + retry
-- [ ] Controle de 40h (planned/validated/active)
+- [x] LearningEvents persistidos no servidor
+- [x] Offline sync com fila + retry
+- [x] Controle de 40h (planned/validated/active)
 
 ### Onda 3 — Classroom
-- [ ] Turmas e matrículas
+- [x] Turmas e matrículas
 - [ ] Painel professor/monitor
 - [ ] Certificados acadêmicos por instituição
 
@@ -235,7 +238,7 @@ Se a conta for suspensa ou o script revogar permissões, o analytics para comple
 - [ ] Creator Studio
 - [ ] Ledger financeiro
 - [ ] Feature flags
-- [ ] Migração de dependência do Google Apps Script
+- [x] Migração de dependência do Google Apps Script
 
 ---
 

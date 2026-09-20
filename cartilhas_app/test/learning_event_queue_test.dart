@@ -84,4 +84,90 @@ void main() {
     expect(restored.activeSeconds, 27);
     expect(restored.toJson()['active_seconds'], 27);
   });
+
+  test('preserva telemetria tipada sem dados pessoais', () async {
+    const queue = LearningEventQueue();
+    final pageView = LearningEvent.telemetry(
+      type: LearningEventType.pageViewed,
+      targetId: 'study_hub',
+      courseId: '_app',
+      sessionId: 'sessao-app',
+      sequence: 1,
+      occurredAt: DateTime.utc(2026, 9, 20, 10, 2),
+    );
+
+    await queue.enqueue(pageView);
+
+    final restored = (await queue.pending()).single;
+    expect(restored.type, LearningEventType.pageViewed);
+    expect(restored.payload, {'page_id': 'study_hub'});
+    expect(restored.toJson(), isNot(contains('cpf')));
+    expect(restored.toJson(), isNot(contains('name')));
+  });
+
+  test('recusa identificador de telemetria com texto livre', () {
+    expect(
+      () => LearningEvent.telemetry(
+        type: LearningEventType.featureUsed,
+        targetId: 'CPF 123.456.789-09',
+        courseId: '_app',
+        sessionId: 'sessao-app',
+        sequence: 1,
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test('telemetria nunca expulsa eventos pedagógicos da fila cheia', () async {
+    const queue = LearningEventQueue(maxPending: 2);
+    await queue.enqueue(event('sessao-7', LearningEventType.lessonStarted));
+    await queue.enqueue(event('sessao-8', LearningEventType.lessonCompleted));
+
+    final accepted = await queue.enqueue(
+      LearningEvent.telemetry(
+        type: LearningEventType.pageViewed,
+        targetId: 'home',
+        courseId: '_app',
+        sessionId: 'sessao-app',
+        sequence: 1,
+      ),
+    );
+
+    expect(accepted, isFalse);
+    expect((await queue.pending()).map((item) => item.type), [
+      LearningEventType.lessonStarted,
+      LearningEventType.lessonCompleted,
+    ]);
+  });
+
+  test('evento pedagógico substitui a telemetria mais antiga', () async {
+    const queue = LearningEventQueue(maxPending: 2);
+    await queue.enqueue(
+      LearningEvent.telemetry(
+        type: LearningEventType.pageViewed,
+        targetId: 'home',
+        courseId: '_app',
+        sessionId: 'sessao-app',
+        sequence: 1,
+      ),
+    );
+    await queue.enqueue(
+      LearningEvent.telemetry(
+        type: LearningEventType.resourceOpened,
+        targetId: 'usage_guide',
+        courseId: '_app',
+        sessionId: 'sessao-app',
+        sequence: 2,
+      ),
+    );
+
+    expect(
+      await queue.enqueue(event('sessao-9', LearningEventType.lessonCompleted)),
+      isTrue,
+    );
+    expect((await queue.pending()).map((item) => item.type), [
+      LearningEventType.resourceOpened,
+      LearningEventType.lessonCompleted,
+    ]);
+  });
 }

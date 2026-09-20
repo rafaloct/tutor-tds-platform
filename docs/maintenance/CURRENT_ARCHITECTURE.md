@@ -34,7 +34,7 @@ O aplicativo está **publicado na Google Play Store** com o package `com.tutortd
 | Gateway de IA | Cloudflare Workers (JS/Wrangler) | serverless edge |
 | KV Store (certificados) | Cloudflare KV | namespace `CERTIFICATES` |
 | LLM / RAG | AnythingLLM | hospedado na VPS Hostinger |
-| Analytics Backend | Google Apps Script | planilha tdsdados@gmail.com |
+| Analytics Backend | FastAPI + PostgreSQL | implementado; publicação VPS pendente |
 | VPS / Orquestração | Hostinger VPS + Dokploy + Docker | IP 46.202.150.132 |
 | Reverse Proxy | Nginx | configurado no container |
 | Android | SDK 36/36, minSDK 24, NDK 28.2 | AGP 9.0.1, Gradle 9.1.0 |
@@ -54,19 +54,19 @@ O aplicativo está **publicado na Google Play Store** com o package `com.tutortd
               ▼                  ▼                     ▼
    ┌──────────────────┐ ┌──────────────────┐  ┌─────────────────────┐
    │  Conteúdo Local  │ │  Tutor IA (chat) │  │ Analytics (eventos) │
-   │  (assets JSON)   │ │  /v1/chat        │  │ Google Sheets       │
-   │  9 cartilhas     │ │  /v1/study       │  │ via Webhook HTTP    │
+   │  (assets JSON)   │ │  /v1/chat        │  │ Fila local offline  │
+   │  9 cartilhas     │ │  /v1/study       │  │ IDs técnicos       │
    │  estáticas no    │ │  /v1/certificates│  │ (com consentimento) │
    │  APK/AAB         │ └────────┬─────────┘  └─────────┬───────────┘
    └──────────────────┘          │                       │
                                  ▼                       ▼
                     ┌────────────────────────┐  ┌──────────────────────┐
-                    │  Cloudflare Worker     │  │  Google Apps Script  │
-                    │  tutor-tds-gateway     │  │  TDS Analytics       │
-                    │  - CORS/auth proxy     │  │  - Aba Eventos       │
-                    │  - rate limiting       │  │  - Aba Alunos        │
-                    │  - HMAC signing        │  │  - Aba Por Cartilha  │
-                    │  - KV certificates     │  │  - Email certificado │
+                    │  Cloudflare Worker     │  │  API Tutor TDS       │
+                    │  tutor-tds-gateway     │  │  JWT + RBAC          │
+                    │  - CORS/auth proxy     │  │  - LearningEvents    │
+                    │  - rate limiting       │  │  - Analytics         │
+                    │  - HMAC signing        │  │  - Hierarquia        │
+                    │  - KV certificates     │  │  - PostgreSQL        │
                     └────────────┬───────────┘  └──────────────────────┘
                                  │
                                  ▼
@@ -141,7 +141,7 @@ WelcomeScreen (cadastro + LGPD)
 | Compartilhamento/impressão de PDF | ✅ Produção | share_plus + printing |
 | QR Code de validação | ✅ Produção | Aponta para /verify/{id} |
 | Verificação online de certificado | ✅ Produção | GET /v1/certificates/{id} |
-| Analytics para Google Sheets | ✅ Produção | DataSyncService → Apps Script |
+| Analytics autenticado e sem PII | 🟡 Pronto para deploy | Fila offline → API → PostgreSQL |
 | Glossário TDS | ✅ Produção | GlossaryScreen |
 | Tema claro/escuro | ✅ Produção | ThemeController + SharedPreferences |
 | Suporte Chatwoot/WhatsApp | ✅ Produção | WebView + ChatwootScreen |
@@ -153,29 +153,23 @@ WelcomeScreen (cadastro + LGPD)
 
 | Funcionalidade | Onda | Prioridade |
 |---|---|---|
-| API REST centralizada publicada (PostgreSQL) | Onda 1 | Alta |
-| Autenticação JWT com RBAC | Onda 1 | Alta |
+| Publicar API REST e PostgreSQL na VPS | Onda 1 | Alta |
 | Cursos dinâmicos (sem rebuild APK) | Onda 2 | Alta |
-| LearningEvents persistidos no servidor | Onda 2 | Alta |
-| Controle de 40h (planned/validated/active) | Onda 2 | Alta |
-| Multi-Instituição (tenant isolado) | Onda 1/3 | Alta |
-| TDS Classroom (turmas) | Onda 3 | Média |
+| Interface de administração da hierarquia | Onda 3 | Alta |
 | Painel Professor/Monitor | Onda 3 | Média |
 | Sync idempotente banco → Sheets | Onda 1 | Média |
 | Certificados acadêmicos verificáveis por instituição | Onda 3 | Média |
-| Offline sync com fila de retry | Onda 2 | Alta |
+| Painel de analytics de páginas/recursos | Onda 3 | Média |
 | Creator Studio | Onda 4 | Baixa |
 | Ledger financeiro | Onda 4 | Baixa |
 | Integração de pagamentos | Onda 4 | Baixa |
 
 ### Fundação local da API (ainda não publicada)
 
-A Onda 1 possui agora um projeto FastAPI isolado em `api/`, com SQLAlchemy,
-Alembic, Docker Compose para PostgreSQL 16 e os endpoints iniciais
-`GET /health` e `GET /courses`. A migration inicial cobre institutions,
-programs, users, sessions, enrollments, learning_events, certificates e
-sync_log. Essa base foi validada apenas localmente; staging, autenticação,
-worker e publicação continuam pendentes.
+A Onda 1 possui um projeto FastAPI isolado em `api/`, com SQLAlchemy, Alembic,
+Docker Compose para PostgreSQL 16, autenticação JWT/RBAC, hierarquia completa,
+turmas, carga horária, eventos e analytics. A base foi validada localmente;
+staging e publicação continuam pendentes.
 
 A autenticação local da API já possui registro, login, access JWT de curta
 duração e refresh token opaco com rotação. CPF é armazenado somente como
@@ -233,7 +227,7 @@ Segredos gerenciados no Cloudflare (não expostos):
 |---|---|---|
 | `user_name` | Nome do participante | Moderada |
 | `user_phone` | WhatsApp do participante | Alta |
-| `user_cpf` | CPF (mascarado na UI) | Alta — o analytics legado ainda o envia em texto puro ao Apps Script |
+| `user_cpf` | CPF (mascarado na UI) | Alta — restrito aos fluxos locais/certificado; analytics não o acessa |
 | `privacy_consent` | Booleano de consentimento | Controle de analytics |
 | `onboarding_seen_v1` | Booleano de tutorial visto | Baixa |
 | `certificates` | JSON lista de CertificateRecord | Moderada (nome + curso, sem CPF) |
@@ -241,19 +235,19 @@ Segredos gerenciados no Cloudflare (não expostos):
 
 ---
 
-## Google Apps Script (Backend Operacional Atual)
+## Google Apps Script (Legado Desconectado)
 
 **Arquivo:** `google_apps_script.js`
 **Conta:** tdsdados@gmail.com
-**Implantação:** Web App Google (URL pública segura)
+**Estado:** o arquivo permanece como referência histórica, mas o Flutter não
+possui URL nem emissor para esse webhook.
 
 Abas da planilha controladas:
 1. `Eventos` — Log bruto de todos os eventos do app
 2. `Alunos` — Um registro por CPF com contadores de acesso e conclusão
 3. `Por Cartilha` — Métricas agregadas por cartilha (iniciadas/concluídas)
 
-Eventos que disparam email de certificado:
-- `COMPLETED` → `_enviarCertificado(data)` → Gmail API
+Novos eventos e certificados não dependem desse fluxo.
 
 ---
 
@@ -277,11 +271,9 @@ Eventos que disparam email de certificado:
 | Risco | Severidade | Ação |
 |---|---|---|
 | Conteúdo das cartilhas hardcoded no APK | Alta | Onda 2: API remota de cursos |
-| Sem banco relacional centralizado | Alta | Onda 1: PostgreSQL + API |
-| Ausência de autenticação real no servidor | Alta | Onda 1: JWT + RBAC |
+| API/PostgreSQL ainda não publicados na VPS | Alta | Deploy controlado no Dokploy |
 | Git não inicializado (histórico ausente) | Média | ✅ Resolvido na Onda 0 |
 | Deploy manual via rsync | Média | Onda 1: CI/CD via Dokploy |
-| LearningEvents não persistem no servidor | Alta | Onda 2: API de eventos |
 | Sem ambiente de staging | Média | Onda 1: staging no Dokploy |
 | Auditoria VPS pendente | Média | Requer SSH — solicitar acesso |
 | CPF em SharedPreferences (plaintext) | Média | Avaliar criptografia local |

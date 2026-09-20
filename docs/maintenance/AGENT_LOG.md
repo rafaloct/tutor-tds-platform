@@ -425,3 +425,22 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   automaticamente quando o administrador cria a matrícula.
 - Validação: 71 testes Flutter e 29 testes Python aprovados; `dart analyze lib
   test` sem achados e `compileall` concluído.
+
+### Rastreabilidade de páginas, recursos e funcionalidades
+
+- Todos os `MaterialPageRoute` do aplicativo foram substituídos por rotas
+  nomeadas e rastreáveis. Entrada e retorno registram `page_viewed`; acessos
+  relevantes também registram `resource_opened` e `feature_used`.
+- IDs são estáveis, limitados e validados. Texto digitado, nome, telefone, CPF
+  e campos arbitrários não entram no contrato de telemetria.
+- A telemetria respeita consentimento antes da persistência, usa a fila offline
+  idempotente e a sincronização autenticada de LearningEvents.
+- Com a fila cheia, eventos pedagógicos substituem primeiro a telemetria mais
+  antiga; analytics nunca expulsa início, conclusão ou atividade de estudo.
+- O antigo `DataSyncService`, que podia enviar CPF ao Apps Script, foi removido
+  juntamente com `TDS_ANALYTICS_WEBHOOK_URL` da configuração do Flutter.
+- `GET /analytics/usage` preserva `course_id` e agrega contagem, usuários únicos e último acesso em
+  janelas de 1 a 90 dias. Estudante tem escopo próprio; professor/monitor ficam
+  limitados à turma associada; administrador possui escopo global ou filtrado.
+- Validação: 78 testes Flutter e 31 testes Python aprovados; `dart analyze lib
+  test` sem achados e `compileall` concluído.

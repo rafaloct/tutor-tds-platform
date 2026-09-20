@@ -1,13 +1,23 @@
 import 'dart:convert';
 import 'dart:math';
 
-enum LearningEventType { lessonStarted, lessonCompleted, studyActivity }
+enum LearningEventType {
+  lessonStarted,
+  lessonCompleted,
+  studyActivity,
+  pageViewed,
+  resourceOpened,
+  featureUsed,
+}
 
 extension LearningEventTypeValue on LearningEventType {
   String get apiValue => switch (this) {
     LearningEventType.lessonStarted => 'lesson_started',
     LearningEventType.lessonCompleted => 'lesson_completed',
     LearningEventType.studyActivity => 'study_activity',
+    LearningEventType.pageViewed => 'page_viewed',
+    LearningEventType.resourceOpened => 'resource_opened',
+    LearningEventType.featureUsed => 'feature_used',
   };
 }
 
@@ -19,6 +29,7 @@ class LearningEvent {
     required this.sessionId,
     required this.occurredAt,
     this.activeSeconds,
+    this.payload = const {},
   });
 
   final String eventId;
@@ -27,6 +38,12 @@ class LearningEvent {
   final String sessionId;
   final DateTime occurredAt;
   final int? activeSeconds;
+  final Map<String, String> payload;
+
+  bool get isTelemetry =>
+      type == LearningEventType.pageViewed ||
+      type == LearningEventType.resourceOpened ||
+      type == LearningEventType.featureUsed;
 
   factory LearningEvent.forSession({
     required LearningEventType type,
@@ -34,8 +51,9 @@ class LearningEvent {
     required String sessionId,
     DateTime? occurredAt,
   }) {
-    if (type == LearningEventType.studyActivity) {
-      throw ArgumentError.value(type, 'type', 'Use LearningEvent.activity.');
+    if (type != LearningEventType.lessonStarted &&
+        type != LearningEventType.lessonCompleted) {
+      throw ArgumentError.value(type, 'type', 'Tipo de sessão inválido.');
     }
     return LearningEvent(
       eventId: '$sessionId:${type.apiValue}',
@@ -43,6 +61,44 @@ class LearningEvent {
       courseId: courseId,
       sessionId: sessionId,
       occurredAt: occurredAt ?? DateTime.now(),
+    );
+  }
+
+  factory LearningEvent.telemetry({
+    required LearningEventType type,
+    required String targetId,
+    required String courseId,
+    required String sessionId,
+    required int sequence,
+    DateTime? occurredAt,
+  }) {
+    final payloadKey = switch (type) {
+      LearningEventType.pageViewed => 'page_id',
+      LearningEventType.resourceOpened => 'resource_id',
+      LearningEventType.featureUsed => 'feature_id',
+      _ => throw ArgumentError.value(
+        type,
+        'type',
+        'Tipo de telemetria inválido.',
+      ),
+    };
+    if (sequence < 1) {
+      throw ArgumentError.value(sequence, 'sequence', 'Deve ser positivo.');
+    }
+    if (!_isStableIdentifier(targetId)) {
+      throw ArgumentError.value(
+        targetId,
+        'targetId',
+        'Identificador inválido.',
+      );
+    }
+    return LearningEvent(
+      eventId: '$sessionId:${type.apiValue}:$sequence',
+      type: type,
+      courseId: courseId,
+      sessionId: sessionId,
+      occurredAt: occurredAt ?? DateTime.now(),
+      payload: {payloadKey: targetId},
     );
   }
 
@@ -89,6 +145,7 @@ class LearningEvent {
     'session_id': sessionId,
     'occurred_at': occurredAt.toUtc().toIso8601String(),
     'active_seconds': ?activeSeconds,
+    if (payload.isNotEmpty) 'payload': payload,
   };
 
   static LearningEvent? fromJson(Object? source) {
@@ -101,6 +158,16 @@ class LearningEvent {
     );
     final typeValue = source['event_type'];
     final activeSeconds = source['active_seconds'];
+    final rawPayload = source['payload'];
+    if (rawPayload != null &&
+        (rawPayload is! Map ||
+            rawPayload.keys.any((key) => key is! String) ||
+            rawPayload.values.any((value) => value is! String))) {
+      return null;
+    }
+    final payload = rawPayload is Map
+        ? Map<String, String>.from(rawPayload)
+        : <String, String>{};
     LearningEventType? type;
     for (final candidate in LearningEventType.values) {
       if (candidate.apiValue == typeValue) type = candidate;
@@ -117,7 +184,8 @@ class LearningEvent {
             (activeSeconds is! int ||
                 activeSeconds < 1 ||
                 activeSeconds > 60)) ||
-        (type != LearningEventType.studyActivity && activeSeconds != null)) {
+        (type != LearningEventType.studyActivity && activeSeconds != null) ||
+        !_validPayload(type, payload)) {
       return null;
     }
     return LearningEvent(
@@ -127,6 +195,26 @@ class LearningEvent {
       sessionId: sessionId,
       occurredAt: occurredAt,
       activeSeconds: activeSeconds as int?,
+      payload: Map.unmodifiable(payload),
     );
   }
+
+  static bool _validPayload(
+    LearningEventType type,
+    Map<String, String> payload,
+  ) {
+    final expectedKey = switch (type) {
+      LearningEventType.pageViewed => 'page_id',
+      LearningEventType.resourceOpened => 'resource_id',
+      LearningEventType.featureUsed => 'feature_id',
+      _ => null,
+    };
+    if (expectedKey == null) return payload.isEmpty;
+    return payload.length == 1 &&
+        payload.containsKey(expectedKey) &&
+        _isStableIdentifier(payload[expectedKey]!);
+  }
+
+  static bool _isStableIdentifier(String value) =>
+      RegExp(r'^[a-z0-9][a-z0-9_.-]{0,79}$').hasMatch(value);
 }

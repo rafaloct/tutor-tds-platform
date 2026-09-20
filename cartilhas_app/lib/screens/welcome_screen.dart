@@ -12,6 +12,7 @@ import '../widgets/tds_brand_stripe.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
 import 'privacy_screen.dart';
+import '../features/analytics/telemetry_route.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -44,7 +45,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
+        trackedRoute(
+          pageId: hasSeenPrivacyNotice ? 'home' : 'privacy_consent',
+          featureId: hasSeenPrivacyNotice ? null : 'privacy_consent',
           builder: (_) => hasSeenPrivacyNotice
               ? const HomeScreen()
               : const PrivacyConsentScreen(),
@@ -65,7 +68,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      trackedRoute(
+        pageId: 'onboarding',
+        featureId: 'onboarding',
+        builder: (context) => const OnboardingScreen(),
+      ),
     );
   }
 
@@ -84,7 +91,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const PrivacyConsentScreen()),
+      trackedRoute(
+        pageId: 'privacy_consent',
+        featureId: 'privacy_consent',
+        builder: (_) => const PrivacyConsentScreen(),
+      ),
     );
   }
 
@@ -482,7 +493,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 child: TextButton(
                                   onPressed: () => Navigator.push(
                                     context,
-                                    MaterialPageRoute(
+                                    trackedRoute(
+                                      pageId: 'privacy_policy',
+                                      resourceId: 'privacy_policy',
                                       builder: (_) =>
                                           const PrivacyPolicyScreen(),
                                     ),

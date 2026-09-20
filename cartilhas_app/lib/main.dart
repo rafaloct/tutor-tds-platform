@@ -12,6 +12,8 @@ import 'features/certificates/data/certificate_service.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/learning_events/learning_event_sync_service.dart';
 import 'features/learning_events/learning_event_sync_lifecycle.dart';
+import 'features/analytics/app_telemetry_service.dart';
+import 'features/analytics/telemetry_route.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,32 +79,57 @@ class _CartilhasAppState extends State<CartilhasApp> {
           ),
           dispose: (_, service) => service.dispose(),
         ),
-      ],
-      child: LearningEventSyncLifecycle(
-        child: Consumer<ThemeController>(
-          builder: (context, themeController, _) => MaterialApp(
-            title: 'Tutor TDS',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            themeMode: themeController.themeMode,
-            locale: const Locale('pt', 'BR'),
-            supportedLocales: const [Locale('pt', 'BR')],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            builder: (context, child) => ColoredBox(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: SafeArea(
-                top: false,
-                child: child ?? const SizedBox.shrink(),
-              ),
-            ),
-            home: const WelcomeScreen(),
+        Provider(
+          create: (context) => AppTelemetryService(
+            syncService: context.read<LearningEventSyncService>(),
           ),
         ),
+      ],
+      child: LearningEventSyncLifecycle(child: const _AppView()),
+    );
+  }
+}
+
+class _AppView extends StatefulWidget {
+  const _AppView();
+
+  @override
+  State<_AppView> createState() => _AppViewState();
+}
+
+class _AppViewState extends State<_AppView> {
+  TelemetryNavigatorObserver? _telemetryObserver;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _telemetryObserver ??= TelemetryNavigatorObserver(
+      context.read<AppTelemetryService>(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeController>(
+      builder: (context, themeController, _) => MaterialApp(
+        title: 'Tutor TDS',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        darkTheme: AppTheme.dark(),
+        themeMode: themeController.themeMode,
+        locale: const Locale('pt', 'BR'),
+        supportedLocales: const [Locale('pt', 'BR')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        navigatorObservers: [_telemetryObserver!],
+        builder: (context, child) => ColoredBox(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: SafeArea(top: false, child: child ?? const SizedBox.shrink()),
+        ),
+        home: const WelcomeScreen(),
       ),
     );
   }

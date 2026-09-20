@@ -5,6 +5,7 @@ import '../../../screens/genui_assistant_screen.dart';
 import 'assessment_screen.dart';
 import 'flashcards_screen.dart';
 import 'summary_screen.dart';
+import '../../analytics/telemetry_route.dart';
 
 class StudyHubScreen extends StatefulWidget {
   const StudyHubScreen({super.key, required this.cartilhas});
@@ -24,8 +25,22 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
     _selected = widget.cartilhas.first;
   }
 
-  void _open(Widget screen) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  void _open({
+    required Widget screen,
+    required String pageId,
+    required String resourceId,
+    required String featureId,
+  }) {
+    Navigator.push(
+      context,
+      trackedRoute(
+        pageId: pageId,
+        courseId: _selected.id,
+        resourceId: resourceId,
+        featureId: featureId,
+        builder: (_) => screen,
+      ),
+    );
   }
 
   @override
@@ -38,7 +53,10 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         icon: Icons.forum_outlined,
         color: colors.primary,
         onTap: () => _open(
-          GenUIAssistantScreen(
+          pageId: 'ai_assistant',
+          resourceId: 'ai_chat',
+          featureId: 'ai_tutor',
+          screen: GenUIAssistantScreen(
             initialContext: 'Quero estudar a cartilha: ${_selected.title}.',
             contextLabel: _selected.title,
           ),
@@ -49,7 +67,12 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         description: 'Revise conceitos e repita os cartões mais difíceis.',
         icon: Icons.style_outlined,
         color: colors.tertiary,
-        onTap: () => _open(FlashcardsScreen(topic: _selected.title)),
+        onTap: () => _open(
+          pageId: 'flashcards',
+          resourceId: 'ai_flashcards',
+          featureId: 'flashcards',
+          screen: FlashcardsScreen(topic: _selected.title),
+        ),
       ),
       _StudyResource(
         title: 'Quiz com IA',
@@ -57,7 +80,10 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         icon: Icons.quiz_outlined,
         color: colors.secondary,
         onTap: () => _open(
-          AssessmentScreen(
+          pageId: 'assessment',
+          resourceId: 'ai_quiz',
+          featureId: 'assessment',
+          screen: AssessmentScreen(
             courseId: _selected.id,
             topic: _selected.title,
             mode: AssessmentMode.quiz,
@@ -70,7 +96,10 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         icon: Icons.summarize_outlined,
         color: colors.primary,
         onTap: () => _open(
-          SummaryScreen(courseId: _selected.id, topic: _selected.title),
+          pageId: 'summary',
+          resourceId: 'ai_summary',
+          featureId: 'summary',
+          screen: SummaryScreen(courseId: _selected.id, topic: _selected.title),
         ),
       ),
       _StudyResource(
@@ -79,7 +108,10 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
         icon: Icons.assignment_outlined,
         color: colors.error,
         onTap: () => _open(
-          AssessmentScreen(
+          pageId: 'assessment',
+          resourceId: 'ai_exam',
+          featureId: 'assessment',
+          screen: AssessmentScreen(
             courseId: _selected.id,
             topic: _selected.title,
             mode: AssessmentMode.exam,

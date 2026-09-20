@@ -177,7 +177,9 @@ Future<List<Cartilha>> _loadCartilhas() async {
 
 #### 2.3 — LearningEvents no Servidor
 
-Substituir `DataSyncService.logEvent()` por requisição autenticada à API:
+**Status:** implementado localmente; aguarda publicação da API na VPS.
+
+O `DataSyncService.logEvent()` foi substituído por requisição autenticada à API:
 ```
 POST /events
 {

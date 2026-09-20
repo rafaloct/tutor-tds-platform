@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/responsive_body.dart';
 import 'home_screen.dart';
+import '../features/analytics/telemetry_route.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final bool openedFromSettings;
@@ -45,7 +46,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        trackedRoute(pageId: 'home', builder: (_) => const HomeScreen()),
       );
     }
   }

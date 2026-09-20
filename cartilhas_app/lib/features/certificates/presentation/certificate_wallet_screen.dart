@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/certificate_service.dart';
 import '../models/certificate_record.dart';
 import 'certificate_details_screen.dart';
+import '../../analytics/telemetry_route.dart';
 
 class CertificateWalletScreen extends StatefulWidget {
   const CertificateWalletScreen({super.key});
@@ -171,7 +172,11 @@ class _CertificateWalletScreenState extends State<CertificateWalletScreen> {
                     }
                     await Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      trackedRoute(
+                        pageId: 'certificate_details',
+                        courseId: certificate.courseId,
+                        resourceId: 'certificate',
+                        featureId: 'certificate_view',
                         builder: (_) =>
                             CertificateDetailsScreen(certificate: certificate),
                       ),

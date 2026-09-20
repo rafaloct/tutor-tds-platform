@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from .analytics import router as analytics_router
 from .auth import router as auth_router
 from .classrooms import admin_router as classroom_admin_router
 from .classrooms import router as classroom_router
@@ -49,6 +50,7 @@ def create_app(
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
     application.include_router(hours_router)
+    application.include_router(analytics_router)
 
     @application.exception_handler(RequestValidationError)
     async def validation_error(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'genui_assistant_screen.dart';
+import '../features/analytics/telemetry_route.dart';
 
 class GlossaryTerm {
   final String term;
@@ -991,7 +992,10 @@ class _TermCard extends StatelessWidget {
                 ),
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
+                  trackedRoute(
+                    pageId: 'ai_assistant',
+                    resourceId: 'ai_chat',
+                    featureId: 'glossary_explanation',
                     builder: (_) => GenUIAssistantScreen(
                       initialContext:
                           'O aluno quer entender melhor o conceito de "${term.term}" da cartilha de ${term.cartilha}. '

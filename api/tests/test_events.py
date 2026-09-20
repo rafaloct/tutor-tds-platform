@@ -115,6 +115,49 @@ def test_event_validation_rejects_unknown_type_and_client_user_id() -> None:
     assert "attacker" not in injected_user.text
 
 
+def test_telemetry_event_stores_only_a_stable_typed_target() -> None:
+    client, app = make_client()
+    payload = event_payload(event_id="session-1:page_viewed:1") | {
+        "event_type": "page_viewed",
+        "course_id": "_app",
+        "payload": {"page_id": "study_hub"},
+    }
+    with client:
+        token = token_for(client, cpf="123.456.789-09", name="Estudante Um")
+        created = client.post("/events", json=payload, headers=bearer(token))
+        retried = client.post("/events", json=payload, headers=bearer(token))
+        free_text = client.post(
+            "/events",
+            json=payload
+            | {
+                "event_id": "invalid-free-text",
+                "payload": {"page_id": "Meu CPF é 123.456.789-09"},
+            },
+            headers=bearer(token),
+        )
+        extra_field = client.post(
+            "/events",
+            json=payload
+            | {
+                "event_id": "invalid-extra-field",
+                "payload": {"page_id": "study_hub", "name": "Pessoa"},
+            },
+            headers=bearer(token),
+        )
+        with Session(app.state.database.engine) as session:
+            record = session.get(LearningEventRecord, payload["event_id"])
+
+    assert created.status_code == 201
+    assert retried.status_code == 200
+    assert created.json()["payload"] == {"page_id": "study_hub"}
+    assert record is not None
+    assert record.payload == {"page_id": "study_hub"}
+    assert free_text.status_code == 422
+    assert "123.456.789-09" not in free_text.text
+    assert extra_field.status_code == 422
+    assert "Pessoa" not in extra_field.text
+
+
 def test_list_events_is_isolated_filtered_and_bounded() -> None:
     client, _ = make_client()
     with client:

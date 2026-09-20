@@ -8,8 +8,6 @@ import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
 import 'genui_assistant_screen.dart';
-import '../services/data_sync_service.dart';
-import '../services/privacy_preferences.dart';
 import '../features/certificates/data/certificate_service.dart';
 import '../features/certificates/models/certificate_record.dart';
 import '../features/certificates/presentation/certificate_details_screen.dart';
@@ -18,6 +16,8 @@ import '../features/learning_events/learning_event.dart';
 import '../features/learning_events/learning_event_queue.dart';
 import '../features/learning_events/learning_event_sync_service.dart';
 import '../features/learning_events/learning_activity_tracker.dart';
+import '../features/analytics/app_telemetry_service.dart';
+import '../features/analytics/telemetry_route.dart';
 import 'cadunico_screen.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
@@ -71,7 +71,6 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       courseId: widget.cartilha.id,
       sessionId: _learningSessionId,
     );
-    DataSyncService.logEvent('STARTED', widget.cartilha.title);
     unawaited(
       _enqueueAndSync(
         LearningEvent.forSession(
@@ -286,7 +285,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     if (_certificate != null) {
       await Navigator.push(
         context,
-        MaterialPageRoute(
+        trackedRoute(
+          pageId: 'certificate_details',
+          courseId: widget.cartilha.id,
+          resourceId: 'certificate',
+          featureId: 'certificate_view',
           builder: (_) => CertificateDetailsScreen(certificate: _certificate!),
         ),
       );
@@ -321,7 +324,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       if (edit == true && mounted) {
         await Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const CadUnicoScreen()),
+          trackedRoute(
+            pageId: 'profile',
+            featureId: 'profile_management',
+            builder: (_) => const CadUnicoScreen(),
+          ),
         );
       }
       return;
@@ -366,11 +373,12 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       );
       if (!mounted) return;
       setState(() => _certificate = certificate);
-      final hasAnalyticsConsent = await PrivacyPreferences.hasConsent();
-      if (!mounted) return;
-      if (hasAnalyticsConsent) {
-        unawaited(DataSyncService.logEvent('COMPLETED', widget.cartilha.title));
-      }
+      unawaited(
+        context.read<AppTelemetryService>().trackFeature(
+          featureId: 'certificate_issued',
+          courseId: widget.cartilha.id,
+        ),
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('✅ Certificado emitido e salvo na sua carteira.'),
@@ -380,7 +388,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       );
       await Navigator.push(
         context,
-        MaterialPageRoute(
+        trackedRoute(
+          pageId: 'certificate_details',
+          courseId: widget.cartilha.id,
+          resourceId: 'certificate',
+          featureId: 'certificate_view',
           builder: (_) => CertificateDetailsScreen(certificate: certificate),
         ),
       );
@@ -510,7 +522,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
             tooltip: 'Perguntar ao Tutor de IA',
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(
+              trackedRoute(
+                pageId: 'ai_assistant',
+                courseId: widget.cartilha.id,
+                resourceId: 'ai_chat',
+                featureId: 'ai_tutor',
                 builder: (_) => GenUIAssistantScreen(
                   initialContext: widget.cartilha.title,
                   contextLabel: widget.cartilha.title,

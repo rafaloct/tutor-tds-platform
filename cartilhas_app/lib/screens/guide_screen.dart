@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'chatwoot_screen.dart';
+import '../features/analytics/telemetry_route.dart';
 import '../widgets/responsive_body.dart';
 
 const _whatsappNumber = '5563993010823';
@@ -317,7 +318,11 @@ class _HelpSheet extends StatelessWidget {
     Navigator.pop(context);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const ChatwootScreen()),
+      trackedRoute(
+        pageId: 'support',
+        featureId: 'support',
+        builder: (_) => const ChatwootScreen(),
+      ),
     );
   }
 

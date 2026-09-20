@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import '../services/data_sync_service.dart';
+import 'package:provider/provider.dart';
 import '../widgets/responsive_body.dart';
 import '../features/certificates/data/certificate_service.dart';
+import '../features/analytics/app_telemetry_service.dart';
 
 class CadUnicoScreen extends StatefulWidget {
   const CadUnicoScreen({super.key});
@@ -53,7 +54,10 @@ class _CadUnicoScreenState extends State<CadUnicoScreen> {
     await prefs.setString('user_phone', _phoneController.text);
     await prefs.setString('user_cpf', _cpfController.text);
 
-    await DataSyncService.logEvent('REGISTERED', 'Cadastro Inicial');
+    if (!mounted) return;
+    await context.read<AppTelemetryService>().trackFeature(
+      featureId: 'profile_saved',
+    );
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

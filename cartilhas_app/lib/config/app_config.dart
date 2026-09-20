@@ -5,10 +5,6 @@ class AppConfig {
   /// a credencial usada para acessar o AnythingLLM ou o provedor do modelo.
   static const tutorGatewayUrl = String.fromEnvironment('TUTOR_GATEWAY_URL');
 
-  static const analyticsWebhookUrl = String.fromEnvironment(
-    'TDS_ANALYTICS_WEBHOOK_URL',
-  );
-
   /// API transacional do Tutor TDS. Enquanto não estiver configurada, o
   /// catálogo continua vindo integralmente dos assets do aplicativo.
   static const tutorApiUrl = String.fromEnvironment('TUTOR_API_URL');

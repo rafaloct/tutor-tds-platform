@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
 
@@ -14,8 +15,21 @@ from .database import Database
 from .models import Enrollment, LearningEventRecord
 
 router = APIRouter(prefix="/events", tags=["events"])
-EventType = Literal["lesson_started", "lesson_completed", "study_activity"]
+EventType = Literal[
+    "lesson_started",
+    "lesson_completed",
+    "study_activity",
+    "page_viewed",
+    "resource_opened",
+    "feature_used",
+]
 student_claims = require_roles("student")
+TELEMETRY_PAYLOAD_KEYS = {
+    "page_viewed": "page_id",
+    "resource_opened": "resource_id",
+    "feature_used": "feature_id",
+}
+STABLE_IDENTIFIER = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,79}$")
 
 
 class EventCreate(BaseModel):
@@ -27,6 +41,7 @@ class EventCreate(BaseModel):
     session_id: str = Field(min_length=1, max_length=160)
     occurred_at: datetime
     active_seconds: int | None = Field(default=None, ge=1, le=60)
+    payload: dict[str, str] = Field(default_factory=dict)
 
     @field_validator("occurred_at")
     @classmethod
@@ -41,6 +56,14 @@ class EventCreate(BaseModel):
             raise ValueError("study_activity exige active_seconds")
         if self.event_type != "study_activity" and self.active_seconds is not None:
             raise ValueError("active_seconds é exclusivo de study_activity")
+        expected_key = TELEMETRY_PAYLOAD_KEYS.get(self.event_type)
+        if expected_key is None and self.payload:
+            raise ValueError("payload é exclusivo de eventos de telemetria")
+        if expected_key is not None:
+            if set(self.payload) != {expected_key}:
+                raise ValueError(f"{self.event_type} exige apenas {expected_key}")
+            if not STABLE_IDENTIFIER.fullmatch(self.payload[expected_key]):
+                raise ValueError(f"{expected_key} deve ser um identificador estável")
         return self
 
 
@@ -85,7 +108,7 @@ def create_event(
             event_type=payload.event_type,
             session_id=payload.session_id,
             occurred_at=payload.occurred_at,
-            payload={},
+            payload=payload.payload,
             active_seconds=payload.active_seconds or 0,
             validated_seconds=validated_seconds,
             sync_status="pending",
@@ -144,6 +167,7 @@ def _same_event(record: LearningEventRecord, payload: EventCreate) -> bool:
         and record.session_id == payload.session_id
         and occurred_at.astimezone(timezone.utc) == payload.occurred_at
         and record.active_seconds == (payload.active_seconds or 0)
+        and record.payload == payload.payload
     )
 
 
@@ -158,6 +182,7 @@ def _serialize(record: LearningEventRecord) -> EventResponse:
         session_id=record.session_id,
         occurred_at=occurred_at,
         active_seconds=record.active_seconds or None,
+        payload=record.payload,
         sync_status=record.sync_status,
         validated_seconds=record.validated_seconds,
     )

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/privacy_preferences.dart';
 import '../widgets/responsive_body.dart';
 import 'home_screen.dart';
+import '../features/analytics/telemetry_route.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -78,7 +79,7 @@ class PrivacyConsentScreen extends StatelessWidget {
     if (!context.mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      trackedRoute(pageId: 'home', builder: (_) => const HomeScreen()),
     );
   }
 
@@ -118,7 +119,9 @@ class PrivacyConsentScreen extends StatelessWidget {
                 TextButton.icon(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    trackedRoute(
+                      pageId: 'privacy_policy',
+                      resourceId: 'privacy_policy',
                       builder: (_) => const PrivacyPolicyScreen(),
                     ),
                   ),

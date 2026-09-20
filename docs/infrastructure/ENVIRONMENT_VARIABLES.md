@@ -6,7 +6,6 @@
 |---|---|---|
 | `TUTOR_GATEWAY_URL` | URL pública do gateway | build Flutter |
 | `TUTOR_API_URL` | API opcional de catálogo e conta; vazia mantém modo offline | build Flutter |
-| `TDS_ANALYTICS_WEBHOOK_URL` | webhook legado de analytics | build Flutter |
 | `ANYTHING_LLM_BASE_URL` | upstream do RAG | Cloudflare Worker |
 | `ANYTHING_LLM_API_KEY` | autenticação do upstream | secret Cloudflare |
 | `ANYTHING_LLM_WORKSPACE` | workspace RAG | Cloudflare Worker |

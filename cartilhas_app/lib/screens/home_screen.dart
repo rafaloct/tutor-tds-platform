@@ -21,6 +21,7 @@ import '../features/study_progress/study_progress_repository.dart';
 import '../widgets/study_resume_card.dart';
 import '../widgets/tds_wait_experience.dart';
 import '../widgets/tds_brand_stripe.dart';
+import '../features/analytics/telemetry_route.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, this.courseLoader});
@@ -61,7 +62,12 @@ class HomeScreen extends StatelessWidget {
             tooltip: 'Glossário',
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const GlossaryScreen()),
+              trackedRoute(
+                pageId: 'glossary',
+                resourceId: 'knowledge_glossary',
+                featureId: 'glossary',
+                builder: (_) => const GlossaryScreen(),
+              ),
             ),
           ),
           IconButton(
@@ -69,7 +75,11 @@ class HomeScreen extends StatelessWidget {
             tooltip: 'Meu Cadastro',
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const CadUnicoScreen()),
+              trackedRoute(
+                pageId: 'profile',
+                featureId: 'profile_management',
+                builder: (_) => const CadUnicoScreen(),
+              ),
             ),
           ),
           PopupMenuButton<String>(
@@ -81,9 +91,20 @@ class HomeScreen extends StatelessWidget {
                 'settings' => const SettingsScreen(),
                 _ => const AboutScreen(),
               };
+              final pageId = switch (value) {
+                'guide' => 'user_guide',
+                'support' => 'support',
+                'settings' => 'settings',
+                _ => 'about',
+              };
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => screen),
+                trackedRoute(
+                  pageId: pageId,
+                  resourceId: value == 'guide' ? 'usage_guide' : null,
+                  featureId: value == 'support' ? 'support' : null,
+                  builder: (_) => screen,
+                ),
               );
             },
             itemBuilder: (_) => const [
@@ -149,30 +170,46 @@ class HomeScreen extends StatelessWidget {
                 onResumeTap: (cartilha) async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    trackedRoute(
+                      pageId: 'guided_lesson',
+                      courseId: cartilha.id,
+                      resourceId: 'course_content',
+                      featureId: 'guided_learning',
                       builder: (_) => ChatExperienceScreen(cartilha: cartilha),
                     ),
                   );
                 },
                 onStudyTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
+                  trackedRoute(
+                    pageId: 'study_hub',
+                    resourceId: 'study_tools',
+                    featureId: 'study_hub',
                     builder: (_) => StudyHubScreen(cartilhas: cartilhas),
                   ),
                 ),
                 onTutorTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
+                  trackedRoute(
+                    pageId: 'ai_assistant',
+                    resourceId: 'ai_chat',
+                    featureId: 'ai_tutor',
                     builder: (_) => const GenUIAssistantScreen(),
                   ),
                 ),
                 onGuideTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const GuideScreen()),
+                  trackedRoute(
+                    pageId: 'user_guide',
+                    resourceId: 'usage_guide',
+                    builder: (_) => const GuideScreen(),
+                  ),
                 ),
                 onCertificatesTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
+                  trackedRoute(
+                    pageId: 'certificate_wallet',
+                    featureId: 'certificates',
                     builder: (_) => const CertificateWalletScreen(),
                   ),
                 ),
@@ -328,7 +365,13 @@ class _LearningHeaderState extends State<_LearningHeader> {
                 onPressed: () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    trackedRoute(
+                      pageId: 'assessment',
+                      courseId: attempt.courseId,
+                      resourceId: attempt.mode == AssessmentMode.exam
+                          ? 'ai_exam'
+                          : 'ai_quiz',
+                      featureId: 'assessment',
                       builder: (_) => AssessmentScreen(
                         courseId: attempt.courseId,
                         topic: attempt.topic,
@@ -434,7 +477,11 @@ class _CartilhaCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(
+          trackedRoute(
+            pageId: 'guided_lesson',
+            courseId: cartilha.id,
+            resourceId: 'course_content',
+            featureId: 'guided_learning',
             builder: (_) => ChatExperienceScreen(cartilha: cartilha),
           ),
         ),

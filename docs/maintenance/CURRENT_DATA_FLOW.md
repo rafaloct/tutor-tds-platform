@@ -42,11 +42,9 @@ HomeScreen
 
 **Estado real do CPF:** no cadastro online, o servidor persiste somente HMAC do
 CPF; no login, o CPF não é salvo novamente em SharedPreferences. O fluxo local
-legado ainda pode manter `user_cpf` para certificados, Chatwoot e analytics. Na
-emissão de certificado, o CPF é usado apenas para gerar um HMAC e não é
-persistido no KV. Entretanto, o analytics legado envia o CPF em texto puro ao
-Google Apps Script mediante consentimento. Esse fluxo deve ser substituído de
-forma compatível.
+legado ainda pode manter `user_cpf` para certificados e Chatwoot. Na emissão de
+certificado, o CPF é usado apenas para gerar um HMAC e não é persistido no KV.
+Analytics não lê nem envia nome, telefone ou CPF.
 
 ---
 
@@ -63,12 +61,10 @@ ChatExperienceScreen (seleção de cartilha)
   - Messages: tipo bot, user, question, quiz
   - Contabiliza perguntas respondidas
       │
-      ├─► [se tem consentimento] DataSyncService.logEvent("STARTED", cartilha)
-      │         └──► POST webhook → Google Apps Script → Planilha Alunos
-      │
-      └─► [ao concluir] DataSyncService.logEvent("COMPLETED", cartilha)
-                └──► POST webhook → Google Apps Script
-                         └──► _enviarCertificado() → Gmail
+      └─► LearningEventQueue
+                ├──► lesson_started / lesson_completed / study_activity
+                └──► page_viewed / resource_opened / feature_used
+                         └──► API autenticada → PostgreSQL
 ```
 
 **Catálogo de cartilhas (9 — embutidas no APK):**
@@ -93,7 +89,8 @@ validado.
 
 ### Fila local de LearningEvents
 
-Desde 2026-09-20, abrir ou concluir uma cartilha também cria um evento local independente do webhook legado:
+Desde 2026-09-20, aprendizagem e uso do aplicativo compartilham uma fila local
+idempotente:
 
 ```text
 ChatExperienceScreen
@@ -108,8 +105,13 @@ LearningEventQueue → SharedPreferences
 - O `event_id` combina sessão e tipo, tornando retries idempotentes.
 - O payload contém apenas IDs técnicos, tipo e horário; não contém nome, telefone ou CPF.
 - A fila mantém no máximo 500 eventos e preserva os mais recentes.
-- Os eventos ainda não são enviados: a sincronização depende da API autenticada da Onda 1.
-- O webhook legado continua separado por compatibilidade e ainda obedece ao consentimento existente.
+- Com consentimento, os eventos são enviados à API autenticada e preservados
+  offline para retomada. Sem consentimento, telemetria de uso não é persistida.
+- Todas as rotas possuem IDs estáveis. Recursos e funcionalidades usam apenas
+  identificadores técnicos validados, nunca texto digitado ou dados pessoais.
+- `GET /analytics/usage` agrega uso por período e respeita a linhagem de turma:
+  estudante vê a si mesmo; professor/monitor somente sua turma; administrador
+  pode consultar o escopo global ou filtrado.
 
 ---
 
@@ -234,27 +236,24 @@ GET /v1/certificates/{id} → { valid: true/false, certificate: {...} }
 
 ---
 
-## 6. Fluxo de Analytics (Google Sheets)
+## 6. Fluxo de Analytics (API Tutor TDS)
 
 ```
-Evento no app (consentimento verificado)
-  - REGISTERED: cadastro concluído
-  - STARTED: iniciou cartilha
-  - QUIZ_ANSWERED: respondeu pergunta
-  - COMPLETED: concluiu cartilha
+Evento tipado no app (consentimento verificado)
+  - page_viewed: página nomeada
+  - resource_opened: recurso técnico
+  - feature_used: funcionalidade acessada
       │
-      ▼ POST (timeout 15s)
-Google Apps Script (Web App pública)
-  - doPost(e)
-      ├─► _logEvento() → Aba "Eventos" (timestamp, nome, WhatsApp, CPF, evento, detalhe)
-      ├─► _atualizarAluno() → Aba "Alunos" (1 linha por CPF com contadores)
-      ├─► _atualizarPorCartilha() → Aba "Por Cartilha" (métricas agregadas)
-      └─► [se COMPLETED] _enviarCertificado() → Email via Gmail API
-
-Fallback: se webhook falhar → app continua funcionando (fire-and-forget)
+      ▼ LearningEventQueue (máximo 500; prioridade pedagógica)
+Sincronização autenticada /events
+      │
+      ▼ PostgreSQL learning_events
+GET /analytics/usage
+  - agrega contagem, usuários únicos e último acesso
+  - aplica escopo de aluno, turma, professor/monitor e administrador
 ```
 
-**⚠️ RISCO:** CPF trafega em plaintext para o Google Apps Script. Rever na Onda 1.
+O contrato aceita apenas IDs técnicos validados e não lê dados pessoais.
 
 ---
 
@@ -288,10 +287,7 @@ Upload play.google.com/console → Google Play Store
 
 | Lacuna | Impacto | Onda |
 |---|---|---|
-| Sem banco relacional → dados só no Sheets e local | Sem histórico confiável, sem multi-turma | Onda 1 |
-| Sem API TDS → app acessa serviços dispersos | Difícil evoluir sem acoplamento | Onda 1 |
-| LearningEvents sem servidor → 40h não confiáveis | Não comprova carga horária | Onda 2 |
-| CPF vai ao Google Apps Script em plaintext | Risco LGPD | Onda 1 |
+| API/PostgreSQL ainda não publicados na VPS | Recursos online novos não operam em produção | Onda 1 |
 | Catálogo de cursos no APK → exige novo build | Sem agilidade para novos cursos | Onda 2 |
 | Deploy manual via rsync | Propenso a erro, sem rollback | Onda 1 |
 | Sem ambiente de staging | Sem zona segura para testar | Onda 1 |

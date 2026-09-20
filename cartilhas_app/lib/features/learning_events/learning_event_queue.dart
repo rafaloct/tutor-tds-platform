@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'learning_event.dart';
 
 class LearningEventQueue {
-  const LearningEventQueue({this.maxPending = 500});
+  const LearningEventQueue({this.maxPending = 500}) : assert(maxPending > 0);
 
   static const _storageKey = 'learning_events:pending:v1';
   static Future<void> _operationTail = Future<void>.value();
@@ -22,10 +22,12 @@ class LearningEventQueue {
       final prefs = await SharedPreferences.getInstance();
       final events = _decode(prefs.getString(_storageKey));
       if (events.any((item) => item.eventId == event.eventId)) return false;
-      events.add(event);
-      if (events.length > maxPending) {
-        events.removeRange(0, events.length - maxPending);
+      if (events.length >= maxPending) {
+        final oldestTelemetry = events.indexWhere((item) => item.isTelemetry);
+        if (event.isTelemetry && oldestTelemetry < 0) return false;
+        events.removeAt(oldestTelemetry >= 0 ? oldestTelemetry : 0);
       }
+      events.add(event);
       await prefs.setString(
         _storageKey,
         jsonEncode(events.map((item) => item.toJson()).toList()),

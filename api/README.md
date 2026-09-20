@@ -26,8 +26,9 @@ Endpoints iniciais:
 - `POST /auth/login`: autentica CPF e senha.
 - `POST /auth/refresh`: rotaciona o refresh token de uso único.
 - `GET /auth/me`: valida o access token e retorna apenas dados públicos.
-- `POST /events`: recebe `lesson_started` e `lesson_completed` autenticados e
-  idempotentes.
+- `POST /events`: recebe aprendizagem e telemetria tipada (`page_viewed`,
+  `resource_opened`, `feature_used`) de forma autenticada e idempotente. O
+  payload de telemetria aceita somente um identificador técnico estável.
 - `GET /events`: lista somente eventos do usuário autenticado, com filtro por
   curso e paginação limitada a 100 itens.
 - `POST /admin/institutions`: cria uma instituição (somente administrador).
@@ -45,6 +46,9 @@ Endpoints iniciais:
   monitor associado.
 - `GET /users/{id}/hours?course_id=...`: consolida uso ativo e horas validadas
   para o próprio estudante ou sua equipe pedagógica autorizada.
+- `GET /analytics/usage`: agrega páginas, recursos e funcionalidades por até
+  90 dias, preservando `course_id`. Estudante vê os próprios eventos; professor e monitor precisam
+  informar uma turma associada; administrador pode usar escopo global ou filtros.
 
 Antes de usar os endpoints administrativos pela primeira vez, crie o primeiro
 administrador no terminal interativo do container. CPF e senha são solicitados

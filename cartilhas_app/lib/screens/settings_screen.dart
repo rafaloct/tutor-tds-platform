@@ -10,6 +10,7 @@ import '../widgets/responsive_body.dart';
 import 'chatwoot_screen.dart';
 import 'onboarding_screen.dart';
 import 'privacy_screen.dart';
+import '../features/analytics/telemetry_route.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -156,7 +157,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      trackedRoute(
+                        pageId: 'privacy_policy',
+                        resourceId: 'privacy_policy',
                         builder: (_) => const PrivacyPolicyScreen(),
                       ),
                     ),
@@ -175,7 +178,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(
+                      trackedRoute(
+                        pageId: 'onboarding',
+                        featureId: 'onboarding_replay',
                         builder: (_) =>
                             const OnboardingScreen(openedFromSettings: true),
                       ),
@@ -188,7 +193,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const ChatwootScreen()),
+                      trackedRoute(
+                        pageId: 'support',
+                        featureId: 'support',
+                        builder: (_) => const ChatwootScreen(),
+                      ),
                     ),
                   ),
                   const Divider(height: 1),

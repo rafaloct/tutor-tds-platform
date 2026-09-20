@@ -37,7 +37,7 @@ const claimDigest = await hmacSha256Hex(env.CERTIFICATE_SIGNING_SECRET, `claim|$
 O app Flutter não contém `ANYTHINGLLM_API_KEY`, `OPENAI_API_KEY` nem nenhuma chave de modelo.
 Todas as credenciais de upstream permanecem exclusivamente no Cloudflare Worker (secrets gerenciados pelo Wrangler).
 
-**Evidência:** `lib/config/app_config.dart` — apenas `tutorGatewayUrl` e `analyticsWebhookUrl` (URL pública sem credencial).
+**Evidência:** `lib/config/app_config.dart` — apenas as URLs públicas do gateway e da API.
 
 ---
 
@@ -65,8 +65,8 @@ if (base == null || base.scheme != 'https' || base.host.isEmpty) {
 
 ### ✅ Consentimento LGPD antes de analytics
 
-O `DataSyncService` verifica `PrivacyPreferences.hasConsent()` antes de enviar qualquer evento.
-Se negado, o evento é ignorado silenciosamente.
+O `AppTelemetryService` verifica `PrivacyPreferences.hasConsent()` antes de
+persistir qualquer evento de uso. Se negado, o evento é ignorado.
 
 ---
 
@@ -76,35 +76,20 @@ O Flutter recalcula o SHA-256 do payload canônico do certificado e compara com 
 
 ---
 
-### 🟠 CPF trafega em plaintext para o Google Apps Script
+### ✅ Analytics não envia CPF ao Google Apps Script
 
-**Risco:** O `DataSyncService` envia o CPF do usuário (texto, sem hash) via HTTP POST para a URL do Google Apps Script.
-
-**Impacto:** Potencial violação da LGPD. O Google Apps Script salva o CPF na aba `Alunos` da planilha Google Sheets.
-
-**Ação recomendada (Onda 1):**
-- Substituir envio do CPF bruto por HMAC-SHA256 ou pseudônimo
-- Ou remover CPF do payload e usar apenas identificador interno
-- Garantir que a planilha não seja compartilhada publicamente
-
-**Evidência:** `lib/services/data_sync_service.dart` linha 39
-```dart
-'cpf': cpf,
-```
-E `google_apps_script.js` linha 48:
-```js
-sheet.appendRow([new Date(), data.name, data.phone, data.cpf, ...])
-```
+O emissor legado `DataSyncService` e sua variável de build foram removidos.
+Eventos autenticados aceitam apenas IDs técnicos tipados e rejeitam texto livre,
+nome, telefone, CPF e campos extras. O Apps Script permanece apenas como artefato
+histórico, sem chamada pelo aplicativo.
 
 ---
 
-### 🟠 Ausência de autenticação server-side para acesso ao app
+### ✅ Autenticação server-side para eventos e analytics
 
-**Risco:** O aplicativo não possui sistema de autenticação real no servidor. O usuário é identificado apenas por dados locais (SharedPreferences). Qualquer manipulação local pode falsificar identidade.
-
-**Impacto:** Impossível garantir multi-usuário seguro, controle de turmas ou perfil de professor sem autenticação real.
-
-**Ação recomendada (Onda 1):** Implementar JWT com refresh token na API Tutor TDS.
+Eventos usam access token e a API deriva a identidade do JWT, sem aceitar
+`user_id` enviado pelo cliente. Consultas agregadas aplicam o escopo de aluno,
+professor, monitor, turma e administrador.
 
 ---
 
@@ -122,11 +107,10 @@ await prefs.setString('user_cpf', _cpfController.text);
 
 ---
 
-### 🟡 Ausência de rate limiting no webhook do Google Apps Script
+### ✅ Webhook legado desconectado do aplicativo
 
-**Risco:** A URL do webhook é pública. Um ator malicioso pode enviar requisições em massa e inflar a planilha com dados falsos.
-
-**Ação recomendada:** Migrar analytics para a API Tutor TDS (Onda 1) com autenticação e rate limiting.
+A URL e o emissor foram removidos do build Flutter. A API Tutor TDS autenticada
+é a fonte primária de eventos e analytics.
 
 ---
 
