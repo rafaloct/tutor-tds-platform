@@ -2,14 +2,16 @@
 
 Auditoria executada em 20/09/2026. Este documento prepara um candidato para
 **teste interno**; não registra upload ou publicação. O bundle abaixo foi
-reconstruído depois das correções finais de acessibilidade/layout e validado
-contra o código-fonte atual.
+reconstruído uma única vez depois das correções finais de acessibilidade/layout
+e da correção P1 de resolução dos endpoints de mídia com base em subpath. O
+APK DEV correspondente passou o reteste físico de grant/HLS, velocidades 0,75x
+e 2x e retomada.
 
 ## Artefato validado
 
 - Caminho: `release/Tutor-TDS-1.4.0+13-signed.aab`
-- Tamanho final: `64.704.732` bytes
-- SHA-256 final: `1B712992F0FD11ACABB3D39F40D928773C8A1B5515EAC62444155EBAA1089646`
+- Tamanho final: `64.716.303` bytes
+- SHA-256 final: `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`
 - Package/applicationId: `com.tutortds_cartilhas` (inalterado)
 - Version name/code: `1.4.0` / `13`
 - SDK: mínimo 24, target 36, compile 36
@@ -18,7 +20,7 @@ contra o código-fonte atual.
 ## Gates aprovados
 
 - `dart analyze lib test`: zero issues.
-- `flutter test --no-pub`: 171 testes aprovados no estado atual.
+- `flutter test --no-pub`: 173 testes aprovados no estado atual.
 - `flutter test --coverage test`: baseline anterior de 163 testes aprovada;
   relatório bruto em `coverage/lcov.info`.
 - Cobertura de linhas: total `5.378/7.881` (68,24%); certificados
@@ -32,6 +34,10 @@ contra o código-fonte atual.
   rolagem da configuração do simulado, expansão do seletor de turma e quebra
   segura da linha de integridade do certificado. A Home também passou a
   reutilizar o `Future` do catálogo em rebuilds.
+- A regressão do prefixo da API de mídia foi coberta para autorização de
+  playback e rating GET/PUT. No Xiaomi, grant/HLS, velocidades 0,75x/2x e
+  retomada foram aprovados; legenda não era testável porque o item retornou
+  `captions=[]`.
 - Configuração produtiva validada sem chaves de IA ou de provedor.
 - Matriz Gradle: debug aceita apenas staging aprovado; release aceita apenas
   produção; staging, configuração vazia e gateway divergente são bloqueados.
@@ -88,7 +94,9 @@ contra o código-fonte atual.
 4. Testar no aparelho: modo offline, voz/TTS, login/logout/reentrada, troca de
    aluno/equipe, vídeos restritos, simulado entre aparelhos, evidências, PDF e
    exclusão.
-5. Não promover se houver divergência de assinatura, versionCode já usado,
+5. Validar legenda quando o catálogo publicar uma faixa real; `captions=[]` não
+   permitiu comprovar esse subcaso no reteste físico.
+6. Não promover se houver divergência de assinatura, versionCode já usado,
    crash/ANR, alerta de SDK/página de memória ou declaração de dados incoerente.
 
 ## Observação de manutenção

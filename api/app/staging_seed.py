@@ -59,6 +59,7 @@ IDS = {
     "student": "staging-qa-student",
 }
 PUBLIC_TEST_HLS = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+CERTIFICATE_PLANNED_SECONDS = 8 * 60 * 60
 
 
 @dataclass(frozen=True)
@@ -267,10 +268,10 @@ def seed_staging_data(
                 ProgramCourse(
                     program_id=program.id,
                     course_id=course.id,
-                    planned_seconds=8 * 60 * 60,
+                    planned_seconds=CERTIFICATE_PLANNED_SECONDS,
                 ),
             )
-            offering.planned_seconds = 8 * 60 * 60
+            offering.planned_seconds = CERTIFICATE_PLANNED_SECONDS
             _count(created, "offerings", was_created)
 
             membership_roles = {
@@ -543,9 +544,9 @@ def seed_staging_data(
                 (
                     "staging-qa-study-activity",
                     "study_activity",
-                    60,
-                    60,
-                    {},
+                    CERTIFICATE_PLANNED_SECONDS,
+                    CERTIFICATE_PLANNED_SECONDS,
+                    {"fixture": "certificate_eligibility"},
                 ),
                 (
                     "staging-qa-lesson-completed",
@@ -556,7 +557,7 @@ def seed_staging_data(
                 ),
             ]
             for event_id, event_type, active, validated, payload in event_specs:
-                _, was_created = _ensure(
+                learning_event, was_created = _ensure(
                     session,
                     LearningEventRecord,
                     event_id,
@@ -574,6 +575,12 @@ def seed_staging_data(
                         sync_status="pending",
                     ),
                 )
+                # The fixture intentionally represents an already completed,
+                # synthetic curriculum. Keep reruns deterministic so staging
+                # can exercise certificate eligibility without real activity.
+                learning_event.active_seconds = active
+                learning_event.validated_seconds = validated
+                learning_event.payload = payload
                 _count(created, "learning_events", was_created)
 
             session.commit()

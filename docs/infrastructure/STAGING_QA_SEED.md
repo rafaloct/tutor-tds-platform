@@ -84,7 +84,9 @@ ou token. Repetir exatamente o comando deve informar zero registros novos.
 - matrícula do aluno, professor titular, monitor atribuído e turma ativa;
 - sessão aberta com token do arquivo, importação/evidência pendente sintética;
 - simulado incompleto para testar retomada offline/online;
-- eventos mínimos de estudo/conclusão para o painel da turma;
+- evento sintético de estudo cobrindo as oito horas planejadas e evento de
+  conclusão, para permitir o gate de elegibilidade de certificado sem atribuir
+  atividade real a uma pessoa;
 - mídia publicada para a instituição usando um stream HLS público de teste
   da Mux (`test-streams.mux.dev`), sem upload, OAuth ou credencial externa.
 

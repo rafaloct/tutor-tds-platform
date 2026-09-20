@@ -33,17 +33,17 @@ somente para o staging isolado. Metadados do artefato atual da rodada:
 - package: `com.tutortds_cartilhas.dev`;
 - versão: `1.4.0-dev+13` (`versionCode` 13);
 - SHA-256:
-  `5EF1AE32E3A07C1D5B0FFFE041DADCA8254F7817345C1A7B1CB02884D7F76D38`;
+  `EDCADDB4D6021650A13EA0A591162B10431749741DCEC3D230C41ECE8E21BF96`;
 - assinatura APK validada e health do staging aprovado antes da tentativa.
 
 Após a instalação/execução da build atualizada, o package Play permaneceu
 preservado em `1.2.0+11`; nenhum update, limpeza ou remoção foi direcionado a
 `com.tutortds_cartilhas`.
 
-Inventário posterior da rodada de Evidence/check-in: o package `.dev` estava em
-`1.4.0-dev+13` e o package Play continuava em `1.2.0+11`. Esta verificação não
-calculou um novo SHA-256; portanto o hash da build 1.4.0-dev+13 não deve ser
-inferido a partir do artefato 1.3.0-dev+12 registrado acima.
+O artefato acima é o rebuild que corrige a preservação do prefixo da API nas
+rotas de playback/rating. Foi validado como package `.dev`, assinatura v2 e
+instalado com `adb install -r`, preservando sessão/dados. Ao final, o package
+Play continuava em `1.2.0+11`.
 
 O DEV 1.2.0 antigo usava assinatura incompatível e foi removido exclusivamente
 do package `.dev`. A reinstalação do novo APK foi recusada pelo MIUI com
@@ -118,7 +118,7 @@ package Play não foi instalado, limpo, removido nem usado como alvo de
 | A13 - capacidades por papel | Professor recebeu `Área da equipe` e `Registrar presença`; monitor recebeu saudação própria, `Monitor por exceção` e `Registrar presença` | **Aprovado para professor e monitor sintéticos:** capabilities vieram dos vínculos de staging; aluno/admin e negações cruzadas ainda pertencem à matriz completa |
 | A14 - dashboards por vínculo | Professor abriu o acompanhamento da `Turma Sintética QA [STAGING]`; monitor abriu o painel acionável por exceção da mesma turma | **Aprovado para os cenários sintéticos observados:** ainda faltam volume, outra turma e tentativa explícita de acesso fora do vínculo |
 | A15 - check-in/QR | Após corrigir a ordem transacional somente no staging, a `Entrada` e a `Saída` foram confirmadas no Xiaomi. Uma repetição física da `Entrada`, com nova chave gerada pela UI, foi recusada como duplicada e não criou outra linha | **Aprovado para sucesso e proteção contra duplicação:** PostgreSQL final com um `checkin`, um `checkout`, duas evidências `attendance` distintas. Retry com a mesma chave passou no smoke da API; expiração foi observada no ensaio anterior. O subcaso offline permanece pendente |
-| A18 - mídia | Catálogo/item de staging abriu no player; controles e contexto pedagógico foram exibidos; após ação explícita de play, o stream apresentou quadro de vídeo | **Parcial aprovado:** catálogo, player e playback sob ação observados; legenda, velocidade, retomada, telemetria e falhas de rede ainda precisam de evidência |
+| A18 - mídia | O rebuild corrigido foi instalado com `-r`; o item `external_hls` recebeu grant e exibiu quadro/posição. Os menus nativos confirmaram seleção de `0.75` e `2`, e o vídeo reabriu em posição não zero após `force-stop`/relaunch | **Parcial aprovado:** P1 de rota encerrado no cliente físico. O fixture tem `captions=[]`, portanto legenda não pôde ser exercitada. Não foram concluídos correlação do access log do POST, offline/rede, telemetria qualificada nem expiração/revogação do grant |
 | A12/A23 - visual/branding | A build `1.4.0-dev+13` exibiu IPEX/UFT/FAPTO/CDR em cards brancos no modo escuro, sem o quadriculado anterior | **Aprovado no recorte físico:** marca TDS e assets seguem o manual; resta confirmar institucionalmente a ordem/assinatura conjunta |
 
 ### Evidências armazenadas
@@ -129,6 +129,12 @@ package Play não foi instalado, limpo, removido nem usado como alvo de
 | [`xiaomi-media-staging.png`](evidence/2026-09-20/xiaomi-media-staging.png) | Item de mídia de staging carregado no player com metadados/contexto |
 | [`xiaomi-media-playing.png`](evidence/2026-09-20/xiaomi-media-playing.png) | Estado do player durante a sequência de reprodução |
 | [`xiaomi-media-after-play-action.png`](evidence/2026-09-20/xiaomi-media-after-play-action.png) | Quadro do stream após ação explícita do usuário |
+| [`xiaomi-media-playback-prefix-blocked.png`](evidence/2026-09-20/xiaomi-media-playback-prefix-blocked.png) | Regressão da build instalada no item restrito: catálogo/contexto carregados, mas autorização de playback caiu em 404 antes do stream; a captura não comprova os chips de legenda/velocidade |
+| [`xiaomi-media-playback-fixed.png`](evidence/2026-09-20/xiaomi-media-playback-fixed.png) | Rebuild corrigido reproduzindo o stream HLS de staging, com quadro e posição visíveis |
+| [`xiaomi-media-speed-075.png`](evidence/2026-09-20/xiaomi-media-speed-075.png) | Menu nativo do player com `0.75` selecionado |
+| [`xiaomi-media-speed-2x.png`](evidence/2026-09-20/xiaomi-media-speed-2x.png) | Menu nativo em tela cheia com `2` selecionado |
+| [`xiaomi-media-resume-before.png`](evidence/2026-09-20/xiaomi-media-resume-before.png) | Posição antes do fechamento forçado somente do DEV |
+| [`xiaomi-media-resume-after.png`](evidence/2026-09-20/xiaomi-media-resume-after.png) | Reabertura do mesmo item em posição não zero, sem reinício |
 | [`xiaomi-home-offline-cache.png`](evidence/2026-09-20/xiaomi-home-offline-cache.png) | Home em modo avião preservando curso e retomada em cache |
 | [`xiaomi-assessment-cross-device.png`](evidence/2026-09-20/xiaomi-assessment-cross-device.png) | Tentativa remota localizada, com progresso 1/1 e retomada sem nova IA |
 | [`xiaomi-assessment-cross-device-resumed.png`](evidence/2026-09-20/xiaomi-assessment-cross-device-resumed.png) | Deck e resposta hidratados no simulado, com estado `Sincronizado` |
@@ -152,6 +158,42 @@ As capturas não contêm nem devem receber token de check-in, senha, CPF ou
 credenciais do staging. As capturas da UI foram correlacionadas com contagens
 somente leitura no PostgreSQL; nenhuma delas é usada isoladamente para atribuir
 sucesso ou falha.
+
+### Rodada compacta de certificado e mídia restrita
+
+O aluno sintético de staging foi preparado pelo backend com 28.804 segundos
+validados para 28.800 planejados, conclusão registrada e matrícula/turma ativas.
+Mesmo assim, a carteira permanecia vazia (`certificates=0`). A emissão e a
+verificação pública não foram tentadas no Xiaomi porque o DEV mantinha
+`TUTOR_GATEWAY_URL` vazio e o staging mantinha o prefixo de verificação vazio:
+não existe ainda emissor, KV ou segredo exclusivos de staging. O smoke da API
+comprovou fail-closed 503, autenticação/isolamento da carteira e ausência de
+CPF/telefone. Isso é bloqueio externo honesto, não aprova emissão, detalhe,
+PDF, compartilhamento, QR ou verificação pública.
+
+Como o certificado não estava pronto, a rodada seguiu para a mídia restrita.
+O catálogo remoto abriu online e exibiu o item sintético, a associação a
+curso/módulo/competência, o creator e o aviso de acesso protegido. Ao abrir o
+player, a UI apresentou de forma honesta a indisponibilidade e a ação `Tentar
+novamente`. A captura `xiaomi-media-playback-prefix-blocked.png` foi preservada
+sem PII.
+
+A correlação entre tela, logs e fonte confirmou a causa no artefato anterior:
+o catálogo concatenava o caminho e chegou a `GET /tutor-staging-api/media`, mas
+playback/rating usavam `Uri.resolve('/media/...')`; a barra inicial removia o
+prefixo `/tutor-staging-api`. Por isso a API de staging não recebeu o `POST` de
+autorização.
+
+O rebuild SHA-256 `EDCADDB4D6021650A13EA0A591162B10431749741DCEC3D230C41ECE8E21BF96`
+foi então instalado como upgrade do package `.dev`. O catálogo abriu, o grant
+foi resolvido e o HLS exibiu quadro e posição. Em seguida foram selecionadas e
+capturadas as velocidades `0.75` e `2` no menu nativo. Após `force-stop` e
+relaunch somente do DEV, o mesmo vídeo retomou em posição não zero, sem
+reiniciar. O fixture de staging declara `captions=[]`; por isso a legenda não
+foi marcada como aprovada nem como defeito. Por ordem de encerramento, não foi
+feita nova rodada offline, e o caminho exato do `POST` não foi correlacionado
+nos access logs antes do encerramento; o sucesso físico comprova grant/HLS, mas
+não substitui essa evidência operacional.
 
 ### Jornada offline, morte/reabertura e reconexão
 

@@ -3,10 +3,12 @@
 ## Atual
 
 `Tutor-TDS-1.4.0+13-signed.aab` é o candidato final validado para envio à
-trilha de teste interno. O upload e a promoção permanecem ações humanas.
+trilha de teste interno. Ele foi reconstruído depois da correção P1 de mídia e
+do reteste físico de grant/HLS, velocidades e retomada. O upload e a promoção
+permanecem ações humanas.
 
-- tamanho: `64.704.732` bytes;
-- SHA-256: `1b712992f0fd11acabb3d39f40d928773c8a1b5515eac62444155ebaa1089646`;
+- tamanho: `64.716.303` bytes;
+- SHA-256: `b93fad21ce8ae92ab464fcafe8fb69e66c07c6e712db0dbfca0ae580b2844b66`;
 - pacote: `com.tutortds_cartilhas`;
 - versão: `1.4.0` (`versionCode 13`);
 - target SDK: 36;

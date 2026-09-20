@@ -5,8 +5,8 @@
 - Pacote: `com.tutortds_cartilhas`.
 - Android: `minSdk 24`, `targetSdk 36`, `compileSdk 36`.
 - AAB candidato: `release/Tutor-TDS-1.4.0+13-signed.aab`.
-- Tamanho final: `64.704.732` bytes.
-- SHA-256 final: `1B712992F0FD11ACABB3D39F40D928773C8A1B5515EAC62444155EBAA1089646`.
+- Tamanho final: `64.716.303` bytes.
+- SHA-256 final: `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`.
 - API: `https://ead.ipexdesenvolvimento.cloud/tutor-api`.
 - Política: `https://cartilhas.ipexdesenvolvimento.cloud/privacy.html`.
 - Exclusão externa: `https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html`.
@@ -46,6 +46,8 @@ Validação executada no artefato:
 - assinatura JAR válida e chave correspondente a `android/upload_certificate.pem`.
 - URLs produtivas de API, gateway e exclusão presentes no binário, sem URL de
   staging ou marcadores conhecidos de credenciais de IA.
+- correção de subpath de mídia coberta por regressão; reteste físico aprovou
+  grant/HLS, 0,75x, 2x e retomada. O item de teste não publicou legenda.
 
 O relatório detalhado deste candidato, incluindo hash, permissões, shrink e
 pendências humanas, está em `release/RELEASE_READINESS_1.4.0+13.md`.

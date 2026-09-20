@@ -82,7 +82,7 @@ https://ead.ipexdesenvolvimento.cloud/tutor-staging-api
 Evidências da implantação:
 
 - banco e API de staging em containers e volume/rede separados da produção;
-- imagem corretiva `tutor-tds-api:staging-0014-evidence-fk-20260920`
+- imagem corretiva `tutor-tds-api:staging-0014-certificate-seed-20260920`
   registrada em `.deployed-image`;
 - migrations aplicadas até `20260920_0014 (head)`, revalidadas por
   `alembic current` somente leitura;
@@ -98,8 +98,8 @@ Evidências da implantação:
 
 A implantação corretiva mais recente de 20/09/2026 manteve API e PostgreSQL de
 staging `healthy`, banco sem porta publicada e head `0014`. A imagem em execução
-e a tag apontam para `sha256:bbc6c2…e8a3d5`; a imagem anterior
-`staging-0014-playback-prefix-20260920` permaneceu disponível para rollback.
+e a tag apontam para `sha256:65a550…521d08`; as imagens corretivas anteriores
+permaneceram disponíveis para rollback.
 `STAGING_PUBLIC_API_BASE_URL` foi
 configurada no `.env` modo `0600`, sem exibir as demais variáveis.
 
@@ -129,6 +129,14 @@ final com dois registros; a conferência direta encontrou duas linhas de
 tokens. O reteste da mesma jornada no Android foi concluído depois do deploy:
 Entrada e Saída foram confirmadas, a repetição semântica não criou nova linha e
 o PostgreSQL terminou com um `checkin`, um `checkout` e duas evidências.
+
+O seed da imagem mais recente deixa o aluno sintético elegível para certificado
+sem dados reais: a conferência PostgreSQL registrou 28.804 segundos validados
+para 28.800 planejados e conclusão presente. O smoke
+`staging_certificate_gate_smoke.py` comprovou autenticação, isolamento das
+carteiras e ausência de CPF/telefone. Emissão, PDF e verificação pública não
+foram simulados: o emissor de staging continua um gate externo desligado,
+detalhado em `docs/testing/STAGING_CERTIFICATE_GATE_2026-09-20.md`.
 
 Para habilitar Sheets, configure `STAGING_SHEETS_SYNC_ENABLED=true` no `.env`
 remoto e forneça `STAGING_GOOGLE_SHEET_ID`,

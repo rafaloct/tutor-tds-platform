@@ -132,6 +132,19 @@ def test_certificate_reference_preserves_academic_snapshot_and_is_idempotent() -
             headers=headers,
         )
         wallet = client.get("/certificates", headers=headers)
+        outsider = client.post(
+            "/auth/register",
+            json={
+                "name": "Outro Estudante",
+                "cpf": "987.654.321-00",
+                "phone": "61999990001",
+                "password": PASSWORD,
+            },
+        ).json()
+        outsider_wallet = client.get(
+            "/certificates",
+            headers={"Authorization": f"Bearer {outsider['access_token']}"},
+        )
 
     assert created.status_code == 201
     assert retried.status_code == 200
@@ -141,6 +154,10 @@ def test_certificate_reference_preserves_academic_snapshot_and_is_idempotent() -
     assert created.json()["institution_name"] == "Instituto TDS"
     assert created.json()["planned_hours"] == 0.0167
     assert wallet.json()["certificates"] == [created.json()]
+    assert outsider_wallet.status_code == 200
+    assert outsider_wallet.json() == {"certificates": []}
+    serialized = json.dumps(wallet.json()).lower()
+    assert "cpf" not in serialized and "phone" not in serialized
 
 
 def test_certificate_reference_rejects_untrusted_verification_origin() -> None:

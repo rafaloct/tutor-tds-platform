@@ -277,12 +277,14 @@ class MediaPlaybackAuthorization {
       throw const FormatException('Autorização de reprodução incompleta.');
     }
     final playbackUrl = Uri.tryParse(rawUrl);
+    final basePath = apiBase.path.replaceFirst(RegExp(r'/+$'), '');
+    final expectedPath = '$basePath/media/$expectedMediaId/playback/';
     if (playbackUrl == null ||
         playbackUrl.scheme != 'https' ||
         playbackUrl.userInfo.isNotEmpty ||
         playbackUrl.host != apiBase.host ||
         playbackUrl.port != apiBase.port ||
-        !playbackUrl.path.startsWith('/media/$expectedMediaId/playback/')) {
+        !playbackUrl.path.startsWith(expectedPath)) {
       throw const FormatException('URL de autorização de reprodução inválida.');
     }
     return MediaPlaybackAuthorization(

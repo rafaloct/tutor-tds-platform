@@ -75,7 +75,10 @@ class MediaRepository {
       final response = await auth.authorized(
         (token) => _client
             .post(
-              base.resolve('/media/${media.id}/playback-authorizations'),
+              _apiEndpoint(
+                'media/${media.id}/playback-authorizations',
+                base: base,
+              ),
               headers: {'Authorization': 'Bearer $token'},
             )
             .timeout(const Duration(seconds: 12)),
@@ -186,7 +189,7 @@ class MediaRepository {
       final response = await auth.authorized(
         (token) => _client
             .get(
-              _apiBase().resolve('/media/$mediaId/rating'),
+              _apiEndpoint('media/$mediaId/rating'),
               headers: {'Authorization': 'Bearer $token'},
             )
             .timeout(const Duration(seconds: 12)),
@@ -221,7 +224,7 @@ class MediaRepository {
       final response = await auth.authorized(
         (token) => _client
             .put(
-              _apiBase().resolve('/media/$mediaId/rating'),
+              _apiEndpoint('media/$mediaId/rating'),
               headers: {
                 'Authorization': 'Bearer $token',
                 'Content-Type': 'application/json',
@@ -275,10 +278,7 @@ class MediaRepository {
       if (courseId != null && courseId.isNotEmpty) 'course_id': courseId,
       if (moduleId != null && moduleId.isNotEmpty) 'module_id': moduleId,
     };
-    final base = apiUrl.endsWith('/')
-        ? apiUrl.substring(0, apiUrl.length - 1)
-        : apiUrl;
-    final uri = Uri.parse('$base/media').replace(queryParameters: query);
+    final uri = _apiEndpoint('media').replace(queryParameters: query);
     final auth = authRepository;
     late http.Response response;
     if (auth != null && auth.isConfigured && await auth.hasSession()) {
@@ -314,14 +314,31 @@ class MediaRepository {
   }
 
   Uri _apiBase() {
-    final uri = Uri.parse(apiUrl);
-    if (uri.scheme != 'https' || uri.host.isEmpty || uri.userInfo.isNotEmpty) {
+    final uri = Uri.tryParse(apiUrl.trim());
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        uri.query.isNotEmpty ||
+        uri.fragment.isNotEmpty) {
       throw const MediaRepositoryException(
         MediaRepositoryIssue.unavailable,
         'A API de vídeos não está configurada com segurança.',
       );
     }
     return uri;
+  }
+
+  /// Resolve um endpoint relativo à base completa da API. `Uri.resolve` trata
+  /// uma base sem barra final como arquivo e uma referência iniciada por `/`
+  /// como raiz do host; ambos os casos removeriam prefixos como `/tutor-api`.
+  Uri _apiEndpoint(String relativePath, {Uri? base}) {
+    final resolvedBase = base ?? _apiBase();
+    final directoryBase = resolvedBase.path.endsWith('/')
+        ? resolvedBase
+        : resolvedBase.replace(path: '${resolvedBase.path}/');
+    final safeRelativePath = relativePath.replaceFirst(RegExp(r'^/+'), '');
+    return directoryBase.resolve(safeRelativePath);
   }
 
   Map<String, dynamic> _jsonMap(String source) {

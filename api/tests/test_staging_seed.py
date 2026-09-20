@@ -28,6 +28,7 @@ from app.models import (
     User,
 )
 from app.staging_seed import (
+    CERTIFICATE_PLANNED_SECONDS,
     CONFIRMATION,
     IDS,
     SeedAccount,
@@ -115,6 +116,12 @@ def test_staging_seed_is_synthetic_complete_and_idempotent() -> None:
         media = session.get(MediaAsset, IDS["media"])
         class_session = session.get(ClassSession, IDS["session"])
         attempt = session.get(AssessmentAttemptRecord, IDS["assessment"])
+        certificate_hours = session.scalar(
+            select(func.sum(LearningEventRecord.validated_seconds)).where(
+                LearningEventRecord.enrollment_id == IDS["enrollment"],
+                LearningEventRecord.event_type == "study_activity",
+            )
+        )
 
         assert teacher is not None and teacher.role == "student"
         assert password_hash.verify(credentials.teacher.password, teacher.password_digest)
@@ -128,6 +135,7 @@ def test_staging_seed_is_synthetic_complete_and_idempotent() -> None:
         assert class_session.token_version == 1
         assert attempt is not None and attempt.owner_id == IDS["student"]
         assert attempt.completed is False
+        assert certificate_hours == CERTIFICATE_PLANNED_SECONDS
 
     database.dispose()
     assert first.total_created == 24

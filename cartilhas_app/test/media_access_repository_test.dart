@@ -70,6 +70,50 @@ void main() {
     },
   );
 
+  test(
+    'preserva subpath da API sem barra final no playback e na resolução',
+    () async {
+      final requests = <http.Request>[];
+      final expiresAt = DateTime.now().toUtc().add(const Duration(minutes: 5));
+      final repository = _repository((request) async {
+        requests.add(request);
+        if (request.method == 'POST') {
+          expect(
+            request.url.toString(),
+            'https://api.example/tutor-staging-api/media/media-1/playback-authorizations',
+          );
+          return http.Response(
+            jsonEncode({
+              'media_id': 'media-1',
+              'playback_url':
+                  'https://api.example/tutor-staging-api/media/media-1/playback/opaque-token',
+              'expires_at': expiresAt.toIso8601String(),
+              'token_type': 'media_playback',
+            }),
+            201,
+          );
+        }
+        expect(
+          request.url.toString(),
+          'https://api.example/tutor-staging-api/media/media-1/playback/opaque-token',
+        );
+        expect(request.headers, isNot(contains('authorization')));
+        return http.Response(
+          '',
+          307,
+          headers: {
+            'location': 'https://www.youtube-nocookie.com/embed/AbCdEf12345',
+          },
+        );
+      }, apiUrl: 'https://api.example/tutor-staging-api');
+
+      final access = await repository.authorizePlayback(_restrictedMedia());
+
+      expect(requests.map((request) => request.method), ['POST', 'GET']);
+      expect(access.media.canPlay, isTrue);
+    },
+  );
+
   test('rejeita redirect para provider inseguro', () async {
     final expiresAt = DateTime.now().toUtc().add(const Duration(minutes: 5));
     final repository = _repository((request) async {
@@ -171,6 +215,34 @@ void main() {
     expect(rating.rating, 4);
   });
 
+  test('preserva subpath da API sem barra final no rating GET e PUT', () async {
+    final requests = <http.Request>[];
+    final repository = _repository((request) async {
+      requests.add(request);
+      expect(
+        request.url.toString(),
+        'https://api.example/tutor-staging-api/media/media-1/rating',
+      );
+      if (request.method == 'GET') {
+        return http.Response('{}', 404);
+      }
+      expect(jsonDecode(request.body), {'rating': 5});
+      return http.Response(
+        jsonEncode({
+          'media_id': 'media-1',
+          'rating': 5,
+          'submitted_at': '2026-09-20T12:00:00Z',
+          'updated_at': '2026-09-20T12:01:00Z',
+        }),
+        200,
+      );
+    }, apiUrl: 'https://api.example/tutor-staging-api');
+
+    expect(await repository.fetchRating('media-1'), isNull);
+    expect((await repository.rate('media-1', 5)).rating, 5);
+    expect(requests.map((request) => request.method), ['GET', 'PUT']);
+  });
+
   test('GET 404 é sem avaliação; 403 e 409 preservam causa', () async {
     final absent = _repository((_) async => http.Response('{}', 404));
     expect(await absent.fetchRating('media-1'), isNull);
@@ -204,9 +276,10 @@ void main() {
 MediaRepository _repository(
   Future<http.Response> Function(http.Request request) handler, {
   bool signedIn = true,
+  String apiUrl = 'https://api.example',
 }) {
   final auth = AuthRepository(
-    apiUrl: 'https://api.example',
+    apiUrl: apiUrl,
     client: MockClient((_) async => http.Response('{}', 500)),
     tokenStore: _TokenStore(
       signedIn
@@ -215,7 +288,7 @@ MediaRepository _repository(
     ),
   );
   return MediaRepository(
-    apiUrl: 'https://api.example',
+    apiUrl: apiUrl,
     authRepository: auth,
     client: MockClient(handler),
   );

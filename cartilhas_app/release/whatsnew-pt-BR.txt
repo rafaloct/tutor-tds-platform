@@ -1,1 +1,1 @@
-Nova jornada de estudo com Tutor contextual, flashcards, resumos, quizzes e simulados com retomada segura entre aparelhos. Inclui vídeos pedagógicos, acompanhamento de turma e evidências, modo offline mais claro, reentrada de conta em dispositivos compartilhados e melhorias de acessibilidade, privacidade e estabilidade.
+Atualização da jornada de estudo com Tutor contextual, flashcards, resumos, quizzes e simulados com salvamento local. Também melhora leitura offline, acessibilidade, login/logout e estabilidade.

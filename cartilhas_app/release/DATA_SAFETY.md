@@ -8,7 +8,7 @@ pelos contratos dos provedores.
 |---|---|---|---|
 | Informações pessoais | Nome, telefone/WhatsApp e CPF informado no cadastro/certificado. Na API de contas o CPF vira HMAC e o número não é armazenado; no dispositivo pode ficar na área privada. | Conta, suporte, identificação pedagógica e certificado. | Conta online é opcional; certificado exige confirmação específica. Exclusão disponível no app e no site. |
 | Identificadores | UUID interno da conta, matrícula, turma, sessão e evento. | Autenticação, hierarquia, idempotência e auditoria. | Excluídos com a conta de estudante. |
-| Atividade no app | Conteúdo iniciado/concluído, respostas e estado de quizzes/simulados, check-in/evidências estruturadas, tempo ativo, páginas, recursos e funcionalidades com identificadores técnicos. | Retomada, progresso, carga horária, presença, funcionamento e analytics pedagógico. | Envio exige conta/vínculo nos recursos online e consentimento de acompanhamento quando aplicável; eventos vinculados são excluídos com a conta. |
+| Atividade no app | Conteúdo iniciado/concluído, respostas e estado de quizzes/simulados, check-in/evidências estruturadas, tempo ativo, páginas, recursos e funcionalidades com identificadores técnicos. | Retomada, progresso, carga horária, presença, funcionamento e analytics pedagógico. | Envio exige conta/vínculo nos recursos online e consentimento de acompanhamento quando aplicável. Eventos vinculados são excluídos com a conta; a cópia pseudonimizada no Google Sheets é removida por fila assíncrona e exige monitoramento. |
 | Conteúdo do usuário | Perguntas ao Tutor de IA e conteúdo enviado voluntariamente ao suporte. | Gerar resposta e prestar atendimento. | Não incluir CPF/telefone automaticamente no prompt. Retenção do suporte depende do canal contratado. |
 | Áudio | Fala usada sob ação explícita para transcrição pelo serviço de reconhecimento disponível no dispositivo. | Preencher a pergunta por voz. | O app não grava nem mantém arquivo de áudio; confirmar no formulário o tratamento efêmero do provedor de reconhecimento. |
 | Arquivos/documentos | PDFs de certificados na área privada e cópias exportadas pela pessoa. | Carteira, impressão e compartilhamento. | Área privada apagada na exclusão/desinstalação; cópia exportada fica sob controle do destino. |
@@ -21,8 +21,9 @@ pelos contratos dos provedores.
 - Dados são criptografados em trânsito: **sim**, endpoints produtivos HTTPS e
   tráfego HTTP bloqueado no Android.
 - O usuário pode solicitar exclusão: **sim**, no app e pela URL externa.
-- Analytics/crash SDK de terceiros: **não há SDK dedicado nesta versão**;
-  analytics é first-party e autenticado.
+- Analytics/crash SDK de terceiros: **não há SDK dedicado nesta versão**. A
+  coleta parte da API própria e autenticada, mas o compose produtivo exige um
+  espelho pseudonimizado dos eventos em Google Sheets.
 - Localização, contatos, saúde e dados financeiros: **não coletados pelo app**.
 - Microfone: permissão opcional e acionada pelo usuário.
 
@@ -34,3 +35,6 @@ podem ser tratados como prestadores de serviço, e a publicação do certificado
 e usos reais atenderem às exceções da política da Play. Caso contrário, declarar
 os grupos aplicáveis como compartilhados. A declaração deve incluir também o
 comportamento de SDKs e serviços do sistema, não apenas o código próprio.
+
+A matriz detalhada, as integrações e as perguntas para a revisão humana estão
+em `PLAY_CONSOLE_HUMAN_REVIEW_1.4.0+13.md`.

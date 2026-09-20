@@ -20,6 +20,8 @@
 - [ ] Informar a política: `https://cartilhas.ipexdesenvolvimento.cloud/privacy.html`.
 - [ ] Informar a exclusão: `https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html`.
 - [ ] Atualizar **Segurança dos dados** usando `DATA_SAFETY.md` e revisar contratos dos provedores.
+- [ ] Resolver as perguntas e divergências técnicas de `PLAY_CONSOLE_HUMAN_REVIEW_1.4.0+13.md`.
+- [ ] Confirmar por OpenAPI/smoke que o backend produtivo expõe as rotas usadas pelo AAB antes de anunciar vídeos, retomada entre aparelhos, área de equipe ou Evidence.
 - [ ] Confirmar público-alvo/classificação indicativa e declarar que o app não é dirigido a crianças, se isso refletir a decisão do Programa TDS.
 - [ ] Executar o relatório de pré-lançamento e corrigir bloqueadores.
 - [ ] Instalar pelo teste interno em pelo menos um Android 7/8 e um Android recente.
