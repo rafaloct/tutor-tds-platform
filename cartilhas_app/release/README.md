@@ -2,12 +2,12 @@
 
 ## Atual
 
-`Tutor-TDS-1.3.0+12-signed.aab` é o bundle candidato à Play Console.
+`Tutor-TDS-1.4.0+13-signed.aab` é o bundle candidato à Play Console para teste interno.
 
-- tamanho: `63.044.125` bytes;
-- SHA-256: `8c1981323f446505e62901f875d609dafb8b3be652174a41bc4e47b22504fdd1`;
+- tamanho: `64.711.735` bytes;
+- SHA-256: `706e007de279010752ebe9d45bdff44f307eedc43f46d0e09a946cd6ef502946`;
 - pacote: `com.tutortds_cartilhas`;
-- versão: `1.3.0` (`versionCode 12`);
+- versão: `1.4.0` (`versionCode 13`);
 - target SDK: 36;
 - alinhamento nativo: 16 KB;
 - assinatura: chave de upload correspondente a `android/upload_certificate.pem`.
@@ -18,5 +18,5 @@ de upload aceita e siga `PLAY_CONSOLE_CHECKLIST.md`.
 
 ## Históricos
 
-Os bundles 1.1.0+10 e 1.2.0+11 permanecem apenas como histórico. O artefato
+Os bundles 1.1.0+10, 1.2.0+11 e 1.3.0+12 permanecem apenas como histórico. O artefato
 1.1.0+10 é não assinado e nunca deve ser enviado.

@@ -126,38 +126,37 @@ def _visible_user_ids(
 ) -> set[str] | None:
     viewer_id = claims["sub"]
     role = claims["role"]
-    if role == "student":
-        if user_id is not None and user_id != viewer_id:
-            raise HTTPException(status_code=403, detail="Analytics não autorizado.")
-        if class_id is not None:
-            active_class = session.scalar(
-                select(ClassEnrollment.class_id).where(
-                    ClassEnrollment.class_id == class_id,
-                    ClassEnrollment.user_id == viewer_id,
-                    ClassEnrollment.status == "active",
-                )
-            )
-            if active_class is None:
-                raise HTTPException(status_code=403, detail="Analytics não autorizado.")
-        return {viewer_id}
-
     if role == "admin":
         if class_id is not None:
             return _class_student_ids(session, class_id, user_id)
         return {user_id} if user_id is not None else None
 
-    if role not in {"teacher", "monitor"} or class_id is None:
-        raise HTTPException(
-            status_code=422,
-            detail="Professor ou monitor deve informar class_id.",
-        )
+    if class_id is None:
+        has_staff_scope = session.scalar(
+            select(Classroom.id).where(Classroom.teacher_id == viewer_id)
+        ) is not None or session.scalar(
+            select(ClassMonitor.class_id).where(ClassMonitor.user_id == viewer_id)
+        ) is not None
+        if has_staff_scope:
+            raise HTTPException(
+                status_code=422,
+                detail="Professor ou monitor deve informar class_id.",
+            )
+        if user_id is not None and user_id != viewer_id:
+            raise HTTPException(status_code=403, detail="Analytics não autorizado.")
+        return {viewer_id}
     classroom = session.get(Classroom, class_id)
     if classroom is None:
         raise HTTPException(status_code=404, detail="Turma não encontrada.")
     is_monitor = session.get(ClassMonitor, (class_id, viewer_id)) is not None
-    if classroom.teacher_id != viewer_id and not is_monitor:
+    if classroom.teacher_id == viewer_id or is_monitor:
+        return _class_student_ids(session, class_id, user_id)
+    active_student = session.get(ClassEnrollment, (class_id, viewer_id))
+    if active_student is None or active_student.status != "active":
         raise HTTPException(status_code=403, detail="Analytics não autorizado.")
-    return _class_student_ids(session, class_id, user_id)
+    if user_id is not None and user_id != viewer_id:
+        raise HTTPException(status_code=403, detail="Analytics não autorizado.")
+    return {viewer_id}
 
 
 def _class_student_ids(

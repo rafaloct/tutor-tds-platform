@@ -11,12 +11,16 @@ class TdsWaitExperience extends StatelessWidget {
     required this.status,
     required this.localTip,
     this.compact = false,
+    this.activityLabel,
+    this.onActivity,
   });
 
   final String title;
   final String status;
   final String localTip;
   final bool compact;
+  final String? activityLabel;
+  final VoidCallback? onActivity;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +108,17 @@ class TdsWaitExperience extends StatelessWidget {
               ),
             ),
           ),
+          if (activityLabel != null && onActivity != null) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: onActivity,
+                icon: const Icon(Icons.psychology_alt_outlined),
+                label: Text(activityLabel!),
+              ),
+            ),
+          ],
         ],
       ),
     );

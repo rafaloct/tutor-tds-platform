@@ -6,6 +6,7 @@ import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
 import 'package:cartilhas_app/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -59,7 +60,10 @@ Future<void> fillLocalForm(WidgetTester tester) async {
 }
 
 void main() {
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
+  });
 
   testWidgets('API vazia preserva exatamente as opções locais', (tester) async {
     var networkCalled = false;
@@ -128,6 +132,11 @@ void main() {
     expect(store.value?.accessToken, 'access-token');
     expect(find.text('Aprenda no seu ritmo'), findsOneWidget);
     final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('user_cpf'), isNull);
+    expect(
+      await const FlutterSecureStorage().read(key: 'tutor_tds:profile_cpf:v1'),
+      '529.982.247-25',
+    );
     expect(
       prefs.getKeys().where((key) => key.toLowerCase().contains('password')),
       isEmpty,

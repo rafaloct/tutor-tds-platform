@@ -4,13 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('mostra status e conteúdo local sem spinner', (tester) async {
+    var activityOpened = false;
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           body: TdsWaitExperience(
             title: 'Preparando seu quiz',
             status: 'Selecionando o conteúdo...',
             localTip: 'Revise o conceito principal enquanto espera.',
+            activityLabel: 'Recordar o ponto principal',
+            onActivity: () => activityOpened = true,
           ),
         ),
       ),
@@ -23,5 +26,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.tap(find.text('Recordar o ponto principal'));
+    expect(activityOpened, isTrue);
   });
 }

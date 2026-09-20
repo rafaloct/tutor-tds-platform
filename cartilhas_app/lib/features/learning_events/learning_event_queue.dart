@@ -66,6 +66,19 @@ class LearningEventQueue {
     }
   }
 
+  Future<void> clear() async {
+    final previous = _operationTail;
+    final turn = Completer<void>();
+    _operationTail = turn.future;
+    await previous;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_storageKey);
+    } finally {
+      turn.complete();
+    }
+  }
+
   List<LearningEvent> _decode(String? source) {
     if (source == null || source.isEmpty) return [];
     try {

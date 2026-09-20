@@ -3,10 +3,15 @@ import 'dart:io';
 import 'package:cartilhas_app/features/auth/data/account_data_deletion_service.dart';
 import 'package:cartilhas_app/features/certificates/data/certificate_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('apaga preferências e a carteira privada de certificados', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    FlutterSecureStorage.setMockInitialValues({
+      'tutor_tds:profile_cpf:v1': '529.982.247-25',
+    });
     SharedPreferences.setMockInitialValues({
       'user_name': 'Pessoa de Teste',
       'learning_events:pending:v1': '[]',
@@ -31,6 +36,10 @@ void main() {
 
     final preferences = await SharedPreferences.getInstance();
     expect(preferences.getKeys(), isEmpty);
+    expect(
+      await const FlutterSecureStorage().read(key: 'tutor_tds:profile_cpf:v1'),
+      isNull,
+    );
     expect(await certificates.exists(), isFalse);
   });
 }

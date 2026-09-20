@@ -166,6 +166,26 @@ def test_classroom_preserves_teacher_monitor_student_hierarchy() -> None:
             f"/classes/{class_id}",
             headers=bearer(accounts["student"]["access_token"]),
         )
+        teacher_list = client.get(
+            "/classes", headers=bearer(accounts["teacher"]["access_token"])
+        )
+        monitor_list = client.get(
+            "/classes", headers=bearer(accounts["monitor"]["access_token"])
+        )
+        student_list = client.get(
+            "/classes", headers=bearer(accounts["student"]["access_token"])
+        )
+        outsider_list = client.get(
+            "/classes", headers=bearer(accounts["outsider"]["access_token"])
+        )
+        dashboard = client.get(
+            f"/classes/{class_id}/dashboard",
+            headers=bearer(accounts["teacher"]["access_token"]),
+        )
+        student_dashboard = client.get(
+            f"/classes/{class_id}/dashboard",
+            headers=bearer(accounts["student"]["access_token"]),
+        )
 
         invalid_teacher = client.post(
             "/admin/classes",
@@ -188,5 +208,21 @@ def test_classroom_preserves_teacher_monitor_student_hierarchy() -> None:
     assert teacher_view.json()["student_ids"] == [ids["student"]]
     assert teacher_view.json()["monitor_ids"] == [ids["monitor"]]
     assert student_view.status_code == 403
+    assert [item["id"] for item in teacher_list.json()["classes"]] == [class_id]
+    assert [item["id"] for item in monitor_list.json()["classes"]] == [class_id]
+    assert [item["id"] for item in student_list.json()["classes"]] == [class_id]
+    assert outsider_list.json() == {"classes": []}
+    assert dashboard.status_code == 200
+    assert dashboard.json()["summary"] == {
+        "total_students": 1,
+        "inactive_students": 0,
+        "pending_students": 1,
+        "below_expected_students": 0,
+    }
+    assert dashboard.json()["students"][0]["user_id"] == ids["student"]
+    assert dashboard.json()["students"][0]["alerts"] == [
+        {"code": "required_activity_pending"}
+    ]
+    assert student_dashboard.status_code == 403
     assert invalid_teacher.status_code == 422
     assert invalid_dates.status_code == 422

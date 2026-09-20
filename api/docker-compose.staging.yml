@@ -1,0 +1,98 @@
+services:
+  db-staging:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tutor_tds_staging
+      POSTGRES_USER: tutor_tds_staging
+      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD:?configure STAGING_POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tutor_tds_staging -d tutor_tds_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - tutor_tds_staging_db:/var/lib/postgresql/data
+    networks: [staging-internal]
+    logging: &bounded-staging-logging
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+  api-staging:
+    image: ${STAGING_API_IMAGE:-tutor-tds-api:staging-local}
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://tutor_tds_staging:${STAGING_POSTGRES_PASSWORD}@db-staging:5432/tutor_tds_staging
+      ALLOWED_ORIGINS: ${STAGING_ALLOWED_ORIGINS:?configure STAGING_ALLOWED_ORIGINS}
+      PUBLIC_API_BASE_URL: ${STAGING_PUBLIC_API_BASE_URL:?configure STAGING_PUBLIC_API_BASE_URL}
+      JWT_SECRET: ${STAGING_JWT_SECRET:?configure STAGING_JWT_SECRET}
+      CPF_PEPPER: ${STAGING_CPF_PEPPER:?configure STAGING_CPF_PEPPER}
+      ACCESS_TOKEN_MINUTES: 15
+      REFRESH_TOKEN_DAYS: 1
+      CERTIFICATE_VERIFICATION_URL_PREFIX: ${STAGING_CERTIFICATE_VERIFICATION_URL_PREFIX:-}
+      CLOUDFLARE_STREAM_DELIVERY_BASE_URL: ${STAGING_CLOUDFLARE_STREAM_DELIVERY_BASE_URL:-}
+      COMMERCIAL_SIMULATION_ENABLED: ${STAGING_COMMERCIAL_SIMULATION_ENABLED:-false}
+      PAYMENT_ADAPTER: disabled
+    command: >-
+      sh -c "alembic upgrade head &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"
+    ports:
+      - "127.0.0.1:${STAGING_API_PORT:-8001}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 10
+      start_period: 20s
+    depends_on:
+      db-staging:
+        condition: service_healthy
+    labels:
+      traefik.enable: ${STAGING_TRAEFIK_ENABLED:-false}
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.tutor-tds-api-staging.entrypoints: websecure
+      traefik.http.routers.tutor-tds-api-staging.rule: Host(`${STAGING_PUBLIC_HOST:-ead.ipexdesenvolvimento.cloud}`) && PathPrefix(`${STAGING_PUBLIC_PATH:-/tutor-staging-api}`)
+      traefik.http.routers.tutor-tds-api-staging.priority: "210"
+      traefik.http.routers.tutor-tds-api-staging.tls: "true"
+      traefik.http.routers.tutor-tds-api-staging.tls.certresolver: letsencrypt
+      traefik.http.routers.tutor-tds-api-staging.middlewares: tutor-tds-api-staging-strip
+      traefik.http.middlewares.tutor-tds-api-staging-strip.stripprefix.prefixes: ${STAGING_PUBLIC_PATH:-/tutor-staging-api}
+      traefik.http.services.tutor-tds-api-staging.loadbalancer.server.port: "8000"
+    networks:
+      - staging-internal
+      - dokploy-network
+    logging: *bounded-staging-logging
+
+  sync-worker-staging:
+    profiles: ["sheets-sync"]
+    image: ${STAGING_API_IMAGE:-tutor-tds-api:staging-local}
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://tutor_tds_staging:${STAGING_POSTGRES_PASSWORD}@db-staging:5432/tutor_tds_staging
+      GOOGLE_SHEET_ID: ${STAGING_GOOGLE_SHEET_ID:-}
+      GOOGLE_SHEET_RANGE: ${STAGING_GOOGLE_SHEET_RANGE:-EventosAPI-Staging!A:J}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${STAGING_GOOGLE_SERVICE_ACCOUNT_JSON:-}
+      SHEETS_PSEUDONYM_SECRET: ${STAGING_SHEETS_PSEUDONYM_SECRET:-}
+      SYNC_BATCH_SIZE: 100
+      SYNC_POLL_SECONDS: 30
+      SYNC_MAX_ATTEMPTS: 3
+      SYNC_LEASE_SECONDS: 300
+    command: python -m app.sync_worker
+    depends_on:
+      db-staging:
+        condition: service_healthy
+    networks: [staging-internal]
+    logging: *bounded-staging-logging
+
+volumes:
+  tutor_tds_staging_db:
+
+networks:
+  staging-internal:
+    internal: true
+  dokploy-network:
+    external: true

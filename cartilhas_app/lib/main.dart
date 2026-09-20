@@ -8,6 +8,7 @@ import 'services/anything_llm_service.dart';
 import 'services/theme_controller.dart';
 import 'theme/app_theme.dart';
 import 'features/study_ai/data/study_ai_service.dart';
+import 'features/study_ai/data/assessment_sync_service.dart';
 import 'features/certificates/data/certificate_service.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/learning_events/learning_event_sync_service.dart';
@@ -71,6 +72,15 @@ class _CartilhasAppState extends State<CartilhasApp> {
         Provider(
           create: (_) => AuthRepository(apiUrl: AppConfig.tutorApiUrl),
           dispose: (_, repository) => repository.dispose(),
+        ),
+        Provider<AssessmentSyncCoordinator>(
+          create: (context) => AssessmentSyncService(
+            apiUrl: AppConfig.tutorApiUrl,
+            authRepository: context.read<AuthRepository>(),
+          ),
+          dispose: (_, coordinator) {
+            if (coordinator is AssessmentSyncService) coordinator.dispose();
+          },
         ),
         Provider(
           create: (context) => LearningEventSyncService(

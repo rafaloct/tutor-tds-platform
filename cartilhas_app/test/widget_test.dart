@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cartilhas_app/main.dart';
@@ -8,6 +9,7 @@ void main() {
     WidgetTester tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
     await tester.pumpWidget(const CartilhasApp());
     await tester.pumpAndSettle();
 
@@ -22,6 +24,7 @@ void main() {
     WidgetTester tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
     await tester.pumpWidget(const CartilhasApp());
     await tester.pumpAndSettle();
 
@@ -43,6 +46,11 @@ void main() {
 
     expect(find.text('Aprenda no seu ritmo'), findsOneWidget);
     final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('user_cpf'), isNull);
+    expect(
+      await const FlutterSecureStorage().read(key: 'tutor_tds:profile_cpf:v1'),
+      '529.982.247-25',
+    );
     expect(prefs.getBool('privacy_consent_v1'), isFalse);
   });
 }

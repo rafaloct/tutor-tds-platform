@@ -1,6 +1,7 @@
 {
+  "TUTOR_ENVIRONMENT": "production",
   "TUTOR_GATEWAY_URL": "https://tutor-tds-gateway.tdsipex.workers.dev",
-  "TUTOR_API_URL": "https://SEU_ENDPOINT_HTTPS",
+  "TUTOR_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-api",
   "PRIVACY_POLICY_URL": "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
   "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html"
 }

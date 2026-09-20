@@ -11,12 +11,15 @@ void _evaluateJavaScript(String script) {
 void chatwootOpen(
   String baseUrl,
   String token,
+  String supportContactId,
   String name,
-  String cpf,
   String phone,
 ) {
-  final cpfDigits = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+  final safeSupportId = supportContactId
+      .replaceAll('"', '')
+      .replaceAll("'", '');
   final safeName = name.replaceAll('"', '').replaceAll("'", '');
+  final safePhone = phone.replaceAll('"', '').replaceAll("'", '');
 
   if (!_injected) {
     _injected = true;
@@ -37,12 +40,12 @@ void chatwootOpen(
           window.chatwootSDK.run({ websiteToken: "$token", baseUrl: BASE_URL });
           window.addEventListener("chatwoot:ready", function() {
             window.\$chatwoot.toggle("open");
-            if ("$cpfDigits" !== "") {
-              window.\$chatwoot.setUser("$cpfDigits", {
+            if ("$safeSupportId" !== "") {
+              window.\$chatwoot.setUser("$safeSupportId", {
                 name: "$safeName",
-                phone_number: "$phone",
+                phone_number: "$safePhone",
               });
-              window.\$chatwoot.setCustomAttributes({ cpf: "$cpf", origem: "App Cartilhas TDS Web" });
+              window.\$chatwoot.setCustomAttributes({ origem: "App Cartilhas TDS Web" });
             }
           });
         };

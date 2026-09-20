@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
+import '../features/profile/data/profile_data_store.dart';
 import '../widgets/responsive_body.dart';
 import '../features/certificates/data/certificate_service.dart';
 import '../features/analytics/app_telemetry_service.dart';
 
 class CadUnicoScreen extends StatefulWidget {
-  const CadUnicoScreen({super.key});
+  const CadUnicoScreen({super.key, this.profileDataStore});
+
+  final ProfileDataStore? profileDataStore;
 
   @override
   State<CadUnicoScreen> createState() => _CadUnicoScreenState();
@@ -21,20 +23,22 @@ class _CadUnicoScreenState extends State<CadUnicoScreen> {
 
   final phoneMask = MaskTextInputFormatter(mask: '(##) #####-####');
   final cpfMask = MaskTextInputFormatter(mask: '###.###.###-##');
+  late final ProfileDataStore _profileDataStore;
 
   @override
   void initState() {
     super.initState();
+    _profileDataStore = widget.profileDataStore ?? SecureProfileDataStore();
     _loadExistingData();
   }
 
   Future<void> _loadExistingData() async {
-    final prefs = await SharedPreferences.getInstance();
+    final profile = await _profileDataStore.read();
     if (!mounted) return;
     setState(() {
-      _nameController.text = prefs.getString('user_name') ?? '';
-      _phoneController.text = prefs.getString('user_phone') ?? '';
-      _cpfController.text = prefs.getString('user_cpf') ?? '';
+      _nameController.text = profile.name;
+      _phoneController.text = profile.phone;
+      _cpfController.text = profile.cpf;
     });
   }
 
@@ -49,10 +53,13 @@ class _CadUnicoScreenState extends State<CadUnicoScreen> {
   Future<void> _submitData() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', _nameController.text);
-    await prefs.setString('user_phone', _phoneController.text);
-    await prefs.setString('user_cpf', _cpfController.text);
+    await _profileDataStore.write(
+      ProfileData(
+        name: _nameController.text,
+        phone: _phoneController.text,
+        cpf: _cpfController.text,
+      ),
+    );
 
     if (!mounted) return;
     await context.read<AppTelemetryService>().trackFeature(
@@ -81,7 +88,7 @@ class _CadUnicoScreenState extends State<CadUnicoScreen> {
               children: [
                 const SizedBox(height: 8),
                 const Text(
-                  'Nome e CPF permitem emitir certificados verificáveis. O CPF não aparece no PDF nem na validação pública.',
+                  'Nome e CPF permitem emitir certificados verificáveis. O CPF fica protegido pelo dispositivo e não aparece no PDF nem na validação pública.',
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey,

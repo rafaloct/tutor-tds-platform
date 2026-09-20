@@ -2,8 +2,8 @@
 void chatwootOpen(
   String baseUrl,
   String token,
+  String supportContactId,
   String name,
-  String cpf,
   String phone,
 ) {}
 void chatwootClose() {}

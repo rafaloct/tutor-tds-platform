@@ -6,6 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../features/auth/data/account_data_deletion_service.dart';
 import '../features/auth/data/auth_repository.dart';
+import '../features/auth/models/auth_session.dart';
+import '../features/auth/presentation/account_login_dialog.dart';
+import '../features/learning_events/learning_event_queue.dart';
+import '../features/study_ai/data/assessment_sync_queue.dart';
 import '../services/privacy_preferences.dart';
 import '../services/theme_controller.dart';
 import '../widgets/responsive_body.dart';
@@ -26,7 +30,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _shareLearningData = false;
   bool _rememberCertificateConsent = false;
   bool _hasOnlineAccount = false;
+  bool _checkingOnlineAccount = true;
+  bool _loggingIn = false;
+  AuthUser? _onlineUser;
   bool _deletingAccount = false;
+  bool _loggingOut = false;
 
   @override
   void initState() {
@@ -43,13 +51,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final auth = context.read<AuthRepository>();
       try {
-        final hasSession = await context.read<AuthRepository>().hasSession();
-        if (mounted) setState(() => _hasOnlineAccount = hasSession);
+        final hasSession = await auth.hasSession();
+        AuthUser? user;
+        if (hasSession) {
+          try {
+            user = await auth.currentUser();
+          } on AuthException {
+            // Uma falha de rede não invalida os tokens locais. Um 401/refresh
+            // inválido é refletido pela segunda leitura abaixo.
+          }
+        }
+        final stillHasSession = await auth.hasSession();
+        if (mounted) {
+          setState(() {
+            _hasOnlineAccount = stillHasSession;
+            _onlineUser = stillHasSession ? user : null;
+            _checkingOnlineAccount = false;
+          });
+        }
       } on AuthException {
-        // O restante das configurações continua disponível sem sessão online.
+        if (mounted) setState(() => _checkingOnlineAccount = false);
       }
     });
+  }
+
+  Future<void> _loginOnline() async {
+    if (_loggingIn) return;
+    final auth = context.read<AuthRepository>();
+    if (!auth.isConfigured) return;
+    setState(() => _loggingIn = true);
+    try {
+      final session = await showAccountLoginDialog(context);
+      if (session == null || !mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_name', session.user.name);
+      if (!mounted) return;
+      setState(() {
+        _hasOnlineAccount = true;
+        _onlineUser = session.user;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Conta de ${session.user.name} conectada.')),
+      );
+    } finally {
+      if (mounted) setState(() => _loggingIn = false);
+    }
   }
 
   Future<void> _rateApp() async {
@@ -157,9 +205,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    if (_loggingOut) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Sair da conta online?'),
+        content: const Text(
+          'A sessão online será encerrada. Envios pendentes desta conta serão removidos para não serem atribuídos à próxima pessoa. O perfil, as cartilhas e o progresso salvos neste aparelho não serão apagados e ainda não são separados por usuário. Em um dispositivo compartilhado, essas informações podem continuar visíveis.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Sair da conta'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final authRepository = context.read<AuthRepository>();
+    setState(() => _loggingOut = true);
+    try {
+      await Future.wait([
+        const LearningEventQueue().clear(),
+        const AssessmentSyncQueue().clear(),
+      ]);
+      await authRepository.logout();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        trackedRoute(
+          pageId: 'welcome',
+          featureId: 'account_logout',
+          builder: (_) => const WelcomeScreen(skipExistingUserRedirect: true),
+        ),
+        (_) => false,
+      );
+    } on Object {
+      if (!mounted) return;
+      setState(() => _loggingOut = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível encerrar a sessão com segurança.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeController = context.watch<ThemeController>();
+    final authConfigured = context.read<AuthRepository>().isConfigured;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -200,6 +300,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const _SectionTitle('Conta'),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    key: const ValueKey('account-session-status'),
+                    leading: const Icon(Icons.account_circle_outlined),
+                    title: Text(
+                      _checkingOnlineAccount
+                          ? 'Verificando conta online'
+                          : _hasOnlineAccount
+                          ? 'Conta online conectada'
+                          : 'Sem conta online conectada',
+                    ),
+                    subtitle: Text(
+                      _onlineUser != null
+                          ? '${_onlineUser!.name} • perfil ${_roleLabel(_onlineUser!.role)}. Os acessos às turmas serão atualizados ao voltar. O progresso local continua neste aparelho.'
+                          : 'O perfil e o progresso deste aparelho permanecem disponíveis no modo local.',
+                    ),
+                  ),
+                  if (!_checkingOnlineAccount && !_hasOnlineAccount) ...[
+                    const Divider(height: 1),
+                    ListTile(
+                      key: const ValueKey('account-login-action'),
+                      leading: const Icon(Icons.login),
+                      title: const Text('Entrar na conta online'),
+                      subtitle: Text(
+                        authConfigured
+                            ? 'Use outra conta para sincronizar e atualizar os acessos deste usuário'
+                            : 'A conta online não está disponível nesta configuração do aplicativo',
+                      ),
+                      trailing: _loggingIn
+                          ? const SizedBox.square(
+                              dimension: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.chevron_right),
+                      onTap: authConfigured && !_loggingIn
+                          ? _loginOnline
+                          : null,
+                    ),
+                  ],
+                  if (_hasOnlineAccount) ...[
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('Sair da conta'),
+                      subtitle: const Text(
+                        'Encerra apenas a sessão online; não apaga os dados locais',
+                      ),
+                      trailing: _loggingOut
+                          ? const SizedBox.square(
+                              dimension: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.chevron_right),
+                      onTap: _loggingOut ? null : _logout,
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(height: 20),
@@ -332,7 +495,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Tutor TDS 1.3.0',
+              'Tutor TDS 1.4.0',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -342,6 +505,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+
+String _roleLabel(String role) => switch (role) {
+  'admin' => 'administrativo',
+  'teacher' => 'docente',
+  'monitor' => 'monitor',
+  _ => 'estudante',
+};
 
 class _SectionTitle extends StatelessWidget {
   final String title;

@@ -32,7 +32,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             const _PrivacySection(
               title: 'Dados do cadastro',
               body:
-                  'No uso offline, nome, WhatsApp e CPF ficam salvos no dispositivo. Se você escolher criar uma conta online, nome e WhatsApp são cadastrados na API TDS; o CPF é transformado em um código criptográfico e o número original não é armazenado no servidor. A senha é protegida por hash e não fica salva no aplicativo. Com sua autorização de acompanhamento, os eventos de início ou conclusão também podem ser enviados à equipe do Programa TDS. Essa autorização é independente da conta e da emissão de certificados.',
+                  'No uso offline, nome e WhatsApp ficam nas preferências privadas do aplicativo; o CPF fica no armazenamento seguro protegido pelo sistema do dispositivo. Dados legados são migrados e removidos das preferências comuns. Se você escolher criar uma conta online, nome e WhatsApp são cadastrados na API TDS; o CPF é transformado em um código criptográfico e o número original não é armazenado no servidor. A senha é protegida por hash e não fica salva no aplicativo. Com sua autorização de acompanhamento, os eventos de início ou conclusão também podem ser enviados à equipe do Programa TDS. Essa autorização é independente da conta e da emissão de certificados.',
             ),
             const _PrivacySection(
               title: 'Certificados verificáveis',

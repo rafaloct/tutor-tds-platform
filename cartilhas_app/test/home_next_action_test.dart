@@ -70,5 +70,9 @@ void main() {
     expect(find.text('Olá, Maria!'), findsOneWidget);
     expect(find.text('Continuar quiz'), findsOneWidget);
     expect(find.text('Agricultura Sustentável'), findsWidgets);
+    expect(find.byKey(const ValueKey('supporter_logo_ipex')), findsOneWidget);
+    expect(find.byKey(const ValueKey('supporter_logo_uft')), findsOneWidget);
+    expect(find.byKey(const ValueKey('supporter_logo_fapto')), findsOneWidget);
+    expect(find.byKey(const ValueKey('supporter_logo_cdr')), findsOneWidget);
   });
 }

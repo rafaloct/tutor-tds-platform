@@ -10,15 +10,25 @@ from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from .analytics import router as analytics_router
+from .assessment_sync import router as assessment_sync_router
+from .assessment_sync import content_router as assessment_content_router
 from .auth import router as auth_router
 from .classrooms import admin_router as classroom_admin_router
 from .classrooms import router as classroom_router
+from .certificates import router as certificates_router
+from .commercial import router as commercial_router
 from .config import Settings
 from .database import Database
 from .events import router as events_router
+from .evidence import router as evidence_router
 from .hours import router as hours_router
+from .media import admin_router as media_admin_router
+from .media import creator_router as creator_media_router
+from .media import router as media_router
 from .models import Course
+from .observability import install_observability
 from .organizations import router as organizations_router
+from .sync_api import router as sync_router
 
 
 def create_app(
@@ -44,13 +54,23 @@ def create_app(
     )
     application.state.database = database
     application.state.settings = resolved
+    install_observability(application)
     application.include_router(auth_router)
+    application.include_router(assessment_content_router)
+    application.include_router(assessment_sync_router)
     application.include_router(events_router)
+    application.include_router(evidence_router)
     application.include_router(organizations_router)
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
+    application.include_router(certificates_router)
+    application.include_router(commercial_router)
     application.include_router(hours_router)
+    application.include_router(media_admin_router)
+    application.include_router(media_router)
+    application.include_router(creator_media_router)
     application.include_router(analytics_router)
+    application.include_router(sync_router)
 
     @application.exception_handler(RequestValidationError)
     async def validation_error(
@@ -74,6 +94,11 @@ def create_app(
             allow_methods=["GET", "POST", "PUT", "DELETE"],
             allow_headers=["Authorization", "Content-Type"],
         )
+
+    @application.get("/live")
+    def live() -> dict[str, str]:
+        """Process liveness probe; deliberately does not depend on PostgreSQL."""
+        return {"status": "ok"}
 
     @application.get("/health")
     def health(request: Request) -> dict[str, str]:

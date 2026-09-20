@@ -22,15 +22,74 @@ import '../widgets/study_resume_card.dart';
 import '../widgets/tds_wait_experience.dart';
 import '../widgets/tds_brand_stripe.dart';
 import '../features/analytics/telemetry_route.dart';
+import '../features/auth/data/auth_repository.dart';
+import '../features/classrooms/data/classroom_repository.dart';
+import '../features/classrooms/application/team_capability.dart';
+import '../features/classrooms/presentation/classroom_dashboard_screen.dart';
+import '../features/evidence/data/evidence_repository.dart';
+import '../features/evidence/presentation/evidence_checkin_screen.dart';
+import '../features/media/data/media_repository.dart';
+import '../features/media/presentation/media_catalog_screen.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.courseLoader});
 
   final Future<List<Cartilha>> Function()? courseLoader;
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Future<TeamCapabilitySnapshot?>? _teamCapability;
+
+  void _refreshTeamCapability() {
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    final Future<TeamCapabilitySnapshot?> next;
+    if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
+      next = Future.value(null);
+    } else {
+      final repository = ClassroomRepository(
+        apiUrl: AppConfig.tutorApiUrl,
+        authRepository: auth,
+      );
+      next = _resolveTeamCapability(repository);
+    }
+    if (mounted) setState(() => _teamCapability = next);
+  }
+
   Future<List<Cartilha>> _loadCartilhas() =>
-      courseLoader?.call() ??
+      widget.courseLoader?.call() ??
       CourseRepository(apiUrl: AppConfig.tutorApiUrl).fetchAll();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_teamCapability != null) return;
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
+      _teamCapability = Future.value(null);
+      return;
+    }
+    final repository = ClassroomRepository(
+      apiUrl: AppConfig.tutorApiUrl,
+      authRepository: auth,
+    );
+    _teamCapability = _resolveTeamCapability(repository);
+  }
+
+  Future<TeamCapabilitySnapshot?> _resolveTeamCapability(
+    ClassroomRepository repository,
+  ) async {
+    try {
+      return await TeamCapabilityResolver(repository).resolve();
+    } on Object {
+      return null;
+    } finally {
+      repository.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,65 +141,117 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          PopupMenuButton<String>(
-            tooltip: 'Mais opções',
-            onSelected: (value) {
-              final screen = switch (value) {
-                'guide' => const GuideScreen(),
-                'support' => const ChatwootScreen(),
-                'settings' => const SettingsScreen(),
-                _ => const AboutScreen(),
-              };
-              final pageId = switch (value) {
-                'guide' => 'user_guide',
-                'support' => 'support',
-                'settings' => 'settings',
-                _ => 'about',
-              };
-              Navigator.push(
-                context,
-                trackedRoute(
-                  pageId: pageId,
-                  resourceId: value == 'guide' ? 'usage_guide' : null,
-                  featureId: value == 'support' ? 'support' : null,
-                  builder: (_) => screen,
+          FutureBuilder<TeamCapabilitySnapshot?>(
+            future: _teamCapability,
+            builder: (context, capability) => PopupMenuButton<String>(
+              tooltip: 'Mais opções',
+              onSelected: (value) async {
+                final screen = switch (value) {
+                  'guide' => const GuideScreen(),
+                  'support' => const ChatwootScreen(),
+                  'settings' => const SettingsScreen(),
+                  'team' || 'monitor' => ClassroomDashboardScreen(
+                    gateway: ClassroomRepository(
+                      apiUrl: AppConfig.tutorApiUrl,
+                      authRepository: context.read<AuthRepository>(),
+                    ),
+                    evidenceGateway: EvidenceRepository(
+                      apiUrl: AppConfig.tutorApiUrl,
+                      authRepository: context.read<AuthRepository>(),
+                    ),
+                  ),
+                  'checkin' => EvidenceCheckinScreen(
+                    gateway: EvidenceRepository(
+                      apiUrl: AppConfig.tutorApiUrl,
+                      authRepository: context.read<AuthRepository>(),
+                    ),
+                  ),
+                  _ => const AboutScreen(),
+                };
+                final pageId = switch (value) {
+                  'guide' => 'user_guide',
+                  'support' => 'support',
+                  'settings' => 'settings',
+                  'team' => 'team_dashboard',
+                  'monitor' => 'monitor_exceptions',
+                  'checkin' => 'evidence_checkin',
+                  _ => 'about',
+                };
+                await Navigator.push(
+                  context,
+                  trackedRoute(
+                    pageId: pageId,
+                    resourceId: value == 'guide' ? 'usage_guide' : null,
+                    featureId: switch (value) {
+                      'support' => 'support',
+                      'team' => 'classroom_dashboard',
+                      'monitor' => 'monitor_exceptions',
+                      'checkin' => 'evidence_checkin',
+                      _ => null,
+                    },
+                    builder: (_) => screen,
+                  ),
+                );
+                if (mounted) _refreshTeamCapability();
+              },
+              itemBuilder: (_) => [
+                const PopupMenuItem(
+                  value: 'guide',
+                  child: ListTile(
+                    leading: Icon(Icons.help_outline),
+                    title: Text('Como usar'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              );
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: 'guide',
-                child: ListTile(
-                  leading: Icon(Icons.help_outline),
-                  title: Text('Como usar'),
-                  contentPadding: EdgeInsets.zero,
+                const PopupMenuItem(
+                  value: 'support',
+                  child: ListTile(
+                    leading: Icon(Icons.support_agent_outlined),
+                    title: Text('Suporte TDS'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'support',
-                child: ListTile(
-                  leading: Icon(Icons.support_agent_outlined),
-                  title: Text('Suporte TDS'),
-                  contentPadding: EdgeInsets.zero,
+                const PopupMenuItem(
+                  value: 'settings',
+                  child: ListTile(
+                    leading: Icon(Icons.settings_outlined),
+                    title: Text('Configurações'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'settings',
-                child: ListTile(
-                  leading: Icon(Icons.settings_outlined),
-                  title: Text('Configurações'),
-                  contentPadding: EdgeInsets.zero,
+                if (capability.data?.hasAccess ?? false)
+                  PopupMenuItem(
+                    value: capability.data!.hasTeacherCockpit
+                        ? 'team'
+                        : 'monitor',
+                    child: ListTile(
+                      leading: const Icon(Icons.groups_outlined),
+                      title: Text(
+                        capability.data!.hasTeacherCockpit
+                            ? 'Área da equipe'
+                            : 'Monitor por exceção',
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                const PopupMenuItem(
+                  value: 'checkin',
+                  child: ListTile(
+                    leading: Icon(Icons.qr_code_scanner_outlined),
+                    title: Text('Registrar presença'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-              PopupMenuItem(
-                value: 'about',
-                child: ListTile(
-                  leading: Icon(Icons.info_outline),
-                  title: Text('Sobre o Programa'),
-                  contentPadding: EdgeInsets.zero,
+                const PopupMenuItem(
+                  value: 'about',
+                  child: ListTile(
+                    leading: Icon(Icons.info_outline),
+                    title: Text('Sobre o Programa'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -197,6 +308,20 @@ class HomeScreen extends StatelessWidget {
                     builder: (_) => const GenUIAssistantScreen(),
                   ),
                 ),
+                onVideosTap: () => Navigator.push(
+                  context,
+                  trackedRoute(
+                    pageId: 'videos',
+                    resourceId: 'video_catalog',
+                    featureId: 'video_learning',
+                    builder: (_) => MediaCatalogScreen(
+                      repository: MediaRepository(
+                        apiUrl: AppConfig.tutorApiUrl,
+                        authRepository: context.read<AuthRepository>(),
+                      ),
+                    ),
+                  ),
+                ),
                 onGuideTap: () => Navigator.push(
                   context,
                   trackedRoute(
@@ -229,6 +354,7 @@ class _LearningHeader extends StatefulWidget {
   final Future<void> Function(Cartilha cartilha) onResumeTap;
   final VoidCallback onStudyTap;
   final VoidCallback onTutorTap;
+  final VoidCallback onVideosTap;
   final VoidCallback onGuideTap;
   final VoidCallback onCertificatesTap;
 
@@ -237,6 +363,7 @@ class _LearningHeader extends StatefulWidget {
     required this.onResumeTap,
     required this.onStudyTap,
     required this.onTutorTap,
+    required this.onVideosTap,
     required this.onGuideTap,
     required this.onCertificatesTap,
   });
@@ -404,6 +531,11 @@ class _LearningHeaderState extends State<_LearningHeader> {
                   onPressed: widget.onTutorTap,
                   icon: const Icon(Icons.psychology_outlined),
                   label: const Text('Perguntar ao Tutor'),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: widget.onVideosTap,
+                  icon: const Icon(Icons.video_library_outlined),
+                  label: const Text('Vídeos'),
                 ),
                 OutlinedButton.icon(
                   onPressed: widget.onGuideTap,
@@ -597,8 +729,35 @@ class _BannerLogo extends StatelessWidget {
   final String asset;
   const _BannerLogo(this.asset);
 
+  String get _partnerName => switch (asset) {
+    'assets/logos/logo_ipex.png' => 'IPEX',
+    'assets/logos/logo_uft.png' => 'UFT',
+    'assets/logos/logo_fapto.png' => 'FAPTO',
+    'assets/logos/logo_cdr.png' => 'CDR',
+    _ => 'Instituição parceira',
+  };
+
   @override
   Widget build(BuildContext context) {
-    return Image.asset(asset, height: 32, fit: BoxFit.contain);
+    return Expanded(
+      child: Semantics(
+        label: 'Logotipo $_partnerName',
+        image: true,
+        child: Container(
+          key: ValueKey('supporter_logo_${_partnerName.toLowerCase()}'),
+          height: 44,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: ExcludeSemantics(
+            child: Image.asset(asset, fit: BoxFit.contain),
+          ),
+        ),
+      ),
+    );
   }
 }

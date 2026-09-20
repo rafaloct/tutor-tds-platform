@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,6 +34,17 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
   // Campos usados no web
   bool _webOpened = false;
   String _userName = '';
+  String _supportContactId = '';
+
+  Future<String> _getSupportContactId(SharedPreferences preferences) async {
+    const key = 'support_contact_id_v1';
+    final existing = preferences.getString(key);
+    if (existing != null && existing.isNotEmpty) return existing;
+    final bytes = List<int>.generate(18, (_) => Random.secure().nextInt(256));
+    final generated = base64UrlEncode(bytes).replaceAll('=', '');
+    await preferences.setString(key, generated);
+    return generated;
+  }
 
   @override
   void initState() {
@@ -54,14 +68,15 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
     final canIdentifyUser = await PrivacyPreferences.hasConsent();
     final name = canIdentifyUser ? prefs.getString('user_name') ?? '' : '';
     final phone = canIdentifyUser ? prefs.getString('user_phone') ?? '' : '';
-    final cpf = canIdentifyUser ? prefs.getString('user_cpf') ?? '' : '';
+    final supportContactId = await _getSupportContactId(prefs);
 
     setState(() {
       _userName = name;
+      _supportContactId = supportContactId;
       _loading = false;
     });
 
-    chatwootOpen(_chatwootBase, _websiteToken, name, cpf, phone);
+    chatwootOpen(_chatwootBase, _websiteToken, supportContactId, name, phone);
     setState(() => _webOpened = true);
   }
 
@@ -73,7 +88,10 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
         ? prefs.getString('user_name') ?? 'Aluno TDS'
         : 'Aluno TDS';
     final phone = canIdentifyUser ? prefs.getString('user_phone') ?? '' : '';
-    final cpf = canIdentifyUser ? prefs.getString('user_cpf') ?? '' : '';
+    final supportContactId = await _getSupportContactId(prefs);
+    final encodedSupportId = jsonEncode(supportContactId);
+    final encodedName = jsonEncode(name);
+    final encodedPhone = jsonEncode(phone);
 
     final html =
         '''
@@ -124,11 +142,11 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
         window.addEventListener("chatwoot:ready", function() {
           document.getElementById("loading").style.display = "none";
           window.\$chatwoot.toggle("open");
-          window.\$chatwoot.setUser("${cpf.replaceAll(RegExp(r'[^0-9]'), '')}", {
-            name:  "${name.replaceAll('"', '')}",
-            phone_number: "$phone",
+          window.\$chatwoot.setUser($encodedSupportId, {
+            name: $encodedName,
+            phone_number: $encodedPhone,
           });
-          window.\$chatwoot.setCustomAttributes({ cpf: "$cpf", origem: "App Cartilhas TDS" });
+          window.\$chatwoot.setCustomAttributes({ origem: "App Cartilhas TDS" });
         });
       };
     })(document,"script");
@@ -268,8 +286,8 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
                   onPressed: () => chatwootOpen(
                     _chatwootBase,
                     _websiteToken,
+                    _supportContactId,
                     _userName,
-                    '',
                     '',
                   ),
                 ),

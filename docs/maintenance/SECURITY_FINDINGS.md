@@ -93,17 +93,18 @@ professor, monitor, turma e administrador.
 
 ---
 
-### 🟡 CPF armazenado em plaintext no SharedPreferences
+### ✅ CPF removido do SharedPreferences
 
-**Risco:** O CPF é armazenado localmente na chave `user_cpf` sem criptografia.
-Em dispositivos com root ou backup ADB habilitado, o dado pode ser exposto.
+O CPF local passou a usar `flutter_secure_storage`, apoiado pelo
+keystore/keychain da plataforma. A leitura executa migração única da chave
+legada `user_cpf` e só a remove depois que a gravação protegida conclui.
 
-**Ação recomendada:** Avaliar uso de `flutter_secure_storage` para dados pessoais sensíveis na Onda 1.
+O fluxo de suporte deixou de usar CPF como identificador do Chatwoot; utiliza
+um identificador aleatório local sem dado pessoal. Exclusão de conta também
+apaga o valor protegido.
 
-**Evidência:** `lib/screens/welcome_screen.dart` linha 57
-```dart
-await prefs.setString('user_cpf', _cpfController.text);
-```
+**Evidência:** `lib/features/profile/data/profile_data_store.dart` e
+`test/profile_data_store_test.dart`.
 
 ---
 
@@ -183,7 +184,7 @@ O CORS limita origens no browser, mas não protege clientes nativos ou curl.
 | Integridade do certificado no cliente | ✅ OK | SHA-256 local |
 | CPF em plaintext para Google Sheets | 🟠 Alto | Resolver na Onda 1 |
 | Sem autenticação JWT no servidor | 🟠 Alto | Resolver na Onda 1 |
-| CPF em plaintext no SharedPreferences | 🟡 Médio | Avaliar na Onda 1 |
+| CPF em plaintext no SharedPreferences | ✅ OK | Migrado para armazenamento seguro |
 | Rate limiting webhook ausente | 🟡 Médio | Resolver na Onda 1 |
 | Log Docker com aproximadamente 235,9 GB | 🔴 Crítico | Correção controlada pendente |
 | Serviços internos publicados / firewall permissivo | 🟠 Alto | Hardening planejado |

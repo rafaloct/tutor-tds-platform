@@ -117,6 +117,10 @@ class AssessmentDeck {
   final int durationMinutes;
   final List<StudyQuestion> items;
 
+  bool get hasAnswerKey => items.every(
+    (item) => item.correctIndex >= 0 && item.correctIndex < item.options.length,
+  );
+
   factory AssessmentDeck.fromJson(Map<String, dynamic> json) => AssessmentDeck(
     title: json['title'] as String? ?? 'Atividade',
     durationMinutes: json['durationMinutes'] as int? ?? 30,
@@ -234,6 +238,7 @@ class SavedStudySummary {
 class AssessmentAttempt {
   AssessmentAttempt({
     required this.id,
+    String? assessmentContentId,
     required this.courseId,
     required this.topic,
     required this.mode,
@@ -241,6 +246,7 @@ class AssessmentAttempt {
     required this.totalQuestions,
     required this.deck,
     required Map<int, int> answers,
+    Set<int> reviewQuestionIndexes = const {},
     required this.currentIndex,
     required this.remainingSeconds,
     required this.score,
@@ -248,10 +254,13 @@ class AssessmentAttempt {
     required this.isCompleted,
     required this.createdAt,
     required this.updatedAt,
-  }) : answers = Map.unmodifiable(answers),
+  }) : assessmentContentId = assessmentContentId ?? _contentIdForAttempt(id),
+       answers = Map.unmodifiable(answers),
+       reviewQuestionIndexes = Set.unmodifiable(reviewQuestionIndexes),
        weakTopics = List.unmodifiable(weakTopics);
 
   final String id;
+  final String assessmentContentId;
   final String courseId;
   final String topic;
   final AssessmentMode mode;
@@ -259,6 +268,7 @@ class AssessmentAttempt {
   final int totalQuestions;
   final AssessmentDeck deck;
   final Map<int, int> answers;
+  final Set<int> reviewQuestionIndexes;
   final int currentIndex;
   final int remainingSeconds;
   final int score;
@@ -269,6 +279,7 @@ class AssessmentAttempt {
 
   AssessmentAttempt copyWith({
     Map<int, int>? answers,
+    Set<int>? reviewQuestionIndexes,
     int? currentIndex,
     int? remainingSeconds,
     int? score,
@@ -278,6 +289,7 @@ class AssessmentAttempt {
   }) {
     return AssessmentAttempt(
       id: id,
+      assessmentContentId: assessmentContentId,
       courseId: courseId,
       topic: topic,
       mode: mode,
@@ -285,6 +297,8 @@ class AssessmentAttempt {
       totalQuestions: totalQuestions,
       deck: deck,
       answers: answers ?? this.answers,
+      reviewQuestionIndexes:
+          reviewQuestionIndexes ?? this.reviewQuestionIndexes,
       currentIndex: currentIndex ?? this.currentIndex,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       score: score ?? this.score,
@@ -297,6 +311,7 @@ class AssessmentAttempt {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    'assessmentContentId': assessmentContentId,
     'courseId': courseId,
     'topic': topic,
     'mode': mode.name,
@@ -304,6 +319,7 @@ class AssessmentAttempt {
     'totalQuestions': totalQuestions,
     'deck': deck.toJson(),
     'answers': answers.map((k, v) => MapEntry(k.toString(), v)),
+    'reviewQuestionIndexes': reviewQuestionIndexes.toList()..sort(),
     'currentIndex': currentIndex,
     'remainingSeconds': remainingSeconds,
     'score': score,
@@ -348,6 +364,13 @@ class AssessmentAttempt {
         }
       }
 
+      final reviewQuestionIndexes =
+          (json['reviewQuestionIndexes'] as List<dynamic>? ?? const [])
+              .whereType<num>()
+              .map((value) => value.toInt())
+              .where((value) => value >= 0)
+              .toSet();
+
       final currentIndex = (json['currentIndex'] as num?)?.toInt() ?? 0;
       final remainingSeconds = (json['remainingSeconds'] as num?)?.toInt() ?? 0;
       final score = (json['score'] as num?)?.toInt() ?? 0;
@@ -374,6 +397,7 @@ class AssessmentAttempt {
         id: id.isNotEmpty
             ? id
             : '${courseId}_${mode.name}_${createdAt.millisecondsSinceEpoch}',
+        assessmentContentId: json['assessmentContentId'] as String?,
         courseId: courseId.isNotEmpty ? courseId : topic,
         topic: topic.isNotEmpty ? topic : courseId,
         mode: mode,
@@ -381,6 +405,7 @@ class AssessmentAttempt {
         totalQuestions: totalQuestions > 0 ? totalQuestions : deck.items.length,
         deck: deck,
         answers: answers,
+        reviewQuestionIndexes: reviewQuestionIndexes,
         currentIndex: currentIndex,
         remainingSeconds: remainingSeconds,
         score: score,
@@ -393,4 +418,11 @@ class AssessmentAttempt {
       return null;
     }
   }
+}
+
+String _contentIdForAttempt(String attemptId) {
+  final safe = attemptId.replaceAll(RegExp(r'[^A-Za-z0-9_.:-]'), '_');
+  final suffix = safe.isEmpty ? 'local' : safe;
+  final candidate = 'content:$suffix';
+  return candidate.length <= 180 ? candidate : candidate.substring(0, 180);
 }

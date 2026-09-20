@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from urllib.parse import unquote, urlsplit
 
 
 @dataclass(frozen=True)
@@ -12,6 +13,20 @@ class Settings:
     cpf_pepper: str | None = None
     access_token_minutes: int = 15
     refresh_token_days: int = 30
+    google_sheet_id: str | None = None
+    google_sheet_range: str = "EventosAPI!A:J"
+    google_service_account_json: str | None = None
+    google_service_account_file: str | None = None
+    sync_batch_size: int = 100
+    sync_poll_seconds: int = 30
+    sync_max_attempts: int = 3
+    sync_lease_seconds: int = 300
+    certificate_verification_url_prefix: str | None = None
+    cloudflare_stream_delivery_base_url: str | None = None
+    commercial_simulation_enabled: bool = False
+    payment_adapter: str = "disabled"
+    sheets_pseudonym_secret: str | None = None
+    public_api_base_url: str | None = None
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -30,6 +45,33 @@ class Settings:
             cpf_pepper=os.getenv("CPF_PEPPER"),
             access_token_minutes=int(os.getenv("ACCESS_TOKEN_MINUTES", "15")),
             refresh_token_days=int(os.getenv("REFRESH_TOKEN_DAYS", "30")),
+            google_sheet_id=os.getenv("GOOGLE_SHEET_ID"),
+            google_sheet_range=os.getenv(
+                "GOOGLE_SHEET_RANGE", "EventosAPI!A:J"
+            ),
+            google_service_account_json=os.getenv(
+                "GOOGLE_SERVICE_ACCOUNT_JSON"
+            ),
+            google_service_account_file=os.getenv(
+                "GOOGLE_SERVICE_ACCOUNT_FILE"
+            ),
+            sync_batch_size=int(os.getenv("SYNC_BATCH_SIZE", "100")),
+            sync_poll_seconds=int(os.getenv("SYNC_POLL_SECONDS", "30")),
+            sync_max_attempts=int(os.getenv("SYNC_MAX_ATTEMPTS", "3")),
+            sync_lease_seconds=int(os.getenv("SYNC_LEASE_SECONDS", "300")),
+            certificate_verification_url_prefix=os.getenv(
+                "CERTIFICATE_VERIFICATION_URL_PREFIX"
+            ),
+            cloudflare_stream_delivery_base_url=os.getenv(
+                "CLOUDFLARE_STREAM_DELIVERY_BASE_URL"
+            ),
+            commercial_simulation_enabled=os.getenv(
+                "COMMERCIAL_SIMULATION_ENABLED", "false"
+            ).lower()
+            in {"1", "true", "yes"},
+            payment_adapter=os.getenv("PAYMENT_ADAPTER", "disabled"),
+            sheets_pseudonym_secret=os.getenv("SHEETS_PSEUDONYM_SECRET"),
+            public_api_base_url=os.getenv("PUBLIC_API_BASE_URL"),
         )
 
     def require_auth_secrets(self) -> tuple[str, str]:
@@ -37,4 +79,39 @@ class Settings:
             raise RuntimeError("JWT_SECRET deve ter pelo menos 32 caracteres.")
         if not self.cpf_pepper or len(self.cpf_pepper) < 32:
             raise RuntimeError("CPF_PEPPER deve ter pelo menos 32 caracteres.")
+        self.resolved_public_api_base_url()
         return self.jwt_secret, self.cpf_pepper
+
+    def resolved_public_api_base_url(self) -> str | None:
+        """Return a canonical public base without trusting proxy request headers."""
+        if self.public_api_base_url is None or not self.public_api_base_url.strip():
+            return None
+        value = self.public_api_base_url.strip()
+        parsed = urlsplit(value)
+        try:
+            parsed.port
+        except ValueError as exc:
+            raise RuntimeError("PUBLIC_API_BASE_URL possui porta inválida.") from exc
+        decoded_path = unquote(parsed.path)
+        invalid_path = (
+            "\\" in decoded_path
+            or "//" in decoded_path
+            or any(part in {".", ".."} for part in decoded_path.split("/"))
+            or any(ord(character) < 32 for character in decoded_path)
+        )
+        if (
+            any(character.isspace() or ord(character) < 32 for character in value)
+            or "\\" in value
+            or parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+            or invalid_path
+        ):
+            raise RuntimeError(
+                "PUBLIC_API_BASE_URL deve ser uma base HTTPS canônica, sem "
+                "credenciais, query, fragmento ou segmentos relativos."
+            )
+        return value.rstrip("/")

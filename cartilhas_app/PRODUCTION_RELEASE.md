@@ -1,10 +1,12 @@
-# Tutor TDS — release Android 1.3.0+12
+# Tutor TDS — release Android 1.4.0+13
 
 ## Estado validado em 20/09/2026
 
 - Pacote: `com.tutortds_cartilhas`.
 - Android: `minSdk 24`, `targetSdk 36`, `compileSdk 36`.
-- AAB: `release/Tutor-TDS-1.3.0+12-signed.aab`.
+- AAB candidato: `release/Tutor-TDS-1.4.0+13-signed.aab`.
+- Tamanho final: `64.711.735` bytes.
+- SHA-256 final: `706E007DE279010752EBE9D45BDFF44F307EEDC43F46D0E09A946CD6EF502946`.
 - API: `https://ead.ipexdesenvolvimento.cloud/tutor-api`.
 - Política: `https://cartilhas.ipexdesenvolvimento.cloud/privacy.html`.
 - Exclusão externa: `https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html`.
@@ -27,20 +29,25 @@ Como o caminho original contém acentos, use um drive virtual curto:
 subst T: "C:\Users\Usuario\Downloads\Cartilhas (Versão Chatbot)\Cartilhas (Versão Chatbot)"
 Set-Location T:\cartilhas_app
 dart run tool/validate_production_config.dart config/production.json
-flutter analyze
-flutter test
+dart analyze lib test
+flutter test --no-pub
 flutter build appbundle --release --dart-define-from-file=config/production.json
 ```
 
 Validação executada no artefato:
 
 - Bundletool 1.18.3: bundle válido;
-- `versionName 1.3.0` e `versionCode 12`;
+- `versionName 1.4.0` e `versionCode 13`;
 - bibliotecas nativas não comprimidas com `PAGE_ALIGNMENT_16K`;
 - símbolos nativos separados em `BUNDLE-METADATA`;
 - permissões somente `INTERNET` e `RECORD_AUDIO` (além da permissão interna do Android);
 - `allowBackup=false` e `usesCleartextTraffic=false`;
 - assinatura JAR válida e chave correspondente a `android/upload_certificate.pem`.
+- URLs produtivas de API, gateway e exclusão presentes no binário, sem URL de
+  staging ou marcadores conhecidos de credenciais de IA.
+
+O relatório detalhado deste candidato, incluindo hash, permissões, shrink e
+pendências humanas, está em `release/RELEASE_READINESS_1.4.0+13.md`.
 
 ## Operação da API
 

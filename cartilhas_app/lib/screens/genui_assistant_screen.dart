@@ -11,7 +11,11 @@ import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
 import '../widgets/tutor_conversation_starter.dart';
+import '../widgets/tutor_response_card.dart';
 import 'guide_screen.dart';
+import '../features/analytics/app_telemetry_service.dart';
+import '../features/study_ai/presentation/assessment_screen.dart';
+import '../features/study_ai/presentation/flashcards_screen.dart';
 import '../models/chat_message.dart';
 import '../genui/genui_renderer.dart';
 import '../genui/atui_parser.dart';
@@ -34,6 +38,7 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   static Future<void> _speechOperationQueue = Future<void>.value();
 
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _inputFocus = FocusNode();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
@@ -60,6 +65,7 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
       await speechToStop.stop();
     });
     _controller.dispose();
+    _inputFocus.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -164,6 +170,47 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(msg), duration: const Duration(seconds: 3)),
     );
+  }
+
+  void _trackTutorFeedback(TutorResponseFeedback feedback) {
+    final telemetry = Provider.of<AppTelemetryService?>(context, listen: false);
+    telemetry?.trackFeature(featureId: 'tutor_feedback_${feedback.name}');
+    _showSnack(
+      feedback == TutorResponseFeedback.report
+          ? 'Problema registrado para análise.'
+          : 'Obrigado pelo feedback.',
+    );
+  }
+
+  String get _studyTopic {
+    final label = widget.contextLabel?.trim();
+    return label != null && label.isNotEmpty
+        ? label
+        : 'Conteúdo das cartilhas TDS';
+  }
+
+  void _openCards() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => FlashcardsScreen(topic: _studyTopic)),
+    );
+  }
+
+  void _openQuiz() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AssessmentScreen(
+          topic: _studyTopic,
+          courseId: _studyTopic,
+          mode: AssessmentMode.quiz,
+        ),
+      ),
+    );
+  }
+
+  void _focusComposer() {
+    _inputFocus.requestFocus();
   }
 
   Future<void> _launchUrlWithConfirmation(String url) async {
@@ -365,7 +412,10 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
                       onSelected: _sendMessage,
                     );
                   }
-                  return _buildMessageBubble(_messages[index]);
+                  return _buildMessageBubble(
+                    _messages[index],
+                    isGreeting: index == 0,
+                  );
                 },
               ),
             ),
@@ -384,7 +434,7 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage msg) {
+  Widget _buildMessageBubble(ChatMessage msg, {bool isGreeting = false}) {
     final isUser = msg.role == 'user';
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -410,34 +460,29 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (msg.text != null) LinkifyText(msg.text!),
-            if (msg.components != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: GenUIRenderer(
-                  components: msg.components!,
-                  onAction: _launchUrlWithConfirmation,
-                  onError: (error) => _sendMessage(
-                    'Erro ao renderizar: $error. Corrija o JSON.',
-                    true,
-                  ),
-                ),
-              ),
-            if (!isUser && msg.text != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.volume_up_outlined,
-                    size: 18,
-                    color: Colors.grey,
-                  ),
-                  tooltip: 'Ouvir resposta',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => _speak(msg.text!),
-                ),
+            if (isUser && msg.text != null) LinkifyText(msg.text!),
+            if (!isUser && isGreeting && msg.text != null)
+              LinkifyText(msg.text!),
+            if (!isUser && !isGreeting && msg.text != null)
+              TutorResponseCard(
+                text: msg.text!,
+                contextLabel: widget.contextLabel,
+                onListen: () => _speak(msg.text!),
+                onCreateCards: _openCards,
+                onPracticeQuiz: _openQuiz,
+                onContinue: _focusComposer,
+                onFollowUp: _sendMessage,
+                onFeedback: _trackTutorFeedback,
+                child: msg.components == null
+                    ? null
+                    : GenUIRenderer(
+                        components: msg.components!,
+                        onAction: _launchUrlWithConfirmation,
+                        onError: (error) => _sendMessage(
+                          'Erro ao renderizar: $error. Corrija o JSON.',
+                          true,
+                        ),
+                      ),
               ),
           ],
         ),
@@ -471,6 +516,7 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
           Expanded(
             child: TextField(
               controller: _controller,
+              focusNode: _inputFocus,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),
               decoration: InputDecoration(

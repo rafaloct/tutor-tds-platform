@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/models/auth_session.dart';
+import '../features/auth/presentation/account_login_dialog.dart';
 import '../features/certificates/data/certificate_service.dart';
+import '../features/profile/data/profile_data_store.dart';
 import '../services/privacy_preferences.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_brand_stripe.dart';
@@ -15,7 +17,14 @@ import 'privacy_screen.dart';
 import '../features/analytics/telemetry_route.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key});
+  const WelcomeScreen({
+    super.key,
+    this.profileDataStore,
+    this.skipExistingUserRedirect = false,
+  });
+
+  final ProfileDataStore? profileDataStore;
+  final bool skipExistingUserRedirect;
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -27,6 +36,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _cpfController = TextEditingController();
   bool _privacyConsent = false;
+  late final ProfileDataStore _profileDataStore;
 
   final phoneMask = MaskTextInputFormatter(mask: '(##) #####-####');
   final cpfMask = MaskTextInputFormatter(mask: '###.###.###-##');
@@ -34,10 +44,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   void initState() {
     super.initState();
+    _profileDataStore = widget.profileDataStore ?? SecureProfileDataStore();
     _checkExistingUser();
   }
 
   Future<void> _checkExistingUser() async {
+    if (widget.skipExistingUserRedirect) return;
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name') ?? '';
     if (name.isNotEmpty && mounted) {
@@ -59,10 +71,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Future<void> _saveData() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', _nameController.text.trim());
-    await prefs.setString('user_phone', _phoneController.text);
-    await prefs.setString('user_cpf', _cpfController.text);
+    await _profileDataStore.write(
+      ProfileData(
+        name: _nameController.text,
+        phone: _phoneController.text,
+        cpf: _cpfController.text,
+      ),
+    );
     await PrivacyPreferences.saveDecision(consent: _privacyConsent);
 
     if (!mounted) return;
@@ -84,7 +99,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   Future<void> _loginOnline() async {
-    final session = await _showAccountDialog(register: false);
+    final session = await showAccountLoginDialog(context);
     if (session == null || !mounted) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_name', session.user.name);

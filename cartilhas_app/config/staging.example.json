@@ -1,0 +1,9 @@
+{
+  "TUTOR_ENVIRONMENT": "staging",
+  "TUTOR_STAGING_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+  "TUTOR_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+  "TUTOR_STAGING_GATEWAY_URL": "",
+  "TUTOR_GATEWAY_URL": "",
+  "PRIVACY_POLICY_URL": "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
+  "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html"
+}

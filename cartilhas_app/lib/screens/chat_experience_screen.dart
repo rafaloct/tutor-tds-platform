@@ -11,6 +11,7 @@ import 'genui_assistant_screen.dart';
 import '../features/certificates/data/certificate_service.dart';
 import '../features/certificates/models/certificate_record.dart';
 import '../features/certificates/presentation/certificate_details_screen.dart';
+import '../features/profile/data/profile_data_store.dart';
 import '../features/study_progress/study_progress_repository.dart';
 import '../features/learning_events/learning_event.dart';
 import '../features/learning_events/learning_event_queue.dart';
@@ -22,7 +23,12 @@ import 'cadunico_screen.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
   final Cartilha cartilha;
-  const ChatExperienceScreen({super.key, required this.cartilha});
+  final ProfileDataStore? profileDataStore;
+  const ChatExperienceScreen({
+    super.key,
+    required this.cartilha,
+    this.profileDataStore,
+  });
 
   @override
   State<ChatExperienceScreen> createState() => _ChatExperienceScreenState();
@@ -298,7 +304,9 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
     final prefs = await SharedPreferences.getInstance();
     final name = (prefs.getString('user_name') ?? '').trim();
-    final cpf = prefs.getString('user_cpf') ?? '';
+    final profileDataStore =
+        widget.profileDataStore ?? SecureProfileDataStore();
+    final cpf = (await profileDataStore.read()).cpf;
     if (name.length < 2 || !CertificateService.isValidCpf(cpf)) {
       if (!mounted) return;
       final edit = await showDialog<bool>(

@@ -94,6 +94,38 @@ A evolução só avança para a próxima onda quando **todos** os critérios da 
 
 ---
 
+## Onda 4 — Creator, Mídia e Comercial
+
+### Mídia com finalidade pedagógica
+- [ ] Toda mídia publicada referencia instituição, programa, curso, módulo, competência e creator
+- [ ] Cada vídeo publicado oferece uma próxima ação pedagógica (quiz, reflexão ou atividade)
+- [ ] O Flutter recebe metadados e referência de reprodução pela API, sem URL de provedor hardcoded
+- [ ] Trocar YouTube, Cloudflare Stream ou HLS não exige novo APK
+- [ ] Google Drive é usado somente como master/acervo; link de compartilhamento do Drive não é usado como CDN ou `playback_url`
+- [ ] A VPS serve API e metadados, mas não concentra a entrega dos arquivos master de vídeo em escala
+
+### Creator e publicação editorial
+- [ ] Creator só cria ou edita o próprio rascunho dentro de seu vínculo institucional
+- [ ] Publicação exige admin/coordenador enquanto não houver fluxo editorial formal aprovado
+- [ ] Estados `draft`, `processing`, `published`, `blocked` e `archived` são aplicados e auditáveis
+- [ ] Novo conteúdo publicado pela API aparece no app sem recompilar ou republicar o APK
+- [ ] Legendas, transcrição, thumbnail, visibilidade e política offline são configuráveis por item
+
+### Analytics qualificado
+- [ ] Eventos `video_started`, checkpoints, `video_completed`, `video_followup_completed` e `video_saved` são idempotentes
+- [ ] Visualização isolada não é tratada como conclusão ou aprendizagem validada
+- [ ] Eventos referenciam mídia, curso, módulo, matrícula e sessão sem texto livre ou dado pessoal desnecessário
+- [ ] Creator Score combina conclusão qualificada, salvamentos, avaliação e atividade posterior
+
+### Ledger e pagamentos
+- [ ] `RevenueRule` é versionada e não altera retroativamente lançamentos fechados
+- [ ] `RevenueLedger` é idempotente, imutável/auditável e rastreia a regra e o evento de origem
+- [ ] Reprocessamento do mesmo evento não duplica crédito ou débito
+- [ ] Adapter de pagamento permanece desativado até autorização humana, definição jurídica e credenciais próprias
+- [ ] Nenhuma cobrança, remuneração ou plano pago é ativado automaticamente
+
+---
+
 ## Onda 5 — QA / Release
 
 ### Qualidade de Código

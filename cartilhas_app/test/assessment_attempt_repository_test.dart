@@ -92,6 +92,7 @@ void main() {
 
     expect(loadedQuiz, isNotNull);
     expect(loadedQuiz?.id, 'attempt-quiz-1');
+    expect(loadedQuiz?.assessmentContentId, 'content:attempt-quiz-1');
     expect(loadedQuiz?.isCompleted, isFalse);
     expect(loadedQuiz?.answers[0], 0);
 
@@ -125,6 +126,7 @@ void main() {
       totalQuestions: 2,
       deck: sampleDeck,
       answers: {0: 2},
+      reviewQuestionIndexes: {1},
       currentIndex: 1,
       remainingSeconds: 300,
       score: 0,
@@ -136,12 +138,14 @@ void main() {
 
     final jsonMap = attempt.toJson();
     final parsed = AssessmentAttempt.tryParse(
-      '{"id": "${jsonMap['id']}", "courseId": "${jsonMap['courseId']}", "topic": "${jsonMap['topic']}", "mode": "${jsonMap['mode']}", "difficulty": "${jsonMap['difficulty']}", "totalQuestions": ${jsonMap['totalQuestions']}, "deck": {"title": "Quiz", "durationMinutes": 10, "items": []}, "answers": {"0": 2}, "currentIndex": 1, "remainingSeconds": 300, "score": 0, "weakTopics": ["Princípios do cooperativismo"], "isCompleted": false, "createdAt": "${jsonMap['createdAt']}", "updatedAt": "${jsonMap['updatedAt']}"}',
+      '{"id": "${jsonMap['id']}", "courseId": "${jsonMap['courseId']}", "topic": "${jsonMap['topic']}", "mode": "${jsonMap['mode']}", "difficulty": "${jsonMap['difficulty']}", "totalQuestions": ${jsonMap['totalQuestions']}, "deck": {"title": "Quiz", "durationMinutes": 10, "items": []}, "answers": {"0": 2}, "reviewQuestionIndexes": [1], "currentIndex": 1, "remainingSeconds": 300, "score": 0, "weakTopics": ["Princípios do cooperativismo"], "isCompleted": false, "createdAt": "${jsonMap['createdAt']}", "updatedAt": "${jsonMap['updatedAt']}"}',
     );
 
     expect(parsed, isNotNull);
     expect(parsed?.id, 'attempt-123');
+    expect(parsed?.assessmentContentId, 'content:attempt-123');
     expect(parsed?.answers[0], 2);
+    expect(parsed?.reviewQuestionIndexes, {1});
     expect(parsed?.weakTopics, ['Princípios do cooperativismo']);
     expect(parsed?.remainingSeconds, 300);
   });

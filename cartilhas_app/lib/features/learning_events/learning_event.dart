@@ -8,6 +8,11 @@ enum LearningEventType {
   pageViewed,
   resourceOpened,
   featureUsed,
+  videoStarted,
+  videoCheckpoint,
+  videoCompleted,
+  videoFollowupCompleted,
+  videoSaved,
 }
 
 extension LearningEventTypeValue on LearningEventType {
@@ -18,6 +23,11 @@ extension LearningEventTypeValue on LearningEventType {
     LearningEventType.pageViewed => 'page_viewed',
     LearningEventType.resourceOpened => 'resource_opened',
     LearningEventType.featureUsed => 'feature_used',
+    LearningEventType.videoStarted => 'video_started',
+    LearningEventType.videoCheckpoint => 'video_checkpoint',
+    LearningEventType.videoCompleted => 'video_completed',
+    LearningEventType.videoFollowupCompleted => 'video_followup_completed',
+    LearningEventType.videoSaved => 'video_saved',
   };
 }
 
@@ -44,6 +54,15 @@ class LearningEvent {
       type == LearningEventType.pageViewed ||
       type == LearningEventType.resourceOpened ||
       type == LearningEventType.featureUsed;
+
+  bool get isVideo => switch (type) {
+    LearningEventType.videoStarted ||
+    LearningEventType.videoCheckpoint ||
+    LearningEventType.videoCompleted ||
+    LearningEventType.videoFollowupCompleted ||
+    LearningEventType.videoSaved => true,
+    _ => false,
+  };
 
   factory LearningEvent.forSession({
     required LearningEventType type,
@@ -130,6 +149,91 @@ class LearningEvent {
     );
   }
 
+  factory LearningEvent.video({
+    required LearningEventType type,
+    required String mediaId,
+    required String moduleId,
+    required String courseId,
+    required String sessionId,
+    int? checkpoint,
+    int? positionSeconds,
+    String? followupType,
+    DateTime? occurredAt,
+  }) {
+    const allowed = {
+      LearningEventType.videoStarted,
+      LearningEventType.videoCheckpoint,
+      LearningEventType.videoCompleted,
+      LearningEventType.videoFollowupCompleted,
+      LearningEventType.videoSaved,
+    };
+    if (!allowed.contains(type)) {
+      throw ArgumentError.value(type, 'type', 'Tipo de vídeo inválido.');
+    }
+    if (!_isStableMediaIdentifier(mediaId) ||
+        !_isStableMediaIdentifier(moduleId)) {
+      throw const FormatException('Identificador de mídia ou módulo inválido.');
+    }
+    if (type == LearningEventType.videoCheckpoint &&
+        !const {25, 50, 75}.contains(checkpoint)) {
+      throw ArgumentError.value(
+        checkpoint,
+        'checkpoint',
+        'Checkpoint inválido.',
+      );
+    }
+    if (type != LearningEventType.videoCheckpoint && checkpoint != null) {
+      throw ArgumentError.value(checkpoint, 'checkpoint', 'Não permitido.');
+    }
+    final requiresPosition =
+        type == LearningEventType.videoCheckpoint ||
+        type == LearningEventType.videoCompleted;
+    if (requiresPosition &&
+        (positionSeconds == null ||
+            positionSeconds < 0 ||
+            positionSeconds > 86400)) {
+      throw ArgumentError.value(
+        positionSeconds,
+        'positionSeconds',
+        'Posição inválida.',
+      );
+    }
+    if (!requiresPosition && positionSeconds != null) {
+      throw ArgumentError.value(
+        positionSeconds,
+        'positionSeconds',
+        'Não permitido.',
+      );
+    }
+    if (type == LearningEventType.videoFollowupCompleted &&
+        !const {'quiz', 'reflection', 'activity'}.contains(followupType)) {
+      throw ArgumentError.value(
+        followupType,
+        'followupType',
+        'Atividade posterior inválida.',
+      );
+    }
+    if (type != LearningEventType.videoFollowupCompleted &&
+        followupType != null) {
+      throw ArgumentError.value(followupType, 'followupType', 'Não permitido.');
+    }
+    final discriminator = checkpoint?.toString() ?? followupType ?? 'once';
+    return LearningEvent(
+      eventId: '$sessionId:${type.apiValue}:$mediaId:$discriminator',
+      type: type,
+      courseId: courseId,
+      sessionId: sessionId,
+      occurredAt: occurredAt ?? DateTime.now(),
+      payload: {
+        'media_id': mediaId,
+        'module_id': moduleId,
+        'checkpoint': ?checkpoint?.toString(),
+        'position_seconds': ?positionSeconds?.toString(),
+        'followup_type': ?followupType,
+      },
+    );
+  }
+
   static String newSessionId({DateTime? now, Random? random}) {
     final timestamp = (now ?? DateTime.now()).toUtc().microsecondsSinceEpoch;
     final source = random ?? Random.secure();
@@ -209,6 +313,7 @@ class LearningEvent {
       LearningEventType.featureUsed => 'feature_id',
       _ => null,
     };
+    if (_isVideoType(type)) return _validVideoPayload(type, payload);
     if (expectedKey == null) return payload.isEmpty;
     return payload.length == 1 &&
         payload.containsKey(expectedKey) &&
@@ -217,4 +322,58 @@ class LearningEvent {
 
   static bool _isStableIdentifier(String value) =>
       RegExp(r'^[a-z0-9][a-z0-9_.-]{0,79}$').hasMatch(value);
+
+  static bool _isStableMediaIdentifier(String value) =>
+      RegExp(r'^[a-z0-9][a-z0-9_.-]{0,79}$').hasMatch(value);
+
+  static bool _isVideoType(LearningEventType type) => switch (type) {
+    LearningEventType.videoStarted ||
+    LearningEventType.videoCheckpoint ||
+    LearningEventType.videoCompleted ||
+    LearningEventType.videoFollowupCompleted ||
+    LearningEventType.videoSaved => true,
+    _ => false,
+  };
+
+  static bool _validVideoPayload(
+    LearningEventType type,
+    Map<String, String> payload,
+  ) {
+    final expectedKeys = <String>{'media_id', 'module_id'};
+    if (type == LearningEventType.videoCheckpoint) {
+      expectedKeys.add('checkpoint');
+    }
+    if (type == LearningEventType.videoCheckpoint ||
+        type == LearningEventType.videoCompleted) {
+      expectedKeys.add('position_seconds');
+    }
+    if (type == LearningEventType.videoFollowupCompleted) {
+      expectedKeys.add('followup_type');
+    }
+    if (payload.keys.toSet().difference(expectedKeys).isNotEmpty ||
+        expectedKeys.difference(payload.keys.toSet()).isNotEmpty ||
+        !_isStableMediaIdentifier(payload['media_id'] ?? '') ||
+        !_isStableMediaIdentifier(payload['module_id'] ?? '')) {
+      return false;
+    }
+    if (type == LearningEventType.videoCheckpoint &&
+        !const {'25', '50', '75'}.contains(payload['checkpoint'])) {
+      return false;
+    }
+    final position = int.tryParse(payload['position_seconds'] ?? '');
+    if ((type == LearningEventType.videoCheckpoint ||
+            type == LearningEventType.videoCompleted) &&
+        (position == null || position < 0 || position > 86400)) {
+      return false;
+    }
+    if (type == LearningEventType.videoFollowupCompleted &&
+        !const {
+          'quiz',
+          'reflection',
+          'activity',
+        }.contains(payload['followup_type'])) {
+      return false;
+    }
+    return true;
+  }
 }

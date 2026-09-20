@@ -1,0 +1,10 @@
+/var/lib/docker/containers/0bdf5d04e11ea7226eb7751f09635d2893e82b290fd37809e9f6ded8a71a794f/0bdf5d04e11ea7226eb7751f09635d2893e82b290fd37809e9f6ded8a71a794f-json.log {
+    daily
+    maxsize 200M
+    rotate 5
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

@@ -21,15 +21,24 @@ from sqlalchemy.orm import Session
 from .config import Settings
 from .database import Database
 from .models import (
+    AssessmentAttemptRecord,
+    AssessmentContentRecord,
     CertificateReference,
     ClassEnrollment,
+    ClassCheckin,
     ClassMonitor,
     Classroom,
     Enrollment,
+    EvidenceItem,
     LearningEventRecord,
+    MediaEventRecord,
+    MediaPlaybackGrant,
+    MediaRating,
     ProgramMembership,
+    ReviewDecision,
     SessionToken,
     SyncLog,
+    SyncDeletionRequest,
     User,
 )
 
@@ -121,6 +130,15 @@ def access_claims(
         session.close()
 
 
+def optional_access_claims(
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> dict[str, str] | None:
+    if authorization is None:
+        return None
+    return access_claims(request, authorization)
+
+
 def require_roles(*allowed_roles: str) -> Callable[..., dict[str, str]]:
     allowed = frozenset(allowed_roles)
     if not allowed:
@@ -173,17 +191,53 @@ def delete_me(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Conta vinculada a uma turma. Solicite a exclusão à equipe TDS.",
             )
+        if session.scalar(select(ClassMonitor.class_id).where(ClassMonitor.user_id == user_id)) or session.scalar(
+            select(ProgramMembership.user_id).where(
+                ProgramMembership.user_id == user_id,
+                ProgramMembership.status == "active",
+                ProgramMembership.role != "student",
+            )
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Conta de equipe/creator exige exclusão assistida para preservar registros institucionais.",
+            )
 
-        event_ids = select(LearningEventRecord.event_id).where(
+        event_id_values = list(session.scalars(select(LearningEventRecord.event_id).where(
             LearningEventRecord.user_id == user_id
-        )
+        )))
+        event_ids = select(LearningEventRecord.event_id).where(LearningEventRecord.user_id == user_id)
+        for event_id in event_id_values:
+            if session.scalar(select(SyncDeletionRequest.id).where(SyncDeletionRequest.event_id == event_id)) is None:
+                session.add(SyncDeletionRequest(id=str(uuid4()), event_id=event_id, status="pending"))
         session.execute(delete(SyncLog).where(SyncLog.event_id.in_(event_ids)))
+        session.execute(
+            delete(MediaEventRecord).where(MediaEventRecord.user_id == user_id)
+        )
+        session.execute(delete(MediaRating).where(MediaRating.user_id == user_id))
+        session.execute(
+            delete(MediaPlaybackGrant).where(MediaPlaybackGrant.user_id == user_id)
+        )
         session.execute(
             delete(LearningEventRecord).where(LearningEventRecord.user_id == user_id)
         )
         session.execute(
             delete(CertificateReference).where(CertificateReference.user_id == user_id)
         )
+        session.execute(
+            delete(AssessmentAttemptRecord).where(
+                AssessmentAttemptRecord.owner_id == user_id
+            )
+        )
+        session.execute(
+            delete(AssessmentContentRecord).where(
+                AssessmentContentRecord.owner_id == user_id
+            )
+        )
+        evidence_ids = select(EvidenceItem.id).where(EvidenceItem.user_id == user_id)
+        session.execute(delete(ClassCheckin).where(ClassCheckin.user_id == user_id))
+        session.execute(delete(ReviewDecision).where(ReviewDecision.evidence_id.in_(evidence_ids)))
+        session.execute(delete(EvidenceItem).where(EvidenceItem.user_id == user_id))
         session.execute(
             delete(ClassEnrollment).where(ClassEnrollment.user_id == user_id)
         )
