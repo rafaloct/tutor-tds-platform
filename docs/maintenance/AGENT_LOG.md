@@ -374,3 +374,19 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   console do Dokploy; nenhuma conexão remota foi necessária nesta etapa.
 - Validação: 26 testes Python aprovados, `compileall` e
   `docker compose config --quiet` concluídos.
+
+### Hierarquia de turmas e equipe pedagógica
+
+- A migration `20260920_0004` adiciona turmas, estudantes da turma e monitores,
+  ligando cada turma a uma oferta real de curso dentro de um programa.
+- O professor precisa ter participação ativa com função `teacher`; monitores
+  precisam de função `monitor`; estudantes precisam de matrícula ativa no mesmo
+  programa e curso.
+- Chaves compostas preservam a linhagem também no PostgreSQL: uma associação
+  manual inconsistente entre turma, programa, curso, usuário e matrícula é
+  rejeitada pelo banco, não apenas pela API.
+- Administradores criam e compõem turmas. A consulta da turma aceita somente
+  administrador global, professor responsável ou monitor associado; estudantes
+  não recebem a lista da turma.
+- Validação: 27 testes Python aprovados, migration com upgrade/downgrade,
+  `compileall` e SQL PostgreSQL offline concluídos.

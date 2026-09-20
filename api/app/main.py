@@ -10,6 +10,8 @@ from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from .auth import router as auth_router
+from .classrooms import admin_router as classroom_admin_router
+from .classrooms import router as classroom_router
 from .config import Settings
 from .database import Database
 from .events import router as events_router
@@ -43,6 +45,8 @@ def create_app(
     application.include_router(auth_router)
     application.include_router(events_router)
     application.include_router(organizations_router)
+    application.include_router(classroom_admin_router)
+    application.include_router(classroom_router)
 
     @application.exception_handler(RequestValidationError)
     async def validation_error(

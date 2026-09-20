@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
@@ -150,6 +152,13 @@ class Enrollment(Base):
             "course_id",
             name="uq_enrollments_user_program_course",
         ),
+        UniqueConstraint(
+            "id",
+            "user_id",
+            "program_id",
+            "course_id",
+            name="uq_enrollments_lineage",
+        ),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
@@ -167,6 +176,100 @@ class Enrollment(Base):
     user: Mapped[User] = relationship(back_populates="enrollments")
     program: Mapped[Program] = relationship(back_populates="enrollments")
     course: Mapped[Course] = relationship(back_populates="enrollments")
+
+
+class Classroom(Base):
+    __tablename__ = "classes"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["program_id", "course_id"],
+            ["program_courses.program_id", "program_courses.course_id"],
+            name="fk_classes_program_course",
+        ),
+        ForeignKeyConstraint(
+            ["teacher_id", "program_id"],
+            ["program_memberships.user_id", "program_memberships.program_id"],
+            name="fk_classes_teacher_membership",
+        ),
+        CheckConstraint("end_date >= start_date", name="ck_classes_date_range"),
+        UniqueConstraint(
+            "id", "program_id", name="uq_classes_program_lineage"
+        ),
+        UniqueConstraint(
+            "id",
+            "program_id",
+            "course_id",
+            name="uq_classes_course_lineage",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    program_id: Mapped[str] = mapped_column(
+        ForeignKey("programs.id"), nullable=False
+    )
+    course_id: Mapped[str] = mapped_column(ForeignKey("courses.id"), nullable=False)
+    teacher_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(240), nullable=False)
+    start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="planned")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class ClassEnrollment(Base):
+    __tablename__ = "class_enrollments"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["class_id", "program_id", "course_id"],
+            ["classes.id", "classes.program_id", "classes.course_id"],
+            name="fk_class_enrollments_class_lineage",
+        ),
+        ForeignKeyConstraint(
+            ["enrollment_id", "user_id", "program_id", "course_id"],
+            [
+                "enrollments.id",
+                "enrollments.user_id",
+                "enrollments.program_id",
+                "enrollments.course_id",
+            ],
+            name="fk_class_enrollments_enrollment_lineage",
+        ),
+    )
+
+    class_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    enrollment_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    program_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    course_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="active")
+    enrolled_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class ClassMonitor(Base):
+    __tablename__ = "class_monitors"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["class_id", "program_id"],
+            ["classes.id", "classes.program_id"],
+            name="fk_class_monitors_class_program",
+        ),
+        ForeignKeyConstraint(
+            ["user_id", "program_id"],
+            ["program_memberships.user_id", "program_memberships.program_id"],
+            name="fk_class_monitors_program_membership",
+        ),
+    )
+
+    class_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    program_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    assigned_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
 
 class CertificateReference(Base):

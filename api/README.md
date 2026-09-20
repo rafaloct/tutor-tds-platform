@@ -36,6 +36,11 @@ Endpoints iniciais:
 - `POST /admin/programs/{id}/memberships`: associa usuário e função ao programa.
 - `POST /admin/enrollments`: matricula somente quando participação e oferta existem.
 - `GET /admin/hierarchy`: consulta a hierarquia institucional configurada.
+- `POST /admin/classes`: cria turma somente com professor vinculado ao programa.
+- `POST /admin/classes/{id}/students/{user_id}`: associa matrícula ativa à turma.
+- `POST /admin/classes/{id}/monitors/{user_id}`: associa monitor do programa.
+- `GET /classes/{id}`: entrega a turma somente ao administrador, professor ou
+  monitor associado.
 
 Antes de usar os endpoints administrativos pela primeira vez, crie o primeiro
 administrador no terminal interativo do container. CPF e senha são solicitados
