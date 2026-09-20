@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import re
 import secrets
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -103,6 +104,24 @@ def access_claims(
         return service.decode_access(_bearer_token(authorization))
     finally:
         session.close()
+
+
+def require_roles(*allowed_roles: str) -> Callable[..., dict[str, str]]:
+    allowed = frozenset(allowed_roles)
+    if not allowed:
+        raise ValueError("Informe ao menos uma função permitida.")
+
+    def authorized_role(
+        claims: dict[str, str] = Depends(access_claims),
+    ) -> dict[str, str]:
+        if claims["role"] not in allowed:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Acesso não autorizado para esta função.",
+            )
+        return claims
+
+    return authorized_role
 
 
 @router.get("/me", response_model=PublicUser)

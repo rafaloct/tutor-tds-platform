@@ -9,12 +9,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .auth import access_claims
+from .auth import require_roles
 from .database import Database
 from .models import LearningEventRecord
 
 router = APIRouter(prefix="/events", tags=["events"])
 EventType = Literal["lesson_started", "lesson_completed"]
+student_claims = require_roles("student")
 
 
 class EventCreate(BaseModel):
@@ -49,7 +50,7 @@ def create_event(
     payload: EventCreate,
     request: Request,
     response: Response,
-    claims: dict[str, str] = Depends(access_claims),
+    claims: dict[str, str] = Depends(student_claims),
 ) -> EventResponse:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
@@ -93,7 +94,7 @@ def list_events(
     course_id: str | None = Query(default=None, min_length=1, max_length=120),
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
-    claims: dict[str, str] = Depends(access_claims),
+    claims: dict[str, str] = Depends(student_claims),
 ) -> EventPage:
     database: Database = request.app.state.database
     statement = select(LearningEventRecord).where(

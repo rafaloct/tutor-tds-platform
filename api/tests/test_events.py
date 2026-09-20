@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -144,3 +145,34 @@ def test_list_events_is_isolated_filtered_and_bounded() -> None:
         "first-a"
     ]
     assert excessive.status_code == 422
+
+
+@pytest.mark.parametrize("role", ["teacher", "monitor", "admin"])
+def test_non_student_roles_are_authenticated_but_cannot_use_student_events(
+    role: str,
+) -> None:
+    client, app = make_client()
+    with client:
+        token_for(client, cpf="123.456.789-09", name="Pessoa da Equipe")
+        with Session(app.state.database.engine) as session:
+            user = session.scalar(select(User).where(User.name == "Pessoa da Equipe"))
+            assert user is not None
+            user.role = role
+            session.commit()
+
+        login = client.post(
+            "/auth/login",
+            json={"cpf": "123.456.789-09", "password": PASSWORD},
+        )
+        token = login.json()["access_token"]
+        profile = client.get("/auth/me", headers=bearer(token))
+        create = client.post(
+            "/events", json=event_payload(), headers=bearer(token)
+        )
+        listing = client.get("/events", headers=bearer(token))
+
+    assert login.status_code == 200
+    assert profile.status_code == 200
+    assert profile.json()["role"] == role
+    assert create.status_code == 403
+    assert listing.status_code == 403

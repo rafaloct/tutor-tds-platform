@@ -334,3 +334,14 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Teste de ciclo de vida demonstra uma falha 503 no primeiro frame, preservação
   local e envio bem-sucedido após `paused`/`resumed`.
 - Validação: 64 testes Flutter aprovados e `dart analyze lib test` sem achados.
+
+### Autorização por função na API
+
+- Criada uma dependência RBAC reutilizável que autentica o JWT antes de validar
+  a função autorizada e responde 403 para usuários autenticados sem permissão.
+- `POST /events` e `GET /events` pessoais foram limitados a estudantes, mantendo
+  professor, monitor e administrador autenticáveis para os recursos futuros de
+  gestão sem permitir que usem endpoints destinados ao estudo do aluno.
+- Testes parametrizados demonstram a distinção entre `student`, `teacher`,
+  `monitor` e `admin` sem depender de infraestrutura ou credenciais externas.
+- Validação: 22 testes Python aprovados e `compileall` concluído.
