@@ -10,6 +10,7 @@ import 'theme/app_theme.dart';
 import 'features/study_ai/data/study_ai_service.dart';
 import 'features/certificates/data/certificate_service.dart';
 import 'features/auth/data/auth_repository.dart';
+import 'features/learning_events/learning_event_sync_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +68,13 @@ class _CartilhasAppState extends State<CartilhasApp> {
         Provider(
           create: (_) => AuthRepository(apiUrl: AppConfig.tutorApiUrl),
           dispose: (_, repository) => repository.dispose(),
+        ),
+        Provider(
+          create: (context) => LearningEventSyncService(
+            apiUrl: AppConfig.tutorApiUrl,
+            authRepository: context.read<AuthRepository>(),
+          ),
+          dispose: (_, service) => service.dispose(),
         ),
       ],
       child: Consumer<ThemeController>(

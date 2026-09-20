@@ -16,6 +16,7 @@ import '../features/certificates/presentation/certificate_details_screen.dart';
 import '../features/study_progress/study_progress_repository.dart';
 import '../features/learning_events/learning_event.dart';
 import '../features/learning_events/learning_event_queue.dart';
+import '../features/learning_events/learning_event_sync_service.dart';
 import 'cadunico_screen.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
@@ -64,7 +65,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
     _tts.setSpeechRate(0.48);
     DataSyncService.logEvent('STARTED', widget.cartilha.title);
     unawaited(
-      _eventQueue.enqueue(
+      _enqueueAndSync(
         LearningEvent.forSession(
           type: LearningEventType.lessonStarted,
           courseId: widget.cartilha.id,
@@ -74,6 +75,12 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
     );
     _initializeExperience();
     _loadExistingCertificate();
+  }
+
+  Future<void> _enqueueAndSync(LearningEvent event) async {
+    final syncService = context.read<LearningEventSyncService>();
+    await _eventQueue.enqueue(event);
+    await syncService.flush();
   }
 
   Future<void> _initializeExperience() async {
@@ -192,7 +199,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
       });
       _saveProgress();
       unawaited(
-        _eventQueue.enqueue(
+        _enqueueAndSync(
           LearningEvent.forSession(
             type: LearningEventType.lessonCompleted,
             courseId: widget.cartilha.id,

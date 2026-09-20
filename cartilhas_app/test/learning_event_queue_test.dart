@@ -52,4 +52,18 @@ void main() {
     );
     expect(await queue.pending(), hasLength(1));
   });
+
+  test('remove somente o event_id confirmado', () async {
+    const queue = LearningEventQueue();
+    final first = event('sessao-5', LearningEventType.lessonStarted);
+    final second = event('sessao-5', LearningEventType.lessonCompleted);
+    await queue.enqueue(first);
+    await queue.enqueue(second);
+
+    expect(await queue.removeById(first.eventId), isTrue);
+    expect(await queue.removeById('inexistente'), isFalse);
+
+    final pending = await queue.pending();
+    expect(pending.map((item) => item.eventId), [second.eventId]);
+  });
 }

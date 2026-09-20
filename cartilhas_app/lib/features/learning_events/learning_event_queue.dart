@@ -43,6 +43,27 @@ class LearningEventQueue {
     return List.unmodifiable(_decode(prefs.getString(_storageKey)));
   }
 
+  Future<bool> removeById(String eventId) async {
+    final previous = _operationTail;
+    final turn = Completer<void>();
+    _operationTail = turn.future;
+    await previous;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final events = _decode(prefs.getString(_storageKey));
+      final originalLength = events.length;
+      events.removeWhere((event) => event.eventId == eventId);
+      if (events.length == originalLength) return false;
+      await prefs.setString(
+        _storageKey,
+        jsonEncode(events.map((event) => event.toJson()).toList()),
+      );
+      return true;
+    } finally {
+      turn.complete();
+    }
+  }
+
   List<LearningEvent> _decode(String? source) {
     if (source == null || source.isEmpty) return [];
     try {

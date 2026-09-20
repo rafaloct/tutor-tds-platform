@@ -305,3 +305,20 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   pedagógico e emissão de certificado. A tela de consentimento tornou-se
   rolável para telas menores.
 - Validação: `flutter analyze` limpo, 54 testes Flutter aprovados.
+
+### Sincronização autenticada da fila de LearningEvents
+
+- A fila local passou a enviar `POST /events` somente quando a API está
+  configurada, existe consentimento e há uma sessão segura disponível.
+- O envio reutiliza `AuthRepository.authorized`, incluindo uma única renovação
+  e repetição em resposta 401, sem criar um segundo fluxo de autenticação.
+- Somente respostas 200 ou 201 removem o `event_id` confirmado. Respostas 409,
+  5xx e exceções preservam o evento atual e os seguintes e interrompem o lote.
+- Flushes concorrentes compartilham a mesma operação, evitando transmissão
+  duplicada. Enfileiramento e remoção continuam serializados no armazenamento.
+- O Google Apps Script legado, o worker do Google Sheets e a infraestrutura
+  remota permaneceram inalterados.
+- Validação: 63 testes Flutter aprovados e `dart analyze lib test` sem
+  achados. O comando `flutter analyze --no-pub` foi tentado, mas o servidor de
+  análise do SDK encerrou antes da análise por JSON LSP truncado neste caminho
+  do Windows.
