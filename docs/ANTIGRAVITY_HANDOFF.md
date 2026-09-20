@@ -31,28 +31,31 @@ ESTADO ATUAL VALIDADO
   com CPF em HMAC-SHA256, senha Argon2id e erros de validação sanitizados.
 - Ingestão autenticada concluída: POST/GET `/events`, idempotência e isolamento
   por estudante.
-- Flutter: baseline de 43 testes e flutter analyze limpo no último fechamento.
+- Flutter: cliente de autenticação segura concluído; baseline de 50 testes e
+  `flutter analyze` limpo no último fechamento.
 - Docker Desktop estava instalado, mas o daemon não estava rodando. Não marque teste
   integrado PostgreSQL como concluído sem executá-lo de fato.
 
-PRÓXIMA FATIA: CLIENTE DE AUTENTICAÇÃO FLUTTER
-Implemente no Flutter uma fundação pequena e revisável para:
-1. AuthRepository para register, login, refresh e `/auth/me` usando TUTOR_API_URL.
-2. Armazenar access e refresh tokens somente com flutter_secure_storage.
-3. Nunca salvar senha em nenhum armazenamento.
-4. Renovar access token uma vez após 401 e impedir loops de refresh.
-5. API vazia deve manter exatamente o comportamento offline atual.
-6. Não alterar ainda WelcomeScreen, Google Apps Script, Chatwoot ou certificados.
+PRÓXIMA FATIA: INTEGRAÇÃO VISUAL DE CONTA NO FLUTTER
+Implemente no Flutter uma fatia pequena e revisável para:
+1. Quando TUTOR_API_URL estiver configurada, oferecer criar conta e entrar sem
+   bloquear o uso offline atual.
+2. Reutilizar AuthRepository; não duplicar HTTP nem acesso ao cofre seguro.
+3. Senha deve usar campo obscurecido e nunca ser salva em SharedPreferences.
+4. Erros devem ser genéricos, acessíveis e nunca repetir CPF ou senha.
+5. TUTOR_API_URL vazia deve preservar pixel e fluxo atuais da WelcomeScreen.
+6. Não remover ainda user_cpf legado: Chatwoot, certificados e analytics ainda
+   dependem dele e exigem uma migração separada e testada.
 
 TESTES MÍNIMOS
-- tokens nunca aparecem em SharedPreferences;
-- register/login/refresh interpretam sucesso e erros genéricos sem ecoar senha;
-- 401 dispara no máximo um refresh e repete a requisição uma vez;
-- refresh rejeitado limpa somente tokens da API;
-- TUTOR_API_URL vazia não gera chamada de rede.
+- modo offline permanece idêntico quando a API está vazia;
+- registro e login possuem estados de carregamento, sucesso e erro testados;
+- senha não aparece em SharedPreferences nem em mensagens;
+- navegação segue funcionando após autenticar e após escolher uso offline;
+- semântica e foco dos novos campos possuem teste de widget.
 
 LIMITES DE ESCOPO
-- Não mudar ainda o fluxo visual de onboarding/login.
+- Não tornar conta obrigatória nesta fatia.
 - Não sincronizar a fila de eventos nesta mesma fatia.
 - Não implementar o worker do Google Sheets.
 - Não iniciar deploy ou staging.
@@ -64,6 +67,6 @@ VALIDAÇÃO E ENTREGA
 - Rode testes focados, depois todos os testes de api/ e compileall.
 - Rode git diff --check e busca de padrões de segredo antes do commit.
 - Atualize docs/maintenance/AGENT_LOG.md com evidências reais e pendências.
-- Faça um commit pequeno com mensagem: feat: add Flutter auth client foundation
+- Faça um commit pequeno com mensagem: feat: add optional account onboarding
 - Termine com git status limpo e informe commit, testes e limitações.
 ```

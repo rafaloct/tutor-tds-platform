@@ -187,6 +187,12 @@ sempre do access token, o `event_id` é idempotente e as consultas são isoladas
 por estudante. A fila Flutter permanece somente local até a integração de
 autenticação no aplicativo.
 
+O Flutter possui agora uma fundação de cliente para register, login, refresh e
+`/auth/me`. Access e refresh tokens ficam somente no armazenamento seguro da
+plataforma; 401 dispara no máximo uma renovação, compartilhada entre chamadas
+concorrentes. O cliente ainda não está ligado à WelcomeScreen nem transmite a
+fila local de eventos.
+
 ---
 
 ## Componentes de Infraestrutura

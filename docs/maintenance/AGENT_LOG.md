@@ -272,3 +272,21 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Apenas `lesson_started` e `lesson_completed` são aceitos nesta etapa; o worker
   do Google Sheets e a transmissão da fila Flutter continuam desativados.
 - Validação local: 19 testes Python aprovados e bytecode compilado.
+
+### Fundação do cliente de autenticação Flutter
+
+- Criados `AuthRepository`, modelos de sessão e `SecureAuthTokenStore` para
+  register, login, refresh e `/auth/me`.
+- Access e refresh tokens são gravados juntos por `flutter_secure_storage`;
+  senha nunca é persistida.
+- Uma resposta 401 executa no máximo um refresh e repete a requisição uma vez;
+  chamadas concorrentes compartilham a mesma renovação.
+- Refresh rejeitado limpa somente a sessão segura da API. Respostas remotas e
+  erros de plataforma não são expostos ao estudante.
+- `TUTOR_API_URL` vazia preserva o modo offline sem chamada de rede.
+- O repositório foi registrado no Provider, mas o onboarding e a fila de eventos
+  ainda não o utilizam.
+- Validação: `flutter analyze` limpo, 50 testes Flutter aprovados, configuração
+  de produção aprovada e build Web concluído.
+- O dry-run opcional de WebAssembly ainda alerta sobre casts no pacote externo
+  `flutter_tts 4.2.5`; a compilação JavaScript usada atualmente foi concluída.

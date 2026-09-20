@@ -9,6 +9,7 @@ import 'services/theme_controller.dart';
 import 'theme/app_theme.dart';
 import 'features/study_ai/data/study_ai_service.dart';
 import 'features/certificates/data/certificate_service.dart';
+import 'features/auth/data/auth_repository.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +63,10 @@ class _CartilhasAppState extends State<CartilhasApp> {
           create: (_) =>
               CertificateService(gatewayUrl: AppConfig.tutorGatewayUrl),
           dispose: (_, service) => service.dispose(),
+        ),
+        Provider(
+          create: (_) => AuthRepository(apiUrl: AppConfig.tutorApiUrl),
+          dispose: (_, repository) => repository.dispose(),
         ),
       ],
       child: Consumer<ThemeController>(
