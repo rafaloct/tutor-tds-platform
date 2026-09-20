@@ -41,7 +41,7 @@ O progresso da cartilha é persistido no aparelho por curso. A Home mostra a pr�
 
 1. Home já mostra próxima ação e progresso local; pendências remotas dependem dos eventos e do backend da Onda 1.
 2. `CourseRepository` consulta API e mantém assets como fallback offline.
-3. Cada retomada/conclusão emite LearningEvent idempotente.
+3. Emissão local idempotente de `lesson_started`/`lesson_completed` concluída; sincronização autenticada aguarda a API da Onda 1.
 4. Interface varia por papel somente depois de RBAC no backend.
 
 ## Incremento 4 - novas superfícies

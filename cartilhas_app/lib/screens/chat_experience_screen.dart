@@ -14,6 +14,8 @@ import '../features/certificates/data/certificate_service.dart';
 import '../features/certificates/models/certificate_record.dart';
 import '../features/certificates/presentation/certificate_details_screen.dart';
 import '../features/study_progress/study_progress_repository.dart';
+import '../features/learning_events/learning_event.dart';
+import '../features/learning_events/learning_event_queue.dart';
 import 'cadunico_screen.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
@@ -37,7 +39,9 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
   final ScrollController _scrollController = ScrollController();
   final FlutterTts _tts = FlutterTts();
   static const _progressRepository = StudyProgressRepository();
+  static const _eventQueue = LearningEventQueue();
   Future<void> _progressSaveQueue = Future<void>.value();
+  final String _learningSessionId = LearningEvent.newSessionId();
 
   int get _totalQuestions => widget.cartilha.sections
       .expand((s) => s.messages)
@@ -59,6 +63,15 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
     _tts.setLanguage('pt-BR');
     _tts.setSpeechRate(0.48);
     DataSyncService.logEvent('STARTED', widget.cartilha.title);
+    unawaited(
+      _eventQueue.enqueue(
+        LearningEvent.forSession(
+          type: LearningEventType.lessonStarted,
+          courseId: widget.cartilha.id,
+          sessionId: _learningSessionId,
+        ),
+      ),
+    );
     _initializeExperience();
     _loadExistingCertificate();
   }
@@ -178,6 +191,15 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
         _visibleMessages.add(_completionMessage());
       });
       _saveProgress();
+      unawaited(
+        _eventQueue.enqueue(
+          LearningEvent.forSession(
+            type: LearningEventType.lessonCompleted,
+            courseId: widget.cartilha.id,
+            sessionId: _learningSessionId,
+          ),
+        ),
+      );
       _scrollToBottom();
     }
   }

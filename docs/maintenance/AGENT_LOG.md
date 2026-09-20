@@ -200,3 +200,12 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Suíte Flutter completa: 37 testes aprovados.
 - Nenhuma chamada automática de IA foi adicionada.
 - VPS e produção não foram alteradas.
+
+### Fila local idempotente de eventos
+
+- Criados `LearningEvent` e `LearningEventQueue` para início e conclusão real de cartilhas.
+- `event_id` determinístico por sessão/tipo impede duplicação em retries.
+- A fila é serializada, tolera armazenamento corrompido e limita-se aos 500 eventos mais recentes.
+- O payload local não contém nome, telefone ou CPF e ainda não é transmitido para nenhum servidor.
+- O Google Apps Script legado permanece isolado e inalterado até a API autenticada estar disponível.
+- Validação: `flutter analyze --no-pub` sem achados e 40 testes aprovados.

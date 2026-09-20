@@ -73,6 +73,26 @@ ChatExperienceScreen (seleção de cartilha)
 
 **Limitação atual:** novos cursos requerem rebuild e republicação do APK.
 
+### Fila local de LearningEvents
+
+Desde 2026-09-20, abrir ou concluir uma cartilha também cria um evento local independente do webhook legado:
+
+```text
+ChatExperienceScreen
+      │
+      ├─► lesson_started
+      └─► lesson_completed (somente no fim real)
+              │
+              ▼
+LearningEventQueue → SharedPreferences
+```
+
+- O `event_id` combina sessão e tipo, tornando retries idempotentes.
+- O payload contém apenas IDs técnicos, tipo e horário; não contém nome, telefone ou CPF.
+- A fila mantém no máximo 500 eventos e preserva os mais recentes.
+- Os eventos ainda não são enviados: a sincronização depende da API autenticada da Onda 1.
+- O webhook legado continua separado por compatibilidade e ainda obedece ao consentimento existente.
+
 ---
 
 ## 3. Fluxo do Tutor IA
