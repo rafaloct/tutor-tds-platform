@@ -36,13 +36,13 @@ class LearningEventSyncService {
   }
 
   Future<int> _flush() async {
-    if (apiUrl.trim().isEmpty || !authRepository.isConfigured) return 0;
-    if (!await consentChecker()) return 0;
-
-    final events = await queue.pending();
     var synced = 0;
-    for (final event in events) {
-      try {
+    try {
+      if (apiUrl.trim().isEmpty || !authRepository.isConfigured) return 0;
+      if (!await consentChecker()) return 0;
+
+      final events = await queue.pending();
+      for (final event in events) {
         final response = await authRepository.authorized(
           (accessToken) => _client
               .post(
@@ -59,11 +59,11 @@ class LearningEventSyncService {
           return synced;
         }
         if (await queue.removeById(event.eventId)) synced++;
-      } on Object {
-        // A fila é a fonte de verdade: qualquer falha preserva este evento e
-        // os seguintes para uma tentativa posterior.
-        return synced;
       }
+    } on Object {
+      // A fila é a fonte de verdade: qualquer falha preserva este evento e
+      // os seguintes para uma tentativa posterior.
+      return synced;
     }
     return synced;
   }

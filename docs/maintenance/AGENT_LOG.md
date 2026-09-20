@@ -322,3 +322,15 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   achados. O comando `flutter analyze --no-pub` foi tentado, mas o servidor de
   análise do SDK encerrou antes da análise por JSON LSP truncado neste caminho
   do Windows.
+
+### Retomada automática da sincronização
+
+- Eventos pendentes agora tentam sincronizar no primeiro frame do aplicativo e
+  sempre que ele volta ao primeiro plano.
+- O gatilho reutiliza o mesmo flush serializado; retomada do app e evento novo
+  não criam transmissões paralelas nem um segundo fluxo de autenticação.
+- Falhas ao consultar consentimento, sessão, armazenamento ou rede também são
+  contidas pelo serviço e preservam a fila para a retomada seguinte.
+- Teste de ciclo de vida demonstra uma falha 503 no primeiro frame, preservação
+  local e envio bem-sucedido após `paused`/`resumed`.
+- Validação: 64 testes Flutter aprovados e `dart analyze lib test` sem achados.
