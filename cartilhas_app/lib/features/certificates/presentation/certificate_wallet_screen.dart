@@ -234,11 +234,15 @@ class _CertificateWalletScreenState extends State<CertificateWalletScreen> {
                                     size: 16,
                                   ),
                                   const SizedBox(width: 5),
-                                  Text(
-                                    'Hash verificado • ${_formatDate(certificate.issuedAt)}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
+                                  Expanded(
+                                    child: Text(
+                                      'Hash verificado • ${_formatDate(certificate.issuedAt)}',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
                                   ),
                                 ],
                               ),

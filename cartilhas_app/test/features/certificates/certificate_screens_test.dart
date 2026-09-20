@@ -142,6 +142,60 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('detalhe mantém ações semânticas com fonte 200% estreita', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+    final certificate = _certificate();
+
+    await _pumpScaled(
+      tester,
+      _FakeCertificateService(verify: (_) async => true),
+      CertificateDetailsScreen(certificate: certificate),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(certificate.holderName), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.widgetWithText(FilledButton, 'Compartilhar PDF'))
+          .label,
+      contains('Compartilhar PDF'),
+    );
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('carteira suporta fonte 200% em telefone landscape', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 360);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+    final certificate = _certificate();
+
+    await _pumpScaled(
+      tester,
+      _FakeCertificateService(records: [certificate]),
+      const CertificateWalletScreen(),
+    );
+    await tester.pump();
+
+    expect(find.text(certificate.courseTitle), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byTooltip('Selecionar todos')).tooltip,
+      'Selecionar todos',
+    );
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> _pump(
@@ -153,6 +207,27 @@ Future<void> _pump(
     Provider<CertificateService>.value(
       value: service,
       child: MaterialApp(theme: ThemeData(useMaterial3: true), home: child),
+    ),
+  );
+}
+
+Future<void> _pumpScaled(
+  WidgetTester tester,
+  CertificateService service,
+  Widget child,
+) {
+  return tester.pumpWidget(
+    Provider<CertificateService>.value(
+      value: service,
+      child: MaterialApp(
+        builder: (context, appChild) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: appChild!,
+        ),
+        home: child,
+      ),
     ),
   );
 }

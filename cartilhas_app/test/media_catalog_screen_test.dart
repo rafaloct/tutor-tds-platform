@@ -77,6 +77,49 @@ void main() {
     expect(find.text('Vídeo de cooperativismo'), findsOneWidget);
     expect(find.text('Acesso protegido • conexão necessária'), findsOneWidget);
   });
+
+  testWidgets('catálogo mantém semântica e layout com fonte 200% estreita', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+    SharedPreferences.setMockInitialValues({
+      'media:catalog_cache:v1': jsonEncode([_mediaJson()]),
+    });
+    final repository = MediaRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((_) async => http.Response('offline', 503)),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: MediaCatalogScreen(repository: repository),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Vídeo de cooperativismo'),
+      500,
+      scrollable: find.byType(Scrollable).last,
+    );
+
+    expect(find.text('Vídeo de cooperativismo'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Vídeo de cooperativismo')).label,
+      contains('Vídeo de cooperativismo'),
+    );
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Map<String, dynamic> _mediaJson() => {

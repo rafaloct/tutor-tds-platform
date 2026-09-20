@@ -217,7 +217,10 @@ def checkin(class_id: str, session_id: str, payload: CheckinCreate, request: Req
             review_status="pending", item_digest=_digest(f"{session_id}:{user_id}:{payload.kind}"), metadata_json={"method": method})
         result = ClassCheckin(id=str(uuid4()), session_id=session_id, user_id=user_id, kind=payload.kind,
             occurred_at=now, method=method, evidence_id=evidence_id, idempotency_key=payload.idempotency_key)
-        session.add_all([evidence, result]); _commit(session)
+        # No ORM relationship connects these rows, so SQLAlchemy cannot infer
+        # their FK dependency. Persist the evidence first on every dialect.
+        session.add(evidence); _flush(session)
+        session.add(result); _commit(session)
         return _checkin_response(result)
 
 @router.post("/classes/{class_id}/evidence-imports", response_model=ImportResponse, status_code=201)
@@ -340,4 +343,7 @@ def _import_response(session, r): return ImportResponse(id=r.id, class_id=r.clas
 def _report(r): return ReportResponse(id=r.id, class_id=r.class_id, session_id=r.session_id, generated_at=r.generated_at, report_digest=r.report_digest, summary=r.summary)
 def _commit(session):
     try: session.commit()
+    except IntegrityError as exc: session.rollback(); raise HTTPException(409, "Registro duplicado ou divergente.") from exc
+def _flush(session):
+    try: session.flush()
     except IntegrityError as exc: session.rollback(); raise HTTPException(409, "Registro duplicado ou divergente.") from exc

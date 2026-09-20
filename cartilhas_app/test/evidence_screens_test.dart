@@ -258,4 +258,80 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(QrImageView), findsOneWidget);
   });
+
+  testWidgets('check-in preserva formulário e semântica com fonte 200%', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: EvidenceCheckinScreen(gateway: _FakeEvidenceGateway()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Registrar presença'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Registrar presença')).label,
+      contains('Registrar presença'),
+    );
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('cockpit de evidências suporta fonte 200% em landscape', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 360);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: EvidenceStaffScreen(
+          classroom: ClassroomDetails(
+            id: 'class-1',
+            programId: 'program-1',
+            courseId: 'course-1',
+            teacherId: 'teacher-1',
+            name: 'Turma Jalapão',
+            startDate: DateTime.utc(2026, 9),
+            endDate: DateTime.utc(2026, 12),
+            status: 'active',
+            studentIds: const [],
+            monitorIds: const [],
+          ),
+          gateway: _FakeEvidenceGateway(recoverOpen: true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Presença e evidências'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Presença e evidências')).label,
+      contains('Presença e evidências'),
+    );
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
 }

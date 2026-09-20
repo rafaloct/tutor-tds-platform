@@ -43,6 +43,21 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Future<TeamCapabilitySnapshot?>? _teamCapability;
+  late Future<List<Cartilha>> _cartilhas;
+
+  @override
+  void initState() {
+    super.initState();
+    _cartilhas = _loadCartilhas();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.courseLoader != widget.courseLoader) {
+      _cartilhas = _loadCartilhas();
+    }
+  }
 
   void _refreshTeamCapability() {
     final auth = Provider.of<AuthRepository?>(context, listen: false);
@@ -112,7 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            const Text('Tutor TDS'),
+            const Flexible(
+              child: Text(
+                'Tutor TDS',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -256,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: FutureBuilder<List<Cartilha>>(
-        future: _loadCartilhas(),
+        future: _cartilhas,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const TdsWaitExperience(
@@ -274,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           final cartilhas = snapshot.data!;
-          return Column(
+          return ListView(
             children: [
               _LearningHeader(
                 cartilhas: cartilhas,
@@ -339,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              Expanded(child: _CartilhaList(cartilhas: cartilhas)),
+              _CartilhaList(cartilhas: cartilhas),
               const _SupportersBanner(),
             ],
           );
@@ -571,6 +592,8 @@ class _CartilhaList extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 960),
           child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -587,6 +610,8 @@ class _CartilhaList extends StatelessWidget {
     }
 
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       itemCount: cartilhas.length,
       itemBuilder: (context, index) =>

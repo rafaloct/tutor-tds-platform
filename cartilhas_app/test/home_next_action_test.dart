@@ -1,6 +1,7 @@
 import 'package:cartilhas_app/features/study_ai/data/assessment_attempt_repository.dart';
 import 'package:cartilhas_app/features/study_ai/data/study_ai_service.dart';
 import 'package:cartilhas_app/features/study_ai/models/study_models.dart';
+import 'package:cartilhas_app/models/cartilha.dart';
 import 'package:cartilhas_app/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,4 +76,66 @@ void main() {
     expect(find.byKey(const ValueKey('supporter_logo_fapto')), findsOneWidget);
     expect(find.byKey(const ValueKey('supporter_logo_cdr')), findsOneWidget);
   });
+
+  testWidgets('Home permanece legível em telefone estreito com fonte 200%', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+    SharedPreferences.setMockInitialValues({
+      'user_name': 'Maria da Silva',
+      'user_cpf': '12345678901',
+      'onboarding_seen_v1': true,
+    });
+
+    await tester.pumpWidget(
+      Provider<StudyAiService>.value(
+        value: StudyAiService(gatewayUrl: 'https://gateway.example'),
+        child: MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(2)),
+            child: child!,
+          ),
+          home: HomeScreen(courseLoader: () async => [_sampleCartilha()]),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 250)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tutor TDS'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byTooltip('Glossário')).tooltip,
+      'Glossário',
+    );
+    await tester.scrollUntilVisible(
+      find.text('Estudar com IA'),
+      320,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Estudar com IA'), findsOneWidget);
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
 }
+
+Cartilha _sampleCartilha() => Cartilha(
+  id: 'agricultura-sustentavel',
+  title: 'Agricultura Sustentável',
+  author: 'TDS 2026',
+  sections: [
+    Section(
+      id: 'introducao',
+      title: 'Introdução',
+      messages: [Message(type: 'bot', content: 'Conteúdo local de teste.')],
+    ),
+  ],
+);

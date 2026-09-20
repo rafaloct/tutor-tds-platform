@@ -82,7 +82,7 @@ https://ead.ipexdesenvolvimento.cloud/tutor-staging-api
 Evidências da implantação:
 
 - banco e API de staging em containers e volume/rede separados da produção;
-- imagem corretiva `tutor-tds-api:staging-0014-playback-prefix-20260920`
+- imagem corretiva `tutor-tds-api:staging-0014-evidence-fk-20260920`
   registrada em `.deployed-image`;
 - migrations aplicadas até `20260920_0014 (head)`, revalidadas por
   `alembic current` somente leitura;
@@ -96,10 +96,11 @@ Evidências da implantação:
   de staging;
 - API de produção permaneceu saudável durante e após a implantação.
 
-A implantação corretiva de 20/09/2026 às 19:32 UTC manteve API e PostgreSQL de
+A implantação corretiva mais recente de 20/09/2026 manteve API e PostgreSQL de
 staging `healthy`, banco sem porta publicada e head `0014`. A imagem em execução
-e a tag apontam para `sha256:653cf3…1d166`; a imagem anterior `staging-0014`
-permaneceu disponível para rollback. `STAGING_PUBLIC_API_BASE_URL` foi
+e a tag apontam para `sha256:bbc6c2…e8a3d5`; a imagem anterior
+`staging-0014-playback-prefix-20260920` permaneceu disponível para rollback.
+`STAGING_PUBLIC_API_BASE_URL` foi
 configurada no `.env` modo `0600`, sem exibir as demais variáveis.
 
 O smoke integral de mídia passou criação/publicação sintética, autorização com
@@ -108,10 +109,26 @@ adulterado, eventos ordenados/idempotentes, rating, bloqueio/revogação,
 histórico e arquivamento final. Não ficaram arquivos `.incoming` nem containers
 one-off. Produção não foi alterada.
 
+O smoke complementar `staging_media_gates_smoke.py` comprovou RBAC negativo,
+trigger editorial append-only para UPDATE/DELETE, expiração controlada do grant,
+Creator Score v2, retry idempotente e janela sobreposta. A mídia sintética foi
+arquivada, o grant expirado removido e não houve linha de ledger. A confirmação
+de mutação DB foi efêmera e não foi gravada no `.env`.
+
 O script `api/ops/staging_role_smoke.py` executa o smoke autenticado usando as
 credenciais sintéticas somente no host. Ele não imprime CPF, senhas ou token de
 check-in. A configuração do seed permanece em
 `/opt/tutor-tds-staging/.staging-seed.env`, modo `0600`.
+
+O script `api/ops/staging_evidence_smoke.py` cria e encerra uma sessão sintética
+descartável e valida no PostgreSQL real a ordem transacional evidência antes de
+check-in, retry idempotente, rotação de token e saída. Na correção acima ele
+obteve `201/200` para entrada, `200` na rotação, `201/200` para saída e relatório
+final com dois registros; a conferência direta encontrou duas linhas de
+`class_checkins` e duas evidências de presença. Ele não imprime credenciais nem
+tokens. O reteste da mesma jornada no Android foi concluído depois do deploy:
+Entrada e Saída foram confirmadas, a repetição semântica não criou nova linha e
+o PostgreSQL terminou com um `checkin`, um `checkout` e duas evidências.
 
 Para habilitar Sheets, configure `STAGING_SHEETS_SYNC_ENABLED=true` no `.env`
 remoto e forneça `STAGING_GOOGLE_SHEET_ID`,

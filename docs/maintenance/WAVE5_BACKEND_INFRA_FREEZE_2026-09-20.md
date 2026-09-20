@@ -13,20 +13,22 @@ houve leitura de `.env`/secrets/dados de usuário, deploy, restart, migration ou
 alteração de produção/staging. Cron, conteúdo dos volumes e backups não são
 inferidos como comprovados apenas porque `/health` responde.
 
-O código local e o staging contêm migrations até `20260920_0014`. Às
-19:32:11 UTC, `.deployed-image` apontava a imagem corretiva
-`tutor-tds-api:staging-0014-playback-prefix-20260920`, o container usava o mesmo
-digest `sha256:653cf3…1d166` e `alembic current` retornou
+O código local e o staging contêm migrations até `20260920_0014`. Após a
+correção transacional do Evidence, `.deployed-image` apontava a imagem corretiva
+`tutor-tds-api:staging-0014-evidence-fk-20260920`, o container usava o mesmo
+digest `sha256:bbc6c2…e8a3d5` e `alembic current` retornou
 `20260920_0014 (head)` sobre PostgreSQL. Seed idempotente, smoke público/quatro
 papéis, conteúdo de avaliação cross-device e o smoke integral de mídia possuem
-evidência operacional registrada.
+evidência operacional registrada. O smoke adicional do Evidence aprovou
+entrada/saída, retries, rotação e relatório, com duas linhas FK-coerentes de
+check-in e duas de evidência.
 
 ## Evidência observada
 
 | Área | Estado | Evidência | Limite / risco residual |
 |---|---|---|---|
 | Produção pública | Parcial | `GET https://ead.ipexdesenvolvimento.cloud/tutor-api/health` retornou HTTP 200 e `{"status":"ok","database":"available"}` em 20/09/2026 | A resposta não trouxe `X-Request-ID`, sinal de que a imagem publicada está atrás do snapshot local de observabilidade. Não prova revision/migration head |
-| Staging | Comprovado no recorte | HTTPS e health local retornaram API/banco disponíveis; API e DB estavam `healthy`; imagem `staging-0014-playback-prefix-20260920`, digest `sha256:653cf3…1d166`; seed/smokes por papel, assessment cross-device e mídia integral registrados | Não substitui restore, carga, jornadas Android completas nem garante que futuras mudanças locais estejam nessa imagem |
+| Staging | Comprovado no recorte | HTTPS retornou API/banco disponíveis; container API `healthy`; imagem `staging-0014-evidence-fk-20260920`, digest `sha256:bbc6c2…e8a3d5`; seed/smokes por papel, assessment cross-device, mídia, gates editoriais/Score v2 e check-in Evidence registrados | Não substitui restore, carga, jornadas Android completas nem garante que futuras mudanças locais estejam nessa imagem |
 | Segregação | Implementada e revalidada | Banco remoto estava apenas em `staging-internal`, sem porta publicada; API em `staging-internal` + `dokploy-network`, porta host apenas `127.0.0.1:8001`; prefixo `/tutor-staging-api` e prioridade 210 | Confirmar periodicamente no host que nomes/volumes reais continuam distintos |
 | Migrations | Comprovada em staging | `alembic current` remoto retornou `20260920_0014 (head)`; cadeia local aditiva tem testes de upgrade/downgrade, FKs, constraints, triggers e inserts reais | Backup atual e promoção controlada antes de produção; migrations futuras exigem nova prova |
 | Liveness/readiness | Corrigida localmente | `/live` não depende de PostgreSQL; `/health` mantém `SELECT 1`; ambos têm request ID no snapshot | Publicar apenas no próximo deploy normal e configurar orquestrador conscientemente; nada foi reiniciado nesta auditoria |
@@ -77,8 +79,9 @@ houve conexão Google nem persistência desses valores sintéticos.
 2. Criar backup verificado e produzir uma imagem candidata imutável que inclua
    também as correções locais posteriores à imagem corretiva de staging; provar sua origem
    por commit/digest antes de qualquer promoção.
-3. Repetir os smokes já aprovados no candidato e completar mídia restrita,
-   rating, Evidence e a matriz física no Xiaomi.
+3. Repetir os smokes já aprovados no candidato e completar mídia restrita com
+   provider real e os recortes ainda abertos da matriz no Xiaomi. Entrada,
+   duplicidade segura e Saída do Evidence já passaram fisicamente.
 4. Instalar o backup endurecido, provisionar `age` e offsite, escolher RPO/RTO
    e restaurar em banco isolado, registrando duração e validações funcionais.
 5. Homologar Sheets em staging com conta/planilha exclusivas, incluindo

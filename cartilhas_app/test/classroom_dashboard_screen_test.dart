@@ -245,24 +245,66 @@ void main() {
   testWidgets('monitor suporta escala de fonte ampliada sem overflow', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(900, 2400);
+    tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
     final gateway = _FakeGateway(
       role: 'student',
       userId: 'monitor-1',
       monitor: true,
     );
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(1.8)),
-        child: MaterialApp(home: ClassroomDashboardScreen(gateway: gateway)),
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: ClassroomDashboardScreen(gateway: gateway),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Monitor por exceção'), findsWidgets);
+    expect(
+      tester.getSemantics(find.text('Monitor por exceção').first).label,
+      contains('Monitor por exceção'),
+    );
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('cockpit do professor suporta fonte 200% em landscape', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 360);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: ClassroomDashboardScreen(gateway: _FakeGateway()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Acompanhamento de turma'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Acompanhamento de turma')).label,
+      contains('Acompanhamento de turma'),
+    );
+    semantics.dispose();
     expect(tester.takeException(), isNull);
   });
 }

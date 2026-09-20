@@ -99,6 +99,50 @@ void main() {
     },
   );
 
+  testWidgets('configuração do simulado suporta fonte 200% em landscape', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 360);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final semantics = tester.ensureSemantics();
+    final service = StudyAiService(
+      gatewayUrl: 'https://gateway.example',
+      client: MockClient((_) async => http.Response('{}', 500)),
+    );
+
+    await tester.pumpWidget(
+      Provider<StudyAiService>.value(
+        value: service,
+        child: MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(2)),
+            child: child!,
+          ),
+          home: const AssessmentScreen(
+            topic: 'Manejo Agroecológico',
+            courseId: 'manejo-agroecologico',
+            mode: AssessmentMode.exam,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Prepare-se com um simulado'), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.widgetWithText(FilledButton, 'Iniciar simulado'))
+          .label,
+      contains('Iniciar simulado'),
+    );
+    semantics.dispose();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'com tentativa em andamento, permite retomar questão sem nova chamada de IA',
     (tester) async {

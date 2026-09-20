@@ -1,13 +1,15 @@
 # Release readiness Android — Tutor TDS 1.4.0+13
 
 Auditoria executada em 20/09/2026. Este documento prepara um candidato para
-**teste interno**; não registra upload ou publicação.
+**teste interno**; não registra upload ou publicação. O bundle abaixo foi
+reconstruído depois das correções finais de acessibilidade/layout e validado
+contra o código-fonte atual.
 
 ## Artefato validado
 
 - Caminho: `release/Tutor-TDS-1.4.0+13-signed.aab`
-- Tamanho final: `64.711.735` bytes
-- SHA-256 final: `706E007DE279010752EBE9D45BDFF44F307EEDC43F46D0E09A946CD6EF502946`
+- Tamanho final: `64.704.732` bytes
+- SHA-256 final: `1B712992F0FD11ACABB3D39F40D928773C8A1B5515EAC62444155EBAA1089646`
 - Package/applicationId: `com.tutortds_cartilhas` (inalterado)
 - Version name/code: `1.4.0` / `13`
 - SDK: mínimo 24, target 36, compile 36
@@ -16,12 +18,20 @@ Auditoria executada em 20/09/2026. Este documento prepara um candidato para
 ## Gates aprovados
 
 - `dart analyze lib test`: zero issues.
-- `flutter test --coverage test`: 163 testes aprovados; relatório bruto em
-  `coverage/lcov.info`.
+- `flutter test --no-pub`: 171 testes aprovados no estado atual.
+- `flutter test --coverage test`: baseline anterior de 163 testes aprovada;
+  relatório bruto em `coverage/lcov.info`.
 - Cobertura de linhas: total `5.378/7.881` (68,24%); certificados
   `499/567` (88,01%); Study AI `1.828/2.191` (83,43%); sync/outbox
   `732/826` (88,62%). O recorte sync/outbox inclui os modelos, fila e serviço
   `assessment_sync_*` e os modelos, fila e serviço em `learning_events`.
+- Gate responsivo automatizado aprovado com `textScale 2.0`, telefone estreito
+  e landscape para Home, quiz/simulado, mídia, Classroom/Monitor, Evidence e
+  certificados, incluindo semântica essencial e ausência de overflow.
+- O gate encontrou e corrigiu quatro falhas reais: rolagem integral da Home,
+  rolagem da configuração do simulado, expansão do seletor de turma e quebra
+  segura da linha de integridade do certificado. A Home também passou a
+  reutilizar o `Future` do catálogo em rebuilds.
 - Configuração produtiva validada sem chaves de IA ou de provedor.
 - Matriz Gradle: debug aceita apenas staging aprovado; release aceita apenas
   produção; staging, configuração vazia e gateway divergente são bloqueados.
@@ -32,6 +42,8 @@ Auditoria executada em 20/09/2026. Este documento prepara um candidato para
 - SHA-256 do certificado de upload: `16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50`.
 - BundleConfig: bibliotecas nativas não comprimidas e alinhamento
   `PAGE_ALIGNMENT_16K`.
+- Os 12 objetos ELF das três ABIs foram inspecionados com `llvm-readelf`; todos
+  os segmentos `LOAD` têm alinhamento mínimo de 16 KB.
 - Shrink Java/Kotlin: R8 ativo, com `proguard.map`, `r8.json` e `usage.txt`.
 - Símbolos nativos para as três ABIs incluídos em `BUNDLE-METADATA`.
 - Dart não usa `--obfuscate` neste candidato. Obfuscação não é controle de

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -18,7 +19,23 @@ def bearer(account): return {"Authorization": f"Bearer {account['access_token']}
 def test_evidence_session_token_import_review_and_auditable_close() -> None:
     settings = Settings(database_url="sqlite+pysqlite:///:memory:", allowed_origins=(), jwt_secret="j"*32, cpf_pepper="p"*32)
     app = create_app(database_url=settings.database_url, settings=settings); Base.metadata.create_all(app.state.database.engine)
+    with app.state.database.engine.connect() as connection:
+        connection.exec_driver_sql("PRAGMA foreign_keys=ON")
     client = TestClient(app)
+    attendance_insert_order: list[str] = []
+
+    def record_attendance_insert(_conn, _cursor, statement, _parameters, _context, _executemany):
+        normalized = " ".join(statement.lower().split())
+        if normalized.startswith("insert into evidence_items"):
+            attendance_insert_order.append("evidence_items")
+        elif normalized.startswith("insert into class_checkins"):
+            attendance_insert_order.append("class_checkins")
+
+    event.listen(
+        app.state.database.engine,
+        "before_cursor_execute",
+        record_attendance_insert,
+    )
     with client:
         teacher = register(client, "123.456.789-09", "Professora")
         student = register(client, "987.654.321-00", "Estudante")
@@ -65,6 +82,11 @@ def test_evidence_session_token_import_review_and_auditable_close() -> None:
         report = client.get(f"/classes/class-1/reports/{closed.json()['id']}", headers=bearer(teacher))
         open_after_close = client.get("/classes/class-1/sessions/open", headers=bearer(student))
         closed_sessions = client.get("/classes/class-1/sessions?status=closed", headers=bearer(student))
+    event.remove(
+        app.state.database.engine,
+        "before_cursor_execute",
+        record_attendance_insert,
+    )
     assert created.status_code == 201 and token
     assert listed.status_code == 200 and listed.json()["total"] == 1
     assert listed_open.status_code == 200 and listed_open.json()["sessions"][0]["id"] == session_id
@@ -74,6 +96,9 @@ def test_evidence_session_token_import_review_and_auditable_close() -> None:
     assert "checkin_token" not in recovered_by_id.json()
     assert outsider_sessions.status_code == 403
     assert checkin.status_code == 201 and checkin_retry.status_code == 200
+    assert attendance_insert_order[:4] == [
+        "evidence_items", "class_checkins", "evidence_items", "class_checkins"
+    ]
     assert rotated.json()["token_version"] == 2
     assert old_token.status_code == 401 and checkout.status_code == 201
     assert imported.status_code == 201 and outsider_read.status_code == 403

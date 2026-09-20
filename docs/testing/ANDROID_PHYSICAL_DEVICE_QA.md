@@ -40,6 +40,11 @@ Após a instalação/execução da build atualizada, o package Play permaneceu
 preservado em `1.2.0+11`; nenhum update, limpeza ou remoção foi direcionado a
 `com.tutortds_cartilhas`.
 
+Inventário posterior da rodada de Evidence/check-in: o package `.dev` estava em
+`1.4.0-dev+13` e o package Play continuava em `1.2.0+11`. Esta verificação não
+calculou um novo SHA-256; portanto o hash da build 1.4.0-dev+13 não deve ser
+inferido a partir do artefato 1.3.0-dev+12 registrado acima.
+
 O DEV 1.2.0 antigo usava assinatura incompatível e foi removido exclusivamente
 do package `.dev`. A reinstalação do novo APK foi recusada pelo MIUI com
 `INSTALL_FAILED_USER_RESTRICTED`, exigindo confirmação humana de “Instalar via
@@ -112,7 +117,7 @@ package Play não foi instalado, limpo, removido nem usado como alvo de
 | A11 - Assessment Sync entre dispositivos | A build encontrou uma tentativa remota com 1/1 resposta, retomou sem nova IA, hidratou deck/resposta e depois preservou uma alteração durante offline, morte/reabertura e reconexão | **Aprovado para recuperação cross-device e offline/reconexão do caso sintético:** ainda faltam conflito concorrente e tentativa concluída em dispositivo |
 | A13 - capacidades por papel | Professor recebeu `Área da equipe` e `Registrar presença`; monitor recebeu saudação própria, `Monitor por exceção` e `Registrar presença` | **Aprovado para professor e monitor sintéticos:** capabilities vieram dos vínculos de staging; aluno/admin e negações cruzadas ainda pertencem à matriz completa |
 | A14 - dashboards por vínculo | Professor abriu o acompanhamento da `Turma Sintética QA [STAGING]`; monitor abriu o painel acionável por exceção da mesma turma | **Aprovado para os cenários sintéticos observados:** ainda faltam volume, outra turma e tentativa explícita de acesso fora do vínculo |
-| A15 - check-in/QR | O token completo não resultou em confirmação observável e o campo não ficou comprovadamente limpo antes da tentativa | **Inconclusivo:** não classificar como falha do backend nem como sucesso. Repetir manualmente com campo vazio, token sintético completo e evidência sem expor o valor |
+| A15 - check-in/QR | Após corrigir a ordem transacional somente no staging, a `Entrada` e a `Saída` foram confirmadas no Xiaomi. Uma repetição física da `Entrada`, com nova chave gerada pela UI, foi recusada como duplicada e não criou outra linha | **Aprovado para sucesso e proteção contra duplicação:** PostgreSQL final com um `checkin`, um `checkout`, duas evidências `attendance` distintas. Retry com a mesma chave passou no smoke da API; expiração foi observada no ensaio anterior. O subcaso offline permanece pendente |
 | A18 - mídia | Catálogo/item de staging abriu no player; controles e contexto pedagógico foram exibidos; após ação explícita de play, o stream apresentou quadro de vídeo | **Parcial aprovado:** catálogo, player e playback sob ação observados; legenda, velocidade, retomada, telemetria e falhas de rede ainda precisam de evidência |
 | A12/A23 - visual/branding | A build `1.4.0-dev+13` exibiu IPEX/UFT/FAPTO/CDR em cards brancos no modo escuro, sem o quadriculado anterior | **Aprovado no recorte físico:** marca TDS e assets seguem o manual; resta confirmar institucionalmente a ordem/assinatura conjunta |
 
@@ -139,10 +144,14 @@ package Play não foi instalado, limpo, removido nem usado como alvo de
 | [`xiaomi-monitor-capabilities.png`](evidence/2026-09-20/xiaomi-monitor-capabilities.png) | Home `Olá, Monitor` e menu com capacidades de monitoria/presença |
 | [`xiaomi-monitor-dashboard.png`](evidence/2026-09-20/xiaomi-monitor-dashboard.png) | Painel acionável do Monitor por exceção para a turma sintética |
 | [`xiaomi-branding-partners-fixed.png`](evidence/2026-09-20/xiaomi-branding-partners-fixed.png) | Build `1.4.0-dev+13` em modo escuro, com os quatro logos parceiros corrigidos e legíveis |
+| [`xiaomi-checkin-duplicate-safe.png`](evidence/2026-09-20/xiaomi-checkin-duplicate-safe.png) | Falha anterior à correção: campo limpo e mensagem honesta de não sincronização; preservada como evidência do P1 detectado |
+| [`xiaomi-checkin-entry-success.png`](evidence/2026-09-20/xiaomi-checkin-entry-success.png) | `Entrada confirmada` no Xiaomi após o deploy corrigido, com o campo já limpo |
+| [`xiaomi-checkin-entry-duplicate-safe-after-fix.png`](evidence/2026-09-20/xiaomi-checkin-entry-duplicate-safe-after-fix.png) | Repetição física recusada sem nova persistência; campo limpo e confirmação anterior ainda visível |
 
 As capturas não contêm nem devem receber token de check-in, senha, CPF ou
-credenciais do staging. O check-in só poderá mudar de `inconclusivo` após nova
-execução controlada; a observação atual não permite inferir defeito da API.
+credenciais do staging. As capturas da UI foram correlacionadas com contagens
+somente leitura no PostgreSQL; nenhuma delas é usada isoladamente para atribuir
+sucesso ou falha.
 
 ### Jornada offline, morte/reabertura e reconexão
 
@@ -167,6 +176,53 @@ toques. A prova de não duplicação deste recorte é a existência de uma únic
 tentativa/estado final estável, não uma alegação de exatamente um `PUT` de rede.
 Nenhum check-in foi executado nesta jornada.
 
+### Check-in detectado, corrigido e retestado no staging
+
+Na build `1.4.0-dev+13`, a conta sintética de aluno manteve acesso a
+`Registrar presença`. A hierarchy da UI confirmou campo de código vazio, opções
+`Entrada`/`Saída` e a ação `Confirmar entrada`. Antes de preencher o campo, uma
+consulta autenticada e sanitizada ao staging inicialmente confirmou:
+
+- sessão `open` e ID sintético esperado;
+- `token_version=5`;
+- token expirado havia aproximadamente 147 minutos no momento da leitura.
+
+Essa primeira tentativa foi corretamente interrompida. Depois da reaplicação
+idempotente do seed, a sessão permaneceu `open`, passou a `token_version=6` e o
+token tinha aproximadamente 479 minutos de validade futura. O token foi lido do
+arquivo remoto `0600` somente em memória; não foi impresso, salvo em evidência
+ou mantido no campo. A hierarchy confirmou que o código completo esperado foi
+inserido antes de cada envio.
+
+Tanto `Entrada` quanto `Saída` retornaram `Não sincronizado` / `Registro
+duplicado ou divergente.`. A verificação somente leitura no PostgreSQL mostrou
+zero linhas em `class_checkins` e zero evidências `attendance` para a sessão e o
+aluno sintéticos. Os logs do banco explicam o 409: em ambas as tentativas, o
+`INSERT` de `class_checkins` ocorreu antes do `INSERT` da evidência referenciada,
+violando `class_checkins_evidence_id_fkey`. A transação foi revertida; portanto a
+mensagem de duplicidade não representava um registro anterior.
+
+O backend foi corrigido e implantado **somente no staging** na imagem
+`tutor-tds-api:staging-0014-evidence-fk-20260920`. O reteste físico com o mesmo
+aluno/sessão sintéticos e token ainda válido produziu:
+
+1. `Entrada confirmada` na UI e uma linha `checkin`/uma evidência no banco;
+2. repetição da `Entrada` recusada como `Registro duplicado ou divergente.`,
+   mantendo exatamente uma linha/uma evidência;
+3. `Saída confirmada` na UI;
+4. estado final no PostgreSQL: um `checkin`, um `checkout`, duas evidências
+   `attendance` e dois `evidence_id` distintos.
+
+O cliente gera uma nova chave após sucesso; por isso a repetição física exercita
+a restrição semântica de duplicidade. O retry com a **mesma** chave, que deve
+retornar 200, foi validado no smoke PostgreSQL da API (Entrada e Saída), não
+inferido pelo app. O token foi conferido integralmente em memória antes de cada
+envio e removido do campo antes das capturas. O subcaso offline foi adiado para
+evitar prolongar a manipulação do segredo depois de fechar o gate principal.
+
+Ao encerrar, Wi-Fi e dados móveis estavam ativados, o package `.dev` estava em
+`force-stop` e o package Play permanecia `1.2.0+11` sem qualquer ação.
+
 ### P1 encerrado - reconexão de conta após logout
 
 O defeito anterior era de UX: após logout, Configurações informava `Sem conta
@@ -176,8 +232,9 @@ online conectada`, mas não oferecia uma ação de re-login. A correção adicio
 Na build final, o fluxo foi aprovado fisicamente com as contas sintéticas de
 professor e monitor: login seguro, sessão conectada, capacidades derivadas dos
 vínculos e progresso local preservado. A correção também está coberta pela suíte
-automatizada final, com **163/163 testes aprovados**. O P1 está encerrado; isso
-não altera o resultado inconclusivo do check-in tokenizado.
+automatizada final, com **171/171 testes aprovados**. O P1 de re-login está
+encerrado; o P1 independente de persistência do check-in também foi corrigido e
+retestado conforme a seção anterior.
 
 ### Branding corrigido
 

@@ -173,6 +173,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                     )
                   else if (_classes.isNotEmpty) ...[
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _selectedClassId,
                       decoration: const InputDecoration(
                         labelText: 'Turma',
@@ -199,6 +200,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                     const SizedBox(height: 12),
                     if (_selectedCapability == ClassroomStaffCapability.teacher)
                       DropdownButtonFormField<int>(
+                        isExpanded: true,
                         initialValue: _days,
                         decoration: const InputDecoration(
                           labelText: 'Período de uso dos recursos',

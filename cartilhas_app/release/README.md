@@ -2,10 +2,11 @@
 
 ## Atual
 
-`Tutor-TDS-1.4.0+13-signed.aab` é o bundle candidato à Play Console para teste interno.
+`Tutor-TDS-1.4.0+13-signed.aab` é o candidato final validado para envio à
+trilha de teste interno. O upload e a promoção permanecem ações humanas.
 
-- tamanho: `64.711.735` bytes;
-- SHA-256: `706e007de279010752ebe9d45bdff44f307eedc43f46d0e09a946cd6ef502946`;
+- tamanho: `64.704.732` bytes;
+- SHA-256: `1b712992f0fd11acabb3d39f40d928773c8a1b5515eac62444155ebaa1089646`;
 - pacote: `com.tutortds_cartilhas`;
 - versão: `1.4.0` (`versionCode 13`);
 - target SDK: 36;

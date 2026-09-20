@@ -26,12 +26,12 @@ piloto. As quatro ondas de produto **não estão fechadas** nesta fotografia.
 
 | Etapa | Estado real | Evidência disponível | Prova ainda necessária para aceite |
 |---|---|---|---|
-| Onda 0 - Auditoria | Aceite documental parcial | Arquitetura, segurança, migração, integrações, QA e intervenções estão documentadas | Brand book oficial e atualização dos documentos históricos que ainda descrevem itens já entregues como inexistentes |
+| Onda 0 - Auditoria | Aceite documental parcial | Arquitetura, segurança, migração, integrações, QA e intervenções estão documentadas; manual oficial auditado | Confirmação institucional da assinatura conjunta e atualização dos documentos históricos que ainda descrevem itens já entregues como inexistentes |
 | Onda 1 - Fundação | Parcial avançada; staging comprovado | API e migrations implantadas em staging isolado; seed e smokes aprovados; **57 testes API** no snapshot local | Sheets real, restore ensaiado, automação CI/CD externa ativada e evidência operacional de observabilidade/rate limit |
-| Onda 2 - Aprendizagem | Parcial avançada; código e recorte físico provados | Catálogo/cache, mídia, analytics, horas e Assessment Sync; **163/163 Flutter**; Home, curso remoto, retomada cross-device e offline/morte/reconexão no Xiaomi | Tutor IA real, conflito concorrente físico, controles restantes de mídia e medição de latência |
-| Onda 3 - Sala e evidência | Parcial avançada; papéis físicos provados | Professor e monitor autenticados, capabilities e dashboards da turma no Xiaomi; Evidence/certificado cobertos no código | Check-in ainda inconclusivo, Evidence físico, certificado público E2E, aluno/admin e negações fora do vínculo |
-| Onda 4 - Mídia, creator e comercial | Implementação testada; aceite operacional parcial | Staging em `0014`; smoke integral de grant prefixado, 307, tamper, eventos, rating, bloqueio/revogação/histórico/arquivo; ledger simulado no código/testes | Mídia restrita com provider real, direitos/canais institucionais e decisão jurídica/comercial |
-| Onda 5 - QA / Release | Parcial; **não aceita** | SDK fixado, análise Dart limpa, 57 API, 163/163 Flutter, cobertura crítica >=80%, upgrade `.dev`, offline/reconexão e branding físico | E2E certificado/Evidence, Sheets, acessibilidade, performance, integrações externas e gates Play |
+| Onda 2 - Aprendizagem | Parcial avançada; código e recorte físico provados | Catálogo/cache, mídia, analytics, horas e Assessment Sync; **171/171 Flutter**; Home, curso remoto, retomada cross-device e offline/morte/reconexão no Xiaomi | Tutor IA real, conflito concorrente físico, controles restantes de mídia e medição de latência |
+| Onda 3 - Sala e evidência | Parcial avançada; check-in físico corrigido | Professor/monitor autenticados; Entrada, duplicidade segura e Saída provadas no Xiaomi; PostgreSQL final 1/1 check-in/checkout e 2 evidências | Falta retomada offline do check-in, Evidence/revisão completos, certificado público E2E, aluno/admin e negações fora do vínculo |
+| Onda 4 - Mídia, creator e comercial | Implementação testada; aceite operacional parcial | Staging em `0014`; smoke integral e gates de RBAC negativo, expiração, trigger append-only, Score v2/idempotência/janela sobreposta | Mídia restrita com provider real, direitos/canais institucionais e decisão jurídica/comercial |
+| Onda 5 - QA / Release | Parcial; **não aceita** | SDK fixado, análise Dart limpa, 57 API, 171/171 Flutter, cobertura crítica >=80%, gate automatizado de fonte 200%/estreito/landscape, upgrade `.dev`, offline/reconexão e branding físico | E2E certificado/Evidence, Sheets, TalkBack/tema/teclado físicos, performance, integrações externas e gates Play |
 
 Conclusão: o estado atual é muito mais avançado que o retrato inicial, mas não
 há base para declarar as quatro ondas encerradas nem para promover diretamente
@@ -46,7 +46,7 @@ Comprovado em `https://ead.ipexdesenvolvimento.cloud/tutor-staging-api`:
 
 - PostgreSQL e API de staging em containers, volume e rede separados de
   produção;
-- imagem `tutor-tds-api:staging-0014-playback-prefix-20260920` em execução e registrada em
+- imagem `tutor-tds-api:staging-0014-evidence-fk-20260920` em execução e registrada em
   `.deployed-image`;
 - `alembic current` remoto comprovado em `20260920_0014 (head)`;
 - `/health` externo com API `ok` e banco `available`;
@@ -63,6 +63,12 @@ Comprovado em `https://ead.ipexdesenvolvimento.cloud/tutor-staging-api`:
 - smoke integral de mídia aprovou URL com prefixo público, resolução 307,
   tamper, telemetria/idempotência, rating, bloqueio, revogação, histórico e
   arquivamento do registro sintético.
+- smoke complementar aprovou RBAC negativo, rejeição de UPDATE/DELETE pelo
+  trigger editorial, grant expirado com HTTP 401, Score v2 de 10.000, retry da
+  mesma janela e janela sobreposta; terminou `archived`, sem grant ou ledger.
+- smoke Evidence no PostgreSQL real aprovou entrada `201`, retry idempotente
+  `200`, rotação de token `200`, saída `201`, retry `200` e relatório fechado
+  com dois registros; conferência no banco encontrou `2:2` check-ins/evidências.
 
 Isso comprova implantação, migrations e contratos básicos no recorte observado.
 Não comprova restauração de backup, carga, rede limitada, todas as jornadas
@@ -73,8 +79,8 @@ não acessou secrets/dados de usuário e não executou deploy, restart ou migrat
 
 - API: **57 testes aprovados** no snapshot local; repetir no SHA candidato.
 - Flutter 3.44.9 / Dart 3.12.2: análise com `--fatal-infos` sem achados.
-- Flutter: **163/163 testes aprovados** no snapshot final, incluindo re-login,
-  Assessment Sync e capacidades por vínculo.
+- Flutter: **171/171 testes aprovados** no snapshot final, incluindo re-login,
+  Assessment Sync, capacidades por vínculo e regressões responsivas.
 - Cobertura: total **68,24%**; certificados **88,01%**, Study AI **83,43%** e
   sync/outbox **88,62%**, sem exclusões artificiais.
 - Gates Android separam debug `.dev`/staging de release/produção e bloqueiam
@@ -93,7 +99,7 @@ artefato candidatos.
 | IA com fonte e ação | Implementado no cliente | O gateway de IA de staging continua externo/desligado, portanto falta E2E e medição de latência |
 | Offline e baixa conectividade | Provado no recorte sintético | Avaliação foi alterada offline, preservada após `force-stop`, reconectada e consolidada como uma tentativa/estado estável no backend |
 | Gestão por exceção | Provado no caso sintético | Monitor abriu o painel acionável da turma vinculada; volume e isolamento negativo ainda não foram provados fisicamente |
-| Evidência antes de narrativa | Implementado/testado | Evidence Engine, sessão, QR, check-in, importação estruturada, revisão e relatório existem; falta operação institucional/política de retenção |
+| Evidência antes de narrativa | Parcial avançada | A ordem transacional foi corrigida e o Xiaomi confirmou Entrada/Saída e proteção contra duplicação, correlacionadas com 2 check-ins/2 evidências no PostgreSQL. Faltam retomada offline, revisão/relatório físico e política institucional de retenção |
 | Drive como acervo, não CDN | Regra preservada | Player rejeita Drive; Shared Drive, responsáveis e retenção ainda são decisões externas |
 | Privacidade e rastreabilidade | Parcial avançada | CPF protegido, telemetria tipada e auditoria backend; ainda faltam E2E de exclusão/Sheets e revisão final da Data Safety |
 
@@ -155,7 +161,8 @@ Estado: **não fechada**.
 ### Implementado e validado
 
 - Classroom por vínculo, professor/monitor e painel por exceção.
-- Evidence Engine com sessão operacional, QR/token rotativo, check-in do aluno,
+- Evidence Engine com sessão, QR/token rotativo e check-in do aluno validado no
+  Xiaomi para Entrada, duplicidade segura e Saída,
   importação somente de metadados estruturados, conciliação/revisão, exceções,
   relatório e recuperação de sessão sem reexpor token.
 - RBAC por turma/organização e testes de isolamento entre turmas.
@@ -167,9 +174,10 @@ Estado: **não fechada**.
 
 1. Completar no Xiaomi aluno/admin e negações de acesso fora da turma; professor
    e monitor já têm login, capabilities e dashboard provados.
-2. Repetir sessão/check-in com campo limpo, token sintético, duplicidade,
-   rotação/expiração, perda de rede, retomada e confirmação humana. A execução
-   atual é inconclusiva e não demonstra falha do backend.
+2. Completar apenas o restante do Evidence físico: a correção implantada já foi
+   retestada no Xiaomi com Entrada, duplicidade sem nova linha e Saída; o banco
+   terminou em 1/1 e duas evidências. O smoke da API cobre retry com a mesma
+   chave. Ainda faltam perda de rede/retomada e revisão/relatório do professor.
 3. Homologar política institucional de importação, retenção e descarte de
    evidência bruta; o código não decide a governança.
 4. Executar emissão, download, compartilhamento e verificação pública do
@@ -203,14 +211,11 @@ Estado: **não fechada**.
 
 ### Gates ainda abertos
 
-1. Exercitar em staging os casos restantes de RBAC negativo, trigger editorial,
-   Score v2 e expiração temporal. O smoke real já provou grant prefixado,
-   tamper, rating, bloqueio/revogação, histórico e arquivo.
-2. Demonstrar playback restrito com o provider institucional definitivo; o
+1. Demonstrar playback restrito com o provider institucional definitivo; o
    smoke usa YouTube sintético e ainda não homologa direitos/provedor de escala.
-3. Definir Shared Drive/master, canal YouTube institucional, direitos de voz e
+2. Definir Shared Drive/master, canal YouTube institucional, direitos de voz e
    imagem, legendas, retenção e provedor de escala.
-4. Obter aprovação jurídica, tributária e comercial antes de qualquer payout.
+3. Obter aprovação jurídica, tributária e comercial antes de qualquer payout.
    Nenhuma transação real está autorizada.
 
 Estado: **não fechada**.
@@ -225,8 +230,10 @@ permaneceu preservado em `1.2.0+11`.
 Há evidência física de upgrade `.dev` preservando estado, Home/curso de
 staging, estudo offline com morte/reabertura/reconexão, player público,
 Assessment Sync cross-device, logout/re-login, professor, monitor, dashboards e
-branding corrigido em modo escuro. O check-in tokenizado permanece
-inconclusivo. Não há evidência física
+branding corrigido em modo escuro. O P1 do check-in tokenizado foi corrigido e
+retestado fisicamente: Entrada, duplicidade segura e Saída foram correlacionadas
+com um `checkin`, um `checkout` e duas evidências no PostgreSQL. Não há evidência
+física
 suficiente de Evidence completo, certificado, acessibilidade, performance,
 exclusão de conta ou upgrade via trilha Play. O freeze permanece aberto.
 
@@ -241,7 +248,7 @@ ou bloqueado conta como aceite.
 |---|---|---|
 | `flutter analyze` sem erros | Parcial | `dart analyze --fatal-infos lib test` passou no SDK fixado; o wrapper `flutter analyze` teve falha LSP no caminho com espaços/parênteses e não há execução final equivalente registrada |
 | `dart analyze` sem erros | Provado | `docs/testing/FLUTTER_TOOLCHAIN_QA_2026-09-20.md`: análise com Flutter 3.44.9/Dart 3.12.2, zero achados |
-| Todos os testes Flutter | Provado | `docs/testing/ANDROID_PHYSICAL_DEVICE_QA.md`: suíte final **163/163**; repetir no commit candidato |
+| Todos os testes Flutter | Provado | Suíte atual **171/171**, repetida sobre o mesmo código-fonte usado para reconstruir o AAB final |
 | Cobertura crítica >= 80% | Provado | Relatório do candidato: certificados 88,01%, Study AI 83,43% e sync/outbox 88,62%; total 68,24%, sem exclusões artificiais |
 | Cadastro -> estudo -> conclusão -> certificado | Parcial | Cadastro, estudo, Assessment Sync e certificado têm testes separados; não há `integration_test` único nem certificado físico E2E |
 | Offline -> reconexão | Provado no recorte sintético | `xiaomi-offline-assessment-pending.png`, `after-relaunch` e `resynced` provam alteração sem rede, morte/reabertura e uma tentativa canônica estável após reconexão |
@@ -251,7 +258,7 @@ ou bloqueado conta como aceite.
 | HTTPS em endpoints de produção | Parcial | Gates Android exigem URLs HTTPS produtivas exatas; esta auditoria não revalidou todos os endpoints externos nem TLS operacional do candidato |
 | Startup <= 3 s em 3G | Bloqueado | Nenhuma medição 3G/percentil registrada |
 | Tutor IA <= 10 s em 90% | Bloqueado | Gateway IA de staging desligado; comportamento indisponível é honesto, mas não mede latência/qualidade |
-| AAB com chave aprovada | Provado tecnicamente | `Tutor-TDS-1.4.0+13-signed.aab`, SHA-256 `706E007DE279010752EBE9D45BDFF44F307EEDC43F46D0E09A946CD6EF502946`: assinatura/certificado de upload, bundletool e alinhamento 16 KB aprovados; upload/trilha Play seguem humanos |
+| AAB com chave aprovada | Provado tecnicamente | O AAB final, SHA-256 `1B712992F0FD11ACABB3D39F40D928773C8A1B5515EAC62444155EBAA1089646`, foi reconstruído após as correções finais e passou assinatura/certificado, bundletool e alinhamento 16 KB; o upload continua uma ação humana |
 | Release notes finais | Parcial | Runbook existe, mas notas do artefato candidato ainda não foram aprovadas |
 | Política de Privacidade HTTPS | Parcial | Configuração/gate existem; a URL final deve ser conferida no candidato e na Play |
 | Segurança dos Dados coerente | Bloqueado | Exige revisão humana final contra integrações realmente habilitadas e formulário da Play Console |
@@ -267,13 +274,13 @@ funcional, mas não demonstram fidelidade visual completa.
 |---|---|---|
 | Home e jornada | Parcial | Home do aluno, capabilities de professor/monitor e branding corrigido foram provados; falta o papel admin e negações físicas fora do vínculo |
 | Tutor IA / espera | Bloqueado | Estado indisponível é honesto; gateway desligado impede resposta, fonte, ação e performance reais |
-| Quiz/simulado | Parcial | Cross-device 1/1, offline/morte/reconexão e `Sincronizado` foram provados; falta conflito físico e sweep de fonte/landscape |
-| Classroom professor | Parcial | `xiaomi-teacher-dashboard.png` prova a turma sintética e entrada Evidence; falta sessão/check-in/Evidence completo e acessibilidade |
+| Quiz/simulado | Parcial | Cross-device 1/1, offline/morte/reconexão, `Sincronizado` e fonte 200%/landscape automatizados; falta conflito físico |
+| Classroom professor | Parcial | `xiaomi-teacher-dashboard.png` prova a turma sintética; check-in do aluno foi retestado fisicamente após a correção. Ainda faltam revisão/relatório do professor, Evidence completo e TalkBack físico |
 | Monitor por exceção | Parcial | `xiaomi-monitor-dashboard.png` prova painel acionável; falta isolamento negativo físico e estados com volume |
 | Perfil/conta | Provado | Logout, `Entrar na conta online`, professor/monitor conectados e progresso local preservado; não equivale a validar exclusão de conta |
 | Mídia | Parcial | Player público e play sob ação foram provados; falta legenda, velocidade, retomada, telemetria e grant restrito |
 | Branding | Parcial aprovado | Manual oficial e fontes FAPTO/CDR foram auditados; `xiaomi-branding-partners-fixed.png` prova os quatro logos sem checkerboard no escuro. Resta confirmação institucional da ordem/assinatura |
-| Acessibilidade/layout | Parcial | Há testes de widget/semântica, mas faltam TalkBack, fonte 200%, claro/escuro, landscape e teclado nas telas críticas |
+| Acessibilidade/layout | Parcial avançada | Home, simulado, mídia, Classroom/Monitor, Evidence e certificados passam testes com semântica essencial, fonte 200%, telefone estreito e landscape sem overflow; faltam TalkBack, claro/escuro e teclado em dispositivo |
 
 ## Menor conjunto restante para freeze
 
@@ -283,10 +290,10 @@ redundantes. Todos precisam usar o mesmo commit/configuração candidata.
 1. **Assessment concorrente:** concluir uma tentativa e provocar conflito CAS
    controlado entre dois clientes. O caminho offline/morte/reconexão já está
    aprovado no recorte sintético.
-2. **Evidence/check-in controlado:** professor abre/rotaciona sessão; aluno usa
-   campo limpo com token sintético; repetir duplicado/expirado e uma retomada
-   offline; professor revisa a evidência/relatório. Cobre A15 e A17. O resultado
-   anterior não deve ser reaproveitado como falha.
+2. **Evidence/check-in restante:** Entrada, duplicidade segura e Saída já
+   passaram fisicamente; retry com a mesma chave, rotação e relatório passaram
+   no smoke PostgreSQL. Completar somente retomada offline e revisão/relatório
+   do professor. Cobre o restante de A15 e A17.
 3. **Certificado E2E:** tornar aluno sintético elegível, emitir, baixar/abrir PDF,
    compartilhar e validar QR público sem login/CPF. Cobre A16 e o fluxo integrado
    exigido pela Onda 5.
@@ -294,10 +301,12 @@ redundantes. Todos precisam usar o mesmo commit/configuração candidata.
    tentativa negativa fora da turma e confirmação de que capability não vem de
    seletor local. Professor/monitor positivos já estão provados, então não é
    necessário repetir seus happy paths.
-5. **Sweep visual/acessível compacto:** Home, simulado, mídia, Classroom/Monitor,
-   Evidence/certificado em claro/escuro, fonte 200%, landscape e TalkBack; anexar
-   somente falhas/capturas representativas. O defeito de checkerboard dos logos
-   já foi corrigido; preservar a ordem até confirmação institucional.
+5. **Sweep visual/acessível compacto:** fonte 200%, telefone estreito e
+   landscape já têm regressão automatizada em Home, simulado, mídia,
+   Classroom/Monitor, Evidence e certificados. Completar em dispositivo apenas
+   claro/escuro, TalkBack e teclado; anexar somente falhas/capturas
+   representativas. O defeito de checkerboard dos logos já foi corrigido;
+   preservar a ordem até confirmação institucional.
 6. **Mídia restante:** legenda, 0,75x/2x, retomada após reabrir, evento qualificado
    único e playback restrito com grant expirado/revogado. Cobre o restante de
    A18 e o gate operacional da Onda 4.
@@ -346,7 +355,7 @@ homologação, não mais um bloqueio por asset defeituoso.
    como ambiente de teste.
 4. Repetir no candidato os smokes de `0013`/`0014` e validar mídia
    restrita/editorial, mantendo pagamentos desligados.
-5. Repetir 57 API, análise, 163 Flutter e preservar o relatório de cobertura.
+5. Repetir 57 API, análise, 171 Flutter e preservar o relatório de cobertura.
 6. Fechar privacidade/performance e executar upgrade somente na trilha
    interna/fechada da Play.
 7. Revisar Data Safety, assinatura, notas e rollout antes de qualquer promoção.

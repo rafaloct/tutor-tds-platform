@@ -5,8 +5,8 @@
 - Pacote: `com.tutortds_cartilhas`.
 - Android: `minSdk 24`, `targetSdk 36`, `compileSdk 36`.
 - AAB candidato: `release/Tutor-TDS-1.4.0+13-signed.aab`.
-- Tamanho final: `64.711.735` bytes.
-- SHA-256 final: `706E007DE279010752EBE9D45BDFF44F307EEDC43F46D0E09A946CD6EF502946`.
+- Tamanho final: `64.704.732` bytes.
+- SHA-256 final: `1B712992F0FD11ACABB3D39F40D928773C8A1B5515EAC62444155EBAA1089646`.
 - API: `https://ead.ipexdesenvolvimento.cloud/tutor-api`.
 - Política: `https://cartilhas.ipexdesenvolvimento.cloud/privacy.html`.
 - Exclusão externa: `https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html`.
@@ -39,6 +39,7 @@ Validação executada no artefato:
 - Bundletool 1.18.3: bundle válido;
 - `versionName 1.4.0` e `versionCode 13`;
 - bibliotecas nativas não comprimidas com `PAGE_ALIGNMENT_16K`;
+- 12 objetos ELF verificados com alinhamento mínimo de 16 KB;
 - símbolos nativos separados em `BUNDLE-METADATA`;
 - permissões somente `INTERNET` e `RECORD_AUDIO` (além da permissão interna do Android);
 - `allowBackup=false` e `usesCleartextTraffic=false`;
