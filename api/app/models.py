@@ -54,6 +54,7 @@ class User(Base):
     cpf_digest: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     phone: Mapped[str] = mapped_column(String(32), nullable=False)
     name: Mapped[str] = mapped_column(String(240), nullable=False)
+    password_digest: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(32), nullable=False, default="student")
 
 

@@ -4,11 +4,20 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.main import create_app
+from app.config import Settings
 from app.models import Base, Course
 
 
 def make_client() -> tuple[TestClient, object]:
-    app = create_app(database_url="sqlite+pysqlite:///:memory:")
+    app = create_app(
+        database_url="sqlite+pysqlite:///:memory:",
+        settings=Settings(
+            database_url="sqlite+pysqlite:///:memory:",
+            allowed_origins=(),
+            jwt_secret="j" * 32,
+            cpf_pepper="p" * 32,
+        ),
+    )
     Base.metadata.create_all(app.state.database.engine)
     return TestClient(app), app
 

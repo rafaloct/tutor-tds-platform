@@ -25,42 +25,38 @@ ESTADO ATUAL VALIDADO
 - Commit a947068: Flutter consulta TUTOR_API_URL com cache e fallback local.
 - Commit 34b328e: fila local idempotente de LearningEvents.
 - Commit f295f14: retomada offline de quiz/simulado.
-- API local: 6 testes Python aprovados; migration upgrade/downgrade aprovada em SQLite;
+- API local: 14 testes Python aprovados; migrations upgrade/downgrade aprovadas em SQLite;
   SQL PostgreSQL gerado offline; docker compose config válido.
+- Autenticação local concluída: registro, login, refresh rotativo e `/auth/me`,
+  com CPF em HMAC-SHA256, senha Argon2id e erros de validação sanitizados.
 - Flutter: baseline de 43 testes e flutter analyze limpo no último fechamento.
 - Docker Desktop estava instalado, mas o daemon não estava rodando. Não marque teste
   integrado PostgreSQL como concluído sem executá-lo de fato.
 
-PRÓXIMA FATIA: AUTENTICAÇÃO LOCAL SEGURA DA ONDA 1
+PRÓXIMA FATIA: INGESTÃO AUTENTICADA DE LEARNING EVENTS
 Implemente em api/ uma fatia pequena e revisável para:
-1. POST /auth/register com name, cpf, phone e password.
-2. POST /auth/login com cpf e password.
-3. POST /auth/refresh com rotação de refresh token.
-4. Access JWT curto (15 minutos) e refresh token opaco, aleatório, armazenado apenas
-   como digest na tabela sessions. Reuso de refresh revogado deve retornar 401.
-5. CPF deve ser normalizado e ter dígitos verificadores validados. Nunca armazenar,
-   registrar ou retornar CPF puro. Persistir somente HMAC-SHA256 com CPF_PEPPER secreto;
-   hash simples de CPF não é aceitável.
-6. Senha com Argon2id. Nunca logar nem retornar senha/digest.
-7. JWT_SECRET e CPF_PEPPER obrigatórios fora dos testes, sem valor produtivo padrão.
-8. Claim de role deve aceitar somente student, teacher, monitor e admin; registro público
-   sempre cria student.
-9. Criar migration Alembic 0002, sem reescrever a migration 0001 já consolidada.
-10. Atualizar .env.example e documentação sem inserir segredos reais.
+1. POST /events protegido por Bearer access token.
+2. Aceitar exatamente o contrato Flutter: event_id, event_type, course_id,
+   session_id e occurred_at.
+3. Derivar user_id exclusivamente do claim sub; nunca aceitar user_id do cliente.
+4. Permitir inicialmente lesson_started e lesson_completed.
+5. Tornar event_id idempotente: o mesmo evento do mesmo usuário deve retornar
+   sucesso sem criar segunda linha; colisão entre usuários deve ser rejeitada.
+6. GET /events?course_id=... protegido, limitado ao usuário autenticado, com
+   paginação e limite máximo seguro.
+7. Não iniciar ainda o worker do Google Sheets.
 
 TESTES MÍNIMOS
-- registro válido não revela CPF nem password;
-- CPF inválido é 422;
-- CPF duplicado é 409;
-- login correto emite tokens; senha errada é 401 genérico;
-- access token expirado é 401;
-- refresh rotaciona e o token anterior não pode ser reutilizado;
-- migration 0002 sobe e desce em banco temporário;
-- nenhuma informação sensível aparece em respostas/erros.
+- requisição sem token ou com token expirado é 401;
+- evento válido persiste com user_id do token;
+- retry do mesmo event_id permanece com uma linha;
+- event_type desconhecido é 422 sem ecoar payload sensível;
+- um estudante não consegue listar eventos de outro;
+- filtros e paginação possuem testes de limite.
 
 LIMITES DE ESCOPO
-- Não integrar ainda a autenticação no Flutter.
-- Não implementar POST /events nesta mesma fatia.
+- Não sincronizar ainda a fila Flutter nesta mesma fatia.
+- Não implementar o worker do Google Sheets.
 - Não iniciar deploy ou staging.
 - Se uma biblioteca de segurança for adicionada, fixe intervalo de versão no
   pyproject.toml e use sua API atual documentada.
@@ -70,6 +66,6 @@ VALIDAÇÃO E ENTREGA
 - Rode testes focados, depois todos os testes de api/ e compileall.
 - Rode git diff --check e busca de padrões de segredo antes do commit.
 - Atualize docs/maintenance/AGENT_LOG.md com evidências reais e pendências.
-- Faça um commit pequeno com mensagem: feat: add secure API authentication
+- Faça um commit pequeno com mensagem: feat: ingest authenticated learning events
 - Termine com git status limpo e informe commit, testes e limitações.
 ```

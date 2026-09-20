@@ -15,11 +15,23 @@ def test_migration_up_and_down(tmp_path: Path) -> None:
     config = Config("alembic.ini")
     config.set_main_option("sqlalchemy.url", database_url)
 
-    command.upgrade(config, "head")
     engine = create_engine(database_url)
+    command.upgrade(config, "20260920_0001")
+    assert "password_digest" not in {
+        column["name"] for column in inspect(engine).get_columns("users")
+    }
+
+    command.upgrade(config, "head")
     tables = set(inspect(engine).get_table_names())
     assert tables == set(Base.metadata.tables) | {"alembic_version"}
+    assert "password_digest" in {
+        column["name"] for column in inspect(engine).get_columns("users")
+    }
 
+    command.downgrade(config, "20260920_0001")
+    assert "password_digest" not in {
+        column["name"] for column in inspect(engine).get_columns("users")
+    }
     command.downgrade(config, "base")
     remaining = set(inspect(engine).get_table_names())
     assert remaining == {"alembic_version"} or remaining == set()

@@ -244,3 +244,19 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
 - Criado `GET /courses/{id}`, que omite cursos inativos e responde 404 para IDs
   inexistentes.
 - Validação local ampliada para 6 testes Python aprovados.
+
+### Autenticação segura da API
+
+- Criados registro, login, rotação de refresh token e endpoint autenticado
+  `/auth/me`.
+- CPF é normalizado, validado e persistido somente como HMAC-SHA256 com
+  `CPF_PEPPER`; respostas não expõem CPF, telefone ou credenciais.
+- Senhas usam Argon2id via pwdlib; access JWT expira em 15 minutos por padrão.
+- Refresh tokens são aleatórios, persistidos somente como digest, rotacionados
+  sob lock transacional e rejeitados após o primeiro uso.
+- `JWT_SECRET` e `CPF_PEPPER` são obrigatórios no startup e não possuem valor
+  produtivo padrão.
+- Adicionada migration reversível `20260920_0002` para o digest de senha.
+- Erros de validação foram sanitizados para não repetir valores recebidos.
+- Validação local: 14 testes Python aprovados, `compileall`, SQL PostgreSQL
+  offline e configuração Compose aprovados.

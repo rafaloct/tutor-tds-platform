@@ -177,6 +177,11 @@ programs, users, sessions, enrollments, learning_events, certificates e
 sync_log. Essa base foi validada apenas localmente; staging, autenticação,
 worker e publicação continuam pendentes.
 
+A autenticação local da API já possui registro, login, access JWT de curta
+duração e refresh token opaco com rotação. CPF é armazenado somente como
+HMAC-SHA256 com pepper e senhas usam Argon2id. A integração dessa autenticação
+com o Flutter ainda não foi iniciada.
+
 ---
 
 ## Componentes de Infraestrutura

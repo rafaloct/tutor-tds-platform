@@ -3,10 +3,13 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from .auth import router as auth_router
 from .config import Settings
 from .database import Database
 from .models import Course
@@ -22,8 +25,11 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
-        yield
-        database.dispose()
+        try:
+            resolved.require_auth_secrets()
+            yield
+        finally:
+            database.dispose()
 
     application = FastAPI(
         title="Tutor TDS API",
@@ -31,6 +37,22 @@ def create_app(
         lifespan=lifespan,
     )
     application.state.database = database
+    application.state.settings = resolved
+    application.include_router(auth_router)
+
+    @application.exception_handler(RequestValidationError)
+    async def validation_error(
+        _: Request, error: RequestValidationError
+    ) -> JSONResponse:
+        sanitized = [
+            {
+                key: value
+                for key, value in item.items()
+                if key not in {"input", "ctx"}
+            }
+            for item in error.errors()
+        ]
+        return JSONResponse(status_code=422, content={"detail": sanitized})
 
     if resolved.allowed_origins:
         application.add_middleware(
