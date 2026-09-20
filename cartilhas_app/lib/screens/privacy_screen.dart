@@ -31,7 +31,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             const _PrivacySection(
               title: 'Dados do cadastro',
               body:
-                  'Nome, WhatsApp e CPF ficam salvos no dispositivo. Com sua autorização de acompanhamento, esses dados e eventos de início ou conclusão podem ser enviados à equipe do Programa TDS. Essa autorização é independente da emissão de certificados.',
+                  'No uso offline, nome, WhatsApp e CPF ficam salvos no dispositivo. Se você escolher criar uma conta online, nome e WhatsApp são cadastrados na API TDS; o CPF é transformado em um código criptográfico e o número original não é armazenado no servidor. A senha é protegida por hash e não fica salva no aplicativo. Com sua autorização de acompanhamento, os eventos de início ou conclusão também podem ser enviados à equipe do Programa TDS. Essa autorização é independente da conta e da emissão de certificados.',
             ),
             const _PrivacySection(
               title: 'Certificados verificáveis',
@@ -90,10 +90,9 @@ class PrivacyConsentScreen extends StatelessWidget {
       body: SafeArea(
         child: ResponsiveBody(
           maxWidth: 560,
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(28),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Icon(
@@ -111,7 +110,7 @@ class PrivacyConsentScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Para acompanhar sua formação, o Programa TDS pode receber seus dados de cadastro e os eventos de início e conclusão das cartilhas. Você pode continuar usando o conteúdo sem autorizar esse envio. A emissão de certificado tem uma confirmação de privacidade própria, mostrada somente quando você solicitar.',
+                  'Se você escolheu criar uma conta online, os dados necessários ao cadastro foram enviados conforme informado nessa ação. Separadamente, para acompanhar sua formação, o Programa TDS pode receber os eventos de início e conclusão das cartilhas. Você pode continuar usando o conteúdo sem autorizar esse acompanhamento. A emissão de certificado tem uma confirmação de privacidade própria, mostrada somente quando você solicitar.',
                   textAlign: TextAlign.center,
                   style: TextStyle(height: 1.5),
                 ),

@@ -179,8 +179,8 @@ worker e publicação continuam pendentes.
 
 A autenticação local da API já possui registro, login, access JWT de curta
 duração e refresh token opaco com rotação. CPF é armazenado somente como
-HMAC-SHA256 com pepper e senhas usam Argon2id. A integração dessa autenticação
-com o Flutter ainda não foi iniciada.
+HMAC-SHA256 com pepper e senhas usam Argon2id. O Flutter já oferece essa conta
+como opção quando `TUTOR_API_URL` está configurada.
 
 A API também recebe e lista LearningEvents autenticados. A identidade vem
 sempre do access token, o `event_id` é idempotente e as consultas são isoladas
@@ -190,8 +190,8 @@ autenticação no aplicativo.
 O Flutter possui agora uma fundação de cliente para register, login, refresh e
 `/auth/me`. Access e refresh tokens ficam somente no armazenamento seguro da
 plataforma; 401 dispara no máximo uma renovação, compartilhada entre chamadas
-concorrentes. O cliente ainda não está ligado à WelcomeScreen nem transmite a
-fila local de eventos.
+concorrentes. A WelcomeScreen permite criar conta, entrar ou continuar offline;
+a fila local de eventos ainda não é transmitida.
 
 ---
 

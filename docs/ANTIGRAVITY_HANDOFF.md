@@ -31,42 +31,40 @@ ESTADO ATUAL VALIDADO
   com CPF em HMAC-SHA256, senha Argon2id e erros de validação sanitizados.
 - Ingestão autenticada concluída: POST/GET `/events`, idempotência e isolamento
   por estudante.
-- Flutter: cliente de autenticação segura concluído; baseline de 50 testes e
+- Flutter: conta online opcional integrada à WelcomeScreen; baseline de 54 testes e
   `flutter analyze` limpo no último fechamento.
 - Docker Desktop estava instalado, mas o daemon não estava rodando. Não marque teste
   integrado PostgreSQL como concluído sem executá-lo de fato.
 
-PRÓXIMA FATIA: INTEGRAÇÃO VISUAL DE CONTA NO FLUTTER
+PRÓXIMA FATIA: SINCRONIZAÇÃO DA FILA DE LEARNING EVENTS
 Implemente no Flutter uma fatia pequena e revisável para:
-1. Quando TUTOR_API_URL estiver configurada, oferecer criar conta e entrar sem
-   bloquear o uso offline atual.
-2. Reutilizar AuthRepository; não duplicar HTTP nem acesso ao cofre seguro.
-3. Senha deve usar campo obscurecido e nunca ser salva em SharedPreferences.
-4. Erros devem ser genéricos, acessíveis e nunca repetir CPF ou senha.
-5. TUTOR_API_URL vazia deve preservar pixel e fluxo atuais da WelcomeScreen.
-6. Não remover ainda user_cpf legado: Chatwoot, certificados e analytics ainda
-   dependem dele e exigem uma migração separada e testada.
+1. Enviar eventos pendentes a POST /events usando AuthRepository.authorized.
+2. Sincronizar somente quando TUTOR_API_URL estiver configurada, houver conta e
+   PrivacyPreferences.hasConsent() for verdadeiro.
+3. Remover da fila apenas eventos confirmados com 200 ou 201.
+4. Parar no primeiro erro transitório, preservando o evento e os seguintes.
+5. Serializar flushes concorrentes e manter idempotência por event_id.
+6. Não alterar nem duplicar o webhook legado nesta fatia.
 
 TESTES MÍNIMOS
-- modo offline permanece idêntico quando a API está vazia;
-- registro e login possuem estados de carregamento, sucesso e erro testados;
-- senha não aparece em SharedPreferences nem em mensagens;
-- navegação segue funcionando após autenticar e após escolher uso offline;
-- semântica e foco dos novos campos possuem teste de widget.
+- sem consentimento, sem API ou sem sessão não há envio nem perda local;
+- 200/201 remove exatamente o event_id confirmado;
+- 401 usa o refresh único já implementado;
+- 409 ou 5xx preserva a fila e interrompe o flush;
+- dois flushes simultâneos não duplicam requisições.
 
 LIMITES DE ESCOPO
-- Não tornar conta obrigatória nesta fatia.
-- Não sincronizar a fila de eventos nesta mesma fatia.
+- Não tornar conta obrigatória.
 - Não implementar o worker do Google Sheets.
 - Não iniciar deploy ou staging.
 - Se uma biblioteca de segurança for adicionada, fixe intervalo de versão no
   pyproject.toml e use sua API atual documentada.
 
 VALIDAÇÃO E ENTREGA
-- Use C:\...\api\.venv\Scripts\python.exe para testes.
-- Rode testes focados, depois todos os testes de api/ e compileall.
+- Use o Flutter dedicado em C:\Users\Usuario\flutter-3.44.9\bin\flutter.bat.
+- Rode testes focados, depois `flutter analyze --no-pub` e a suíte Flutter completa.
 - Rode git diff --check e busca de padrões de segredo antes do commit.
 - Atualize docs/maintenance/AGENT_LOG.md com evidências reais e pendências.
-- Faça um commit pequeno com mensagem: feat: add optional account onboarding
+- Faça um commit pequeno com mensagem: feat: sync learning events to API
 - Termine com git status limpo e informe commit, testes e limitações.
 ```

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'home_screen.dart';
-import 'onboarding_screen.dart';
-import 'privacy_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../features/auth/data/auth_repository.dart';
+import '../features/auth/models/auth_session.dart';
+import '../features/certificates/data/certificate_service.dart';
 import '../services/privacy_preferences.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_brand_stripe.dart';
-import '../features/certificates/data/certificate_service.dart';
+import 'home_screen.dart';
+import 'onboarding_screen.dart';
+import 'privacy_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -65,6 +69,204 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
+  Future<void> _createOnlineAccount() async {
+    if (!_formKey.currentState!.validate()) return;
+    final session = await _showAccountDialog(register: true);
+    if (session == null || !mounted) return;
+    await _saveData();
+  }
+
+  Future<void> _loginOnline() async {
+    final session = await _showAccountDialog(register: false);
+    if (session == null || !mounted) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', session.user.name);
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const PrivacyConsentScreen()),
+    );
+  }
+
+  Future<AuthSession?> _showAccountDialog({required bool register}) async {
+    final auth = context.read<AuthRepository>();
+    final dialogFormKey = GlobalKey<FormState>();
+    var cpfValue = register ? _cpfController.text : '';
+    var passwordValue = '';
+    var obscurePassword = true;
+    var busy = false;
+    String? errorMessage;
+
+    final result = await showDialog<AuthSession>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          Future<void> submit() async {
+            if (!dialogFormKey.currentState!.validate() || busy) return;
+            setDialogState(() {
+              busy = true;
+              errorMessage = null;
+            });
+            try {
+              final session = register
+                  ? await auth.register(
+                      name: _nameController.text.trim(),
+                      cpf: _cpfController.text,
+                      phone: _phoneController.text,
+                      password: passwordValue,
+                    )
+                  : await auth.login(cpf: cpfValue, password: passwordValue);
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop(session);
+              }
+            } on AuthException catch (error) {
+              if (!dialogContext.mounted) return;
+              setDialogState(() {
+                busy = false;
+                errorMessage = error.message;
+              });
+            }
+          }
+
+          return AlertDialog(
+            title: Text(register ? 'Criar conta Tutor TDS' : 'Entrar na conta'),
+            content: Form(
+              key: dialogFormKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      register
+                          ? 'Sua conta ajuda a sincronizar o progresso quando houver internet.'
+                          : 'Use seu CPF e sua senha. O CPF não fica salvo neste acesso.',
+                    ),
+                    if (!register) ...[
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        key: const ValueKey('account-login-cpf'),
+                        initialValue: cpfValue,
+                        decoration: const InputDecoration(
+                          labelText: 'CPF da conta',
+                          prefixIcon: Icon(Icons.badge_outlined),
+                        ),
+                        inputFormatters: [
+                          MaskTextInputFormatter(mask: '###.###.###-##'),
+                        ],
+                        keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.next,
+                        onChanged: (value) => cpfValue = value,
+                        validator: (value) =>
+                            CertificateService.isValidCpf(value ?? '')
+                            ? null
+                            : 'Informe um CPF válido',
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      key: const ValueKey('account-password'),
+                      obscureText: obscurePassword,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      autofillHints: register
+                          ? const [AutofillHints.newPassword]
+                          : const [AutofillHints.password],
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          tooltip: obscurePassword
+                              ? 'Mostrar senha'
+                              : 'Ocultar senha',
+                          onPressed: busy
+                              ? null
+                              : () => setDialogState(
+                                  () => obscurePassword = !obscurePassword,
+                                ),
+                          icon: Icon(
+                            obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                        ),
+                      ),
+                      validator: (value) => (value?.length ?? 0) < 12
+                          ? 'Use pelo menos 12 caracteres'
+                          : null,
+                      onChanged: (value) => passwordValue = value,
+                      textInputAction: register
+                          ? TextInputAction.next
+                          : TextInputAction.done,
+                      onFieldSubmitted: register ? null : (_) => submit(),
+                    ),
+                    if (register) ...[
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        key: const ValueKey('account-password-confirmation'),
+                        obscureText: obscurePassword,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        autofillHints: const [AutofillHints.newPassword],
+                        decoration: const InputDecoration(
+                          labelText: 'Confirme a senha',
+                          prefixIcon: Icon(Icons.lock_outline),
+                        ),
+                        validator: (value) => value != passwordValue
+                            ? 'As senhas precisam ser iguais'
+                            : null,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => submit(),
+                      ),
+                    ],
+                    if (errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          errorMessage!,
+                          key: const ValueKey('account-error'),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (busy) ...[
+                      const SizedBox(height: 16),
+                      const LinearProgressIndicator(),
+                      const SizedBox(height: 8),
+                      Text(
+                        register ? 'Criando conta...' : 'Entrando...',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: busy
+                    ? null
+                    : () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: busy ? null : submit,
+                child: Text(
+                  register ? 'Criar conta segura' : 'Entrar na conta',
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    return result;
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -76,6 +278,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final accountAvailable = context.read<AuthRepository>().isConfigured;
     return Scaffold(
       backgroundColor: colors.primary,
       body: SafeArea(
@@ -193,6 +396,65 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 textInputAction: TextInputAction.done,
                                 onFieldSubmitted: (_) => _saveData(),
                               ),
+                              if (accountAvailable) ...[
+                                const SizedBox(height: 18),
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: colors.primaryContainer.withValues(
+                                      alpha: 0.45,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: colors.outlineVariant,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          'Conta online opcional',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Entre para preparar a sincronização do seu progresso ou continue usando somente este dispositivo.',
+                                          style: TextStyle(
+                                            color: colors.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Ao criar a conta, nome, CPF e WhatsApp são enviados à API TDS. A senha não é armazenada no aplicativo.',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: colors.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        FilledButton.tonalIcon(
+                                          onPressed: _createOnlineAccount,
+                                          icon: const Icon(
+                                            Icons.person_add_alt_1_outlined,
+                                          ),
+                                          label: const Text('Criar conta'),
+                                        ),
+                                        TextButton(
+                                          onPressed: _loginOnline,
+                                          child: const Text('Já tenho conta'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: 10),
                               Text(
                                 'O cadastro fica no dispositivo. Ao emitir um certificado, você verá uma confirmação separada de privacidade.',
@@ -236,9 +498,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(double.infinity, 54),
                                 ),
-                                child: const Text(
-                                  'Entrar',
-                                  style: TextStyle(fontSize: 16),
+                                child: Text(
+                                  accountAvailable
+                                      ? 'Continuar neste dispositivo'
+                                      : 'Entrar',
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ),
                             ],

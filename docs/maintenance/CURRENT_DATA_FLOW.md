@@ -14,6 +14,10 @@ Primeiro acesso
 WelcomeScreen
   - Coleta: nome, WhatsApp, CPF
   - Valida CPF com algoritmo Mod 11 (client-side)
+  - Se TUTOR_API_URL existir: oferece conta online opcional
+      - register/login via API
+      - tokens somente no armazenamento seguro
+  - Permite continuar apenas no dispositivo
   - Pergunta consentimento de compartilhamento
   - Salva em SharedPreferences (local)
       │
@@ -32,10 +36,17 @@ HomeScreen
 
 **Dados persistidos localmente:**
 - `user_name`, `user_phone`, `user_cpf` → SharedPreferences
+- access/refresh tokens da conta → armazenamento seguro da plataforma
 - `privacy_consent` → SharedPreferences
 - `onboarding_seen_v1` → SharedPreferences
 
-**Estado real do CPF:** na emissão de certificado, o CPF é usado apenas para gerar um HMAC e não é persistido no KV. Entretanto, o fluxo legado de analytics envia o CPF em texto puro ao Google Apps Script. Esse fluxo deve ser substituído de forma compatível na Onda 1.
+**Estado real do CPF:** no cadastro online, o servidor persiste somente HMAC do
+CPF; no login, o CPF não é salvo novamente em SharedPreferences. O fluxo local
+legado ainda pode manter `user_cpf` para certificados, Chatwoot e analytics. Na
+emissão de certificado, o CPF é usado apenas para gerar um HMAC e não é
+persistido no KV. Entretanto, o analytics legado envia o CPF em texto puro ao
+Google Apps Script mediante consentimento. Esse fluxo deve ser substituído de
+forma compatível.
 
 ---
 

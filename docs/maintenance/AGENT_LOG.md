@@ -290,3 +290,18 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   de produção aprovada e build Web concluído.
 - O dry-run opcional de WebAssembly ainda alerta sobre casts no pacote externo
   `flutter_tts 4.2.5`; a compilação JavaScript usada atualmente foi concluída.
+
+### Conta online opcional no onboarding
+
+- A WelcomeScreen mostra criar conta e login somente quando `TUTOR_API_URL`
+  está configurada; sem API, o layout e o fluxo offline permanecem iguais.
+- Criar conta reutiliza nome, WhatsApp e CPF já validados e solicita senha em
+  campo obscurecido. Login solicita apenas CPF e senha.
+- A senha não é persistida nem repetida em mensagens de erro; loading e erros
+  são anunciados visualmente e por região semântica.
+- O uso sem conta continua explícito. Login bem-sucedido segue para a decisão
+  de privacidade e não grava novamente o CPF em SharedPreferences.
+- Textos de privacidade passaram a separar cadastro online, acompanhamento
+  pedagógico e emissão de certificado. A tela de consentimento tornou-se
+  rolável para telas menores.
+- Validação: `flutter analyze` limpo, 54 testes Flutter aprovados.
