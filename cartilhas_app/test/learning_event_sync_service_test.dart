@@ -256,6 +256,41 @@ void main() {
     expect(requests, 1);
     expect(await queue.pending(), isEmpty);
   });
+
+  test('evento enfileirado durante flush recebe segunda passagem', () async {
+    await seedOne();
+    final release = Completer<void>();
+    var requests = 0;
+    final service = LearningEventSyncService(
+      apiUrl: 'https://api.example',
+      authRepository: auth(),
+      queue: queue,
+      client: MockClient((_) async {
+        requests++;
+        if (requests == 1) await release.future;
+        return http.Response('{}', 201);
+      }),
+      consentChecker: () async => true,
+    );
+
+    final first = service.flush();
+    await Future<void>.delayed(Duration.zero);
+    await queue.enqueue(
+      LearningEvent.activity(
+        courseId: 'agricultura-sustentavel',
+        sessionId: 'sessao-2',
+        sequence: 1,
+        activeSeconds: 12,
+        occurredAt: DateTime.utc(2026, 9, 20, 10, 1),
+      ),
+    );
+    final second = service.flush();
+    release.complete();
+
+    expect(await Future.wait([first, second]), [2, 2]);
+    expect(requests, 2);
+    expect(await queue.pending(), isEmpty);
+  });
 }
 
 class _CountingTokenStore extends _MemoryTokenStore {

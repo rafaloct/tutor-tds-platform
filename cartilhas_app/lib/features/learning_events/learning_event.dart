@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
 
-enum LearningEventType { lessonStarted, lessonCompleted }
+enum LearningEventType { lessonStarted, lessonCompleted, studyActivity }
 
 extension LearningEventTypeValue on LearningEventType {
   String get apiValue => switch (this) {
     LearningEventType.lessonStarted => 'lesson_started',
     LearningEventType.lessonCompleted => 'lesson_completed',
+    LearningEventType.studyActivity => 'study_activity',
   };
 }
 
@@ -17,6 +18,7 @@ class LearningEvent {
     required this.courseId,
     required this.sessionId,
     required this.occurredAt,
+    this.activeSeconds,
   });
 
   final String eventId;
@@ -24,6 +26,7 @@ class LearningEvent {
   final String courseId;
   final String sessionId;
   final DateTime occurredAt;
+  final int? activeSeconds;
 
   factory LearningEvent.forSession({
     required LearningEventType type,
@@ -31,12 +34,43 @@ class LearningEvent {
     required String sessionId,
     DateTime? occurredAt,
   }) {
+    if (type == LearningEventType.studyActivity) {
+      throw ArgumentError.value(type, 'type', 'Use LearningEvent.activity.');
+    }
     return LearningEvent(
       eventId: '$sessionId:${type.apiValue}',
       type: type,
       courseId: courseId,
       sessionId: sessionId,
       occurredAt: occurredAt ?? DateTime.now(),
+    );
+  }
+
+  factory LearningEvent.activity({
+    required String courseId,
+    required String sessionId,
+    required int sequence,
+    required int activeSeconds,
+    DateTime? occurredAt,
+  }) {
+    if (sequence < 1) {
+      throw ArgumentError.value(sequence, 'sequence', 'Deve ser positivo.');
+    }
+    if (activeSeconds < 1 || activeSeconds > 60) {
+      throw ArgumentError.value(
+        activeSeconds,
+        'activeSeconds',
+        'Deve estar entre 1 e 60.',
+      );
+    }
+    return LearningEvent(
+      eventId:
+          '$sessionId:${LearningEventType.studyActivity.apiValue}:$sequence',
+      type: LearningEventType.studyActivity,
+      courseId: courseId,
+      sessionId: sessionId,
+      occurredAt: occurredAt ?? DateTime.now(),
+      activeSeconds: activeSeconds,
     );
   }
 
@@ -54,6 +88,7 @@ class LearningEvent {
     'course_id': courseId,
     'session_id': sessionId,
     'occurred_at': occurredAt.toUtc().toIso8601String(),
+    'active_seconds': ?activeSeconds,
   };
 
   static LearningEvent? fromJson(Object? source) {
@@ -65,6 +100,7 @@ class LearningEvent {
       source['occurred_at'] as String? ?? '',
     );
     final typeValue = source['event_type'];
+    final activeSeconds = source['active_seconds'];
     LearningEventType? type;
     for (final candidate in LearningEventType.values) {
       if (candidate.apiValue == typeValue) type = candidate;
@@ -76,7 +112,12 @@ class LearningEvent {
         sessionId is! String ||
         sessionId.isEmpty ||
         occurredAt == null ||
-        type == null) {
+        type == null ||
+        (type == LearningEventType.studyActivity &&
+            (activeSeconds is! int ||
+                activeSeconds < 1 ||
+                activeSeconds > 60)) ||
+        (type != LearningEventType.studyActivity && activeSeconds != null)) {
       return null;
     }
     return LearningEvent(
@@ -85,6 +126,7 @@ class LearningEvent {
       courseId: courseId,
       sessionId: sessionId,
       occurredAt: occurredAt,
+      activeSeconds: activeSeconds as int?,
     );
   }
 }

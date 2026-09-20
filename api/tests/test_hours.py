@@ -14,6 +14,7 @@ from app.models import (
     Course,
     Enrollment,
     Institution,
+    LearningEventRecord,
     Program,
     ProgramCourse,
     ProgramMembership,
@@ -196,8 +197,8 @@ def test_hours_count_interaction_without_double_counting_overlap() -> None:
     assert spoofed.status_code == 422
 
 
-def test_activity_requires_enrollment_and_bounded_duration() -> None:
-    client, _ = make_client()
+def test_activity_before_enrollment_is_preserved_and_duration_is_bounded() -> None:
+    client, app = make_client()
     with client:
         student = register(client, "123.456.789-09", "Estudante")
         missing_enrollment = client.post(
@@ -210,6 +211,11 @@ def test_activity_requires_enrollment_and_bounded_duration() -> None:
             json=activity("activity-2", "2026-09-20T12:02:00Z", 61),
             headers=bearer(student),
         )
+        with Session(app.state.database.engine) as session:
+            stored = session.get(LearningEventRecord, "activity-1")
+            assert stored is not None
+            assert stored.enrollment_id is None
+            assert stored.validated_seconds == 60
 
-    assert missing_enrollment.status_code == 422
+    assert missing_enrollment.status_code == 201
     assert excessive.status_code == 422

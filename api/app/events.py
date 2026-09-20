@@ -177,13 +177,11 @@ def _resolve_enrollment(
         # Serializa o cálculo por matrícula no PostgreSQL para que dois eventos
         # concorrentes não validem o mesmo intervalo antes do commit.
         statement = statement.with_for_update()
-    records = session.scalars(
-        statement
-    ).all()
-    if payload.event_type == "study_activity" and len(records) != 1:
+    records = session.scalars(statement).all()
+    if payload.event_type == "study_activity" and len(records) > 1:
         raise HTTPException(
             status_code=422,
-            detail="Atividade exige uma única matrícula ativa para o curso.",
+            detail="Atividade possui mais de uma matrícula ativa para o curso.",
         )
     return records[0] if len(records) == 1 else None
 

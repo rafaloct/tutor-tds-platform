@@ -405,7 +405,23 @@ _Adicionar nova entrada para cada sessão ou conjunto significativo de alteraç�
   os estudantes de suas turmas; administrador possui acesso global.
 - A carga planejada de cada programa/curso pode ser configurada pela API
   administrativa, sem alteração de código.
-- Pendente: o Flutter ainda precisa medir interação real e enfileirar
-  `study_activity`; tela apenas aberta não gera tempo no backend atual.
+- A instrumentação correspondente no Flutter é registrada na seção seguinte.
 - Validação: 29 testes Python aprovados, `compileall`, upgrade/downgrade e SQL
   PostgreSQL offline concluídos.
+
+### Atividade real no Flutter
+
+- A cartilha mede somente o intervalo entre duas ações explícitas do estudante:
+  continuar a leitura ou responder uma questão. A primeira ação apenas inicia
+  a medição; tela aberta, segundo plano e ausência de interação geram zero.
+- Intervalos acima de 90 segundos são tratados como inatividade, e qualquer ida
+  ao segundo plano reinicia a referência de tempo.
+- Cada evento `study_activity` possui ID sequencial dentro da sessão e no máximo
+  60 segundos, preservando idempotência e o limite aceito pela API.
+- O evento usa a mesma fila offline, consentimento, autenticação e retomada já
+  implementados. Uma solicitação de flush recebida durante outra execução
+  agenda nova passagem sem duplicar a transmissão atual.
+- Atividade anterior à matrícula é aceita sem bloquear a fila e associada
+  automaticamente quando o administrador cria a matrícula.
+- Validação: 71 testes Flutter e 29 testes Python aprovados; `dart analyze lib
+  test` sem achados e `compileall` concluído.

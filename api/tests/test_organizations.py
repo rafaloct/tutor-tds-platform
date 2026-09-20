@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -7,7 +9,15 @@ from sqlalchemy.orm import Session
 from app.bootstrap_admin import ensure_admin
 from app.config import Settings
 from app.main import create_app
-from app.models import Base, Course, Enrollment, ProgramCourse, ProgramMembership, User
+from app.models import (
+    Base,
+    Course,
+    Enrollment,
+    LearningEventRecord,
+    ProgramCourse,
+    ProgramMembership,
+    User,
+)
 
 PASSWORD = "uma-senha-forte-2026"
 CPF_ADMIN = "123.456.789-09"
@@ -60,6 +70,21 @@ def test_admin_builds_and_reads_complete_program_hierarchy() -> None:
                     author="TDS",
                     content={"sections": []},
                     active=True,
+                )
+            )
+            session.add(
+                LearningEventRecord(
+                    event_id="activity-before-enrollment",
+                    user_id=student["user"]["id"],
+                    enrollment_id=None,
+                    course_id="course-1",
+                    event_type="study_activity",
+                    session_id="session-1",
+                    occurred_at=datetime(2026, 9, 20, 12, tzinfo=timezone.utc),
+                    payload={},
+                    active_seconds=30,
+                    validated_seconds=30,
+                    sync_status="pending",
                 )
             )
             session.commit()
@@ -126,6 +151,9 @@ def test_admin_builds_and_reads_complete_program_hierarchy() -> None:
             enrollment_count = session.scalar(
                 select(func.count()).select_from(Enrollment)
             )
+            reconciled_event = session.get(
+                LearningEventRecord, "activity-before-enrollment"
+            )
 
     assert institution.status_code == 201
     assert program.status_code == 201
@@ -148,6 +176,8 @@ def test_admin_builds_and_reads_complete_program_hierarchy() -> None:
     assert course_link_count == 1
     assert membership_count == 1
     assert enrollment_count == 1
+    assert reconciled_event is not None
+    assert reconciled_event.enrollment_id == enrollment.json()["id"]
 
 
 def test_student_cannot_manage_hierarchy() -> None:

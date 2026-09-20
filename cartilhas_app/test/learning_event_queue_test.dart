@@ -66,4 +66,22 @@ void main() {
     final pending = await queue.pending();
     expect(pending.map((item) => item.eventId), [second.eventId]);
   });
+
+  test('preserva atividade e segundos ativos no armazenamento local', () async {
+    const queue = LearningEventQueue();
+    final activity = LearningEvent.activity(
+      courseId: 'agricultura-sustentavel',
+      sessionId: 'sessao-6',
+      sequence: 1,
+      activeSeconds: 27,
+      occurredAt: DateTime.utc(2026, 9, 20, 10, 1),
+    );
+
+    await queue.enqueue(activity);
+
+    final restored = (await queue.pending()).single;
+    expect(restored.type, LearningEventType.studyActivity);
+    expect(restored.activeSeconds, 27);
+    expect(restored.toJson()['active_seconds'], 27);
+  });
 }

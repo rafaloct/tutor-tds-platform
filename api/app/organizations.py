@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -18,6 +18,7 @@ from .models import (
     Program,
     ProgramCourse,
     ProgramMembership,
+    LearningEventRecord,
     User,
 )
 
@@ -244,6 +245,17 @@ def create_enrollment(
             status="active",
         )
         session.add(record)
+        session.flush()
+        session.execute(
+            update(LearningEventRecord)
+            .where(
+                LearningEventRecord.user_id == payload.user_id,
+                LearningEventRecord.course_id == payload.course_id,
+                LearningEventRecord.enrollment_id.is_(None),
+                LearningEventRecord.event_type == "study_activity",
+            )
+            .values(enrollment_id=record.id)
+        )
         _commit(session, "Não foi possível criar a matrícula.")
         return EnrollmentResponse(
             id=record.id,

@@ -24,15 +24,28 @@ class LearningEventSyncService {
   final http.Client _client;
   final ConsentChecker consentChecker;
   Future<int>? _flushInFlight;
+  bool _flushAgain = false;
 
   Future<int> flush() {
     final current = _flushInFlight;
-    if (current != null) return current;
-    final operation = _flush();
+    if (current != null) {
+      _flushAgain = true;
+      return current;
+    }
+    final operation = _drain();
     _flushInFlight = operation;
     return operation.whenComplete(() {
       if (identical(_flushInFlight, operation)) _flushInFlight = null;
     });
+  }
+
+  Future<int> _drain() async {
+    var synced = 0;
+    do {
+      _flushAgain = false;
+      synced += await _flush();
+    } while (_flushAgain);
+    return synced;
   }
 
   Future<int> _flush() async {

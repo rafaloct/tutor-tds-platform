@@ -17,6 +17,7 @@ import '../features/study_progress/study_progress_repository.dart';
 import '../features/learning_events/learning_event.dart';
 import '../features/learning_events/learning_event_queue.dart';
 import '../features/learning_events/learning_event_sync_service.dart';
+import '../features/learning_events/learning_activity_tracker.dart';
 import 'cadunico_screen.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
@@ -27,7 +28,8 @@ class ChatExperienceScreen extends StatefulWidget {
   State<ChatExperienceScreen> createState() => _ChatExperienceScreenState();
 }
 
-class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
+class _ChatExperienceScreenState extends State<ChatExperienceScreen>
+    with WidgetsBindingObserver {
   final List<Message> _visibleMessages = [];
   int _currentSectionIndex = 0;
   int _currentMessageIndex = 0;
@@ -43,6 +45,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
   static const _eventQueue = LearningEventQueue();
   Future<void> _progressSaveQueue = Future<void>.value();
   final String _learningSessionId = LearningEvent.newSessionId();
+  late final LearningActivityTracker _activityTracker;
 
   int get _totalQuestions => widget.cartilha.sections
       .expand((s) => s.messages)
@@ -61,8 +64,13 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tts.setLanguage('pt-BR');
     _tts.setSpeechRate(0.48);
+    _activityTracker = LearningActivityTracker(
+      courseId: widget.cartilha.id,
+      sessionId: _learningSessionId,
+    );
     DataSyncService.logEvent('STARTED', widget.cartilha.title);
     unawaited(
       _enqueueAndSync(
@@ -81,6 +89,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
     final syncService = context.read<LearningEventSyncService>();
     await _eventQueue.enqueue(event);
     await syncService.flush();
+  }
+
+  void _recordInteraction() {
+    final event = _activityTracker.recordInteraction();
+    if (event != null) unawaited(_enqueueAndSync(event));
   }
 
   Future<void> _initializeExperience() async {
@@ -157,8 +170,14 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tts.stop();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _activityTracker.reset();
   }
 
   Future<void> _speak(String text) async {
@@ -180,6 +199,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
   }
 
   void _advance() {
+    _recordInteraction();
     final section = widget.cartilha.sections[_currentSectionIndex];
     if (_currentMessageIndex < section.messages.length - 1) {
       setState(() => _currentMessageIndex++);
@@ -212,6 +232,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen> {
   }
 
   void _handleOptionClick(Option option) {
+    _recordInteraction();
     setState(() {
       _showOptions = false;
       _questionsAnswered++;
