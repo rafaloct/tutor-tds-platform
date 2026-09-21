@@ -8,6 +8,10 @@ class AppConfig {
   /// API transacional do Tutor TDS. Enquanto não estiver configurada, o
   /// catálogo continua vindo integralmente dos assets do aplicativo.
   static const tutorApiUrl = String.fromEnvironment('TUTOR_API_URL');
+  // Enable only after the inbox signature and account-switch QA are configured.
+  static const signedSupportIdentity = bool.fromEnvironment(
+    'SIGNED_SUPPORT_IDENTITY',
+  );
 
   static const privacyPolicyUrl = String.fromEnvironment(
     'PRIVACY_POLICY_URL',

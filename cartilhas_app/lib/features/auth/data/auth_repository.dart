@@ -157,6 +157,45 @@ class AuthRepository {
 
   Future<void> logout() => _tokenStore.clear();
 
+  /// Fetches a server-signed support identity; never caches or signs locally.
+  Future<Map<String, String>> supportIdentity() async {
+    const failure = AuthException(
+      'Não foi possível identificar sua conta no suporte.',
+    );
+    try {
+      final owner = await localUserId();
+      if (owner == null) throw failure;
+      Future<void> checkOwner() async {
+        if (await localUserId() != owner) throw failure;
+      }
+
+      final response = await authorized((token) async {
+        await checkOwner();
+        return _client
+            .get(
+              _uri('/support/identity'),
+              headers: {'Authorization': 'Bearer $token'},
+            )
+            .timeout(const Duration(seconds: 12));
+      });
+      await checkOwner();
+      if (response.statusCode != 200) throw failure;
+      final data = jsonDecode(response.body);
+      if (data is! Map<String, dynamic>) throw failure;
+      final identifier = data['identifier'];
+      final signature = data['identifier_hash'];
+      if (identifier is! String ||
+          identifier.isEmpty ||
+          signature is! String ||
+          !RegExp(r'^[a-f0-9]{64}$').hasMatch(signature)) {
+        throw failure;
+      }
+      return {'identifier': identifier, 'identifier_hash': signature};
+    } on Object {
+      throw failure;
+    }
+  }
+
   Future<AuthSession> _authenticate({
     required String path,
     required Map<String, String> body,

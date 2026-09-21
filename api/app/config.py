@@ -27,6 +27,8 @@ class Settings:
     payment_adapter: str = "disabled"
     sheets_pseudonym_secret: str | None = None
     public_api_base_url: str | None = None
+    chatwoot_identity_secret: str | None = None
+    chatwoot_identity_namespace: str | None = None
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -72,6 +74,8 @@ class Settings:
             payment_adapter=os.getenv("PAYMENT_ADAPTER", "disabled"),
             sheets_pseudonym_secret=os.getenv("SHEETS_PSEUDONYM_SECRET"),
             public_api_base_url=os.getenv("PUBLIC_API_BASE_URL"),
+            chatwoot_identity_secret=os.getenv("CHATWOOT_IDENTITY_SECRET"),
+            chatwoot_identity_namespace=os.getenv("CHATWOOT_IDENTITY_NAMESPACE"),
         )
 
     def require_auth_secrets(self) -> tuple[str, str]:

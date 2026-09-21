@@ -33,6 +33,7 @@ from .models import Course
 from .observability import install_observability
 from .organizations import router as organizations_router
 from .sync_api import router as sync_router
+from .support import router as support_router
 
 
 def create_app(
@@ -60,6 +61,7 @@ def create_app(
     application.state.settings = resolved
     install_observability(application)
     application.include_router(auth_router)
+    application.include_router(support_router)
     application.include_router(assessment_content_router)
     application.include_router(assessment_sync_router)
     application.include_router(events_router)

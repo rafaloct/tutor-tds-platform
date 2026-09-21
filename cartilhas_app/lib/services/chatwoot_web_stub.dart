@@ -4,7 +4,8 @@ void chatwootOpen(
   String token,
   String supportContactId,
   String name,
-  String phone,
-) {}
+  String phone, {
+  String? identifierHash,
+}) {}
 void chatwootClose() {}
 bool get chatwootAvailable => false;

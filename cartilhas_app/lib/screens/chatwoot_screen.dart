@@ -5,7 +5,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
+import '../config/app_config.dart';
+import '../features/auth/data/auth_repository.dart';
 import '../services/privacy_preferences.dart';
+import '../services/chatwoot_script_value.dart';
 
 // Import condicional: usa JS no web, stub no mobile
 import '../services/chatwoot_web_impl.dart'
@@ -35,6 +39,28 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
   bool _webOpened = false;
   String _userName = '';
   String _supportContactId = '';
+  String? _identifierHash;
+
+  Future<String?> _resolveSupportId(SharedPreferences preferences) async {
+    if (!AppConfig.signedSupportIdentity) {
+      return _getSupportContactId(preferences);
+    }
+    try {
+      if (!mounted) return null;
+      final identity = await context.read<AuthRepository>().supportIdentity();
+      if (!mounted) return null;
+      _identifierHash = identity['identifier_hash'];
+      return identity['identifier'];
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = true;
+        });
+      }
+      return null;
+    }
+  }
 
   Future<String> _getSupportContactId(SharedPreferences preferences) async {
     const key = 'support_contact_id_v1';
@@ -68,7 +94,8 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
     final canIdentifyUser = await PrivacyPreferences.hasConsent();
     final name = canIdentifyUser ? prefs.getString('user_name') ?? '' : '';
     final phone = canIdentifyUser ? prefs.getString('user_phone') ?? '' : '';
-    final supportContactId = await _getSupportContactId(prefs);
+    final supportContactId = await _resolveSupportId(prefs);
+    if (!mounted || supportContactId == null) return;
 
     setState(() {
       _userName = name;
@@ -76,7 +103,14 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
       _loading = false;
     });
 
-    chatwootOpen(_chatwootBase, _websiteToken, supportContactId, name, phone);
+    chatwootOpen(
+      _chatwootBase,
+      _websiteToken,
+      supportContactId,
+      name,
+      phone,
+      identifierHash: _identifierHash,
+    );
     setState(() => _webOpened = true);
   }
 
@@ -88,10 +122,14 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
         ? prefs.getString('user_name') ?? 'Aluno TDS'
         : 'Aluno TDS';
     final phone = canIdentifyUser ? prefs.getString('user_phone') ?? '' : '';
-    final supportContactId = await _getSupportContactId(prefs);
-    final encodedSupportId = jsonEncode(supportContactId);
-    final encodedName = jsonEncode(name);
-    final encodedPhone = jsonEncode(phone);
+    final supportContactId = await _resolveSupportId(prefs);
+    if (!mounted || supportContactId == null) return;
+    final signedField = _identifierHash == null
+        ? ''
+        : 'identifier_hash: ${chatwootScriptValue(_identifierHash!)},';
+    final encodedSupportId = chatwootScriptValue(supportContactId);
+    final encodedName = chatwootScriptValue(name);
+    final encodedPhone = chatwootScriptValue(phone);
 
     final html =
         '''
@@ -145,6 +183,7 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
           window.\$chatwoot.setUser($encodedSupportId, {
             name: $encodedName,
             phone_number: $encodedPhone,
+            $signedField
           });
           window.\$chatwoot.setCustomAttributes({ origem: "App Cartilhas TDS" });
         });
@@ -211,6 +250,17 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
 
   // ── CORPO WEB ──────────────────────────────────────────────────────
   Widget _buildWebBody() {
+    if (_error) {
+      return _ErrorView(
+        onRetry: () {
+          setState(() {
+            _error = false;
+            _loading = true;
+          });
+          _initWeb();
+        },
+      );
+    }
     if (_loading) {
       return const Center(
         child: Column(
@@ -289,6 +339,7 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
                     _supportContactId,
                     _userName,
                     '',
+                    identifierHash: _identifierHash,
                   ),
                 ),
 

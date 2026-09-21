@@ -1,6 +1,7 @@
 // Implementação web — injeta o SDK do Chatwoot na página Flutter web
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
+import 'chatwoot_script_value.dart';
 
 bool _injected = false;
 
@@ -13,13 +14,30 @@ void chatwootOpen(
   String token,
   String supportContactId,
   String name,
-  String phone,
-) {
-  final safeSupportId = supportContactId
-      .replaceAll('"', '')
-      .replaceAll("'", '');
-  final safeName = name.replaceAll('"', '').replaceAll("'", '');
-  final safePhone = phone.replaceAll('"', '').replaceAll("'", '');
+  String phone, {
+  String? identifierHash,
+}) {
+  final signedField = identifierHash == null
+      ? ''
+      : 'identifier_hash: ${chatwootScriptValue(identifierHash)},';
+  final safeSupportId = chatwootScriptValue(supportContactId);
+  final safeName = chatwootScriptValue(name);
+  final safePhone = chatwootScriptValue(phone);
+  final safeBase = chatwootScriptValue(baseUrl);
+  final safeToken = chatwootScriptValue(token);
+
+  // Keep only the latest opening request while the SDK loads. Closing clears
+  // this callback so a late ready event cannot reopen a disposed screen.
+  _evaluateJavaScript('''
+    window.__tdsSupportOpen = function() {
+      if (!window.\$chatwoot) return;
+      window.\$chatwoot.setUser($safeSupportId, {
+        name: $safeName, phone_number: $safePhone, $signedField
+      });
+      window.\$chatwoot.setCustomAttributes({ origem: "App Cartilhas TDS Web" });
+      window.\$chatwoot.toggle("open");
+    };
+  ''');
 
   if (!_injected) {
     _injected = true;
@@ -31,31 +49,24 @@ void chatwootOpen(
         darkMode: "auto",
       };
       (function(d,t){
-        var BASE_URL = "$baseUrl";
+        var BASE_URL = $safeBase;
         var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
         g.src = BASE_URL + "/packs/js/sdk.js";
         g.defer = true; g.async = true;
         s.parentNode.insertBefore(g, s);
         g.onload = function() {
-          window.chatwootSDK.run({ websiteToken: "$token", baseUrl: BASE_URL });
           window.addEventListener("chatwoot:ready", function() {
-            window.\$chatwoot.toggle("open");
-            if ("$safeSupportId" !== "") {
-              window.\$chatwoot.setUser("$safeSupportId", {
-                name: "$safeName",
-                phone_number: "$safePhone",
-              });
-              window.\$chatwoot.setCustomAttributes({ origem: "App Cartilhas TDS Web" });
-            }
+            if (window.__tdsSupportOpen) window.__tdsSupportOpen();
           });
+          window.chatwootSDK.run({ websiteToken: $safeToken, baseUrl: BASE_URL });
         };
       })(document, "script");
     ''');
   } else {
-    // SDK já injetado — só abre o widget e reidenta
+    // SDK já injetado: atualizar também identidade/assinatura, não só abrir.
     _evaluateJavaScript(r'''
       if (window.$chatwoot) {
-        window.$chatwoot.toggle("open");
+        window.__tdsSupportOpen();
       }
     ''');
   }
@@ -63,7 +74,11 @@ void chatwootOpen(
 
 void chatwootClose() {
   _evaluateJavaScript(r'''
-    if (window.$chatwoot) window.$chatwoot.toggle("close");
+    window.__tdsSupportOpen = null;
+    if (window.$chatwoot) {
+      window.$chatwoot.toggle("close");
+      window.$chatwoot.reset();
+    }
   ''');
 }
 
