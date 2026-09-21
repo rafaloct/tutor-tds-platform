@@ -323,21 +323,25 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                             _loading ||
                                 _dashboard!.classroom.id != _selectedClassId
                             ? null
-                            : () => Navigator.push(
-                                context,
-                                trackedRoute(
-                                  pageId: 'student_followup',
-                                  featureId: 'student_followup',
-                                  courseId: _dashboard!.classroom.courseId,
-                                  builder: (_) => StudentFollowupScreen(
-                                    repository:
-                                        widget.gateway as ClassroomRepository,
-                                    classroom: _dashboard!.classroom,
-                                    students: _dashboard!.students,
-                                    staffId: _user!.id,
-                                  ),
-                                ),
-                              ),
+                            : () =>
+                                  Navigator.push(
+                                    context,
+                                    trackedRoute(
+                                      pageId: 'student_followup',
+                                      featureId: 'student_followup',
+                                      courseId: _dashboard!.classroom.courseId,
+                                      builder: (_) => StudentFollowupScreen(
+                                        repository:
+                                            widget.gateway
+                                                as ClassroomRepository,
+                                        classroom: _dashboard!.classroom,
+                                        students: _dashboard!.students,
+                                        staffId: _user!.id,
+                                      ),
+                                    ),
+                                  ).then((_) {
+                                    if (mounted) _loadDashboard();
+                                  }),
                         icon: const Icon(Icons.support_agent),
                         label: const Text('Baseline e mentoria dos estudantes'),
                       ),
@@ -449,6 +453,24 @@ class _Dashboard extends StatelessWidget {
               value: '${dashboard.summary.totalStudents}',
               icon: Icons.people_outline,
             ),
+            if (dashboard.summary.baselineLinkedStudents != null)
+              _Metric(
+                label: 'Baseline vinculado',
+                value: '${dashboard.summary.baselineLinkedStudents}',
+                icon: Icons.link,
+              ),
+            if (dashboard.summary.confirmedParticipations != null)
+              _Metric(
+                label: 'Presenças confirmadas',
+                value: '${dashboard.summary.confirmedParticipations}',
+                icon: Icons.fact_check_outlined,
+              ),
+            if (dashboard.summary.openMentorshipCases != null)
+              _Metric(
+                label: 'Mentorias abertas',
+                value: '${dashboard.summary.openMentorshipCases}',
+                icon: Icons.support_agent,
+              ),
             _Metric(
               label: 'Inativos',
               value: '${dashboard.summary.inactiveStudents}',
@@ -566,6 +588,18 @@ class _StudentTile extends StatelessWidget {
                       ? 'Sem atividade registrada'
                       : 'Última atividade: ${_dateTime(student.lastActivityAt!)}',
                 ),
+                if (student.baselineLinked != null)
+                  Text(
+                    student.baselineLinked!
+                        ? 'Baseline vinculado pela equipe'
+                        : 'Baseline ainda não vinculado',
+                  ),
+                if (student.confirmedSessions != null)
+                  Text(
+                    'Encontros com presença confirmada: ${student.confirmedSessions}',
+                  ),
+                if (student.openMentorshipCases != null)
+                  Text('Mentorias abertas: ${student.openMentorshipCases}'),
                 if (student.alerts.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Wrap(

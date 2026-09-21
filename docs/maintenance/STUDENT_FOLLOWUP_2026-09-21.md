@@ -101,3 +101,15 @@ da equipe ativa vinculada à turma, excluindo o próprio aluno. A gravação
 continua revalidando autorização no servidor. Nenhuma migração adicional.
 17 testes direcionados do backend e 8 testes Flutter passaram. Este incremento
 ainda não está na imagem de staging 096c0d4; precisa acompanhar o próximo deploy.
+
+## Indicadores integrados ao painel — cliente local
+
+O Flutter passou a ler `baseline_linked`, `confirmed_sessions` e
+`open_mentorship_cases` por aluno, e `baseline_linked_students`,
+`confirmed_participations`, `open_mentorship_cases` no resumo da turma.
+Campos ausentes permanecem null e não geram zero fictício em APIs antigas.
+Professor vê totais e detalhes; monitor vê contexto nos detalhes autorizados.
+Retorno da tela de acompanhamento atualiza o dashboard. Nenhum texto de
+baseline/mentoria é usado como métrica ou enviado pela navegação rastreada.
+14 testes de modelos/painel passaram e análise Dart sem problemas.
+Backend dos agregados em implementação separada; ainda não implantado.

@@ -48,6 +48,9 @@ void main() {
       expect(dashboard.summary.belowExpectedStudents, 1);
       expect(dashboard.students.single.completion, 0.2);
       expect(dashboard.students.single.alerts, hasLength(2));
+      expect(dashboard.students.single.baselineLinked, isNull);
+      expect(dashboard.students.single.confirmedSessions, isNull);
+      expect(dashboard.summary.openMentorshipCases, isNull);
     },
   );
 
@@ -56,5 +59,38 @@ void main() {
       () => ClassroomDashboard.fromJson(const {'students': []}),
       throwsFormatException,
     );
+  });
+
+  test('decodifica acompanhamento sem confundir ausência com zero', () {
+    final summary = ClassroomDashboardSummary.fromJson({
+      'total_students': 2,
+      'inactive_students': 0,
+      'pending_students': 0,
+      'below_expected_students': 0,
+      'baseline_linked_students': 1,
+      'confirmed_participations': 3,
+      'open_mentorship_cases': 0,
+    });
+    expect(summary.baselineLinkedStudents, 1);
+    expect(summary.confirmedParticipations, 3);
+    expect(summary.openMentorshipCases, 0);
+    final student = ClassroomStudent.fromJson({
+      'user_id': 's',
+      'name': 'Ana',
+      'enrollment_id': 'e',
+      'status': 'active',
+      'planned_hours': 10,
+      'validated_hours': 0,
+      'progress_percent': 0,
+      'last_activity_at': null,
+      'inactive_days': 0,
+      'alerts': [],
+      'baseline_linked': false,
+      'confirmed_sessions': 2,
+      'open_mentorship_cases': 1,
+    });
+    expect(student.baselineLinked, false);
+    expect(student.confirmedSessions, 2);
+    expect(student.openMentorshipCases, 1);
   });
 }

@@ -208,6 +208,18 @@ class _MonitorStudentCard extends StatelessWidget {
                       : 'Última atividade: ${_dateTime(student.lastActivityAt!)}',
                 ),
                 Text('Matrícula interna: ${student.enrollmentId}'),
+                if (student.baselineLinked != null)
+                  Text(
+                    student.baselineLinked!
+                        ? 'Baseline vinculado pela equipe'
+                        : 'Baseline ainda não vinculado',
+                  ),
+                if (student.confirmedSessions != null)
+                  Text(
+                    'Encontros com presença confirmada: ${student.confirmedSessions}',
+                  ),
+                if (student.openMentorshipCases != null)
+                  Text('Mentorias abertas: ${student.openMentorshipCases}'),
                 const SizedBox(height: 10),
                 for (final alert in alerts)
                   Padding(

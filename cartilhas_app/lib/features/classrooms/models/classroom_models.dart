@@ -95,6 +95,9 @@ class ClassroomStudent {
     required this.lastActivityAt,
     required this.inactiveDays,
     required this.alerts,
+    this.baselineLinked,
+    this.confirmedSessions,
+    this.openMentorshipCases,
   });
 
   final String userId;
@@ -107,6 +110,9 @@ class ClassroomStudent {
   final DateTime? lastActivityAt;
   final int? inactiveDays;
   final List<ClassroomAlert> alerts;
+  final bool? baselineLinked;
+  final int? confirmedSessions;
+  final int? openMentorshipCases;
 
   double get completion => (progressPercent / 100).clamp(0, 1);
 
@@ -125,6 +131,9 @@ class ClassroomStudent {
       progressPercent: _requiredNumber(json, 'progress_percent'),
       lastActivityAt: _nullableDate(json['last_activity_at']),
       inactiveDays: _nullableInt(json['inactive_days']),
+      baselineLinked: json['baseline_linked'] as bool?,
+      confirmedSessions: _nullableInt(json['confirmed_sessions']),
+      openMentorshipCases: _nullableInt(json['open_mentorship_cases']),
       alerts: rawAlerts
           .whereType<Map<String, dynamic>>()
           .map(ClassroomAlert.fromJson)
@@ -139,12 +148,18 @@ class ClassroomDashboardSummary {
     required this.inactiveStudents,
     required this.pendingStudents,
     required this.belowExpectedStudents,
+    this.baselineLinkedStudents,
+    this.confirmedParticipations,
+    this.openMentorshipCases,
   });
 
   final int totalStudents;
   final int inactiveStudents;
   final int pendingStudents;
   final int belowExpectedStudents;
+  final int? baselineLinkedStudents;
+  final int? confirmedParticipations;
+  final int? openMentorshipCases;
 
   factory ClassroomDashboardSummary.fromJson(Map<String, dynamic> json) =>
       ClassroomDashboardSummary(
@@ -152,6 +167,9 @@ class ClassroomDashboardSummary {
         inactiveStudents: _requiredInt(json, 'inactive_students'),
         pendingStudents: _requiredInt(json, 'pending_students'),
         belowExpectedStudents: _requiredInt(json, 'below_expected_students'),
+        baselineLinkedStudents: _nullableInt(json['baseline_linked_students']),
+        confirmedParticipations: _nullableInt(json['confirmed_participations']),
+        openMentorshipCases: _nullableInt(json['open_mentorship_cases']),
       );
 }
 
