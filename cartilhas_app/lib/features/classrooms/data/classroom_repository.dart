@@ -63,6 +63,121 @@ class ClassroomRepository
   final String apiUrl;
   final AuthRepository authRepository;
   final http.Client _client;
+  String? _followupOwner;
+
+  Future<Map<String, dynamic>> studentBaseline(
+    String classId,
+    String userId,
+  ) => _followup(
+    '/classes/${Uri.encodeComponent(classId)}/students/${Uri.encodeComponent(userId)}/baseline',
+  );
+
+  Future<Map<String, dynamic>> saveStudentBaseline({
+    required String classId,
+    required String userId,
+    required String source,
+    required String recordId,
+    required String baselineDate,
+    String? territoryId,
+    required int expectedRevision,
+    required String reason,
+    required String idempotencyKey,
+  }) => _followup(
+    '/classes/${Uri.encodeComponent(classId)}/students/${Uri.encodeComponent(userId)}/baseline',
+    method: 'PUT',
+    body: {
+      'source': source.trim(),
+      'record_id': recordId.trim(),
+      'baseline_date': baselineDate,
+      'territory_id': territoryId,
+      'expected_revision': expectedRevision,
+      'reason': reason.trim(),
+      'idempotency_key': idempotencyKey,
+    },
+  );
+
+  Future<Map<String, dynamic>> mentorshipCases(
+    String classId,
+    String userId, {
+    int offset = 0,
+  }) => _followup(
+    '/classes/${Uri.encodeComponent(classId)}/mentorship-cases?${Uri(queryParameters: {'user_id': userId, 'limit': '50', 'offset': '$offset'}).query}',
+  );
+
+  Future<Map<String, dynamic>> openMentorship({
+    required String classId,
+    required String userId,
+    required String mentorId,
+    required String objective,
+    required String nextAction,
+    required String reason,
+    required String idempotencyKey,
+  }) => _followup(
+    '/classes/${Uri.encodeComponent(classId)}/mentorship-cases',
+    method: 'POST',
+    body: {
+      'user_id': userId,
+      'mentor_id': mentorId,
+      'objective': objective.trim(),
+      'next_action': nextAction.trim(),
+      'reason': reason.trim(),
+      'idempotency_key': idempotencyKey,
+    },
+  );
+
+  Future<Map<String, dynamic>> mentorshipCase(
+    String classId,
+    String caseId,
+  ) => _followup(
+    '/classes/${Uri.encodeComponent(classId)}/mentorship-cases/${Uri.encodeComponent(caseId)}',
+  );
+
+  Future<Map<String, dynamic>> updateMentorship({
+    required String classId,
+    required String caseId,
+    required int expectedRevision,
+    required String mentorId,
+    required String objective,
+    required String nextAction,
+    required String status,
+    required String reason,
+    required String idempotencyKey,
+  }) => _followup(
+    '/classes/${Uri.encodeComponent(classId)}/mentorship-cases/${Uri.encodeComponent(caseId)}',
+    method: 'PATCH',
+    body: {
+      'expected_revision': expectedRevision,
+      'mentor_id': mentorId,
+      'objective': objective.trim(),
+      'next_action': nextAction.trim(),
+      'status': status,
+      'reason': reason.trim(),
+      'idempotency_key': idempotencyKey,
+    },
+  );
+
+  // Sensitive follow-up data stays online and bound to the opening account.
+  Future<Map<String, dynamic>> _followup(
+    String path, {
+    String method = 'GET',
+    Map<String, dynamic>? body,
+  }) async {
+    final owner = await authRepository.localUserId();
+    if (owner == null || (_followupOwner != null && _followupOwner != owner)) {
+      throw const ClassroomException(
+        'A conta mudou. Reabra o acompanhamento.',
+        statusCode: 401,
+      );
+    }
+    _followupOwner ??= owner;
+    final response = await _authorizedRequest(
+      path,
+      method: method,
+      body: body,
+      expectedOwner: owner,
+    );
+    return _object(response.body);
+  }
 
   @override
   Future<AuthUser> currentUser() => authRepository.currentUser();
@@ -189,21 +304,49 @@ class ClassroomRepository
   Future<http.Response> _authorizedRequest(
     String path, {
     bool put = false,
+    String? method,
+    Map<String, dynamic>? body,
+    String? expectedOwner,
   }) async {
     try {
-      final response = await authRepository.authorized(
-        (token) =>
-            (put
-                    ? _client.put(
-                        _uri(path),
-                        headers: {'Authorization': 'Bearer $token'},
-                      )
-                    : _client.get(
-                        _uri(path),
-                        headers: {'Authorization': 'Bearer $token'},
-                      ))
-                .timeout(const Duration(seconds: 12)),
-      );
+      final response = await authRepository.authorized((token) async {
+        if (expectedOwner != null &&
+            await authRepository.localUserId() != expectedOwner) {
+          throw const ClassroomException(
+            'A conta mudou. Reabra o acompanhamento.',
+            statusCode: 401,
+          );
+        }
+        if (method != null) {
+          final request = http.Request(method, _uri(path));
+          request.headers.addAll({
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          });
+          if (body != null) request.body = jsonEncode(body);
+          return _client
+              .send(request)
+              .then(http.Response.fromStream)
+              .timeout(const Duration(seconds: 12));
+        }
+        return (put
+                ? _client.put(
+                    _uri(path),
+                    headers: {'Authorization': 'Bearer $token'},
+                  )
+                : _client.get(
+                    _uri(path),
+                    headers: {'Authorization': 'Bearer $token'},
+                  ))
+            .timeout(const Duration(seconds: 12));
+      });
+      if (expectedOwner != null &&
+          await authRepository.localUserId() != expectedOwner) {
+        throw const ClassroomException(
+          'A conta mudou. Reabra o acompanhamento.',
+          statusCode: 401,
+        );
+      }
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ClassroomException(
           _errorMessage(response),
