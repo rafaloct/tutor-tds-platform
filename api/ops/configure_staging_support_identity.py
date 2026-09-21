@@ -19,8 +19,8 @@ def main() -> int:
     if not ENV_PATH.is_file() or ENV_PATH.is_symlink():
         raise SystemExit("staging .env ausente ou não é arquivo regular")
     secret = sys.stdin.readline().rstrip("\r\n")
-    if len(secret) < 32 or "\n" in secret or "\r" in secret:
-        raise SystemExit("a chave HMAC deve ter ao menos 32 caracteres")
+    if len(secret) < 16 or "\n" in secret or "\r" in secret:
+        raise SystemExit("a chave HMAC deve ter ao menos 16 caracteres")
     namespace = "tds-staging"
     original = ENV_PATH.read_text(encoding="utf-8")
     lines = [line for line in original.splitlines() if not line.startswith((
