@@ -75,6 +75,9 @@ class GoogleSheetsSink:
         )
 
     def event_ids(self) -> list[str]:
+        return self._event_column()[1:]
+
+    def _event_column(self) -> list[str]:
         # A primeira coluna é reservada ao event_id. Ler antes do append torna
         # seguro repetir um lote após timeout/crash entre o Google e o commit.
         first_column = self.cell_range.split(":", 1)[0]
@@ -83,7 +86,10 @@ class GoogleSheetsSink:
         values = response.get("values", [])
         if not values:
             return []
-        return [str(value) for value in values[0] if value != "event_id"]
+        column = [str(value) for value in values[0]]
+        if column and column[0] != "event_id":
+            raise RuntimeError("A aba de eventos não possui o cabeçalho esperado.")
+        return [value for value in column if value]
 
     def delete_event_ids(self, event_ids: list[str]) -> None:
         if not event_ids:
@@ -102,10 +108,11 @@ class GoogleSheetsSink:
     def append_missing(self, rows: list[SyncRow]) -> set[str]:
         if not rows:
             return set()
-        existing = set(self.event_ids())
+        column = self._event_column()
+        existing = set(column[1:])
         missing = [row for row in rows if row.event_id not in existing]
         values: list[list[object]] = []
-        if not existing:
+        if not column:
             values.append(HEADER)
         values.extend(row.values for row in missing)
         if values:

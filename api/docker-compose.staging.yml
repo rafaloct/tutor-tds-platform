@@ -85,13 +85,14 @@ services:
     depends_on:
       db-staging:
         condition: service_healthy
-    networks: [staging-internal]
+    networks: [staging-internal, sheets-egress]
     logging: *bounded-staging-logging
 
 volumes:
   tutor_tds_staging_db:
 
 networks:
+  sheets-egress: {}
   staging-internal:
     internal: true
   dokploy-network:

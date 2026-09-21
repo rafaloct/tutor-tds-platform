@@ -34,6 +34,87 @@ Map<String, dynamic> classroomJson() => {
 };
 
 void main() {
+  test(
+    'busca candidatos por nome paginados e inclui com PUT autenticado',
+    () async {
+      final requests = <http.Request>[];
+      final auth = AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(),
+      );
+      final repository = ClassroomRepository(
+        apiUrl: 'https://api.example',
+        authRepository: auth,
+        client: MockClient((request) async {
+          requests.add(request);
+          expect(request.headers['authorization'], 'Bearer access-token');
+          if (request.method == 'PUT') return http.Response('{}', 200);
+          return http.Response(
+            jsonEncode({
+              'students': [
+                {'user_id': 'student/id', 'name': 'Ana Silva'},
+              ],
+              'next_offset': 40,
+            }),
+            200,
+          );
+        }),
+      );
+      final page = await repository.eligibleStudents(
+        'class/id',
+        query: ' Ana & Silva ',
+        offset: 20,
+      );
+      expect(page.students.single.name, 'Ana Silva');
+      expect(page.nextOffset, 40);
+      expect(requests.single.url.queryParameters, {
+        'q': 'Ana & Silva',
+        'offset': '20',
+        'limit': '20',
+      });
+      expect(
+        requests.single.url.toString(),
+        contains('class%2Fid/eligible-students'),
+      );
+      await repository.includeStudent('class/id', page.students.single.userId);
+      expect(requests.last.method, 'PUT');
+      expect(
+        requests.last.url.toString(),
+        contains('class%2Fid/students/student%2Fid'),
+      );
+    },
+  );
+
+  test('inclusão transmite erro claro de turma encerrada', () async {
+    final repository = ClassroomRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(),
+      ),
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'detail':
+                'Esta turma está encerrada e não pode receber estudantes.',
+          }),
+          409,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        ),
+      ),
+    );
+    await expectLater(
+      repository.includeStudent('a', 'b'),
+      throwsA(
+        isA<ClassroomException>().having(
+          (e) => e.message,
+          'message',
+          contains('encerrada'),
+        ),
+      ),
+    );
+  });
+
   test('lista somente turmas visíveis usando autenticação existente', () async {
     final auth = AuthRepository(
       apiUrl: 'https://api.example',

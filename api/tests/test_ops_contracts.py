@@ -21,3 +21,19 @@ def test_encrypted_backup_fails_closed() -> None:
     assert 'if ! age -r "$BACKUP_AGE_RECIPIENT"' in script
     assert 'rm -f "$OUTPUT"' in script
     assert 'sha256sum "$ARTIFACT"' in script
+
+
+def test_sheets_workers_have_outbound_network_without_database_exposure() -> None:
+    for filename, worker, database in (
+        ('docker-compose.staging.yml', 'sync-worker-staging', 'db-staging'),
+        ('docker-compose.production.yml', 'sync-worker', 'db'),
+    ):
+        compose = (API_ROOT / filename).read_text(encoding='utf-8')
+        # These are intentionally text-level deployment contract checks.
+        worker_block = compose.split(f'  {worker}:\n', 1)[1].split('\n  policy-web:', 1)[0]
+        worker_block = worker_block.split('\nvolumes:', 1)[0]
+        assert 'sheets-egress' in worker_block
+        assert 'ports:' not in worker_block
+        database_block = compose.split(f'  {database}:\n', 1)[1].split('\n  api', 1)[0]
+        assert 'sheets-egress' not in database_block
+        assert 'ports:' not in database_block

@@ -70,4 +70,41 @@ void main() {
     expect((await repository.fetchAll()).single.id, 'local');
     expect(networkCalled, isFalse);
   });
+
+  test(
+    'catálogo vazio autorizado não restaura cursos removidos nem offline',
+    () async {
+      final local = () async => [course('old', 'Curso retirado')];
+      final online = CourseRepository(
+        apiUrl: 'https://api.example',
+        httpGet: (_) async => http.Response('{"courses":[]}', 200),
+        localLoader: local,
+      );
+      expect(await online.fetchAll(), isEmpty);
+      final offline = CourseRepository(
+        apiUrl: 'https://api.example',
+        httpGet: (_) async => http.Response('offline', 503),
+        localLoader: local,
+      );
+      expect(await offline.fetchAll(), isEmpty);
+    },
+  );
+
+  test('resposta inválida não apaga o cache válido', () async {
+    final online = CourseRepository(
+      apiUrl: 'https://api.example',
+      httpGet: (_) async => http.Response(
+        jsonEncode({
+          'courses': [course('valid', 'Curso').toJson()],
+        }),
+        200,
+      ),
+    );
+    await online.fetchAll();
+    final invalid = CourseRepository(
+      apiUrl: 'https://api.example',
+      httpGet: (_) async => http.Response('{"error":"invalid"}', 200),
+    );
+    expect((await invalid.fetchAll()).single.id, 'valid');
+  });
 }

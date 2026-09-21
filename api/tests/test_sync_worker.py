@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.database import Database
 from app.models import Base, LearningEventRecord, SyncDeletionRequest, SyncLog, User
-from app.sync_worker import SyncRow, SyncWorker, _pseudonym
+from app.sync_worker import GoogleSheetsSink, HEADER, SyncRow, SyncWorker, _pseudonym
+import pytest
 
 
 class MemorySink:
@@ -25,6 +26,37 @@ class MemorySink:
 
     def delete_event_ids(self, event_ids: list[str]) -> None:
         self.ids = [item for item in self.ids if item not in set(event_ids)]
+
+
+@pytest.mark.parametrize("existing", [[], [HEADER], [HEADER, ["event-1"]]])
+def test_google_sink_does_not_repeat_precreated_header_or_event(existing) -> None:
+    sink = object.__new__(GoogleSheetsSink)
+    sink.spreadsheet_id = "synthetic-sheet"
+    sink.cell_range = "EventosAPI!A:J"
+    stored = list(existing)
+
+    def request(method, url, body=None):
+        if method == "GET":
+            return {"values": [[row[0] for row in stored]]} if stored else {}
+        assert "valueInputOption=RAW" in url
+        stored.extend(body["values"])
+        return {}
+
+    sink._request = request
+    row = SyncRow("event-1", ["event-1"] + [""] * 9)
+    assert sink.append_missing([row]) == {"event-1"}
+    assert sink.append_missing([row]) == {"event-1"}
+    assert sum(row[0] == "event_id" for row in stored) == 1
+    assert sink.event_ids() == ["event-1"]
+
+
+def test_google_sink_refuses_a_different_sheet_header() -> None:
+    sink = object.__new__(GoogleSheetsSink)
+    sink.spreadsheet_id = "synthetic-sheet"
+    sink.cell_range = "EventosAPI!A:J"
+    sink._request = lambda *args: {"values": [["baseline_record_id"]]}
+    with pytest.raises(RuntimeError, match="cabeçalho"):
+        sink.append_missing([SyncRow("event-1", ["event-1"])])
 
 
 class FailingSink(MemorySink):

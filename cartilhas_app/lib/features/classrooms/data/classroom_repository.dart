@@ -18,6 +18,15 @@ abstract interface class ClassroomGateway {
   });
 }
 
+abstract interface class ClassroomRosterGateway {
+  Future<EligibleStudentPage> eligibleStudents(
+    String classId, {
+    String query = '',
+    int offset = 0,
+  });
+  Future<void> includeStudent(String classId, String userId);
+}
+
 class ClassroomException implements Exception {
   const ClassroomException(this.message);
   final String message;
@@ -26,7 +35,7 @@ class ClassroomException implements Exception {
   String toString() => message;
 }
 
-class ClassroomRepository implements ClassroomGateway {
+class ClassroomRepository implements ClassroomGateway, ClassroomRosterGateway {
   ClassroomRepository({
     required this.apiUrl,
     required this.authRepository,
@@ -105,12 +114,54 @@ class ClassroomRepository implements ClassroomGateway {
     return StudentHours.fromJson(_object(response.body));
   }
 
-  Future<http.Response> _authorizedGet(String path) async {
+  @override
+  Future<EligibleStudentPage> eligibleStudents(
+    String classId, {
+    String query = '',
+    int offset = 0,
+  }) async {
+    final parameters = Uri(
+      queryParameters: {'q': query.trim(), 'offset': '$offset', 'limit': '20'},
+    ).query;
+    final response = await _authorizedGet(
+      '/classes/${Uri.encodeComponent(classId)}/eligible-students?$parameters',
+    );
+    try {
+      return EligibleStudentPage.fromJson(_object(response.body));
+    } on FormatException {
+      throw const ClassroomException(
+        'Não foi possível carregar os estudantes. Tente novamente.',
+      );
+    }
+  }
+
+  @override
+  Future<void> includeStudent(String classId, String userId) async {
+    await _authorizedRequest(
+      '/classes/${Uri.encodeComponent(classId)}/students/${Uri.encodeComponent(userId)}',
+      put: true,
+    );
+  }
+
+  Future<http.Response> _authorizedGet(String path) => _authorizedRequest(path);
+
+  Future<http.Response> _authorizedRequest(
+    String path, {
+    bool put = false,
+  }) async {
     try {
       final response = await authRepository.authorized(
-        (token) => _client
-            .get(_uri(path), headers: {'Authorization': 'Bearer $token'})
-            .timeout(const Duration(seconds: 12)),
+        (token) =>
+            (put
+                    ? _client.put(
+                        _uri(path),
+                        headers: {'Authorization': 'Bearer $token'},
+                      )
+                    : _client.get(
+                        _uri(path),
+                        headers: {'Authorization': 'Bearer $token'},
+                      ))
+                .timeout(const Duration(seconds: 12)),
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ClassroomException(_errorMessage(response));
@@ -123,8 +174,10 @@ class ClassroomRepository implements ClassroomGateway {
     } on FormatException {
       throw const ClassroomException('A API retornou dados inválidos.');
     } on Object {
-      throw const ClassroomException(
-        'Não foi possível consultar a turma agora. Tente novamente.',
+      throw ClassroomException(
+        put
+            ? 'Não foi possível confirmar a inclusão. Tente novamente; o estudante não será duplicado.'
+            : 'Não foi possível consultar a turma agora. Tente novamente.',
       );
     }
   }

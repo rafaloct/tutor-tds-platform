@@ -8,6 +8,7 @@ import '../../evidence/data/evidence_repository.dart';
 import '../../evidence/presentation/evidence_staff_screen.dart';
 import '../../analytics/telemetry_route.dart';
 import 'monitor_exceptions_view.dart';
+import 'classroom_roster_screen.dart';
 
 class ClassroomDashboardScreen extends StatefulWidget {
   const ClassroomDashboardScreen({
@@ -217,6 +218,39 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                                 _loadDashboard();
                               },
                       ),
+                    if (widget.gateway is ClassroomRosterGateway &&
+                        _selectedCapability != null &&
+                        _dashboard != null) ...[
+                      const SizedBox(height: 12),
+                      FilledButton.tonalIcon(
+                        onPressed:
+                            _loading || _dashboard!.classroom.status == 'closed'
+                            ? null
+                            : () async {
+                                await Navigator.push<void>(
+                                  context,
+                                  trackedRoute<void>(
+                                    pageId: 'classroom_roster',
+                                    courseId: _dashboard!.classroom.courseId,
+                                    featureId: 'classroom_roster',
+                                    builder: (_) => ClassroomRosterScreen(
+                                      classroom: _dashboard!.classroom,
+                                      gateway:
+                                          widget.gateway
+                                              as ClassroomRosterGateway,
+                                    ),
+                                  ),
+                                );
+                                if (mounted) await _loadDashboard();
+                              },
+                        icon: const Icon(Icons.person_add_alt_1),
+                        label: const Text('Incluir estudantes'),
+                      ),
+                      if (_dashboard!.classroom.status == 'closed')
+                        const Text(
+                          'Turma encerrada: inclusão de estudantes indisponível.',
+                        ),
+                    ],
                     if (widget.evidenceGateway != null &&
                         _selectedCapability ==
                             ClassroomStaffCapability.teacher &&

@@ -5,7 +5,7 @@ import 'package:cartilhas_app/features/classrooms/presentation/classroom_dashboa
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _FakeGateway implements ClassroomGateway {
+class _FakeGateway implements ClassroomGateway, ClassroomRosterGateway {
   _FakeGateway({
     this.role = 'teacher',
     this.userId = 'prof-1',
@@ -19,6 +19,22 @@ class _FakeGateway implements ClassroomGateway {
   final bool monitor;
   final bool hasAlerts;
   int dashboardCalls = 0;
+  final included = <String>[];
+
+  @override
+  Future<EligibleStudentPage> eligibleStudents(
+    String classId, {
+    String query = '',
+    int offset = 0,
+  }) async => EligibleStudentPage(
+    students: included.isEmpty
+        ? const [EligibleStudent(userId: 'candidate-1', name: 'Ana Souza')]
+        : const [],
+  );
+
+  @override
+  Future<void> includeStudent(String classId, String userId) async =>
+      included.add(userId);
 
   static final classroomValue = ClassroomDetails(
     id: 'turma-1',
@@ -120,6 +136,34 @@ class _FakeGateway implements ClassroomGateway {
 }
 
 void main() {
+  testWidgets('monitor inclui estudante por nome e atualiza painel ao voltar', (
+    tester,
+  ) async {
+    final gateway = _FakeGateway(
+      role: 'student',
+      userId: 'monitor-1',
+      monitor: true,
+    );
+    await tester.pumpWidget(
+      MaterialApp(home: ClassroomDashboardScreen(gateway: gateway)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Incluir estudantes'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ana Souza'), findsOneWidget);
+    expect(find.text('candidate-1'), findsNothing);
+    await tester.tap(find.text('Ana Souza'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Incluir na turma'));
+    await tester.tap(find.text('Incluir na turma'));
+    await tester.pumpAndSettle();
+    expect(gateway.included, ['candidate-1']);
+    expect(find.text('Ana Souza foi incluído(a) na turma.'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(gateway.dashboardCalls, 2);
+  });
+
   testWidgets('professor vê turma, alertas, carga horária e analytics', (
     tester,
   ) async {

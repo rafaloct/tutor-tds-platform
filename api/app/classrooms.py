@@ -4,7 +4,7 @@ from datetime import date, datetime, timezone
 from typing import Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
@@ -58,6 +58,16 @@ class ClassroomDetail(ClassroomResponse):
 
 class ClassroomPage(BaseModel):
     classes: list[ClassroomResponse]
+
+
+class EligibleStudent(BaseModel):
+    user_id: str
+    name: str
+
+
+class EligibleStudentPage(BaseModel):
+    students: list[EligibleStudent]
+    next_offset: int | None
 
 
 class StudentAlert(BaseModel):
@@ -200,6 +210,106 @@ def add_monitor(
         )
         _commit(session, "Não foi possível adicionar o monitor.")
         return {"class_id": class_id, "user_id": user_id}
+
+
+@router.get("/{class_id}/eligible-students", response_model=EligibleStudentPage)
+def eligible_students(
+    class_id: str,
+    request: Request,
+    q: str = Query(default="", max_length=100),
+    offset: int = Query(default=0, ge=0, le=100000),
+    limit: int = Query(default=20, ge=1, le=50),
+    claims: dict[str, str] = Depends(access_claims),
+) -> EligibleStudentPage:
+    database: Database = request.app.state.database
+    with Session(database.engine) as session:
+        classroom = _classroom(session, class_id)
+        _require_staff_access(session, classroom, claims)
+        _require_open_classroom(classroom)
+        existing = select(ClassEnrollment.user_id).where(
+            ClassEnrollment.class_id == class_id,
+            ClassEnrollment.status == "active",
+        )
+        statement = (
+            select(User.id, User.name)
+            .join(Enrollment, Enrollment.user_id == User.id)
+            .where(
+                Enrollment.program_id == classroom.program_id,
+                Enrollment.course_id == classroom.course_id,
+                Enrollment.status == "active",
+                User.id.not_in(existing),
+            )
+        )
+        if q.strip():
+            statement = statement.where(
+                User.name.icontains(q.strip(), autoescape=True)
+            )
+        records = session.execute(
+            statement.order_by(User.name, User.id).offset(offset).limit(limit + 1)
+        ).all()
+        return EligibleStudentPage(
+            students=[
+                EligibleStudent(user_id=row.id, name=row.name)
+                for row in records[:limit]
+            ],
+            next_offset=offset + limit if len(records) > limit else None,
+        )
+
+
+@router.put("/{class_id}/students/{user_id}")
+def include_student(
+    class_id: str,
+    user_id: str,
+    request: Request,
+    claims: dict[str, str] = Depends(access_claims),
+) -> dict[str, str]:
+    database: Database = request.app.state.database
+    with Session(database.engine) as session:
+        # Serializa inclusões concorrentes na turma em bancos com row locking.
+        classroom = session.scalar(
+            select(Classroom).where(Classroom.id == class_id).with_for_update()
+        )
+        if classroom is None:
+            raise HTTPException(status_code=404, detail="Turma não encontrada.")
+        _require_staff_access(session, classroom, claims)
+        _require_open_classroom(classroom)
+        enrollment = session.scalar(
+            select(Enrollment).where(
+                Enrollment.user_id == user_id,
+                Enrollment.program_id == classroom.program_id,
+                Enrollment.course_id == classroom.course_id,
+                Enrollment.status == "active",
+            )
+        )
+        if enrollment is None:
+            raise HTTPException(
+                status_code=422,
+                detail="Estudante não possui matrícula ativa para esta turma.",
+            )
+        membership = session.get(ClassEnrollment, (class_id, user_id))
+        if membership is None:
+            session.add(
+                ClassEnrollment(
+                    class_id=class_id,
+                    user_id=user_id,
+                    enrollment_id=enrollment.id,
+                    program_id=classroom.program_id,
+                    course_id=classroom.course_id,
+                    status="active",
+                )
+            )
+        elif membership.status != "active":
+            membership.status = "active"
+        _commit(session, "Não foi possível incluir o estudante. Tente novamente.")
+        return {"class_id": class_id, "user_id": user_id, "status": "active"}
+
+
+def _require_open_classroom(classroom: Classroom) -> None:
+    if classroom.status == "closed":
+        raise HTTPException(
+            status_code=409,
+            detail="Esta turma está encerrada e não pode receber estudantes.",
+        )
 
 
 @router.get("/{class_id}", response_model=ClassroomDetail)

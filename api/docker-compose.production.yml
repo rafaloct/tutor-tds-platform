@@ -90,6 +90,7 @@ services:
         condition: service_healthy
     networks:
       - internal
+      - sheets-egress
     logging: *bounded-logging
 
   policy-web:
@@ -114,6 +115,7 @@ volumes:
   tutor_tds_api_db:
 
 networks:
+  sheets-egress: {}
   internal:
     internal: true
   dokploy-network:

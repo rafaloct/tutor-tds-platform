@@ -1,3 +1,36 @@
+class EligibleStudent {
+  const EligibleStudent({required this.userId, required this.name});
+  final String userId;
+  final String name;
+
+  factory EligibleStudent.fromJson(Map<String, dynamic> json) =>
+      EligibleStudent(
+        userId: _requiredString(json, 'user_id'),
+        name: _requiredString(json, 'name'),
+      );
+}
+
+class EligibleStudentPage {
+  const EligibleStudentPage({required this.students, this.nextOffset});
+  final List<EligibleStudent> students;
+  final int? nextOffset;
+
+  factory EligibleStudentPage.fromJson(Map<String, dynamic> json) {
+    final students = json['students'];
+    if (students is! List<dynamic> ||
+        students.any((item) => item is! Map<String, dynamic>)) {
+      throw const FormatException('Lista de estudantes inválida.');
+    }
+    return EligibleStudentPage(
+      students: students
+          .cast<Map<String, dynamic>>()
+          .map(EligibleStudent.fromJson)
+          .toList(growable: false),
+      nextOffset: _nullableInt(json['next_offset']),
+    );
+  }
+}
+
 class ClassroomDetails {
   const ClassroomDetails({
     required this.id,
