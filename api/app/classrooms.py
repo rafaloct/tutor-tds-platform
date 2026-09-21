@@ -494,6 +494,7 @@ def class_dashboard(
         students = [
             _student_progress(
                 session,
+                classroom=classroom,
                 membership=membership,
                 user=user,
                 planned_seconds=offering.planned_seconds,
@@ -564,6 +565,7 @@ def _require_staff_access(
 def _student_progress(
     session: Session,
     *,
+    classroom: Classroom,
     membership: ClassEnrollment,
     user: User,
     planned_seconds: int,
@@ -579,6 +581,11 @@ def _student_progress(
             ),
         ).where(
             LearningEventRecord.enrollment_id == membership.enrollment_id,
+            LearningEventRecord.user_id == membership.user_id,
+            LearningEventRecord.course_id == classroom.course_id,
+            classroom.course_version_id is not None,
+            LearningEventRecord.payload["class_id"].as_string() == classroom.id,
+            LearningEventRecord.payload["course_version_id"].as_string() == classroom.course_version_id,
             or_(
                 LearningEventRecord.event_type == "study_activity",
                 LearningEventRecord.event_type == "lesson_completed",

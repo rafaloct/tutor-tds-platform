@@ -118,11 +118,15 @@ IDs de formulários. Apenas presença confirmada entra no total; casos encerrado
 não entram em mentorias abertas. Roster e acesso da equipe revalidam vínculos
 ativos. 9 testes de dashboard/turmas passaram.
 
-Lacuna anterior identificada e ainda aberta: `_student_progress` em
-`api/app/classrooms.py` consulta LearningEvents por matrícula, sem separar
-turma/edição. Os três indicadores novos têm escopo exato, mas isso não corrige
-o cálculo antigo de progresso/horas; corrigir esse ponto antes do aceite global
-de analytics, sem declarar todo o painel validado pelos novos agregados.
+Lacuna anterior corrigida localmente: `_student_progress` em
+`api/app/classrooms.py` agora exige aluno, matrícula, curso, turma e edição
+exatos nos LearningEvents. Eventos públicos/sem contexto ou de outra edição
+não entram em horas, última atividade ou conclusão do painel da turma.
+Turma sem edição fixada não recebe crédito de eventos ambíguos. Eventos legados
+permanecem armazenados, sem reescrita/exclusão; não são atribuídos por inferência.
+10 testes direcionados passaram, incluindo contaminação por outra turma,
+outra edição e eventos sem versão, seguida de crédito correto no contexto exato.
+Essa correção ainda não foi implantada; não equivale ao aceite global de analytics.
 
 Regressão integrada Flutter posterior: **290 testes passaram**. O marcador de
 release foi atualizado somente quanto à contagem de testes; build/upload

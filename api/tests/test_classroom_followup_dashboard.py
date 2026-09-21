@@ -4,7 +4,8 @@ import pytest
 from sqlalchemy import event, text
 from sqlalchemy.orm import Session
 
-from app.models import ClassEnrollment, ClassSession, Enrollment, ProgramMembership
+from app.models import ClassEnrollment, ClassSession, Classroom, Enrollment, ProgramMembership
+from test_certificate_requests import evidence
 from test_certificate_requests import header, requests_api
 from test_presence import activity, decide, presence_api
 from test_student_followup import baseline, case_create, case_patch
@@ -12,6 +13,24 @@ from test_student_followup import baseline, case_create, case_patch
 
 def dashboard(client, actor="teacher"):
     return client.get("/classes/c1/dashboard", headers=header(actor))
+
+
+def test_progress_never_mixes_class_edition_or_unscoped_legacy_events(presence_api):
+    client, engine = presence_api
+    with Session(engine) as session:
+        version = session.get(Classroom, "c1").course_version_id
+        other_version = session.get(Classroom, "c2").course_version_id
+    evidence(engine, classroom="c2", version=version, seconds=3600)
+    evidence(engine, classroom="c1", version=other_version, seconds=3600)
+    evidence(engine, classroom=None, version=version, seconds=3600)
+    evidence(engine, classroom="c1", version=None, seconds=3600)
+    row = next(item for item in dashboard(client).json()["students"] if item["user_id"] == "learner")
+    assert row["validated_hours"] == 0 and row["last_activity_at"] is None
+    assert "required_activity_pending" in [item["code"] for item in row["alerts"]]
+    evidence(engine, classroom="c1", version=version, seconds=1800)
+    row = next(item for item in dashboard(client).json()["students"] if item["user_id"] == "learner")
+    assert row["validated_hours"] == 0.5 and row["last_activity_at"] is not None
+    assert "required_activity_pending" not in [item["code"] for item in row["alerts"]]
 
 
 def test_dashboard_aggregates_only_exact_class_roster_without_private_content(presence_api):
