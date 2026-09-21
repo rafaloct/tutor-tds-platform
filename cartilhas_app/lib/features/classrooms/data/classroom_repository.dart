@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -35,8 +36,14 @@ abstract interface class ClassroomRosterGateway {
 }
 
 class ClassroomException implements Exception {
-  const ClassroomException(this.message);
+  const ClassroomException(
+    this.message, {
+    this.statusCode,
+    this.allowOfflineFallback = false,
+  });
   final String message;
+  final int? statusCode;
+  final bool allowOfflineFallback;
 
   @override
   String toString() => message;
@@ -198,13 +205,29 @@ class ClassroomRepository
                 .timeout(const Duration(seconds: 12)),
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw ClassroomException(_errorMessage(response));
+        throw ClassroomException(
+          _errorMessage(response),
+          statusCode: response.statusCode,
+        );
       }
       return response;
     } on ClassroomException {
       rethrow;
     } on AuthException catch (error) {
-      throw ClassroomException(error.message);
+      throw ClassroomException(
+        error.message,
+        allowOfflineFallback: error.allowOfflineFallback,
+      );
+    } on TimeoutException {
+      throw const ClassroomException(
+        'Sem resposta da conexão.',
+        allowOfflineFallback: true,
+      );
+    } on http.ClientException {
+      throw const ClassroomException(
+        'Sem conexão com a turma.',
+        allowOfflineFallback: true,
+      );
     } on FormatException {
       throw const ClassroomException('A API retornou dados inválidos.');
     } on Object {

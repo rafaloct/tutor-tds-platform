@@ -25,11 +25,13 @@ class ChatExperienceScreen extends StatefulWidget {
   final Cartilha cartilha;
   final ProfileDataStore? profileDataStore;
   final String? progressOwnerId;
+  final bool savedClassroomContent;
   const ChatExperienceScreen({
     super.key,
     required this.cartilha,
     this.profileDataStore,
     this.progressOwnerId,
+    this.savedClassroomContent = false,
   });
 
   @override
@@ -489,6 +491,13 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
             )
           : Column(
               children: [
+                if (widget.savedClassroomContent)
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      'Conteúdo salvo da sua turma. Seu progresso será enviado quando a conexão voltar.',
+                    ),
+                  ),
                 LinearProgressIndicator(
                   value: _progress,
                   backgroundColor: Colors.grey[200],

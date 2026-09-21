@@ -7,9 +7,10 @@ import '../models/auth_session.dart';
 import 'auth_token_store.dart';
 
 class AuthException implements Exception {
-  const AuthException(this.message);
+  const AuthException(this.message, {this.allowOfflineFallback = false});
 
   final String message;
+  final bool allowOfflineFallback;
 
   @override
   String toString() => message;
@@ -32,6 +33,27 @@ class AuthRepository {
 
   Future<bool> hasSession() async => (await _readTokens()) != null;
 
+  /// Unverified subject used only to select previously API-validated local data.
+  /// This is not authentication or authorization and grants no roles.
+  Future<String?> localUserId() async {
+    final tokens = await _readTokens();
+    if (tokens == null) return null;
+    try {
+      final segments = tokens.accessToken.split('.');
+      if (segments.length != 3 || segments.any((part) => part.isEmpty)) {
+        return null;
+      }
+      final payload = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(segments[1]))),
+      );
+      if (payload is! Map<String, dynamic>) return null;
+      final subject = payload['sub'];
+      return subject is String && subject.trim().isNotEmpty ? subject : null;
+    } on FormatException {
+      return null;
+    }
+  }
+
   Future<AuthSession> register({
     required String name,
     required String cpf,
@@ -53,12 +75,15 @@ class AuthRepository {
   Future<AuthUser> currentUser() async {
     try {
       final response = await authorized(
-        (accessToken) => _client
-            .get(
-              _uri('/auth/me'),
-              headers: {'Authorization': 'Bearer $accessToken'},
-            )
-            .timeout(const Duration(seconds: 12)),
+        (accessToken) => _offlineAwareRequest(
+          () => _client
+              .get(
+                _uri('/auth/me'),
+                headers: {'Authorization': 'Bearer $accessToken'},
+              )
+              .timeout(const Duration(seconds: 12)),
+          'Não foi possível validar sua conta agora.',
+        ),
       );
       if (response.statusCode != 200) {
         if (response.statusCode == 401) {
@@ -166,13 +191,16 @@ class AuthRepository {
       throw const AuthException('Entre na sua conta para continuar.');
     }
     try {
-      final response = await _client
-          .post(
-            _uri('/auth/refresh'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'refresh_token': tokens.refreshToken}),
-          )
-          .timeout(const Duration(seconds: 12));
+      final response = await _offlineAwareRequest(
+        () => _client
+            .post(
+              _uri('/auth/refresh'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({'refresh_token': tokens.refreshToken}),
+            )
+            .timeout(const Duration(seconds: 12)),
+        'Não foi possível renovar sua sessão agora.',
+      );
       if (response.statusCode != 200) {
         await _tokenStore.clear();
         throw const AuthException('Sua sessão expirou. Entre novamente.');
@@ -193,6 +221,21 @@ class AuthRepository {
       throw const FormatException('Resposta de autenticação inválida.');
     }
     return AuthSession.fromJson(decoded);
+  }
+
+  Future<http.Response> _offlineAwareRequest(
+    Future<http.Response> Function() request,
+    String message,
+  ) async {
+    // Limit fallback classification to transport failures. Secure-storage and
+    // response-decoding failures outside this call must remain fail-closed.
+    try {
+      return await request();
+    } on TimeoutException {
+      throw AuthException(message, allowOfflineFallback: true);
+    } on http.ClientException {
+      throw AuthException(message, allowOfflineFallback: true);
+    }
   }
 
   Future<AuthTokens?> _readTokens() async {

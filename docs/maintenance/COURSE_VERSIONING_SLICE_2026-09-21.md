@@ -4,7 +4,7 @@ Estado: editor/versionamento implantado e exercitado no PostgreSQL staging;
 promoção explícita implementada localmente; **não liberada para produção**.
 Esta fatia não encerra as Ondas 1–4 nem o Freeze/QA da Onda 5.
 
-Validação local atualizada: **143 testes API** e **214 testes Flutter** passaram;
+Validação local atualizada: **143 testes API** e **242 testes Flutter** passaram;
 análise Dart dos arquivos alterados sem problemas. A suíte API também revelou
 que o carregamento de configuração Alembic desabilitava o logger de rastreio
 quando executado no mesmo processo; corrigido com `disable_existing_loggers=False`.
@@ -84,12 +84,16 @@ Nenhum certificado existente, namespace KV ou chave de assinatura foi alterado.
 3. Promoção explícita implementada em `api/app/course_promotion.py`, com
    manifesto SHA256, identidade preservada e dry-run padrão. Oito testes locais
    passaram; ainda não aplicada entre ambientes reais. Não clona bancos.
-4. Fechar disponibilidade offline de **reabertura** da área de turmas. Esta
-   versão consulta associação/edição online e mostra falha explícita, sem abrir
-   silenciosamente outra versão; o cache público não é cache privado de turma.
+4. Reabertura offline implementada em cache privado por conta/ambiente,
+   com validade de sete dias e invalidação por negativa de acesso. Reabertura
+   fria com progresso concluído passou no Xiaomi; revogação/troca de conta e
+   retomada parcial físicas ainda pendentes. Ver
+   `CLASSROOM_OFFLINE_AND_CERTIFICATE_DECISION_2026-09-21.md`.
 5. Integrar certificados de cursos novos/versionados ao gateway. O Worker atual
    mantém `CERTIFICATE_COURSES` estático em `src/index.js`; isso é uma lacuna
    concreta para cursos dinâmicos. Preservar resgate/verificação dos antigos.
+   Usuário decidiu: emissão por edição/matrícula com aprovação humana. Fluxo
+   atual também precisa deixar de confiar em contadores locais para emissão.
 6. Rever fluxo de devolver revisão para correção (hoje lifecycle linear),
    atribuição de eventos públicos offline estudados após arquivamento e
    interpretação longitudinal de progresso entre edições. Não inventar presença

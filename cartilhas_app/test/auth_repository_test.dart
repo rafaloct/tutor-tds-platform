@@ -29,6 +29,44 @@ class MemoryTokenStore implements AuthTokenStore {
   }
 }
 
+class FailingTokenStore extends MemoryTokenStore {
+  Object? readError;
+  Object? writeError;
+  Object? clearError;
+  @override
+  Future<AuthTokens?> read() async {
+    if (readError != null) throw readError!;
+    return super.read();
+  }
+
+  @override
+  Future<void> write(AuthTokens tokens) async {
+    if (writeError != null) throw writeError!;
+    return super.write(tokens);
+  }
+
+  @override
+  Future<void> clear() async {
+    if (clearError != null) throw clearError!;
+    return super.clear();
+  }
+}
+
+String unverifiedToken(Object? payload) =>
+    'header.${base64Url.encode(utf8.encode(jsonEncode(payload))).replaceAll('=', '')}.signature';
+
+MemoryTokenStore storedSession() => MemoryTokenStore()
+  ..value = const AuthTokens(
+    accessToken: 'access-current',
+    refreshToken: 'refresh-current',
+  );
+
+Matcher fallbackError(bool allowed) => isA<AuthException>().having(
+  (error) => error.allowOfflineFallback,
+  'allowOfflineFallback',
+  allowed,
+);
+
 String sessionJson({
   String accessToken = 'access-new',
   String refreshToken = 'refresh-new',
@@ -41,6 +79,192 @@ String sessionJson({
 });
 
 void main() {
+  test(
+    'localUserId only decodes subject and performs no network or writes',
+    () async {
+      final store = MemoryTokenStore()
+        ..value = AuthTokens(
+          accessToken: unverifiedToken({'sub': 'owner-1', 'role': 'admin'}),
+          refreshToken: 'refresh',
+        );
+      final repository = AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: store,
+        client: MockClient(
+          (_) async => throw StateError('Must not call network'),
+        ),
+      );
+      expect(await repository.localUserId(), 'owner-1');
+      expect(store.writes, 0);
+      expect(store.clears, 0);
+      repository.dispose();
+    },
+  );
+
+  test(
+    'localUserId rejects malformed tokens, absent and non-string subjects',
+    () async {
+      final store = MemoryTokenStore();
+      final repository = AuthRepository(apiUrl: '', tokenStore: store);
+      expect(await repository.localUserId(), isNull);
+      for (final token in [
+        '',
+        'not-jwt',
+        'a.b',
+        'a.b.c.d',
+        'a.%%%.c',
+        '.e30.signature',
+        'header.${base64Url.encode([255])}.signature',
+        unverifiedToken([]),
+        unverifiedToken(null),
+        unverifiedToken({}),
+        unverifiedToken({'sub': null}),
+        unverifiedToken({'sub': 123}),
+        unverifiedToken({'sub': ''}),
+        unverifiedToken({'sub': '   '}),
+      ]) {
+        store.value = AuthTokens(accessToken: token, refreshToken: 'refresh');
+        expect(await repository.localUserId(), isNull);
+      }
+      repository.dispose();
+    },
+  );
+
+  test(
+    'localUserId reflects token replacement and logout immediately',
+    () async {
+      final store = MemoryTokenStore()
+        ..value = AuthTokens(
+          accessToken: unverifiedToken({'sub': 'owner-1'}),
+          refreshToken: 'refresh',
+        );
+      final repository = AuthRepository(apiUrl: '', tokenStore: store);
+      expect(await repository.localUserId(), 'owner-1');
+      store.value = AuthTokens(
+        accessToken: unverifiedToken({'sub': 'owner-2'}),
+        refreshToken: 'refresh-next',
+      );
+      expect(await repository.localUserId(), 'owner-2');
+      await repository.logout();
+      expect(await repository.localUserId(), isNull);
+      repository.dispose();
+    },
+  );
+
+  for (final refresh in [false, true]) {
+    final operation = refresh ? 'refresh' : 'currentUser';
+    test(
+      '$operation permits fallback only for transport timeout/client errors',
+      () async {
+        for (final error in [
+          TimeoutException('network detail'),
+          http.ClientException('network detail'),
+        ]) {
+          final store = storedSession();
+          final repository = AuthRepository(
+            apiUrl: 'https://api.example',
+            tokenStore: store,
+            client: MockClient((_) async => throw error),
+          );
+          await expectLater(
+            refresh ? repository.refresh() : repository.currentUser(),
+            throwsA(fallbackError(true)),
+          );
+          expect(store.clears, 0);
+          repository.dispose();
+        }
+      },
+    );
+    test(
+      '$operation denies fallback for rejected HTTP responses and malformed data',
+      () async {
+        for (final response in [
+          http.Response('private details', 401),
+          http.Response('private details', 403),
+          http.Response('private details', 500),
+          http.Response('not-json', 200),
+          http.Response('[]', 200),
+          http.Response('{}', 200),
+        ]) {
+          final store = storedSession();
+          final repository = AuthRepository(
+            apiUrl: 'https://api.example',
+            tokenStore: store,
+            client: MockClient((request) async {
+              if (!refresh && request.url.path == '/auth/refresh') {
+                return http.Response(sessionJson(), 200);
+              }
+              return response;
+            }),
+          );
+          await expectLater(
+            refresh ? repository.refresh() : repository.currentUser(),
+            throwsA(fallbackError(false)),
+          );
+          repository.dispose();
+        }
+      },
+    );
+  }
+
+  test(
+    'storage failures never enable fallback even when they are timeouts',
+    () async {
+      for (final failure in ['read', 'write', 'clear']) {
+        final store = FailingTokenStore()
+          ..value = const AuthTokens(
+            accessToken: 'access-current',
+            refreshToken: 'refresh-current',
+          );
+        final timeout = TimeoutException('secure storage timeout');
+        if (failure == 'read') store.readError = timeout;
+        if (failure == 'write') store.writeError = timeout;
+        if (failure == 'clear') store.clearError = timeout;
+        final repository = AuthRepository(
+          apiUrl: 'https://api.example',
+          tokenStore: store,
+          client: MockClient(
+            (_) async => failure == 'clear'
+                ? http.Response('{}', 403)
+                : http.Response(sessionJson(), 200),
+          ),
+        );
+        await expectLater(repository.refresh(), throwsA(fallbackError(false)));
+        if (failure == 'read') {
+          await expectLater(
+            repository.localUserId(),
+            throwsA(fallbackError(false)),
+          );
+          await expectLater(
+            repository.currentUser(),
+            throwsA(fallbackError(false)),
+          );
+        }
+        repository.dispose();
+      }
+    },
+  );
+
+  test(
+    'currentUser propagates refresh transport failure without losing session',
+    () async {
+      final store = storedSession();
+      final repository = AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: store,
+        client: MockClient((request) async {
+          if (request.url.path == '/auth/refresh') {
+            throw TimeoutException('offline');
+          }
+          return http.Response('{}', 401);
+        }),
+      );
+      await expectLater(repository.currentUser(), throwsA(fallbackError(true)));
+      expect(store.clears, 0);
+      repository.dispose();
+    },
+  );
+
   test('API vazia preserva modo offline sem chamada de rede', () async {
     var networkCalled = false;
     final repository = AuthRepository(

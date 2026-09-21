@@ -15,6 +15,7 @@ void main() {
     SharedPreferences.setMockInitialValues({
       'user_name': 'Pessoa de Teste',
       'learning_events:pending:v1': '[]',
+      'classroom_private:v1:environment:owner': '{"classes":[]}',
     });
     final documents = await Directory.systemTemp.createTemp(
       'tutor-tds-account-delete-',

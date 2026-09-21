@@ -43,6 +43,7 @@ class ClassroomDetails {
     required this.status,
     required this.studentIds,
     required this.monitorIds,
+    this.courseVersionId,
   });
 
   final String id;
@@ -55,6 +56,7 @@ class ClassroomDetails {
   final String status;
   final List<String> studentIds;
   final List<String> monitorIds;
+  final String? courseVersionId;
 
   factory ClassroomDetails.fromJson(Map<String, dynamic> json) {
     return ClassroomDetails(
@@ -68,6 +70,7 @@ class ClassroomDetails {
       status: _requiredString(json, 'status'),
       studentIds: _stringList(json, 'student_ids'),
       monitorIds: _stringList(json, 'monitor_ids'),
+      courseVersionId: json['course_version_id'] as String?,
     );
   }
 }

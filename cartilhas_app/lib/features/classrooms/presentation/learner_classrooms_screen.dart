@@ -7,6 +7,7 @@ import '../../../screens/chat_experience_screen.dart';
 import '../../analytics/telemetry_route.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/classroom_repository.dart';
+import '../data/learner_offline_repository.dart';
 import '../models/classroom_models.dart';
 
 /// Class membership is verified by the API; the public catalog stays separate.
@@ -22,6 +23,7 @@ class LearnerClassroomsScreen extends StatefulWidget {
 
 class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
   late final LearnerClassroomGateway _gateway;
+  ClassroomRepository? _ownedRemote;
   List<ClassroomDetails> _classes = const [];
   String? _ownerId;
   String? _error;
@@ -31,20 +33,26 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
   @override
   void initState() {
     super.initState();
-    _gateway =
-        widget.gateway ??
-        ClassroomRepository(
-          apiUrl: AppConfig.tutorApiUrl,
-          authRepository: context.read<AuthRepository>(),
-        );
+    if (widget.gateway != null) {
+      _gateway = widget.gateway!;
+    } else {
+      final auth = context.read<AuthRepository>();
+      _ownedRemote = ClassroomRepository(
+        apiUrl: AppConfig.tutorApiUrl,
+        authRepository: auth,
+      );
+      _gateway = LearnerOfflineRepository(
+        remote: _ownedRemote!,
+        auth: auth,
+        apiUrl: AppConfig.tutorApiUrl,
+      );
+    }
     _load();
   }
 
   @override
   void dispose() {
-    if (widget.gateway == null && _gateway is ClassroomRepository) {
-      _gateway.dispose();
-    }
+    _ownedRemote?.dispose();
     super.dispose();
   }
 
@@ -52,6 +60,8 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _classes = const [];
+      _ownerId = null;
     });
     try {
       final user = await _gateway.currentUser();
@@ -92,6 +102,7 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
             builder: (_) => ChatExperienceScreen(
               cartilha: course,
               progressOwnerId: _ownerId,
+              savedClassroomContent: _usingSavedData,
             ),
           ),
         );
@@ -108,6 +119,9 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
     }
   }
 
+  bool get _usingSavedData =>
+      _gateway is LearnerOfflineRepository && _gateway.usingSavedData;
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Minhas turmas')),
@@ -120,6 +134,24 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
                 'Abra o conteúdo que sua equipe preparou para cada turma. A edição é preservada mesmo quando o catálogo recebe atualizações.',
               ),
               const SizedBox(height: 16),
+              if (_usingSavedData)
+                const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(
+                      'Sem conexão: exibindo turmas salvas neste aparelho. Abra somente conteúdos já salvos. Reconecte em até 7 dias para atualizar seu acesso.',
+                    ),
+                  ),
+                )
+              else
+                const Text(
+                  'Ao abrir o conteúdo com internet, uma cópia da edição da sua turma fica salva para estudar sem rede por até 7 dias.',
+                ),
+              TextButton.icon(
+                onPressed: _opening == null ? _load : null,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Atualizar turmas'),
+              ),
               if (_error != null) ...[
                 Text(_error!, key: const Key('classroom-course-error')),
                 TextButton(
