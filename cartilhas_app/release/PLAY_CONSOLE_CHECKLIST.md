@@ -7,14 +7,24 @@
 
 ## Estado histórico e bloqueio atual
 
-- [x] `versionCode 13` maior que o último candidato local (`12`). Confirmar na Play Console que 13 ainda não foi usado.
+- [x] Freeze legível por máquina em `release/release_status.json`.
+- [x] `preReleaseBuild` bloqueia release enquanto
+  `release_build_allowed=false` ou existir evidência física obrigatória pendente.
+- [x] `dart run tool/verify_release_readiness.dart --intent=audit` confirma
+  versão/pacote/SDKs, flags, configuração produtiva e identidade de assinatura;
+  o estado atual falha somente pelos bloqueios deliberados do freeze.
+
+- [x] Auditoria somente leitura observou `versionCode 13` disponível; revalidar
+  imediatamente antes do upload porque outro envio pode consumir o código.
+  Evidência: `PLAY_CONSOLE_READONLY_AUDIT_2026-09-20.md`; os únicos pacotes
+  visíveis eram `11 (1.2.0)` e `2 (1.1.0)`.
 - [x] Target/compile SDK 36 e min SDK 24.
 - [x] O AAB superseded foi assinado, validado pelo Bundletool e alinhado a
   páginas de 16 KB; o novo bundle deverá repetir esses gates.
 - [x] Certificado do keystore local igual a `android/upload_certificate.pem`.
 - [x] URLs produtivas HTTPS compiladas e validadas sem segredos.
 - [x] API e banco produtivos saudáveis, 9 cursos carregados e backup diário local.
-- [x] Código atual com 177/177 testes; validação do bundle superseded preservada
+- [x] Código atual com 183/183 testes; validação do bundle superseded preservada
   apenas como histórico.
 - [x] Exclusão dentro do app e página externa disponíveis.
 - [x] Política de privacidade pública disponível.
@@ -22,6 +32,14 @@
 
 ## Ações na Play Console
 
+- [ ] Revisar o rascunho `Teste fechado - App` e a mudança de testadores ainda
+  não enviada, para que não sejam submetidos por acidente junto do novo release.
+- [ ] Após o reteste físico, registrar o gate como `passed` e liberar build de
+  forma explícita no manifesto; não remover o verificador do Gradle.
+- [ ] Depois do rebuild e dos gates do AAB, registrar novo caminho/hash como
+  `candidate`, `upload_allowed=true` e `matches_current_source=true`.
+- [ ] Executar `dart run tool/verify_release_readiness.dart --intent=upload --artifact=release/NOVO-CANDIDATO.aab`;
+  só prosseguir se retornar `READY`.
 - [ ] Confirmar que a chave de upload exibida corresponde ao certificado PEM.
 - [ ] Após reteste/rebuild, registrar novo nome/hash e enviar somente o **novo
   AAB** para Teste interno. Nunca enviar o hash superseded acima.

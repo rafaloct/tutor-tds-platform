@@ -27,11 +27,11 @@ piloto. As quatro ondas de produto **não estão fechadas** nesta fotografia.
 | Etapa | Estado real | Evidência disponível | Prova ainda necessária para aceite |
 |---|---|---|---|
 | Onda 0 - Auditoria | Aceite documental parcial | Arquitetura, segurança, migração, integrações, QA e intervenções estão documentadas; manual oficial auditado | Confirmação institucional da assinatura conjunta e atualização dos documentos históricos que ainda descrevem itens já entregues como inexistentes |
-| Onda 1 - Fundação | Parcial avançada; staging comprovado | API e migrations implantadas em staging isolado; seed e smokes aprovados; **67 testes API** no snapshot local | Sheets real, restore ensaiado, automação CI/CD externa ativada e evidência operacional de observabilidade/rate limit |
-| Onda 2 - Aprendizagem | Parcial avançada; código e recorte físico provados | Catálogo/cache, analytics, horas e Assessment Sync; **177/177 Flutter** no código atual; Home, curso remoto, retomada cross-device/offline e player HLS com 0,75x/2x/retomada no Xiaomi | Tutor IA real, conflito concorrente físico, legenda com fixture real e medição de latência |
+| Onda 1 - Fundação | Parcial avançada; staging comprovado | API e migrations implantadas em staging isolado; seed e smokes aprovados; **71 testes API** no snapshot local | Sheets real, restore ensaiado, automação CI/CD externa ativada e evidência operacional de observabilidade/rate limit |
+| Onda 2 - Aprendizagem | Parcial avançada; código e recorte físico provados | Catálogo/cache, analytics, horas e Assessment Sync; **183/183 Flutter** no código atual; Home, curso remoto, retomada cross-device/offline e player HLS com 0,75x/2x/retomada no Xiaomi | Tutor IA real, conflito concorrente físico, legenda com fixture real e medição de latência |
 | Onda 3 - Sala e evidência | Parcial avançada; check-in físico corrigido | Professor/monitor autenticados; Entrada, duplicidade segura e Saída provadas no Xiaomi; PostgreSQL final 1/1 check-in/checkout e 2 evidências; retomada segura offline coberta por testes sem persistir token | Reteste físico da perda/reconexão e reabertura do check-in no Xiaomi; Evidence/revisão completos, certificado público E2E, aluno/admin e negações fora do vínculo |
 | Onda 4 - Mídia, creator e comercial | Implementação testada; aceite operacional parcial | Staging em `0014`; P1 de prefixo corrigido, 16/16 regressões de mídia, player HLS/0,75x/2x/retomada físicos, dois POSTs `201` confirmados no container e gates backend de RBAC/expiração/ledger | Legenda com novo fixture VTT, telemetria qualificada, grant revogado/expirado no app, direitos/canais e decisão jurídica/comercial |
-| Onda 5 - QA / Release | Parcial; **não aceita** | SDK fixado, análise Dart limpa, 59 API, **177/177 Flutter** no código atual, cobertura crítica >=80%, upgrade `.dev`, offline/reconexão, branding e mídia físicos | Reteste/rebuild após Evidence offline; E2E certificado/Evidence, Sheets, TalkBack/tema/teclado físicos, performance, integrações externas e gates Play |
+| Onda 5 - QA / Release | Parcial; **não aceita** | SDK fixado, análise Dart limpa, 71 API, **183/183 Flutter** no código atual, cobertura crítica >=80%, upgrade `.dev`, offline/reconexão, branding e mídia físicos | Reteste/rebuild após Evidence offline; E2E certificado/Evidence, Sheets, TalkBack/tema/teclado físicos, performance, integrações externas e gates Play |
 
 Conclusão: o estado atual é muito mais avançado que o retrato inicial, mas não
 há base para declarar as quatro ondas encerradas nem para promover diretamente
@@ -89,9 +89,9 @@ não acessou secrets/dados de usuário e não executou deploy, restart ou migrat
 
 ### Gates automatizados
 
-- API: **67 testes aprovados** no snapshot local; repetir no SHA candidato.
+- API: **71 testes aprovados** no snapshot local; repetir no SHA candidato.
 - Flutter 3.44.9 / Dart 3.12.2: análise com `--fatal-infos` sem achados.
-- Flutter: **177/177 testes aprovados** no snapshot atual, incluindo re-login,
+- Flutter: **183/183 testes aprovados** no snapshot atual, incluindo re-login,
   Assessment Sync, capacidades por vínculo, regressões responsivas e base path
   de playback/rating, persistência mínima/retry/reabertura segura do check-in
   sem token; recorte dirigido de mídia **16/16**.
@@ -99,6 +99,10 @@ não acessou secrets/dados de usuário e não executou deploy, restart ou migrat
   sync/outbox **88,62%**, sem exclusões artificiais.
 - Gates Android separam debug `.dev`/staging de release/produção e bloqueiam
   URLs vazias ou cruzadas.
+- O freeze agora é executável: `release/release_status.json` mantém o AAB
+  `B93F…` superseded, build/upload desabilitados e o gate físico do Evidence
+  pendente; `preReleaseBuild` e o verificador local recusam prosseguir nesse
+  estado.
 
 Os números valem para o snapshot auditado. Devem ser repetidos no commit e no
 artefato candidatos.
@@ -264,7 +268,7 @@ ou bloqueado conta como aceite.
 |---|---|---|
 | `flutter analyze` sem erros | Parcial | `dart analyze --fatal-infos lib test` passou no SDK fixado; o wrapper `flutter analyze` teve falha LSP no caminho com espaços/parênteses e não há execução final equivalente registrada |
 | `dart analyze` sem erros | Provado | `docs/testing/FLUTTER_TOOLCHAIN_QA_2026-09-20.md`: análise com Flutter 3.44.9/Dart 3.12.2, zero achados |
-| Todos os testes Flutter | Provado no código; artefato pendente | Suíte atual **177/177**. O AAB de hash `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66` antecede a mudança de Evidence offline, está **superseded/não uploadável** e não corresponde mais a este snapshot |
+| Todos os testes Flutter | Provado no código; artefato pendente | Suíte atual **183/183**. O AAB de hash `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66` antecede a mudança de Evidence offline, está **superseded/não uploadável** e não corresponde mais a este snapshot |
 | Cobertura crítica >= 80% | Provado | Relatório do candidato: certificados 88,01%, Study AI 83,43% e sync/outbox 88,62%; total 68,24%, sem exclusões artificiais |
 | Cadastro -> estudo -> conclusão -> certificado | Parcial | Cadastro, estudo, Assessment Sync e certificado têm testes separados; não há `integration_test` único nem certificado físico E2E |
 | Offline -> reconexão | Provado no recorte sintético | `xiaomi-offline-assessment-pending.png`, `after-relaunch` e `resynced` provam alteração sem rede, morte/reabertura e uma tentativa canônica estável após reconexão |
@@ -373,7 +377,7 @@ homologação, não mais um bloqueio por asset defeituoso.
    como ambiente de teste.
 4. Repetir no candidato os smokes de `0013`/`0014` e validar mídia
    restrita/editorial, mantendo pagamentos desligados.
-5. Repetir 59 API, análise, 173 Flutter e preservar o relatório de cobertura.
+5. Repetir 71 API, análise, 183 Flutter e preservar o relatório de cobertura.
 6. Fechar privacidade/performance e executar upgrade somente na trilha
    interna/fechada da Play.
 7. Revisar Data Safety, assinatura, notas e rollout antes de qualquer promoção.

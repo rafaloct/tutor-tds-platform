@@ -3,6 +3,8 @@ set -eu
 
 IMAGE=${1:?immutable image reference required}
 DEPLOY_DIR=${2:?absolute deploy directory required}
+EXPECTED_REVISION=${3:?full Git revision required}
+EXPECTED_SOURCE=${4:?public repository source required}
 
 case "$DEPLOY_DIR" in
   /*) ;;
@@ -72,12 +74,13 @@ rollback() {
   fi
   exit "$code"
 }
-trap rollback EXIT HUP INT TERM
-
 export STAGING_API_IMAGE="$IMAGE"
 if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
   docker pull "$IMAGE"
 fi
+python3 "$DEPLOY_DIR/ops/verify_image_provenance.py" \
+  "$IMAGE" --expected-revision "$EXPECTED_REVISION" \
+  --expected-source "$EXPECTED_SOURCE"
 docker compose -f "$COMPOSE_FILE" config --quiet
 if [ "$sheets_sync_enabled" = "true" ]; then
   docker compose -f "$COMPOSE_FILE" --profile sheets-sync config --format json |
@@ -96,6 +99,7 @@ if not isinstance(credentials, dict):
     raise SystemExit("GOOGLE_SERVICE_ACCOUNT_JSON must be a JSON object")
 '
 fi
+trap rollback EXIT HUP INT TERM
 docker compose -f "$COMPOSE_FILE" up -d db-staging
 attempt=0
 db_health=""
@@ -130,6 +134,8 @@ if [ "${health:-}" != "healthy" ]; then
   exit 1
 fi
 
+running_api_image=$(docker inspect --format '{{.Image}}' "$container_id")
+
 if [ "$sheets_sync_enabled" = "true" ]; then
   sleep 2
   worker_id=$(docker compose -f "$COMPOSE_FILE" --profile sheets-sync ps --status running -q sync-worker-staging)
@@ -137,6 +143,15 @@ if [ "$sheets_sync_enabled" = "true" ]; then
     printf 'Staging sync worker is not running.\n' >&2
     exit 1
   fi
+  running_worker_image=$(docker inspect --format '{{.Image}}' "$worker_id")
+  python3 "$DEPLOY_DIR/ops/verify_image_provenance.py" \
+    "$running_api_image" "$running_worker_image" \
+    --expected-revision "$EXPECTED_REVISION" \
+    --expected-source "$EXPECTED_SOURCE"
+else
+  python3 "$DEPLOY_DIR/ops/verify_image_provenance.py" \
+    "$IMAGE" "$running_api_image" --expected-revision "$EXPECTED_REVISION" \
+    --expected-source "$EXPECTED_SOURCE"
 fi
 
 published_port=$(docker compose -f "$COMPOSE_FILE" port api-staging 8000 | tail -n 1 | awk -F: '{print $NF}')

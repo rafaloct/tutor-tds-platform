@@ -26,23 +26,22 @@ class CertificateService {
   }) {
     final resolvedRepository = repository ?? CertificateRepository();
     return CertificateService._(
+      client ?? http.Client(),
+      client == null,
       gatewayUrl: gatewayUrl,
       repository: resolvedRepository,
       pdfService:
           pdfService ?? CertificatePdfService(repository: resolvedRepository),
-      client: client ?? http.Client(),
-      ownsClient: client == null,
     );
   }
 
-  CertificateService._({
+  CertificateService._(
+    this._client,
+    this._ownsClient, {
     required this.gatewayUrl,
     required this.repository,
     required this.pdfService,
-    required http.Client client,
-    required bool ownsClient,
-  }) : _client = client,
-       _ownsClient = ownsClient;
+  });
 
   Future<List<CertificateRecord>> loadAll() => repository.loadAll();
 

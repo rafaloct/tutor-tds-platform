@@ -66,7 +66,7 @@ Essas mudanças existem apenas no workspace e não autorizam publicação.
 
 ## Validação local do snapshot
 
-- `pytest -q`: **67 testes aprovados**;
+- `pytest -q`: **71 testes aprovados**;
 - migration tests incluídos na suíte: upgrade/downgrade, constraints e inserts;
 - `compileall`: aplicação e testes compilados;
 - `bash -n`: `backup.sh` e `deploy_staging.sh` válidos;

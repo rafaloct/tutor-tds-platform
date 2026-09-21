@@ -2,6 +2,7 @@ import java.io.FileInputStream
 import java.net.URI
 import java.util.Base64
 import java.util.Properties
+import groovy.json.JsonSlurper
 
 fun decodeDartDefines(raw: String?): Map<String, String> = raw
     .orEmpty()
@@ -107,6 +108,54 @@ fun validateReleaseProductionDefines(defines: Map<String, String>) {
     }
 }
 
+fun validateReleaseFreezeState(statusFile: java.io.File) {
+    if (!statusFile.exists()) {
+        throw GradleException(
+            "Build release bloqueado: release/release_status.json ausente.",
+        )
+    }
+    val status = runCatching {
+        JsonSlurper().parse(statusFile) as? Map<*, *>
+    }.getOrNull() ?: throw GradleException(
+        "Build release bloqueado: release_status.json invalido.",
+    )
+    if (status["schema_version"] != 1) {
+        throw GradleException(
+            "Build release bloqueado: schema de release_status.json invalido.",
+        )
+    }
+    if (status["release_build_allowed"] != true) {
+        throw GradleException(
+            "Build release congelado: conclua os gates em release/release_status.json.",
+        )
+    }
+    val evidence = status["required_physical_evidence"] as? List<*>
+        ?: throw GradleException(
+            "Build release bloqueado: evidencias fisicas ausentes.",
+        )
+    val invalidEvidence = evidence.any { item ->
+        item !is Map<*, *> ||
+            item["id"] !is String ||
+            item["status"] !is String ||
+            item["required_for_release_build"] !is Boolean
+    }
+    if (invalidEvidence) {
+        throw GradleException(
+            "Build release bloqueado: evidencia fisica invalida.",
+        )
+    }
+    val incompleteRequiredGate = evidence
+        .filterIsInstance<Map<*, *>>()
+        .any {
+            it["required_for_release_build"] == true && it["status"] != "passed"
+    }
+    if (incompleteRequiredGate) {
+        throw GradleException(
+            "Build release bloqueado: evidencia fisica obrigatoria pendente.",
+        )
+    }
+}
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -187,6 +236,7 @@ tasks.matching { it.name == "preDebugBuild" }.configureEach {
 // nem herdar a rota isolada usada no APK DEV.
 tasks.matching { it.name == "preReleaseBuild" }.configureEach {
     doFirst {
+        validateReleaseFreezeState(rootProject.file("../release/release_status.json"))
         validateReleaseProductionDefines(
             decodeDartDefines(project.findProperty("dart-defines")?.toString()),
         )

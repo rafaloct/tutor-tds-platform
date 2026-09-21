@@ -8,7 +8,7 @@ contratos, das configurações dos provedores e das decisões do responsável pe
 tratamento dos dados.
 
 > **Não enviar o AAB auditado.** O hash `B93FAD21…B2844B66` antecede a mudança
-> de Evidence/check-in offline. O código atual passou 177/177, mas aguarda
+> de Evidence/check-in offline. O código atual passou 183/183, mas aguarda
 > reteste no Xiaomi reconectado e novo rebuild.
 
 ## Artefato histórico auditado — superseded

@@ -61,7 +61,18 @@ jobs:
           repository="${GITHUB_REPOSITORY,,}"
           echo "ref=ghcr.io/${repository}/tutor-tds-api:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
       - name: Build immutable image
-        run: docker build --pull --tag "${{ steps.image.outputs.ref }}" api
+        shell: bash
+        run: |
+          created=$(git show -s --format=%cI "$GITHUB_SHA")
+          source="https://github.com/${GITHUB_REPOSITORY}"
+          docker build --pull \
+            --build-arg "OCI_REVISION=$GITHUB_SHA" \
+            --build-arg "OCI_SOURCE=$source" \
+            --build-arg "OCI_CREATED=$created" \
+            --tag "${{ steps.image.outputs.ref }}" api
+          python api/ops/verify_image_provenance.py \
+            "${{ steps.image.outputs.ref }}" --expected-revision "$GITHUB_SHA" \
+            --expected-source "$source"
       - name: Authenticate to GHCR
         if: github.event_name == 'push'
         env:
@@ -115,7 +126,7 @@ jobs:
           esac
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH/ops'"
           scp -P "$SSH_PORT" api/docker-compose.staging.yml "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/docker-compose.staging.yml"
-          scp -P "$SSH_PORT" api/ops/deploy_staging.sh api/ops/smoke_test.py "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/ops/"
+          scp -P "$SSH_PORT" api/ops/deploy_staging.sh api/ops/smoke_test.py api/ops/verify_image_provenance.py "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/ops/"
       - name: Deploy with health gate and automatic image rollback
         env:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
@@ -123,6 +134,8 @@ jobs:
           SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
           DEPLOY_PATH: ${{ secrets.STAGING_DEPLOY_PATH }}
           IMAGE: ${{ needs.build.outputs.image }}
+          REVISION: ${{ github.sha }}
+          SOURCE: https://github.com/${{ github.repository }}
         run: |
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
-            "chmod 700 '$DEPLOY_PATH/ops/deploy_staging.sh' && '$DEPLOY_PATH/ops/deploy_staging.sh' '$IMAGE' '$DEPLOY_PATH'"
+            "chmod 700 '$DEPLOY_PATH/ops/deploy_staging.sh' && '$DEPLOY_PATH/ops/deploy_staging.sh' '$IMAGE' '$DEPLOY_PATH' '$REVISION' '$SOURCE'"

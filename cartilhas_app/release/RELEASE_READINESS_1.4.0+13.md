@@ -2,7 +2,7 @@
 
 Auditoria executada em 20/09/2026. **O bundle registrado abaixo está superseded
 e não deve ser enviado à Play Console.** Ele antecede a implementação da
-retomada offline segura do Evidence/check-in. O código atual passou 177/177
+retomada offline segura do Evidence/check-in. O código atual passou 183/183
 testes, mas requer reteste físico no Xiaomi reconectado e novo rebuild antes de
 voltar a ser candidato a teste interno. Este documento não registra upload ou
 publicação. O bundle histórico foi
@@ -24,8 +24,9 @@ e 2x e retomada.
 ## Gates históricos do artefato e gates atuais do código
 
 - `dart analyze lib test`: zero issues.
-- `flutter test --no-pub`: **177/177** no código atual, depois da mudança de
-  Evidence offline. Esse resultado não transforma o AAB superseded em candidato.
+- `flutter test --no-pub`: **183/183** no código atual, incluindo os seis
+  testes do verificador e a mudança de Evidence offline. Esse resultado não
+  transforma o AAB superseded em candidato.
 - `flutter test --coverage test`: baseline anterior de 163 testes aprovada;
   relatório bruto em `coverage/lcov.info`.
 - Cobertura de linhas: total `5.378/7.881` (68,24%); certificados
@@ -106,6 +107,30 @@ e 2x e retomada.
    permitiu comprovar esse subcaso no reteste físico.
 7. Não promover se houver divergência de assinatura, versionCode já usado,
    crash/ANR, alerta de SDK/página de memória ou declaração de dados incoerente.
+
+## Gate local de freeze
+
+O estado bloqueado está materializado em `release/release_status.json`, não
+apenas neste texto. O gate atual declara o AAB `B93F…` como `superseded`,
+`upload_allowed=false`, `matches_current_source=false`,
+`release_build_allowed=false` e mantém
+`evidence_offline_xiaomi` pendente. `preReleaseBuild` lê esse manifesto e falha
+antes de compilar release.
+
+`tool/verify_release_readiness.dart` faz auditoria somente leitura de versão,
+applicationId, SDKs, flags do manifesto, configuração produtiva, presença da
+assinatura, correspondência entre certificado/keystore e fingerprint aprovada,
+freeze físico e, para upload, hash do AAB. O comando atual de auditoria retorna
+`BLOCKED` somente por `physical_evidence_pending`, `release_build_frozen` e
+`artifact_superseded`; não encontrou divergência nos gates estáticos.
+Uma execução direta de `gradlew preReleaseBuild --no-daemon` também parou em
+`Build release congelado` antes de qualquer compilação/AAB, provando a ligação
+do manifesto ao Gradle. A auditoria somente leitura da Play observou o
+`versionCode 13` disponível, com somente os códigos 11 e 2 no inventário de
+pacotes. O detalhe está em `PLAY_CONSOLE_READONLY_AUDIT_2026-09-20.md`, mas deve
+ser reconfirmado imediatamente antes do upload. Permanecem como gates externos:
+reteste no Xiaomi, revisão humana de Data Safety/conteúdo e compatibilidade do
+backend produtivo antes do upload.
 
 ## Observação de manutenção
 

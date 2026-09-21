@@ -321,7 +321,7 @@ online conectada`, mas não oferecia uma ação de re-login. A correção adicio
 Na build final, o fluxo foi aprovado fisicamente com as contas sintéticas de
 professor e monitor: login seguro, sessão conectada, capacidades derivadas dos
 vínculos e progresso local preservado. A correção também está coberta pela suíte
-automatizada final, com **177/177 testes aprovados**. O P1 de re-login está
+automatizada final, com **183/183 testes aprovados**. O P1 de re-login está
 encerrado; o P1 independente de persistência do check-in também foi corrigido e
 retestado conforme a seção anterior.
 

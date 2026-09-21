@@ -129,10 +129,25 @@ presente no host também passou `config --quiet`, sem imprimir valores.
 2. Executar suíte API, migrations, Flutter e scans no mesmo SHA.
 3. Construir/publicar uma única imagem imutável por SHA; registrar digest e
    SBOM/scan. Não promover a tag manual de staging desta fotografia.
+   O build deve injetar `revision=$SHA`, `version=$SHA`, `source` HTTPS do
+   repositório e `created` igual ao timestamp do commit, nunca ao relógio do
+   runner. A base Python permanece fixada por digest.
 4. Implantar esse digest primeiro em staging, repetir smokes por papel,
    assessment cross-device, Evidence e mídia.
 5. Rodar o comparador OpenAPI; o candidato não pode perder rota produtiva nem
    operação exigida pelo AAB.
+
+Verificar a imagem candidata antes do staging e novamente antes da produção:
+
+```bash
+python api/ops/verify_image_provenance.py IMAGEM_OU_DIGEST \
+  --expected-revision SHA_GIT_COMPLETO \
+  --expected-source https://github.com/ORGANIZACAO/REPOSITORIO
+```
+
+Quando API e worker estiverem ativos, passe ambos os image IDs ao mesmo comando.
+O resultado só é válido se digest e revisão coincidirem. O script inspeciona
+somente ID/labels OCI; não lê `Config.Env` nem imprime secrets.
 
 ### 2. Preparar janela e rollback
 
@@ -143,6 +158,11 @@ presente no host também passou `config --quiet`, sem imprimir valores.
 4. Configurar `PRODUCTION_API_IMAGE` com o digest candidato, sem alterar os
    demais secrets; confirmar `PUBLIC_API_BASE_URL` e `PAYMENT_ADAPTER=disabled`.
 5. Confirmar espaço em disco, banco healthy e ausência de migration concorrente.
+
+A imagem produtiva antiga não possui os labels novos e serve apenas como
+rollback do estado anterior. Ela não pode ser apresentada como candidata
+rastreável. O primeiro candidato 1.4 deve nascer do commit congelado; labels não
+podem ser acrescentados posteriormente por retag.
 
 ### 3. Backup obrigatório
 

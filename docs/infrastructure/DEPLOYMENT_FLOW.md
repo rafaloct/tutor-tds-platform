@@ -161,6 +161,28 @@ aciona o job de deploy protegido pelo environment GitHub `staging`.
 As actions oficiais usadas pelo workflow estão fixadas por SHA, evitando que
 uma tag mutável altere o pipeline sem revisão.
 
+O build usa a base Python fixada por digest e grava labels OCI determinísticas:
+
+- `org.opencontainers.image.revision`: SHA Git completo de 40 caracteres;
+- `org.opencontainers.image.source`: URL HTTPS do repositório;
+- `org.opencontainers.image.created`: timestamp versionado do commit;
+- `org.opencontainers.image.version`: o mesmo SHA da revisão.
+
+A tag continua sendo exatamente `${GITHUB_SHA}`. O verificador
+`api/ops/verify_image_provenance.py` roda depois do build, antes de qualquer
+mutação de staging e novamente sobre os image IDs dos containers. Ele falha se
+label estiver ausente/inválida, se revisão/source divergirem do job ou se API e
+worker não resolverem para o mesmo digest e revisão. Quando o profile Sheets
+está desligado, ele compara a imagem solicitada com a API efetivamente iniciada.
+Imagens manuais antigas com label `unknown` são recusadas; não se deve adaptar a
+revisão com `docker tag`, pois tag não altera nem prova os labels internos.
+
+Isso torna a origem verificável e repetível por commit, mas não promete build
+byte a byte idêntico: as dependências Python ainda usam intervalos no
+`pyproject.toml`. Por isso staging e produção devem promover o **mesmo digest do
+GHCR**, nunca reconstruir a imagem para cada ambiente. Um lockfile com hashes e
+SBOM/assinatura continuam endurecimentos de supply chain posteriores.
+
 O deploy usa apenas `ssh`/`scp` nativos, aguarda o PostgreSQL, aplica migrations
 antes de trocar os serviços, exige health check e roda o smoke test. Ele confirma
 o worker somente quando Sheets foi habilitado explicitamente. Falha em qualquer

@@ -3,7 +3,7 @@
 ## Estado validado em 20/09/2026
 
 > **BLOQUEADO PARA UPLOAD:** o AAB abaixo está superseded porque antecede a
-> retomada offline segura do Evidence/check-in. O código atual passou 177/177,
+> retomada offline segura do Evidence/check-in. O código atual passou 183/183,
 > mas é obrigatório retestar no Xiaomi reconectado e gerar um novo AAB. Não
 > enviar o hash `B93FAD21…B2844B66` à Play Console.
 
@@ -56,6 +56,18 @@ Validação executada no artefato:
 
 O relatório histórico deste artefato superseded, incluindo hash, permissões, shrink e
 pendências humanas, está em `release/RELEASE_READINESS_1.4.0+13.md`.
+
+O freeze também é executável. `release/release_status.json` bloqueia o
+`preReleaseBuild` enquanto o reteste físico do Evidence estiver pendente. Antes
+de qualquer build ou upload, execute respectivamente:
+
+```powershell
+dart run tool/verify_release_readiness.dart --intent=build
+dart run tool/verify_release_readiness.dart --intent=upload --artifact=release/NOVO-CANDIDATO.aab
+```
+
+O segundo comando é somente leitura e valida estado/hash; ele não acessa a Play
+Console nem faz upload.
 
 ## Operação da API
 
