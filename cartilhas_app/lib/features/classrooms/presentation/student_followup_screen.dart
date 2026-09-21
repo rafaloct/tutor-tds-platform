@@ -306,6 +306,65 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
     );
   }
 
+  Future<void> _history({String? caseId}) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final result = caseId == null
+          ? await widget.repository.studentBaseline(
+              widget.classroom.id,
+              _student!,
+            )
+          : await widget.repository.mentorshipCase(widget.classroom.id, caseId);
+      final rows = (result['history'] as List).cast<Map<String, dynamic>>();
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Histórico do acompanhamento'),
+          content: SizedBox(
+            width: 440,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (rows.isEmpty) const Text('Nenhuma alteração registrada.'),
+                  for (final row in rows)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        'Revisão ${row['revision']} • ${row['occurred_at']}\n${row['reason']}',
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Fechar'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _error = error.toString();
+          _ready = false;
+          _baseline = null;
+          _cases = [];
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _write(Future<Object?> Function() operation) async {
     setState(() {
       _busy = true;
@@ -391,6 +450,11 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
                     onPressed: _busy ? null : _saveBaseline,
                     child: const Text('Conferir vínculo do baseline'),
                   ),
+                  if (_baseline != null)
+                    TextButton(
+                      onPressed: _busy ? null : () => _history(),
+                      child: const Text('Histórico do vínculo'),
+                    ),
                 ],
               ),
             ),
@@ -427,6 +491,12 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
                     TextButton(
                       onPressed: _busy ? null : () => _editCase(item),
                       child: const Text('Atualizar mentoria'),
+                    ),
+                    TextButton(
+                      onPressed: _busy
+                          ? null
+                          : () => _history(caseId: item['id'] as String),
+                      child: const Text('Histórico da mentoria'),
                     ),
                   ],
                 ),

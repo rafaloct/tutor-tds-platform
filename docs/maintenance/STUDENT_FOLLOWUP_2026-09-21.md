@@ -47,5 +47,8 @@ a API precisa validar qualquer outro ID informado.
 
 14 testes direcionados de tela/painel passaram, incluindo cancelamento sem
 escrita, confirmação obrigatória, acesso revogado e leitura do próximo passo.
-Ainda pendentes: fluxo positivo de escrita pela UI, histórico visível,
-seletor de responsável por nome, integração real API e verificação física.
+Atualização: teste positivo de escrita de baseline pela UI passou, incluindo
+confirmação explícita, revisão esperada, chave de idempotência e releitura.
+Histórico de vínculo e mentoria ganhou consulta online na tela (sem cache).
+Ainda pendentes: teste positivo completo de mentoria pela UI, seletor de
+responsável por nome, integração real API e verificação física.

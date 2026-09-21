@@ -60,6 +60,60 @@ void main() {
     return repo;
   }
 
+  testWidgets('baseline save rereads server state with explicit consent', (
+    tester,
+  ) async {
+    Map<String, dynamic>? saved;
+    var writes = 0;
+    await showScreen(
+      tester,
+      handler: (request) async {
+        if (request.method == 'PUT') {
+          writes++;
+          saved = {
+            ...jsonDecode(request.body) as Map<String, dynamic>,
+            'revision': 1,
+          };
+          return http.Response(jsonEncode(saved), 200);
+        }
+        return http.Response(
+          jsonEncode(
+            request.url.path.endsWith('/baseline')
+                ? {'baseline': saved, 'history': []}
+                : {'items': [], 'total': 0},
+          ),
+          200,
+        );
+      },
+    );
+    await tester.tap(find.text('Conferir vínculo do baseline'));
+    await tester.pumpAndSettle();
+    Future<void> fill(String label, String value) async {
+      final field = find.byWidgetPredicate(
+        (w) => w is TextField && w.decoration?.labelText == label,
+      );
+      await tester.ensureVisible(field);
+      await tester.enterText(field, value);
+    }
+
+    await fill('ID local do registro', 'tablet-123');
+    await fill('Data da coleta (AAAA-MM-DD)', '2026-09-21');
+    await fill('Justificativa da vinculação', 'Formulário conferido');
+    await tester.ensureVisible(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Salvar online'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+    expect(writes, 1);
+    expect(saved!['expected_revision'], 0);
+    expect(saved!['idempotency_key'], startsWith('followup-'));
+    expect(find.text('Baseline vinculado'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'baseline requires explicit confirmation and cancel does not write',
     (tester) async {
