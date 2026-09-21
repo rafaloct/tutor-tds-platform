@@ -4,7 +4,7 @@ set -eu
 IMAGE=${1:?immutable image reference required}
 DEPLOY_DIR=${2:?absolute deploy directory required}
 EXPECTED_REVISION=${3:?full Git revision required}
-EXPECTED_SOURCE=${4:?public repository source required}
+EXPECTED_SOURCE=${4:?HTTPS repository or SHA-256 source archive required}
 
 case "$DEPLOY_DIR" in
   /*) ;;

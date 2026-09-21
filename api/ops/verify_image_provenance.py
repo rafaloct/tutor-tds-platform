@@ -12,6 +12,7 @@ from datetime import datetime
 from urllib.parse import urlsplit
 
 REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+ARCHIVE_SOURCE_PATTERN = re.compile(r"^urn:sha256:[0-9a-f]{64}$")
 LABEL_REVISION = "org.opencontainers.image.revision"
 LABEL_SOURCE = "org.opencontainers.image.source"
 LABEL_CREATED = "org.opencontainers.image.created"
@@ -62,14 +63,21 @@ def parse_provenance(document: dict) -> ImageProvenance:
     if version != revision:
         raise ProvenanceError("Image version and revision labels diverge")
     parsed_source = urlsplit(source if isinstance(source, str) else "")
-    if (
-        parsed_source.scheme != "https"
-        or not parsed_source.netloc
-        or parsed_source.username
-        or parsed_source.query
-        or parsed_source.fragment
-    ):
-        raise ProvenanceError("Image source label must be a public HTTPS repository URL")
+    repository_source = (
+        parsed_source.scheme == "https"
+        and bool(parsed_source.netloc)
+        and not parsed_source.username
+        and not parsed_source.query
+        and not parsed_source.fragment
+    )
+    archive_source = bool(
+        ARCHIVE_SOURCE_PATTERN.fullmatch(source if isinstance(source, str) else "")
+    )
+    if not repository_source and not archive_source:
+        raise ProvenanceError(
+            "Image source label must be a public HTTPS repository URL "
+            "or a SHA-256 source archive URN"
+        )
     try:
         parsed_created = datetime.fromisoformat(
             created.replace("Z", "+00:00") if isinstance(created, str) else ""

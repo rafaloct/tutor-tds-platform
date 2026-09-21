@@ -16,6 +16,7 @@ SPEC.loader.exec_module(provenance)
 
 REVISION = "a" * 40
 SOURCE = "https://github.com/example/tutor-tds"
+ARCHIVE_SOURCE = "urn:sha256:" + "a" * 64
 
 
 def image_document(
@@ -47,6 +48,17 @@ def test_same_digest_and_revision_pass_for_api_and_worker() -> None:
 
     assert result.image_id == "sha256:" + "1" * 64
     assert result.revision == REVISION
+
+
+def test_content_addressed_local_archive_is_accepted_without_git_remote() -> None:
+    result = provenance.verify_images(
+        [image_document(source=ARCHIVE_SOURCE)],
+        expected_revision=REVISION,
+        expected_source=ARCHIVE_SOURCE,
+    )
+    assert result.source == ARCHIVE_SOURCE
+    with pytest.raises(provenance.ProvenanceError, match="source"):
+        provenance.parse_provenance(image_document(source="urn:sha256:invalid"))
 
 
 def test_missing_or_untrusted_oci_labels_fail_closed() -> None:
@@ -96,5 +108,5 @@ def test_dockerfile_workflow_and_deploy_are_wired_for_provenance() -> None:
     assert '--build-arg "OCI_REVISION=$GITHUB_SHA"' in workflow
     assert "verify_image_provenance.py" in workflow
     assert "EXPECTED_REVISION=${3:?full Git revision required}" in deploy
-    assert "EXPECTED_SOURCE=${4:?public repository source required}" in deploy
+    assert "EXPECTED_SOURCE=${4:?HTTPS repository or SHA-256 source archive required}" in deploy
     assert deploy.count("verify_image_provenance.py") >= 3
