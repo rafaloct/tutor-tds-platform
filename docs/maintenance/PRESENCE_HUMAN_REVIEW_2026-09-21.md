@@ -1,7 +1,7 @@
 # Presença: fechamento funcional local
 
-Estado: implantada em staging; produção não alterada. Fluxo autenticado de
-presença e triggers PostgreSQL ainda precisam de validação específica.
+Estado: implantada em staging, com fluxo autenticado e proteções de histórico
+verificados no PostgreSQL. Produção não alterada; validação física pendente.
 
 O fluxo reutiliza sessões, matrículas, autorização de equipe e o repositório de
 evidências existentes. Não cria um novo sistema de permissões.
@@ -55,3 +55,25 @@ arquitetura e sem alterar produção com base apenas nos testes locais.
 
 Não confundir essas verificações com conclusão do fluxo de presença em banco
 real ou com liberação de produção. Xiaomi não utilizado nesta implantação.
+
+## Verificação funcional posterior em PostgreSQL
+
+`smoke_presence_staging.py` criou uma sessão exclusivamente na turma sintética:
+`fd77e219-c001-462b-a10b-7581a71a1667`. Relatório:
+`49e61feb-0338-4357-867a-2b43d0502190`.
+
+Login real de aluno/professor, lista inicialmente pendente, tentativa de
+encerramento pendente bloqueada, decisão humana persistida na revisão 1,
+releitura, retry sem duplicação, revisão desatualizada bloqueada e encerramento
+com total confirmado 1 passaram. Aluno recebeu 403 na lista e na decisão.
+Segunda execução na mesma sessão fechada passou sem criar sessão/decisão nova.
+Os registros sintéticos foram mantidos; não representam presença real.
+
+`audit_presence_staging.py` conferiu diretamente uma única decisão, autoria do
+professor e correspondência de estado/justificativa com o registro. Tentativas
+de alterar presença encerrada, reescrever histórico e apagar histórico foram
+recusadas pelos triggers PostgreSQL. Todas as sondagens foram revertidas.
+
+Scripts copiados separadamente para operação, não incluídos na imagem 0395fa0.
+Esta evidência substitui a pendência de fluxo HTTP/banco acima, mas não comprova
+UI no Xiaomi, concorrência em PostgreSQL, exportação Sheets ou baseline/mentoria.
