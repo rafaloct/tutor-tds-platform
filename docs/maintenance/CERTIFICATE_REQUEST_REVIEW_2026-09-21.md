@@ -117,3 +117,18 @@ Resultado Flutter deste fechamento: **274 testes passaram**, análise dos quatro
 arquivos Dart alterados sem problemas. Suíte API completa: **163 testes passaram**
 (dois avisos de depreciação de dependências, sem falhas). Nenhuma mudança em implementação backend,
 migração, Worker, produção ou mecanismo de capabilities nesta integração.
+
+## Gate de compatibilidade para emissão
+
+O bypass entre a rota legada de referências e a aprovação humana foi isolado
+por configuração no commit `032c769`. `CERTIFICATE_APPROVAL_REQUIRED=false`
+mantém o contrato do aplicativo publicado durante a migração. Quando ativado
+no staging, `POST /certificates/references` exige um pedido aprovado para a
+mesma matrícula/edição e, quando informada, turma correspondente; pedido
+ausente ou turma divergente retorna `422`. A aprovação não emite o documento
+por si só: Worker autenticado, reserva/idempotência, assinatura, KV e carteira
+ainda precisam de validação ponta a ponta. Não ativar em produção antes de
+testar o aplicativo publicado e preservar referências antigas.
+
+Regressão após o gate: **207 testes API passaram**, com dois avisos de
+depreciação conhecidos. A flag permanece desligada em todos os ambientes.
