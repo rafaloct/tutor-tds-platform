@@ -113,3 +113,7 @@ Retorno da tela de acompanhamento atualiza o dashboard. Nenhum texto de
 baseline/mentoria é usado como métrica ou enviado pela navegação rastreada.
 14 testes de modelos/painel passaram e análise Dart sem problemas.
 Backend dos agregados em implementação separada; ainda não implantado.
+
+Regressão integrada Flutter posterior: **290 testes passaram**. O marcador de
+release foi atualizado somente quanto à contagem de testes; build/upload
+permanecem bloqueados. Isso não é aceite físico nem conclusão das demais ondas.
