@@ -46,6 +46,19 @@ def run():
     call('GET', detail, token=student, expected=(403,))
     page = call('GET', cases + '?user_id=' + USER, token=teacher)
     assert any(row['id'] == identity and row['revision'] == 2 for row in page['items'])
+    mentors = call('GET', f'/classes/{CLASS}/students/{USER}/mentors', token=teacher)['mentors']
+    assert any(row['user_id'] == 'staging-qa-teacher' for row in mentors)
+    assert all(set(row) == {'user_id', 'name'} for row in mentors)
+    call('GET', f'/classes/{CLASS}/students/{USER}/mentors', token=student, expected=(403,))
+    dashboard = call('GET', f'/classes/{CLASS}/dashboard', token=teacher)
+    learner = next(row for row in dashboard['students'] if row['user_id'] == USER)
+    assert learner['baseline_linked'] is True
+    assert learner['confirmed_sessions'] == 1
+    assert learner['open_mentorship_cases'] == 1
+    assert dashboard['summary']['baseline_linked_students'] == 1
+    assert dashboard['summary']['confirmed_participations'] == 1
+    assert dashboard['summary']['open_mentorship_cases'] == 1
+    assert 'record_id' not in json.dumps(dashboard) and 'next_action' not in json.dumps(dashboard)
     print(json.dumps({'baseline_id': saved['id'], 'case_id': identity, 'baseline_revision': 1, 'case_revision': 2, 'authenticated_roundtrip': 'pass', 'source_accessed': False}))
 
 
