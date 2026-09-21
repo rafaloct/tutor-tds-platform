@@ -27,7 +27,7 @@ piloto. As quatro ondas de produto **não estão fechadas** nesta fotografia.
 | Etapa | Estado real | Evidência disponível | Prova ainda necessária para aceite |
 |---|---|---|---|
 | Onda 0 - Auditoria | Aceite documental parcial | Arquitetura, segurança, migração, integrações, QA e intervenções estão documentadas; manual oficial auditado | Confirmação institucional da assinatura conjunta e atualização dos documentos históricos que ainda descrevem itens já entregues como inexistentes |
-| Onda 1 - Fundação | Parcial avançada; staging comprovado | API e migrations implantadas em staging isolado; seed e smokes aprovados; **59 testes API** no snapshot local | Sheets real, restore ensaiado, automação CI/CD externa ativada e evidência operacional de observabilidade/rate limit |
+| Onda 1 - Fundação | Parcial avançada; staging comprovado | API e migrations implantadas em staging isolado; seed e smokes aprovados; **67 testes API** no snapshot local | Sheets real, restore ensaiado, automação CI/CD externa ativada e evidência operacional de observabilidade/rate limit |
 | Onda 2 - Aprendizagem | Parcial avançada; código e recorte físico provados | Catálogo/cache, analytics, horas e Assessment Sync; **177/177 Flutter** no código atual; Home, curso remoto, retomada cross-device/offline e player HLS com 0,75x/2x/retomada no Xiaomi | Tutor IA real, conflito concorrente físico, legenda com fixture real e medição de latência |
 | Onda 3 - Sala e evidência | Parcial avançada; check-in físico corrigido | Professor/monitor autenticados; Entrada, duplicidade segura e Saída provadas no Xiaomi; PostgreSQL final 1/1 check-in/checkout e 2 evidências; retomada segura offline coberta por testes sem persistir token | Reteste físico da perda/reconexão e reabertura do check-in no Xiaomi; Evidence/revisão completos, certificado público E2E, aluno/admin e negações fora do vínculo |
 | Onda 4 - Mídia, creator e comercial | Implementação testada; aceite operacional parcial | Staging em `0014`; P1 de prefixo corrigido, 16/16 regressões de mídia, player HLS/0,75x/2x/retomada físicos, dois POSTs `201` confirmados no container e gates backend de RBAC/expiração/ledger | Legenda com novo fixture VTT, telemetria qualificada, grant revogado/expirado no app, direitos/canais e decisão jurídica/comercial |
@@ -89,7 +89,7 @@ não acessou secrets/dados de usuário e não executou deploy, restart ou migrat
 
 ### Gates automatizados
 
-- API: **59 testes aprovados** no snapshot local; repetir no SHA candidato.
+- API: **67 testes aprovados** no snapshot local; repetir no SHA candidato.
 - Flutter 3.44.9 / Dart 3.12.2: análise com `--fatal-infos` sem achados.
 - Flutter: **177/177 testes aprovados** no snapshot atual, incluindo re-login,
   Assessment Sync, capacidades por vínculo, regressões responsivas e base path

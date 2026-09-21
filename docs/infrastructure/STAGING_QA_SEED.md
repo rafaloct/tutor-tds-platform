@@ -94,6 +94,40 @@ Os IDs começam por `staging-qa-`. A conta de professor e a de monitor mantêm
 papel global `student`; a autoridade de equipe deriva dos vínculos locais de
 programa/turma, conforme o modelo multi-programa.
 
+## Sessão Evidence descartável para QA físico
+
+Quando a sessão canônica já possuir entrada/saída histórica, não apague seus
+registros para fabricar um baseline. Crie uma sessão nova com:
+
+```bash
+python3 ops/staging_evidence_session_refresh.py \
+  https://ead.ipexdesenvolvimento.cloud/tutor-staging-api \
+  /opt/tutor-tds-staging/.staging-seed.env
+```
+
+Execute somente no host de staging, imediatamente antes do ensaio. A ferramenta:
+
+- aceita somente o HTTPS exato aprovado
+  `ead.ipexdesenvolvimento.cloud/tutor-staging-api`, sem porta, credenciais,
+  query ou fragmento;
+- exige, no Linux, que o arquivo existente esteja exatamente em modo `0600`;
+- autentica somente o professor sintético e cria sessão na turma
+  `staging-qa-class`;
+- exige exatamente uma chave `STAGING_SEED_CHECKIN_TOKEN`, grava o novo token
+  por arquivo temporário + `fsync` + `os.replace` e reaplica modo `0600`;
+- imprime somente a allowlist `id`, turma, janela, status, expiração e versão;
+  `checkin_token` e access token nunca entram na saída;
+- não apaga sessão, check-in, checkout ou evidência anterior.
+
+O token criado pela API é curto/rotativo; inicie o teste logo após o comando.
+Confirme o baseline da nova sessão por `session_id`, sem consultar o digest ou o
+token. Não reaplique o seed canônico entre a criação e o ensaio: ele administra
+também a sessão fixa histórica e não é o mecanismo de reset da sessão nova.
+
+Os testes unitários em `tests/test_staging_evidence_session_refresh.py` usam
+somente arquivos temporários e respostas simuladas; eles cobrem fail-closed da
+URL, substituição única/atômica, solicitação de modo `0600` e saída sem segredos.
+
 ## Arquivos necessários no staging
 
 A imagem da API precisa conter `app/staging_seed.py`. Para operação manual,

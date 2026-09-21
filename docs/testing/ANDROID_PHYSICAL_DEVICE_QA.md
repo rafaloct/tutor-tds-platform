@@ -117,7 +117,7 @@ package Play não foi instalado, limpo, removido nem usado como alvo de
 | A11 - Assessment Sync entre dispositivos | A build encontrou uma tentativa remota com 1/1 resposta, retomou sem nova IA, hidratou deck/resposta e depois preservou uma alteração durante offline, morte/reabertura e reconexão | **Aprovado para recuperação cross-device e offline/reconexão do caso sintético:** ainda faltam conflito concorrente e tentativa concluída em dispositivo |
 | A13 - capacidades por papel | Professor recebeu `Área da equipe` e `Registrar presença`; monitor recebeu saudação própria, `Monitor por exceção` e `Registrar presença` | **Aprovado para professor e monitor sintéticos:** capabilities vieram dos vínculos de staging; aluno/admin e negações cruzadas ainda pertencem à matriz completa |
 | A14 - dashboards por vínculo | Professor abriu o acompanhamento da `Turma Sintética QA [STAGING]`; monitor abriu o painel acionável por exceção da mesma turma | **Aprovado para os cenários sintéticos observados:** ainda faltam volume, outra turma e tentativa explícita de acesso fora do vínculo |
-| A15 - check-in/QR | Após corrigir a ordem transacional somente no staging, a `Entrada` e a `Saída` foram confirmadas no Xiaomi. Uma repetição física da `Entrada`, com nova chave gerada pela UI, foi recusada como duplicada e não criou outra linha | **Aprovado para sucesso e proteção contra duplicação:** PostgreSQL final com um `checkin`, um `checkout`, duas evidências `attendance` distintas. Retry com a mesma chave passou no smoke da API; expiração foi observada no ensaio anterior. O subcaso offline permanece pendente |
+| A15 - check-in/QR | Após corrigir a ordem transacional somente no staging, a `Entrada` e a `Saída` foram confirmadas no Xiaomi. Uma repetição física da `Entrada`, com nova chave gerada pela UI, foi recusada como duplicada e não criou outra linha. Na build mais recente, um rascunho offline persistiu após `force-stop`, não reteve o código e foi removido pelo logout | **Aprovado para sucesso, proteção contra duplicação, persistência segura do rascunho e limpeza no logout. Parcial para recuperação offline:** o retry físico online com a mesma chave e a associação à nova sessão sintética ainda não foram aceitos; o backend permaneceu `0 checkin / 0 checkout` nessa sessão |
 | A18 - mídia | O rebuild corrigido foi instalado com `-r`; o item `external_hls` recebeu grant e exibiu quadro/posição. Os menus nativos confirmaram seleção de `0.75` e `2`, e o vídeo reabriu em posição não zero após `force-stop`/relaunch. O container de staging confirmou duas autorizações físicas `201` | **Parcial aprovado:** P1 de rota encerrado no cliente físico. O fixture tem `captions=[]`, portanto legenda não pôde ser exercitada. Não foram concluídos offline/rede, telemetria qualificada nem expiração/revogação do grant |
 | A12/A23 - visual/branding | A build `1.4.0-dev+13` exibiu IPEX/UFT/FAPTO/CDR em cards brancos no modo escuro, sem o quadriculado anterior | **Aprovado no recorte físico:** marca TDS e assets seguem o manual; resta confirmar institucionalmente a ordem/assinatura conjunta |
 
@@ -153,6 +153,9 @@ package Play não foi instalado, limpo, removido nem usado como alvo de
 | [`xiaomi-checkin-duplicate-safe.png`](evidence/2026-09-20/xiaomi-checkin-duplicate-safe.png) | Falha anterior à correção: campo limpo e mensagem honesta de não sincronização; preservada como evidência do P1 detectado |
 | [`xiaomi-checkin-entry-success.png`](evidence/2026-09-20/xiaomi-checkin-entry-success.png) | `Entrada confirmada` no Xiaomi após o deploy corrigido, com o campo já limpo |
 | [`xiaomi-checkin-entry-duplicate-safe-after-fix.png`](evidence/2026-09-20/xiaomi-checkin-entry-duplicate-safe-after-fix.png) | Repetição física recusada sem nova persistência; campo limpo e confirmação anterior ainda visível |
+| [`xiaomi-evidence-offline-pending-restart.png`](evidence/2026-09-20/xiaomi-evidence-offline-pending-restart.png) | Rascunho de presença pendente preservado após `force-stop` e reabertura offline |
+| [`xiaomi-evidence-retry-requires-current-code.png`](evidence/2026-09-20/xiaomi-evidence-retry-requires-current-code.png) | Recuperação informa que o código temporário não foi salvo e exige código atual |
+| [`xiaomi-evidence-draft-cleared-by-logout.png`](evidence/2026-09-20/xiaomi-evidence-draft-cleared-by-logout.png) | Logout concluído sem rascunho pendente no aparelho |
 
 As capturas não contêm nem devem receber token de check-in, senha, CPF ou
 credenciais do staging. As capturas da UI foram correlacionadas com contagens
@@ -284,6 +287,27 @@ retornar 200, foi validado no smoke PostgreSQL da API (Entrada e Saída), não
 inferido pelo app. O token foi conferido integralmente em memória antes de cada
 envio e removido do campo antes das capturas. O subcaso offline foi adiado para
 evitar prolongar a manipulação do segredo depois de fechar o gate principal.
+
+### Check-in offline: resultado parcial e bloqueio reproduzível
+
+O APK DEV recompilado após a implementação do rascunho seguro foi instalado
+somente em `com.tutortds_cartilhas.dev`. A versão Play `1.2.0+11` permaneceu
+intacta. Com Wi-Fi e dados móveis desligados, o envio entrou em estado pendente;
+depois de `force-stop` e reabertura, a UI preservou o rascunho e exigiu um código
+atual. O código temporário não foi persistido. Um logout subsequente removeu a
+chave local `evidence:pending_checkin:v1`, comprovando também a limpeza de
+sessão.
+
+O ensaio não aceita ainda o retry físico online. Uma calibração inicial da
+automação criou um rascunho com código fictício; esse estado foi descartado e
+limpo. Na repetição limpa, o diálogo de login Flutter não submeteu de forma
+confiável as credenciais sintéticas depois que o teclado reposicionou os campos.
+Sem sessão autenticada, o app falhou antes da chamada de rede. A sessão nova de
+staging permaneceu `open` e com `0 checkin / 0 checkout`; portanto não houve
+confirmação falsa ou mutação a conciliar. Para fechar o subcaso, ainda é preciso
+autenticar o aluno no DEV e executar offline -> reabertura -> código atual ->
+retry online, exigindo 2xx, ausência do draft e exatamente um `checkin` no
+backend.
 
 Ao encerrar, Wi-Fi e dados móveis estavam ativados, o package `.dev` estava em
 `force-stop` e o package Play permanecia `1.2.0+11` sem qualquer ação.
