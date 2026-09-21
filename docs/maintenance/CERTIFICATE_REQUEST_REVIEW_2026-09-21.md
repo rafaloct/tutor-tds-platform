@@ -1,6 +1,8 @@
 # Certificados — pedido e revisão humana
 
-Estado: implementação local; **não implantada em staging ou produção**.
+Estado atualizado: API implantada e validada em **staging**, sem ativação em produção.
+Evidência: `../infrastructure/CERTIFICATE_REQUESTS_STAGING_2026-09-21.md`.
+As seções de verificação local abaixo registram a etapa anterior ao deploy.
 Esta fatia implementa a decisão do usuário de analisar certificados por matrícula
 e edição. Não implementa ainda assinatura, emissão ou migração da carteira.
 
