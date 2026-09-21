@@ -20,7 +20,9 @@ o smoke autenticado retornou hash hexadecimal de 64 caracteres sem expor o
 segredo. O APK de staging foi compilado em
 `cartilhas_app/build/app/outputs/flutter-apk/app-debug.apk` (SHA-256
 `8CECCDF33D42DBB60979ECA761AA680F92598CF5999508E2012CA9706563B349`). Isso
-ainda não comprova isolamento de conversas no Chatwoot real nem teste físico.
+foi instalado no Xiaomi `ZT6HPRHQHATSEQPR`; `MainActivity` abriu em primeiro
+plano e não houve `FATAL EXCEPTION` no logcat inicial. Isso ainda não comprova
+isolamento de conversas no Chatwoot real nem o fluxo autenticado.
 
 Pendências: validar login/logout/troca de conta no SDK e WebView, ticket/status
 e notificações no dispositivo Xiaomi. Produção permanece sem a flag.
