@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _refreshTeamCapability() {
+    _refreshSessionState();
     _refreshEditorCapability();
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     final Future<TeamCapabilitySnapshot?> next;
@@ -138,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_teamCapability != null) return;
+    _refreshSessionState();
     _refreshEditorCapability();
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
@@ -171,9 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
       authRepository: auth,
     );
     var hasAccess = false;
-    var hasSession = false;
     try {
-      hasSession = await auth.hasSession();
       hasAccess = (await repository.programs()).isNotEmpty;
     } catch (_) {
       // Access is granted only by a successful scoped capability response.
@@ -181,11 +181,23 @@ class _HomeScreenState extends State<HomeScreen> {
       repository.dispose();
     }
     if (mounted) {
-      setState(() {
-        _hasEditorAccess = hasAccess;
-        _hasSession = hasSession;
-      });
+      setState(() => _hasEditorAccess = hasAccess);
     }
+  }
+
+  Future<void> _refreshSessionState() async {
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
+      if (mounted) setState(() => _hasSession = false);
+      return;
+    }
+    var hasSession = false;
+    try {
+      hasSession = await auth.hasSession();
+    } catch (_) {
+      hasSession = false;
+    }
+    if (mounted) setState(() => _hasSession = hasSession);
   }
 
   @override
@@ -366,14 +378,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
-                const PopupMenuItem(
-                  value: 'checkin',
-                  child: ListTile(
-                    leading: Icon(Icons.qr_code_scanner_outlined),
-                    title: Text('Registrar presença'),
-                    contentPadding: EdgeInsets.zero,
+                if (_hasSession)
+                  const PopupMenuItem(
+                    value: 'checkin',
+                    child: ListTile(
+                      leading: Icon(Icons.qr_code_scanner_outlined),
+                      title: Text('Registrar presença'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
                 const PopupMenuItem(
                   value: 'about',
                   child: ListTile(
