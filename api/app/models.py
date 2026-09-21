@@ -794,3 +794,104 @@ class SessionPresenceDecision(Base):
     actor_role: Mapped[str] = mapped_column(String(32), nullable=False)
     idempotency_key: Mapped[str] = mapped_column(String(180), unique=True, nullable=False)
     evidence_counts: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+
+
+class BaselineSourceRecord(Base):
+    """A human-reserved form reference, never the form's answers or identity guess."""
+    __tablename__ = "baseline_source_records"
+    __table_args__ = (
+        UniqueConstraint("source", "record_id", name="uq_baseline_source_reference"),
+        UniqueConstraint("id", "user_id", name="uq_baseline_source_owner"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    source: Mapped[str] = mapped_column(String(120), nullable=False)
+    record_id: Mapped[str] = mapped_column(String(240), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
+
+class StudentBaseline(Base):
+    __tablename__ = "student_baselines"
+    __table_args__ = (
+        UniqueConstraint("class_id", "user_id", name="uq_student_baseline_class_person"),
+        ForeignKeyConstraint(["source_record_id", "user_id"], ["baseline_source_records.id", "baseline_source_records.user_id"], name="fk_student_baseline_source_owner"),
+        ForeignKeyConstraint(["class_id", "program_id", "course_id"], ["classes.id", "classes.program_id", "classes.course_id"], name="fk_student_baseline_class"),
+        ForeignKeyConstraint(["enrollment_id", "user_id", "program_id", "course_id"], ["enrollments.id", "enrollments.user_id", "enrollments.program_id", "enrollments.course_id"], name="fk_student_baseline_enrollment", ondelete="CASCADE"),
+        CheckConstraint("revision >= 1", name="ck_student_baseline_revision"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    class_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    enrollment_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    program_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    course_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    source_record_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    baseline_date: Mapped[date] = mapped_column(Date, nullable=False)
+    territory_id: Mapped[str | None] = mapped_column(String(120))
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class BaselineRevision(Base):
+    __tablename__ = "baseline_revisions"
+    __table_args__ = (
+        UniqueConstraint("baseline_id", "revision", name="uq_baseline_revision"),
+        CheckConstraint("revision >= 1", name="ck_baseline_revision"),
+        CheckConstraint("length(trim(reason)) BETWEEN 3 AND 500", name="ck_baseline_revision_reason"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    baseline_id: Mapped[str] = mapped_column(ForeignKey("student_baselines.id", ondelete="CASCADE"), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    actor_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    actor_role: Mapped[str] = mapped_column(String(32), nullable=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    idempotency_key: Mapped[str] = mapped_column(String(180), unique=True, nullable=False)
+    snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+
+
+class MentorshipCase(Base):
+    __tablename__ = "mentorship_cases"
+    __table_args__ = (
+        ForeignKeyConstraint(["class_id", "program_id", "course_id"], ["classes.id", "classes.program_id", "classes.course_id"], name="fk_mentorship_class"),
+        ForeignKeyConstraint(["enrollment_id", "user_id", "program_id", "course_id"], ["enrollments.id", "enrollments.user_id", "enrollments.program_id", "enrollments.course_id"], name="fk_mentorship_enrollment", ondelete="CASCADE"),
+        CheckConstraint("revision >= 1", name="ck_mentorship_revision"),
+        CheckConstraint("status IN ('open', 'in_progress', 'closed')", name="ck_mentorship_status"),
+        CheckConstraint("(status = 'closed' AND closed_at IS NOT NULL) OR (status != 'closed' AND closed_at IS NULL)", name="ck_mentorship_closed_at"),
+        CheckConstraint("length(trim(objective)) BETWEEN 3 AND 1000 AND length(trim(next_action)) BETWEEN 3 AND 1000", name="ck_mentorship_text"),
+        Index("ix_mentorship_class_user", "class_id", "user_id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    class_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    enrollment_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    program_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    course_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    mentor_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    objective: Mapped[str] = mapped_column(String(1000), nullable=False)
+    next_action: Mapped[str] = mapped_column(String(1000), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MentorshipRevision(Base):
+    __tablename__ = "mentorship_revisions"
+    __table_args__ = (
+        UniqueConstraint("case_id", "revision", name="uq_mentorship_revision"),
+        CheckConstraint("revision >= 1", name="ck_mentorship_history_revision"),
+        CheckConstraint("length(trim(reason)) BETWEEN 3 AND 500", name="ck_mentorship_revision_reason"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("mentorship_cases.id", ondelete="CASCADE"), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    actor_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    mentor_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    actor_role: Mapped[str] = mapped_column(String(32), nullable=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    idempotency_key: Mapped[str] = mapped_column(String(180), unique=True, nullable=False)
+    # Only explicitly supplied PATCH fields; actor/mentor IDs remain separate FKs.
+    changed_fields: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)

@@ -9,6 +9,19 @@ import 'package:http/testing.dart';
 import 'student_followup_repository_test.dart' show FollowupAuth;
 
 void main() {
+  Future<void> fillField(
+    WidgetTester tester,
+    String label,
+    String value,
+  ) async {
+    final field = find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.labelText == label,
+    );
+    await tester.ensureVisible(field);
+    await tester.pumpAndSettle();
+    await tester.enterText(field, value);
+  }
+
   Future<ClassroomRepository> showScreen(
     WidgetTester tester, {
     required Future<http.Response> Function(http.Request) handler,
@@ -111,6 +124,87 @@ void main() {
     expect(saved!['expected_revision'], 0);
     expect(saved!['idempotency_key'], startsWith('followup-'));
     expect(find.text('Baseline vinculado'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mentorship creates, updates and rereads history', (
+    tester,
+  ) async {
+    Map<String, dynamic>? item;
+    final writes = <Map<String, dynamic>>[];
+    await showScreen(
+      tester,
+      handler: (request) async {
+        if (request.method == 'POST' || request.method == 'PATCH') {
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          writes.add(body);
+          item = {
+            ...body,
+            'id': 'case-1',
+            'mentor_name': 'Professora',
+            'status': body['status'] ?? 'open',
+            'revision': writes.length,
+          };
+          return http.Response(
+            jsonEncode(item),
+            request.method == 'POST' ? 201 : 200,
+          );
+        }
+        if (request.url.path.endsWith('/case-1')) {
+          return http.Response(
+            jsonEncode({
+              ...item!,
+              'history': [
+                {
+                  'revision': 2,
+                  'occurred_at': '2026-09-21T15:00:00Z',
+                  'reason': 'Próximo passo combinado',
+                },
+              ],
+            }),
+            200,
+          );
+        }
+        return http.Response(
+          jsonEncode(
+            request.url.path.endsWith('/baseline')
+                ? {'baseline': null, 'history': []}
+                : {
+                    'items': [if (item != null) item],
+                    'total': item == null ? 0 : 1,
+                  },
+          ),
+          200,
+        );
+      },
+    );
+    await tester.tap(find.text('Abrir mentoria'));
+    await tester.pumpAndSettle();
+    await fillField(tester, 'Objetivo', 'Retomar os estudos');
+    await fillField(tester, 'Próxima ação', 'Conversar na aula');
+    await fillField(tester, 'Justificativa', 'Pedido do aluno');
+    await tester.tap(find.text('Salvar online'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+    expect(writes.single['mentor_id'], 'teacher');
+    expect(find.text('Retomar os estudos'), findsOneWidget);
+    await tester.ensureVisible(find.text('Atualizar mentoria'));
+    await tester.tap(find.text('Atualizar mentoria'));
+    await tester.pumpAndSettle();
+    await fillField(tester, 'Próxima ação', 'Rever progresso na sexta');
+    await fillField(tester, 'Justificativa', 'Próximo passo combinado');
+    await tester.tap(find.text('Salvar online'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+    expect(writes.last['expected_revision'], 1);
+    expect(writes.length, 2);
+    expect(find.textContaining('Rever progresso na sexta'), findsOneWidget);
+    await tester.ensureVisible(find.text('Histórico da mentoria'));
+    await tester.tap(find.text('Histórico da mentoria'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Próximo passo combinado'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

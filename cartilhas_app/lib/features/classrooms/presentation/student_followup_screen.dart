@@ -320,6 +320,7 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
           : await widget.repository.mentorshipCase(widget.classroom.id, caseId);
       final rows = (result['history'] as List).cast<Map<String, dynamic>>();
       if (!mounted) return;
+      setState(() => _busy = false);
       await showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(

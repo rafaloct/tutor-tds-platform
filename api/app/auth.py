@@ -23,6 +23,8 @@ from .database import Database
 from .models import (
     AssessmentAttemptRecord,
     AssessmentContentRecord,
+    BaselineRevision,
+    BaselineSourceRecord,
     CertificateReference,
     CertificateRequest,
     CertificateRequestTransition,
@@ -38,11 +40,14 @@ from .models import (
     MediaEventRecord,
     MediaPlaybackGrant,
     MediaRating,
+    MentorshipCase,
+    MentorshipRevision,
     ProgramMembership,
     ReviewDecision,
     SessionToken,
     SessionPresence,
     SessionPresenceDecision,
+    StudentBaseline,
     SyncLog,
     SyncDeletionRequest,
     User,
@@ -245,6 +250,18 @@ def delete_me(
         if presence_ids:
             session.execute(delete(SessionPresenceDecision).where(SessionPresenceDecision.presence_id.in_(presence_ids)))
         session.execute(update(SessionPresenceDecision).where(SessionPresenceDecision.actor_user_id == user_id).values(actor_user_id=None))
+        # Baseline references and mentorship narratives never outlive their owner.
+        # Actor/mentor IDs in other people's audit are separate nullable FKs;
+        # immutable JSON snapshots do not duplicate those identifiers.
+        for parent, history, history_fk in ((StudentBaseline, BaselineRevision, BaselineRevision.baseline_id), (MentorshipCase, MentorshipRevision, MentorshipRevision.case_id)):
+            owned_ids = list(session.scalars(select(parent.id).where(parent.user_id == user_id)))
+            session.execute(delete(parent).where(parent.user_id == user_id))
+            if owned_ids:
+                session.execute(delete(history).where(history_fk.in_(owned_ids)))
+            session.execute(update(history).where(history.actor_user_id == user_id).values(actor_user_id=None))
+        session.execute(delete(BaselineSourceRecord).where(BaselineSourceRecord.user_id == user_id))
+        session.execute(update(MentorshipCase).where(MentorshipCase.mentor_id == user_id).values(mentor_id=None))
+        session.execute(update(MentorshipRevision).where(MentorshipRevision.mentor_id == user_id).values(mentor_id=None))
         session.execute(
             delete(AssessmentAttemptRecord).where(
                 AssessmentAttemptRecord.owner_id == user_id

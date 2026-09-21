@@ -50,5 +50,23 @@ escrita, confirmação obrigatória, acesso revogado e leitura do próximo passo
 Atualização: teste positivo de escrita de baseline pela UI passou, incluindo
 confirmação explícita, revisão esperada, chave de idempotência e releitura.
 Histórico de vínculo e mentoria ganhou consulta online na tela (sem cache).
-Ainda pendentes: teste positivo completo de mentoria pela UI, seletor de
-responsável por nome, integração real API e verificação física.
+Atualização posterior: criação, atualização com revisão esperada e consulta de
+histórico passaram no teste Flutter com HTTP simulado. Corrigido indicador de
+carregamento que permanecia ativo durante a exibição do histórico.
+Ainda pendentes: seletor de responsável por nome, integração real API e
+verificação física.
+
+## Backend local concluído
+
+Migração aditiva `20260921_0018` e `student_followup.py`: vínculo explícito por
+turma/aluno/matrícula, referência de origem reservada à mesma pessoa entre
+turmas, casos com objetivo/responsável/próxima ação e estados
+`open/in_progress/closed`. Revisões humanas justificadas, idempotência e
+histórico são persistidos; exclusão privada remove dados do titular e anonimiza
+responsáveis/revisores no histórico de terceiros. RBAC reutiliza vínculos de
+equipe ativos; o aluno não recebe capacidade de decisão.
+
+Regressão API local reportada pelo agente responsável: 196 testes passaram;
+18 testes direcionados/migrações passaram. Flutter: 5 testes da tela passaram.
+Esses resultados usam dados sintéticos/SQLite ou HTTP simulado, não são prova de
+integração PostgreSQL/Flutter real. Migração 0018 ainda não implantada.

@@ -24,6 +24,7 @@ from .database import Database
 from .events import router as events_router
 from .evidence import router as evidence_router
 from .presence import router as presence_router
+from .student_followup import router as student_followup_router
 from .hours import router as hours_router
 from .media import admin_router as media_admin_router
 from .media import creator_router as creator_media_router
@@ -64,6 +65,7 @@ def create_app(
     application.include_router(events_router)
     application.include_router(evidence_router)
     application.include_router(presence_router)
+    application.include_router(student_followup_router)
     application.include_router(organizations_router)
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
