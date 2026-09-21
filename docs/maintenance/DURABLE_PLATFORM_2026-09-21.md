@@ -132,3 +132,13 @@ baixo desempenho.
 Próxima ordem: editor de cursos/publicação, presença assistida e vínculo baseline
 manual; depois adapter Chatwoot com transferência humana e painel analítico.
 Somente ao concluir os critérios de cada fluxo reabrir o gate da Play Console.
+
+## Continuidade — editor e versões (implementação local)
+
+Fatia A integrada em código e descrita em
+[COURSE_VERSIONING_SLICE_2026-09-21.md](COURSE_VERSIONING_SLICE_2026-09-21.md).
+Inclui lifecycle editorial, snapshots imutáveis, turma fixada em edição,
+progresso isolado, eventos versionados e seed sem sobrescrita. A migração 0015
+existe localmente, mas o VPS continua na 0014 até deploy verificado.
+Não confundir isso com conclusão das ondas. Há gates explícitos para PostgreSQL,
+Xiaomi, promoção de conteúdo, cache privado e certificados de cursos dinâmicos.

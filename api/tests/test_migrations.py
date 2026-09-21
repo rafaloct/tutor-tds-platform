@@ -212,6 +212,13 @@ def test_existing_enrollment_is_backfilled_into_complete_hierarchy(
     command.upgrade(config, "head")
 
     with engine.begin() as connection:
+        legacy_version = connection.execute(text(
+            "SELECT id, content, status FROM course_versions WHERE course_id = 'course-1'"
+        )).one()
+        assert legacy_version.status == "published"
+        assert connection.execute(text(
+            "SELECT course_version_id FROM classes WHERE id = 'class-ledger'"
+        )).scalar_one() == legacy_version.id
         backfilled = connection.execute(text(
             "SELECT from_status, to_status, actor_user_id, actor_role "
             "FROM media_status_transitions WHERE media_id = 'media-1'"

@@ -12,7 +12,10 @@ from sqlalchemy.orm import Session
 
 from .auth import require_roles
 from .database import Database
-from .models import Enrollment, LearningEventRecord, MediaAsset, MediaEventRecord
+from .models import (
+    ClassEnrollment, Classroom, Course, CourseVersion, CourseVersionTransition, Enrollment,
+    LearningEventRecord, MediaAsset, MediaEventRecord,
+)
 
 router = APIRouter(prefix="/events", tags=["events"])
 EventType = Literal[
@@ -42,6 +45,9 @@ VIDEO_EVENT_TYPES = {
     "video_saved",
 }
 STABLE_IDENTIFIER = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,79}$")
+VERSIONED_EVENT_TYPES = {"lesson_started", "lesson_completed", "study_activity"}
+COURSE_CONTEXT_KEYS = {"course_version_id", "class_id"}
+COURSE_CONTEXT_IDENTIFIER = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,35}$")
 
 
 class EventCreate(BaseModel):
@@ -96,6 +102,13 @@ class EventCreate(BaseModel):
                 raise ValueError("position_seconds deve ser inteiro estável")
             if self.event_type == "video_followup_completed" and self.payload["followup_type"] not in {"quiz", "reflection", "activity"}:
                 raise ValueError("followup_type inválido")
+        elif self.event_type in VERSIONED_EVENT_TYPES:
+            if set(self.payload) - COURSE_CONTEXT_KEYS:
+                raise ValueError("Evento de estudo aceita apenas course_version_id e class_id")
+            if "class_id" in self.payload and "course_version_id" not in self.payload:
+                raise ValueError("class_id exige course_version_id")
+            if any(not COURSE_CONTEXT_IDENTIFIER.fullmatch(value) for value in self.payload.values()):
+                raise ValueError("Contexto do curso exige identificadores estáveis de até 36 caracteres")
         elif expected_key is None and self.payload:
             raise ValueError("payload é exclusivo de eventos de telemetria")
         if expected_key is not None:
@@ -142,6 +155,8 @@ def create_event(
             media, enrollment = _resolve_media_event(
                 session, claims["sub"], payload
             )
+        elif "course_version_id" in payload.payload:
+            enrollment = _resolve_course_version_event(session, claims["sub"], payload)
         else:
             enrollment = _resolve_enrollment(session, claims["sub"], payload)
         validated_seconds = _validated_seconds(
@@ -297,6 +312,79 @@ def _resolve_enrollment(
             detail="Atividade possui mais de uma matrícula ativa para o curso.",
         )
     return records[0] if len(records) == 1 else None
+
+
+def _resolve_course_version_event(
+    session: Session,
+    user_id: str,
+    payload: EventCreate,
+) -> Enrollment | None:
+    version = session.get(CourseVersion, payload.payload["course_version_id"])
+    if version is None or version.course_id != payload.course_id or version.status not in {"published", "archived"}:
+        raise HTTPException(status_code=404, detail="Versão de curso publicada não encontrada.")
+    class_id = payload.payload.get("class_id")
+    if class_id is not None or version.status == "archived":
+        # The class enrollment identifies the exact program/course enrollment;
+        # never attach this evidence to an arbitrary parallel enrollment.
+        statement = select(Enrollment).join(
+            ClassEnrollment,
+            (ClassEnrollment.enrollment_id == Enrollment.id)
+            & (ClassEnrollment.user_id == Enrollment.user_id)
+            & (ClassEnrollment.program_id == Enrollment.program_id)
+            & (ClassEnrollment.course_id == Enrollment.course_id),
+        ).join(
+            Classroom,
+            (Classroom.id == ClassEnrollment.class_id)
+            & (Classroom.program_id == ClassEnrollment.program_id)
+            & (Classroom.course_id == ClassEnrollment.course_id),
+        ).where(
+            Enrollment.user_id == user_id,
+            Enrollment.course_id == payload.course_id,
+            Enrollment.status == "active",
+            ClassEnrollment.status == "active",
+            Classroom.course_version_id == version.id,
+        )
+        if class_id is not None:
+            statement = statement.where(Classroom.id == class_id)
+        if payload.event_type == "study_activity":
+            statement = statement.with_for_update(of=Enrollment)
+        records = session.scalars(statement).unique().all()
+        if not records:
+            if class_id is None and _was_public_when_recorded(session, version.id, payload.occurred_at):
+                # Offline catalog evidence may arrive after a newer publication.
+                # Explicit class claims must still pass the exact lineage above.
+                return _resolve_enrollment(session, user_id, payload)
+            raise HTTPException(status_code=403, detail="Versão/turma sem matrícula ativa autorizada.")
+        if len(records) > 1:
+            raise HTTPException(status_code=422, detail="Informe class_id para identificar a matrícula desta versão.")
+        return records[0]
+    course = session.get(Course, payload.course_id)
+    if course is None or not course.active:
+        raise HTTPException(status_code=404, detail="Curso publicado não encontrado.")
+    return _resolve_enrollment(session, user_id, payload)
+
+
+def _was_public_when_recorded(
+    session: Session,
+    version_id: str,
+    occurred_at: datetime,
+) -> bool:
+    """Use audited UTC publication windows, never infer them from creation."""
+    transitions = session.scalars(select(CourseVersionTransition).where(
+        CourseVersionTransition.version_id == version_id,
+        CourseVersionTransition.to_status.in_({"published", "archived"}),
+    ).order_by(CourseVersionTransition.occurred_at)).all()
+    published_at: datetime | None = None
+    event_time = occurred_at.astimezone(timezone.utc)
+    for transition in transitions:
+        timestamp = transition.occurred_at
+        timestamp = timestamp.replace(tzinfo=timezone.utc) if timestamp.tzinfo is None else timestamp.astimezone(timezone.utc)
+        if transition.to_status == "published":
+            published_at = timestamp
+        elif transition.from_status == "published" and published_at is not None:
+            # Half-open interval: publication permits access; archive ends it.
+            return published_at <= event_time < timestamp
+    return False
 
 
 def _resolve_media_event(

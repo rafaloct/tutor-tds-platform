@@ -12,10 +12,13 @@ from sqlalchemy.orm import Session
 
 from .auth import access_claims, require_roles
 from .database import Database
+from .course_editor import latest_published_version, ensure_legacy_course_version
 from .models import (
     ClassEnrollment,
     ClassMonitor,
     Classroom,
+    Course,
+    CourseVersion,
     Enrollment,
     LearningEventRecord,
     ProgramCourse,
@@ -49,6 +52,7 @@ class ClassroomCreate(BaseModel):
 
 class ClassroomResponse(ClassroomCreate):
     id: str
+    course_version_id: str | None = None
 
 
 class ClassroomDetail(ClassroomResponse):
@@ -127,10 +131,20 @@ def create_classroom(
                 status_code=422,
                 detail="Professor não possui vínculo ativo neste programa.",
             )
+        course = session.get(Course, payload.course_id)
+        if course is None or not course.active:
+            raise HTTPException(422, "Curso não está publicado para novas turmas.")
+        version = latest_published_version(session, course.id)
+        if version is None:
+            # Compatibility for initial catalog imported before versioning.
+            version = ensure_legacy_course_version(session, course)
+        if version.status != "published":
+            raise HTTPException(409, "Curso não possui versão publicada.")
         record = Classroom(
             id=str(uuid4()),
             program_id=payload.program_id,
             course_id=payload.course_id,
+            course_version_id=version.id,
             teacher_id=payload.teacher_id,
             name=payload.name.strip(),
             start_date=payload.start_date,
@@ -355,6 +369,7 @@ def class_detail(
 @router.get("", response_model=ClassroomPage)
 def visible_classes(
     request: Request,
+    enrolled_only: bool = False,
     claims: dict[str, str] = Depends(access_claims),
 ) -> ClassroomPage:
     """Lista somente turmas relacionadas ao papel autenticado.
@@ -367,7 +382,14 @@ def visible_classes(
     with Session(database.engine) as session:
         statement = select(Classroom)
         user_id = claims["sub"]
-        if claims["role"] != "admin":
+        if enrolled_only:
+            statement = statement.where(Classroom.id.in_(
+                select(ClassEnrollment.class_id)
+                .join(Enrollment, Enrollment.id == ClassEnrollment.enrollment_id)
+                .where(ClassEnrollment.user_id == user_id,
+                       ClassEnrollment.status == "active", Enrollment.status == "active")
+            ))
+        elif claims["role"] != "admin":
             monitored = select(ClassMonitor.class_id).where(
                 ClassMonitor.user_id == user_id
             )
@@ -389,6 +411,36 @@ def visible_classes(
             statement.order_by(Classroom.start_date.desc(), Classroom.name)
         ).all()
         return ClassroomPage(classes=[_serialize(item) for item in records])
+
+
+@router.get("/{class_id}/course")
+def classroom_course(
+    class_id: str,
+    request: Request,
+    claims: dict[str, str] = Depends(access_claims),
+) -> dict[str, object]:
+    """Read the class snapshot, never silently fall back to the public edition."""
+    database: Database = request.app.state.database
+    with Session(database.engine) as session:
+        classroom = _classroom(session, class_id)
+        membership = session.get(ClassEnrollment, (class_id, claims["sub"]))
+        enrollment = session.get(Enrollment, membership.enrollment_id) if membership else None
+        if not (
+            membership is not None and membership.status == "active"
+            and enrollment is not None and enrollment.status == "active"
+        ):
+            _require_staff_access(session, classroom, claims)
+        version = session.get(CourseVersion, classroom.course_version_id) if classroom.course_version_id else None
+        if version is None or version.course_id != classroom.course_id or version.status not in {"published", "archived"}:
+            raise HTTPException(409, "A versão do curso desta turma precisa ser conferida pela equipe.")
+        return {
+            **version.content,
+            "course_version_id": version.id,
+            "version_id": version.id,
+            "version_number": version.version_number,
+            "legacy_progress_compatible": False,
+            "class_id": classroom.id,
+        }
 
 
 @router.get("/{class_id}/dashboard", response_model=ClassroomDashboard)
@@ -546,6 +598,7 @@ def _serialize(record: Classroom) -> ClassroomResponse:
         id=record.id,
         program_id=record.program_id,
         course_id=record.course_id,
+        course_version_id=record.course_version_id,
         teacher_id=record.teacher_id,
         name=record.name,
         start_date=record.start_date,

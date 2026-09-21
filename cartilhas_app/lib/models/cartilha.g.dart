@@ -15,6 +15,10 @@ Cartilha _$CartilhaFromJson(Map<String, dynamic> json) => Cartilha(
       .toList(),
   downloadUrl: json['downloadUrl'] as String?,
   thumbnailUrl: json['thumbnailUrl'] as String?,
+  courseVersionId: json['course_version_id'] as String?,
+  versionNumber: (json['version_number'] as num?)?.toInt(),
+  classId: json['class_id'] as String?,
+  legacyProgressCompatible: json['legacy_progress_compatible'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$CartilhaToJson(Cartilha instance) => <String, dynamic>{
@@ -24,6 +28,10 @@ Map<String, dynamic> _$CartilhaToJson(Cartilha instance) => <String, dynamic>{
   'sections': instance.sections,
   'downloadUrl': instance.downloadUrl,
   'thumbnailUrl': instance.thumbnailUrl,
+  'course_version_id': instance.courseVersionId,
+  'version_number': instance.versionNumber,
+  'class_id': instance.classId,
+  'legacy_progress_compatible': instance.legacyProgressCompatible,
 };
 
 Section _$SectionFromJson(Map<String, dynamic> json) => Section(

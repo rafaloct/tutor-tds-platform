@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import json
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import Database
 from app.models import Base, LearningEventRecord, SyncDeletionRequest, SyncLog, User
-from app.sync_worker import GoogleSheetsSink, HEADER, SyncRow, SyncWorker, _pseudonym
+from app.sync_worker import GoogleSheetsSink, HEADER, SyncRow, SyncWorker, _pseudonym, _sync_row
 import pytest
 
 
@@ -26,6 +27,18 @@ class MemorySink:
 
     def delete_event_ids(self, event_ids: list[str]) -> None:
         self.ids = [item for item in self.ids if item not in set(event_ids)]
+
+
+def test_version_and_class_context_survives_sheets_projection_without_personal_id():
+    now = datetime.now(timezone.utc)
+    record = LearningEventRecord(event_id="versioned-event", user_id="private-user-id",
+        course_id="course", event_type="lesson_started", session_id="private-session-id",
+        occurred_at=now, active_seconds=0, validated_seconds=0,
+        payload={"course_version_id": "version-1", "class_id": "class-1"})
+    row = _sync_row(record, now, "synthetic-pseudonym-secret-at-least-32-chars")
+    assert json.loads(row.values[8]) == record.payload
+    assert "private-user-id" not in json.dumps(row.values)
+    assert "private-session-id" not in json.dumps(row.values)
 
 
 @pytest.mark.parametrize("existing", [[], [HEADER], [HEADER, ["event-1"]]])

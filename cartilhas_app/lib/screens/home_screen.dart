@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/app_config.dart';
 import '../features/courses/data/course_repository.dart';
+import '../features/course_editor/data/course_editor_repository.dart';
+import '../features/course_editor/presentation/course_editor_screen.dart';
 import '../models/cartilha.dart';
 import 'chat_experience_screen.dart';
 import 'cadunico_screen.dart';
@@ -26,6 +28,7 @@ import '../features/auth/data/auth_repository.dart';
 import '../features/classrooms/data/classroom_repository.dart';
 import '../features/classrooms/application/team_capability.dart';
 import '../features/classrooms/presentation/classroom_dashboard_screen.dart';
+import '../features/classrooms/presentation/learner_classrooms_screen.dart';
 import '../features/evidence/data/evidence_repository.dart';
 import '../features/evidence/presentation/evidence_checkin_screen.dart';
 import '../features/media/data/media_repository.dart';
@@ -42,6 +45,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _hasEditorAccess = false;
+  bool _hasSession = false;
   Future<TeamCapabilitySnapshot?>? _teamCapability;
   late Future<List<Cartilha>> _cartilhas;
 
@@ -60,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _refreshTeamCapability() {
+    _refreshEditorCapability();
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     final Future<TeamCapabilitySnapshot?> next;
     if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
@@ -82,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_teamCapability != null) return;
+    _refreshEditorCapability();
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
       _teamCapability = Future.value(null);
@@ -103,6 +110,31 @@ class _HomeScreenState extends State<HomeScreen> {
       return null;
     } finally {
       repository.dispose();
+    }
+  }
+
+  Future<void> _refreshEditorCapability() async {
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) return;
+    final repository = CourseEditorRepository(
+      apiUrl: AppConfig.tutorApiUrl,
+      authRepository: auth,
+    );
+    var hasAccess = false;
+    var hasSession = false;
+    try {
+      hasSession = await auth.hasSession();
+      hasAccess = (await repository.programs()).isNotEmpty;
+    } catch (_) {
+      // Access is granted only by a successful scoped capability response.
+    } finally {
+      repository.dispose();
+    }
+    if (mounted) {
+      setState(() {
+        _hasEditorAccess = hasAccess;
+        _hasSession = hasSession;
+      });
     }
   }
 
@@ -168,6 +200,13 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: 'Mais opções',
               onSelected: (value) async {
                 final screen = switch (value) {
+                  'learner_classes' => const LearnerClassroomsScreen(),
+                  'editor' => CourseEditorCatalogScreen(
+                    gateway: CourseEditorRepository(
+                      apiUrl: AppConfig.tutorApiUrl,
+                      authRepository: context.read<AuthRepository>(),
+                    ),
+                  ),
                   'guide' => const GuideScreen(),
                   'support' => const ChatwootScreen(),
                   'settings' => const SettingsScreen(),
@@ -190,6 +229,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   _ => const AboutScreen(),
                 };
                 final pageId = switch (value) {
+                  'learner_classes' => 'learner_classrooms',
+                  'editor' => 'course_editor_catalog',
                   'guide' => 'user_guide',
                   'support' => 'support',
                   'settings' => 'settings',
@@ -204,6 +245,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     pageId: pageId,
                     resourceId: value == 'guide' ? 'usage_guide' : null,
                     featureId: switch (value) {
+                      'learner_classes' => 'classroom_learning',
+                      'editor' => 'course_editor',
                       'support' => 'support',
                       'team' => 'classroom_dashboard',
                       'monitor' => 'monitor_exceptions',
@@ -216,6 +259,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (mounted) _refreshTeamCapability();
               },
               itemBuilder: (_) => [
+                if (_hasSession)
+                  const PopupMenuItem(
+                    value: 'learner_classes',
+                    child: ListTile(
+                      leading: Icon(Icons.school_outlined),
+                      title: Text('Minhas turmas'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                if (_hasEditorAccess)
+                  const PopupMenuItem(
+                    value: 'editor',
+                    child: ListTile(
+                      leading: Icon(Icons.edit_note),
+                      title: Text('Meus conteúdos'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                 const PopupMenuItem(
                   value: 'guide',
                   child: ListTile(
@@ -434,7 +495,12 @@ class _LearningHeaderState extends State<_LearningHeader> {
     final progress = _lastProgress;
     if (progress == null) return null;
     for (final cartilha in widget.cartilhas) {
-      if (cartilha.id == progress.courseId) return cartilha;
+      if (cartilha.id == progress.courseId &&
+          (progress.courseVersionId == cartilha.courseVersionId ||
+              (progress.courseVersionId == null &&
+                  cartilha.legacyProgressCompatible))) {
+        return cartilha;
+      }
     }
     return null;
   }

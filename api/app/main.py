@@ -18,6 +18,7 @@ from .classrooms import router as classroom_router
 from .certificates import router as certificates_router
 from .commercial import router as commercial_router
 from .config import Settings
+from .course_editor import router as course_editor_router, latest_published_version, legacy_version_id
 from .database import Database
 from .events import router as events_router
 from .evidence import router as evidence_router
@@ -71,6 +72,7 @@ def create_app(
     application.include_router(creator_media_router)
     application.include_router(analytics_router)
     application.include_router(sync_router)
+    application.include_router(course_editor_router)
 
     @application.exception_handler(RequestValidationError)
     async def validation_error(
@@ -91,7 +93,7 @@ def create_app(
             CORSMiddleware,
             allow_origins=list(resolved.allowed_origins),
             allow_credentials=False,
-            allow_methods=["GET", "POST", "PUT", "DELETE"],
+            allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
             allow_headers=["Authorization", "Content-Type"],
         )
 
@@ -114,7 +116,7 @@ def create_app(
             records = session.scalars(
                 select(Course).where(Course.active.is_(True)).order_by(Course.title)
             ).all()
-        return {"courses": [_serialize_course(record) for record in records]}
+            return {"courses": [_serialize_course(record, session) for record in records]}
 
     @application.get("/courses/{course_id}")
     def course(course_id: str, request: Request) -> dict[str, object]:
@@ -123,14 +125,19 @@ def create_app(
             record = session.get(Course, course_id)
             if record is None or not record.active:
                 raise HTTPException(status_code=404, detail="Curso não encontrado.")
-            return _serialize_course(record)
+            return _serialize_course(record, session)
 
     return application
 
 
-def _serialize_course(record: Course) -> dict[str, object]:
+def _serialize_course(record: Course, session: Session) -> dict[str, object]:
     item = dict(record.content)
     item.update(id=record.id, title=record.title, author=record.author)
+    version = latest_published_version(session, record.id)
+    if version is not None:
+        item.update(course_version_id=version.id, version_id=version.id,
+                    version_number=version.version_number,
+                    legacy_progress_compatible=version.id == legacy_version_id(record.id))
     return item
 
 

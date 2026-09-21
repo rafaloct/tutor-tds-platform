@@ -11,6 +11,8 @@ class StudyProgress {
     required this.showOptions,
     required this.isCompleted,
     required this.updatedAt,
+    this.courseVersionId,
+    this.ownerId,
   });
 
   final String courseId;
@@ -20,6 +22,8 @@ class StudyProgress {
   final bool showOptions;
   final bool isCompleted;
   final DateTime updatedAt;
+  final String? courseVersionId;
+  final String? ownerId;
 
   Map<String, Object> toJson() => {
     'courseId': courseId,
@@ -29,6 +33,8 @@ class StudyProgress {
     'showOptions': showOptions,
     'isCompleted': isCompleted,
     'updatedAt': updatedAt.toUtc().toIso8601String(),
+    'courseVersionId': ?courseVersionId,
+    'ownerId': ?ownerId,
   };
 
   static StudyProgress? tryParse(String? source) {
@@ -49,6 +55,8 @@ class StudyProgress {
         showOptions: json['showOptions'] == true,
         isCompleted: json['isCompleted'] == true,
         updatedAt: updatedAt,
+        courseVersionId: json['courseVersionId'] as String?,
+        ownerId: json['ownerId'] as String?,
       );
     } on FormatException {
       return null;
@@ -63,11 +71,25 @@ class StudyProgressRepository {
 
   const StudyProgressRepository();
 
-  String _courseKey(String courseId) => 'study_progress:course:$courseId';
+  String _courseKey(String courseId, String? versionId, String? ownerId) =>
+      versionId == null && ownerId == null
+      ? 'study_progress:course:$courseId'
+      : 'study_progress:version:${jsonEncode([courseId, versionId, ownerId])}';
 
-  Future<StudyProgress?> load(String courseId) async {
+  Future<StudyProgress?> load(
+    String courseId, {
+    String? courseVersionId,
+    String? ownerId,
+    bool allowLegacy = false,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    return StudyProgress.tryParse(prefs.getString(_courseKey(courseId)));
+    final current = StudyProgress.tryParse(
+      prefs.getString(_courseKey(courseId, courseVersionId, ownerId)),
+    );
+    if (current != null || !allowLegacy || ownerId != null) return current;
+    return StudyProgress.tryParse(
+      prefs.getString(_courseKey(courseId, null, null)),
+    );
   }
 
   Future<StudyProgress?> loadLast() async {
@@ -79,8 +101,15 @@ class StudyProgressRepository {
     final prefs = await SharedPreferences.getInstance();
     final encoded = jsonEncode(progress.toJson());
     await Future.wait([
-      prefs.setString(_courseKey(progress.courseId), encoded),
-      prefs.setString(_lastProgressKey, encoded),
+      prefs.setString(
+        _courseKey(
+          progress.courseId,
+          progress.courseVersionId,
+          progress.ownerId,
+        ),
+        encoded,
+      ),
+      if (progress.ownerId == null) prefs.setString(_lastProgressKey, encoded),
     ]);
   }
 }

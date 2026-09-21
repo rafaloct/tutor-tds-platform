@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from .config import Settings
 from .database import Database
 from .models import Course
+from .course_editor import ensure_legacy_course_version, snapshot_content
 
 
 def discover_json_files(sources: Iterable[Path]) -> list[Path]:
@@ -32,7 +33,21 @@ def import_courses(engine: Engine, sources: Iterable[Path]) -> int:
     courses = [_read_course(path) for path in files]
     with Session(engine) as session:
         for course in courses:
-            session.merge(course)
+            existing = session.get(Course, course.id)
+            if existing is not None:
+                incoming = snapshot_content(course.id, course.title, course.author, course.content, legacy=True)
+                current = snapshot_content(existing.id, existing.title, existing.author, existing.content, legacy=True)
+                # Version metadata describes identity, not seed-owned content.
+                for value in (incoming, current):
+                    value.pop("version_id", None)
+                    value.pop("course_version_id", None)
+                    value.pop("version_number", None)
+                if current != incoming:
+                    raise ValueError(f"Curso {course.id} já existe com conteúdo diferente. Use uma nova versão pelo editor; importação cancelada.")
+                ensure_legacy_course_version(session, existing)
+            else:
+                session.add(course)
+                ensure_legacy_course_version(session, course)
         session.commit()
     return len(courses)
 

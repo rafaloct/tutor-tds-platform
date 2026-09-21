@@ -5,6 +5,13 @@ import 'package:http/http.dart' as http;
 import '../../auth/data/auth_repository.dart';
 import '../../auth/models/auth_session.dart';
 import '../models/classroom_models.dart';
+import '../../../models/cartilha.dart';
+
+abstract interface class LearnerClassroomGateway {
+  Future<AuthUser> currentUser();
+  Future<List<ClassroomDetails>> learnerClassrooms();
+  Future<Cartilha> course(String classId);
+}
 
 abstract interface class ClassroomGateway {
   Future<AuthUser> currentUser();
@@ -35,7 +42,11 @@ class ClassroomException implements Exception {
   String toString() => message;
 }
 
-class ClassroomRepository implements ClassroomGateway, ClassroomRosterGateway {
+class ClassroomRepository
+    implements
+        ClassroomGateway,
+        ClassroomRosterGateway,
+        LearnerClassroomGateway {
   ClassroomRepository({
     required this.apiUrl,
     required this.authRepository,
@@ -50,8 +61,31 @@ class ClassroomRepository implements ClassroomGateway, ClassroomRosterGateway {
   Future<AuthUser> currentUser() => authRepository.currentUser();
 
   @override
-  Future<List<ClassroomDetails>> classrooms() async {
-    final response = await _authorizedGet('/classes');
+  Future<Cartilha> course(String classId) async {
+    final response = await _authorizedGet(
+      '/classes/${Uri.encodeComponent(classId)}/course',
+    );
+    final course = Cartilha.fromJson(_object(response.body));
+    if (course.classId != classId ||
+        course.courseVersionId == null ||
+        course.sections.isEmpty ||
+        course.sections.any((section) => section.messages.isEmpty)) {
+      throw const ClassroomException(
+        'O conteúdo desta turma precisa ser conferido pela equipe.',
+      );
+    }
+    return course;
+  }
+
+  @override
+  Future<List<ClassroomDetails>> classrooms() => _classList('/classes');
+
+  @override
+  Future<List<ClassroomDetails>> learnerClassrooms() =>
+      _classList('/classes?enrolled_only=true');
+
+  Future<List<ClassroomDetails>> _classList(String path) async {
+    final response = await _authorizedGet(path);
     final payload = _object(response.body);
     final rawClasses = payload['classes'];
     if (rawClasses is! List<dynamic>) {

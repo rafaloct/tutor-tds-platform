@@ -50,6 +50,23 @@ class LearningEvent {
   final int? activeSeconds;
   final Map<String, String> payload;
 
+  LearningEvent withCourseContext({String? courseVersionId, String? classId}) {
+    if (courseVersionId == null) return this;
+    return LearningEvent(
+      eventId: eventId,
+      type: type,
+      courseId: courseId,
+      sessionId: sessionId,
+      occurredAt: occurredAt,
+      activeSeconds: activeSeconds,
+      payload: {
+        ...payload,
+        'course_version_id': courseVersionId,
+        'class_id': ?classId,
+      },
+    );
+  }
+
   bool get isTelemetry =>
       type == LearningEventType.pageViewed ||
       type == LearningEventType.resourceOpened ||
@@ -314,7 +331,15 @@ class LearningEvent {
       _ => null,
     };
     if (_isVideoType(type)) return _validVideoPayload(type, payload);
-    if (expectedKey == null) return payload.isEmpty;
+    if (expectedKey == null) {
+      if (payload.isEmpty) return true;
+      return payload.keys.every(
+            (key) => key == 'course_version_id' || key == 'class_id',
+          ) &&
+          _isStableIdentifier(payload['course_version_id'] ?? '') &&
+          (!payload.containsKey('class_id') ||
+              _isStableIdentifier(payload['class_id']!));
+    }
     return payload.length == 1 &&
         payload.containsKey(expectedKey) &&
         _isStableIdentifier(payload[expectedKey]!);

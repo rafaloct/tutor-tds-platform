@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Index,
     Integer,
     String,
     Text,
@@ -53,6 +54,41 @@ class Institution(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     name: Mapped[str] = mapped_column(String(240), nullable=False)
     programs: Mapped[list["Program"]] = relationship(back_populates="institution")
+
+
+class CourseVersion(Base):
+    __tablename__ = "course_versions"
+    __table_args__ = (
+        Index("ix_course_versions_program_status", "program_id", "status"),
+        UniqueConstraint("course_id", "version_number", name="uq_course_version_number"),
+        UniqueConstraint("id", "course_id", name="uq_course_version_lineage"),
+        CheckConstraint("revision >= 1 AND version_number >= 1", name="ck_course_version_revision"),
+        CheckConstraint("status IN ('draft', 'in_review', 'published', 'archived')", name="ck_course_version_status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    course_id: Mapped[str] = mapped_column(ForeignKey("courses.id"), nullable=False)
+    program_id: Mapped[str | None] = mapped_column(ForeignKey("programs.id"))
+    creator_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    source_version_id: Mapped[str | None] = mapped_column(ForeignKey("course_versions.id"))
+    version_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    content: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class CourseVersionTransition(Base):
+    __tablename__ = "course_version_transitions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    version_id: Mapped[str] = mapped_column(ForeignKey("course_versions.id"), nullable=False)
+    from_status: Mapped[str | None] = mapped_column(String(24))
+    to_status: Mapped[str] = mapped_column(String(24), nullable=False)
+    actor_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    actor_role: Mapped[str] = mapped_column(String(32), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 class Program(Base):
@@ -257,6 +293,11 @@ class Classroom(Base):
     __tablename__ = "classes"
     __table_args__ = (
         ForeignKeyConstraint(
+            ["course_version_id", "course_id"],
+            ["course_versions.id", "course_versions.course_id"],
+            name="fk_classes_course_version",
+        ),
+        ForeignKeyConstraint(
             ["program_id", "course_id"],
             ["program_courses.program_id", "program_courses.course_id"],
             name="fk_classes_program_course",
@@ -279,6 +320,7 @@ class Classroom(Base):
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    course_version_id: Mapped[str | None] = mapped_column(String(36))
     program_id: Mapped[str] = mapped_column(
         ForeignKey("programs.id"), nullable=False
     )

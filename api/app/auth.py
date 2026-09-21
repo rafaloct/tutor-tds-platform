@@ -14,7 +14,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, Field, SecretStr
 from pwdlib import PasswordHash
 from pwdlib.exceptions import UnknownHashError
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -28,6 +28,8 @@ from .models import (
     ClassCheckin,
     ClassMonitor,
     Classroom,
+    CourseVersion,
+    CourseVersionTransition,
     Enrollment,
     EvidenceItem,
     LearningEventRecord,
@@ -247,6 +249,10 @@ def delete_me(
             delete(ProgramMembership).where(ProgramMembership.user_id == user_id)
         )
         session.execute(delete(SessionToken).where(SessionToken.user_id == user_id))
+        # Keep immutable institutional history but anonymize departed creators.
+        # Explicit updates also cover SQLite installations without FK enforcement.
+        session.execute(update(CourseVersion).where(CourseVersion.creator_user_id == user_id).values(creator_user_id=None))
+        session.execute(update(CourseVersionTransition).where(CourseVersionTransition.actor_user_id == user_id).values(actor_user_id=None))
         session.execute(delete(User).where(User.id == user_id))
         session.commit()
         return Response(status_code=status.HTTP_204_NO_CONTENT)

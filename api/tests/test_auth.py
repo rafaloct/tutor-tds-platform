@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.main import create_app
-from app.models import Base, LearningEventRecord, SessionToken, User
+from app.models import Base, Course, CourseVersion, CourseVersionTransition, LearningEventRecord, SessionToken, User
 
 CPF = "123.456.789-09"
 PASSWORD = "uma-senha-forte-2026"
@@ -154,6 +154,14 @@ def test_student_can_delete_account_events_sessions_and_revoke_access() -> None:
                 "payload": {"page_id": "settings"},
             },
         )
+        with Session(app.state.database.engine) as session:
+            user_id = registered["user"]["id"]
+            session.add(Course(id="former-creator-course", title="Histórico", author="TDS", content={"sections": []}, active=False))
+            session.flush()
+            session.add(CourseVersion(id="former-version", course_id="former-creator-course", creator_user_id=user_id, version_number=1, revision=1, status="archived", content={"sections": []}))
+            session.flush()
+            session.add(CourseVersionTransition(id="former-transition", version_id="former-version", to_status="archived", actor_user_id=user_id, actor_role="creator"))
+            session.commit()
         deleted = client.delete("/auth/me", headers=headers)
         access_after_delete = client.get("/auth/me", headers=headers)
         refresh_after_delete = client.post(
@@ -164,6 +172,8 @@ def test_student_can_delete_account_events_sessions_and_revoke_access() -> None:
         with Session(app.state.database.engine) as session:
             assert session.scalar(select(func.count()).select_from(User)) == 0
             assert session.scalar(select(func.count()).select_from(SessionToken)) == 0
+            assert session.get(CourseVersion, "former-version").creator_user_id is None
+            assert session.get(CourseVersionTransition, "former-transition").actor_user_id is None
             assert (
                 session.scalar(select(func.count()).select_from(LearningEventRecord))
                 == 0

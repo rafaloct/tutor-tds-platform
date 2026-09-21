@@ -36,4 +36,58 @@ void main() {
 
     expect(await const StudyProgressRepository().loadLast(), isNull);
   });
+
+  test('mantém progresso legado e isola versões e contas', () async {
+    const repository = StudyProgressRepository();
+    StudyProgress progress({String? version, String? owner, int index = 3}) =>
+        StudyProgress(
+          courseId: 'course',
+          courseVersionId: version,
+          ownerId: owner,
+          sectionIndex: index,
+          messageIndex: 0,
+          questionsAnswered: 0,
+          showOptions: false,
+          isCompleted: false,
+          updatedAt: DateTime.utc(2026),
+        );
+    await repository.save(progress());
+    expect(await repository.load('course', courseVersionId: 'v2'), isNull);
+    expect(
+      (await repository.load(
+        'course',
+        courseVersionId: 'v1',
+        allowLegacy: true,
+      ))?.sectionIndex,
+      3,
+    );
+    expect(
+      await repository.load(
+        'course',
+        courseVersionId: 'v1',
+        ownerId: 'alice',
+        allowLegacy: true,
+      ),
+      isNull,
+    );
+    await repository.save(progress(version: 'v1', owner: 'alice', index: 1));
+    expect(
+      (await repository.load(
+        'course',
+        courseVersionId: 'v1',
+        ownerId: 'alice',
+      ))?.sectionIndex,
+      1,
+    );
+    expect(
+      await repository.load('course', courseVersionId: 'v1', ownerId: 'bob'),
+      isNull,
+    );
+    expect(
+      await repository.load('course', courseVersionId: 'v2', ownerId: 'alice'),
+      isNull,
+    );
+    expect((await repository.load('course'))?.sectionIndex, 3);
+    expect((await repository.loadLast())?.ownerId, isNull);
+  });
 }

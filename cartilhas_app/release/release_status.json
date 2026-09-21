@@ -25,6 +25,12 @@
   },
   "required_physical_evidence": [
     {
+      "id": "course_versioning_xiaomi",
+      "status": "pending",
+      "required_for_release_build": true,
+      "description": "Editor por papel, nova publicação sem alterar turma anterior, eventos versionados e replay offline no Xiaomi com API staging atualizada."
+    },
+    {
       "id": "evidence_offline_xiaomi",
       "status": "pending",
       "required_for_release_build": true,

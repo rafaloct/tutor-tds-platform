@@ -12,6 +12,14 @@ class Cartilha {
   final String? downloadUrl;
   @JsonKey(name: 'thumbnailUrl')
   final String? thumbnailUrl;
+  @JsonKey(name: 'course_version_id')
+  final String? courseVersionId;
+  @JsonKey(name: 'version_number')
+  final int? versionNumber;
+  @JsonKey(name: 'class_id')
+  final String? classId;
+  @JsonKey(name: 'legacy_progress_compatible')
+  final bool legacyProgressCompatible;
 
   Cartilha({
     required this.id,
@@ -20,6 +28,10 @@ class Cartilha {
     required this.sections,
     this.downloadUrl,
     this.thumbnailUrl,
+    this.courseVersionId,
+    this.versionNumber,
+    this.classId,
+    this.legacyProgressCompatible = true,
   });
 
   factory Cartilha.fromJson(Map<String, dynamic> json) =>
@@ -47,6 +59,8 @@ class Message {
   final List<Option>? options;
   final String? feedback;
   final String? explanation;
+
+  bool get isAssessmentQuestion => type == 'question' || type == 'quiz';
 
   Message({
     required this.type,

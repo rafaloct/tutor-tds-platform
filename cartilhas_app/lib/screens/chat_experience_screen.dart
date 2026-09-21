@@ -24,10 +24,12 @@ import 'cadunico_screen.dart';
 class ChatExperienceScreen extends StatefulWidget {
   final Cartilha cartilha;
   final ProfileDataStore? profileDataStore;
+  final String? progressOwnerId;
   const ChatExperienceScreen({
     super.key,
     required this.cartilha,
     this.profileDataStore,
+    this.progressOwnerId,
   });
 
   @override
@@ -55,7 +57,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   int get _totalQuestions => widget.cartilha.sections
       .expand((s) => s.messages)
-      .where((m) => m.type == 'question')
+      .where((m) => m.isAssessmentQuestion)
       .length;
 
   bool get _earnedCertificate =>
@@ -92,7 +94,12 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   Future<void> _enqueueAndSync(LearningEvent event) async {
     final syncService = context.read<LearningEventSyncService>();
-    await _eventQueue.enqueue(event);
+    await _eventQueue.enqueue(
+      event.withCourseContext(
+        courseVersionId: widget.cartilha.courseVersionId,
+        classId: widget.cartilha.classId,
+      ),
+    );
     await syncService.flush();
   }
 
@@ -102,7 +109,12 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   }
 
   Future<void> _initializeExperience() async {
-    final saved = await _progressRepository.load(widget.cartilha.id);
+    final saved = await _progressRepository.load(
+      widget.cartilha.id,
+      courseVersionId: widget.cartilha.courseVersionId,
+      ownerId: widget.progressOwnerId,
+      allowLegacy: widget.cartilha.legacyProgressCompatible,
+    );
     if (!mounted) return;
 
     final sections = widget.cartilha.sections;
@@ -161,6 +173,8 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   void _saveProgress() {
     final snapshot = StudyProgress(
       courseId: widget.cartilha.id,
+      courseVersionId: widget.cartilha.courseVersionId,
+      ownerId: widget.progressOwnerId,
       sectionIndex: _currentSectionIndex,
       messageIndex: _currentMessageIndex,
       questionsAnswered: _questionsAnswered,
@@ -237,18 +251,19 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   }
 
   void _handleOptionClick(Option option) {
-    _recordInteraction();
-    setState(() {
-      _showOptions = false;
-      _questionsAnswered++;
-      _visibleMessages.add(Message(type: 'user', content: option.label));
-    });
-    _scrollToBottom();
-
+    if (!_showOptions) return;
     final currentMsg = widget
         .cartilha
         .sections[_currentSectionIndex]
         .messages[_currentMessageIndex];
+    _recordInteraction();
+    setState(() {
+      _showOptions = false;
+      if (currentMsg.isAssessmentQuestion) _questionsAnswered++;
+      _visibleMessages.add(Message(type: 'user', content: option.label));
+    });
+    _scrollToBottom();
+
     final feedback = option.feedback ?? currentMsg.explanation;
 
     if (feedback != null) {
