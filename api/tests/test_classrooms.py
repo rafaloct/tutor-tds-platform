@@ -223,6 +223,9 @@ def test_classroom_preserves_teacher_monitor_student_hierarchy() -> None:
         "inactive_students": 0,
         "pending_students": 1,
         "below_expected_students": 0,
+        "baseline_linked_students": 0,
+        "confirmed_participations": 0,
+        "open_mentorship_cases": 0,
     }
     assert dashboard.json()["students"][0]["user_id"] == ids["student"]
     assert dashboard.json()["students"][0]["alerts"] == [

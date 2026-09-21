@@ -112,7 +112,17 @@ Professor vê totais e detalhes; monitor vê contexto nos detalhes autorizados.
 Retorno da tela de acompanhamento atualiza o dashboard. Nenhum texto de
 baseline/mentoria é usado como métrica ou enviado pela navegação rastreada.
 14 testes de modelos/painel passaram e análise Dart sem problemas.
-Backend dos agregados em implementação separada; ainda não implantado.
+Backend dos agregados concluído localmente; ainda não implantado. Três consultas
+agrupadas respeitam turma, aluno, matrícula, programa e curso, sem narrativas ou
+IDs de formulários. Apenas presença confirmada entra no total; casos encerrados
+não entram em mentorias abertas. Roster e acesso da equipe revalidam vínculos
+ativos. 9 testes de dashboard/turmas passaram.
+
+Lacuna anterior identificada e ainda aberta: `_student_progress` em
+`api/app/classrooms.py` consulta LearningEvents por matrícula, sem separar
+turma/edição. Os três indicadores novos têm escopo exato, mas isso não corrige
+o cálculo antigo de progresso/horas; corrigir esse ponto antes do aceite global
+de analytics, sem declarar todo o painel validado pelos novos agregados.
 
 Regressão integrada Flutter posterior: **290 testes passaram**. O marcador de
 release foi atualizado somente quanto à contagem de testes; build/upload

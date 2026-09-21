@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from .auth import access_claims, require_roles
 from .database import Database
 from .course_editor import latest_published_version, ensure_legacy_course_version
+from .evidence import _staff
 from .models import (
     ClassEnrollment,
     ClassMonitor,
@@ -21,8 +22,11 @@ from .models import (
     CourseVersion,
     Enrollment,
     LearningEventRecord,
+    MentorshipCase,
     ProgramCourse,
     ProgramMembership,
+    SessionPresence,
+    StudentBaseline,
     User,
 )
 
@@ -93,6 +97,9 @@ class StudentProgress(BaseModel):
     last_activity_at: datetime | None
     inactive_days: int
     alerts: list[StudentAlert]
+    baseline_linked: bool = False
+    confirmed_sessions: int = 0
+    open_mentorship_cases: int = 0
 
 
 class DashboardSummary(BaseModel):
@@ -100,6 +107,9 @@ class DashboardSummary(BaseModel):
     inactive_students: int
     pending_students: int
     below_expected_students: int
+    baseline_linked_students: int = 0
+    confirmed_participations: int = 0
+    open_mentorship_cases: int = 0
 
 
 class ClassroomDashboard(BaseModel):
@@ -454,7 +464,7 @@ def class_dashboard(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        _require_staff_access(session, classroom, claims)
+        _staff(session, classroom, claims, monitor=True)
         offering = session.get(
             ProgramCourse, (classroom.program_id, classroom.course_id)
         )
@@ -462,15 +472,25 @@ def class_dashboard(
             raise HTTPException(status_code=409, detail="Oferta da turma inconsistente.")
 
         expected_percent = _expected_progress(classroom, now.date())
-        memberships = session.execute(
+        roster = (
             select(ClassEnrollment, User)
             .join(User, User.id == ClassEnrollment.user_id)
+            .join(Enrollment, Enrollment.id == ClassEnrollment.enrollment_id)
+            .join(ProgramMembership, (ProgramMembership.user_id == ClassEnrollment.user_id) & (ProgramMembership.program_id == ClassEnrollment.program_id))
             .where(
                 ClassEnrollment.class_id == class_id,
+                ClassEnrollment.program_id == classroom.program_id,
+                ClassEnrollment.course_id == classroom.course_id,
                 ClassEnrollment.status == "active",
+                Enrollment.user_id == ClassEnrollment.user_id,
+                Enrollment.program_id == ClassEnrollment.program_id,
+                Enrollment.course_id == ClassEnrollment.course_id,
+                Enrollment.status == "active",
+                ProgramMembership.status == "active",
             )
-            .order_by(User.name, User.id)
-        ).all()
+        )
+        memberships = session.execute(roster.order_by(User.name, User.id)).all()
+        aggregates = _followup_counts(session, classroom, roster.with_only_columns(ClassEnrollment.user_id, ClassEnrollment.enrollment_id).subquery()) if memberships else {}
         students = [
             _student_progress(
                 session,
@@ -479,7 +499,7 @@ def class_dashboard(
                 planned_seconds=offering.planned_seconds,
                 expected_percent=expected_percent,
                 now=now,
-            )
+            ).model_copy(update=aggregates.get((membership.user_id, membership.enrollment_id), {}))
             for membership, user in memberships
         ]
         return ClassroomDashboard(
@@ -495,9 +515,28 @@ def class_dashboard(
                 below_expected_students=_alert_count(
                     students, "below_expected_hours"
                 ),
+                baseline_linked_students=sum(student.baseline_linked for student in students),
+                confirmed_participations=sum(student.confirmed_sessions for student in students),
+                open_mentorship_cases=sum(student.open_mentorship_cases for student in students),
             ),
             students=students,
         )
+
+
+def _followup_counts(session: Session, classroom: Classroom, eligible) -> dict:
+    """Three grouped queries, independent of roster size; no private narratives."""
+    result: dict = {}
+    for model, field in ((StudentBaseline, "baseline_linked"), (SessionPresence, "confirmed_sessions"), (MentorshipCase, "open_mentorship_cases")):
+        query = select(model.user_id, model.enrollment_id, func.count()).join(
+            eligible, (eligible.c.user_id == model.user_id) & (eligible.c.enrollment_id == model.enrollment_id),
+        ).where(model.class_id == classroom.id, model.program_id == classroom.program_id, model.course_id == classroom.course_id)
+        if model is SessionPresence:
+            query = query.where(model.status == "confirmed_present")
+        elif model is MentorshipCase:
+            query = query.where(model.status.in_(("open", "in_progress")))
+        for user_id, enrollment_id, count in session.execute(query.group_by(model.user_id, model.enrollment_id)):
+            result.setdefault((user_id, enrollment_id), {})[field] = bool(count) if model is StudentBaseline else count
+    return result
 
 
 def _classroom(session: Session, class_id: str) -> Classroom:
