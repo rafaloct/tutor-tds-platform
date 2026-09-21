@@ -16,6 +16,7 @@ from .config import Settings
 from .database import Database
 from .models import (
     CertificateReference,
+    CertificateRequest,
     ClassEnrollment,
     Classroom,
     Course,
@@ -120,6 +121,16 @@ def create_reference(
         )
         if enrollment is None:
             raise HTTPException(status_code=422, detail="Matrícula ativa não encontrada.")
+        if settings.certificate_approval_required:
+            approved = session.scalar(select(CertificateRequest).where(
+                CertificateRequest.enrollment_id == enrollment.id,
+                CertificateRequest.user_id == claims["sub"],
+                CertificateRequest.status == "approved",
+            ))
+            if approved is None:
+                raise HTTPException(status_code=422, detail="Emissão exige aprovação humana da matrícula e edição.")
+            if payload.class_id is not None and approved.class_id != payload.class_id:
+                raise HTTPException(status_code=422, detail="A aprovação não corresponde à turma informada.")
         offering = session.get(
             ProgramCourse, (payload.program_id, payload.course_id)
         )

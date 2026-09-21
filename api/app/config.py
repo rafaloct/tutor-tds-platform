@@ -29,6 +29,7 @@ class Settings:
     public_api_base_url: str | None = None
     chatwoot_identity_secret: str | None = None
     chatwoot_identity_namespace: str | None = None
+    certificate_approval_required: bool = False
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -76,6 +77,7 @@ class Settings:
             public_api_base_url=os.getenv("PUBLIC_API_BASE_URL"),
             chatwoot_identity_secret=os.getenv("CHATWOOT_IDENTITY_SECRET"),
             chatwoot_identity_namespace=os.getenv("CHATWOOT_IDENTITY_NAMESPACE"),
+            certificate_approval_required=os.getenv("CERTIFICATE_APPROVAL_REQUIRED", "false").lower() in {"1", "true", "yes"},
         )
 
     def require_auth_secrets(self) -> tuple[str, str]:
