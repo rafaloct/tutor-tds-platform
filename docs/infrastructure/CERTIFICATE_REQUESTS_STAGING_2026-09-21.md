@@ -63,6 +63,11 @@ preservados no staging para consulta, não apagados depois do teste.
 
 ## O que não está provado
 
+Atualização posterior: leitura do pedido/decisão no Flutter conectado ao staging
+foi verificada no Xiaomi. Ver `../qa/certificate-requests-2026-09-21/README.md`.
+Os limites abaixo descrevem o teste inicial HTTP/banco e não substituem os limites
+específicos da evidência física.
+
 Não foi feito nesta etapa teste Flutter conectado às novas rotas no Xiaomi,
 aprovação positiva com horas reais suficientes, emissão assinada, carteira nova,
 notificação ou projeção dos pedidos no Sheets. O sincronizador estar rodando não
