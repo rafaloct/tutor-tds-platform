@@ -257,6 +257,89 @@ class EvidenceReport {
   }
 }
 
+class SessionPresence {
+  const SessionPresence({
+    required this.userId,
+    required this.userName,
+    required this.enrollmentId,
+    required this.status,
+    required this.revision,
+    required this.checkinCount,
+    required this.checkoutCount,
+    required this.activityCount,
+    this.reason,
+    this.decidedAt,
+  });
+  final String userId, userName, enrollmentId, status;
+  final int revision, checkinCount, checkoutCount, activityCount;
+  final String? reason;
+  final DateTime? decidedAt;
+  static const statuses = {
+    'pending',
+    'suggested_present',
+    'confirmed_present',
+    'justified_absence',
+    'absent',
+  };
+  factory SessionPresence.fromJson(Map<String, dynamic> json) {
+    final status = _string(json, 'status');
+    if (!statuses.contains(status)) {
+      throw const FormatException('Presença inválida.');
+    }
+    int count(String key) {
+      final value = json[key];
+      if (value is! int || value < 0) {
+        throw const FormatException('Contagem inválida.');
+      }
+      return value;
+    }
+
+    return SessionPresence(
+      userId: _string(json, 'user_id'),
+      userName: _string(json, 'user_name'),
+      enrollmentId: _string(json, 'enrollment_id'),
+      status: status,
+      revision: count('revision'),
+      checkinCount: count('checkin_count'),
+      checkoutCount: count('checkout_count'),
+      activityCount: count('activity_count'),
+      reason: _optionalString(json['reason']),
+      decidedAt: json['decided_at'] == null ? null : _date(json, 'decided_at'),
+    );
+  }
+}
+
+class SessionPresencePage {
+  const SessionPresencePage({
+    required this.items,
+    required this.total,
+    required this.offset,
+    required this.limit,
+    required this.sessionStatus,
+  });
+  final List<SessionPresence> items;
+  final int total, offset, limit;
+  final String sessionStatus;
+  factory SessionPresencePage.fromJson(Map<String, dynamic> json) {
+    final items = json['items'];
+    final status = _string(json, 'session_status');
+    if (items is! List || !{'open', 'closed'}.contains(status)) {
+      throw const FormatException('Lista de presença inválida.');
+    }
+    return SessionPresencePage(
+      items: List.unmodifiable(
+        items.map(
+          (item) => SessionPresence.fromJson(item as Map<String, dynamic>),
+        ),
+      ),
+      total: _int(json, 'total'),
+      offset: _int(json, 'offset'),
+      limit: _int(json, 'limit'),
+      sessionStatus: status,
+    );
+  }
+}
+
 String _string(Map<String, dynamic> json, String key) {
   final value = json[key];
   if (value is! String || value.trim().isEmpty) {

@@ -6,6 +6,20 @@ import '../../auth/data/auth_repository.dart';
 import '../models/evidence_models.dart';
 
 abstract interface class EvidenceGateway {
+  Future<SessionPresencePage> presence(
+    String classId,
+    String sessionId, {
+    int offset = 0,
+  });
+  Future<SessionPresence> decidePresence({
+    required String classId,
+    required String sessionId,
+    required String userId,
+    required String status,
+    required int expectedRevision,
+    required String reason,
+    required String idempotencyKey,
+  });
   Future<EvidenceSession> createSession({
     required String classId,
     required DateTime startsAt,
@@ -75,6 +89,73 @@ class EvidenceRepository implements EvidenceGateway {
   final String apiUrl;
   final AuthRepository authRepository;
   final http.Client _client;
+  String? _presenceOwner;
+
+  Future<Map<String, dynamic>> _presenceRequest(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
+    final owner = await authRepository.localUserId();
+    if (owner == null || (_presenceOwner != null && _presenceOwner != owner)) {
+      throw const EvidenceApiException(
+        'Sua sessão mudou. Abra novamente a presença.',
+        statusCode: 401,
+      );
+    }
+    _presenceOwner ??= owner;
+    return _request(method, path, body: body, expectedOwner: owner);
+  }
+
+  @override
+  Future<SessionPresencePage> presence(
+    String classId,
+    String sessionId, {
+    int offset = 0,
+  }) async => SessionPresencePage.fromJson(
+    await _presenceRequest(
+      'GET',
+      '/classes/${_segment(classId)}/sessions/${_segment(sessionId)}/presence?limit=50&offset=${offset.clamp(0, 1 << 31)}',
+    ),
+  );
+
+  @override
+  Future<SessionPresence> decidePresence({
+    required String classId,
+    required String sessionId,
+    required String userId,
+    required String status,
+    required int expectedRevision,
+    required String reason,
+    required String idempotencyKey,
+  }) async {
+    final normalized = reason.trim();
+    if (!{
+          'confirmed_present',
+          'justified_absence',
+          'absent',
+        }.contains(status) ||
+        expectedRevision < 0 ||
+        normalized.length < 3 ||
+        normalized.length > 500) {
+      throw const EvidenceApiException(
+        'Confira a decisão e a justificativa.',
+        statusCode: 422,
+      );
+    }
+    return SessionPresence.fromJson(
+      await _presenceRequest(
+        'POST',
+        '/classes/${_segment(classId)}/sessions/${_segment(sessionId)}/presence/${_segment(userId)}',
+        body: {
+          'status': status,
+          'expected_revision': expectedRevision,
+          'reason': normalized,
+          'idempotency_key': idempotencyKey,
+        },
+      ),
+    );
+  }
 
   @override
   Future<EvidenceSession> createSession({
@@ -254,9 +335,21 @@ class EvidenceRepository implements EvidenceGateway {
     String method,
     String path, {
     Map<String, dynamic>? body,
+    String? expectedOwner,
   }) async {
     try {
-      final response = await authRepository.authorized((token) {
+      Future<void> verifyOwner() async {
+        if (expectedOwner != null &&
+            await authRepository.localUserId() != expectedOwner) {
+          throw const EvidenceApiException(
+            'Sua sessão mudou. Abra novamente a presença.',
+            statusCode: 401,
+          );
+        }
+      }
+
+      final response = await authRepository.authorized((token) async {
+        await verifyOwner();
         final headers = {
           'Authorization': 'Bearer $token',
           if (body != null) 'Content-Type': 'application/json',
@@ -271,6 +364,7 @@ class EvidenceRepository implements EvidenceGateway {
           ),
         }.timeout(const Duration(seconds: 15));
       });
+      await verifyOwner();
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw EvidenceApiException(
           _errorMessage(response),
@@ -285,12 +379,12 @@ class EvidenceRepository implements EvidenceGateway {
     } on EvidenceApiException {
       rethrow;
     } on AuthException catch (error) {
-      throw EvidenceApiException(error.message);
+      throw EvidenceApiException(error.message, statusCode: 401);
     } on FormatException catch (error) {
       throw EvidenceApiException(error.message);
     } on Object {
       throw const EvidenceApiException(
-        'Sem conexão com o registro de evidências. Nenhum dado foi enviado.',
+        'Não foi possível confirmar o registro. Atualize para conferir antes de tentar novamente.',
         isNetworkFailure: true,
       );
     }

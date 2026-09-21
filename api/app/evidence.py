@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -293,17 +293,19 @@ def exceptions(class_id: str, request: Request, claims=Depends(access_claims)):
 
 @router.post("/classes/{class_id}/sessions/{session_id}/close", response_model=ReportResponse)
 def close(class_id: str, session_id: str, request: Request, confirm_pending: bool = False, claims=Depends(access_claims)):
+    from .presence import presence_summary
     db: Database = request.app.state.database
     with Session(db.engine) as session:
         classroom = _class(session, class_id); _staff(session, classroom, claims, monitor=False)
-        class_session = _class_session(session, class_id, session_id)
+        class_session = _locked_class_session(session, class_id, session_id)
         existing = session.scalar(select(SessionReport).where(SessionReport.session_id == session_id))
         if existing: return _report(existing)
         pending = list(session.scalars(select(EvidenceItem.id).where(EvidenceItem.session_id == session_id, EvidenceItem.review_status == "pending")))
-        if pending and not confirm_pending:
-            raise HTTPException(409, "Há evidências pendentes; confirme o fechamento explicitamente.")
+        presence = presence_summary(session, classroom, session_id)
+        if (pending or presence["pending_count"]) and not confirm_pending:
+            raise HTTPException(409, "Há evidências/presenças pendentes; confirme o fechamento explicitamente.")
         checkins = list(session.scalars(select(ClassCheckin.id).where(ClassCheckin.session_id == session_id)))
-        now = datetime.now(timezone.utc); summary = {"checkin_count": len(checkins), "pending_evidence_ids": pending, "pending_explicitly_confirmed": bool(pending), "external_integrations": "disabled"}
+        now = datetime.now(timezone.utc); summary = {"checkin_count": len(checkins), "pending_evidence_ids": pending, "pending_explicitly_confirmed": bool(pending or presence["pending_count"]), "presence": presence, "external_integrations": "disabled"}
         digest = _digest(json.dumps(summary, sort_keys=True) + session_id)
         report = SessionReport(id=str(uuid4()), class_id=class_id, session_id=session_id, generated_by=claims["sub"], generated_at=now, report_digest=digest, summary=summary)
         class_session.status = "closed"; class_session.closed_by = claims["sub"]
@@ -325,6 +327,14 @@ def _class(session, class_id):
 def _class_session(session, class_id, session_id):
     record = session.get(ClassSession, session_id)
     if record is None or record.class_id != class_id: raise HTTPException(404, "Sessão não encontrada.")
+    return record
+def _locked_class_session(session, class_id, session_id):
+    # A no-op write provides the same session-level mutex on SQLite and Postgres.
+    # Both formal decisions and close acquire it before reading presence state.
+    result = session.execute(update(ClassSession).where(ClassSession.id == session_id, ClassSession.class_id == class_id).values(status=ClassSession.status), execution_options={"synchronize_session": False})
+    if result.rowcount != 1: raise HTTPException(404, "Sessão não encontrada.")
+    record = _class_session(session, class_id, session_id)
+    session.refresh(record)
     return record
 def _is_staff(session, classroom, user_id, role):
     if role == "admin":

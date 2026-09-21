@@ -10,6 +10,28 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeEvidenceGateway implements EvidenceGateway {
+  @override
+  Future<SessionPresencePage> presence(
+    String classId,
+    String sessionId, {
+    int offset = 0,
+  }) async => const SessionPresencePage(
+    items: [],
+    total: 0,
+    offset: 0,
+    limit: 50,
+    sessionStatus: 'open',
+  );
+  @override
+  Future<SessionPresence> decidePresence({
+    required String classId,
+    required String sessionId,
+    required String userId,
+    required String status,
+    required int expectedRevision,
+    required String reason,
+    required String idempotencyKey,
+  }) => throw UnimplementedError();
   _FakeEvidenceGateway({this.recoverOpen = false});
 
   final bool recoverOpen;

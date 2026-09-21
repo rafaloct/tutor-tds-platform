@@ -41,6 +41,8 @@ from .models import (
     ProgramMembership,
     ReviewDecision,
     SessionToken,
+    SessionPresence,
+    SessionPresenceDecision,
     SyncLog,
     SyncDeletionRequest,
     User,
@@ -236,6 +238,13 @@ def delete_me(
         if request_ids:
             session.execute(delete(CertificateRequestTransition).where(CertificateRequestTransition.request_id.in_(request_ids)))
         session.execute(update(CertificateRequestTransition).where(CertificateRequestTransition.actor_user_id == user_id).values(actor_user_id=None))
+        # Presence snapshots and reasons are private learner data. Erase the
+        # parent first; immutable history permits deletion only after this.
+        presence_ids = list(session.scalars(select(SessionPresence.id).where(SessionPresence.user_id == user_id)))
+        session.execute(delete(SessionPresence).where(SessionPresence.user_id == user_id))
+        if presence_ids:
+            session.execute(delete(SessionPresenceDecision).where(SessionPresenceDecision.presence_id.in_(presence_ids)))
+        session.execute(update(SessionPresenceDecision).where(SessionPresenceDecision.actor_user_id == user_id).values(actor_user_id=None))
         session.execute(
             delete(AssessmentAttemptRecord).where(
                 AssessmentAttemptRecord.owner_id == user_id

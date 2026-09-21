@@ -673,6 +673,7 @@ class RevenueLedgerEntry(Base):
 
 class ClassSession(Base):
     __tablename__ = "class_sessions"
+    __table_args__ = (Index("uq_class_sessions_class_lineage", "id", "class_id", unique=True),)
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     class_id: Mapped[str] = mapped_column(ForeignKey("classes.id"), nullable=False)
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -748,3 +749,48 @@ class SessionReport(Base):
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     report_digest: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     summary: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+
+
+class SessionPresence(Base):
+    __tablename__ = "session_presence"
+    __table_args__ = (
+        UniqueConstraint("session_id", "user_id", name="uq_session_presence_person"),
+        ForeignKeyConstraint(["session_id", "class_id"], ["class_sessions.id", "class_sessions.class_id"], name="fk_presence_session"),
+        ForeignKeyConstraint(["class_id", "program_id", "course_id"], ["classes.id", "classes.program_id", "classes.course_id"], name="fk_presence_class"),
+        ForeignKeyConstraint(["enrollment_id", "user_id", "program_id", "course_id"], ["enrollments.id", "enrollments.user_id", "enrollments.program_id", "enrollments.course_id"], name="fk_presence_enrollment", ondelete="CASCADE"),
+        CheckConstraint("status IN ('confirmed_present', 'justified_absence', 'absent')", name="ck_presence_status"),
+        CheckConstraint("revision >= 1", name="ck_presence_revision"),
+        CheckConstraint("length(trim(reason)) BETWEEN 3 AND 500", name="ck_presence_reason"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    class_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    enrollment_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    program_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    course_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    user_name: Mapped[str] = mapped_column(String(240), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class SessionPresenceDecision(Base):
+    __tablename__ = "session_presence_decisions"
+    __table_args__ = (
+        UniqueConstraint("presence_id", "revision", name="uq_presence_decision_revision"),
+        CheckConstraint("revision >= 1", name="ck_presence_decision_revision"),
+        CheckConstraint("status IN ('confirmed_present', 'justified_absence', 'absent')", name="ck_presence_decision_status"),
+        CheckConstraint("length(trim(reason)) BETWEEN 3 AND 500", name="ck_presence_decision_reason"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    presence_id: Mapped[str] = mapped_column(ForeignKey("session_presence.id", ondelete="CASCADE"), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    actor_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    actor_role: Mapped[str] = mapped_column(String(32), nullable=False)
+    idempotency_key: Mapped[str] = mapped_column(String(180), unique=True, nullable=False)
+    evidence_counts: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)

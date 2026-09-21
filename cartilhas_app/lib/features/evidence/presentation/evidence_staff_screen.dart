@@ -4,6 +4,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../classrooms/models/classroom_models.dart';
 import '../data/evidence_repository.dart';
 import '../models/evidence_models.dart';
+import '../../analytics/telemetry_route.dart';
+import 'session_presence_screen.dart';
 
 class EvidenceStaffScreen extends StatefulWidget {
   const EvidenceStaffScreen({
@@ -369,6 +371,24 @@ class _EvidenceStaffScreenState extends State<EvidenceStaffScreen> {
                 runSpacing: 8,
                 children: [
                   OutlinedButton.icon(
+                    onPressed: _busy
+                        ? null
+                        : () => Navigator.push(
+                            context,
+                            trackedRoute(
+                              pageId: 'session_presence',
+                              featureId: 'session_presence',
+                              builder: (_) => SessionPresenceScreen(
+                                gateway: widget.gateway,
+                                classId: widget.classroom.id,
+                                sessionId: session.id,
+                              ),
+                            ),
+                          ),
+                    icon: const Icon(Icons.how_to_reg),
+                    label: const Text('Conferir presença'),
+                  ),
+                  OutlinedButton.icon(
                     onPressed:
                         _busy || session.status != 'open' || _report != null
                         ? null
@@ -706,6 +726,23 @@ class _ReportCard extends StatelessWidget {
   final EvidenceReport report;
   final VoidCallback onRefresh;
 
+  Widget _presenceSummary() {
+    final presence = report.summary['presence'];
+    if (presence is! Map || presence['counts'] is! Map) {
+      return const SizedBox.shrink();
+    }
+    final counts = presence['counts'] as Map;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Presenças confirmadas: ${counts['confirmed_present'] ?? 0}'),
+        Text('Ausências justificadas: ${counts['justified_absence'] ?? 0}'),
+        Text('Ausências registradas: ${counts['absent'] ?? 0}'),
+        Text('Presenças ainda sem decisão: ${presence['pending_count'] ?? 0}'),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Card.filled(
     child: Padding(
@@ -723,8 +760,9 @@ class _ReportCard extends StatelessWidget {
           Text('Gerado em ${_dateTime(report.generatedAt)}'),
           Text('Check-ins: ${report.summary['checkin_count'] ?? 0}'),
           Text(
-            'Pendências confirmadas: ${(report.summary['pending_evidence_ids'] as List<dynamic>? ?? const []).length}',
+            'Evidências ainda pendentes: ${(report.summary['pending_evidence_ids'] as List<dynamic>? ?? const []).length}',
           ),
+          _presenceSummary(),
           const SizedBox(height: 8),
           SelectableText(
             'Digest: ${report.reportDigest}',
