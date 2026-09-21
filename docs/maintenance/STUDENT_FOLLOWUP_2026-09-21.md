@@ -1,7 +1,7 @@
 # Acompanhamento: baseline e mentoria
 
-Estado: implementação local em andamento; não implantada. Tela ligada ao painel
-de turma, mas ainda sem evidência ponta a ponta desta fatia.
+Estado: API implantada em staging e fluxo HTTP autenticado validado. Tela ligada
+ao painel local; integração no aparelho ainda pendente. Produção não alterada.
 
 ## Reaproveitamento confirmado
 
@@ -70,3 +70,25 @@ Regressão API local reportada pelo agente responsável: 196 testes passaram;
 18 testes direcionados/migrações passaram. Flutter: 5 testes da tela passaram.
 Esses resultados usam dados sintéticos/SQLite ou HTTP simulado, não são prova de
 integração PostgreSQL/Flutter real. Migração 0018 ainda não implantada.
+
+## Implantação e teste real subsequentes
+
+Commit implantado `096c0d4af276c9dc42fdad89611eaf06a1c87b4c`, Alembic
+`20260921_0018 (head)`. API/worker usam a mesma imagem:
+`sha256:6fe11576906f40ca3f37b741846e4257eb387233560ae41728d9a2c6e14fc84f`.
+Fonte SHA256 `93947ccf52bf31764e1d13c64c1c143295b0e6c531d829dce672b7dde494fa85`.
+Backup `/root/tutor-tds-backups/followup-096c0d4/before-0018.dump`, SHA256
+`2aacc4a4c514fca55b04567ae56a8bb7825d30296aa5b6b8b03cd82dafae870e`.
+`pg_restore --list` aceitou o backup; não foi ensaiada restauração completa.
+
+Smoke autenticado com contas sintéticas passou: vínculo criado/repetido/relido,
+mentoria criada, atualizada para revisão 2 e histórico relido; aluno recebe 403
+e revisão desatualizada recebe 409. Fonte externa não consultada.
+
+- Baseline sintético `e0866a41-a5f8-4dd4-80cf-b6445cf9340e`, revisão 1.
+- Caso sintético `707ddba4-07c8-453a-a231-92048b9f0698`, revisão 2.
+- Script `smoke_followup_staging.py` copiado separadamente, fora da imagem.
+
+Esta evidência supera a pendência HTTP/PostgreSQL acima, mas não comprova
+interface em dispositivo, concorrência/guards diretos PostgreSQL ou exportação
+para Sheets. Nenhuma resposta real de baseline foi importada.
