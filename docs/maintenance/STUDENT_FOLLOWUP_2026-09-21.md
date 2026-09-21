@@ -131,3 +131,21 @@ Essa correção ainda não foi implantada; não equivale ao aceite global de ana
 Regressão integrada Flutter posterior: **290 testes passaram**. O marcador de
 release foi atualizado somente quanto à contagem de testes; build/upload
 permanecem bloqueados. Isso não é aceite físico nem conclusão das demais ondas.
+
+## Consolidação em staging — indicadores e responsáveis
+
+Regressão completa API: **205 testes passaram**, com dois avisos de depreciação.
+Implantado commit `342dd70cfe3dbedf959ff05a61276c452be27db3`, sem nova migração
+(permanece 0018), preservando a imagem anterior 096c0d4 e backups existentes.
+Fonte SHA256 `f0875b337dd1d92dc730d515cbce30fa916a8c68a19b1bd3d95016b0bc522b1f`.
+API/worker: `sha256:463ce33a4ff1364ed17d0e19bb6c405455b2a910121416a871ad16c4a879a0ec`.
+
+Smoke real ampliado passou: responsáveis ativos retornam somente ID/nome;
+aluno recebe403; dashboard da turma sintética retorna exatamente 1 baseline
+vinculado, 1 presença confirmada e 1 mentoria aberta, sem referência de
+formulário ou próxima ação na resposta agregada. Vínculo/caso anteriores
+permanecem nas revisões1/2, sem duplicação. Saúde e catálogo passaram.
+
+Supera as pendências de implantação descritas nas etapas anteriores. Ainda não
+é validação física do Flutter nem conclusão do painel analítico completo,
+certificados, comunicação, produção ou release.
