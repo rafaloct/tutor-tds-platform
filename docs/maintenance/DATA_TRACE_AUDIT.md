@@ -4,7 +4,7 @@ Data: 2026-09-21. Escopo: **um** evento de telemetria sintético no Xiaomi `com.
 
 ## Resultado
 
-**DATA GATE: FAIL.** O sentinela chegou íntegro e único ao PostgreSQL após offline/reabertura, mas o staging em execução não registra `event_id` nos logs de `POST /events`. O mesmo ID não pode ser pesquisado de ponta a ponta. A correção mínima foi implementada e testada **localmente**, não implantada. O worker Sheets de staging está desligado e não foi testado. Produção 1.4 continua NO-GO; não usar contagem de rotas como prova de compatibilidade.
+**DATA GATE: PASS para um sentinela APP → PostgreSQL staging**, após a correção mínima de logging e novo ensaio físico. O mesmo `event_id` foi observado na fila local, no log do `POST /events 201` e em uma única linha do banco, com 6/6 campos íntegros. Isso **não** declara 100% dos tipos de dados ou a versão 1.4 pronta para produção. O worker Sheets de staging está desligado e não foi testado. Produção 1.4 continua NO-GO; não usar contagem de rotas como prova de compatibilidade.
 
 ## Mapa curto do fluxo observado
 
@@ -12,7 +12,7 @@ Data: 2026-09-21. Escopo: **um** evento de telemetria sintético no Xiaomi `com.
 |---|---|---|---|
 | Ação de abrir Home → `LearningEvent` no Flutter | `event_id` abaixo | Navegação física offline gerou `page_viewed` | PASS |
 | Flutter → `SharedPreferences` privada (`learning_events:pending:v1`) | mesmo `event_id` | `run-as` no package `.dev`: fila tinha 1 registro integral; permaneceu após `force-stop` | PASS |
-| Fila → `POST /events` via HTTPS | mesmo `event_id` no JSON | Após rede restaurada e reabertura, fila 1 → 0; staging registrou `POST /events 201`, sem ID no log | PASS para saída; FAIL para correlação do POST específico |
+| Fila → `POST /events` via HTTPS | mesmo `event_id` no JSON | Primeiro ensaio: fila 1 → 0, log sem ID. Após correção em staging, segundo ensaio: fila 2 → 0; log `POST /events 201` com o ID do sentinela | PASS |
 | API FastAPI → `learning_events` PostgreSQL staging | mesmo `event_id` | `GET /events` autenticado devolveu o registro; consulta SQL direta retornou exatamente 1 linha | PASS |
 | PostgreSQL → Google Sheets staging | pseudônimo HMAC do `event_id` | profile `sheets-sync` desligado; nenhuma planilha/credencial de staging comprovada | NÃO VERIFICADO; fora do destino ativo neste ensaio |
 | Flutter → gateway de IA/AnythingLLM; Evidence, mídia, certificado, suporte e comercial | IDs próprios | Não exercitados pelo único sentinela; resultados públicos relatados pelo usuário não substituem teste de payload | NÃO VERIFICADO |
@@ -42,9 +42,17 @@ Campos esperados/enviados/recebidos/persistidos corretamente: **6/6/6/6**. O obj
 
 ## Falha objetiva de rastreabilidade e correção mínima
 
-`docker logs` do container staging mostra diversos `POST /events HTTP/1.1 201 Created` na janela, sem `event_id` nem `request_id` associados. A classe `observability.py` local gerava `X-Request-ID`, mas usava logger INFO sem handler efetivo no processo Uvicorn; o endpoint não anexava o `event_id`. Logo, não é possível atribuir **um POST específico** ao sentinela só pelos logs. O banco/API permitem busca por `event_id`, mas isso não satisfaz o gate dos logs de ponta a ponta.
+Antes da correção, `docker logs` do container staging mostrava diversos `POST /events HTTP/1.1 201 Created` na janela, sem `event_id` nem `request_id` associados. A classe `observability.py` gerava `X-Request-ID`, mas usava logger INFO sem handler efetivo no processo Uvicorn; o endpoint não anexava o `event_id`. Não era possível atribuir **um POST específico** ao primeiro sentinela só pelos logs.
 
-Correção estritamente limitada: middleware passa a usar logger ativo `uvicorn.error`, registrar timestamp, `request_id`, `trace_id` (`event_id`), rota, status, tentativa semântica (`new`/`retry`/`conflict`), resultado e classe de erro sem payload ou credenciais. `POST /events` define o ID/estado de tentativa. Teste direcionado `api/tests/test_events.py::test_event_trace_links_request_to_idempotent_record`: **PASS**, verificando 201/new e 200/retry com o mesmo trace ID e ausência de senha no log. **Não implantado no staging neste checkpoint.** O usuário confirmou que há Git apenas no PC e no VPS, sem remoto hospedado. O verificador de imagem agora aceita também `urn:sha256:<hash do arquivo fonte>` como origem endereçada por conteúdo, mantendo a revisão Git completa e a comparação exata do hash do pacote transferido. Testes de proveniência: **5/5 PASS**. Não fazer patch direto no container, inventar URL de repositório ou tocar produção.
+Correção estritamente limitada: middleware usa logger ativo `uvicorn.error` e registra timestamp, `request_id`, `trace_id` (`event_id`), rota, status, tentativa semântica (`new`/`retry`/`conflict`), resultado e classe de erro sem payload ou credenciais. `POST /events` define o ID/estado de tentativa. Teste direcionado `api/tests/test_events.py::test_event_trace_links_request_to_idempotent_record`: **PASS**, verificando 201/new e 200/retry com o mesmo trace ID e ausência de senha no log. O usuário confirmou Git local sem remoto hospedado. O verificador aceita `urn:sha256:<hash do arquivo fonte>` como origem endereçada por conteúdo, mantendo a revisão Git completa e a comparação exata do hash do pacote transferido. Testes de proveniência: **5/5 PASS**.
+
+### Repetição física apenas do trecho afetado
+
+- Commit fonte local: `01efa5404919c8c177b7605894b0075a80a5ba6e`; arquivo `git archive` SHA-256 `709695e81b2c68f0257fbd6ce2d0330628a6b9f83674648318342540b2765076` igual no PC e VPS. Nenhum segredo no arquivo. Imagem staging `sha256:65d9e49a4afa1fadc0d90b4132e0690958352309854b9f4c5ed4bef5c1775d90`, com revision/source/created verificados antes e depois do deploy. Imagem anterior preservada para rollback; Compose válido, banco no head `20260920_0014`, smoke de health/cursos aprovado. A transferência do script em CRLF exigiu normalização de linha na execução; a primeira tentativa falhou antes de qualquer mutação do container.
+- Novo sentinela: `1789996700697338-6noKE7GFuU9DUYd9:page_viewed:2`. Capturado na fila com `event_type=page_viewed`, `course_id=_app`, `session_id=1789996700697338-6noKE7GFuU9DUYd9`, `occurred_at=2026-09-21T13:18:21.774964Z`, `payload={"page_id":"home"}`. Havia 0 pendentes antes; 2 eventos surgiram no relançamento offline e voltaram a 0 depois de reabrir online. Wi-Fi/dados móveis foram restaurados aos estados anteriores (`1`/`1`).
+- Log do container staging: `timestamp=2026-09-21T13:18:24.199320+00:00`, `trace_id` igual ao sentinela, `request_id=ffef19771d044e96b46cd4b905707d4e`, `method=POST`, `route=/events`, `status=201`, `attempt=new`, `result=created`, `error=null`. Nenhum token, senha ou payload pessoal no log.
+- SQL direto em `learning_events`: exatamente **1** linha para o ID, com os mesmos 6 campos da fila; `occurred_at=2026-09-21T13:18:21.774964+00:00` é o mesmo instante UTC, `active_seconds=0`, `sync_status=pending` (Sheets desligado), `validated_seconds=0`. Integridade do novo sentinela: **6/6**.
+- Produção não foi implantada. `GET /tutor-api/health` após o staging permaneceu HTTP 200, `database=available`; isso não valida as rotas 1.4 em produção.
 
 ## Gate obrigatório
 
@@ -55,7 +63,7 @@ Correção estritamente limitada: middleware passa a usar logger ativo `uvicorn.
 | Campos comparados | PASS, 6/6 |
 | Configuração/conectividade de rede | PASS em staging no recorte; produção 1.4 NÃO VERIFICADA |
 | Comportamento offline/retry | PASS no corte/reabertura executado; demais erros NÃO VERIFICADOS |
-| Rastreabilidade pelo mesmo ID nos logs **em execução** | **FAIL** |
+| Rastreabilidade pelo mesmo ID nos logs **em execução** | **PASS no staging após novo ensaio** |
 | Sheets e demais destinos/funcionalidades | NÃO VERIFICADO |
 
-**Próxima ação mínima:** empacotar o commit Git local, verificar SHA-256 antes/depois da transferência ao VPS, construir/implantar essa imagem com origem `urn:sha256` **somente no staging** e repetir apenas o sentinela de logs. Não retomar as ondas nem promover produção antes de fechar o gate.
+**Condição de parada atingida para um registro APP → REDE → API → PostgreSQL staging.** Parar aqui. Próxima ação mínima, somente em nova etapa autorizada: definir se o Google Sheets deve ser destino ativo deste gate e fornecer planilha/conta de serviço exclusivas de staging; produção 1.4 permanece congelada até preflight próprio.
