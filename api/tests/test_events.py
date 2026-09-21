@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import logging
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
@@ -80,6 +83,30 @@ def test_event_uses_authenticated_user_and_is_idempotent() -> None:
     assert retried.status_code == 200
     assert "user_id" not in created.json()
     assert created.json()["sync_status"] == "pending"
+
+
+def test_event_trace_links_request_to_idempotent_record(caplog: pytest.LogCaptureFixture) -> None:
+    client, _ = make_client()
+    payload = event_payload(event_id="data-gate:lesson_started")
+    with client:
+        token = token_for(client, cpf="123.456.789-09", name="Estudante Um")
+        with caplog.at_level(logging.INFO, logger="uvicorn.error"):
+            created = client.post("/events", json=payload, headers=bearer(token))
+            retried = client.post("/events", json=payload, headers=bearer(token))
+
+    traces = [
+        json.loads(record.message)
+        for record in caplog.records
+        if record.message.startswith("{")
+        and '"trace_id":"data-gate:lesson_started"' in record.message
+    ]
+    assert (created.status_code, retried.status_code) == (201, 200)
+    assert [(item["status"], item["attempt"]) for item in traces] == [
+        (201, "new"), (200, "retry")
+    ]
+    assert all(item["route"] == "/events" for item in traces)
+    assert all(item["request_id"] for item in traces)
+    assert all("password" not in json.dumps(item) for item in traces)
 
 
 def test_event_id_collision_between_users_is_rejected() -> None:

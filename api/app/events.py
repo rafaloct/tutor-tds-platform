@@ -124,12 +124,16 @@ def create_event(
     response: Response,
     claims: dict[str, str] = Depends(student_claims),
 ) -> EventResponse:
+    request.state.trace_id = payload.event_id
+    request.state.attempt = "new"
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         existing = session.get(LearningEventRecord, payload.event_id)
         if existing is not None:
             if existing.user_id != claims["sub"] or not _same_event(existing, payload):
+                request.state.attempt = "conflict"
                 raise HTTPException(status_code=409, detail="event_id em conflito.")
+            request.state.attempt = "retry"
             response.status_code = 200
             return _serialize(existing)
 
@@ -206,8 +210,10 @@ def create_event(
                 and existing.user_id == claims["sub"]
                 and _same_event(existing, payload)
             ):
+                request.state.attempt = "retry"
                 response.status_code = 200
                 return _serialize(existing)
+            request.state.attempt = "conflict"
             raise HTTPException(status_code=409, detail="event_id em conflito.") from error
         return _serialize(record)
 
