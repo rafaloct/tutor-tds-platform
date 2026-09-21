@@ -17,7 +17,7 @@ from .auth import access_claims
 from .database import Database
 from .models import (ClassCheckin, ClassEnrollment, ClassMonitor, Classroom,
     ClassSession, EvidenceImport, EvidenceItem, LearningEventRecord,
-    ReviewDecision, SessionReport)
+    ReviewDecision, SessionReport, Enrollment, ProgramMembership)
 
 router = APIRouter(tags=["evidence"])
 
@@ -192,9 +192,11 @@ def checkin(class_id: str, session_id: str, payload: CheckinCreate, request: Req
     with Session(db.engine) as session:
         classroom = _class(session, class_id); record = _class_session(session, class_id, session_id)
         staff = _is_staff(session, classroom, claims["sub"], claims["role"])
+        if payload.user_id and payload.user_id != claims["sub"] and not staff:
+            raise HTTPException(403, "Não é permitido registrar presença de outra pessoa.")
         user_id = payload.user_id if staff and payload.user_id else claims["sub"]
-        membership = session.get(ClassEnrollment, (class_id, user_id))
-        if membership is None or membership.status != "active": raise HTTPException(403, "Matrícula na turma não autorizada.")
+        if not _active_student(session, classroom, user_id):
+            raise HTTPException(403, "Matrícula na turma não autorizada.")
         existing = session.scalar(select(ClassCheckin).where(ClassCheckin.idempotency_key == payload.idempotency_key))
         if existing:
             if existing.session_id != session_id or existing.user_id != user_id or existing.kind != payload.kind:
@@ -244,8 +246,8 @@ def import_evidence(class_id: str, payload: ImportCreate, request: Request, resp
         session.add(record)
         for item in payload.items:
             if item.user_id:
-                enrolled = session.get(ClassEnrollment, (class_id, item.user_id))
-                if enrolled is None or enrolled.status != "active": raise HTTPException(422, "Usuário fora da turma.")
+                if not _active_student(session, classroom, item.user_id):
+                    raise HTTPException(422, "Usuário fora da turma ou matrícula inativa.")
             if item.session_id:
                 evidence_session = session.get(ClassSession, item.session_id)
                 if evidence_session is None or evidence_session.class_id != class_id: raise HTTPException(422, "Sessão fora da turma.")
@@ -284,7 +286,7 @@ def exceptions(class_id: str, request: Request, claims=Depends(access_claims)):
         classroom = _class(session, class_id); staff = _is_staff(session, classroom, claims["sub"], claims["role"])
         student_ids = list(session.scalars(select(ClassEnrollment.user_id).where(ClassEnrollment.class_id == class_id, ClassEnrollment.status == "active")))
         if not staff:
-            if claims["sub"] not in student_ids: raise HTTPException(403, "Turma não autorizada.")
+            if not _active_student(session, classroom, claims["sub"]): raise HTTPException(403, "Turma não autorizada.")
             student_ids = [claims["sub"]]
         items = session.scalars(select(EvidenceItem).where(EvidenceItem.class_id == class_id, EvidenceItem.review_status == "pending")).all()
         return {"exceptions": [{"code": "evidence_needs_review", "user_id": item.user_id, "evidence_id": item.id} for item in items if (staff and item.user_id is None) or item.user_id in student_ids]}
@@ -325,16 +327,33 @@ def _class_session(session, class_id, session_id):
     if record is None or record.class_id != class_id: raise HTTPException(404, "Sessão não encontrada.")
     return record
 def _is_staff(session, classroom, user_id, role):
-    return role == "admin" or classroom.teacher_id == user_id or session.get(ClassMonitor, (classroom.id, user_id)) is not None
+    if role == "admin":
+        return True
+    membership = session.get(ProgramMembership, (user_id, classroom.program_id))
+    if membership is None or membership.status != "active":
+        return False
+    if classroom.teacher_id == user_id and membership.role in {"teacher", "coordinator", "admin"}:
+        return True
+    return membership.role in {"monitor", "teacher", "coordinator", "admin"} and session.get(ClassMonitor, (classroom.id, user_id)) is not None
 def _staff(session, classroom, claims, monitor):
-    allowed = claims["role"] == "admin" or classroom.teacher_id == claims["sub"] or (monitor and session.get(ClassMonitor, (classroom.id, claims["sub"])) is not None)
+    allowed = _is_staff(session, classroom, claims["sub"], claims["role"]) and (monitor or claims["role"] == "admin" or classroom.teacher_id == claims["sub"])
     if not allowed: raise HTTPException(403, "Equipe da turma não autorizada.")
 def _class_member(session, classroom, claims):
     if _is_staff(session, classroom, claims["sub"], claims["role"]):
         return
-    enrollment = session.get(ClassEnrollment, (classroom.id, claims["sub"]))
-    if enrollment is None or enrollment.status != "active":
+    if not _active_student(session, classroom, claims["sub"]):
         raise HTTPException(403, "Vínculo com a turma não autorizado.")
+
+def _active_student(session, classroom, user_id):
+    link = session.get(ClassEnrollment, (classroom.id, user_id))
+    membership = session.get(ProgramMembership, (user_id, classroom.program_id))
+    enrollment = session.get(Enrollment, link.enrollment_id) if link else None
+    return (link is not None and link.status == "active" and
+        membership is not None and membership.status == "active" and
+        enrollment is not None and enrollment.status == "active" and
+        enrollment.user_id == user_id and
+        enrollment.program_id == link.program_id == classroom.program_id and
+        enrollment.course_id == link.course_id == classroom.course_id)
 def _digest(value): return hashlib.sha256(value.encode()).hexdigest()
 def _session_response(r, token=None): return SessionResponse(id=r.id, class_id=r.class_id, starts_at=r.starts_at, ends_at=r.ends_at, status=r.status, token_expires_at=r.token_expires_at, token_version=r.token_version, checkin_token=token)
 def _session_view(r): return SessionView(id=r.id, class_id=r.class_id, starts_at=r.starts_at, ends_at=r.ends_at, status=r.status, token_expires_at=r.token_expires_at, token_version=r.token_version)

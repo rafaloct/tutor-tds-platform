@@ -82,6 +82,13 @@ def test_evidence_session_token_import_review_and_auditable_close() -> None:
         report = client.get(f"/classes/class-1/reports/{closed.json()['id']}", headers=bearer(teacher))
         open_after_close = client.get("/classes/class-1/sessions/open", headers=bearer(student))
         closed_sessions = client.get("/classes/class-1/sessions?status=closed", headers=bearer(student))
+        with Session(app.state.database.engine) as session:
+            session.get(Enrollment, "enrollment-1").status = "inactive"
+            session.commit()
+        # An old successful idempotency key is not an authorization bypass.
+        assert client.post(f"/classes/class-1/sessions/{session_id}/checkins", headers=bearer(student), json={
+            "kind": "checkin", "idempotency_key": "checkin:student:1", "token": token
+        }).status_code == 403
     event.remove(
         app.state.database.engine,
         "before_cursor_execute",
@@ -183,6 +190,56 @@ def test_session_recovery_is_isolated_by_class_and_institution() -> None:
         monitor_cross_org = client.get(f"/classes/class-b/sessions/{session_b_id}", headers=bearer(monitor_a))
         cross_class_session_a = client.get(f"/classes/class-a/sessions/{session_b_id}", headers=bearer(teacher_a))
         cross_class_session_b = client.get(f"/classes/class-b/sessions/{session_a_id}", headers=bearer(teacher_b))
+
+        # Revocation is enforced even while the old classroom assignment remains.
+        for actor in (teacher_a, monitor_a):
+            actor_id = actor["user"]["id"]
+            with Session(app.state.database.engine) as session:
+                membership = session.get(ProgramMembership, (actor_id, "program-a"))
+                membership.status = "inactive"
+                session.commit()
+            assert client.get("/classes/class-a/sessions", headers=bearer(actor)).status_code == 403
+            assert client.get("/classes/class-a/exceptions", headers=bearer(actor)).status_code == 403
+            assert client.post(f"/classes/class-a/sessions/{session_a_id}/token", headers=bearer(actor)).status_code == 403
+            assert client.post(f"/classes/class-a/sessions/{session_a_id}/checkins", headers=bearer(actor), json={
+                "kind": "checkin", "idempotency_key": "revoked-staff-checkin", "user_id": ids["student_a"]
+            }).status_code == 403
+            with Session(app.state.database.engine) as session:
+                session.get(ProgramMembership, (actor_id, "program-a")).status = "active"
+                original_role = session.get(ProgramMembership, (actor_id, "program-a")).role
+                session.get(ProgramMembership, (actor_id, "program-a")).role = "student"
+                session.commit()
+            assert client.post(f"/classes/class-a/sessions/{session_a_id}/token", headers=bearer(actor)).status_code == 403
+            with Session(app.state.database.engine) as session:
+                session.get(ProgramMembership, (actor_id, "program-a")).role = original_role
+                session.commit()
+
+        for target in ("program", "enrollment", "class"):
+            def revoked_record(session):
+                if target == "program":
+                    return session.get(ProgramMembership, (ids["student_a"], "program-a"))
+                if target == "enrollment":
+                    return session.get(Enrollment, "enrollment-a")
+                return session.get(ClassEnrollment, ("class-a", ids["student_a"]))
+            with Session(app.state.database.engine) as session:
+                revoked_record(session).status = "inactive"
+                session.commit()
+            assert client.get("/classes/class-a/sessions", headers=bearer(student_a)).status_code == 403
+            assert client.get("/classes/class-a/exceptions", headers=bearer(student_a)).status_code == 403
+            assert client.post(f"/classes/class-a/sessions/{session_a_id}/checkins", headers=bearer(student_a), json={
+                "kind": "checkin", "idempotency_key": "revoked-student-checkin", "token": session_a.json()["checkin_token"]
+            }).status_code == 403
+            assert client.post(f"/classes/class-a/sessions/{session_a_id}/checkins", headers=bearer(teacher_a), json={
+                "kind": "checkin", "idempotency_key": "manual-revoked-student", "user_id": ids["student_a"]
+            }).status_code == 403
+            with Session(app.state.database.engine) as session:
+                revoked_record(session).status = "active"
+                session.commit()
+
+        assert client.post(f"/classes/class-a/sessions/{session_a_id}/checkins", headers=bearer(student_a), json={
+            "kind": "checkin", "idempotency_key": "student-targets-another", "token": session_a.json()["checkin_token"], "user_id": ids["teacher_a"]
+        }).status_code == 403
+        assert client.get("/classes/class-a/sessions", headers=bearer(student_a)).status_code == 200
 
     assert session_a.status_code == session_b.status_code == 201
     assert teacher_a_list.status_code == 200 and teacher_a_list.json()["total"] == 1
