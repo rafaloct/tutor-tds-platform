@@ -82,9 +82,9 @@ perfil socioeconômico inteiro para analytics/IA. Ainda não implementado.
 | Vídeos | Plataforma de media e documento MEDIA_PLATFORM | Titularidade/direitos e decisão canal/CDN; Drive como origem, não tratar como CDN garantida |
 
 Chatwoot: leitura somente confirmou usuários Paulo (12) e Evellyn (13).
-Existem caixas WebWidget `Tutor TDS — Site` (7, sem agentes) e `Ipex - TDS` (13,
-contém ambos). É necessário identificar qual token o app usa antes de alterar
-atribuições. Nenhuma conta criada, nenhum bot ativado nesta inspeção.
+O token público configurado em `chatwoot_screen.dart` resolve para a caixa
+`Ipex - TDS` (13), que já contém ambos. A caixa `Tutor TDS — Site` (7, sem agentes)
+não é a usada pelo app. Nenhuma conta criada, atribuição alterada ou bot ativado.
 
 Adiados do segundo app: migração de identidade, deduplicação entre tablets/Forms,
 sincronização bidirecional, previsão automática de mentoria, integração analítica
@@ -93,8 +93,8 @@ baixo desempenho.
 
 ## Validação incremental
 
-- API local: 14 testes direcionados passaram antes do ajuste A1; depois, todos
-  os 9 testes de sync passaram incluindo o novo caso A1.
+- API local: 15 testes direcionados passaram na execução final, incluindo
+  o novo caso A1.
 - Flutter: 20 testes de turma/equipe e 5 de catálogo passaram.
 - Análise Dart de turma/equipe limpa. SDK correto:
   `C:\Users\Usuario\flutter-3.44.9\bin`; SDK do PATH era incompatível.
@@ -103,5 +103,32 @@ baixo desempenho.
 
 ## Resultado operacional final
 
-Pendente de completar nesta execução: reconciliação, replay sem duplicação,
-readback do evento sentinela e saúde de produção após correção A1.
+- **Sheets staging validado:** PostgreSQL 421 eventos / Sheets 421 eventos;
+  0 ausentes, 0 desconhecidos, 0 duplicados. Todos os 421 em `synced` no banco.
+- Readback do sentinela `1789996700697338-6noKE7GFuU9DUYd9:page_viewed:2`
+  na linha 420: nove campos de conteúdo idênticos após pseudonimização; usar
+  `valueRenderOption=UNFORMATTED_VALUE` para comparar segundos numéricos.
+  Replay explícito do mesmo registro manteve as 421 linhas de eventos.
+- Durante recuperação do erro A1, 200 eventos de staging com falha HTTP 400
+  foram recolocados na fila; payloads e os 400 logs de tentativas anteriores
+  preservados. Nenhum registro de aprendizagem excluído/reescrito.
+- API e worker staging executam a mesma imagem
+  `sha256:fe9828ac00a3050ed1e677d5d1ad0818203421ff8c15fdc4ef5bf709d8a9b2cd`.
+  Código `3def64d2f2f8e3421b803d039f1b73327f3fc01e`; arquivo de fontes SHA256
+  `ddde9a2268f6b4c0db533d2e95fa3cbaaaec5bfb6fea400d76b18b6a57b197f9`.
+  OCI created real `2026-09-21T14:23:54Z`.
+- Artefato VPS: `/opt/tutor-tds-sheets-3def64d2f2f8e3421b803d039f1b73327f3fc01e/source.tar`.
+- Backup da configuração anterior: `/opt/tutor-tds-staging/.env.before-sheets-20260921T142007727888`
+  e `/opt/tutor-tds-staging/docker-compose.before-sheets-20260921.yml`.
+- Para retorno à situação anterior a Sheets: parar apenas `sync-worker-staging`,
+  restaurar os dois arquivos de configuração preservados e usar a imagem
+  `tutor-tds-api:staging-01efa5404919c8c177b7605894b0075a80a5ba6e`.
+  Não apagar eventos nem planilhas para efetuar rollback.
+- Schema permanece `20260920_0014`; esta rodada não adicionou migrations.
+- Health público produção e staging OK; nenhum deploy de produção, alteração
+  de KV ou app separado de baseline. Produção Sheets continua preparada, não
+  ativada; exige conferir compatibilidade da API/banco implantados antes de ligar.
+
+Próxima ordem: editor de cursos/publicação, presença assistida e vínculo baseline
+manual; depois adapter Chatwoot com transferência humana e painel analítico.
+Somente ao concluir os critérios de cada fluxo reabrir o gate da Play Console.

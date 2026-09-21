@@ -13,18 +13,17 @@ institucional para:
 - confirmar a ordem e o papel das marcas parceiras na tela Sobre/Home;
 - fornecer um vetor IPEX, caso exista, para substituir futuramente o JPG limpo.
 
-## 2. Google Sheets - staging
+## 2. Google Sheets — staging configurado em 21/09/2026
 
-Necessário para fechar o gate da Onda 1:
+O usuário escolheu destinos separados para produção e staging. Planilhas
+criadas, compartilhadas com a conta de serviço institucional existente e
+verificadas. Credencial instalada somente no VPS, com backup protegido.
 
-1. criar uma planilha exclusiva de staging;
-2. criar/selecionar uma service account no projeto Google autorizado;
-3. compartilhar somente a planilha de staging com o e-mail da service account;
-4. instalar `GOOGLE_SERVICE_ACCOUNT_JSON` diretamente no secret/env do
-   Dokploy, nunca no repositório;
-5. informar ao processo de deploy somente o `GOOGLE_SHEET_ID` e o nome da aba;
-6. executar evento, retry, deduplicação e reconciliação antes de configurar a
-   planilha de produção.
+Staging: 421 eventos sincronizados, reconciliação sem ausências/duplicatas e
+replay do sentinela sem criar nova linha. Produção: planilha preparada, worker
+ainda não ativado; conferir primeiro compatibilidade da API/banco de produção.
+IDs, evidências e próximos passos em
+`docs/maintenance/DURABLE_PLATFORM_2026-09-21.md`.
 
 ## 3. Dokploy/VPS - staging (implantação inicial concluída)
 
@@ -37,8 +36,9 @@ Uma nova confirmação de janela continua necessária antes de:
 - executar o teste de restauração em base vazia;
 - alterar firewall, usuário root ou serviços compartilhados.
 
-O staging não reutiliza banco, JWT, pepper, planilha nem credenciais de
-produção.
+O staging não reutiliza banco, JWT, pepper, planilha ou chave de pseudonimização
+de produção. A conta de serviço Google institucional foi reaproveitada por
+autorização do usuário, com destinos de dados separados.
 
 ## 4. Drive, YouTube e vídeo
 

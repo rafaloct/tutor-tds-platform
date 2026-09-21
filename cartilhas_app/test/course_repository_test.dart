@@ -74,7 +74,7 @@ void main() {
   test(
     'catálogo vazio autorizado não restaura cursos removidos nem offline',
     () async {
-      final local = () async => [course('old', 'Curso retirado')];
+      Future<List<Cartilha>> local() async => [course('old', 'Curso retirado')];
       final online = CourseRepository(
         apiUrl: 'https://api.example',
         httpGet: (_) async => http.Response('{"courses":[]}', 200),
