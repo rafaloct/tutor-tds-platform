@@ -9,6 +9,7 @@ import '../../evidence/presentation/evidence_staff_screen.dart';
 import '../../analytics/telemetry_route.dart';
 import 'monitor_exceptions_view.dart';
 import 'classroom_roster_screen.dart';
+import '../../certificates/presentation/certificate_requests_screen.dart';
 
 class ClassroomDashboardScreen extends StatefulWidget {
   const ClassroomDashboardScreen({
@@ -168,6 +169,23 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  if (_selectedCapability == ClassroomStaffCapability.teacher)
+                    OutlinedButton.icon(
+                      onPressed: _loading
+                          ? null
+                          : () => Navigator.push(
+                              context,
+                              trackedRoute(
+                                pageId: 'certificate_review',
+                                featureId: 'certificate_review',
+                                builder: (_) => const CertificateRequestsScreen(
+                                  reviewMode: true,
+                                ),
+                              ),
+                            ),
+                      icon: const Icon(Icons.school_outlined),
+                      label: const Text('Revisar pedidos de certificado'),
+                    ),
                   if (_classes.isEmpty && _error == null)
                     const _EmptyCard(
                       message: 'Nenhuma turma está vinculada à sua conta.',

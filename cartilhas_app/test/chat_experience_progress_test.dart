@@ -118,11 +118,11 @@ void main() {
 
       await advanceReader(tester);
       expect(progressValue(tester), closeTo(2 / 3, 0.0001));
-      expect(find.text('Emitir certificado'), findsNothing);
+      expect(find.text('Solicitar certificado'), findsNothing);
       await advanceReader(tester);
       expect(progressValue(tester), 1);
       expect(find.text('Continuar'), findsNothing);
-      expect(find.text('Emitir certificado'), findsOneWidget);
+      expect(find.text('Solicitar certificado'), findsOneWidget);
       expect(
         tester
             .widget<FloatingActionButton>(find.byType(FloatingActionButton))
@@ -172,6 +172,13 @@ void main() {
       expect(progressValue(tester), closeTo(2 / 3, 0.0001));
       await advanceReader(tester);
       expect(progressValue(tester), 1);
+      // Expository courses without quiz questions can also request human review.
+      expect(
+        tester
+            .widget<FloatingActionButton>(find.byType(FloatingActionButton))
+            .onPressed,
+        isNotNull,
+      );
       expect(tester.takeException(), isNull);
     },
   );

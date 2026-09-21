@@ -16,6 +16,7 @@ from .auth import router as auth_router
 from .classrooms import admin_router as classroom_admin_router
 from .classrooms import router as classroom_router
 from .certificates import router as certificates_router
+from .certificate_requests import router as certificate_requests_router
 from .commercial import router as commercial_router
 from .config import Settings
 from .course_editor import router as course_editor_router, latest_published_version, legacy_version_id
@@ -65,6 +66,7 @@ def create_app(
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
     application.include_router(certificates_router)
+    application.include_router(certificate_requests_router)
     application.include_router(commercial_router)
     application.include_router(hours_router)
     application.include_router(media_admin_router)

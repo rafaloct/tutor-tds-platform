@@ -1,25 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../models/cartilha.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
 import 'genui_assistant_screen.dart';
-import '../features/certificates/data/certificate_service.dart';
-import '../features/certificates/models/certificate_record.dart';
-import '../features/certificates/presentation/certificate_details_screen.dart';
+import '../features/certificates/presentation/certificate_requests_screen.dart';
 import '../features/profile/data/profile_data_store.dart';
 import '../features/study_progress/study_progress_repository.dart';
 import '../features/learning_events/learning_event.dart';
 import '../features/learning_events/learning_event_queue.dart';
 import '../features/learning_events/learning_event_sync_service.dart';
 import '../features/learning_events/learning_activity_tracker.dart';
-import '../features/analytics/app_telemetry_service.dart';
 import '../features/analytics/telemetry_route.dart';
-import 'cadunico_screen.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
   final Cartilha cartilha;
@@ -46,8 +41,6 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   bool _showOptions = false;
   bool _isCompleted = false;
   bool _isInitializing = true;
-  CertificateRecord? _certificate;
-  bool _issuingCertificate = false;
   int _questionsAnswered = 0;
   final ScrollController _scrollController = ScrollController();
   final FlutterTts _tts = FlutterTts();
@@ -62,8 +55,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       .where((m) => m.isAssessmentQuestion)
       .length;
 
-  bool get _earnedCertificate =>
-      _questionsAnswered >= _totalQuestions && _totalQuestions > 0;
+  bool get _questionsComplete => _questionsAnswered >= _totalQuestions;
 
   double get _progress {
     if (_isCompleted) return 1.0;
@@ -103,7 +95,6 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       ),
     );
     _initializeExperience();
-    _loadExistingCertificate();
   }
 
   Future<void> _enqueueAndSync(LearningEvent event) async {
@@ -177,11 +168,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   Message _completionMessage() => Message(
     type: 'bot',
-    content: _earnedCertificate
-        ? '🎉 Parabéns! Você concluiu toda a cartilha e respondeu às perguntas. '
-              'Quando quiser, emita seu certificado verificável pelo botão abaixo.'
-        : '✅ Você chegou ao fim do conteúdo! Para solicitar o certificado, '
-              'volte e responda ${_totalQuestions == 1 ? 'a questão' : 'as questões'} da cartilha.',
+    content: _questionsComplete
+        ? '🎉 Parabéns! Você concluiu o conteúdo da cartilha. '
+              'Você pode solicitar a análise do certificado. A equipe confere a matrícula, a edição cursada e a carga horária antes de aprovar.'
+        : '✅ Você chegou ao fim do conteúdo! Ainda há perguntas para revisar. '
+              'Você pode consultar os critérios e solicitar a análise do certificado; a equipe verificará sua aprendizagem e carga horária.',
   );
 
   void _saveProgress() {
@@ -306,152 +297,20 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     });
   }
 
-  Future<void> _loadExistingCertificate() async {
-    final certificate = await context.read<CertificateService>().findByCourse(
-      widget.cartilha.id,
-    );
-    if (mounted && certificate != null) {
-      setState(() => _certificate = certificate);
-    }
-  }
-
-  Future<void> _issueCertificate() async {
-    final certificateService = context.read<CertificateService>();
-    if (_certificate != null) {
-      await Navigator.push(
-        context,
-        trackedRoute(
-          pageId: 'certificate_details',
-          courseId: widget.cartilha.id,
-          resourceId: 'certificate',
-          featureId: 'certificate_view',
-          builder: (_) => CertificateDetailsScreen(certificate: _certificate!),
-        ),
-      );
-      return;
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final name = (prefs.getString('user_name') ?? '').trim();
-    final profileDataStore =
-        widget.profileDataStore ?? SecureProfileDataStore();
-    final cpf = (await profileDataStore.read()).cpf;
-    if (name.length < 2 || !CertificateService.isValidCpf(cpf)) {
-      if (!mounted) return;
-      final edit = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Complete seu cadastro'),
-          content: const Text(
-            'Para emitir um certificado verificável, informe seu nome e um CPF válido. '
-            'O CPF não aparecerá no certificado nem na página pública.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Agora não'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Abrir cadastro'),
-            ),
-          ],
-        ),
-      );
-      if (edit == true && mounted) {
-        await Navigator.push(
-          context,
-          trackedRoute(
-            pageId: 'profile',
-            featureId: 'profile_management',
-            builder: (_) => const CadUnicoScreen(),
-          ),
-        );
-      }
-      return;
-    }
-
-    if (prefs.getBool('certificate_consent_v1') != true) {
-      if (!mounted) return;
-      final allowSharing = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Emitir certificado verificável?'),
-          content: const Text(
-            'O app enviará por conexão segura seu nome, CPF e a conclusão desta cartilha. '
-            'O servidor usa o CPF apenas para evitar duplicidade e armazena somente um código '
-            'irreversível. A página pública e o PDF mostram nome, cartilha, data, ID e hash, '
-            'mas nunca exibem o CPF.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Agora não'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Concordar e emitir'),
-            ),
-          ],
-        ),
-      );
-      if (allowSharing != true) return;
-      await prefs.setBool('certificate_consent_v1', true);
-    }
-
-    if (mounted) setState(() => _issuingCertificate = true);
-    try {
-      final certificate = await certificateService.issue(
-        holderName: name,
-        cpf: cpf,
+  Future<void> _requestCertificate() async {
+    await Navigator.push(
+      context,
+      trackedRoute(
+        pageId: 'certificate_requests',
         courseId: widget.cartilha.id,
-        answeredQuestions: _questionsAnswered,
-        totalQuestions: _totalQuestions,
-      );
-      if (!mounted) return;
-      setState(() => _certificate = certificate);
-      unawaited(
-        context.read<AppTelemetryService>().trackFeature(
-          featureId: 'certificate_issued',
+        featureId: 'certificate_request',
+        builder: (_) => CertificateRequestsScreen(
           courseId: widget.cartilha.id,
+          courseVersionId: widget.cartilha.courseVersionId,
+          classId: widget.cartilha.classId,
         ),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Certificado emitido e salvo na sua carteira.'),
-          backgroundColor: Color(0xFF093AF4),
-          duration: Duration(seconds: 4),
-        ),
-      );
-      await Navigator.push(
-        context,
-        trackedRoute(
-          pageId: 'certificate_details',
-          courseId: widget.cartilha.id,
-          resourceId: 'certificate',
-          featureId: 'certificate_view',
-          builder: (_) => CertificateDetailsScreen(certificate: certificate),
-        ),
-      );
-    } on CertificateException catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.message)));
-      }
-    } on Object {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Não foi possível salvar o certificado. Tente novamente.',
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _issuingCertificate = false);
-    }
+      ),
+    );
   }
 
   @override
@@ -462,7 +321,8 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
           widget.cartilha.title,
           style: const TextStyle(fontSize: 15),
         ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
           IconButton(
             tooltip: 'Perguntar ao Tutor de IA',
@@ -541,34 +401,13 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       floatingActionButton: _isCompleted
           ? FloatingActionButton.extended(
               heroTag: 'cert',
-              icon: _issuingCertificate
-                  ? const SizedBox.square(
-                      dimension: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : _certificate != null
-                  ? const Icon(Icons.check_circle, color: Colors.white)
-                  : Icon(
-                      Icons.workspace_premium,
-                      color: _earnedCertificate ? Colors.amber : Colors.white54,
-                    ),
-              label: Text(
-                _issuingCertificate
-                    ? 'Emitindo...'
-                    : _certificate != null
-                    ? 'Ver certificado'
-                    : 'Emitir certificado',
-                style: const TextStyle(fontSize: 13),
+              icon: const Icon(Icons.workspace_premium, color: Colors.amber),
+              label: const Text(
+                'Solicitar certificado',
+                style: TextStyle(fontSize: 13),
               ),
-              backgroundColor: _earnedCertificate
-                  ? const Color(0xFF093AF4)
-                  : Colors.grey[600],
-              onPressed: (_issuingCertificate || !_earnedCertificate)
-                  ? null
-                  : _issueCertificate,
+              backgroundColor: const Color(0xFF093AF4),
+              onPressed: _requestCertificate,
             )
           : null,
     );

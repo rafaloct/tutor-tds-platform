@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../data/certificate_service.dart';
 import '../models/certificate_record.dart';
 import 'certificate_details_screen.dart';
+import 'certificate_requests_screen.dart';
 import '../../analytics/telemetry_route.dart';
 
 class CertificateWalletScreen extends StatefulWidget {
@@ -99,6 +100,19 @@ class _CertificateWalletScreenState extends State<CertificateWalletScreen> {
                 : 'Meus certificados',
           ),
           actions: [
+            if (!_selecting)
+              IconButton(
+                tooltip: 'Pedidos de certificado',
+                icon: const Icon(Icons.pending_actions),
+                onPressed: () => Navigator.push(
+                  context,
+                  trackedRoute(
+                    pageId: 'certificate_requests',
+                    featureId: 'certificate_request',
+                    builder: (_) => const CertificateRequestsScreen(),
+                  ),
+                ),
+              ),
             if (_certificates.isNotEmpty)
               IconButton(
                 tooltip: _selected.length == _certificates.length
@@ -363,7 +377,7 @@ class _EmptyWallet extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Conclua uma cartilha e responda todas as perguntas para emitir seu primeiro certificado verificável.',
+                'Conclua uma cartilha e solicite a análise em Pedidos de certificado. A equipe verifica os critérios antes de aprovar. Certificados antigos continuam nesta carteira.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

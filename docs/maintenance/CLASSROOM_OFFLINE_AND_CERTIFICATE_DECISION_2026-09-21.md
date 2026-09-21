@@ -71,6 +71,10 @@ Não extrapolar os testes locais para validação física ou prontidão de produ
 
 ## Certificados: decisão explícita do usuário
 
+Atualização posterior: pedido/revisão humana e navegação Flutter implementados
+localmente em `CERTIFICATE_REQUEST_REVIEW_2026-09-21.md`. A auditoria abaixo
+registra a situação anterior; emissão/Worker/carteira ainda não foram migrados.
+
 Em resposta à pergunta desta tarefa, foi escolhida emissão **por edição e
 matrícula, com aprovação humana após conclusão e carga horária validadas**.
 Preservar todos os certificados antigos e suas formas de verificação.

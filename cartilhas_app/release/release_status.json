@@ -11,7 +11,7 @@
   },
   "release_build_allowed": false,
   "source_verification": {
-    "flutter_tests": "242/242",
+    "flutter_tests": "270/270",
     "dart_analyze": "passed",
     "verified_at": "2026-09-21"
   },
@@ -24,6 +24,12 @@
     "reason": "Antecede a retomada offline segura do Evidence/check-in."
   },
   "required_physical_evidence": [
+    {
+      "id": "certificate_human_approval_e2e",
+      "status": "pending",
+      "required_for_release_build": true,
+      "description": "Pedido e revisão humana por matrícula/edição, emissão autenticada API-Worker-KV, carteira isolada e certificados legados preservados; não confundir aprovação com emissão."
+    },
     {
       "id": "classroom_cold_offline_xiaomi",
       "status": "pending",

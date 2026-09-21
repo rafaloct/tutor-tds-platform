@@ -24,6 +24,8 @@ from .models import (
     AssessmentAttemptRecord,
     AssessmentContentRecord,
     CertificateReference,
+    CertificateRequest,
+    CertificateRequestTransition,
     ClassEnrollment,
     ClassCheckin,
     ClassMonitor,
@@ -226,6 +228,14 @@ def delete_me(
         session.execute(
             delete(CertificateReference).where(CertificateReference.user_id == user_id)
         )
+        # Private certificate requests contain the learner's name. Delete their
+        # entire history before removing enrollment/user lineage (also on SQLite
+        # without FK enforcement). Reviewers of other requests are anonymized.
+        request_ids = list(session.scalars(select(CertificateRequest.id).where(CertificateRequest.user_id == user_id)))
+        session.execute(delete(CertificateRequest).where(CertificateRequest.user_id == user_id))
+        if request_ids:
+            session.execute(delete(CertificateRequestTransition).where(CertificateRequestTransition.request_id.in_(request_ids)))
+        session.execute(update(CertificateRequestTransition).where(CertificateRequestTransition.actor_user_id == user_id).values(actor_user_id=None))
         session.execute(
             delete(AssessmentAttemptRecord).where(
                 AssessmentAttemptRecord.owner_id == user_id

@@ -408,6 +408,57 @@ class CertificateReference(Base):
     )
 
 
+class CertificateRequest(Base):
+    __tablename__ = "certificate_requests"
+    __table_args__ = (
+        UniqueConstraint("enrollment_id", "course_version_id", name="uq_certificate_request_edition"),
+        ForeignKeyConstraint(["enrollment_id", "user_id", "program_id", "course_id"], ["enrollments.id", "enrollments.user_id", "enrollments.program_id", "enrollments.course_id"], name="fk_certificate_request_enrollment", ondelete="CASCADE"),
+        ForeignKeyConstraint(["course_version_id", "course_id"], ["course_versions.id", "course_versions.course_id"], name="fk_certificate_request_version"),
+        ForeignKeyConstraint(["class_id", "program_id", "course_id"], ["classes.id", "classes.program_id", "classes.course_id"], name="fk_certificate_request_class"),
+        CheckConstraint("status IN ('pending', 'approved', 'rejected')", name="ck_certificate_request_status"),
+        CheckConstraint("revision >= 1 AND required_seconds >= 0", name="ck_certificate_request_numbers"),
+        CheckConstraint("(status = 'pending' AND reviewed_at IS NULL AND review_reason IS NULL) OR (status != 'pending' AND reviewed_at IS NOT NULL AND review_reason IS NOT NULL)", name="ck_certificate_request_review"),
+        Index("ix_certificate_requests_program_status", "program_id", "status"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    enrollment_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    course_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    course_version_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    class_id: Mapped[str | None] = mapped_column(String(36))
+    program_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    institution_id: Mapped[str] = mapped_column(ForeignKey("institutions.id"), nullable=False)
+    holder_name: Mapped[str] = mapped_column(String(240), nullable=False)
+    course_title: Mapped[str] = mapped_column(String(240), nullable=False)
+    program_name: Mapped[str] = mapped_column(String(240), nullable=False)
+    institution_name: Mapped[str] = mapped_column(String(240), nullable=False)
+    required_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="pending")
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    review_reason: Mapped[str | None] = mapped_column(String(500))
+
+
+class CertificateRequestTransition(Base):
+    __tablename__ = "certificate_request_transitions"
+    __table_args__ = (
+        UniqueConstraint("request_id", "revision", name="uq_certificate_request_transition_revision"),
+        CheckConstraint("revision >= 1", name="ck_certificate_request_transition_revision"),
+        CheckConstraint("to_status IN ('pending', 'approved', 'rejected') AND (from_status IS NULL OR from_status IN ('pending', 'rejected'))", name="ck_certificate_request_transition_status"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    request_id: Mapped[str] = mapped_column(ForeignKey("certificate_requests.id", ondelete="CASCADE"), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    from_status: Mapped[str | None] = mapped_column(String(24))
+    to_status: Mapped[str] = mapped_column(String(24), nullable=False)
+    actor_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    actor_role: Mapped[str] = mapped_column(String(32), nullable=False)
+    reason: Mapped[str | None] = mapped_column(String(500))
+    eligibility: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
 class LearningEventRecord(Base):
     __tablename__ = "learning_events"
 
