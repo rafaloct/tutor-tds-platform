@@ -47,6 +47,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _hasEditorAccess = false;
   bool _hasSession = false;
+  int _navigationIndex = 0;
   Future<TeamCapabilitySnapshot?>? _teamCapability;
   late Future<List<Cartilha>> _cartilhas;
 
@@ -83,6 +84,55 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<List<Cartilha>> _loadCartilhas() =>
       widget.courseLoader?.call() ??
       CourseRepository(apiUrl: AppConfig.tutorApiUrl).fetchAll();
+
+  Future<void> _openBottomDestination(int index) async {
+    if (index == 0) return;
+    setState(() => _navigationIndex = index);
+    try {
+      switch (index) {
+        case 1:
+          final cartilhas = await _cartilhas;
+          if (!mounted) return;
+          await Navigator.push(
+            context,
+            trackedRoute(
+              pageId: 'study_hub',
+              resourceId: 'study_tools',
+              featureId: 'study_hub_navigation',
+              builder: (_) => StudyHubScreen(cartilhas: cartilhas),
+            ),
+          );
+        case 2:
+          if (!mounted) return;
+          await Navigator.push(
+            context,
+            trackedRoute(
+              pageId: 'content_catalog',
+              resourceId: 'content_catalog',
+              featureId: 'content_navigation',
+              builder: (_) => MediaCatalogScreen(
+                repository: MediaRepository(
+                  apiUrl: AppConfig.tutorApiUrl,
+                  authRepository: context.read<AuthRepository>(),
+                ),
+              ),
+            ),
+          );
+        case 3:
+          if (!mounted) return;
+          await Navigator.push(
+            context,
+            trackedRoute(
+              pageId: 'profile',
+              featureId: 'profile_navigation',
+              builder: (_) => const CadUnicoScreen(),
+            ),
+          );
+      }
+    } finally {
+      if (mounted) setState(() => _navigationIndex = 0);
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -426,6 +476,32 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           );
         },
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _navigationIndex,
+        onDestinationSelected: _openBottomDestination,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Início',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_outlined),
+            selectedIcon: Icon(Icons.menu_book),
+            label: 'Aprender',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.article_outlined),
+            selectedIcon: Icon(Icons.article),
+            label: 'Conteúdos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Perfil',
+          ),
+        ],
       ),
     );
   }
