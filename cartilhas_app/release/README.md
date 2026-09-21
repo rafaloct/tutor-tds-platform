@@ -2,10 +2,17 @@
 
 ## Atual
 
-`Tutor-TDS-1.4.0+13-signed.aab` é o candidato final validado para envio à
-trilha de teste interno. Ele foi reconstruído depois da correção P1 de mídia e
-do reteste físico de grant/HLS, velocidades e retomada. O upload e a promoção
-permanecem ações humanas.
+**Não há AAB atual liberado para upload.**
+
+`Tutor-TDS-1.4.0+13-signed.aab`, hash
+`B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`, está
+**superseded e não deve ser enviado à Play Console**. Ele antecede a mudança de
+retomada offline segura do Evidence/check-in, validada no código pela suíte
+Flutter 177/177. Um novo bundle só deve ser gerado depois do reteste físico no
+Xiaomi reconectado.
+
+Os dados abaixo são mantidos somente para rastreabilidade do artefato
+superseded:
 
 - tamanho: `64.716.303` bytes;
 - SHA-256: `b93fad21ce8ae92ab464fcafe8fb69e66c07c6e712db0dbfca0ae580b2844b66`;
@@ -15,9 +22,9 @@ permanecem ações humanas.
 - alinhamento nativo: 16 KB;
 - assinatura: chave de upload correspondente a `android/upload_certificate.pem`.
 
-Não envie o `.jks`, `key.properties` nem `config/production.json`. Antes do
-upload, confirme na Play Console que o certificado público versionado é a chave
-de upload aceita e siga `PLAY_CONSOLE_CHECKLIST.md`.
+Não envie este AAB, o `.jks`, `key.properties` nem `config/production.json`.
+Depois do reteste e rebuild, confirme na Play Console que o certificado público
+versionado é a chave de upload aceita e siga `PLAY_CONSOLE_CHECKLIST.md`.
 
 ## Históricos
 

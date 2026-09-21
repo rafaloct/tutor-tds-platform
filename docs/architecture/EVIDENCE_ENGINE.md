@@ -136,3 +136,26 @@ app, o Flutter deve recuperar a sessão por `/open` (ou pelo ID salvo) e, para
 exibir um novo QR, um professor/monitor autorizado deve chamar o endpoint de
 rotação. Estudantes precisam ler o QR novamente; `token_version` permite
 invalidar um QR antigo no estado local.
+
+### Limite offline do check-in no app
+
+O envio exige conexão e somente uma resposta `2xx` pode ser apresentada como
+presença confirmada. Em uma falha de rede, o Flutter mantém o token rotativo
+apenas em memória e persiste por no máximo 24 horas somente `class_id`,
+`session_id`, `kind`, `idempotency_key` e a data de criação. Assim:
+
+- uma reconexão com a tela ainda aberta repete a mesma operação com a mesma
+  chave idempotente;
+- após morte ou reabertura do app, a pendência reaparece, mas um código atual
+  da mesma sessão precisa ser lido ou colado novamente;
+- trocar turma, sessão ou tipo de presença abandona a chave anterior e inicia
+  outra operação;
+- sucesso remove a pendência e o código da memória; pendências antigas ou
+  inválidas são descartadas localmente;
+- o app nunca agenda replay silencioso nem informa confirmação offline.
+
+Retry automático após reinício não é compatível com o contrato atual: ele
+exigiria persistir o token em claro e ainda poderia reenviar um token expirado
+ou invalidado por rotação. Uma fila automática futura exigiria um grant offline
+dedicado, limitado por aluno, sessão e ação, com validade verificável pelo
+cliente e consumo idempotente no servidor; não deve reutilizar o token do QR.

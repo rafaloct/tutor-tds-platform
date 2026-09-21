@@ -2,11 +2,16 @@
 
 ## Estado validado em 20/09/2026
 
+> **BLOQUEADO PARA UPLOAD:** o AAB abaixo está superseded porque antecede a
+> retomada offline segura do Evidence/check-in. O código atual passou 177/177,
+> mas é obrigatório retestar no Xiaomi reconectado e gerar um novo AAB. Não
+> enviar o hash `B93FAD21…B2844B66` à Play Console.
+
 - Pacote: `com.tutortds_cartilhas`.
 - Android: `minSdk 24`, `targetSdk 36`, `compileSdk 36`.
-- AAB candidato: `release/Tutor-TDS-1.4.0+13-signed.aab`.
-- Tamanho final: `64.716.303` bytes.
-- SHA-256 final: `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`.
+- AAB histórico superseded: `release/Tutor-TDS-1.4.0+13-signed.aab`.
+- Tamanho histórico: `64.716.303` bytes.
+- SHA-256 superseded: `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`.
 - API: `https://ead.ipexdesenvolvimento.cloud/tutor-api`.
 - Política: `https://cartilhas.ipexdesenvolvimento.cloud/privacy.html`.
 - Exclusão externa: `https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html`.
@@ -49,7 +54,7 @@ Validação executada no artefato:
 - correção de subpath de mídia coberta por regressão; reteste físico aprovou
   grant/HLS, 0,75x, 2x e retomada. O item de teste não publicou legenda.
 
-O relatório detalhado deste candidato, incluindo hash, permissões, shrink e
+O relatório histórico deste artefato superseded, incluindo hash, permissões, shrink e
 pendências humanas, está em `release/RELEASE_READINESS_1.4.0+13.md`.
 
 ## Operação da API
@@ -71,7 +76,8 @@ restauração ainda são controles operacionais obrigatórios pós-release.
 
 ## Antes do rollout
 
-Use `release/PLAY_CONSOLE_CHECKLIST.md`. O upload e a promoção para produção
+Não use o AAB superseded. Após reteste físico e rebuild, use
+`release/PLAY_CONSOLE_CHECKLIST.md`. O upload e a promoção para produção
 dependem de login humano na Play Console, confirmação da chave de upload,
 revisão das declarações e resultado do teste interno. Não publique diretamente
 em 100% dos usuários sem passar por teste interno e rollout gradual.

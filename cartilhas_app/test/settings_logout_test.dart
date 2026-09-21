@@ -1,6 +1,7 @@
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
+import 'package:cartilhas_app/features/evidence/data/checkin_draft_store.dart';
 import 'package:cartilhas_app/screens/settings_screen.dart';
 import 'package:cartilhas_app/screens/welcome_screen.dart';
 import 'package:cartilhas_app/services/theme_controller.dart';
@@ -41,6 +42,8 @@ void main() {
       'study_progress:last': 'progresso-local',
       'learning_events:pending:v1': '[{"event_id":"old-user"}]',
       'study_assessment:sync:v1': '{"old-attempt":{}}',
+      SharedPreferencesCheckinDraftStore.storageKey:
+          '{"class_id":"class-1","session_id":"session-1","kind":"checkin","idempotency_key":"mobile:1","created_at":"2026-09-20T14:00:00Z"}',
     });
     final tokenStore = _TokenStore();
     final auth = AuthRepository(
@@ -95,6 +98,10 @@ void main() {
     expect(prefs.getString('study_progress:last'), 'progresso-local');
     expect(prefs.getString('learning_events:pending:v1'), isNull);
     expect(prefs.getString('study_assessment:sync:v1'), isNull);
+    expect(
+      prefs.getString(SharedPreferencesCheckinDraftStore.storageKey),
+      isNull,
+    );
 
     // Simula o novo processo do app: o perfil local leva à Home mesmo sem
     // sessão, e Configurações precisa continuar oferecendo reentrada online.

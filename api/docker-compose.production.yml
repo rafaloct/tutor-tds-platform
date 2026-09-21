@@ -22,6 +22,7 @@ services:
         max-file: "5"
 
   api:
+    image: ${PRODUCTION_API_IMAGE:-tutor-tds-api:production-local}
     build: .
     restart: unless-stopped
     environment:
@@ -70,6 +71,7 @@ services:
     logging: *bounded-logging
 
   sync-worker:
+    image: ${PRODUCTION_API_IMAGE:-tutor-tds-api:production-local}
     build: .
     restart: unless-stopped
     environment:

@@ -8,6 +8,7 @@ import '../features/auth/data/account_data_deletion_service.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/models/auth_session.dart';
 import '../features/auth/presentation/account_login_dialog.dart';
+import '../features/evidence/data/checkin_draft_store.dart';
 import '../features/learning_events/learning_event_queue.dart';
 import '../features/study_ai/data/assessment_sync_queue.dart';
 import '../services/privacy_preferences.dart';
@@ -233,6 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await Future.wait([
         const LearningEventQueue().clear(),
         const AssessmentSyncQueue().clear(),
+        SharedPreferencesCheckinDraftStore().clear(),
       ]);
       await authRepository.logout();
       if (!mounted) return;

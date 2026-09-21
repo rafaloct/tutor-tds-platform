@@ -39,9 +39,10 @@ class CertificateService {
     required this.gatewayUrl,
     required this.repository,
     required this.pdfService,
-    required this._client,
-    required this._ownsClient,
-  });
+    required http.Client client,
+    required bool ownsClient,
+  }) : _client = client,
+       _ownsClient = ownsClient;
 
   Future<List<CertificateRecord>> loadAll() => repository.loadAll();
 

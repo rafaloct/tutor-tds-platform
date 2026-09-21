@@ -52,9 +52,14 @@ abstract interface class EvidenceGateway {
 }
 
 class EvidenceApiException implements Exception {
-  const EvidenceApiException(this.message, {this.statusCode});
+  const EvidenceApiException(
+    this.message, {
+    this.statusCode,
+    this.isNetworkFailure = false,
+  });
   final String message;
   final int? statusCode;
+  final bool isNetworkFailure;
 
   @override
   String toString() => message;
@@ -286,6 +291,7 @@ class EvidenceRepository implements EvidenceGateway {
     } on Object {
       throw const EvidenceApiException(
         'Sem conexão com o registro de evidências. Nenhum dado foi enviado.',
+        isNetworkFailure: true,
       );
     }
   }

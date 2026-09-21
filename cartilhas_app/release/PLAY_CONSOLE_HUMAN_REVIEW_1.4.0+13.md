@@ -1,18 +1,24 @@
 # Revisão humana da Play Console — Tutor TDS 1.4.0+13
 
-Auditoria técnica executada em 20/09/2026 sobre o código, o AAB final e os
+Auditoria técnica executada em 20/09/2026 sobre o código, um AAB agora
+**superseded** e os
 endpoints públicos configurados. Este documento **não é parecer jurídico** e
 não autoriza publicação. As respostas finais da Play Console dependem dos
 contratos, das configurações dos provedores e das decisões do responsável pelo
 tratamento dos dados.
 
-## Artefato auditado
+> **Não enviar o AAB auditado.** O hash `B93FAD21…B2844B66` antecede a mudança
+> de Evidence/check-in offline. O código atual passou 177/177, mas aguarda
+> reteste no Xiaomi reconectado e novo rebuild.
+
+## Artefato histórico auditado — superseded
 
 - pacote: `com.tutortds_cartilhas`;
 - versão: `1.4.0` (`versionCode 13`);
 - AAB: `release/Tutor-TDS-1.4.0+13-signed.aab`;
 - tamanho: `64.716.303` bytes;
 - SHA-256: `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`;
+- estado: **não uploadável; superseded**;
 - configuração compilada: API e gateway produtivos, política e exclusão em
   HTTPS; tráfego HTTP desabilitado no manifesto.
 
@@ -77,7 +83,8 @@ jornadas, mas fallback não equivale à integração online habilitada.
 | `com.tutortds_cartilhas.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | permissão interna gerada pelo AndroidX | interna | não representa uma categoria de dado solicitada à pessoa |
 
 Não há permissões de câmera, localização, contatos, calendário, telefone,
-SMS, fotos, vídeos, armazenamento amplo ou notificações no manifesto final.
+SMS, fotos, vídeos, armazenamento amplo ou notificações no manifesto do
+artefato auditado.
 
 ## Matriz técnica de dados
 
@@ -100,7 +107,7 @@ da Play.
 | Áudio | fala durante o ditado | transcrição da pergunta | botão de voz, aviso e permissão Android | o app não cria arquivo; comportamento do serviço de reconhecimento instalado exige confirmação |
 | Certificados/documentos | nome, curso, data, progresso, ID, hash e assinatura no KV e no PDF local | emissão e verificação pública | confirmação específica antes da emissão | PDF/índice na área privada; cópias exportadas ficam no destino escolhido; registro público pode permanecer sem TTL definido |
 | Metadados de mídia | catálogo, autorização efêmera, fonte e legenda; requisição de playback ao provedor | reprodução de vídeo | ação de abrir/reproduzir; algumas visibilidades exigem matrícula | grant interno usa token opaco curto; logs/cookies/IP no YouTube, Cloudflare Stream ou HLS dependem do provedor; integração produtiva atual não está exposta pela API |
-| Dados locais não enviados por padrão | tema, preferências, progresso offline, resumos, filas pendentes, cache de catálogo e PDFs | funcionamento offline e retomada | uso normal do app | `allowBackup=false`; exclusão no app limpa preferências e certificados após sucesso remoto; logout não apaga o perfil/progresso local |
+| Dados locais não enviados por padrão | tema, preferências, progresso offline, resumos, filas pendentes, metadados mínimos de check-in pendente sem token, cache de catálogo e PDFs | funcionamento offline e retomada | uso normal do app | `allowBackup=false`; o draft de check-in expira em 24 horas e é limpo no sucesso/logout; exclusão no app limpa preferências e certificados após sucesso remoto; logout não apaga o perfil/progresso local |
 
 ### Categorias sem coleta explícita encontrada no código
 

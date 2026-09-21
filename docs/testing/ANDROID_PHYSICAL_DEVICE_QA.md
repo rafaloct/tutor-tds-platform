@@ -118,7 +118,7 @@ package Play não foi instalado, limpo, removido nem usado como alvo de
 | A13 - capacidades por papel | Professor recebeu `Área da equipe` e `Registrar presença`; monitor recebeu saudação própria, `Monitor por exceção` e `Registrar presença` | **Aprovado para professor e monitor sintéticos:** capabilities vieram dos vínculos de staging; aluno/admin e negações cruzadas ainda pertencem à matriz completa |
 | A14 - dashboards por vínculo | Professor abriu o acompanhamento da `Turma Sintética QA [STAGING]`; monitor abriu o painel acionável por exceção da mesma turma | **Aprovado para os cenários sintéticos observados:** ainda faltam volume, outra turma e tentativa explícita de acesso fora do vínculo |
 | A15 - check-in/QR | Após corrigir a ordem transacional somente no staging, a `Entrada` e a `Saída` foram confirmadas no Xiaomi. Uma repetição física da `Entrada`, com nova chave gerada pela UI, foi recusada como duplicada e não criou outra linha | **Aprovado para sucesso e proteção contra duplicação:** PostgreSQL final com um `checkin`, um `checkout`, duas evidências `attendance` distintas. Retry com a mesma chave passou no smoke da API; expiração foi observada no ensaio anterior. O subcaso offline permanece pendente |
-| A18 - mídia | O rebuild corrigido foi instalado com `-r`; o item `external_hls` recebeu grant e exibiu quadro/posição. Os menus nativos confirmaram seleção de `0.75` e `2`, e o vídeo reabriu em posição não zero após `force-stop`/relaunch | **Parcial aprovado:** P1 de rota encerrado no cliente físico. O fixture tem `captions=[]`, portanto legenda não pôde ser exercitada. Não foram concluídos correlação do access log do POST, offline/rede, telemetria qualificada nem expiração/revogação do grant |
+| A18 - mídia | O rebuild corrigido foi instalado com `-r`; o item `external_hls` recebeu grant e exibiu quadro/posição. Os menus nativos confirmaram seleção de `0.75` e `2`, e o vídeo reabriu em posição não zero após `force-stop`/relaunch. O container de staging confirmou duas autorizações físicas `201` | **Parcial aprovado:** P1 de rota encerrado no cliente físico. O fixture tem `captions=[]`, portanto legenda não pôde ser exercitada. Não foram concluídos offline/rede, telemetria qualificada nem expiração/revogação do grant |
 | A12/A23 - visual/branding | A build `1.4.0-dev+13` exibiu IPEX/UFT/FAPTO/CDR em cards brancos no modo escuro, sem o quadriculado anterior | **Aprovado no recorte físico:** marca TDS e assets seguem o manual; resta confirmar institucionalmente a ordem/assinatura conjunta |
 
 ### Evidências armazenadas
@@ -191,9 +191,32 @@ capturadas as velocidades `0.75` e `2` no menu nativo. Após `force-stop` e
 relaunch somente do DEV, o mesmo vídeo retomou em posição não zero, sem
 reiniciar. O fixture de staging declara `captions=[]`; por isso a legenda não
 foi marcada como aprovada nem como defeito. Por ordem de encerramento, não foi
-feita nova rodada offline, e o caminho exato do `POST` não foi correlacionado
-nos access logs antes do encerramento; o sucesso físico comprova grant/HLS, mas
-não substitui essa evidência operacional.
+feita nova rodada offline.
+
+Uma verificação posterior somente leitura dos logs do container de staging
+confirmou duas chamadas físicas a
+`POST /media/staging-qa-media/playback-authorizations`, ambas `201 Created`, sem
+expor header, token ou payload. O Traefik remove `/tutor-staging-api` antes de
+encaminhar ao container; portanto o log interno não repete o prefixo, mas essas
+chamadas chegaram pela rota pública prefixada usada pelo APK DEV. Não havia
+access log do Traefik habilitado para uma segunda correlação.
+
+### Inventário read-only para os próximos gates
+
+Na consulta posterior, `adb devices -l` não listou o Xiaomi. Assim, o estado
+atual do TalkBack não pôde ser inventariado sem inventar evidência: instalação,
+serviço disponível e estado de acessibilidade permanecem **desconhecidos**. Nada
+foi habilitado ou alterado. O último estado confirmado antes da desconexão era
+Wi-Fi e dados móveis ligados, DEV `1.4.0-dev+13` em `force-stop` e Play
+`1.2.0+11` preservado; ele deve ser reconfirmado quando o ADB voltar a `device`.
+
+O fixture atual não pode ganhar legenda apenas reaplicando o seed: `_ensure`
+preserva o registro existente e a mídia já está `published`, enquanto o endpoint
+de patch aceita edição somente em `draft`. O caminho seguro para o próximo gate
+é criar, via API editorial/admin de staging, **um novo rascunho sintético** com
+caption HTTPS WebVTT (`format=vtt`, idioma e referência), publicá-lo e então
+testar no DEV. O contrato atual aceita até 20 captions VTT e o player HLS injeta
+somente trilhas WebVTT; SRT não deve ser usado nesse fixture.
 
 ### Jornada offline, morte/reabertura e reconexão
 
@@ -274,7 +297,7 @@ online conectada`, mas não oferecia uma ação de re-login. A correção adicio
 Na build final, o fluxo foi aprovado fisicamente com as contas sintéticas de
 professor e monitor: login seguro, sessão conectada, capacidades derivadas dos
 vínculos e progresso local preservado. A correção também está coberta pela suíte
-automatizada final, com **171/171 testes aprovados**. O P1 de re-login está
+automatizada final, com **177/177 testes aprovados**. O P1 de re-login está
 encerrado; o P1 independente de persistência do check-in também foi corrigido e
 retestado conforme a seção anterior.
 

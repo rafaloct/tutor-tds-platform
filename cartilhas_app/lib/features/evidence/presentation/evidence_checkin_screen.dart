@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../data/checkin_draft_store.dart';
 import '../data/evidence_repository.dart';
 import '../models/evidence_models.dart';
 
 class EvidenceCheckinScreen extends StatefulWidget {
-  const EvidenceCheckinScreen({super.key, required this.gateway});
+  const EvidenceCheckinScreen({
+    super.key,
+    required this.gateway,
+    this.draftStore,
+  });
 
   final EvidenceGateway gateway;
+  final CheckinDraftStore? draftStore;
 
   @override
   State<EvidenceCheckinScreen> createState() => _EvidenceCheckinScreenState();
@@ -23,6 +29,27 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
   String? _error;
   EvidenceCheckin? _result;
   late String _idempotencyKey = _newIdempotencyKey();
+  late final CheckinDraftStore _draftStore;
+  CheckinDraft? _pendingDraft;
+
+  @override
+  void initState() {
+    super.initState();
+    _draftStore = widget.draftStore ?? SharedPreferencesCheckinDraftStore();
+    _restoreDraft();
+  }
+
+  Future<void> _restoreDraft() async {
+    final draft = await _draftStore.read();
+    if (!mounted || draft == null) return;
+    setState(() {
+      _pendingDraft = draft;
+      _classId.text = draft.classId;
+      _sessionId.text = draft.sessionId;
+      _kind = draft.kind;
+      _idempotencyKey = draft.idempotencyKey;
+    });
+  }
 
   @override
   void dispose() {
@@ -35,30 +62,41 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
     super.dispose();
   }
 
-  void _parseCode() {
+  Future<bool> _parseCode() async {
     final raw = _code.text.trim();
     final uri = Uri.tryParse(raw);
     if (uri == null || uri.scheme != 'tutortds' || uri.host != 'checkin') {
       setState(() => _error = 'Código incompleto. Confira com a equipe.');
-      return;
+      return false;
     }
     final classId = uri.queryParameters['class_id'] ?? '';
     final sessionId = uri.queryParameters['session_id'] ?? '';
     final token = uri.queryParameters['token'] ?? '';
     if (classId.isEmpty || sessionId.isEmpty || token.isEmpty) {
       setState(() => _error = 'Código incompleto. Confira com a equipe.');
-      return;
+      return false;
     }
+    final resumesPending =
+        _pendingDraft == null ||
+        (_pendingDraft!.classId == classId &&
+            _pendingDraft!.sessionId == sessionId &&
+            _pendingDraft!.kind == _kind);
     setState(() {
+      if (!resumesPending) {
+        _pendingDraft = null;
+        _idempotencyKey = _newIdempotencyKey();
+      }
       _classId.text = classId;
       _sessionId.text = sessionId;
       _token.text = token;
       _error = null;
     });
+    if (!resumesPending) await _draftStore.clear();
+    return true;
   }
 
   Future<void> _submit() async {
-    _parseCode();
+    if (!await _parseCode()) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() {
       _busy = true;
@@ -75,8 +113,25 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
       if (!mounted) return;
       setState(() {
         _result = result;
+        _pendingDraft = null;
         _idempotencyKey = _newIdempotencyKey();
+        _code.clear();
+        _token.clear();
       });
+      await _draftStore.clear();
+    } on EvidenceApiException catch (error) {
+      if (error.isNetworkFailure) {
+        final draft = CheckinDraft(
+          classId: _classId.text,
+          sessionId: _sessionId.text,
+          kind: _kind,
+          idempotencyKey: _idempotencyKey,
+          createdAt: DateTime.now().toUtc(),
+        );
+        await _draftStore.write(draft);
+        if (mounted) setState(() => _pendingDraft = draft);
+      }
+      if (mounted) setState(() => _error = error.toString());
     } on Object catch (error) {
       if (mounted) setState(() => _error = error.toString());
     } finally {
@@ -101,6 +156,18 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
           'Cole o código exibido pela equipe. O app identifica apenas sua conta e nunca mostra a lista da turma.',
         ),
         const SizedBox(height: 12),
+        if (_pendingDraft != null)
+          Card.filled(
+            key: const ValueKey('pending-checkin'),
+            child: const ListTile(
+              leading: Icon(Icons.pending_actions_outlined),
+              title: Text('Presença pendente neste aparelho'),
+              subtitle: Text(
+                'A confirmação não foi enviada. Cole um código atual da mesma sessão para tentar novamente; o código anterior não foi salvo.',
+              ),
+            ),
+          ),
+        if (_pendingDraft != null) const SizedBox(height: 12),
         Card.filled(
           child: const ListTile(
             leading: Icon(Icons.wifi_outlined),
@@ -144,10 +211,14 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
                 selected: {_kind},
                 onSelectionChanged: _busy
                     ? null
-                    : (values) => setState(() {
-                        _kind = values.first;
-                        _idempotencyKey = _newIdempotencyKey();
-                      }),
+                    : (values) {
+                        setState(() {
+                          _kind = values.first;
+                          _pendingDraft = null;
+                          _idempotencyKey = _newIdempotencyKey();
+                        });
+                        _draftStore.clear();
+                      },
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
@@ -171,7 +242,11 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
             child: ListTile(
               leading: const Icon(Icons.sync_problem_outlined),
               title: const Text('Não sincronizado'),
-              subtitle: Text(_error!),
+              subtitle: Text(
+                _pendingDraft == null
+                    ? _error!
+                    : '$_error Seu registro está pendente, não confirmado. Tente novamente com conexão; se o app for fechado, obtenha um novo código.',
+              ),
             ),
           ),
         if (_result != null)

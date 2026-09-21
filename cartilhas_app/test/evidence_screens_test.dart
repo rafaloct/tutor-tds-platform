@@ -1,3 +1,4 @@
+import 'package:cartilhas_app/features/evidence/data/checkin_draft_store.dart';
 import 'package:cartilhas_app/features/classrooms/models/classroom_models.dart';
 import 'package:cartilhas_app/features/evidence/data/evidence_repository.dart';
 import 'package:cartilhas_app/features/evidence/models/evidence_models.dart';
@@ -6,6 +7,7 @@ import 'package:cartilhas_app/features/evidence/presentation/evidence_staff_scre
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeEvidenceGateway implements EvidenceGateway {
   _FakeEvidenceGateway({this.recoverOpen = false});
@@ -13,6 +15,8 @@ class _FakeEvidenceGateway implements EvidenceGateway {
   final bool recoverOpen;
   int tokenVersion = 1;
   String? lastIdempotencyKey;
+  final List<String> idempotencyKeys = [];
+  bool failCheckinWithNetwork = false;
   bool reviewed = false;
 
   @override
@@ -56,6 +60,13 @@ class _FakeEvidenceGateway implements EvidenceGateway {
     required String token,
   }) async {
     lastIdempotencyKey = idempotencyKey;
+    idempotencyKeys.add(idempotencyKey);
+    if (failCheckinWithNetwork) {
+      throw const EvidenceApiException(
+        'Sem conexão com o registro de evidências. Nenhum dado foi enviado.',
+        isNetworkFailure: true,
+      );
+    }
     return EvidenceCheckin(
       id: 'checkin-1',
       sessionId: sessionId,
@@ -144,6 +155,8 @@ class _FakeEvidenceGateway implements EvidenceGateway {
 }
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   testWidgets('aluno registra somente a própria presença por código', (
     tester,
   ) async {
@@ -165,6 +178,86 @@ void main() {
     expect(gateway.lastIdempotencyKey, startsWith('mobile:'));
     expect(find.text('student-1'), findsNothing);
   });
+
+  testWidgets('queda de rede mantém retry idempotente sem confirmar presença', (
+    tester,
+  ) async {
+    final gateway = _FakeEvidenceGateway()..failCheckinWithNetwork = true;
+    await tester.pumpWidget(
+      MaterialApp(home: EvidenceCheckinScreen(gateway: gateway)),
+    );
+    const code =
+        'tutortds://checkin?class_id=class-1&session_id=session-1&token=secret-token';
+    await tester.enterText(find.byType(TextFormField), code);
+    await tester.tap(find.text('Confirmar entrada'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Não sincronizado'), findsOneWidget);
+    expect(find.text('Presença pendente neste aparelho'), findsOneWidget);
+    expect(find.text('Entrada confirmada'), findsNothing);
+    final firstKey = gateway.lastIdempotencyKey;
+    final raw = (await SharedPreferences.getInstance()).getString(
+      SharedPreferencesCheckinDraftStore.storageKey,
+    );
+    expect(raw, isNotNull);
+    expect(raw, isNot(contains('secret-token')));
+
+    gateway.failCheckinWithNetwork = false;
+    await tester.tap(find.text('Confirmar entrada'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Entrada confirmada'), findsOneWidget);
+    expect(gateway.idempotencyKeys, [firstKey, firstKey]);
+    expect(
+      (await SharedPreferences.getInstance()).containsKey(
+        SharedPreferencesCheckinDraftStore.storageKey,
+      ),
+      isFalse,
+    );
+  });
+
+  testWidgets(
+    'reabertura recupera pendência sem token e exige código atual da sessão',
+    (tester) async {
+      final gateway = _FakeEvidenceGateway()..failCheckinWithNetwork = true;
+      await tester.pumpWidget(
+        MaterialApp(home: EvidenceCheckinScreen(gateway: gateway)),
+      );
+      await tester.enterText(
+        find.byType(TextFormField),
+        'tutortds://checkin?class_id=class-1&session_id=session-1&token=old-secret',
+      );
+      await tester.tap(find.text('Confirmar entrada'));
+      await tester.pumpAndSettle();
+      final originalKey = gateway.lastIdempotencyKey;
+
+      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+      await tester.pumpAndSettle();
+      gateway.failCheckinWithNetwork = false;
+      await tester.pumpWidget(
+        MaterialApp(home: EvidenceCheckinScreen(gateway: gateway)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Presença pendente neste aparelho'), findsOneWidget);
+      expect(
+        find.textContaining('código anterior não foi salvo'),
+        findsOneWidget,
+      );
+      final field = tester.widget<TextFormField>(find.byType(TextFormField));
+      expect(field.controller?.text, isEmpty);
+
+      await tester.enterText(
+        find.byType(TextFormField),
+        'tutortds://checkin?class_id=class-1&session_id=session-1&token=fresh-secret',
+      );
+      await tester.ensureVisible(find.text('Confirmar entrada'));
+      await tester.tap(find.text('Confirmar entrada'));
+      await tester.pumpAndSettle();
+      expect(find.text('Entrada confirmada'), findsOneWidget);
+      expect(gateway.lastIdempotencyKey, originalKey);
+    },
+  );
 
   testWidgets('equipe abre sessão, rotaciona QR e revisa exceção', (
     tester,

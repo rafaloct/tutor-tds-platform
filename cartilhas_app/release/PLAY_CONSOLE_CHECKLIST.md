@@ -1,14 +1,21 @@
 # Checklist Play Console — 1.4.0+13
 
-## Pronto localmente e na infraestrutura
+> **STOP:** `Tutor-TDS-1.4.0+13-signed.aab` com SHA-256
+> `B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`
+> está superseded e não deve ser enviado. Aguardar reteste físico do Evidence
+> offline e novo rebuild.
+
+## Estado histórico e bloqueio atual
 
 - [x] `versionCode 13` maior que o último candidato local (`12`). Confirmar na Play Console que 13 ainda não foi usado.
 - [x] Target/compile SDK 36 e min SDK 24.
-- [x] AAB assinado, validado pelo Bundletool e alinhado a páginas de 16 KB.
+- [x] O AAB superseded foi assinado, validado pelo Bundletool e alinhado a
+  páginas de 16 KB; o novo bundle deverá repetir esses gates.
 - [x] Certificado do keystore local igual a `android/upload_certificate.pem`.
 - [x] URLs produtivas HTTPS compiladas e validadas sem segredos.
 - [x] API e banco produtivos saudáveis, 9 cursos carregados e backup diário local.
-- [x] Gates Flutter locais aprovados e bundle validado com Bundletool 1.18.3.
+- [x] Código atual com 177/177 testes; validação do bundle superseded preservada
+  apenas como histórico.
 - [x] Exclusão dentro do app e página externa disponíveis.
 - [x] Política de privacidade pública disponível.
 - [x] Notas da versão em `whatsnew-pt-BR.txt`.
@@ -16,7 +23,8 @@
 ## Ações na Play Console
 
 - [ ] Confirmar que a chave de upload exibida corresponde ao certificado PEM.
-- [ ] Enviar `Tutor-TDS-1.4.0+13-signed.aab` somente para **Teste interno**.
+- [ ] Após reteste/rebuild, registrar novo nome/hash e enviar somente o **novo
+  AAB** para Teste interno. Nunca enviar o hash superseded acima.
 - [ ] Informar a política: `https://cartilhas.ipexdesenvolvimento.cloud/privacy.html`.
 - [ ] Informar a exclusão: `https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html`.
 - [ ] Atualizar **Segurança dos dados** usando `DATA_SAFETY.md` e revisar contratos dos provedores.

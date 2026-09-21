@@ -30,6 +30,10 @@ branch
 
 Produção não deve receber migrations destrutivas nem alteração de rede sem backup e autorização.
 
+O preflight específico da atualização 1.4, incluindo o delta OpenAPI/Alembic,
+imagem/rollback observados e o runbook de promoção, está em
+`docs/infrastructure/PRODUCTION_PROMOTION_1_4_PREFLIGHT_2026-09-20.md`.
+
 ## Staging reproduzível
 
 `api/docker-compose.staging.yml` cria banco e API isolados, sem rota pública

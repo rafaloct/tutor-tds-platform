@@ -41,9 +41,15 @@ check-in e duas de evidência.
 | Segurança/LGPD | Parcial avançada | CPF por HMAC, Argon2id, refresh rotativo, payloads fechados, RBAC por vínculo, exclusão/purge, CORS explícito e respostas sem PII desnecessária | Rate limit/WAF, análise de imagem/dependências, teste de penetração, Data Safety e políticas humanas continuam gates |
 | Comercial | Seguro por padrão | Ledger somente simulado, append-only e com origem auditável; `PAYMENT_ADAPTER=disabled` | Aprovação jurídica, tributária e comercial antes de qualquer integração/pagamento |
 | DeepSeek | Ausente do produto | Busca no código/configuração encontrou apenas documentação que o proíbe; nenhum provider/model DeepSeek é configurado para Tutor TDS | A VPS compartilhada pode manter modelos de outros sistemas; confirmar allowlist efetiva do gateway Tutor sem remover ativos compartilhados |
-| CI/CD | Pronto no repositório, não comprovado operacionalmente | CI testa API/Compose, publica imagem por SHA e deploya somente branch `staging`, com health/smoke/rollback | Configurar branch/environment/secrets no GitHub e ensaiar. Produção ainda usa `build: .`, não promoção imutável automatizada |
+| CI/CD | Pronto no repositório, não comprovado operacionalmente | CI testa API/Compose, publica imagem por SHA e deploya somente branch `staging`, com health/smoke/rollback; Compose produtivo aceita uma `PRODUCTION_API_IMAGE` única para API/worker | Configurar branch/environment/secrets no GitHub e ensaiar. Promoção produtiva por digest ainda é manual e exige aprovação |
 | Supply chain/runtime | Parcial | Secrets não são versionados e actions oficiais estão fixadas por SHA | Imagens base estão por tag, não digest; container API usa usuário root. Endurecer e validar compatibilidade em uma onda controlada |
 | Escala | Não aceita | Serviços são stateless onde aplicável e PostgreSQL/worker estão isolados | Sem load test, orçamento de conexões, múltiplas réplicas, pooling, filas externas, autoscaling ou teste de falha |
+
+O preflight de promoção 1.4 confirmou produção em `0005` e staging em `0014`,
+com 41 operações adicionais no candidato e 26 delas chamadas pelo AAB. A imagem
+produtiva atual não possui marker/tag durável de rollback e a imagem manual de
+staging não possui proveniência por commit; a promoção permanece NO-GO até
+congelar/reconstruir um digest e executar o runbook documentado.
 
 ## Correções seguras deste freeze
 
@@ -60,7 +66,7 @@ Essas mudanças existem apenas no workspace e não autorizam publicação.
 
 ## Validação local do snapshot
 
-- `pytest -q`: **57 testes aprovados**;
+- `pytest -q`: **59 testes aprovados**;
 - migration tests incluídos na suíte: upgrade/downgrade, constraints e inserts;
 - `compileall`: aplicação e testes compilados;
 - `bash -n`: `backup.sh` e `deploy_staging.sh` válidos;
