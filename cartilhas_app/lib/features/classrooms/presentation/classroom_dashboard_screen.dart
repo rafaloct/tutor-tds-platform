@@ -171,15 +171,22 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                   const SizedBox(height: 20),
                   if (_selectedCapability == ClassroomStaffCapability.teacher)
                     OutlinedButton.icon(
-                      onPressed: _loading
+                      onPressed:
+                          _loading ||
+                              _dashboard == null ||
+                              _dashboard!.classroom.id != _selectedClassId
                           ? null
                           : () => Navigator.push(
                               context,
                               trackedRoute(
                                 pageId: 'certificate_review',
                                 featureId: 'certificate_review',
-                                builder: (_) => const CertificateRequestsScreen(
+                                builder: (_) => CertificateRequestsScreen(
                                   reviewMode: true,
+                                  classId: _dashboard!.classroom.id,
+                                  courseId: _dashboard!.classroom.courseId,
+                                  courseVersionId:
+                                      _dashboard!.classroom.courseVersionId,
                                 ),
                               ),
                             ),

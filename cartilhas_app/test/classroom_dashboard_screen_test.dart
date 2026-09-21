@@ -4,6 +4,9 @@ import 'package:cartilhas_app/features/classrooms/models/classroom_models.dart';
 import 'package:cartilhas_app/features/classrooms/presentation/classroom_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
+import 'package:cartilhas_app/features/certificates/presentation/certificate_requests_screen.dart';
 
 class _FakeGateway implements ClassroomGateway, ClassroomRosterGateway {
   _FakeGateway({
@@ -40,6 +43,7 @@ class _FakeGateway implements ClassroomGateway, ClassroomRosterGateway {
     id: 'turma-1',
     programId: 'programa-1',
     courseId: 'agricultura',
+    courseVersionId: 'version-a',
     teacherId: 'prof-1',
     name: 'Turma Jalapão',
     startDate: DateTime(2026, 9),
@@ -135,7 +139,105 @@ class _FakeGateway implements ClassroomGateway, ClassroomRosterGateway {
   );
 }
 
+class _NoSessionAuth implements AuthRepository {
+  @override
+  Future<String?> localUserId() async => null;
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _TwoClasses extends _FakeGateway {
+  _TwoClasses({this.secondIsMonitor = false}) : super(role: 'student');
+  final bool secondIsMonitor;
+  ClassroomDetails get second => ClassroomDetails(
+    id: 'turma-2',
+    programId: 'programa-1',
+    courseId: 'agricultura',
+    courseVersionId: 'version-b',
+    teacherId: secondIsMonitor ? 'other' : 'prof-1',
+    name: 'Turma B',
+    startDate: DateTime(2026, 9),
+    endDate: DateTime(2026, 12),
+    status: 'active',
+    studentIds: const [],
+    monitorIds: secondIsMonitor ? const ['prof-1'] : const [],
+  );
+  @override
+  Future<List<ClassroomDetails>> classrooms() async => [
+    _FakeGateway.classroomValue,
+    second,
+  ];
+  @override
+  Future<ClassroomDetails> classroom(String classId) async =>
+      classId == 'turma-2' ? second : _FakeGateway.classroomValue;
+  @override
+  Future<ClassroomDashboard> dashboard(String classId) async {
+    final base = await super.dashboard(classId);
+    return ClassroomDashboard(
+      classroom: await classroom(classId),
+      generatedAt: base.generatedAt,
+      expectedProgressPercent: base.expectedProgressPercent,
+      summary: base.summary,
+      students: base.students,
+    );
+  }
+}
+
 void main() {
+  for (final monitor in [false, true]) {
+    testWidgets(
+      'selected class preserves review context; second monitor=$monitor',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(900, 1200));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          Provider<AuthRepository>.value(
+            value: _NoSessionAuth(),
+            child: MaterialApp(
+              home: ClassroomDashboardScreen(
+                gateway: _TwoClasses(secondIsMonitor: monitor),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Revisar pedidos de certificado'));
+        await tester.pumpAndSettle();
+        final first = tester.widget<CertificateRequestsScreen>(
+          find.byType(CertificateRequestsScreen),
+        );
+        expect(first.classId, 'turma-1');
+        expect(first.courseId, 'agricultura');
+        expect(first.courseVersionId, 'version-a');
+        expect(first.reviewMode, isTrue);
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(DropdownButtonFormField<String>));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Turma B').last);
+        await tester.pumpAndSettle();
+        if (monitor) {
+          expect(
+            find.descendant(
+              of: find.byType(AppBar),
+              matching: find.text('Monitor por exceção'),
+            ),
+            findsOneWidget,
+          );
+          expect(find.text('Revisar pedidos de certificado'), findsNothing);
+        } else {
+          await tester.tap(find.text('Revisar pedidos de certificado'));
+          await tester.pumpAndSettle();
+          final second = tester.widget<CertificateRequestsScreen>(
+            find.byType(CertificateRequestsScreen),
+          );
+          expect(second.classId, 'turma-2');
+          expect(second.courseVersionId, 'version-b');
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   testWidgets('monitor inclui estudante por nome e atualiza painel ao voltar', (
     tester,
   ) async {

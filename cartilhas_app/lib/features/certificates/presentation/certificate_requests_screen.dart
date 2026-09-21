@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/app_config.dart';
-import '../../analytics/telemetry_route.dart';
 import '../../analytics/app_telemetry_service.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/certificate_request_repository.dart';
@@ -36,7 +35,6 @@ class _CertificateRequestsScreenState extends State<CertificateRequestsScreen> {
   CertificateRequestContext? _selected;
   bool _loading = true;
   bool _busy = false;
-  bool _canReview = false;
   String? _error;
 
   @override
@@ -66,7 +64,6 @@ class _CertificateRequestsScreenState extends State<CertificateRequestsScreen> {
       _requests = const [];
       _contexts = const [];
       _selected = null;
-      _canReview = false;
     });
     try {
       final rows = widget.reviewMode
@@ -78,26 +75,18 @@ class _CertificateRequestsScreenState extends State<CertificateRequestsScreen> {
               widget.courseVersionId != null
           ? await _gateway.contexts(widget.courseId!, widget.courseVersionId!)
           : <CertificateRequestContext>[];
-      var canReview = widget.reviewMode;
-      if (!widget.reviewMode) {
-        try {
-          await _gateway.reviewQueue();
-          canReview = true;
-        } on CertificateRequestException catch (error) {
-          // Only lack of review authority is optional. Session/network errors
-          // must not publish rows obtained before an account change.
-          if (error.statusCode != 403) rethrow;
-        }
-      }
       if (!mounted) return;
       setState(() {
         _requests = rows
             .where(
               (row) =>
-                  widget.courseId == null ||
-                  row.courseId == widget.courseId &&
-                      (widget.courseVersionId == null ||
-                          row.courseVersionId == widget.courseVersionId),
+                  (widget.courseId == null ||
+                      row.courseId == widget.courseId) &&
+                  (widget.courseVersionId == null ||
+                      row.courseVersionId == widget.courseVersionId) &&
+                  (!widget.reviewMode ||
+                      widget.classId == null ||
+                      row.classId == widget.classId),
             )
             .toList();
         _contexts = contexts
@@ -112,7 +101,6 @@ class _CertificateRequestsScreenState extends State<CertificateRequestsScreen> {
             )
             .toList();
         _selected = _contexts.length == 1 ? _contexts.single : null;
-        _canReview = canReview;
       });
     } on Object catch (error) {
       if (mounted) _showError(error);
@@ -131,7 +119,6 @@ class _CertificateRequestsScreenState extends State<CertificateRequestsScreen> {
       _requests = const [];
       _contexts = const [];
       _selected = null;
-      _canReview = false;
     }
   });
 
@@ -257,26 +244,6 @@ class _CertificateRequestsScreenState extends State<CertificateRequestsScreen> {
       title: Text(
         widget.reviewMode ? 'Revisar certificados' : 'Pedidos de certificado',
       ),
-      actions: [
-        if (_canReview && !widget.reviewMode)
-          IconButton(
-            tooltip: 'Revisar pedidos',
-            icon: const Icon(Icons.fact_check_outlined),
-            onPressed: _busy
-                ? null
-                : () => Navigator.push(
-                    context,
-                    trackedRoute(
-                      pageId: 'certificate_review',
-                      featureId: 'certificate_review',
-                      builder: (_) => CertificateRequestsScreen(
-                        gateway: widget.gateway,
-                        reviewMode: true,
-                      ),
-                    ),
-                  ),
-          ),
-      ],
     ),
     body: _loading
         ? const Center(child: CircularProgressIndicator())

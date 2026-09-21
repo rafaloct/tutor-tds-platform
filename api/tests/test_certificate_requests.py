@@ -116,6 +116,27 @@ def test_contexts_are_own_active_and_snapshot_request_is_pending_idempotent(requ
         assert len(session.scalars(select(CertificateRequestTransition)).all()) == 1
 
 
+def test_request_review_roundtrip_persists_decision_and_student_rereads_it(requests_api):
+    client, engine = requests_api
+    contexts = client.get(f"/certificate-requests/contexts?course_id=course&course_version_id={ORIGINAL}").json()["contexts"]
+    context = next(row for row in contexts if row["class_id"] == "c1")
+    response = create(client, enrollment=context["enrollment_id"], version=context["course_version_id"], classroom=context["class_id"])
+    assert response.status_code == 201
+    pending = response.json()
+    assert client.get(f"/certificate-requests/{pending['id']}").json()["status"] == "pending"
+    queue = client.get("/certificate-requests/review-queue", headers=header("teacher")).json()["requests"]
+    assert [row["id"] for row in queue] == [pending["id"]]
+    evidence(engine, classroom="c1")
+    assert review(client, pending, user="teacher").status_code == 200
+    with Session(engine) as session:
+        assert session.get(CertificateRequest, pending["id"]).status == "approved"
+        decision = session.scalar(select(CertificateRequestTransition).where(CertificateRequestTransition.request_id == pending["id"], CertificateRequestTransition.revision == 2))
+        assert decision.actor_user_id == "teacher" and decision.to_status == "approved"
+        assert decision.reason == "Conferido pela equipe"
+    own = client.get("/certificate-requests").json()["requests"]
+    assert own[0]["id"] == pending["id"] and own[0]["status"] == "approved"
+
+
 def test_public_requests_require_coordinator_and_private_reads_do_not_leak(requests_api):
     client, engine = requests_api
     record = create(client).json()

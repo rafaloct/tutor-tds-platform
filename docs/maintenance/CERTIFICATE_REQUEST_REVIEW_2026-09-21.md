@@ -49,8 +49,8 @@ identificado, evitando uma duplicação impossível. O nome de turma é o nome a
 não parte do snapshot acadêmico imutável.
 
 Operações exigem rede e sessão. O repositório é vinculado à primeira conta usada
-e valida a conta antes/depois das requisições. O probe de autorização da revisão
-ignora somente 403, nunca uma troca de sessão; erro 401 limpa os dados da tela.
+e valida a conta antes/depois das requisições. Não usa a fila de revisão como
+probe de permissão; erro 401 limpa os dados da tela.
 Não há fila offline de aprovação. Analytics registra identificadores de
 página/recurso/ação sem nome, justificativa ou evidências acadêmicas.
 
@@ -84,3 +84,34 @@ Paginação das filas/listas e aferição de consultas por pedido permanecem pen
 para validação de escala. O filtro SQL de autorização não substitui esse teste.
 Produção, Worker, KV, Sheets e certificados existentes não foram alterados nesta
 fatia. As demais ondas continuam abertas; não há autorização técnica de release.
+
+## Fechamento delimitado da integração de turma
+
+Decisão do usuário: revisão aberta pelo dashboard fica restrita à turma
+selecionada e à edição correspondente. O dashboard passa `classId`, `courseId`
+e `courseVersionId` (quando disponível); o botão fica indisponível enquanto
+carrega ou se o dashboard não corresponde à seleção. O filtro da tela de revisão
+combina os três campos; a API continua impondo o escopo autorizado completo.
+Esse filtro de apresentação não concede nem substitui autorização.
+
+`TeamCapabilityResolver` existente foi preservado. Não foi encontrado endpoint
+de capability específico para revisão de certificados: `/auth/me` fornece papel
+global e `/editor/context` trata de publicação de cursos, regras não equivalentes.
+O atalho baseado em `reviewQueue()` foi removido dos pedidos próprios, mantendo
+a entrada pela equipe. Não foi criado novo endpoint ou sistema de capabilities.
+
+Cobertura acrescentada: professor com duas turmas, professor em A/monitor em B,
+mudança da capacidade ao selecionar B, parâmetros reais da navegação e exclusão
+de pedidos de outra turma/edição na revisão. Um teste integrado da API percorre
+contexts → criação → releitura → fila autorizada → decisão → SQL/auditoria →
+releitura pelo aluno. Usa identidade substituída na fixture e SQLite; não é teste
+de login real, Flutter conectado à API, PostgreSQL ou dispositivo físico.
+
+Critério de parada desta integração: testes locais e análise passando. Emissão,
+deploy, validação real de staging e aperfeiçoamentos visuais permanecem fora
+deste recorte; não confundir este fechamento com conclusão das ondas.
+
+Resultado Flutter deste fechamento: **274 testes passaram**, análise dos quatro
+arquivos Dart alterados sem problemas. Suíte API completa: **163 testes passaram**
+(dois avisos de depreciação de dependências, sem falhas). Nenhuma mudança em implementação backend,
+migração, Worker, produção ou mecanismo de capabilities nesta integração.

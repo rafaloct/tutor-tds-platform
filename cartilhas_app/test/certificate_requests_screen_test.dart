@@ -22,11 +22,12 @@ CertificateRequest record({
   int revision = 1,
   String? reason,
   String classId = 'class',
+  String versionId = 'version',
 }) => CertificateRequest(
   id: 'request',
   enrollmentId: 'enrollment',
   courseId: 'course',
-  courseVersionId: 'version',
+  courseVersionId: versionId,
   classId: classId,
   className: 'Turma $classId',
   programId: 'program',
@@ -47,6 +48,7 @@ class RequestsFake implements CertificateRequestGateway {
   bool conflict = false;
   bool sessionChanged = false;
   int creates = 0;
+  int queueCalls = 0;
   int reviews = 0;
   int resubmits = 0;
   int? sentRevision;
@@ -75,9 +77,19 @@ class RequestsFake implements CertificateRequestGateway {
   }
 
   @override
-  Future<List<CertificateRequest>> ownRequests() async => rows;
+  Future<List<CertificateRequest>> ownRequests() async {
+    if (sessionChanged) {
+      throw const CertificateRequestException(
+        'Sessão alterada.',
+        statusCode: 401,
+      );
+    }
+    return rows;
+  }
+
   @override
   Future<List<CertificateRequest>> reviewQueue() async {
+    queueCalls++;
     if (sessionChanged) {
       throw const CertificateRequestException(
         'Sessão alterada.',
@@ -150,9 +162,7 @@ Future<void> showRequests(
 }
 
 void main() {
-  testWidgets('session change during optional probe does not expose old rows', (
-    tester,
-  ) async {
+  testWidgets('session failure does not expose old rows', (tester) async {
     final gateway = RequestsFake()
       ..rows = [record()]
       ..sessionChanged = true;
@@ -160,6 +170,30 @@ void main() {
     expect(find.text('Sessão alterada.'), findsOneWidget);
     expect(find.text('Meu curso'), findsNothing);
     expect(find.text('Programa TDS'), findsNothing);
+  });
+
+  testWidgets('own requests never probe the review queue', (tester) async {
+    final gateway = RequestsFake()..reviewer = true;
+    await showRequests(tester, gateway);
+    expect(gateway.queueCalls, 0);
+    expect(find.byTooltip('Revisar pedidos'), findsNothing);
+  });
+
+  testWidgets('review is restricted to selected class and edition', (
+    tester,
+  ) async {
+    final gateway = RequestsFake()
+      ..reviewer = true
+      ..rows = [
+        record(),
+        record(classId: 'other-class'),
+        record(versionId: 'other-version'),
+      ];
+    await showRequests(tester, gateway, review: true, course: true);
+    expect(gateway.queueCalls, 1);
+    expect(find.text('Meu curso'), findsOneWidget);
+    expect(find.text('Turma other-class'), findsNothing);
+    expect(find.text('Aprovar análise'), findsOneWidget);
   });
 
   testWidgets(

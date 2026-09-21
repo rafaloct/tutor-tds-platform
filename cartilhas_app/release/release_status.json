@@ -11,7 +11,7 @@
   },
   "release_build_allowed": false,
   "source_verification": {
-    "flutter_tests": "270/270",
+    "flutter_tests": "274/274",
     "dart_analyze": "passed",
     "verified_at": "2026-09-21"
   },
