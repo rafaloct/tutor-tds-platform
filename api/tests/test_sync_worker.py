@@ -37,6 +37,7 @@ def test_google_sink_does_not_repeat_precreated_header_or_event(existing) -> Non
 
     def request(method, url, body=None):
         if method == "GET":
+            assert "%21A%3AA?majorDimension=COLUMNS" in url
             return {"values": [[row[0] for row in stored]]} if stored else {}
         assert "valueInputOption=RAW" in url
         stored.extend(body["values"])
@@ -57,6 +58,17 @@ def test_google_sink_refuses_a_different_sheet_header() -> None:
     sink._request = lambda *args: {"values": [["baseline_record_id"]]}
     with pytest.raises(RuntimeError, match="cabeçalho"):
         sink.append_missing([SyncRow("event-1", ["event-1"])])
+
+
+def test_google_sink_quotes_titles_in_a1_ranges() -> None:
+    from urllib.parse import unquote
+
+    sink = object.__new__(GoogleSheetsSink)
+    sink.spreadsheet_id = "synthetic-sheet"
+    for title in ("EventosAPI-Staging", "Eventos API", "Equipe d'Água"):
+        expected = "'" + title.replace("'", "''") + "'!A:A"
+        assert unquote(sink._values_url(title + "!A:A")).endswith(expected)
+        assert unquote(sink._values_url(expected)).endswith(expected)
 
 
 class FailingSink(MemorySink):

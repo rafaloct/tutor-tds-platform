@@ -80,7 +80,7 @@ class GoogleSheetsSink:
     def _event_column(self) -> list[str]:
         # A primeira coluna é reservada ao event_id. Ler antes do append torna
         # seguro repetir um lote após timeout/crash entre o Google e o commit.
-        first_column = self.cell_range.split(":", 1)[0]
+        first_column = self.cell_range.rsplit("!", 1)[0] + "!A:A"
         url = self._values_url(first_column) + "?majorDimension=COLUMNS"
         response = self._request("GET", url)
         values = response.get("values", [])
@@ -94,7 +94,7 @@ class GoogleSheetsSink:
     def delete_event_ids(self, event_ids: list[str]) -> None:
         if not event_ids:
             return
-        first_column = self.cell_range.split(":", 1)[0]
+        first_column = self.cell_range.rsplit("!", 1)[0] + "!A:A"
         values = self._request("GET", self._values_url(first_column) + "?majorDimension=COLUMNS").get("values", [])
         column = values[0] if values else []
         wanted = set(event_ids)
@@ -128,6 +128,12 @@ class GoogleSheetsSink:
 
     def _values_url(self, cell_range: str) -> str:
         spreadsheet_id = parse.quote(self.spreadsheet_id, safe="")
+        # Quote sheet titles (hyphens/spaces are valid) and use valid A1 ranges.
+        # A lone column letter `!A` is not a full-column range; use `!A:A`.
+        sheet, cells = cell_range.rsplit("!", 1)
+        if sheet.startswith("'") and sheet.endswith("'"):
+            sheet = sheet[1:-1].replace("''", "'")
+        cell_range = "'" + sheet.replace("'", "''") + "'!" + cells
         encoded_range = parse.quote(cell_range, safe="")
         return (
             "https://sheets.googleapis.com/v4/spreadsheets/"
