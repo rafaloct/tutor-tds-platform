@@ -1,6 +1,7 @@
 # Presença: fechamento funcional local
 
-Estado: implementação local, ainda não implantada em staging ou produção.
+Estado: implantada em staging; produção não alterada. Fluxo autenticado de
+presença e triggers PostgreSQL ainda precisam de validação específica.
 
 O fluxo reutiliza sessões, matrículas, autorização de equipe e o repositório de
 evidências existentes. Não cria um novo sistema de permissões.
@@ -38,3 +39,19 @@ baseline/mentoria. Esses requisitos continuam abertos, assim como o release.
 
 Próximo passo: validar esta mesma implementação no staging, sem redesenhar a
 arquitetura e sem alterar produção com base apenas nos testes locais.
+
+## Implantação em staging
+
+- Commit: `0395fa0682d85e6005705aa290737fe31f9bbc1c`.
+- Arquivo fonte SHA256: `35abe5f7d9f697df4a5a18f63291ca712c58411f624015061d100e09b2d5c29c`.
+- API e worker: `sha256:8d258a50896713489f148d64c4d3dac20ce9c34b42244f1565d854202ed970c8`.
+- Alembic remoto: `20260921_0017 (head)`.
+- Backup: `/root/tutor-tds-backups/presence-0395fa0/before-0017.dump`.
+- Backup SHA256: `732c4565e8ff740862a40f2ea930d8d52706222c1a0e3f027ef148db2ba129f5`.
+- `pg_restore --list` aceitou o backup; restauração integral não foi ensaiada.
+- Deploy existente validou proveniência, saúde e consulta de cursos.
+- Smoke autenticado de certificados passou após implantação: pedido sintético
+  existente continua rejeitado na revisão 2; nenhuma emissão foi tentada.
+
+Não confundir essas verificações com conclusão do fluxo de presença em banco
+real ou com liberação de produção. Xiaomi não utilizado nesta implantação.
