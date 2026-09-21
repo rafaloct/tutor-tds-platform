@@ -4,12 +4,12 @@ from typing import Annotated, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .auth import require_roles
+from .auth import AuthService, RegisterRequest, require_roles
 from .database import Database
 from .models import (
     Course,
@@ -57,6 +57,26 @@ class MembershipCreate(BaseModel):
 class MembershipResponse(MembershipCreate):
     program_id: str
     status: str
+
+
+class ManagedAccountCreate(BaseModel):
+    """Admin-only account creation with its program membership in one transaction."""
+
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=2, max_length=240)
+    cpf: SecretStr
+    phone: str = Field(min_length=10, max_length=32)
+    password: SecretStr
+    role: ProgramRole
+    program_id: str = Field(min_length=1, max_length=36)
+
+
+class ManagedAccountResponse(BaseModel):
+    id: str
+    name: str
+    role: ProgramRole
+    program_id: str
+    membership_status: str
 
 
 class EnrollmentCreate(BaseModel):
@@ -206,6 +226,43 @@ def create_membership(
             program_id=record.program_id,
             role=record.role,
             status=record.status,
+        )
+
+
+@router.post("/accounts", response_model=ManagedAccountResponse, status_code=201)
+def create_managed_account(
+    payload: ManagedAccountCreate,
+    request: Request,
+    _: dict[str, str] = Depends(admin_claims),
+) -> ManagedAccountResponse:
+    """Create a role-bearing account and its program link atomically."""
+    database: Database = request.app.state.database
+    with Session(database.engine) as session:
+        _require(session, Program, payload.program_id, "Programa não encontrado.")
+        service = AuthService(session, request.app.state.settings)
+        user = service.register(
+            RegisterRequest(
+                name=payload.name,
+                cpf=payload.cpf,
+                phone=payload.phone,
+                password=payload.password,
+            )
+        )
+        user.role = payload.role
+        membership = ProgramMembership(
+            user_id=user.id,
+            program_id=payload.program_id,
+            role=payload.role,
+            status="active",
+        )
+        session.add(membership)
+        _commit(session, "Não foi possível criar a conta vinculada ao programa.")
+        return ManagedAccountResponse(
+            id=user.id,
+            name=user.name,
+            role=payload.role,
+            program_id=payload.program_id,
+            membership_status=membership.status,
         )
 
 

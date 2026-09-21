@@ -192,6 +192,50 @@ def test_student_cannot_manage_hierarchy() -> None:
     assert response.status_code == 403
 
 
+def test_admin_creates_role_account_and_program_membership_atomically() -> None:
+    client, app, _ = make_client()
+    with client:
+        register(client, cpf=CPF_ADMIN, name="Administradora")
+        with Session(app.state.database.engine) as session:
+            admin = session.scalar(select(User).where(User.name == "Administradora"))
+            assert admin is not None
+            admin.role = "admin"
+            session.commit()
+        admin_login = client.post(
+            "/auth/login", json={"cpf": CPF_ADMIN, "password": PASSWORD}
+        )
+        headers = bearer(admin_login.json()["access_token"])
+        institution = client.post(
+            "/admin/institutions", json={"name": "Instituto"}, headers=headers
+        )
+        program = client.post(
+            "/admin/programs",
+            json={"institution_id": institution.json()["id"], "name": "Programa"},
+            headers=headers,
+        )
+        response = client.post(
+            "/admin/accounts",
+            json={
+                "name": "Professora TDS",
+                "cpf": "111.444.777-35",
+                "phone": "61999990001",
+                "password": PASSWORD,
+                "role": "teacher",
+                "program_id": program.json()["id"],
+            },
+            headers=headers,
+        )
+        with Session(app.state.database.engine) as session:
+            created = session.get(User, response.json()["id"])
+            membership = session.get(
+                ProgramMembership, (response.json()["id"], program.json()["id"])
+            )
+    assert response.status_code == 201
+    assert response.json()["role"] == "teacher"
+    assert created is not None and created.role == "teacher"
+    assert membership is not None and membership.role == "teacher"
+
+
 def test_bootstrap_admin_is_rerunnable_without_duplicate_user() -> None:
     _, app, settings = make_client()
     with Session(app.state.database.engine) as session:
