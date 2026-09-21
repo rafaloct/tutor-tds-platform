@@ -9,6 +9,7 @@ import '../../evidence/presentation/evidence_staff_screen.dart';
 import '../../analytics/telemetry_route.dart';
 import 'monitor_exceptions_view.dart';
 import 'classroom_roster_screen.dart';
+import 'student_followup_screen.dart';
 import '../../certificates/presentation/certificate_requests_screen.dart';
 
 class ClassroomDashboardScreen extends StatefulWidget {
@@ -315,6 +316,31 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                   ],
                   if (_dashboard != null && _usage != null) ...[
                     const SizedBox(height: 20),
+                    if (widget.gateway is ClassroomRepository &&
+                        _selectedCapability != null)
+                      OutlinedButton.icon(
+                        onPressed:
+                            _loading ||
+                                _dashboard!.classroom.id != _selectedClassId
+                            ? null
+                            : () => Navigator.push(
+                                context,
+                                trackedRoute(
+                                  pageId: 'student_followup',
+                                  featureId: 'student_followup',
+                                  courseId: _dashboard!.classroom.courseId,
+                                  builder: (_) => StudentFollowupScreen(
+                                    repository:
+                                        widget.gateway as ClassroomRepository,
+                                    classroom: _dashboard!.classroom,
+                                    students: _dashboard!.students,
+                                    staffId: _user!.id,
+                                  ),
+                                ),
+                              ),
+                        icon: const Icon(Icons.support_agent),
+                        label: const Text('Baseline e mentoria dos estudantes'),
+                      ),
                     if (_selectedCapability == ClassroomStaffCapability.monitor)
                       MonitorExceptionsView(dashboard: _dashboard!)
                     else

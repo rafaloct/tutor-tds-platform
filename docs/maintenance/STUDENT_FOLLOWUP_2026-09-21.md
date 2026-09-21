@@ -1,7 +1,7 @@
 # Acompanhamento: baseline e mentoria
 
-Estado: implementação local em andamento; não implantada. Não há ainda tela
-integrada nem evidência ponta a ponta desta fatia.
+Estado: implementação local em andamento; não implantada. Tela ligada ao painel
+de turma, mas ainda sem evidência ponta a ponta desta fatia.
 
 ## Reaproveitamento confirmado
 
@@ -35,3 +35,17 @@ acompanhamento no contexto do estudante, com objetivo, responsável, próxima
 ação e estado do caso. Reusar navegação/telemetria existentes, sem criar um
 painel analítico novo. Testar vínculo, abertura, atualização e releitura antes
 de promover. Nenhuma recomendação automática concede mentoria nesta entrega.
+
+## Tela local
+
+O painel da turma abre `StudentFollowupScreen` pela rota rastreada
+`student_followup`. O operador seleciona explicitamente o aluno e pode conferir
+baseline, abrir ou atualizar mentoria. Vínculo exige checkbox de conferência e
+justificativa; data é validada. Decisões não entram em fila offline, erros limpam
+dados editáveis e pedem releitura. O responsável inicia com o ID do operador;
+a API precisa validar qualquer outro ID informado.
+
+14 testes direcionados de tela/painel passaram, incluindo cancelamento sem
+escrita, confirmação obrigatória, acesso revogado e leitura do próximo passo.
+Ainda pendentes: fluxo positivo de escrita pela UI, histórico visível,
+seletor de responsável por nome, integração real API e verificação física.
