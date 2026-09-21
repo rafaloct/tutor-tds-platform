@@ -14,9 +14,13 @@ novo cadastro, bot ou alteração de produção.
 - Web cancela abertura pendente no fechamento e atualiza a identidade ao reabrir.
 
 Evidências locais: testes API e Flutter direcionados, análise Dart sem erros e
-regressão API completa. Isso não comprova isolamento de conversas no Chatwoot
-real.
+regressão API completa. Em 21/09/2026, staging foi configurado com namespace
+`tds-staging`, segredo fora do repositório e `SIGNED_SUPPORT_IDENTITY=true`;
+o smoke autenticado retornou hash hexadecimal de 64 caracteres sem expor o
+segredo. O APK de staging foi compilado em
+`cartilhas_app/build/app/outputs/flutter-apk/app-debug.apk` (SHA-256
+`8CECCDF33D42DBB60979ECA761AA680F92598CF5999508E2012CA9706563B349`). Isso
+ainda não comprova isolamento de conversas no Chatwoot real nem teste físico.
 
-Pendências: configurar chave de homologação, publicar somente em staging,
-validar login/logout/troca de conta no SDK e WebView, ticket/status e
-notificações. Não habilitar a flag sem esses testes.
+Pendências: validar login/logout/troca de conta no SDK e WebView, ticket/status
+e notificações no dispositivo Xiaomi. Produção permanece sem a flag.
