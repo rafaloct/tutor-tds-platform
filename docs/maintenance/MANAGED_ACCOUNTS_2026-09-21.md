@@ -22,3 +22,11 @@ Papéis aceitos: `student`, `teacher`, `monitor`, `creator`, `coordinator`,
 - produção não deve receber novos perfis até a imagem candidata ser validada;
 - staging deve usar uma conta administrativa de homologação provisionada pelo
   procedimento de bootstrap, nunca credenciais inventadas no cliente.
+
+## Evidência de homologação
+
+Em 21/09/2026, a conta administrativa sintética foi criada no staging pela
+rota consolidada e validada com login (`200`) e leitura da hierarquia
+administrativa (`200`). O APK DEV no Xiaomi `ZT6HPRHQHATSEQPR` permaneceu em
+primeiro plano sem `FATAL EXCEPTION` no logcat. As credenciais não são
+registradas neste documento.
