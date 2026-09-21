@@ -1,9 +1,10 @@
 # Fatia A — editor e versões de cursos
 
-Estado: implementação local integrada; **não liberada para produção**.
+Estado: editor/versionamento implantado e exercitado no PostgreSQL staging;
+promoção explícita implementada localmente; **não liberada para produção**.
 Esta fatia não encerra as Ondas 1–4 nem o Freeze/QA da Onda 5.
 
-Validação final local: **135 testes API** e **212 testes Flutter** passaram;
+Validação local atualizada: **143 testes API** e **214 testes Flutter** passaram;
 análise Dart dos arquivos alterados sem problemas. A suíte API também revelou
 que o carregamento de configuração Alembic desabilitava o logger de rastreio
 quando executado no mesmo processo; corrigido com `disable_existing_loggers=False`.
@@ -71,14 +72,18 @@ Nenhum certificado existente, namespace KV ou chave de assinatura foi alterado.
 
 ## Portões ainda abertos — não omitir na continuidade
 
-1. Revisar e aplicar migração no PostgreSQL **staging** com backup e imagem
-   rastreável, verificar backfill/constraints/triggers no PostgreSQL real e
-   exercer editor com contas sintéticas. Ainda não houve deploy desta fatia.
-2. Instalar APK DEV atualizado no Xiaomi; validar professores/coordenadores,
-   nova publicação, turma anterior, fonte ampliada, conflitos, rede/replay e
-   PG → Sheets. `release_status.json` ganhou gate físico obrigatório específico.
-3. Implementar promoção explícita de conteúdo staging → produção com manifesto
-   verificável, preservando IDs. Não clonar bancos ou recadastrar os nove cursos.
+1. Migração staging concluída com backup, imagem rastreável e preservação dos
+   hashes das 17 tabelas auditadas. Editor, permissões, duas publicações,
+   matrícula e replay exercitados pela API real; evidências em
+   `../qa/course-versioning-2026-09-21/README.md`.
+2. APK DEV instalado: turma manteve edição anterior, conclusão offline chegou
+   ao PostgreSQL e Sheets após reconexão. Ainda validar UI de professores/
+   coordenadores, fonte ampliada, conflitos e regressão visual no aparelho.
+   Correções de progresso e Tutor sobreposto passaram nos testes e foram
+   instaladas; isso não aprova o gate físico completo em `release_status.json`.
+3. Promoção explícita implementada em `api/app/course_promotion.py`, com
+   manifesto SHA256, identidade preservada e dry-run padrão. Oito testes locais
+   passaram; ainda não aplicada entre ambientes reais. Não clona bancos.
 4. Fechar disponibilidade offline de **reabertura** da área de turmas. Esta
    versão consulta associação/edição online e mostra falha explícita, sem abrir
    silenciosamente outra versão; o cache público não é cache privado de turma.
@@ -95,10 +100,8 @@ Nenhum certificado existente, namespace KV ou chave de assinatura foi alterado.
 ## Separação dos dados reafirmada pelo usuário
 
 Tutor usa planilhas distintas para produção e testes. Baseline permanece intacto.
-Staging Sheets já está ativo na imagem anterior; produção Sheets permanece
-preparada, não ativada. Esta implementação não mudou nenhuma planilha, serviço
-remoto, banco remoto, KV, caixa Chatwoot ou credencial.
-
-Inspeção somente leitura nesta rodada: APIs Docker produção/staging saudáveis,
-worker staging em execução, VPS com 27% do disco ocupado. Xiaomi
-`ZT6HPRHQHATSEQPR` conectado. Conexão não equivale a teste do APK novo.
+Staging Sheets está ativo e recebeu eventos do teste físico; produção Sheets
+permanece preparada, não ativada. A escolha de planilhas separadas foi confirmada
+expressamente pelo usuário. Baseline, produção, KV, Chatwoot e credenciais não
+foram modificados nesta rodada. Mudanças remotas foram limitadas a staging:
+migração, imagem API/worker, importação idempotente dos nove cursos e registros QA.

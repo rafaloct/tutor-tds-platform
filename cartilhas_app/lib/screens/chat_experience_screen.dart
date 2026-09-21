@@ -65,8 +65,20 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   double get _progress {
     if (_isCompleted) return 1.0;
-    final totalSections = widget.cartilha.sections.length;
-    return (_currentSectionIndex + 1) / totalSections;
+    final sections = widget.cartilha.sections;
+    final totalMessages = sections.fold<int>(
+      0,
+      (total, section) => total + section.messages.length,
+    );
+    if (totalMessages == 0) return 0;
+    final advancedMessages =
+        sections
+            .take(_currentSectionIndex)
+            .fold<int>(0, (total, section) => total + section.messages.length) +
+        _currentMessageIndex;
+    // The current message is still being read. Only advancing past it counts;
+    // reaching the final message must not announce completion prematurely.
+    return advancedMessages / totalMessages;
   }
 
   @override
@@ -449,6 +461,25 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
           style: const TextStyle(fontSize: 15),
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            tooltip: 'Perguntar ao Tutor de IA',
+            icon: const Icon(Icons.psychology),
+            onPressed: () => Navigator.push(
+              context,
+              trackedRoute(
+                pageId: 'ai_assistant',
+                courseId: widget.cartilha.id,
+                resourceId: 'ai_chat',
+                featureId: 'ai_tutor',
+                builder: (_) => GenUIAssistantScreen(
+                  initialContext: widget.cartilha.title,
+                  contextLabel: widget.cartilha.title,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: _isInitializing
           ? const TdsWaitExperience(
@@ -498,14 +529,8 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                   ),
               ],
             ),
-      // FABs empilhados — tutor sempre visível, certificado aparece ao concluir
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (_isCompleted) ...[
-            // Botão de certificado
-            FloatingActionButton.extended(
+      floatingActionButton: _isCompleted
+          ? FloatingActionButton.extended(
               heroTag: 'cert',
               icon: _issuingCertificate
                   ? const SizedBox.square(
@@ -535,31 +560,8 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
               onPressed: (_issuingCertificate || !_earnedCertificate)
                   ? null
                   : _issueCertificate,
-            ),
-            const SizedBox(height: 10),
-          ],
-          // Botão do tutor — sempre visível
-          FloatingActionButton(
-            heroTag: 'tutor',
-            backgroundColor: const Color(0xFF093AF4),
-            tooltip: 'Perguntar ao Tutor de IA',
-            onPressed: () => Navigator.push(
-              context,
-              trackedRoute(
-                pageId: 'ai_assistant',
-                courseId: widget.cartilha.id,
-                resourceId: 'ai_chat',
-                featureId: 'ai_tutor',
-                builder: (_) => GenUIAssistantScreen(
-                  initialContext: widget.cartilha.title,
-                  contextLabel: widget.cartilha.title,
-                ),
-              ),
-            ),
-            child: const Icon(Icons.psychology, color: Colors.white),
-          ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 

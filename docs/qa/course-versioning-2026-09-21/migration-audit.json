@@ -1,0 +1,176 @@
+{
+  "database": "tutor_tds_staging",
+  "source_revision": "ac03fbcf4767d967f72a6d449435918383352188",
+  "before": {
+    "schema": "20260920_0014",
+    "tables": {
+      "assessment_attempts": {
+        "count": 1,
+        "sha256": "ce15c15ed173570ec6251b48d1b19a1236b1065d31fce02965a7613c83c71d9e"
+      },
+      "assessment_contents": {
+        "count": 1,
+        "sha256": "cdc64998e55b57b20796802f425a03ea1118b3d102b1bf41dbdb87c40fb07516"
+      },
+      "certificates": {
+        "count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "class_checkins": {
+        "count": 4,
+        "sha256": "76d282b674bd3e94fc5c70bb3beca288fa8871e05275d6e77b926956d8c5a554"
+      },
+      "class_enrollments": {
+        "count": 1,
+        "sha256": "0a56e6c5992986f6150d8f86a61f568cb30757c4221177bbd4ddf77e8ec26818"
+      },
+      "class_monitors": {
+        "count": 1,
+        "sha256": "ea7b946471b8059dc1cad0f9f128954d16ec2fe400ad457cf492f19e4238bba6"
+      },
+      "class_sessions": {
+        "count": 3,
+        "sha256": "4f441006ad5ecee9f4202a273cf9d2ee4b3167ea8d01e425adf8e5e62a55d72e"
+      },
+      "classes": {
+        "count": 1,
+        "sha256": "600fa572329ee05bb04d7e40d5da9f0389b977dc46cc31a03d61140036d5940e"
+      },
+      "courses": {
+        "count": 1,
+        "sha256": "a50c84811d8148f4bcf4b068261962341d47470e18459b8529a16c83db7ca1a6"
+      },
+      "enrollments": {
+        "count": 1,
+        "sha256": "e21200959b99c74e48f8164eabcb184448695607eb49f2922ee27fb05ca792c2"
+      },
+      "evidence_items": {
+        "count": 5,
+        "sha256": "31b7004ad27da1332ab461073056a134afb3600d1300d2773670ad860edd15c7"
+      },
+      "learning_events": {
+        "count": 421,
+        "sha256": "ae17aa28da97cfe53f128affd7559f671c7cf7303536668e0eafde46d2a4f02d"
+      },
+      "program_courses": {
+        "count": 1,
+        "sha256": "0384a65f70cac580d56ddcbf26747dda38ab8146340a519ed84becec69cbf7b3"
+      },
+      "program_memberships": {
+        "count": 4,
+        "sha256": "8136f0d89d909fffed087fd595fe59f0a14e8660ffcba647a534984874875d53"
+      },
+      "programs": {
+        "count": 1,
+        "sha256": "b6edc7865a80456e2b321be9ae35a204a6055343e967ad273837f65b45ac6c3a"
+      },
+      "review_decisions": {
+        "count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "users": {
+        "count": 4,
+        "sha256": "5e66452f8a8d0d6be120d5fb8ff57de33ea95fa8592d082ed51940f10ac89d29"
+      }
+    }
+  },
+  "after": {
+    "schema": "20260921_0015",
+    "tables": {
+      "assessment_attempts": {
+        "count": 1,
+        "sha256": "ce15c15ed173570ec6251b48d1b19a1236b1065d31fce02965a7613c83c71d9e"
+      },
+      "assessment_contents": {
+        "count": 1,
+        "sha256": "cdc64998e55b57b20796802f425a03ea1118b3d102b1bf41dbdb87c40fb07516"
+      },
+      "certificates": {
+        "count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "class_checkins": {
+        "count": 4,
+        "sha256": "76d282b674bd3e94fc5c70bb3beca288fa8871e05275d6e77b926956d8c5a554"
+      },
+      "class_enrollments": {
+        "count": 1,
+        "sha256": "0a56e6c5992986f6150d8f86a61f568cb30757c4221177bbd4ddf77e8ec26818"
+      },
+      "class_monitors": {
+        "count": 1,
+        "sha256": "ea7b946471b8059dc1cad0f9f128954d16ec2fe400ad457cf492f19e4238bba6"
+      },
+      "class_sessions": {
+        "count": 3,
+        "sha256": "4f441006ad5ecee9f4202a273cf9d2ee4b3167ea8d01e425adf8e5e62a55d72e"
+      },
+      "classes": {
+        "count": 1,
+        "sha256": "600fa572329ee05bb04d7e40d5da9f0389b977dc46cc31a03d61140036d5940e"
+      },
+      "courses": {
+        "count": 1,
+        "sha256": "a50c84811d8148f4bcf4b068261962341d47470e18459b8529a16c83db7ca1a6"
+      },
+      "enrollments": {
+        "count": 1,
+        "sha256": "e21200959b99c74e48f8164eabcb184448695607eb49f2922ee27fb05ca792c2"
+      },
+      "evidence_items": {
+        "count": 5,
+        "sha256": "31b7004ad27da1332ab461073056a134afb3600d1300d2773670ad860edd15c7"
+      },
+      "learning_events": {
+        "count": 421,
+        "sha256": "ae17aa28da97cfe53f128affd7559f671c7cf7303536668e0eafde46d2a4f02d"
+      },
+      "program_courses": {
+        "count": 1,
+        "sha256": "0384a65f70cac580d56ddcbf26747dda38ab8146340a519ed84becec69cbf7b3"
+      },
+      "program_memberships": {
+        "count": 4,
+        "sha256": "8136f0d89d909fffed087fd595fe59f0a14e8660ffcba647a534984874875d53"
+      },
+      "programs": {
+        "count": 1,
+        "sha256": "b6edc7865a80456e2b321be9ae35a204a6055343e967ad273837f65b45ac6c3a"
+      },
+      "review_decisions": {
+        "count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "users": {
+        "count": 4,
+        "sha256": "5e66452f8a8d0d6be120d5fb8ff57de33ea95fa8592d082ed51940f10ac89d29"
+      }
+    },
+    "versioning": {
+      "backfilled_courses": 1,
+      "immutable_trigger": "pass",
+      "lineage_fk": "pass",
+      "pinned_classes": 1
+    }
+  },
+  "unchanged_tables": [
+    "assessment_attempts",
+    "assessment_contents",
+    "certificates",
+    "class_checkins",
+    "class_enrollments",
+    "class_monitors",
+    "class_sessions",
+    "classes",
+    "courses",
+    "enrollments",
+    "evidence_items",
+    "learning_events",
+    "program_courses",
+    "program_memberships",
+    "programs",
+    "review_decisions",
+    "users"
+  ],
+  "scope": "Before importing real catalog and adding synthetic editorial QA"
+}
