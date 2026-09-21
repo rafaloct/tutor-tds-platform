@@ -30,6 +30,21 @@ def case_patch(client, identity, *, actor="teacher", revision=1, key="mentorship
     return client.patch(f"/classes/c1/mentorship-cases/{identity}", headers=header(actor), json=payload)
 
 
+def test_mentor_picker_uses_active_class_staff_only(presence_api):
+    client, engine = presence_api
+    path = "/classes/c1/students/learner/mentors"
+    response = client.get(path, headers=header("teacher"))
+    assert response.status_code == 200
+    assert {row["user_id"] for row in response.json()["mentors"]} == {"teacher", "monitor"}
+    assert all(set(row) == {"user_id", "name"} for row in response.json()["mentors"])
+    assert client.get(path, headers=header("learner")).status_code == 403
+    assert client.get(path, headers=header("teacher2")).status_code == 403
+    with Session(engine) as session:
+        session.get(ProgramMembership, ("monitor", "p1")).status = "inactive"
+        session.commit()
+    assert [row["user_id"] for row in client.get(path, headers=header("teacher")).json()["mentors"]] == ["teacher"]
+
+
 def test_baseline_is_explicit_reference_not_inferred_or_copied(presence_api):
     client, engine = presence_api
     assert baseline_get(client).json() == {"baseline": None, "history": []}

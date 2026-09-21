@@ -29,7 +29,15 @@ void main() {
     final repo = ClassroomRepository(
       apiUrl: 'https://example.test',
       authRepository: FollowupAuth(),
-      client: MockClient(handler),
+      client: MockClient((request) async {
+        if (request.url.path.endsWith('/mentors')) {
+          return http.Response(
+            '{"mentors":[{"user_id":"teacher","name":"Professora"}]}',
+            200,
+          );
+        }
+        return handler(request);
+      }),
     );
     addTearDown(repo.dispose);
     await tester.pumpWidget(

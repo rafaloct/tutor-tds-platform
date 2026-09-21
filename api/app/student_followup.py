@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from .auth import access_claims
 from .evidence import _active_student, _class, _is_staff, _staff
-from .models import BaselineRevision, BaselineSourceRecord, ClassEnrollment, Classroom, Enrollment, MentorshipCase, MentorshipRevision, ProgramMembership, StudentBaseline, User
+from .models import BaselineRevision, BaselineSourceRecord, ClassEnrollment, ClassMonitor, Classroom, Enrollment, MentorshipCase, MentorshipRevision, ProgramMembership, StudentBaseline, User
 
 router = APIRouter(tags=["student-followup"])
 CASE_FIELDS = {"mentor_id", "objective", "next_action", "status"}
@@ -136,6 +136,17 @@ def _commit(session):
     except IntegrityError as error:
         session.rollback()
         raise HTTPException(409, "Alteração concorrente ou referência conflitante; recarregue.") from error
+
+
+@router.get("/classes/{class_id}/students/{user_id}/mentors")
+def list_mentors(class_id: str, user_id: str, request: Request, claims=Depends(access_claims)):
+    with Session(request.app.state.database.engine) as session:
+        classroom = _scope(session, class_id, claims)
+        _student(session, classroom, user_id)
+        identities = set(session.scalars(select(ClassMonitor.user_id).where(ClassMonitor.class_id == class_id)))
+        identities.add(classroom.teacher_id)
+        candidates = session.scalars(select(User).where(User.id.in_(identities), User.id != user_id).order_by(User.name, User.id))
+        return {"mentors": [{"user_id": user.id, "name": user.name} for user in candidates if _is_staff(session, classroom, user.id, "student")]}
 
 
 @router.get("/classes/{class_id}/students/{user_id}/baseline")

@@ -92,3 +92,12 @@ e revisão desatualizada recebe 409. Fonte externa não consultada.
 Esta evidência supera a pendência HTTP/PostgreSQL acima, mas não comprova
 interface em dispositivo, concorrência/guards diretos PostgreSQL ou exportação
 para Sheets. Nenhuma resposta real de baseline foi importada.
+
+## Seleção de responsável — incremento local posterior
+
+Removida a digitação de ID técnico: a tela consulta responsáveis pelo nome em
+`GET /classes/{class}/students/{user}/mentors`. A lista retorna somente ID/nome
+da equipe ativa vinculada à turma, excluindo o próprio aluno. A gravação
+continua revalidando autorização no servidor. Nenhuma migração adicional.
+17 testes direcionados do backend e 8 testes Flutter passaram. Este incremento
+ainda não está na imagem de staging 096c0d4; precisa acompanhar o próximo deploy.

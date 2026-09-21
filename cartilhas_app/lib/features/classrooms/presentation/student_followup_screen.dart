@@ -24,6 +24,7 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
   String? _student, _error;
   Map<String, dynamic>? _baseline;
   List<Map<String, dynamic>> _cases = [];
+  List<Map<String, dynamic>> _mentors = [];
   bool _busy = false, _ready = false;
   int _total = 0;
 
@@ -104,7 +105,33 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
                     for (final entry in controllers.entries)
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
-                        child: entry.key == 'status'
+                        child: entry.key == 'mentor_id'
+                            ? DropdownButtonFormField<String>(
+                                initialValue:
+                                    _mentors.any(
+                                      (m) => m['user_id'] == entry.value.text,
+                                    )
+                                    ? entry.value.text
+                                    : null,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Responsável da equipe',
+                                ),
+                                items: _mentors
+                                    .map(
+                                      (m) => DropdownMenuItem(
+                                        value: m['user_id'] as String,
+                                        child: Text(m['name'] as String),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) =>
+                                    entry.value.text = value ?? '',
+                                validator: (value) => value == null
+                                    ? 'Selecione um responsável ativo.'
+                                    : null,
+                              )
+                            : entry.key == 'status'
                             ? DropdownButtonFormField<String>(
                                 initialValue: entry.value.text,
                                 isExpanded: true,
@@ -257,6 +284,34 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
   }
 
   Future<void> _editCase([Map<String, dynamic>? item]) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      _mentors = await widget.repository.studentMentors(
+        widget.classroom.id,
+        _student!,
+      );
+      if (_mentors.isEmpty) {
+        throw const ClassroomException(
+          'Não há responsável ativo disponível nesta turma.',
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _error = error.toString();
+          _ready = false;
+          _baseline = null;
+          _cases = [];
+        });
+      }
+      return;
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (!mounted) return;
     final values = await _form(
       item == null ? 'Abrir mentoria' : 'Atualizar mentoria',
       {

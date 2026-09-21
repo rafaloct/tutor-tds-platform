@@ -65,6 +65,16 @@ class ClassroomRepository
   final http.Client _client;
   String? _followupOwner;
 
+  Future<List<Map<String, dynamic>>> studentMentors(
+    String classId,
+    String userId,
+  ) async {
+    final result = await _followup(
+      '/classes/${Uri.encodeComponent(classId)}/students/${Uri.encodeComponent(userId)}/mentors',
+    );
+    return (result['mentors'] as List).cast<Map<String, dynamic>>();
+  }
+
   Future<Map<String, dynamic>> studentBaseline(
     String classId,
     String userId,
