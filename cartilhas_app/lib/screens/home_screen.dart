@@ -38,11 +38,17 @@ import '../features/media/presentation/media_catalog_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.courseLoader, this.learningHomeController});
+  const HomeScreen({
+    super.key,
+    this.courseLoader,
+    this.learningHomeController,
+    this.editorGatewayFactory,
+  });
 
   final LearningHomeController? learningHomeController;
 
   final Future<List<Cartilha>> Function()? courseLoader;
+  final CourseEditorGateway Function()? editorGatewayFactory;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -54,20 +60,65 @@ class _HomeScreenState extends State<HomeScreen> {
   int _navigationIndex = 0;
   Future<TeamCapabilitySnapshot?>? _teamCapability;
   late Future<List<Cartilha>> _cartilhas;
+  bool _catalogLoading = false;
+  bool _catalogReloadQueued = false;
 
   @override
   void initState() {
     super.initState();
-    _cartilhas = _loadCartilhas();
+    _cartilhas = _startCatalogLoad();
   }
 
   @override
   void didUpdateWidget(covariant HomeScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.courseLoader != widget.courseLoader) {
-      _cartilhas = _loadCartilhas();
+      _refreshCatalog(afterCurrent: true);
     }
   }
+
+  Future<List<Cartilha>> _startCatalogLoad() {
+    _catalogLoading = true;
+    return Future<List<Cartilha>>.sync(_loadCartilhas).whenComplete(() {
+      if (!mounted) return;
+      setState(() {
+        _catalogLoading = false;
+        if (_catalogReloadQueued) {
+          _catalogReloadQueued = false;
+          _cartilhas = _startCatalogLoad();
+        }
+      });
+    });
+  }
+
+  void _refreshCatalog({bool afterCurrent = false}) {
+    if (_catalogLoading) {
+      // A publication can finish while the previous catalog request is pending.
+      // Coalesce that return into one reload after the current request finishes.
+      _catalogReloadQueued = _catalogReloadQueued || afterCurrent;
+      return;
+    }
+    setState(() {
+      _cartilhas = _startCatalogLoad();
+    });
+  }
+
+  Future<List<Cartilha>> _currentCatalog() async {
+    var requested = _cartilhas;
+    var courses = await requested;
+    while (mounted && !identical(requested, _cartilhas)) {
+      requested = _cartilhas;
+      courses = await requested;
+    }
+    return courses;
+  }
+
+  CourseEditorGateway _newEditorGateway() =>
+      widget.editorGatewayFactory?.call() ??
+      CourseEditorRepository(
+        apiUrl: AppConfig.tutorApiUrl,
+        authRepository: context.read<AuthRepository>(),
+      );
 
   void _refreshTeamCapability() {
     _refreshSessionState();
@@ -95,13 +146,23 @@ class _HomeScreenState extends State<HomeScreen> {
       CourseRepository(apiUrl: AppConfig.tutorApiUrl).fetchAll();
 
   Future<void> _openBottomDestination(int index) async {
-    if (index == 0) return;
+    if (index == 0 || _navigationIndex != 0) return;
     setState(() => _navigationIndex = index);
     try {
       switch (index) {
         case 1:
-          final cartilhas = await _cartilhas;
+          final cartilhas = await _currentCatalog();
           if (!mounted) return;
+          if (cartilhas.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Nenhum curso disponível para estudar. Atualize o catálogo.',
+                ),
+              ),
+            );
+            return;
+          }
           await Navigator.push(
             context,
             trackedRoute(
@@ -175,18 +236,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refreshEditorCapability() async {
     final auth = Provider.of<AuthRepository?>(context, listen: false);
-    if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) return;
-    final repository = CourseEditorRepository(
-      apiUrl: AppConfig.tutorApiUrl,
-      authRepository: auth,
-    );
+    if (widget.editorGatewayFactory == null &&
+        (auth == null || AppConfig.tutorApiUrl.trim().isEmpty)) {
+      return;
+    }
+    final repository = _newEditorGateway();
     var hasAccess = false;
     try {
       hasAccess = (await repository.programs()).isNotEmpty;
     } catch (_) {
       // Access is granted only by a successful scoped capability response.
     } finally {
-      repository.dispose();
+      if (repository is CourseEditorRepository) repository.dispose();
     }
     if (mounted) {
       setState(() => _hasEditorAccess = hasAccess);
@@ -376,13 +437,14 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context, capability) => PopupMenuButton<String>(
               tooltip: 'Mais opções',
               onSelected: (value) async {
+                if (value == 'refresh_catalog') {
+                  _refreshCatalog();
+                  return;
+                }
                 final screen = switch (value) {
                   'learner_classes' => const LearnerClassroomsScreen(),
                   'editor' => CourseEditorCatalogScreen(
-                    gateway: CourseEditorRepository(
-                      apiUrl: AppConfig.tutorApiUrl,
-                      authRepository: context.read<AuthRepository>(),
-                    ),
+                    gateway: _newEditorGateway(),
                   ),
                   'guide' => const GuideScreen(),
                   'support' => const ChatwootScreen(),
@@ -433,9 +495,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (_) => screen,
                   ),
                 );
-                if (mounted) _refreshTeamCapability();
+                if (mounted) {
+                  if (value == 'editor') _refreshCatalog(afterCurrent: true);
+                  _refreshTeamCapability();
+                }
               },
               itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'refresh_catalog',
+                  enabled: !_catalogLoading,
+                  child: const ListTile(
+                    leading: Icon(Icons.refresh),
+                    title: Text('Atualizar catálogo'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
                 if (_hasSession)
                   const PopupMenuItem(
                     value: 'learner_classes',

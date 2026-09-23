@@ -132,6 +132,8 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
                 : constraints.maxWidth >= 600
                 ? 2
                 : 1;
+            final cardWidth =
+                (constraints.maxWidth - 40 - (columns - 1) * 12) / columns;
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
@@ -229,17 +231,17 @@ class _StudyHubScreenState extends State<StudyHubScreen> {
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      mainAxisExtent: 174,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) =>
-                          _ResourceCard(resource: resources[index]),
-                      childCount: resources.length,
+                  sliver: SliverToBoxAdapter(
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        for (final resource in resources)
+                          SizedBox(
+                            width: cardWidth,
+                            child: _ResourceCard(resource: resource),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -282,10 +284,11 @@ class _ResourceCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(resource.icon, size: 30, color: resource.color),
-              const Spacer(),
+              const SizedBox(height: 12),
               Text(
                 resource.title,
                 style: Theme.of(
@@ -293,11 +296,7 @@ class _ResourceCard extends StatelessWidget {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
-              Text(
-                resource.description,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(resource.description),
               const SizedBox(height: 6),
               const Align(
                 alignment: Alignment.centerRight,

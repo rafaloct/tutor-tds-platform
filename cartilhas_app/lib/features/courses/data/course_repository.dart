@@ -17,7 +17,6 @@ class CourseRepository {
   }) : _httpGet = httpGet ?? http.get,
        _localLoader = localLoader ?? _loadBundledCourses;
 
-  static const _cacheKey = 'courses:remote_cache:v1';
   static const _assetPaths = [
     'assets/data/lessons/agricultura-sustentavel.json',
     'assets/data/lessons/atendimento-cliente.json',
@@ -34,8 +33,12 @@ class CourseRepository {
   final CourseHttpGet _httpGet;
   final LocalCourseLoader _localLoader;
 
+  String get _apiBase => apiUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+  String get _cacheKey =>
+      'courses:remote_cache:v2:${Uri.encodeComponent(_apiBase)}';
+
   Future<List<Cartilha>> fetchAll() async {
-    if (apiUrl.trim().isNotEmpty) {
+    if (_apiBase.isNotEmpty) {
       try {
         final remote = await _fetchRemote();
         await _saveCache(remote);
@@ -49,11 +52,8 @@ class CourseRepository {
   }
 
   Future<List<Cartilha>> _fetchRemote() async {
-    final base = apiUrl.endsWith('/')
-        ? apiUrl.substring(0, apiUrl.length - 1)
-        : apiUrl;
     final response = await _httpGet(
-      Uri.parse('$base/courses'),
+      Uri.parse('$_apiBase/courses'),
     ).timeout(const Duration(seconds: 8));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw const FormatException('Catálogo remoto indisponível.');

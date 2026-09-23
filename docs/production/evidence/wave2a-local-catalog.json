@@ -1,0 +1,53 @@
+{
+  "status": "WAVE2A_LOCAL_CATALOG_CHECKS_PASSED",
+  "verified_at": "2026-09-23T21:37:12.242471+00:00",
+  "gate_2a_passed": false,
+  "production_ready": false,
+  "source_sha256": {
+    "cartilhas_app/lib/screens/home_screen.dart": "18500b3459f36bdd909bde594174347b563b624667fdabe56e5e908c5f071bb7",
+    "cartilhas_app/lib/features/courses/data/course_repository.dart": "fd405801e3a6e444808fb7844eb97b74f467b3419ecf5e7de810a118c3411b2a",
+    "cartilhas_app/lib/features/study_ai/presentation/study_hub_screen.dart": "8186484b3d02e0c4612c0213bea7e75cb44c4db8e74404d3356e72f626da2d53",
+    "cartilhas_app/test/course_repository_test.dart": "fa857cdcccc3056f0aa9ed4d101192dc61dffef3cc7dc91c8a6e900442858e3b",
+    "cartilhas_app/test/home_catalog_refresh_test.dart": "4a32a982625f12e3f98aebce23a5a17d65436e27dd2d227d17021321ce9c1dbb",
+    "cartilhas_app/test/study_hub_test.dart": "a23f3a4e76edfbdd92fe49a3e64df031deb15402af50d1866ac598f6443b8ed5"
+  },
+  "checks": [
+    {
+      "scope": "course repository, Home refresh, Home next action, Learning Home, editor widgets",
+      "run": "61568",
+      "passed": 29,
+      "failed": 1,
+      "failure": "StudyHub fixed card height overflow; subsequently resolved"
+    },
+    {
+      "scope": "Home refresh and StudyHub responsive layout",
+      "run": "81469",
+      "passed": 9,
+      "failed": 1,
+      "failure": "New test attempted ensureVisible before lazy sliver existed; bounded scroll correction required"
+    },
+    {
+      "scope": "320px/200% text bounded scroll regression",
+      "run": "63188",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "scope": "StudyHub complete file after test correction",
+      "run": "41682",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "scope": "flutter analyze --no-pub on 8 changed product/test/smoke files",
+      "run": "32636",
+      "exit_code": 0,
+      "diagnostics": 0
+    }
+  ],
+  "limits": [
+    "Targeted local validation only; real course publication still pending",
+    "Earlier failed checks retained as history rather than presented as a single green run",
+    "Wave 1 full suite is historical checkpoint 0081ab0; not a full suite claim for Wave 2 changes"
+  ]
+}
