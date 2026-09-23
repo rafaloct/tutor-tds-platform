@@ -147,7 +147,7 @@ void main() {
           case 'author_v1':
             expect(await api.publicStatus('/courses/$_course'), 404);
             expect(await api.publicContainsCourse(), isFalse);
-            await _signedIn(tester, api, prefs, _author);
+            await _signedIn(tester, api, prefs, _author, evidence: evidence);
             expect((await api.auth.currentUser()).role, 'student');
             await _openEditor(tester, api);
             await _tap(
@@ -207,7 +207,7 @@ void main() {
               'preview_without_learning_events': true,
             });
           case 'publisher_v1':
-            await _signedIn(tester, api, prefs, _publisher);
+            await _signedIn(tester, api, prefs, _publisher, evidence: evidence);
             await _openEditor(tester, api);
             await _openEditorialCourse(tester, _title(1));
             expect(
@@ -221,7 +221,7 @@ void main() {
             evidence['host_next_action'] =
                 'after_v1: provision cohort/enrollment before learner_v1';
           case 'learner_v1':
-            await _signedIn(tester, api, prefs, _learner);
+            await _signedIn(tester, api, prefs, _learner, evidence: evidence);
             final cohort = await api.cohort(1, _version(state, 1));
             state['cohort_v1'] = cohort;
             final initial = await api.context(cohort);
@@ -283,7 +283,7 @@ void main() {
               'denied_publication_unchanged': true,
             });
           case 'author_v2':
-            await _signedIn(tester, api, prefs, _author);
+            await _signedIn(tester, api, prefs, _author, evidence: evidence);
             await _openEditor(tester, api);
             await _openEditorialCourse(tester, _title(1));
             expect(
@@ -320,7 +320,7 @@ void main() {
             state['v2'] = _versionSummary(review);
             evidence['stale_revision_status'] = 409;
           case 'publisher_v2':
-            await _signedIn(tester, api, prefs, _publisher);
+            await _signedIn(tester, api, prefs, _publisher, evidence: evidence);
             await _openEditor(tester, api);
             await _openEditorialCourse(tester, _title(2));
             await _transition(tester, 'Publicar');
@@ -340,7 +340,7 @@ void main() {
                   'after_v2: provision cohort/enrollment before learner_after_v2',
             });
           case 'learner_after_v2':
-            await _signedIn(tester, api, prefs, _learner);
+            await _signedIn(tester, api, prefs, _learner, evidence: evidence);
             final old = await api.cohort(1, _version(state, 1));
             final latest = await api.cohort(2, _version(state, 2));
             expect(old, state['cohort_v1']);
@@ -776,10 +776,35 @@ Future<void> _signedIn(
   WidgetTester tester,
   _Api api,
   SharedPreferences prefs,
-  _Actor actor,
-) async {
+  _Actor actor, {
+  required Map<String, dynamic> evidence,
+}) async {
   final current = await api.auth.localUserId();
   final hasSession = await api.auth.hasSession();
+  final accountEvidence = <String, dynamic>{
+    'initial_has_session': hasSession,
+    'initial_owner_matches_requested_actor': current == actor.id,
+    'settings_state': 'not_opened',
+  };
+  evidence['account_access'] = accountEvidence;
+  Future<bool> inspectAccountSettings() async {
+    final connected = await _accountSettingsReady(tester);
+    final resolvedSession = await api.auth.hasSession();
+    final resolvedOwner = await api.auth.localUserId();
+    accountEvidence.addAll({
+      'settings_state': connected ? 'connected' : 'signed_out',
+      'resolved_has_session': resolvedSession,
+      'resolved_owner_matches_initial': resolvedOwner == current,
+      'session_invalidated_during_verification': hasSession && !resolvedSession,
+    });
+    expect(
+      resolvedSession,
+      connected,
+      reason: 'Settings account state disagrees with the local session.',
+    );
+    return connected;
+  }
+
   expect(
     hasSession && current == null,
     isFalse,
@@ -803,6 +828,7 @@ Future<void> _signedIn(
         find.byType(HomeScreen).evaluate().isNotEmpty ||
         find.text('Já tenho conta').evaluate().isNotEmpty,
   );
+  var settingsOpen = false;
   if (current != null && current != actor.id) {
     // Existing Settings logout clears these legacy drafts. Refuse that operation
     // if unrelated data would be removed; never clear or rewrite it in the test.
@@ -823,20 +849,49 @@ Future<void> _signedIn(
       reason: 'Refuse logout that would clear an attendance draft.',
     );
     await _menu(tester, 'Configurações');
-    await _tap(
-      tester,
-      find.text('Sair da conta'),
-      within: find.byType(SettingsScreen),
-    );
-    await _tap(tester, find.widgetWithText(FilledButton, 'Sair da conta'));
-    await _waitFor(tester, find.text('Já tenho conta'));
+    settingsOpen = true;
+    final connected = await inspectAccountSettings();
+    if (connected) {
+      expect(
+        await api.auth.localUserId(),
+        current,
+        reason:
+            'The account changed during Settings verification; refuse logout.',
+      );
+      await _tap(
+        tester,
+        find.text('Sair da conta'),
+        within: find.byType(SettingsScreen),
+      );
+      await _tap(tester, find.widgetWithText(FilledButton, 'Sair da conta'));
+      await _waitFor(tester, find.text('Já tenho conta'));
+      settingsOpen = false;
+    } else {
+      // Settings can invalidate an expired session while verifying /auth/me.
+      // Follow its explicit signed-out UI; never force logout or clear tokens.
+      expect(
+        await api.auth.hasSession(),
+        isFalse,
+        reason: 'Signed-out Settings disagrees with the local session.',
+      );
+      expect(await api.auth.localUserId(), isNull);
+    }
   }
   if (current != actor.id) {
     final welcome = find.text('Já tenho conta').evaluate().isNotEmpty;
     if (welcome) {
       await _tap(tester, find.text('Já tenho conta'));
     } else {
-      await _menu(tester, 'Configurações');
+      if (!settingsOpen) {
+        await _menu(tester, 'Configurações');
+      }
+      expect(
+        await inspectAccountSettings(),
+        isFalse,
+        reason:
+            'Refuse replacing a connected account through the login action.',
+      );
+      expect(await api.auth.hasSession(), isFalse);
       await _tap(
         tester,
         find.byKey(const Key('account-login-action')),
@@ -870,6 +925,41 @@ Future<void> _signedIn(
   }
   await _waitFor(tester, find.byType(HomeScreen));
   expect((await api.auth.currentUser()).id, actor.id);
+  accountEvidence['final_owner_verified'] = true;
+}
+
+Future<bool> _accountSettingsReady(WidgetTester tester) async {
+  final settings = find.byType(SettingsScreen);
+  await _waitFor(tester, settings);
+  const labels = {
+    'Verificando conta online',
+    'Conta online conectada',
+    'Sem conta online conectada',
+  };
+  final accountState = find.descendant(
+    of: settings,
+    matching: find.byWidgetPredicate(
+      (widget) => widget is Text && labels.contains(widget.data),
+    ),
+  );
+  // This row exists during loading, unlike the conditional login/logout tile.
+  // Reveal it once, then wait for the real asynchronous account verification.
+  await _reveal(tester, accountState, within: settings);
+  final connected = find.descendant(
+    of: settings,
+    matching: find.text('Conta online conectada'),
+  );
+  final disconnected = find.descendant(
+    of: settings,
+    matching: find.text('Sem conta online conectada'),
+  );
+  await _waitUntil(
+    tester,
+    () async =>
+        connected.evaluate().isNotEmpty || disconnected.evaluate().isNotEmpty,
+    reason: 'Settings did not finish its explicit account verification.',
+  );
+  return connected.evaluate().isNotEmpty;
 }
 
 Future<void> _openEditor(WidgetTester tester, _Api api) async {

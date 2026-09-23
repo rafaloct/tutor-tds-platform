@@ -1,0 +1,17 @@
+{
+  "status": "ANDROID_GATE_FAILED_BEFORE_COURSE_CREATION",
+  "verified_at": "2026-09-23T22:02:10.879764+00:00",
+  "run_id": "603b9cc65be945c1b9f17f6925b075bc",
+  "source_checkpoint": "30f8101",
+  "phase": "author_v1",
+  "boundary": "test waits for Settings account verification before finding logout action",
+  "app_product_changed": false,
+  "course_absent_verified_in_database": true,
+  "initial_event_bodies_preserved": 76,
+  "current_event_count": 79,
+  "original_progress_percent": 10.0,
+  "cleanup_errors": [],
+  "log_sha256": "6af51a8d63a9069b91022b2e0d196073d1fb9d5143793ccb74bd16ff3ec88d6e",
+  "next_action": "Fix explicit account-state wait in integration test, preserve failed artifacts; a new complete run is permitted without reseed/reset while the course is absent",
+  "gate_2a_passed": false
+}

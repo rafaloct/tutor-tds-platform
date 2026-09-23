@@ -83,3 +83,21 @@
   9 casos; o décimo expôs apenas ensureVisible antes de construir o sliver no
   teste 320px/200%. Corrigido para scrollUntilVisible limitado; repetição isolada
   passou. O overflow original e os quatro cenários responsivos foram verificados.
+
+## Gate 2A: primeira troca de conta — primeira tentativa
+
+- Observed: execução `603b9cc65be945c1b9f17f6925b075bc` falhou em
+  `_signedIn`/`_reveal`, procurando "Sair da conta" antes de criar o curso.
+- Expected: aguardar a verificação da conta em Settings e usar a ação disponível.
+- Responsible Boundary: integração Android; montagem assíncrona do estado da conta.
+- Evidence: `author_v1.log`, hash em `evidence/dynamic-learning-first-attempt.json`;
+  Settings inicia verificando e só monta logout depois de consultar a sessão/API.
+- Likely Root Cause: helper usava a espera de 300ms do clique e tratava a ação
+  ainda ausente como conteúdo fora da área visível, esgotando a rolagem.
+- Affected Files: `integration_test/dynamic_learning_path_test.dart`; nenhuma
+  alteração de produto demonstrada necessária.
+- Structural Fix: revelar o status da conta, esperar conectado/sem sessão,
+  reler identidade e então navegar pela ação correta. Preservar guardas de
+  propriedade/pendências; registrar eventual invalidação de sessão. Não capturar
+  a exceção para prosseguir nem limpar dados. Manter tentativa falha e verificar
+  banco/histórico antes de novo ensaio completo; não reseedar o ambiente.
