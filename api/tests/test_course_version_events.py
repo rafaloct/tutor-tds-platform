@@ -6,6 +6,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.database import Database
+from app.auth import access_claims
 from app.events import router, student_claims
 from app.models import Base, ClassEnrollment, Classroom, Course, CourseVersion, CourseVersionTransition, Enrollment, Institution, LearningEventRecord, Program, ProgramCourse, ProgramMembership, User
 
@@ -22,6 +23,7 @@ def version_events():
         return {"sub": x_user, "role": "student"}
 
     app.dependency_overrides[student_claims] = claims
+    app.dependency_overrides[access_claims] = claims
     with Session(database.engine) as session:
         session.add(Institution(id="i", name="Institution"))
         session.add_all([User(id=identity, name=identity, cpf_digest=identity, phone="61999990000", password_digest="digest", role="student") for identity in ("student", "outsider", "teacher")])
@@ -91,15 +93,38 @@ def test_public_version_without_enrollment_and_archived_version_requires_class_m
     assert client.post("/events", json=event("e4", course_version_id="old")).status_code == 201
 
 
-@pytest.mark.parametrize("table", ["enrollments", "class_enrollments"])
+@pytest.mark.parametrize("table", ["enrollments", "class_enrollments", "program_memberships"])
 def test_inactive_enrollment_is_not_allowed_to_claim_archived_snapshot(version_events, table):
     client, engine = version_events
     with Session(engine) as session:
-        record = session.get(Enrollment, "enrollment-p1") if table == "enrollments" else session.get(ClassEnrollment, ("class-p1", "student"))
+        record = {
+            "enrollments": lambda: session.get(Enrollment, "enrollment-p1"),
+            "class_enrollments": lambda: session.get(ClassEnrollment, ("class-p1", "student")),
+            "program_memberships": lambda: session.get(ProgramMembership, ("student", "p1")),
+        }[table]()
         record.status = "inactive"
         session.commit()
     assert client.post("/events", json=event(course_version_id="old", class_id="class-p1")).status_code == 403
     assert client.post("/events", json=event("e2", course_version_id="old")).status_code == 403
+
+
+@pytest.mark.parametrize("version,class_id,program", [
+    ("old", "class-p1", "p1"), ("current", "class-p2", "p2"),
+])
+def test_revoked_program_cannot_create_evidence_but_existing_retry_stays_idempotent(
+    version_events, version, class_id, program,
+):
+    client, engine = version_events
+    payload = event(course_version_id=version, class_id=class_id)
+    assert client.post("/events", json=payload).status_code == 201
+    with Session(engine) as session:
+        session.get(ProgramMembership, ("student", program)).status = "inactive"
+        session.commit()
+    assert client.post("/events", json=payload).status_code == 200
+    rejected = event("rejected", course_version_id=version, class_id=class_id)
+    assert client.post("/events", json=rejected).status_code == 403
+    with Session(engine) as session:
+        assert session.get(LearningEventRecord, "rejected") is None
 
 
 def test_legacy_payloads_keep_behavior_and_telemetry_video_are_not_broadened(version_events):

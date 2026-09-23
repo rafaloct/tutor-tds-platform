@@ -11,12 +11,16 @@ class MediaEventTracker {
     required this.syncService,
     this.queue = const LearningEventQueue(),
     String? sessionId,
-  }) : sessionId = sessionId ?? LearningEvent.newSessionId();
+  }) : sessionId = sessionId ?? LearningEvent.newSessionId(),
+       _owner = queue.isDurable
+           ? syncService.authRepository.localUserId()
+           : Future.value(null);
 
   final MediaItem media;
   final LearningEventSyncService syncService;
   final LearningEventQueue queue;
   final String sessionId;
+  final Future<String?> _owner;
   final Set<int> _checkpoints = {};
   bool _started = false;
   bool _completed = false;
@@ -66,7 +70,7 @@ class MediaEventTracker {
     int? positionSeconds,
     String? followupType,
   }) async {
-    final event = LearningEvent.video(
+    var event = LearningEvent.video(
       type: type,
       mediaId: media.id,
       moduleId: media.moduleId,
@@ -76,6 +80,10 @@ class MediaEventTracker {
       positionSeconds: positionSeconds,
       followupType: followupType,
     );
+    final owner = await _owner;
+    if (owner != null) {
+      event = event.forLocalOwner(userId: owner, apiUrl: syncService.apiUrl);
+    }
     await queue.enqueue(event);
     unawaited(syncService.flush());
   }

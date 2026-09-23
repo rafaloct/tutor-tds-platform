@@ -40,6 +40,8 @@ class LearningEvent {
     required this.occurredAt,
     this.activeSeconds,
     this.payload = const {},
+    this.localOwnerId,
+    this.localApiUrl,
   });
 
   final String eventId;
@@ -50,6 +52,30 @@ class LearningEvent {
   final int? activeSeconds;
   final Map<String, String> payload;
 
+  /// Local delivery envelope, never sent as API authorization or event payload.
+  final String? localOwnerId;
+  final String? localApiUrl;
+
+  LearningEvent forLocalOwner({
+    required String userId,
+    required String apiUrl,
+  }) {
+    if (userId.isEmpty || apiUrl.isEmpty) {
+      throw ArgumentError('Owner and API are required');
+    }
+    return LearningEvent(
+      eventId: eventId,
+      type: type,
+      courseId: courseId,
+      sessionId: sessionId,
+      occurredAt: occurredAt,
+      activeSeconds: activeSeconds,
+      payload: payload,
+      localOwnerId: userId,
+      localApiUrl: apiUrl.replaceFirst(RegExp(r'/+$'), ''),
+    );
+  }
+
   LearningEvent withCourseContext({String? courseVersionId, String? classId}) {
     if (courseVersionId == null) return this;
     return LearningEvent(
@@ -59,6 +85,8 @@ class LearningEvent {
       sessionId: sessionId,
       occurredAt: occurredAt,
       activeSeconds: activeSeconds,
+      localOwnerId: localOwnerId,
+      localApiUrl: localApiUrl,
       payload: {
         ...payload,
         'course_version_id': courseVersionId,
@@ -269,14 +297,26 @@ class LearningEvent {
     if (payload.isNotEmpty) 'payload': payload,
   };
 
+  Map<String, Object> toStorageJson() => {
+    ...toJson(),
+    'local_owner_id': ?localOwnerId,
+    'local_api_url': ?localApiUrl,
+  };
+
   static LearningEvent? fromJson(Object? source) {
     if (source is! Map<String, dynamic>) return null;
+    final owner = source['local_owner_id'];
+    final api = source['local_api_url'];
+    if ((owner != null || api != null) &&
+        (owner is! String || owner.isEmpty || api is! String || api.isEmpty)) {
+      return null;
+    }
     final eventId = source['event_id'];
     final courseId = source['course_id'];
     final sessionId = source['session_id'];
-    final occurredAt = DateTime.tryParse(
-      source['occurred_at'] as String? ?? '',
-    );
+    final rawOccurredAt = source['occurred_at'];
+    if (rawOccurredAt is! String) return null;
+    final occurredAt = DateTime.tryParse(rawOccurredAt);
     final typeValue = source['event_type'];
     final activeSeconds = source['active_seconds'];
     final rawPayload = source['payload'];
@@ -317,6 +357,8 @@ class LearningEvent {
       occurredAt: occurredAt,
       activeSeconds: activeSeconds as int?,
       payload: Map.unmodifiable(payload),
+      localOwnerId: owner as String?,
+      localApiUrl: api as String?,
     );
   }
 

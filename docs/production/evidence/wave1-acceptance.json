@@ -1,0 +1,56 @@
+{
+  "verified_at": "2026-09-23T20:54:46.460785+00:00",
+  "status": "WAVE1_FUNCTIONAL_STAGING_PASSED",
+  "wave": 1,
+  "next_wave_allowed": 2,
+  "production_ready": false,
+  "production_changed": false,
+  "candidate_base_commit": "fb50a57",
+  "api_deployment_id": "b67f0921-d2c4-400d-a28e-c8832eb268fb",
+  "api_url": "https://tutor-tds-staging.fastapicloud.dev",
+  "android": {
+    "version": "16",
+    "device": "emulator-5556",
+    "phases": [
+      "student_online",
+      "student_restart",
+      "student_offline",
+      "offline_restart",
+      "student_reconnect",
+      "instructor_observation"
+    ],
+    "same_source_verified": true
+  },
+  "checks": {
+    "student_learning_path": "passed",
+    "instructor_observation_path": "passed",
+    "offline_sync_path": "passed",
+    "contextual_authorization_and_isolation_https": "passed",
+    "flutter_unit_widget_tests": 344,
+    "flutter_analyze": "passed",
+    "locked_api_suite": 281,
+    "isolation_ops_tests": 15,
+    "source_files_verified": {
+      "flutter": 195,
+      "deployed_backend": 54
+    }
+  },
+  "evidence_sha256": {
+    "docs/production/evidence/context-android-gate.json": "79348f39a8bf90cfb83ae14840ececaf4d18f343cebfc45f5f31a45f7a129139",
+    "docs/production/evidence/cloud-context-isolation.json": "8ab1222b51399b600c54d01e8aedb9f4881e85353af7d6b59edb216272a44054",
+    "docs/production/evidence/cloud-context-isolation-local.json": "1ee0a745a06fb0c343052980d789153f0ff20477cda29557a7985a5c4d6955f9",
+    "docs/production/evidence/wave1-flutter-local-gate.json": "30859afb7f7c935c7357dfd685a8c180df212a52e30ec749e9d25d2373e213bb",
+    "docs/production/evidence/cloud-locked-deployment.json": "760bae04c9854298403eeda1c6e96c37a8eb1a3d077ba3d90186c22b9e085674",
+    "docs/production/evidence/context-physical-postgres-gate.json": "83e98c12b0fb69ac68a2b1f7901c3152f7c66158288e7ee789bd62db185fcb3c",
+    "docs/production/evidence/context-v2-postgres-gate.json": "73cbbf967e0d8a92d661a27adddd2bddd7715434a403c1ce75105c4ac93c754a",
+    "docs/production/evidence/learning-delivery-local-verification.json": "407ce2e22cff3ce60ccfe104b5286fdb5cb134b070d4b33109ee9826ceb6a54c",
+    "docs/production/evidence/learning-delivery-repository.json": "9cecc3bd4dc438d066ada3bd3ab676612024affe256876c30728b451007ee463"
+  },
+  "limitations": [
+    "Synthetic isolated staging on emulator; no physical-device claim",
+    "Full Stitch visual parity belongs to corresponding later slices",
+    "SQLite receipt retention required before production promotion",
+    "Legacy global-role paths are preserved pending migration",
+    "Production flags remain disabled; release signing, build freeze and Play gates unchanged"
+  ]
+}

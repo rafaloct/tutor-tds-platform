@@ -41,12 +41,15 @@ function Assert-StagingConfig {
     $allowedApiUri = Get-HttpsUri `
         -Name 'TUTOR_STAGING_API_URL' `
         -Value ([string]$Config.TUTOR_STAGING_API_URL)
-    $approvedApiUrl = 'https://ead.ipexdesenvolvimento.cloud/tutor-staging-api'
+    $approvedApiUrls = @(
+        'https://ead.ipexdesenvolvimento.cloud/tutor-staging-api',
+        'https://tutor-tds-staging.fastapicloud.dev'
+    )
     if (
         $apiUri.AbsoluteUri.TrimEnd('/') -ne $allowedApiUri.AbsoluteUri.TrimEnd('/') -or
-        $apiUri.AbsoluteUri.TrimEnd('/') -ne $approvedApiUrl
+        $apiUri.AbsoluteUri.TrimEnd('/') -notin $approvedApiUrls
     ) {
-        throw 'TUTOR_API_URL deve ser a rota de staging aprovada.'
+        throw 'TUTOR_API_URL deve ser uma rota de staging aprovada.'
     }
 
     $gatewayUrl = [string]$Config.TUTOR_GATEWAY_URL

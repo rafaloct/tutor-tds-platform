@@ -6,6 +6,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from app.database import normalize_database_url
 from app.models import Base
 
 config = context.config
@@ -13,9 +14,11 @@ if config.config_file_name is not None:
     # Embedded migrations must not disable the API's request/trace logger.
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
-database_url = os.getenv("DATABASE_URL")
+database_url = os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
 if database_url:
-    config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
+    config.set_main_option(
+        "sqlalchemy.url", normalize_database_url(database_url).replace("%", "%%")
+    )
 
 target_metadata = Base.metadata
 

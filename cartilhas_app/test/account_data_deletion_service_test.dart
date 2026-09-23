@@ -31,11 +31,16 @@ void main() {
       '${certificates.path}${Platform.pathSeparator}private.pdf',
     ).writeAsString('private certificate');
 
+    var outboxDeleted = false;
     await AccountDataDeletionService(
       certificateRepository: repository,
+      deleteLearningOutbox: () async {
+        outboxDeleted = true;
+      },
     ).deleteLocalData();
 
     final preferences = await SharedPreferences.getInstance();
+    expect(outboxDeleted, isTrue);
     expect(preferences.getKeys(), isEmpty);
     expect(
       await const FlutterSecureStorage().read(key: 'tutor_tds:profile_cpf:v1'),

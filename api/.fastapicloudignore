@@ -1,0 +1,33 @@
+# Deploy from api/, not the monorepo root. Only runtime and migration inputs.
+/*
+!/app/
+!/migrations/
+!/pyproject.toml
+!/.python-version
+!/alembic.ini
+!/uv.lock
+!/pylock.toml
+
+# Never upload local state, bytecode, credentials, or database copies,
+# including files accidentally placed inside an allowed directory.
+**/__pycache__/
+**/*.py[cod]
+**/.env
+**/.env.*
+**/*.env
+**/*.env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jks
+**/*.keystore
+**/*service-account*.json
+**/*credentials*.json
+**/*.db
+**/*.sqlite*
+**/*.dump
+**/*.backup
+**/*.log
+**/.DS_Store
+**/Thumbs.db

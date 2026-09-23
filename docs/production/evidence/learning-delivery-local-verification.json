@@ -1,0 +1,57 @@
+{
+  "status": "LOCAL_TARGETED_PASS_ANDROID_ACCEPTANCE_PENDING",
+  "verifiedAt": "2026-09-23T17:36:01.2300984-03:00",
+  "sdk": "C:/Users/Usuario/flutter-3.44.9/bin/flutter.bat",
+  "executionWorkspace": "C:/Users/Usuario/.codex/tmp/tutor-tds-context-qa",
+  "stitchSourceScreenId": "75ac62c1bb3241aba1b3092f908b7c5f",
+  "stitchDerivativeScreenId": "9d6e0e93f2c448058d3f4afac70a7c4a",
+  "analysis": {
+    "seconds": 13.7,
+    "toolSession": 36678,
+    "files": 7,
+    "result": "No issues found"
+  },
+  "tests": {
+    "toolSession": 48751,
+    "newTests": 19,
+    "command": "flutter test --no-pub --reporter expanded test/learning_delivery_controller_test.dart test/learning_delivery_status_test.dart test/learning_delivery_reader_test.dart test/learning_home_test.dart test/home_next_action_test.dart test/chat_experience_progress_test.dart",
+    "regressionTests": 12,
+    "seconds": 19,
+    "failed": 0,
+    "result": "All tests passed",
+    "passed": 31
+  },
+  "coverage": [
+    "Immutable event held after known storage, data, migration or conflict error; retry preserves body and ID",
+    "Local commit serializes interaction; network latency does not block reading",
+    "Late owner change does not expose previous scoped counts",
+    "Consent and auth rejection never authorize sending",
+    "External lifecycle acknowledgement refreshes delivery summary without inferring official progress",
+    "Reader initial command recovers after projection failure using one captured lessonStarted",
+    "Committed completion waits safely for projection recovery and applies intent once",
+    "Unsaved intent prevents silent navigation away",
+    "Home, status component and complete reader fit 320 logical px at text scale 200%; recovery reachable by scrolling",
+    "Existing contextual progress and reading-position regressions preserved"
+  ],
+  "initialHarnessCorrections": [
+    "Use expectSync inside asynchronous fake repository callback; never suppress FlutterError",
+    "Locate generic PopScope via widget predicate; preserve canPop assertions"
+  ],
+  "limits": [
+    "Android six-phase staging acceptance for these changes remains pending",
+    "Full suite and full analysis delegated to root at acceptance gate",
+    "No release build or production readiness claimed",
+    "Global lifecycle ack may retain previous confirmed progress/date until normal screen revalidation",
+    "No policy change to retention of synced receipts"
+  ],
+  "sourceSha256": {
+    "cartilhas_app/lib/features/learning_events/learning_delivery_controller.dart": "3bceeeb16372319a0389478de0972533e8311a330547fad4a03d7f3cfd342e8f",
+    "cartilhas_app/lib/features/learning_events/learning_delivery_status.dart": "ec4dabb0d0c4828144c441b847a854ed805b7d006206d0fd5726982e572db070",
+    "cartilhas_app/lib/features/learning_context/learning_home_card.dart": "8628ea39d8c0bfd242ecc076331351c5e29795a1db4557d0e434bcd16da88469",
+    "cartilhas_app/lib/screens/chat_experience_screen.dart": "def1828885585d0023b716e5324d897be81b5bb6aa4e62ab734ed0b71dfe1ca1",
+    "cartilhas_app/test/learning_delivery_controller_test.dart": "2f02c72cfdb4415a3869636dd65cd3cb7de4d01b043472453872fde0fcbe2e1a",
+    "cartilhas_app/test/learning_delivery_status_test.dart": "5fe7a630e64af869cd4886a9c38f2f03ff0dd057fc8bb8f6fcff6732aa0bfd36",
+    "cartilhas_app/test/learning_delivery_reader_test.dart": "c5eeea5cd6aec3392297153dc3e7ce28549c7eb02ea3ae0739571e8437588930",
+    "docs/production/LEARNING_DELIVERY_CONTRACT.md": "134ad78d4b3202828d59b7f3ac3eb95c8539b4aae0682963f25a3006d92c28ce"
+  }
+}

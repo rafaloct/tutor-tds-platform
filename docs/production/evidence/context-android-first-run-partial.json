@@ -1,0 +1,91 @@
+{
+  "verified_at": "2026-09-23T20:01:12.099663+00:00",
+  "status": "PARTIAL_TEST_ASSERTION_FIXED",
+  "passed_phases": [
+    "student_online",
+    "student_restart"
+  ],
+  "failed_phase": "student_offline",
+  "cause": "Test incorrectly required contextual payload on analytics events. Product contracts unchanged.",
+  "pending_offline_events_snapshot": [
+    {
+      "course_id": "_app",
+      "event_id": "1790193427626453-Yo6dyq8ExCjrw9dB:page_viewed:1",
+      "event_type": "page_viewed",
+      "local_api_url": "https://tutor-tds-staging.fastapicloud.dev",
+      "local_owner_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "occurred_at": "2026-09-23T19:57:09.853594Z",
+      "payload": {
+        "page_id": "welcome"
+      },
+      "session_id": "1790193427626453-Yo6dyq8ExCjrw9dB"
+    },
+    {
+      "course_id": "_app",
+      "event_id": "1790193427626453-Yo6dyq8ExCjrw9dB:page_viewed:2",
+      "event_type": "page_viewed",
+      "local_api_url": "https://tutor-tds-staging.fastapicloud.dev",
+      "local_owner_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "occurred_at": "2026-09-23T19:57:10.634438Z",
+      "payload": {
+        "page_id": "home"
+      },
+      "session_id": "1790193427626453-Yo6dyq8ExCjrw9dB"
+    },
+    {
+      "course_id": "qa-course",
+      "event_id": "1790193427626453-Yo6dyq8ExCjrw9dB:page_viewed:3",
+      "event_type": "page_viewed",
+      "local_api_url": "https://tutor-tds-staging.fastapicloud.dev",
+      "local_owner_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "occurred_at": "2026-09-23T19:57:12.865026Z",
+      "payload": {
+        "page_id": "classroom_course"
+      },
+      "session_id": "1790193427626453-Yo6dyq8ExCjrw9dB"
+    },
+    {
+      "course_id": "qa-course",
+      "event_id": "1790193427626453-Yo6dyq8ExCjrw9dB:feature_used:4",
+      "event_type": "feature_used",
+      "local_api_url": "https://tutor-tds-staging.fastapicloud.dev",
+      "local_owner_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "occurred_at": "2026-09-23T19:57:12.889342Z",
+      "payload": {
+        "feature_id": "contextual_home_continue"
+      },
+      "session_id": "1790193427626453-Yo6dyq8ExCjrw9dB"
+    },
+    {
+      "course_id": "qa-course",
+      "event_id": "1790193433146269-I_hgxmFXsGDXSGs4:lesson_started",
+      "event_type": "lesson_started",
+      "local_api_url": "https://tutor-tds-staging.fastapicloud.dev",
+      "local_owner_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "occurred_at": "2026-09-23T19:57:13.152012Z",
+      "payload": {
+        "class_id": "qa-cohort",
+        "course_version_id": "qa-edition-1"
+      },
+      "session_id": "1790193433146269-I_hgxmFXsGDXSGs4"
+    },
+    {
+      "active_seconds": 3,
+      "course_id": "qa-course",
+      "event_id": "1790193433146269-I_hgxmFXsGDXSGs4:study_activity:1",
+      "event_type": "study_activity",
+      "local_api_url": "https://tutor-tds-staging.fastapicloud.dev",
+      "local_owner_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "occurred_at": "2026-09-23T19:57:17.526971Z",
+      "payload": {
+        "class_id": "qa-cohort",
+        "course_version_id": "qa-edition-1"
+      },
+      "session_id": "1790193433146269-I_hgxmFXsGDXSGs4"
+    }
+  ],
+  "synthetic_server_events_archived_and_reset": 12,
+  "reset_scope": "Only synthetic seed events in lgtphbbpgqnzduhtyate plus owned emulator .dev app data; no schema/auth/account deletion",
+  "next": "Full six-phase run with corrected contract assertion",
+  "production_changed": false
+}

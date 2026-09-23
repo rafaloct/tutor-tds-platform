@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from dataclasses import replace
 
 import pytest
 from sqlalchemy import event, text
@@ -87,6 +88,18 @@ def test_dashboard_aggregates_only_exact_class_roster_without_private_content(pr
     assert result["summary"]["open_mentorship_cases"] == 3
     for private in ("private-reference-other", "Private objective", "Revisão humana", first["id"]):
         assert private not in response.text
+    # The learner and observing instructor must receive the whole shared
+    # projection, including follow-up aggregates, after physical migration.
+    from app.context_memberships import backfill_context_bindings
+    with Session(engine) as session:
+        backfill_context_bindings(session)
+        session.commit()
+    client.app.state.settings = replace(client.app.state.settings, learning_context_enabled=True)
+    own = client.get('/classes/c1/learning-context', headers=header('learner'))
+    observed = client.get('/classes/c1/students/learner/learning-context', headers=header('teacher'))
+    assert own.status_code == observed.status_code == 200
+    current = next(item for item in dashboard(client).json()['students'] if item['user_id'] == 'learner')
+    assert own.json()['progress'] == observed.json()['progress'] == current
 
 
 def test_dashboard_does_not_treat_qr_or_accepted_activity_as_formal_presence(presence_api):

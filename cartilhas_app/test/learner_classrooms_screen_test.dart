@@ -3,6 +3,9 @@ import 'package:cartilhas_app/features/classrooms/data/classroom_repository.dart
 import 'package:cartilhas_app/features/classrooms/models/classroom_models.dart';
 import 'package:cartilhas_app/features/classrooms/presentation/learner_classrooms_screen.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event.dart';
+import 'package:cartilhas_app/features/learning_context/learning_context.dart';
+import 'package:cartilhas_app/features/learning_context/learning_context_repository.dart';
+import 'learning_context_test.dart' show contextPayload;
 import 'package:cartilhas_app/models/cartilha.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,6 +52,37 @@ class FakeClasses implements LearnerClassroomGateway {
 }
 
 void main() {
+  for (final version in ['version-1', 'wrong-version']) {
+    testWidgets(
+      'context gate only opens the exact enrollment edition: $version',
+      (tester) async {
+        var opened = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: LearnerClassroomsScreen(
+              gateway: FakeClasses(),
+              contextRepository: FakeLearningContextRepository({
+                'class-1': LearningContextSnapshot.fromJson(
+                  contextPayload(version: version),
+                ),
+              }),
+              onOpenCourse: (_, _) => opened = true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Minha turma'));
+        await tester.pumpAndSettle();
+        expect(opened, version == 'version-1');
+        if (!opened) {
+          expect(
+            find.byKey(const Key('classroom-course-error')),
+            findsOneWidget,
+          );
+        }
+      },
+    );
+  }
   test('contagem de aprendizagem inclui quiz e não conta falas do usuário', () {
     expect(Message(type: 'quiz', content: 'Quiz').isAssessmentQuestion, isTrue);
     expect(

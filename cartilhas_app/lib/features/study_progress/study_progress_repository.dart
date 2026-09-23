@@ -13,6 +13,7 @@ class StudyProgress {
     required this.updatedAt,
     this.courseVersionId,
     this.ownerId,
+    this.contextKey,
   });
 
   final String courseId;
@@ -24,6 +25,7 @@ class StudyProgress {
   final DateTime updatedAt;
   final String? courseVersionId;
   final String? ownerId;
+  final String? contextKey;
 
   Map<String, Object> toJson() => {
     'courseId': courseId,
@@ -35,6 +37,7 @@ class StudyProgress {
     'updatedAt': updatedAt.toUtc().toIso8601String(),
     'courseVersionId': ?courseVersionId,
     'ownerId': ?ownerId,
+    'contextKey': ?contextKey,
   };
 
   static StudyProgress? tryParse(String? source) {
@@ -57,6 +60,7 @@ class StudyProgress {
         updatedAt: updatedAt,
         courseVersionId: json['courseVersionId'] as String?,
         ownerId: json['ownerId'] as String?,
+        contextKey: json['contextKey'] as String?,
       );
     } on FormatException {
       return null;
@@ -71,8 +75,14 @@ class StudyProgressRepository {
 
   const StudyProgressRepository();
 
-  String _courseKey(String courseId, String? versionId, String? ownerId) =>
-      versionId == null && ownerId == null
+  String _courseKey(
+    String courseId,
+    String? versionId,
+    String? ownerId, [
+    String? contextKey,
+  ]) => contextKey != null
+      ? 'study_progress:context:${jsonEncode([contextKey, courseId, versionId, ownerId])}'
+      : versionId == null && ownerId == null
       ? 'study_progress:course:$courseId'
       : 'study_progress:version:${jsonEncode([courseId, versionId, ownerId])}';
 
@@ -81,12 +91,20 @@ class StudyProgressRepository {
     String? courseVersionId,
     String? ownerId,
     bool allowLegacy = false,
+    String? contextKey,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final current = StudyProgress.tryParse(
-      prefs.getString(_courseKey(courseId, courseVersionId, ownerId)),
+      prefs.getString(
+        _courseKey(courseId, courseVersionId, ownerId, contextKey),
+      ),
     );
-    if (current != null || !allowLegacy || ownerId != null) return current;
+    if (current != null ||
+        !allowLegacy ||
+        ownerId != null ||
+        contextKey != null) {
+      return current;
+    }
     return StudyProgress.tryParse(
       prefs.getString(_courseKey(courseId, null, null)),
     );
@@ -106,10 +124,12 @@ class StudyProgressRepository {
           progress.courseId,
           progress.courseVersionId,
           progress.ownerId,
+          progress.contextKey,
         ),
         encoded,
       ),
-      if (progress.ownerId == null) prefs.setString(_lastProgressKey, encoded),
+      if (progress.ownerId == null && progress.contextKey == null)
+        prefs.setString(_lastProgressKey, encoded),
     ]);
   }
 }

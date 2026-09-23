@@ -335,9 +335,38 @@ class Classroom(Base):
     )
 
 
+class CohortMembership(Base):
+    __tablename__ = "cohort_memberships"
+    __table_args__ = (
+        UniqueConstraint("class_id", "user_id", "role", name="uq_cohort_membership_natural"),
+        UniqueConstraint("id", "class_id", "user_id", "role", name="uq_cohort_membership_lineage"),
+        CheckConstraint("role IN ('student', 'teacher', 'monitor')", name="ck_cohort_membership_role"),
+        CheckConstraint("status IN ('active', 'inactive')", name="ck_cohort_membership_status"),
+        Index("ix_cohort_membership_user_status", "user_id", "status"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    class_id: Mapped[str] = mapped_column(ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    role: Mapped[str] = mapped_column(String(24), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
 class ClassEnrollment(Base):
     __tablename__ = "class_enrollments"
     __table_args__ = (
+        UniqueConstraint("context_id", name="uq_class_enrollment_context_id"),
+        UniqueConstraint("membership_id", "course_version_id", name="uq_class_enrollment_membership_version"),
+        ForeignKeyConstraint(["membership_id", "class_id", "user_id", "membership_role"],
+            ["cohort_memberships.id", "cohort_memberships.class_id", "cohort_memberships.user_id", "cohort_memberships.role"],
+            name="fk_class_enrollment_membership"),
+        ForeignKeyConstraint(["course_version_id", "course_id"], ["course_versions.id", "course_versions.course_id"],
+            name="fk_class_enrollment_version"),
+        CheckConstraint("membership_role = 'student'", name="ck_class_enrollment_student"),
+        CheckConstraint("(context_id IS NULL AND membership_id IS NULL AND course_version_id IS NULL) OR "
+                        "(context_id IS NOT NULL AND membership_id IS NOT NULL AND course_version_id IS NOT NULL)",
+                        name="ck_class_enrollment_context_complete"),
         ForeignKeyConstraint(
             ["class_id", "program_id", "course_id"],
             ["classes.id", "classes.program_id", "classes.course_id"],
@@ -357,6 +386,10 @@ class ClassEnrollment(Base):
 
     class_id: Mapped[str] = mapped_column(String(36), primary_key=True)
     user_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    context_id: Mapped[str | None] = mapped_column(String(36))
+    membership_id: Mapped[str | None] = mapped_column(String(36))
+    membership_role: Mapped[str] = mapped_column(String(24), nullable=False, server_default="student")
+    course_version_id: Mapped[str | None] = mapped_column(String(36))
     enrollment_id: Mapped[str] = mapped_column(String(36), nullable=False)
     program_id: Mapped[str] = mapped_column(String(36), nullable=False)
     course_id: Mapped[str] = mapped_column(String(120), nullable=False)

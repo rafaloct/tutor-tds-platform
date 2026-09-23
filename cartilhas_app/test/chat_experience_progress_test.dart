@@ -2,6 +2,10 @@ import 'package:cartilhas_app/features/certificates/data/certificate_service.dar
 import 'package:cartilhas_app/features/certificates/models/certificate_record.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event_sync_service.dart';
 import 'package:cartilhas_app/features/study_progress/study_progress_repository.dart';
+import 'package:cartilhas_app/features/learning_context/learning_context.dart';
+import 'package:cartilhas_app/features/learning_context/learning_context_controller.dart';
+import 'package:cartilhas_app/features/learning_context/learning_context_repository.dart';
+import 'learning_context_test.dart' show contextPayload;
 import 'package:cartilhas_app/models/cartilha.dart';
 import 'package:cartilhas_app/screens/chat_experience_screen.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +23,8 @@ class _NoCertificateService implements CertificateService {
 
 class _OfflineSync implements LearningEventSyncService {
   @override
+  String get apiUrl => 'https://staging.example';
+  @override
   Future<int> flush() async => 0;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -28,14 +34,24 @@ double progressValue(WidgetTester tester) => tester
     .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator))
     .value!;
 
-Future<void> openReader(WidgetTester tester, Cartilha course) async {
+Future<void> openReader(
+  WidgetTester tester,
+  Cartilha course, {
+  LearningContextController? controller,
+}) async {
   await tester.pumpWidget(
     MultiProvider(
       providers: [
         Provider<CertificateService>.value(value: _NoCertificateService()),
         Provider<LearningEventSyncService>.value(value: _OfflineSync()),
       ],
-      child: MaterialApp(home: ChatExperienceScreen(cartilha: course)),
+      child: MaterialApp(
+        home: ChatExperienceScreen(
+          cartilha: course,
+          progressOwnerId: controller?.snapshot?.context.userId,
+          learningContextController: controller,
+        ),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -61,6 +77,57 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(const MethodChannel('flutter_tts'), null);
   });
+
+  testWidgets(
+    'contextual reader shows shared projection and resumes its own local position',
+    (tester) async {
+      final controller = LearningContextController(
+        FakeLearningContextRepository({
+          'class-1': LearningContextSnapshot.fromJson(contextPayload()),
+        }),
+      );
+      addTearDown(controller.dispose);
+      await controller.load('class-1');
+      final course = Cartilha(
+        id: 'course',
+        title: 'Context course',
+        author: 'TDS',
+        classId: 'class-1',
+        courseVersionId: 'version-1',
+        legacyProgressCompatible: false,
+        sections: [
+          Section(
+            id: 'module',
+            title: 'Module',
+            messages: [
+              Message(type: 'bot', content: 'First contextual message'),
+              Message(type: 'bot', content: 'Second contextual message'),
+              Message(type: 'bot', content: 'Third contextual message'),
+            ],
+          ),
+        ],
+      );
+      await openReader(tester, course, controller: controller);
+      expect(
+        find.textContaining('Progresso confirmado: 12.5%'),
+        findsOneWidget,
+      );
+      await advanceReader(tester);
+      expect(find.text('Second contextual message'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+      await openReader(tester, course, controller: controller);
+      expect(
+        find.text('Você retomou esta cartilha de onde parou.'),
+        findsOneWidget,
+      );
+      expect(find.text('Second contextual message'), findsOneWidget);
+      expect(
+        find.textContaining('Progresso confirmado: 12.5%'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets(
     'single module progresses only after advancing; Tutor never covers answer or Continue',

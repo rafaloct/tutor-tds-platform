@@ -1,0 +1,56 @@
+{
+  "screenId": "9731628404551462355",
+  "title": "ChatGPT Image 21 de set. de 2026, 10_28_39.png",
+  "actor": [
+    "student",
+    "teacher",
+    "monitor",
+    "coordinator",
+    "creator"
+  ],
+  "route": "home (region 7 only in Wave 1)",
+  "regions": [
+    "7 Home - Aluno: header, next mission, progress, continue study, quick actions, recent content, bottom navigation"
+  ],
+  "components": [
+    "course progress card",
+    "continue study button",
+    "role-specific header"
+  ],
+  "actions": [
+    "continue study",
+    "open content"
+  ],
+  "states": [
+    "ready"
+  ],
+  "designTokens": {
+    "surface": "white",
+    "header": "TDS blue",
+    "cards": "rounded"
+  },
+  "domainEntities": [
+    "LearningContext",
+    "Membership",
+    "Enrollment",
+    "CourseVersion",
+    "Progress"
+  ],
+  "repositories": [
+    "LearningContextRepository",
+    "LearnerClassroomGateway",
+    "HomeSelectionRepository"
+  ],
+  "endpoints": [
+    "GET /classes?enrolled_only=true",
+    "GET /classes/{id}/learning-context",
+    "GET /classes/{id}/course"
+  ],
+  "analyticsEvents": [
+    "page_viewed",
+    "lesson_started",
+    "study_activity"
+  ],
+  "offlineBehavior": "Previously authorized context/content cached; activity outbox; no public course substitution",
+  "implementationStatus": "STITCH_ONLY"
+}

@@ -1,0 +1,376 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport">
+<title>TDS Classroom - Professor</title>
+<!-- Tailwind CSS CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: '#0B57D0',
+              blueDark: '#0842A0',
+              navy: '#0C2340',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Roboto', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style data-purpose="global-styles">
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #0f172a;
+    }
+    /* Hide scrollbar for clean app feel */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 md:p-4 selection:bg-blue-100">
+<!-- BEGIN: PhoneContainer -->
+<!-- Mimics mobile device viewport exactly matching IMAGE_1 -->
+<div class="relative w-full max-w-[420px] h-[100dvh] md:h-[915px] bg-[#f8fafd] flex flex-col overflow-hidden md:rounded-[44px] shadow-2xl md:ring-1 md:ring-slate-800/40" data-purpose="mobile-viewport">
+<!-- BEGIN: StatusBar -->
+<header class="w-full bg-[#0B57D0] text-white pt-2.5 pb-1 px-6 flex items-center justify-between z-30 select-none" data-purpose="status-bar">
+<!-- Time Display -->
+<span class="text-xs font-semibold tracking-tight">9:41</span>
+<!-- Front Camera Punch-hole Simulation -->
+<div class="w-3.5 h-3.5 bg-black rounded-full ring-2 ring-black/40"></div>
+<!-- Device Status Icons -->
+<div class="flex items-center space-x-1.5 text-white">
+<!-- Wi-Fi Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+<path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.3c3.48 0 6.64 1.34 9 3.53L12 19.34 3 10.83c2.36-2.19 5.52-3.53 9-3.53z"></path>
+</svg>
+<!-- Cellular Network Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+<path d="M2 22h20V2L2 22z"></path>
+</svg>
+<!-- Battery 100% -->
+<div class="flex items-center space-x-0.5">
+<span class="text-[10px] font-semibold">100%</span>
+<div class="w-4 h-2.5 border border-white rounded-sm p-0.5 flex items-center">
+<div class="w-full h-full bg-white rounded-xs"></div>
+</div>
+</div>
+</div>
+</header>
+<!-- END: StatusBar -->
+<!-- BEGIN: AppBar -->
+<nav class="w-full bg-[#0B57D0] text-white px-4 pb-4 pt-1 flex items-center justify-between shadow-sm z-20" data-purpose="app-bar">
+<div class="flex items-center space-x-3">
+<!-- Back Navigation Button -->
+<button aria-label="Voltar" class="p-1.5 -ml-1 text-white hover:bg-white/10 active:bg-white/20 rounded-full transition-colors" type="button">
+<svg class="w-6 h-6 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- TDS Classroom Badge Brand -->
+<div class="bg-white rounded-xl px-3 py-1.5 shadow-sm flex items-center justify-center">
+<span class="text-sm font-black tracking-tight flex items-center">
+<span class="text-[#0B57D0]">T</span>
+<span class="text-[#002661]">D</span>
+<span class="text-[#F59E0B]">S</span>
+</span>
+</div>
+<!-- App & Role Titles -->
+<div class="flex flex-col">
+<h1 class="text-base font-bold leading-tight tracking-tight text-white">TDS Classroom</h1>
+<span class="text-xs font-medium text-blue-100/90 leading-tight">Professor</span>
+</div>
+</div>
+<!-- More Options Button -->
+<button aria-label="Mais opções" class="p-1 text-white hover:bg-white/10 active:bg-white/20 rounded-full transition-colors" type="button">
+<svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+<circle cx="12" cy="5" r="2"></circle>
+<circle cx="12" cy="12" r="2"></circle>
+<circle cx="12" cy="19" r="2"></circle>
+</svg>
+</button>
+</nav>
+<!-- END: AppBar -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 overflow-y-auto px-4 py-3.5 space-y-3.5 pb-24" data-purpose="scrollable-content">
+<!-- BEGIN: SessionInfoCard -->
+<!-- Navy dark card with lesson metadata -->
+<section class="bg-[#0b2144] text-white rounded-2xl p-4 shadow-sm relative overflow-hidden" data-purpose="session-info-card">
+<div class="flex items-start justify-between gap-2">
+<!-- Left: Title and Theme -->
+<div class="space-y-1">
+<h2 class="text-sm font-bold text-white tracking-tight">Classroom - Encontro 04</h2>
+<p class="text-xs font-normal text-slate-300">Agricultura Sustentável</p>
+</div>
+<!-- Right: Date and Time Indicators -->
+<div class="flex flex-col space-y-1.5 text-right items-end">
+<div class="flex items-center space-x-1.5 text-slate-200">
+<svg class="w-3.5 h-3.5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect>
+<line x1="16" x2="16" y1="2" y2="6"></line>
+<line x1="8" x2="8" y1="2" y2="6"></line>
+<line x1="3" x2="21" y1="10" y2="10"></line>
+</svg>
+<span class="text-[11px] font-normal leading-none whitespace-nowrap">Hoje, 15 de set de 2026</span>
+</div>
+<div class="flex items-center space-x-1.5 text-slate-200">
+<svg class="w-3.5 h-3.5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+<span class="text-[11px] font-normal leading-none whitespace-nowrap">14:00 – 17:30</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: SessionInfoCard -->
+<!-- BEGIN: ActiveStatusCard -->
+<!-- Soft mint green banner with live badge -->
+<section class="bg-[#E9F9EE] border border-[#B3E8C4] rounded-2xl p-3 px-4 flex items-center justify-between" data-purpose="session-status">
+<div class="flex items-center space-x-3">
+<span class="w-3.5 h-3.5 rounded-full bg-[#16A34A] inline-block shadow-sm"></span>
+<div>
+<h3 class="text-sm font-bold text-slate-900 leading-tight">Sessão ativa</h3>
+<p class="text-xs text-slate-600 font-medium">34/37 presentes • 14:00 – 17:30</p>
+</div>
+</div>
+<!-- Live Badge -->
+<span class="inline-flex items-center space-x-1 px-2.5 py-1 bg-[#D3F3DC] border border-[#A7E6BC] rounded-lg text-[11px] font-extrabold text-[#15803D] tracking-wide">
+<svg class="w-3.5 h-3.5 stroke-current stroke-2 fill-none animate-pulse" viewBox="0 0 24 24">
+<path d="M9.348 14.652a3.75 3.75 0 010-5.304m5.304 0a3.75 3.75 0 010 5.304m-7.424 2.12a6.75 6.75 0 010-9.548m9.548 0a6.75 6.75 0 010 9.548M12 12h.008v.008H12V12z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span>AO VIVO</span>
+</span>
+</section>
+<!-- END: ActiveStatusCard -->
+<!-- BEGIN: QuickActionsGrid -->
+<!-- 2 column interactive card action triggers -->
+<section class="grid grid-cols-2 gap-3" data-purpose="quick-actions">
+<!-- Card 1: Abrir QR -->
+<button class="group bg-[#EEF5FF] border border-[#D5E6FA] hover:bg-[#E3EFFD] active:scale-[0.99] transition-all rounded-2xl p-3.5 text-left flex flex-col justify-between shadow-xs h-[104px]" type="button">
+<div class="flex items-center justify-between w-full">
+<!-- QR Icon -->
+<div class="text-[#0B57D0]">
+<svg class="w-6 h-6 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+<path d="M14 14h2v2h-2z M19 14h2v2h-2z M14 19h2v2h-2z M19 19h2v2h-2z" fill="currentColor"></path>
+</svg>
+</div>
+<!-- Arrow Right -->
+<svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900 leading-snug">Abrir QR</h4>
+<p class="text-[11px] text-slate-500 font-medium">check-in / check-out</p>
+</div>
+</button>
+<!-- Card 2: Enviar Atividade -->
+<button class="group bg-[#EEF5FF] border border-[#D5E6FA] hover:bg-[#E3EFFD] active:scale-[0.99] transition-all rounded-2xl p-3.5 text-left flex flex-col justify-between shadow-xs h-[104px]" type="button">
+<div class="flex items-center justify-between w-full">
+<!-- Share Icon -->
+<div class="text-[#0B57D0]">
+<svg class="w-6 h-6 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<circle cx="18" cy="5" r="3"></circle>
+<circle cx="6" cy="12" r="3"></circle>
+<circle cx="18" cy="19" r="3"></circle>
+<line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
+<line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
+</svg>
+</div>
+<!-- Arrow Right -->
+<svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900 leading-snug">Enviar atividade</h4>
+<p class="text-[11px] text-slate-500 font-medium">app + compartilhar</p>
+</div>
+</button>
+</section>
+<!-- END: QuickActionsGrid -->
+<!-- BEGIN: ClassAttendanceCard -->
+<!-- Soft lavender/purple card summarizing real-time classroom states -->
+<button class="w-full bg-[#F4ECFD] border border-[#DEC7FA] hover:bg-[#EEDEFB] active:scale-[0.99] transition-all rounded-2xl p-3.5 flex items-center justify-between shadow-xs text-left" data-purpose="class-overview-banner" type="button">
+<div class="flex items-center space-x-3.5">
+<!-- Class Group Icon in Circle -->
+<div class="w-10 h-10 rounded-full bg-[#D6B5F7] text-[#6925B8] flex items-center justify-center flex-shrink-0">
+<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-900 leading-tight">Turma agora</h3>
+<p class="text-[11.5px] text-slate-600 font-medium mt-0.5">27 normais | 4 atenção | 3 ausentes</p>
+</div>
+</div>
+<svg class="w-4 h-4 text-slate-400 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- END: ClassAttendanceCard -->
+<!-- BEGIN: ActionsModuleSection -->
+<!-- Interactive Classroom Actions container with 2x2 cards -->
+<section class="bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-3xl p-3.5 shadow-sm space-y-3" data-purpose="actions-container">
+<!-- Section Header -->
+<div class="flex items-center space-x-2.5 px-1 pt-0.5">
+<div class="w-8 h-8 rounded-full bg-blue-50 text-[#0B57D0] flex items-center justify-center">
+<svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.81-.976l.666-2.185C3.816 16.275 3 14.238 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-900 leading-tight">Ações</h3>
+<p class="text-[11px] text-slate-500 font-normal">Interaja com a turma em tempo real</p>
+</div>
+</div>
+<!-- 2x2 Grid of Actions -->
+<div class="grid grid-cols-2 gap-2.5 pt-0.5">
+<!-- Action 1: Pergunta ao vivo -->
+<button class="flex items-center justify-between p-3 bg-white border border-[#DCE8F7] hover:border-blue-300 active:bg-blue-50/50 rounded-xl transition-all shadow-2xs" type="button">
+<div class="flex items-center space-x-2.5 truncate mr-1">
+<svg class="w-5 h-5 text-[#0B57D0] stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.502 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-xs font-semibold text-slate-900 truncate">Pergunta ao vivo</span>
+</div>
+<svg class="w-3.5 h-3.5 text-slate-400 stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Action 2: Aviso -->
+<button class="flex items-center justify-between p-3 bg-white border border-[#DCE8F7] hover:border-blue-300 active:bg-blue-50/50 rounded-xl transition-all shadow-2xs" type="button">
+<div class="flex items-center space-x-2.5 truncate mr-1">
+<svg class="w-5 h-5 text-[#0B57D0] stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.455a20.06 20.06 0 01-1.674-4.219m3.336 0c1.84 0 3.655.12 5.433.352a1.5 1.5 0 001.691-1.488V7.575a1.5 1.5 0 00-1.691-1.488 43.715 43.715 0 00-5.433.352" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-xs font-semibold text-slate-900 truncate">Aviso</span>
+</div>
+<svg class="w-3.5 h-3.5 text-slate-400 stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Action 3: Evidência -->
+<button class="flex items-center justify-between p-3 bg-white border border-[#DCE8F7] hover:border-blue-300 active:bg-blue-50/50 rounded-xl transition-all shadow-2xs" type="button">
+<div class="flex items-center space-x-2.5 truncate mr-1">
+<svg class="w-5 h-5 text-[#0B57D0] stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-xs font-semibold text-slate-900 truncate">Evidência</span>
+</div>
+<svg class="w-3.5 h-3.5 text-slate-400 stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Action 4: Observação -->
+<button class="flex items-center justify-between p-3 bg-white border border-[#DCE8F7] hover:border-blue-300 active:bg-blue-50/50 rounded-xl transition-all shadow-2xs" type="button">
+<div class="flex items-center space-x-2.5 truncate mr-1">
+<svg class="w-5 h-5 text-[#0B57D0] stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-xs font-semibold text-slate-900 truncate">Observação</span>
+</div>
+<svg class="w-3.5 h-3.5 text-slate-400 stroke-current stroke-2 fill-none flex-shrink-0" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</section>
+<!-- END: ActionsModuleSection -->
+<!-- BEGIN: EndMeetingAction -->
+<!-- Soft peach/warm yellow warning card to end classroom session -->
+<button class="w-full bg-[#FFF3D6] border border-[#FAD68A] hover:bg-[#FDEBBF] active:scale-[0.99] transition-all rounded-2xl p-3.5 flex items-center justify-between shadow-xs text-left" data-purpose="end-session-card" type="button">
+<div class="flex items-center space-x-3.5">
+<!-- Stop Circle Icon -->
+<div class="w-10 h-10 rounded-full bg-[#FEDB96] text-[#E05305] flex items-center justify-center flex-shrink-0">
+<div class="w-3.5 h-3.5 bg-[#E05305] rounded-[3px]"></div>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-900 leading-tight">Encerrar encontro</h3>
+<p class="text-[11.5px] text-slate-600 font-medium mt-0.5">revisar frequência e gerar resumo</p>
+</div>
+</div>
+<svg class="w-4 h-4 text-slate-400 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- END: EndMeetingAction -->
+</main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: BottomNavigation -->
+<!-- Fixed persistent bottom bar with 4 tabs and Android gesture pill -->
+<nav class="absolute bottom-0 inset-x-0 bg-white border-t border-slate-200/90 flex flex-col z-40" data-purpose="bottom-navbar">
+<div class="flex justify-around items-center pt-2 pb-1.5 px-2">
+<!-- Tab 1: Início (Active) -->
+<button class="flex flex-col items-center justify-center w-16 group focus:outline-none" type="button">
+<div class="w-8 h-6 flex items-center justify-center">
+<!-- Filled Home Icon -->
+<svg class="w-6 h-6 text-[#0B57D0] fill-current" viewBox="0 0 24 24">
+<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+</svg>
+</div>
+<span class="text-[11px] font-bold text-[#0B57D0] relative tracking-tight">
+            Início
+            <span class="absolute -bottom-1 inset-x-0 h-0.5 bg-[#0B57D0] rounded-full"></span>
+</span>
+</button>
+<!-- Tab 2: Conteúdos -->
+<button class="flex flex-col items-center justify-center w-16 group text-slate-500 hover:text-slate-800 transition-colors focus:outline-none" type="button">
+<div class="w-8 h-6 flex items-center justify-center">
+<!-- Notebook/Document outline -->
+<svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-[11px] font-medium tracking-tight">Conteúdos</span>
+</button>
+<!-- Tab 3: TDS IA -->
+<button class="flex flex-col items-center justify-center w-16 group text-slate-500 hover:text-slate-800 transition-colors focus:outline-none" type="button">
+<div class="w-8 h-6 flex items-center justify-center">
+<!-- Sparkles / Star AI icon -->
+<svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-[11px] font-medium tracking-tight">TDS IA</span>
+</button>
+<!-- Tab 4: Perfil -->
+<button class="flex flex-col items-center justify-center w-16 group text-slate-500 hover:text-slate-800 transition-colors focus:outline-none" type="button">
+<div class="w-8 h-6 flex items-center justify-center">
+<!-- User / Profile outline -->
+<svg class="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+<path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-[11px] font-medium tracking-tight">Perfil</span>
+</button>
+</div>
+<!-- Android Home Indicator Bar -->
+<div class="w-full pb-2 flex justify-center items-center">
+<div class="w-32 h-1 bg-slate-800/80 rounded-full"></div>
+</div>
+</nav>
+<!-- END: BottomNavigation -->
+</div>
+<!-- END: PhoneContainer -->
+</body></html>

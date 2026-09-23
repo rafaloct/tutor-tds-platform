@@ -1,0 +1,41 @@
+{
+  "scope": "Wave 1 cloud context isolation verifier: local tests only",
+  "environment": "isolated locked Python environment",
+  "workingDirectory": "api",
+  "command": "..\\tmp\\context-cloud-locked-env\\Scripts\\python.exe -m pytest tests/test_cloud_context_isolation.py",
+  "result": {
+    "passed": 15,
+    "failed": 0,
+    "durationSeconds": 17.50,
+    "exitCode": 0,
+    "warnings": 2,
+    "warningSummary": "Existing upstream Starlette TestClient httpx and AnyIO BlockingPortal deprecations"
+  },
+  "files": [
+    {
+      "path": "api/ops/verify_cloud_context_isolation.py",
+      "sha256": "a4c7636e94d97d07bf13d1527adb00b620ab5eb9b981db6ba7355d3870e9b811"
+    },
+    {
+      "path": "api/tests/test_cloud_context_isolation.py",
+      "sha256": "f7dde7dbc948c2e6c5a246f4577ff37680424b837c6359571baf97317ce4522d"
+    }
+  ],
+  "outputEvidence": {
+    "source": "exec session 16113 completed with exit code 0",
+    "summary": "15 passed, 2 warnings in 17.50s",
+    "persistentLog": null,
+    "note": "No persistent log for this run was found; result retained from the completed tool session. Tests were not repeated."
+  },
+  "verifiedBehaviors": [
+    "Authenticated outsider without ClassEnrollment receives 403 for /classes/qa-cohort/learning-context",
+    "The same outsider receives 403 for /classes/qa-cohort/course",
+    "Real login and JWT authentication are used by the local TestClient test",
+    "The outsider may observe the enrolled student in its own second cohort",
+    "Original context and learning history hashes remain unchanged"
+  ],
+  "limitations": [
+    "Local migrated SQLite and TestClient validation does not establish live HTTPS acceptance",
+    "No remote fixture, API deployment, Flutter execution, or runtime configuration change was performed for this evidence"
+  ]
+}

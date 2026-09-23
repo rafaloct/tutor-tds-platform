@@ -8,6 +8,14 @@ class AppConfig {
   /// API transacional do Tutor TDS. Enquanto não estiver configurada, o
   /// catálogo continua vindo integralmente dos assets do aplicativo.
   static const tutorApiUrl = String.fromEnvironment('TUTOR_API_URL');
+
+  /// Enable with the matching API flag only after the Context Core staging gate.
+  static const learningContextEnabled = bool.fromEnvironment(
+    'LEARNING_CONTEXT_ENABLED',
+  );
+  static const durableLearningOutboxEnabled = bool.fromEnvironment(
+    'DURABLE_LEARNING_OUTBOX_ENABLED',
+  );
   // Enable only after the inbox signature and account-switch QA are configured.
   static const signedSupportIdentity = bool.fromEnvironment(
     'SIGNED_SUPPORT_IDENTITY',

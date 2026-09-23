@@ -72,12 +72,42 @@ $production = [ordered]@{
 
 Invoke-GateCase -Name 'debug aceita staging aprovado' `
     -Task ':app:preDebugBuild' -Defines $staging -ShouldPass $true
+$cloudStaging = [ordered]@{}
+foreach ($entry in $staging.GetEnumerator()) {
+    $cloudStaging[$entry.Key] = $entry.Value
+}
+$cloudStaging.TUTOR_API_URL = 'https://tutor-tds-staging.fastapicloud.dev'
+$cloudStaging.TUTOR_STAGING_API_URL = $cloudStaging.TUTOR_API_URL
+Invoke-GateCase -Name 'debug aceita app Cloud staging aprovado' `
+    -Task ':app:preDebugBuild' -Defines $cloudStaging -ShouldPass $true
+
+$unapproved = [ordered]@{}
+foreach ($entry in $cloudStaging.GetEnumerator()) {
+    $unapproved[$entry.Key] = $entry.Value
+}
+$unapproved.TUTOR_API_URL = 'https://other-staging.fastapicloud.dev'
+$unapproved.TUTOR_STAGING_API_URL = $unapproved.TUTOR_API_URL
+Invoke-GateCase -Name 'debug rejeita outro app no mesmo provedor' `
+    -Task ':app:preDebugBuild' -Defines $unapproved -ShouldPass $false
+$unapproved.TUTOR_API_URL = 'http://tutor-tds-staging.fastapicloud.dev'
+$unapproved.TUTOR_STAGING_API_URL = $unapproved.TUTOR_API_URL
+Invoke-GateCase -Name 'debug rejeita Cloud sem HTTPS' `
+    -Task ':app:preDebugBuild' -Defines $unapproved -ShouldPass $false
+$unapproved.TUTOR_API_URL = $cloudStaging.TUTOR_API_URL
+$unapproved.TUTOR_STAGING_API_URL = $staging.TUTOR_API_URL
+Invoke-GateCase -Name 'debug rejeita bases staging divergentes' `
+    -Task ':app:preDebugBuild' -Defines $unapproved -ShouldPass $false
 Invoke-GateCase -Name 'debug rejeita producao' `
     -Task ':app:preDebugBuild' -Defines $production -ShouldPass $false
-Invoke-GateCase -Name 'release aceita producao aprovada' `
-    -Task ':app:preReleaseBuild' -Defines $production -ShouldPass $true
+$releaseStatusPath = Join-Path $WorkspaceRoot 'cartilhas_app\release\release_status.json'
+$releaseStatus = Get-Content -LiteralPath $releaseStatusPath -Raw | ConvertFrom-Json
+Invoke-GateCase -Name 'release respeita congelamento com configuracao produtiva' `
+    -Task ':app:preReleaseBuild' -Defines $production `
+    -ShouldPass ($releaseStatus.release_build_allowed -eq $true)
 Invoke-GateCase -Name 'release rejeita staging' `
     -Task ':app:preReleaseBuild' -Defines $staging -ShouldPass $false
+Invoke-GateCase -Name 'release rejeita Cloud staging' `
+    -Task ':app:preReleaseBuild' -Defines $cloudStaging -ShouldPass $false
 Invoke-GateCase -Name 'release rejeita configuracao vazia' `
     -Task ':app:preReleaseBuild' -Defines ([ordered]@{}) -ShouldPass $false
 

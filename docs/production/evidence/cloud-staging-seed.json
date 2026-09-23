@@ -1,0 +1,14 @@
+{
+  "project_ref": "lgtphbbpgqnzduhtyate",
+  "migration": "20260923_0019",
+  "synthetic_only": true,
+  "tls": true,
+  "seed": {
+    "student_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+    "teacher_id": "5b7a0c42-28ba-4f5b-9b8a-c3af65b946be",
+    "cohort_id": "qa-cohort",
+    "course_id": "qa-course",
+    "course_version_id": "qa-edition-1",
+    "initial_events": 0
+  }
+}

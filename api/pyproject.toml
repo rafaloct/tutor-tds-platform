@@ -5,7 +5,7 @@ description = "API transacional do Tutor TDS"
 requires-python = ">=3.12"
 dependencies = [
   "alembic>=1.16,<2",
-  "fastapi>=0.115,<1",
+  "fastapi[standard]>=0.115,<1",
   "google-auth[requests]>=2.35,<3",
   "pwdlib[argon2]>=0.3,<1",
   "PyJWT>=2.10,<3",
@@ -23,6 +23,9 @@ test = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.fastapi]
+entrypoint = "app.main:app"
 
 [build-system]
 requires = ["setuptools>=75"]

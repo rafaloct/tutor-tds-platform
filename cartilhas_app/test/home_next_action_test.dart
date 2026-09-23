@@ -13,6 +13,27 @@ void main() {
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  testWidgets('retornar do menu atualiza acesso sem Future no setState', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(home: HomeScreen(courseLoader: () async => [])),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Mais opções'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Como usar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Como usar o App TDS'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Tutor TDS'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byTooltip('Mais opções'));
+    await tester.pumpAndSettle();
+    expect(find.text('Como usar'), findsOneWidget);
+  });
+
   testWidgets('mostra tentativa recente como próxima ação na Home', (
     tester,
   ) async {

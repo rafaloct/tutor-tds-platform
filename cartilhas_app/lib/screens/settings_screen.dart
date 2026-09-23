@@ -213,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Sair da conta online?'),
         content: const Text(
-          'A sessão online será encerrada. Envios pendentes desta conta serão removidos para não serem atribuídos à próxima pessoa. O perfil, as cartilhas e o progresso salvos neste aparelho não serão apagados e ainda não são separados por usuário. Em um dispositivo compartilhado, essas informações podem continuar visíveis.',
+          'A sessão online será encerrada. Atividades vinculadas à sua conta aguardam seu próximo login para sincronizar. Envios antigos sem identificação da conta serão removidos. O perfil e os estudos antigos não são separados por usuário e não serão apagados; em um dispositivo compartilhado, essas informações podem continuar visíveis.',
         ),
         actions: [
           TextButton(
@@ -232,7 +232,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _loggingOut = true);
     try {
       await Future.wait([
-        const LearningEventQueue().clear(),
+        const LearningEventQueue().clear(preserveOwned: true),
         const AssessmentSyncQueue().clear(),
         SharedPreferencesCheckinDraftStore().clear(),
       ]);

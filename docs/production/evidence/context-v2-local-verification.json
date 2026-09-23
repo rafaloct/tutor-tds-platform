@@ -1,0 +1,36 @@
+{
+  "verified_at": "2026-09-23T19:00:31.591863+00:00",
+  "status": "passed",
+  "contract": "cohort-enrollment-v2",
+  "api_full_suite": {
+    "command": "python -m pytest -q",
+    "tests_collected": 228,
+    "exit_code": 0
+  },
+  "flutter_targeted": {
+    "tests": [
+      "learning_context_test.dart",
+      "chat_experience_progress_test.dart",
+      "learner_classrooms_screen_test.dart"
+    ],
+    "passed": 15,
+    "analysis": "No issues found"
+  },
+  "postgres_evidence": "context-v2-postgres-gate.json",
+  "source_sha256": {
+    "api/app/context_memberships.py": "83e79e34193ee482969a9b2bb2e3afc572988881deab3a4e53ac75f5f93d9df1",
+    "api/app/learning_context.py": "a8e55eb5097662cf96de754d825b719ccf87d6c2fa2de6fa5ec58a31c9826531",
+    "api/app/classrooms.py": "a59cd7995d2bba981f26870739e389fd6e363587d146a2923451e3bba17510e8",
+    "api/app/evidence.py": "e79f5536e072809e68668cfe01838a34bed6ceba2c3bf7a508eeb93f4232aaf0",
+    "api/app/events.py": "0be42869a65ef0a19f5a38594ee10470a183eb54da3aef6999207b626b3a1345",
+    "api/app/staging_seed.py": "0c2b9da6f62bc2bb81050d7374073ae7541e3eb9a977e662eb18706dfe070809",
+    "cartilhas_app/lib/features/learning_context/learning_context.dart": "853620deb4a178caf919ef84748ff5a501a6e95bc2674a45628bfe19dc881869",
+    "cartilhas_app/lib/screens/chat_experience_screen.dart": "df378aab30a8fae7e5c3c2237b0eef4bea4fa86d7d867371affd2f0e2f424c72",
+    "cartilhas_app/test/learning_context_test.dart": "c1b4dd22bc78003d10adb4f021a41a30b575d84590804f12876605a6067ffdab"
+  },
+  "limitations": [
+    "No public staging deployment",
+    "No end-to-end Android/API/instructor acceptance",
+    "No release build or production change"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "screenId": "9d6e0e93f2c448058d3f4afac70a7c4a",
+  "title": "Home - Aluno - Atividades salvas offline",
+  "actor": "student",
+  "route": "home; classroom_course",
+  "regions": ["contextual learning card", "delivery status below confirmed progress"],
+  "components": ["LearningDeliveryStatus: cartilhas_app/lib/features/learning_events/learning_delivery_status.dart", "LearningHomeCard", "ChatExperienceScreen", "cloud_off icon", "amber status container", "pending study record count", "retry button"],
+  "actions": ["retry synchronization", "continue study"],
+  "states": ["offline pending"],
+  "designTokens": {"font": "Inter", "primary": "#0B57D0", "navy": "#0C2340", "surface": "#FFFFFF", "status": "soft amber"},
+  "domainEntities": ["LearningContext", "LearningEvent", "LearningDeliveryScope", "LearningDeliverySnapshot"],
+  "repositories": ["LearningEventQueue", "LearningOutbox", "SqliteLearningOutbox", "LearningEventSyncService"],
+  "endpoints": ["POST /events (existing; idempotent replay)", "GET /classes/{id}/learning-context (existing; confirmed progress)"],
+  "analyticsEvents": ["N/A: delivery status does not create learning evidence"],
+  "offlineBehavior": "OFFLINE_WRITE_SYNC; only committed events described as saved; scope owner/API/cohort/course/version; excludes telemetry; exact unsaved event held in memory for retry; global acknowledgement may retain prior progress/date until context revalidation; LEARNING_DELIVERY_CONTRACT.md",
+  "implementationStatus": "STAGING"
+}

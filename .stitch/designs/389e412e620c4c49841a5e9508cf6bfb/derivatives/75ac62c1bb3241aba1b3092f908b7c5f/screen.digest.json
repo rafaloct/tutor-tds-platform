@@ -1,0 +1,60 @@
+{
+  "screenId": "75ac62c1bb3241aba1b3092f908b7c5f",
+  "title": "Home - Aluno - Contexto de Aprendizagem",
+  "actor": "student",
+  "route": "home",
+  "regions": [
+    "TDS header",
+    "contextual learning card",
+    "public catalog",
+    "bottom navigation"
+  ],
+  "components": [
+    "cohort/course/edition label",
+    "confirmed progress",
+    "last sync text",
+    "continue button",
+    "change cohort action"
+  ],
+  "actions": [
+    "continue study",
+    "change cohort",
+    "explore public content"
+  ],
+  "states": [
+    "ready"
+  ],
+  "designTokens": {
+    "font": "Inter",
+    "primary": "#0B57D0",
+    "primaryDark": "#0947A8",
+    "navy": "#0C2340",
+    "progress": "#059669",
+    "card": "rounded white"
+  },
+  "domainEntities": [
+    "LearningContext",
+    "Membership",
+    "Enrollment",
+    "CourseVersion",
+    "Progress"
+  ],
+  "repositories": [
+    "LearnerClassroomGateway",
+    "LearningContextRepository",
+    "HomeSelectionRepository"
+  ],
+  "endpoints": [
+    "GET /classes?enrolled_only=true",
+    "GET /classes/{id}/learning-context",
+    "GET /classes/{id}/course"
+  ],
+  "analyticsEvents": [
+    "page_viewed",
+    "feature_used (contextual_home_continue)",
+    "lesson_started",
+    "study_activity"
+  ],
+  "offlineBehavior": "CACHE_READ authorized context/content; OFFLINE_WRITE_SYNC through existing outbox",
+  "implementationStatus": "STAGING"
+}

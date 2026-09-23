@@ -59,15 +59,22 @@ class AppTelemetryService {
     required String courseId,
   }) async {
     if (!await consentChecker()) return 0;
+    final owner = queue.isDurable
+        ? await syncService.authRepository.localUserId()
+        : null;
+    if (queue.isDurable && owner == null) return 0;
     var queued = 0;
     for (final target in targets) {
-      final event = LearningEvent.telemetry(
+      var event = LearningEvent.telemetry(
         type: target.$1,
         targetId: target.$2,
         courseId: courseId,
         sessionId: sessionId,
         sequence: ++_sequence,
       );
+      if (owner != null) {
+        event = event.forLocalOwner(userId: owner, apiUrl: syncService.apiUrl);
+      }
       if (await queue.enqueue(event)) queued++;
     }
     if (queued > 0) unawaited(syncService.flush());

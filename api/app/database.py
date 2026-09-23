@@ -7,8 +7,17 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 
+def normalize_database_url(url: str) -> str:
+    """Select the installed PostgreSQL driver without rewriting credentials or TLS."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
 class Database:
     def __init__(self, url: str) -> None:
+        url = normalize_database_url(url)
         options: dict[str, object] = {"pool_pre_ping": True}
         if url == "sqlite+pysqlite:///:memory:":
             options.update(

@@ -47,6 +47,68 @@ void main() {
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  test(
+    'offline scoped queue survives restart and skips another account or environment',
+    () async {
+      String token(String owner) =>
+          'header.${base64UrlEncode(utf8.encode(jsonEncode({'sub': owner})))}.signature';
+      final store = _MemoryTokenStore(
+        AuthTokens(accessToken: token('other'), refreshToken: 'test-refresh'),
+      );
+      final scopedAuth = AuthRepository(
+        apiUrl: 'https://staging.example',
+        tokenStore: store,
+      );
+      addTearDown(scopedAuth.dispose);
+      final saved =
+          LearningEvent.forSession(
+                type: LearningEventType.lessonCompleted,
+                courseId: 'course',
+                sessionId: 'scoped-session',
+              )
+              .withCourseContext(courseVersionId: 'version', classId: 'cohort')
+              .forLocalOwner(
+                userId: 'student',
+                apiUrl: 'https://staging.example',
+              );
+      await queue.enqueue(saved);
+      var requests = 0;
+      LearningEventSyncService service(String url) {
+        final value = LearningEventSyncService(
+          apiUrl: url,
+          authRepository: scopedAuth,
+          queue: const LearningEventQueue(),
+          consentChecker: () async => true,
+          client: MockClient((request) async {
+            requests++;
+            final body = jsonDecode(request.body) as Map;
+            expect(body['event_id'], saved.eventId);
+            expect(body.containsKey('local_owner_id'), isFalse);
+            expect(body['payload'], {
+              'course_version_id': 'version',
+              'class_id': 'cohort',
+            });
+            return http.Response('{}', 200);
+          }),
+        );
+        addTearDown(value.dispose);
+        return value;
+      }
+
+      expect(await service('https://staging.example').flush(), 0);
+      await store.write(
+        AuthTokens(accessToken: token('student'), refreshToken: 'test-refresh'),
+      );
+      expect(await service('https://production.example').flush(), 0);
+      expect(requests, 0);
+      expect(await queue.pending(), hasLength(1));
+      expect(await service('https://staging.example/').flush(), 1);
+      expect(await service('https://staging.example').flush(), 0);
+      expect(requests, 1);
+      expect(await queue.pending(), isEmpty);
+    },
+  );
+
   LearningEvent event(String session, LearningEventType type) =>
       LearningEvent.forSession(
         type: type,

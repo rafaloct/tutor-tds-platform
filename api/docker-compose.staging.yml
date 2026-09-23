@@ -40,6 +40,7 @@ services:
       CHATWOOT_IDENTITY_NAMESPACE: ${CHATWOOT_IDENTITY_NAMESPACE:-tds-staging}
       SIGNED_SUPPORT_IDENTITY: ${SIGNED_SUPPORT_IDENTITY:-false}
       CERTIFICATE_APPROVAL_REQUIRED: ${STAGING_CERTIFICATE_APPROVAL_REQUIRED:-false}
+      LEARNING_CONTEXT_ENABLED: ${STAGING_LEARNING_CONTEXT_ENABLED:-false}
     command: >-
       sh -c "alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"

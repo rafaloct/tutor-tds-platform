@@ -1,0 +1,12 @@
+{
+  "prepared_at": "2026-09-23T20:37:38.568655+00:00",
+  "action": "Reset only archived synthetic .dev preferences after completed logout; native outbox and secure storage preserved",
+  "guarded_phase": "student_reconnect",
+  "outbox_sha256": "b51b3576338647d7155cc87ff89fbb2851c1a9fc28e349c940625dc94c0425e7",
+  "outbox_unchanged": true,
+  "pending_pedagogical_before": 0,
+  "pending_telemetry_preserved": 1,
+  "synced_receipts_preserved": 33,
+  "server_data_changed": false,
+  "backup_directory": "tmp\\context-android-20260923-170438\\client-before-delivery-upgrade"
+}

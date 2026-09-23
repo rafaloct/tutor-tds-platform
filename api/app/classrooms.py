@@ -13,7 +13,8 @@ from sqlalchemy.orm import Session
 from .auth import access_claims, require_roles
 from .database import Database
 from .course_editor import latest_published_version, ensure_legacy_course_version
-from .evidence import _staff
+from .evidence import _active_student, _is_staff, _staff
+from .context_memberships import active_student_binding, bind_membership, bind_student
 from .models import (
     ClassEnrollment,
     ClassMonitor,
@@ -90,6 +91,7 @@ class StudentProgress(BaseModel):
     user_id: str
     name: str
     enrollment_id: str
+    context_enrollment_id: str | None = None
     status: str
     planned_hours: float
     validated_hours: float
@@ -162,6 +164,8 @@ def create_classroom(
             status=payload.status,
         )
         session.add(record)
+        session.flush()
+        bind_membership(session, record.id, record.teacher_id, "teacher")
         _commit(session, "Não foi possível criar a turma.")
         return _serialize(record)
 
@@ -191,8 +195,7 @@ def add_student(
             )
         if session.get(ClassEnrollment, (class_id, user_id)) is not None:
             raise HTTPException(status_code=409, detail="Estudante já está na turma.")
-        session.add(
-            ClassEnrollment(
+        link = ClassEnrollment(
                 class_id=class_id,
                 user_id=user_id,
                 enrollment_id=enrollment.id,
@@ -200,7 +203,8 @@ def add_student(
                 course_id=classroom.course_id,
                 status="active",
             )
-        )
+        session.add(link)
+        _bind_context(session, classroom, link, request)
         _commit(session, "Não foi possível adicionar o estudante.")
         return {"class_id": class_id, "user_id": user_id, "status": "active"}
 
@@ -232,6 +236,7 @@ def add_monitor(
                 program_id=classroom.program_id,
             )
         )
+        bind_membership(session, class_id, user_id, "monitor")
         _commit(session, "Não foi possível adicionar o monitor.")
         return {"class_id": class_id, "user_id": user_id}
 
@@ -312,20 +317,32 @@ def include_student(
             )
         membership = session.get(ClassEnrollment, (class_id, user_id))
         if membership is None:
-            session.add(
-                ClassEnrollment(
+            membership = ClassEnrollment(
                     class_id=class_id,
                     user_id=user_id,
                     enrollment_id=enrollment.id,
                     program_id=classroom.program_id,
                     course_id=classroom.course_id,
                     status="active",
-                )
             )
+            session.add(membership)
         elif membership.status != "active":
             membership.status = "active"
+        _bind_context(session, classroom, membership, request)
         _commit(session, "Não foi possível incluir o estudante. Tente novamente.")
         return {"class_id": class_id, "user_id": user_id, "status": "active"}
+
+
+def _bind_context(session, classroom, link, request):
+    # Old servers/fixtures can still create unpinned links while the flag is off.
+    # An enabled contextual journey must never guess an edition or write half a binding.
+    enabled = getattr(getattr(request.app.state, "settings", None), "learning_context_enabled", False)
+    if classroom.course_version_id is None and not enabled:
+        return
+    try:
+        bind_student(session, classroom, link)
+    except ValueError as error:
+        raise HTTPException(409, "Matrícula contextual inconsistente; confira a edição da turma.") from error
 
 
 def _require_open_classroom(classroom: Classroom) -> None:
@@ -345,16 +362,7 @@ def class_detail(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        is_monitor = session.get(ClassMonitor, (class_id, claims["sub"])) is not None
-        if (
-            claims["role"] != "admin"
-            and classroom.teacher_id != claims["sub"]
-            and not is_monitor
-        ):
-            raise HTTPException(
-                status_code=403,
-                detail="Acesso não autorizado para esta turma.",
-            )
+        _staff(session, classroom, claims, monitor=True)
         student_ids = session.scalars(
             select(ClassEnrollment.user_id)
             .where(
@@ -395,9 +403,14 @@ def visible_classes(
         if enrolled_only:
             statement = statement.where(Classroom.id.in_(
                 select(ClassEnrollment.class_id)
+                .join(Classroom, Classroom.id == ClassEnrollment.class_id)
                 .join(Enrollment, Enrollment.id == ClassEnrollment.enrollment_id)
+                .join(ProgramMembership,
+                      (ProgramMembership.user_id == ClassEnrollment.user_id)
+                      & (ProgramMembership.program_id == ClassEnrollment.program_id))
                 .where(ClassEnrollment.user_id == user_id,
-                       ClassEnrollment.status == "active", Enrollment.status == "active")
+                       ClassEnrollment.status == "active", Enrollment.status == "active",
+                       ProgramMembership.status == "active", active_student_binding())
             ))
         elif claims["role"] != "admin":
             monitored = select(ClassMonitor.class_id).where(
@@ -420,7 +433,9 @@ def visible_classes(
         records = session.scalars(
             statement.order_by(Classroom.start_date.desc(), Classroom.name)
         ).all()
-        return ClassroomPage(classes=[_serialize(item) for item in records])
+        return ClassroomPage(classes=[_serialize(item) for item in records
+            if (enrolled_only or _is_staff(session, item, user_id, claims["role"])
+                or _active_student(session, item, user_id))])
 
 
 @router.get("/{class_id}/course")
@@ -433,13 +448,8 @@ def classroom_course(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        membership = session.get(ClassEnrollment, (class_id, claims["sub"]))
-        enrollment = session.get(Enrollment, membership.enrollment_id) if membership else None
-        if not (
-            membership is not None and membership.status == "active"
-            and enrollment is not None and enrollment.status == "active"
-        ):
-            _require_staff_access(session, classroom, claims)
+        if not _active_student(session, classroom, claims["sub"]):
+            _staff(session, classroom, claims, monitor=True)
         version = session.get(CourseVersion, classroom.course_version_id) if classroom.course_version_id else None
         if version is None or version.course_id != classroom.course_id or version.status not in {"published", "archived"}:
             raise HTTPException(409, "A versão do curso desta turma precisa ser conferida pela equipe.")
@@ -474,6 +484,7 @@ def class_dashboard(
         expected_percent = _expected_progress(classroom, now.date())
         roster = (
             select(ClassEnrollment, User)
+            .join(Classroom, Classroom.id == ClassEnrollment.class_id)
             .join(User, User.id == ClassEnrollment.user_id)
             .join(Enrollment, Enrollment.id == ClassEnrollment.enrollment_id)
             .join(ProgramMembership, (ProgramMembership.user_id == ClassEnrollment.user_id) & (ProgramMembership.program_id == ClassEnrollment.program_id))
@@ -487,6 +498,7 @@ def class_dashboard(
                 Enrollment.course_id == ClassEnrollment.course_id,
                 Enrollment.status == "active",
                 ProgramMembership.status == "active",
+                active_student_binding(),
             )
         )
         memberships = session.execute(roster.order_by(User.name, User.id)).all()
@@ -500,7 +512,8 @@ def class_dashboard(
                 planned_seconds=offering.planned_seconds,
                 expected_percent=expected_percent,
                 now=now,
-            ).model_copy(update=aggregates.get((membership.user_id, membership.enrollment_id), {}))
+                followup_counts=aggregates.get((membership.user_id, membership.enrollment_id), {}),
+            )
             for membership, user in memberships
         ]
         return ClassroomDashboard(
@@ -552,14 +565,7 @@ def _require_staff_access(
     classroom: Classroom,
     claims: dict[str, str],
 ) -> None:
-    if claims["role"] == "admin" or classroom.teacher_id == claims["sub"]:
-        return
-    if session.get(ClassMonitor, (classroom.id, claims["sub"])) is not None:
-        return
-    raise HTTPException(
-        status_code=403,
-        detail="Acesso não autorizado para o painel desta turma.",
-    )
+    _staff(session, classroom, claims, monitor=True)
 
 
 def _student_progress(
@@ -571,7 +577,12 @@ def _student_progress(
     planned_seconds: int,
     expected_percent: float,
     now: datetime,
+    followup_counts: dict | None = None,
 ) -> StudentProgress:
+    if followup_counts is None:
+        eligible = select(ClassEnrollment.user_id, ClassEnrollment.enrollment_id).where(
+            ClassEnrollment.class_id == classroom.id, ClassEnrollment.user_id == user.id).subquery()
+        followup_counts = _followup_counts(session, classroom, eligible).get((user.id, membership.enrollment_id), {})
     validated, last_activity, completed = session.execute(
         select(
             func.coalesce(func.sum(LearningEventRecord.validated_seconds), 0),
@@ -613,6 +624,7 @@ def _student_progress(
         user_id=user.id,
         name=user.name,
         enrollment_id=membership.enrollment_id,
+        context_enrollment_id=membership.context_id,
         status=membership.status,
         planned_hours=round(planned_seconds / 3600, 4),
         validated_hours=round(validated_seconds / 3600, 4),
@@ -620,6 +632,7 @@ def _student_progress(
         last_activity_at=last_activity,
         inactive_days=inactive_days,
         alerts=codes,
+        **followup_counts,
     )
 
 

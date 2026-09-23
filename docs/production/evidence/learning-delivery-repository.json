@@ -1,0 +1,49 @@
+{
+  "verified_at": "2026-09-23T20:23:57.671447+00:00",
+  "status": "passed",
+  "scope": "Typed learning outbox delivery projection and explicit scoped retry",
+  "sdk": "Flutter 3.44.9",
+  "platform": "Windows; real SQLite through FFI",
+  "analysis": {
+    "result": "No issues found",
+    "items": 6,
+    "exit_code": 0
+  },
+  "tests": {
+    "command": "flutter test --no-pub test/learning_delivery_outbox_test.dart test/sqlite_learning_outbox_test.dart test/learning_event_queue_test.dart test/learning_event_sync_service_test.dart test/learning_event_sync_lifecycle_test.dart test/learning_activity_tracker_test.dart test/media_learning_event_test.dart --reporter expanded",
+    "files": [
+      "learning_delivery_outbox_test.dart",
+      "sqlite_learning_outbox_test.dart",
+      "learning_event_queue_test.dart",
+      "learning_event_sync_service_test.dart",
+      "learning_event_sync_lifecycle_test.dart",
+      "learning_activity_tracker_test.dart",
+      "media_learning_event_test.dart"
+    ],
+    "passed": 42,
+    "new_cases": 8,
+    "exit_code": 0
+  },
+  "verified_behaviors": [
+    "Owner/API filter before body decoding; cohort/version/course and pedagogical type selection",
+    "Scoped blocked retry verifies immutable body inside the SQLite transaction without JSON1",
+    "Typed data/storage/import-cleanup errors; OutboxConflict stays explicit",
+    "Known synchronous/asynchronous open failures do not permanently poison the cached Future",
+    "Account/environment/context isolation; immutable retry/reopen; no recursive notification on reads",
+    "Existing queue/sync/auth consent/idempotence/media tests preserved"
+  ],
+  "source_sha256": {
+    "cartilhas_app/lib/features/learning_events/learning_outbox.dart": "eee0e0ee2b7f2920cd54145e6d1cd84ce59c9482e0b3cbf4c1dcbb18f5f15fb8",
+    "cartilhas_app/lib/features/learning_events/sqlite_learning_outbox.dart": "8c3971f8e2d2fc5f93b7ece84b75969dd0f866d44abea81e9bc1ea2251ef9bc7",
+    "cartilhas_app/lib/features/learning_events/learning_event_queue.dart": "5ff62825c30dd1d084ac423cbd3807860c9b0d0a96aba71ab7c5bbc360939008",
+    "cartilhas_app/lib/features/learning_events/learning_event.dart": "9d3a321b42d80ba1566642951e40c5564a264374cc21fe3a949f9c7b2fc461f2",
+    "cartilhas_app/test/learning_delivery_outbox_test.dart": "14ccaa4c897117619e53edbf483a53303a0a24827d410d5fd0279ee8cd3d3577",
+    "cartilhas_app/test/sqlite_learning_outbox_test.dart": "6bd8f0a0ca9fcca570ed9bdc2166a7512be4ee2af656f0080036ab741d5738b2"
+  },
+  "limitations": [
+    "Controller and widget acceptance are separate",
+    "Not the six-phase Android/staging journey",
+    "No schema migration, API change, production promotion or release build",
+    "Storage import-cleanup exception is typed but native SharedPreferences cleanup failure is not injected by these eight new tests"
+  ]
+}

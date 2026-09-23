@@ -1,0 +1,25 @@
+{
+  "projectId": "3740249934950673416",
+  "screenId": "389e412e620c4c49841a5e9508cf6bfb",
+  "title": "TDS Classroom - Professor",
+  "retrievedAt": "2026-09-23T14:41:03.061628-03:00",
+  "sourceDimensions": [
+    "780",
+    "1768"
+  ],
+  "assetDimensions": [
+    487,
+    1105
+  ],
+  "imageFormat": "PNG converted from downloaded JPEG without visual edits",
+  "sha256": {
+    "screen.png": "ffe6aec7761004a2425b6efa6796262909e063751c1775357cc65ea727bdc2ec",
+    "screen.html": "af29a0a3ecaabf4a3015b93b6b56f499fc3e82b39608fddfe4eb1bc24e4bd3df"
+  },
+  "implementationTarget": "ClassroomDashboardScreen",
+  "transport": "MCP get_screen, name only; no remote mutations",
+  "cacheComplete": true,
+  "htmlStatus": "VERIFIED_STITCH_CODE_EXPORT",
+  "htmlAcquisition": "Authenticated in-app browser: selected Classroom, Show code, Copy code; no remote edits",
+  "visualParity": "NOT_APPROVED"
+}

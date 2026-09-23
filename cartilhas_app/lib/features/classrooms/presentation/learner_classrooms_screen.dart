@@ -9,11 +9,19 @@ import '../../auth/data/auth_repository.dart';
 import '../data/classroom_repository.dart';
 import '../data/learner_offline_repository.dart';
 import '../models/classroom_models.dart';
+import '../../learning_context/learning_context_controller.dart';
+import '../../learning_context/learning_context_repository.dart';
 
 /// Class membership is verified by the API; the public catalog stays separate.
 class LearnerClassroomsScreen extends StatefulWidget {
-  const LearnerClassroomsScreen({super.key, this.gateway, this.onOpenCourse});
+  const LearnerClassroomsScreen({
+    super.key,
+    this.gateway,
+    this.onOpenCourse,
+    this.contextRepository,
+  });
   final LearnerClassroomGateway? gateway;
+  final LearningContextRepository? contextRepository;
   final void Function(Cartilha course, String ownerId)? onOpenCourse;
 
   @override
@@ -24,6 +32,8 @@ class LearnerClassroomsScreen extends StatefulWidget {
 class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
   late final LearnerClassroomGateway _gateway;
   ClassroomRepository? _ownedRemote;
+  RemoteLearningContextRepository? _ownedContextRepository;
+  LearningContextController? _contextController;
   List<ClassroomDetails> _classes = const [];
   String? _ownerId;
   String? _error;
@@ -47,12 +57,23 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
         apiUrl: AppConfig.tutorApiUrl,
       );
     }
+    if (widget.contextRepository != null) {
+      _contextController = LearningContextController(widget.contextRepository!);
+    } else if (AppConfig.learningContextEnabled) {
+      _ownedContextRepository = RemoteLearningContextRepository(
+        apiUrl: AppConfig.tutorApiUrl,
+        auth: context.read<AuthRepository>(),
+      );
+      _contextController = LearningContextController(_ownedContextRepository!);
+    }
     _load();
   }
 
   @override
   void dispose() {
     _ownedRemote?.dispose();
+    _contextController?.dispose();
+    _ownedContextRepository?.dispose();
     super.dispose();
   }
 
@@ -90,8 +111,17 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
       _error = null;
     });
     try {
+      final snapshot = await _contextController?.load(classroom.id);
+      if (!mounted) return;
+      if (_contextController != null &&
+          (snapshot == null || snapshot.context.userId != _ownerId)) {
+        throw const ClassroomException('Contexto da matrícula indisponível.');
+      }
       final course = await _gateway.course(classroom.id);
       if (!mounted) return;
+      if (snapshot != null && !snapshot.context.matchesCourse(course)) {
+        throw const ClassroomException('A edição não corresponde à matrícula.');
+      }
       if (widget.onOpenCourse != null) {
         widget.onOpenCourse!(course, _ownerId!);
       } else {
@@ -103,6 +133,7 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
               cartilha: course,
               progressOwnerId: _ownerId,
               savedClassroomContent: _usingSavedData,
+              learningContextController: _contextController,
             ),
           ),
         );

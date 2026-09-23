@@ -16,6 +16,7 @@ class LearningEventSyncService {
     this.queue = const LearningEventQueue(),
     http.Client? client,
     this.consentChecker = PrivacyPreferences.hasConsent,
+    this.clock = DateTime.now,
   }) : _client = client ?? http.Client();
 
   final String apiUrl;
@@ -23,6 +24,7 @@ class LearningEventSyncService {
   final LearningEventQueue queue;
   final http.Client _client;
   final ConsentChecker consentChecker;
+  final DateTime Function() clock;
   Future<int>? _flushInFlight;
   bool _flushAgain = false;
 
@@ -50,14 +52,28 @@ class LearningEventSyncService {
 
   Future<int> _flush() async {
     var synced = 0;
+    String? currentId;
     try {
       if (apiUrl.trim().isEmpty || !authRepository.isConfigured) return 0;
       if (!await consentChecker()) return 0;
 
-      final events = await queue.pending();
+      final events = await queue.ready(clock());
       for (final event in events) {
-        final response = await authRepository.authorized(
-          (accessToken) => _client
+        // A legacy event without an owner cannot be assigned to whoever logs in
+        // next. Keep it for explicit reconciliation, never infer its owner.
+        if (queue.isDurable && event.localOwnerId == null) continue;
+        if (event.localOwnerId != null &&
+            (event.localApiUrl != apiUrl.replaceFirst(RegExp(r'/+$'), '') ||
+                event.localOwnerId != await authRepository.localUserId())) {
+          continue;
+        }
+        currentId = event.eventId;
+        final response = await authRepository.authorized((accessToken) async {
+          if (event.localOwnerId != null &&
+              event.localOwnerId != await authRepository.localUserId()) {
+            throw const AuthException('A conta mudou durante a sincronização.');
+          }
+          return _client
               .post(
                 _uri('/events'),
                 headers: {
@@ -66,16 +82,33 @@ class LearningEventSyncService {
                 },
                 body: jsonEncode(event.toJson()),
               )
-              .timeout(const Duration(seconds: 12)),
-        );
+              .timeout(const Duration(seconds: 12));
+        });
         if (response.statusCode != 200 && response.statusCode != 201) {
+          await queue.recordFailure(
+            event.eventId,
+            now: clock(),
+            statusCode: response.statusCode,
+          );
+          if (queue.isDurable &&
+              response.statusCode != 401 &&
+              response.statusCode != 403) {
+            continue;
+          }
           return synced;
         }
         if (await queue.removeById(event.eventId)) synced++;
       }
-    } on Object {
-      // A fila é a fonte de verdade: qualquer falha preserva este evento e
-      // os seguintes para uma tentativa posterior.
+    } on TimeoutException {
+      if (currentId != null) await queue.recordFailure(currentId, now: clock());
+      return synced;
+    } on http.ClientException {
+      if (currentId != null) await queue.recordFailure(currentId, now: clock());
+      return synced;
+    } on AuthException {
+      if (currentId != null) {
+        await queue.recordFailure(currentId, now: clock(), statusCode: 401);
+      }
       return synced;
     }
     return synced;

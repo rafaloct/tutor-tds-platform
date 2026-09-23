@@ -46,15 +46,16 @@ fun validateDebugStagingDefines(defines: Map<String, String>) {
         "TUTOR_STAGING_API_URL",
         defines["TUTOR_STAGING_API_URL"].orEmpty(),
     )
-    val approvedApiUri = URI(
+    val approvedApiUris = setOf(
         "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
-    ).normalize()
+        "https://tutor-tds-staging.fastapicloud.dev",
+    ).map { URI(it).normalize() }.toSet()
     if (
         apiUri != allowedApiUri ||
-        apiUri != approvedApiUri
+        apiUri !in approvedApiUris
     ) {
         throw GradleException(
-            "Build debug bloqueado: TUTOR_API_URL deve ser a rota de staging aprovada.",
+            "Build debug bloqueado: TUTOR_API_URL deve ser uma rota de staging aprovada.",
         )
     }
 

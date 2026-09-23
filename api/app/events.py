@@ -10,11 +10,12 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .auth import require_roles
+from .auth import access_claims, require_roles
 from .database import Database
+from .context_memberships import active_student_binding
 from .models import (
     ClassEnrollment, Classroom, Course, CourseVersion, CourseVersionTransition, Enrollment,
-    LearningEventRecord, MediaAsset, MediaEventRecord,
+    LearningEventRecord, MediaAsset, MediaEventRecord, ProgramMembership,
 )
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -130,12 +131,33 @@ class EventPage(BaseModel):
     limit: int
 
 
+def event_claims(
+    payload: EventCreate,
+    request: Request,
+    claims: dict[str, str] = Depends(access_claims),
+) -> dict[str, str]:
+    # Preserve the legacy catalog/media policy. Only explicit cohort learning
+    # uses contextual authorization while the additive flag is enabled.
+    if claims["role"] == "student":
+        return claims
+    if (
+        request.app.state.settings.learning_context_enabled
+        and payload.event_type in VERSIONED_EVENT_TYPES
+        and "class_id" in payload.payload
+        and "course_version_id" in payload.payload
+    ):
+        # This is not a grant: create_event still resolves active relational
+        # enrollment before inserting, and retries must match owner and content.
+        return claims
+    raise HTTPException(status_code=403, detail="Acesso não autorizado para esta função.")
+
+
 @router.post("", response_model=EventResponse, status_code=201)
 def create_event(
     payload: EventCreate,
     request: Request,
     response: Response,
-    claims: dict[str, str] = Depends(student_claims),
+    claims: dict[str, str] = Depends(event_claims),
 ) -> EventResponse:
     request.state.trace_id = payload.event_id
     request.state.attempt = "new"
@@ -337,12 +359,18 @@ def _resolve_course_version_event(
             (Classroom.id == ClassEnrollment.class_id)
             & (Classroom.program_id == ClassEnrollment.program_id)
             & (Classroom.course_id == ClassEnrollment.course_id),
+        ).join(
+            ProgramMembership,
+            (ProgramMembership.user_id == Enrollment.user_id)
+            & (ProgramMembership.program_id == Enrollment.program_id),
         ).where(
             Enrollment.user_id == user_id,
             Enrollment.course_id == payload.course_id,
             Enrollment.status == "active",
             ClassEnrollment.status == "active",
+            ProgramMembership.status == "active",
             Classroom.course_version_id == version.id,
+            active_student_binding(),
         )
         if class_id is not None:
             statement = statement.where(Classroom.id == class_id)

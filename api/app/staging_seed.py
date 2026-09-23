@@ -20,14 +20,18 @@ from sqlalchemy.orm import Session
 from .auth import _valid_cpf, password_hash
 from .config import Settings
 from .database import Database
+from .context_memberships import bind_membership, bind_student
+from .course_editor import ensure_legacy_course_version, latest_published_version
 from .models import (
     AssessmentAttemptRecord,
     AssessmentContentRecord,
     ClassEnrollment,
     ClassMonitor,
     Classroom,
+    CohortMembership,
     ClassSession,
     Course,
+    CourseVersion,
     Enrollment,
     EvidenceImport,
     EvidenceItem,
@@ -315,6 +319,14 @@ def seed_staging_data(
             enrollment.status = "active"
             _count(created, "enrollments", was_created)
 
+            existing_version = session.scalar(select(CourseVersion.id).where(CourseVersion.course_id == course.id).limit(1))
+            seed_version = latest_published_version(session, course.id)
+            if seed_version is None:
+                seed_version = ensure_legacy_course_version(session, course)
+            if seed_version.status not in {"published", "archived"}:
+                raise ValueError("Synthetic classroom requires a published edition")
+            _count(created, "course_versions", existing_version is None)
+            _count(created, "course_version_transitions", existing_version is None)
             classroom, was_created = _ensure(
                 session,
                 Classroom,
@@ -323,6 +335,7 @@ def seed_staging_data(
                     id=IDS["classroom"],
                     program_id=program.id,
                     course_id=course.id,
+                    course_version_id=seed_version.id,
                     teacher_id=users["teacher"].id,
                     name="Turma Sintética QA [STAGING]",
                     start_date=(now - timedelta(days=30)).date(),
@@ -340,7 +353,7 @@ def seed_staging_data(
             _count(created, "classes", was_created)
             session.flush()
 
-            _, was_created = _ensure(
+            student_link, was_created = _ensure(
                 session,
                 ClassEnrollment,
                 (classroom.id, users["student"].id),
@@ -365,6 +378,13 @@ def seed_staging_data(
                 ),
             )
             _count(created, "class_monitors", was_created)
+            session.flush()
+            previous_bindings = set(session.scalars(select(CohortMembership.id).where(CohortMembership.class_id == classroom.id)))
+            bind_membership(session, classroom.id, users["teacher"].id, "teacher", preserve_inactive=True)
+            bind_membership(session, classroom.id, users["monitor"].id, "monitor", preserve_inactive=True)
+            bind_student(session, classroom, student_link, preserve_inactive=True)
+            for identity in session.scalars(select(CohortMembership.id).where(CohortMembership.class_id == classroom.id)):
+                _count(created, "cohort_memberships", identity not in previous_bindings)
 
             class_session, was_created = _ensure(
                 session,

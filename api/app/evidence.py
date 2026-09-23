@@ -15,9 +15,10 @@ from sqlalchemy.orm import Session
 
 from .auth import access_claims
 from .database import Database
+from .context_memberships import active_student_binding, membership_id
 from .models import (ClassCheckin, ClassEnrollment, ClassMonitor, Classroom,
     ClassSession, EvidenceImport, EvidenceItem, LearningEventRecord,
-    ReviewDecision, SessionReport, Enrollment, ProgramMembership)
+    ReviewDecision, SessionReport, Enrollment, ProgramMembership, CohortMembership)
 
 router = APIRouter(tags=["evidence"])
 
@@ -343,8 +344,12 @@ def _is_staff(session, classroom, user_id, role):
     if membership is None or membership.status != "active":
         return False
     if classroom.teacher_id == user_id and membership.role in {"teacher", "coordinator", "admin"}:
-        return True
-    return membership.role in {"monitor", "teacher", "coordinator", "admin"} and session.get(ClassMonitor, (classroom.id, user_id)) is not None
+        bound = session.get(CohortMembership, membership_id(classroom.id, user_id, "teacher"))
+        return bound is None or bound.status == "active"
+    bound = session.get(CohortMembership, membership_id(classroom.id, user_id, "monitor"))
+    return (membership.role in {"monitor", "teacher", "coordinator", "admin"}
+        and session.get(ClassMonitor, (classroom.id, user_id)) is not None
+        and (bound is None or bound.status == "active"))
 def _staff(session, classroom, claims, monitor):
     allowed = _is_staff(session, classroom, claims["sub"], claims["role"]) and (monitor or claims["role"] == "admin" or classroom.teacher_id == claims["sub"])
     if not allowed: raise HTTPException(403, "Equipe da turma não autorizada.")
@@ -363,7 +368,10 @@ def _active_student(session, classroom, user_id):
         enrollment is not None and enrollment.status == "active" and
         enrollment.user_id == user_id and
         enrollment.program_id == link.program_id == classroom.program_id and
-        enrollment.course_id == link.course_id == classroom.course_id)
+        enrollment.course_id == link.course_id == classroom.course_id and
+        session.scalar(select(ClassEnrollment.class_id).join(Classroom, Classroom.id == ClassEnrollment.class_id)
+            .where(ClassEnrollment.class_id == classroom.id, ClassEnrollment.user_id == user_id,
+                   active_student_binding())) is not None)
 def _digest(value): return hashlib.sha256(value.encode()).hexdigest()
 def _session_response(r, token=None): return SessionResponse(id=r.id, class_id=r.class_id, starts_at=r.starts_at, ends_at=r.ends_at, status=r.status, token_expires_at=r.token_expires_at, token_version=r.token_version, checkin_token=token)
 def _session_view(r): return SessionView(id=r.id, class_id=r.class_id, starts_at=r.starts_at, ends_at=r.ends_at, status=r.status, token_expires_at=r.token_expires_at, token_version=r.token_version)

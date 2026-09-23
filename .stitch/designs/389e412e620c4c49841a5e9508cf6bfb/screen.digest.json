@@ -1,0 +1,81 @@
+{
+  "screenId": "389e412e620c4c49841a5e9508cf6bfb",
+  "title": "TDS Classroom - Professor",
+  "actor": "professor",
+  "route": "classroom_dashboard (candidate mapping; visual parity not approved)",
+  "regions": [
+    "header TDS Classroom",
+    "classroom and date",
+    "active session",
+    "QR and activity shortcuts",
+    "class status",
+    "teacher actions",
+    "close meeting",
+    "bottom navigation"
+  ],
+  "components": [
+    "blue app bar",
+    "dark cohort card",
+    "green live session banner",
+    "shortcut cards",
+    "purple roster status card",
+    "four teacher action buttons",
+    "yellow close-session action",
+    "bottom navigation"
+  ],
+  "actions": [
+    "back",
+    "more options",
+    "open QR",
+    "send activity",
+    "view class status",
+    "live question",
+    "notice",
+    "evidence",
+    "observation",
+    "close meeting",
+    "home",
+    "content",
+    "TDS IA",
+    "profile"
+  ],
+  "states": [
+    "active classroom session visible; other states not inspected"
+  ],
+  "designTokens": {
+    "source": "original HTML + screenshot",
+    "primary": "#0B57D0",
+    "primaryDark": "#0842A0",
+    "navy": "#0C2340",
+    "sessionCard": "#0b2144",
+    "surface": "#f8fafd",
+    "activeSession": "#E9F9EE",
+    "classStatus": "#F4ECFD",
+    "closeSession": "#FFF3D6",
+    "font": "Inter, Roboto, system-ui",
+    "cardRadius": "rounded-2xl (16px Tailwind)",
+    "viewport": "390x884 selected screen; HTML max-width 420px"
+  },
+  "domainEntities": [
+    "Classroom (Cohort)",
+    "ClassEnrollment (legacy learner membership)",
+    "Enrollment",
+    "LearningEvent",
+    "ClassSession"
+  ],
+  "repositories": [
+    "ClassroomRepository",
+    "EvidenceRepository",
+    "LearningContextRepository (Wave 1 adapter)"
+  ],
+  "endpoints": [
+    "GET /classes/{class_id}/dashboard",
+    "GET /classes/{class_id}/students/{user_id}/learning-context",
+    "live-question endpoint missing (Wave 4)"
+  ],
+  "analyticsEvents": [
+    "page_viewed; individual Stitch actions require verification"
+  ],
+  "offlineBehavior": "ONLINE_ONLY for instructor data; never use learner cache for staff roster",
+  "implementationStatus": "PARTIAL: complete design cache verified; existing dashboard functionally mapped but layout differs; live-question action missing; no production or visual parity approval"
+}

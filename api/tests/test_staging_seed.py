@@ -14,8 +14,11 @@ from app.models import (
     ClassEnrollment,
     ClassMonitor,
     Classroom,
+    CohortMembership,
     ClassSession,
     Course,
+    CourseVersion,
+    CourseVersionTransition,
     Enrollment,
     EvidenceImport,
     EvidenceItem,
@@ -94,6 +97,9 @@ def test_staging_seed_is_synthetic_complete_and_idempotent() -> None:
             ProgramMembership: 4,
             Enrollment: 1,
             Classroom: 1,
+            CohortMembership: 3,
+            CourseVersion: 1,
+            CourseVersionTransition: 1,
             ClassEnrollment: 1,
             ClassMonitor: 1,
             ClassSession: 1,
@@ -138,5 +144,5 @@ def test_staging_seed_is_synthetic_complete_and_idempotent() -> None:
         assert certificate_hours == CERTIFICATE_PLANNED_SECONDS
 
     database.dispose()
-    assert first.total_created == 24
+    assert first.total_created == 29
     assert second.total_created == 0

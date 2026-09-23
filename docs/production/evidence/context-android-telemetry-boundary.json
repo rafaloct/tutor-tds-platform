@@ -1,0 +1,25 @@
+{
+  "status": "TEST_CORRECTED_ANDROID_RERUN_PENDING",
+  "observed": "student_offline expected class_id=qa-cohort for every queued course event; a typed analytics event correctly had no class_id.",
+  "expected": "All queued records preserve owner and environment. Only lesson_started, lesson_completed and study_activity require the cohort and immutable edition. Analytics retain their separate typed payload.",
+  "responsible_boundary": "Android acceptance-test assertion; product event contracts are unchanged.",
+  "evidence": [
+    "tmp/context-android-20260923-164809/student_offline.log",
+    "api/app/events.py:VERSIONED_EVENT_TYPES",
+    "api/app/events.py:TELEMETRY_PAYLOAD_KEYS",
+    "cartilhas_app/lib/features/analytics/app_telemetry_service.dart:_trackTargets"
+  ],
+  "likely_root_cause": "The test grouped events by course and then incorrectly applied the pedagogical payload contract to page_viewed and feature_used telemetry.",
+  "affected_files": [
+    "cartilhas_app/integration_test/context_learning_path_test.dart"
+  ],
+  "structural_fix": "Validate exact cohort+edition payload for the three pedagogical event types and exact page_id/resource_id/feature_id payload for analytics; reject unexpected types. Preserve every event in offline snapshots and restart/sync comparisons.",
+  "test_sha256": "34249c8a6a283d34aab87bdf758a497b826147c6175f508d104a4378b9d03c43",
+  "targeted_analysis": {
+    "command": "flutter analyze --no-pub integration_test/context_learning_path_test.dart",
+    "result": "No issues found",
+    "seconds": 81.2
+  },
+  "product_changed": false,
+  "android_gate_passed": false
+}

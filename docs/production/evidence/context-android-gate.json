@@ -1,0 +1,1033 @@
+{
+  "verified_at": "2026-09-23T20:51:40.8956844Z",
+  "device": "emulator-5556",
+  "android_version": "16",
+  "api_url": "https://tutor-tds-staging.fastapicloud.dev",
+  "app_package": "com.tutortds_cartilhas.dev",
+  "all_phases_in_this_run": true,
+  "status": "ANDROID_PATHS_PASSED",
+  "tests": [
+    "student_learning_path",
+    "instructor_observation_path",
+    "offline_sync_path"
+  ],
+  "separate_processes": true,
+  "uninstall_between_phases": false,
+  "production_ready": false,
+  "test_sha256": "4fef14fb8eb30e2aec3b7fd5891bcecee25781fafc85b28bf119d7bb418e7087",
+  "runner_sha256": "53577c86de235920aacae77e32402ecd3fb1d9410d51a86f9243e41fb057e1f3",
+  "phases": [
+    {
+      "phase": "student_online",
+      "context": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "organization_id": "qa-org",
+        "program_id": "qa-program",
+        "cohort_id": "qa-cohort",
+        "membership_id": "c1e10aa8-1f7d-5cc5-954d-22241d1beb24",
+        "role": "student",
+        "course_id": "qa-course",
+        "course_version_id": "qa-edition-1",
+        "enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "legacy_enrollment_id": "qa-legacy-enrollment",
+        "permissions": [
+          "content.read",
+          "progress.read",
+          "activity.record"
+        ]
+      },
+      "baseline_progress": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "name": "Aluno QA Contexto",
+        "enrollment_id": "qa-legacy-enrollment",
+        "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0017,
+        "progress_percent": 5.0,
+        "last_activity_at": "2026-09-23T20:11:17.825043Z",
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          },
+          {
+            "code": "below_expected_hours"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      },
+      "baseline_event_ids": [
+        "1790194512337611-5w98ZQD1d8DGrIyT:lesson_started",
+        "1790194467131802-HCvUUaIH_OtLRl7w:feature_used:4",
+        "1790194467131802-HCvUUaIH_OtLRl7w:page_viewed:3",
+        "1790194381307196-PutACDAaN7iwMgy-:lesson_started",
+        "1790194377426447-wsYW-XDQ3hAv4AIA:feature_used:4",
+        "1790194377426447-wsYW-XDQ3hAv4AIA:page_viewed:3",
+        "1790194273477454-QcVlncZaJZ07AduJ:study_activity:1",
+        "1790194273477454-QcVlncZaJZ07AduJ:lesson_started",
+        "1790194269287406-iNeDvt8Okp9GCQrI:feature_used:4",
+        "1790194269287406-iNeDvt8Okp9GCQrI:page_viewed:3",
+        "1790194167825747-CcddAZ5gBwdg5X5g:lesson_started",
+        "1790194137125573-6iYJxk6hcjJZCrSc:feature_used:4",
+        "1790194137125573-6iYJxk6hcjJZCrSc:page_viewed:3",
+        "1790194016743267-LQazugbDsNmbUvUW:study_activity:1",
+        "1790194016743267-LQazugbDsNmbUvUW:lesson_started",
+        "1790193984836320-c9m5r0h19eUFBSdK:feature_used:3",
+        "1790193984836320-c9m5r0h19eUFBSdK:page_viewed:2"
+      ],
+      "baseline_events_unchanged": true,
+      "new_activity_ids": [
+        "1790196090163822-Nvfl81z9KJ2P8Eif:study_activity:1"
+      ],
+      "progress": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "name": "Aluno QA Contexto",
+        "enrollment_id": "qa-legacy-enrollment",
+        "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0025,
+        "progress_percent": 7.5,
+        "last_activity_at": "2026-09-23T20:41:34.651519Z",
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          },
+          {
+            "code": "below_expected_hours"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      },
+      "events": [
+        {
+          "event_id": "1790196090163822-Nvfl81z9KJ2P8Eif:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790196090163822-Nvfl81z9KJ2P8Eif",
+          "occurred_at": "2026-09-23T20:41:34.651519Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 3
+        },
+        {
+          "event_id": "1790196057423192-TgLER-n7QfbAueQM:feature_used:3",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790196057423192-TgLER-n7QfbAueQM",
+          "occurred_at": "2026-09-23T20:41:30.48064Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196057423192-TgLER-n7QfbAueQM:page_viewed:2",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790196057423192-TgLER-n7QfbAueQM",
+          "occurred_at": "2026-09-23T20:41:30.365174Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196090163822-Nvfl81z9KJ2P8Eif:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790196090163822-Nvfl81z9KJ2P8Eif",
+          "occurred_at": "2026-09-23T20:41:30.169408Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194512337611-5w98ZQD1d8DGrIyT:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194512337611-5w98ZQD1d8DGrIyT",
+          "occurred_at": "2026-09-23T20:15:12.34097Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194467131802-HCvUUaIH_OtLRl7w:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194467131802-HCvUUaIH_OtLRl7w",
+          "occurred_at": "2026-09-23T20:15:12.09493Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194467131802-HCvUUaIH_OtLRl7w:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194467131802-HCvUUaIH_OtLRl7w",
+          "occurred_at": "2026-09-23T20:15:12.079154Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194381307196-PutACDAaN7iwMgy-:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194381307196-PutACDAaN7iwMgy-",
+          "occurred_at": "2026-09-23T20:13:01.310993Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194377426447-wsYW-XDQ3hAv4AIA:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194377426447-wsYW-XDQ3hAv4AIA",
+          "occurred_at": "2026-09-23T20:13:01.26288Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194377426447-wsYW-XDQ3hAv4AIA:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194377426447-wsYW-XDQ3hAv4AIA",
+          "occurred_at": "2026-09-23T20:13:01.242268Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194273477454-QcVlncZaJZ07AduJ:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790194273477454-QcVlncZaJZ07AduJ",
+          "occurred_at": "2026-09-23T20:11:17.825043Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 3
+        },
+        {
+          "event_id": "1790194273477454-QcVlncZaJZ07AduJ:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194273477454-QcVlncZaJZ07AduJ",
+          "occurred_at": "2026-09-23T20:11:13.481394Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194269287406-iNeDvt8Okp9GCQrI:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194269287406-iNeDvt8Okp9GCQrI",
+          "occurred_at": "2026-09-23T20:11:13.436512Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194269287406-iNeDvt8Okp9GCQrI:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194269287406-iNeDvt8Okp9GCQrI",
+          "occurred_at": "2026-09-23T20:11:13.414319Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194167825747-CcddAZ5gBwdg5X5g:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194167825747-CcddAZ5gBwdg5X5g",
+          "occurred_at": "2026-09-23T20:09:27.82884Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194137125573-6iYJxk6hcjJZCrSc:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194137125573-6iYJxk6hcjJZCrSc",
+          "occurred_at": "2026-09-23T20:09:27.71575Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194137125573-6iYJxk6hcjJZCrSc:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194137125573-6iYJxk6hcjJZCrSc",
+          "occurred_at": "2026-09-23T20:09:27.694838Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194016743267-LQazugbDsNmbUvUW:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790194016743267-LQazugbDsNmbUvUW",
+          "occurred_at": "2026-09-23T20:07:01.047219Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 3
+        },
+        {
+          "event_id": "1790194016743267-LQazugbDsNmbUvUW:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194016743267-LQazugbDsNmbUvUW",
+          "occurred_at": "2026-09-23T20:06:56.746272Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790193984836320-c9m5r0h19eUFBSdK:feature_used:3",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790193984836320-c9m5r0h19eUFBSdK",
+          "occurred_at": "2026-09-23T20:06:56.471881Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790193984836320-c9m5r0h19eUFBSdK:page_viewed:2",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790193984836320-c9m5r0h19eUFBSdK",
+          "occurred_at": "2026-09-23T20:06:56.445905Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        }
+      ]
+    },
+    {
+      "phase": "student_restart",
+      "progress": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "name": "Aluno QA Contexto",
+        "enrollment_id": "qa-legacy-enrollment",
+        "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0025,
+        "progress_percent": 7.5,
+        "last_activity_at": "2026-09-23T20:41:34.651519Z",
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          },
+          {
+            "code": "below_expected_hours"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      },
+      "restored_position": {
+        "courseId": "qa-course",
+        "sectionIndex": 0,
+        "messageIndex": 1,
+        "questionsAnswered": 1,
+        "showOptions": false,
+        "isCompleted": false,
+        "updatedAt": "2026-09-23T20:43:45.074563Z",
+        "courseVersionId": "qa-edition-1",
+        "ownerId": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"f360b09a-b6f6-401b-b973-38a4ab21393a\",\"qa-cohort\",\"c1e10aa8-1f7d-5cc5-954d-22241d1beb24\",\"qa-legacy-enrollment\",\"qa-edition-1\"]"
+      }
+    },
+    {
+      "phase": "student_offline",
+      "network_unreachable": true,
+      "delivery_pending_visible": true,
+      "pending_events": [
+        {
+          "event_id": "1790196315796745-3BkfdBhCX1OtmdlR:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790196315796745-3BkfdBhCX1OtmdlR",
+          "occurred_at": "2026-09-23T20:45:20.573642Z",
+          "payload": {
+            "page_id": "classroom_course"
+          }
+        },
+        {
+          "event_id": "1790196315796745-3BkfdBhCX1OtmdlR:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790196315796745-3BkfdBhCX1OtmdlR",
+          "occurred_at": "2026-09-23T20:45:20.599751Z",
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          }
+        },
+        {
+          "event_id": "1790196320869887-UIx2DVpYLg_dyk7X:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790196320869887-UIx2DVpYLg_dyk7X",
+          "occurred_at": "2026-09-23T20:45:20.881008Z",
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          }
+        },
+        {
+          "event_id": "1790196320869887-UIx2DVpYLg_dyk7X:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790196320869887-UIx2DVpYLg_dyk7X",
+          "occurred_at": "2026-09-23T20:45:25.273705Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          }
+        }
+      ],
+      "position": {
+        "courseId": "qa-course",
+        "sectionIndex": 1,
+        "messageIndex": 0,
+        "questionsAnswered": 1,
+        "showOptions": false,
+        "isCompleted": false,
+        "updatedAt": "2026-09-23T20:45:25.430428Z",
+        "courseVersionId": "qa-edition-1",
+        "ownerId": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"f360b09a-b6f6-401b-b973-38a4ab21393a\",\"qa-cohort\",\"c1e10aa8-1f7d-5cc5-954d-22241d1beb24\",\"qa-legacy-enrollment\",\"qa-edition-1\"]"
+      }
+    },
+    {
+      "phase": "offline_restart",
+      "network_unreachable": true,
+      "delivery_pending_visible_home_and_reader": true,
+      "restored_event_ids": [
+        "1790196315796745-3BkfdBhCX1OtmdlR:page_viewed:3",
+        "1790196315796745-3BkfdBhCX1OtmdlR:feature_used:4",
+        "1790196320869887-UIx2DVpYLg_dyk7X:lesson_started",
+        "1790196320869887-UIx2DVpYLg_dyk7X:study_activity:1"
+      ],
+      "restored_position": {
+        "courseId": "qa-course",
+        "sectionIndex": 1,
+        "messageIndex": 0,
+        "questionsAnswered": 1,
+        "showOptions": false,
+        "isCompleted": false,
+        "updatedAt": "2026-09-23T20:47:05.594057Z",
+        "courseVersionId": "qa-edition-1",
+        "ownerId": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"f360b09a-b6f6-401b-b973-38a4ab21393a\",\"qa-cohort\",\"c1e10aa8-1f7d-5cc5-954d-22241d1beb24\",\"qa-legacy-enrollment\",\"qa-edition-1\"]"
+      }
+    },
+    {
+      "phase": "student_reconnect",
+      "progress": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "name": "Aluno QA Contexto",
+        "enrollment_id": "qa-legacy-enrollment",
+        "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0033,
+        "progress_percent": 10.0,
+        "last_activity_at": "2026-09-23T20:45:25.273705Z",
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          },
+          {
+            "code": "below_expected_hours"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      },
+      "events": [
+        {
+          "event_id": "1790196419587716-RWNXypQWYvIpfNEs:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790196419587716-RWNXypQWYvIpfNEs",
+          "occurred_at": "2026-09-23T20:47:06.261127Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196425519699-Ta0TWWUbNDFg_K26:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790196425519699-Ta0TWWUbNDFg_K26",
+          "occurred_at": "2026-09-23T20:47:05.523233Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196419587716-RWNXypQWYvIpfNEs:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790196419587716-RWNXypQWYvIpfNEs",
+          "occurred_at": "2026-09-23T20:47:05.500581Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196320869887-UIx2DVpYLg_dyk7X:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790196320869887-UIx2DVpYLg_dyk7X",
+          "occurred_at": "2026-09-23T20:45:25.273705Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 3
+        },
+        {
+          "event_id": "1790196320869887-UIx2DVpYLg_dyk7X:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790196320869887-UIx2DVpYLg_dyk7X",
+          "occurred_at": "2026-09-23T20:45:20.881008Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196315796745-3BkfdBhCX1OtmdlR:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790196315796745-3BkfdBhCX1OtmdlR",
+          "occurred_at": "2026-09-23T20:45:20.599751Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196315796745-3BkfdBhCX1OtmdlR:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790196315796745-3BkfdBhCX1OtmdlR",
+          "occurred_at": "2026-09-23T20:45:20.573642Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196224975934-tuMSdtl4lVkc5cpn:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790196224975934-tuMSdtl4lVkc5cpn",
+          "occurred_at": "2026-09-23T20:43:44.980122Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196195925990-ieYtvmD0kGhahG9Z:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790196195925990-ieYtvmD0kGhahG9Z",
+          "occurred_at": "2026-09-23T20:43:44.88606Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196195925990-ieYtvmD0kGhahG9Z:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790196195925990-ieYtvmD0kGhahG9Z",
+          "occurred_at": "2026-09-23T20:43:44.83656Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196090163822-Nvfl81z9KJ2P8Eif:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790196090163822-Nvfl81z9KJ2P8Eif",
+          "occurred_at": "2026-09-23T20:41:34.651519Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 3
+        },
+        {
+          "event_id": "1790196057423192-TgLER-n7QfbAueQM:feature_used:3",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790196057423192-TgLER-n7QfbAueQM",
+          "occurred_at": "2026-09-23T20:41:30.48064Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196057423192-TgLER-n7QfbAueQM:page_viewed:2",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790196057423192-TgLER-n7QfbAueQM",
+          "occurred_at": "2026-09-23T20:41:30.365174Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790196090163822-Nvfl81z9KJ2P8Eif:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790196090163822-Nvfl81z9KJ2P8Eif",
+          "occurred_at": "2026-09-23T20:41:30.169408Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194512337611-5w98ZQD1d8DGrIyT:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194512337611-5w98ZQD1d8DGrIyT",
+          "occurred_at": "2026-09-23T20:15:12.34097Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194467131802-HCvUUaIH_OtLRl7w:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194467131802-HCvUUaIH_OtLRl7w",
+          "occurred_at": "2026-09-23T20:15:12.09493Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194467131802-HCvUUaIH_OtLRl7w:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194467131802-HCvUUaIH_OtLRl7w",
+          "occurred_at": "2026-09-23T20:15:12.079154Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194381307196-PutACDAaN7iwMgy-:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194381307196-PutACDAaN7iwMgy-",
+          "occurred_at": "2026-09-23T20:13:01.310993Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194377426447-wsYW-XDQ3hAv4AIA:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194377426447-wsYW-XDQ3hAv4AIA",
+          "occurred_at": "2026-09-23T20:13:01.26288Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194377426447-wsYW-XDQ3hAv4AIA:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194377426447-wsYW-XDQ3hAv4AIA",
+          "occurred_at": "2026-09-23T20:13:01.242268Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194273477454-QcVlncZaJZ07AduJ:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790194273477454-QcVlncZaJZ07AduJ",
+          "occurred_at": "2026-09-23T20:11:17.825043Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 3
+        },
+        {
+          "event_id": "1790194273477454-QcVlncZaJZ07AduJ:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194273477454-QcVlncZaJZ07AduJ",
+          "occurred_at": "2026-09-23T20:11:13.481394Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194269287406-iNeDvt8Okp9GCQrI:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194269287406-iNeDvt8Okp9GCQrI",
+          "occurred_at": "2026-09-23T20:11:13.436512Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194269287406-iNeDvt8Okp9GCQrI:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194269287406-iNeDvt8Okp9GCQrI",
+          "occurred_at": "2026-09-23T20:11:13.414319Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194167825747-CcddAZ5gBwdg5X5g:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194167825747-CcddAZ5gBwdg5X5g",
+          "occurred_at": "2026-09-23T20:09:27.82884Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194137125573-6iYJxk6hcjJZCrSc:feature_used:4",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790194137125573-6iYJxk6hcjJZCrSc",
+          "occurred_at": "2026-09-23T20:09:27.71575Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194137125573-6iYJxk6hcjJZCrSc:page_viewed:3",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790194137125573-6iYJxk6hcjJZCrSc",
+          "occurred_at": "2026-09-23T20:09:27.694838Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790194016743267-LQazugbDsNmbUvUW:study_activity:1",
+          "event_type": "study_activity",
+          "course_id": "qa-course",
+          "session_id": "1790194016743267-LQazugbDsNmbUvUW",
+          "occurred_at": "2026-09-23T20:07:01.047219Z",
+          "active_seconds": 3,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 3
+        },
+        {
+          "event_id": "1790194016743267-LQazugbDsNmbUvUW:lesson_started",
+          "event_type": "lesson_started",
+          "course_id": "qa-course",
+          "session_id": "1790194016743267-LQazugbDsNmbUvUW",
+          "occurred_at": "2026-09-23T20:06:56.746272Z",
+          "active_seconds": null,
+          "payload": {
+            "class_id": "qa-cohort",
+            "course_version_id": "qa-edition-1"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790193984836320-c9m5r0h19eUFBSdK:feature_used:3",
+          "event_type": "feature_used",
+          "course_id": "qa-course",
+          "session_id": "1790193984836320-c9m5r0h19eUFBSdK",
+          "occurred_at": "2026-09-23T20:06:56.471881Z",
+          "active_seconds": null,
+          "payload": {
+            "feature_id": "contextual_home_continue"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        },
+        {
+          "event_id": "1790193984836320-c9m5r0h19eUFBSdK:page_viewed:2",
+          "event_type": "page_viewed",
+          "course_id": "qa-course",
+          "session_id": "1790193984836320-c9m5r0h19eUFBSdK",
+          "occurred_at": "2026-09-23T20:06:56.445905Z",
+          "active_seconds": null,
+          "payload": {
+            "page_id": "classroom_course"
+          },
+          "sync_status": "pending",
+          "validated_seconds": 0
+        }
+      ],
+      "identical_replay_status": 200,
+      "delivery_pending_cleared": true,
+      "baseline_events_unchanged": true
+    },
+    {
+      "phase": "instructor_observation",
+      "instructor_id": "5b7a0c42-28ba-4f5b-9b8a-c3af65b946be",
+      "global_role": "student",
+      "context": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "organization_id": "qa-org",
+        "program_id": "qa-program",
+        "cohort_id": "qa-cohort",
+        "membership_id": "c1e10aa8-1f7d-5cc5-954d-22241d1beb24",
+        "role": "student",
+        "course_id": "qa-course",
+        "course_version_id": "qa-edition-1",
+        "enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "legacy_enrollment_id": "qa-legacy-enrollment",
+        "permissions": [
+          "content.read",
+          "progress.read",
+          "activity.record"
+        ]
+      },
+      "student_progress": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "name": "Aluno QA Contexto",
+        "enrollment_id": "qa-legacy-enrollment",
+        "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0033,
+        "progress_percent": 10.0,
+        "last_activity_at": "2026-09-23T20:45:25.273705Z",
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          },
+          {
+            "code": "below_expected_hours"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      },
+      "instructor_progress": {
+        "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+        "name": "Aluno QA Contexto",
+        "enrollment_id": "qa-legacy-enrollment",
+        "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0033,
+        "progress_percent": 10.0,
+        "last_activity_at": "2026-09-23T20:45:25.273705Z",
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          },
+          {
+            "code": "below_expected_hours"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      },
+      "visible_progress": "10% • 0.0 h validadas"
+    }
+  ]
+}

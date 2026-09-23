@@ -1,0 +1,99 @@
+{
+  "verified_at": "2026-09-23T19:36:58.793998+00:00",
+  "scope": "local Cloud staging packaging only",
+  "status": "LOCAL_VERIFIED_NOT_DEPLOYED",
+  "fastapi_cloud_cli_version": "0.26.0",
+  "python_cloud_series": "3.13",
+  "checks": {
+    "toml_parse_and_entrypoint": "passed",
+    "official_cli_archive": {
+      "cli_version": "0.26.0",
+      "file_count": 54,
+      "archive_size_bytes": 98734,
+      "runtime_and_migrations_complete": true,
+      "secrets_and_local_state_excluded": true,
+      "files": [
+        ".python-version",
+        "alembic.ini",
+        "app/__init__.py",
+        "app/analytics.py",
+        "app/assessment_sync.py",
+        "app/auth.py",
+        "app/bootstrap_admin.py",
+        "app/certificate_requests.py",
+        "app/certificates.py",
+        "app/classrooms.py",
+        "app/commercial.py",
+        "app/config.py",
+        "app/context_memberships.py",
+        "app/context_migration_audit.py",
+        "app/course_editor.py",
+        "app/course_promotion.py",
+        "app/course_seed.py",
+        "app/database.py",
+        "app/events.py",
+        "app/evidence.py",
+        "app/hours.py",
+        "app/learning_context.py",
+        "app/main.py",
+        "app/media.py",
+        "app/models.py",
+        "app/observability.py",
+        "app/organizations.py",
+        "app/presence.py",
+        "app/staging_seed.py",
+        "app/student_followup.py",
+        "app/support.py",
+        "app/sync_api.py",
+        "app/sync_worker.py",
+        "migrations/env.py",
+        "migrations/script.py.mako",
+        "migrations/versions/20260920_0001_initial.py",
+        "migrations/versions/20260920_0002_authentication.py",
+        "migrations/versions/20260920_0003_program_hierarchy.py",
+        "migrations/versions/20260920_0004_classroom_hierarchy.py",
+        "migrations/versions/20260920_0005_learning_hours.py",
+        "migrations/versions/20260920_0006_sync_worker.py",
+        "migrations/versions/20260920_0007_certificate_lineage.py",
+        "migrations/versions/20260920_0008_creator_media.py",
+        "migrations/versions/20260920_0009_evidence_engine.py",
+        "migrations/versions/20260920_0011_sync_deletion.py",
+        "migrations/versions/20260920_0012_assessment_sync.py",
+        "migrations/versions/20260920_0013_media_editorial_rating.py",
+        "migrations/versions/20260920_0014_assessment_content.py",
+        "migrations/versions/20260921_0015_course_versions.py",
+        "migrations/versions/20260921_0016_certificate_requests.py",
+        "migrations/versions/20260921_0017_session_presence.py",
+        "migrations/versions/20260921_0018_baseline_mentorship.py",
+        "migrations/versions/20260923_0019_context_memberships.py",
+        "pyproject.toml"
+      ]
+    },
+    "wheel_build": {
+      "status": "passed",
+      "artifact": "tutor_tds_api-0.1.0-py3-none-any.whl",
+      "sha256": "d951971ab84066810556f552efbeb75736a6af694483cd7f4e7f7e988f47735d"
+    },
+    "existing_liveness_and_readiness_tests": {
+      "status": "passed",
+      "count": 2,
+      "command": "python -m pytest tests/test_api.py -k \"health_reports_database_available or live_reports_process_without_database_dependency\""
+    },
+    "git_diff_check": "passed",
+    "synthetic_upload_policy_probe": {
+      "status": "passed",
+      "allowed_files": 5,
+      "excluded_files": 12
+    }
+  },
+  "source_sha256": {
+    "api/pyproject.toml": "e6f5ddd4d65f1c5c9d6285f2ebc86cd316a1e10371ba466c0f3e856d3ad724d2",
+    "api/.python-version": "02e735b3dfe1c32833eb550b7ff8ffa17f5f2bc3fa1e7bae61a8f5a3883ce398",
+    "api/.fastapicloudignore": "bf48a4002b4567db9a4cd5f4977568ce90905a397ba49e90d93206e576cdc04d"
+  },
+  "limitations": [
+    "No Cloud deployment or Supabase migration performed by packaging verification.",
+    "Dependency ranges preserved; no resolved runtime lockfile added.",
+    "No Android acceptance gate or production promotion demonstrated."
+  ]
+}

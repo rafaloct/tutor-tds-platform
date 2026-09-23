@@ -1,0 +1,15 @@
+{
+  "projectId": "3740249934950673416",
+  "screenId": "9731628404551462355",
+  "title": "ChatGPT Image 21 de set. de 2026, 10_28_39.png",
+  "assetKind": "imported_reference_image",
+  "retrievedAt": "2026-09-23T19:07:17.234797+00:00",
+  "sha256": {
+    "screen.png": "797b6af6430f4075cdece4ba337243fd7700d8056e2559aa57b3724ff60be26d"
+  },
+  "width": 656,
+  "height": 600,
+  "source": "visible canvas image URL, s656 rendition",
+  "htmlStatus": "NOT_APPLICABLE_IMPORTED_IMAGE",
+  "limitation": "Original imported composition has no HTML export pair; not fabricated. Generated derivative needs real HTML before Flutter UI implementation."
+}

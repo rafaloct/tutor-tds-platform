@@ -178,7 +178,7 @@ void main() {
             request.url.path.endsWith('/baseline')
                 ? {'baseline': null, 'history': []}
                 : {
-                    'items': [if (item != null) item],
+                    'items': [?item],
                     'total': item == null ? 0 : 1,
                   },
           ),

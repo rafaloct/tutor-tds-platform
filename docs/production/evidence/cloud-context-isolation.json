@@ -1,0 +1,134 @@
+{
+  "verified_at": "2026-09-23T20:53:06.136239+00:00",
+  "status": "passed",
+  "scope": "real HTTPS cohort authorization and contextual progress isolation",
+  "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+  "project_sha256": "551997fd3e34c4b92af821fd15c2d6939763d56153be843ba355746346badd66",
+  "user_agent": "TutorTDS-StagingAcceptance/1.0",
+  "fixture": {
+    "cohort_id": "qa-cohort-isolation",
+    "created": true
+  },
+  "original_progress": {
+    "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+    "name": "Aluno QA Contexto",
+    "enrollment_id": "qa-legacy-enrollment",
+    "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+    "status": "active",
+    "planned_hours": 0.0333,
+    "validated_hours": 0.0033,
+    "progress_percent": 10.0,
+    "last_activity_at": "2026-09-23T20:45:25.273705Z",
+    "inactive_days": 0,
+    "alerts": [
+      {
+        "code": "required_activity_pending"
+      },
+      {
+        "code": "below_expected_hours"
+      }
+    ],
+    "baseline_linked": false,
+    "confirmed_sessions": 0,
+    "open_mentorship_cases": 0
+  },
+  "second_progress": {
+    "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+    "name": "Aluno QA Contexto",
+    "enrollment_id": "qa-legacy-enrollment",
+    "context_enrollment_id": "f136b887-b326-5c58-b2a4-82d3252903b0",
+    "status": "active",
+    "planned_hours": 0.0333,
+    "validated_hours": 0.0,
+    "progress_percent": 0.0,
+    "last_activity_at": null,
+    "inactive_days": 0,
+    "alerts": [
+      {
+        "code": "required_activity_pending"
+      },
+      {
+        "code": "below_expected_hours"
+      }
+    ],
+    "baseline_linked": false,
+    "confirmed_sessions": 0,
+    "open_mentorship_cases": 0
+  },
+  "original_unchanged": {
+    "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+    "all_events_sha256": "153277cb4661827518766c8c9dfdbbb0c6e229ff13d01ad95eb8fec6653ece23",
+    "all_events_count": 74
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/learning-context",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/students/f360b09a-b6f6-401b-b973-38a4ab21393a/learning-context",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/learning-context",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/course",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/students/f360b09a-b6f6-401b-b973-38a4ab21393a/learning-context",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/dashboard",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort-isolation/learning-context",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort-isolation/students/f360b09a-b6f6-401b-b973-38a4ab21393a/learning-context",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/learning-context",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/qa-cohort/students/f360b09a-b6f6-401b-b973-38a4ab21393a/learning-context",
+      "status": 200
+    }
+  ],
+  "limitations": [
+    "Synthetic isolated staging only",
+    "Does not replace Android acceptance or release validation"
+  ]
+}

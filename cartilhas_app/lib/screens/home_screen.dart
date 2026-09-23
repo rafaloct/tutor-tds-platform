@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/app_config.dart';
+import '../features/learning_context/learning_home_card.dart';
+import '../features/learning_context/learning_home_controller.dart';
 import '../features/courses/data/course_repository.dart';
 import '../features/course_editor/data/course_editor_repository.dart';
 import '../features/course_editor/presentation/course_editor_screen.dart';
@@ -36,7 +38,9 @@ import '../features/media/presentation/media_catalog_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.courseLoader});
+  const HomeScreen({super.key, this.courseLoader, this.learningHomeController});
+
+  final LearningHomeController? learningHomeController;
 
   final Future<List<Cartilha>> Function()? courseLoader;
 
@@ -79,7 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       next = _resolveTeamCapability(repository);
     }
-    if (mounted) setState(() => _teamCapability = next);
+    if (mounted) {
+      setState(() {
+        _teamCapability = next;
+      });
+    }
   }
 
   Future<List<Cartilha>> _loadCartilhas() =>
@@ -199,6 +207,113 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     if (mounted) setState(() => _hasSession = hasSession);
   }
+
+  bool get _useLearningHome =>
+      widget.learningHomeController != null ||
+      (AppConfig.learningContextEnabled && _hasSession);
+
+  Widget _catalogBody({bool embedded = false}) => FutureBuilder<List<Cartilha>>(
+    future: _cartilhas,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return TdsWaitExperience(
+          compact: embedded,
+          title: 'Organizando seus cursos',
+          status: 'Carregando a biblioteca disponível neste aparelho...',
+          localTip:
+              'As cartilhas instaladas continuam disponíveis mesmo com conexão instável.',
+        );
+      } else if (snapshot.hasError) {
+        return Center(
+          child: Text('Erro ao carregar cartilhas: ${snapshot.error}'),
+        );
+      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        return const Center(child: Text('Nenhuma cartilha encontrada.'));
+      }
+
+      final cartilhas = snapshot.data!;
+      return ListView(
+        shrinkWrap: embedded,
+        physics: embedded ? const NeverScrollableScrollPhysics() : null,
+        children: [
+          _LearningHeader(
+            showLocalResume: !_useLearningHome,
+            cartilhas: cartilhas,
+            onResumeTap: (cartilha) async {
+              await Navigator.push(
+                context,
+                trackedRoute(
+                  pageId: 'guided_lesson',
+                  courseId: cartilha.id,
+                  resourceId: 'course_content',
+                  featureId: 'guided_learning',
+                  builder: (_) => ChatExperienceScreen(cartilha: cartilha),
+                ),
+              );
+            },
+            onStudyTap: () => Navigator.push(
+              context,
+              trackedRoute(
+                pageId: 'study_hub',
+                resourceId: 'study_tools',
+                featureId: 'study_hub',
+                builder: (_) => StudyHubScreen(cartilhas: cartilhas),
+              ),
+            ),
+            onTutorTap: () => Navigator.push(
+              context,
+              trackedRoute(
+                pageId: 'ai_assistant',
+                resourceId: 'ai_chat',
+                featureId: 'ai_tutor',
+                builder: (_) => const GenUIAssistantScreen(),
+              ),
+            ),
+            onVideosTap: () => Navigator.push(
+              context,
+              trackedRoute(
+                pageId: 'videos',
+                resourceId: 'video_catalog',
+                featureId: 'video_learning',
+                builder: (_) => MediaCatalogScreen(
+                  repository: MediaRepository(
+                    apiUrl: AppConfig.tutorApiUrl,
+                    authRepository: context.read<AuthRepository>(),
+                  ),
+                ),
+              ),
+            ),
+            onGuideTap: () => Navigator.push(
+              context,
+              trackedRoute(
+                pageId: 'user_guide',
+                resourceId: 'usage_guide',
+                builder: (_) => const GuideScreen(),
+              ),
+            ),
+            onCertificatesTap: () => Navigator.push(
+              context,
+              trackedRoute(
+                pageId: 'certificate_wallet',
+                featureId: 'certificates',
+                builder: (_) => const CertificateWalletScreen(),
+              ),
+            ),
+          ),
+          if (_useLearningHome)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Text(
+                'Explorar conteúdos',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          _CartilhaList(cartilhas: cartilhas),
+          const _SupportersBanner(),
+        ],
+      );
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -400,96 +515,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Cartilha>>(
-        future: _cartilhas,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const TdsWaitExperience(
-              title: 'Organizando seus cursos',
-              status: 'Carregando a biblioteca disponível neste aparelho...',
-              localTip:
-                  'As cartilhas instaladas continuam disponíveis mesmo com conexão instável.',
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Erro ao carregar cartilhas: ${snapshot.error}'),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Nenhuma cartilha encontrada.'));
-          }
-
-          final cartilhas = snapshot.data!;
-          return ListView(
-            children: [
-              _LearningHeader(
-                cartilhas: cartilhas,
-                onResumeTap: (cartilha) async {
-                  await Navigator.push(
-                    context,
-                    trackedRoute(
-                      pageId: 'guided_lesson',
-                      courseId: cartilha.id,
-                      resourceId: 'course_content',
-                      featureId: 'guided_learning',
-                      builder: (_) => ChatExperienceScreen(cartilha: cartilha),
-                    ),
-                  );
-                },
-                onStudyTap: () => Navigator.push(
-                  context,
-                  trackedRoute(
-                    pageId: 'study_hub',
-                    resourceId: 'study_tools',
-                    featureId: 'study_hub',
-                    builder: (_) => StudyHubScreen(cartilhas: cartilhas),
-                  ),
-                ),
-                onTutorTap: () => Navigator.push(
-                  context,
-                  trackedRoute(
-                    pageId: 'ai_assistant',
-                    resourceId: 'ai_chat',
-                    featureId: 'ai_tutor',
-                    builder: (_) => const GenUIAssistantScreen(),
-                  ),
-                ),
-                onVideosTap: () => Navigator.push(
-                  context,
-                  trackedRoute(
-                    pageId: 'videos',
-                    resourceId: 'video_catalog',
-                    featureId: 'video_learning',
-                    builder: (_) => MediaCatalogScreen(
-                      repository: MediaRepository(
-                        apiUrl: AppConfig.tutorApiUrl,
-                        authRepository: context.read<AuthRepository>(),
-                      ),
-                    ),
-                  ),
-                ),
-                onGuideTap: () => Navigator.push(
-                  context,
-                  trackedRoute(
-                    pageId: 'user_guide',
-                    resourceId: 'usage_guide',
-                    builder: (_) => const GuideScreen(),
-                  ),
-                ),
-                onCertificatesTap: () => Navigator.push(
-                  context,
-                  trackedRoute(
-                    pageId: 'certificate_wallet',
-                    featureId: 'certificates',
-                    builder: (_) => const CertificateWalletScreen(),
-                  ),
-                ),
-              ),
-              _CartilhaList(cartilhas: cartilhas),
-              const _SupportersBanner(),
-            ],
-          );
-        },
-      ),
+      body: _useLearningHome
+          ? ListView(
+              children: [
+                LearningHomeCard(controller: widget.learningHomeController),
+                _catalogBody(embedded: true),
+              ],
+            )
+          : _catalogBody(),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _navigationIndex,
         onDestinationSelected: _openBottomDestination,
@@ -521,6 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _LearningHeader extends StatefulWidget {
+  final bool showLocalResume;
   final List<Cartilha> cartilhas;
   final Future<void> Function(Cartilha cartilha) onResumeTap;
   final VoidCallback onStudyTap;
@@ -530,6 +564,7 @@ class _LearningHeader extends StatefulWidget {
   final VoidCallback onCertificatesTap;
 
   const _LearningHeader({
+    this.showLocalResume = true,
     required this.cartilhas,
     required this.onResumeTap,
     required this.onStudyTap,
@@ -652,7 +687,7 @@ class _LearningHeaderState extends State<_LearningHeader> {
               'O que você quer aprender hoje?',
               style: TextStyle(color: colors.onSurfaceVariant),
             ),
-            if (_shouldShowAttempt && attempt != null)
+            if (widget.showLocalResume && _shouldShowAttempt && attempt != null)
               StudyResumeCard(
                 courseTitle: attempt.topic,
                 progress: attempt.totalQuestions > 0
@@ -686,7 +721,9 @@ class _LearningHeaderState extends State<_LearningHeader> {
                   await _loadLocalState();
                 },
               )
-            else if (lastCartilha != null && _lastProgress != null)
+            else if (widget.showLocalResume &&
+                lastCartilha != null &&
+                _lastProgress != null)
               StudyResumeCard(
                 courseTitle: lastCartilha.title,
                 progress: _progressFor(lastCartilha, _lastProgress!),

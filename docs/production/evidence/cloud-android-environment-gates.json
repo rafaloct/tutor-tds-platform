@@ -1,0 +1,38 @@
+{
+  "verified_at": "2026-09-23T19:47:33.541609+00:00",
+  "scope": "Exact Android debug staging allowlist; no APK/AAB built",
+  "approved_api_urls": [
+    "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+    "https://tutor-tds-staging.fastapicloud.dev"
+  ],
+  "cloud_app_id": "dfd6d736-4da8-4586-b9de-1f08aa94d82e",
+  "cloud_team_id": "f659d528-141d-49cd-964b-e4be3b275757",
+  "gradle_cases_passed": [
+    "approved VPS staging accepted",
+    "exact Cloud staging accepted",
+    "other Cloud app rejected",
+    "Cloud HTTP rejected"
+  ],
+  "installer_cases_passed": [
+    "approved VPS staging accepted",
+    "exact Cloud staging accepted",
+    "other Cloud app rejected",
+    "API and allowed base mismatch rejected",
+    "HTTP rejected",
+    "production environment rejected",
+    "extra API path rejected",
+    "URL query rejected"
+  ],
+  "matrix_status": "remaining Gradle cases intentionally stopped after targeted checks to release Android build slot; no failure observed in completed cases",
+  "release_guards_signing_and_dev_suffix_unchanged_from_head": true,
+  "source_sha256": {
+    "cartilhas_app/android/app/build.gradle.kts": "4c3b4741e5875c77df613c44d9c3db9764149efb7878c116ecedd4d020784a61",
+    "tooling/build_install_android_dev.ps1": "76afac36973ab17dafc762a3f81c90470c206137a7c99ec79ec988184a0b2e87",
+    "tooling/validate_android_environment_gates.ps1": "abda2c2a3eeb5c1c546d982ed4e01d4a763b0166a8c867dd76b8339686b0aee3"
+  },
+  "limitations": [
+    "Full Gradle matrix not executed; release guards checked unchanged, not bypassed for a test.",
+    "Android application journey pending; this evidence validates configuration boundaries only."
+  ],
+  "release_build_allowed": false
+}

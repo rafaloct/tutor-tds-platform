@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
@@ -15,18 +16,26 @@ import '../features/learning_events/learning_event_queue.dart';
 import '../features/learning_events/learning_event_sync_service.dart';
 import '../features/learning_events/learning_activity_tracker.dart';
 import '../features/analytics/telemetry_route.dart';
+import '../features/learning_context/learning_context_controller.dart';
+import '../features/learning_events/learning_delivery_controller.dart';
+import '../features/learning_events/learning_delivery_status.dart';
+import '../features/learning_events/learning_outbox.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
   final Cartilha cartilha;
   final ProfileDataStore? profileDataStore;
   final String? progressOwnerId;
   final bool savedClassroomContent;
+  final LearningContextController? learningContextController;
+  final LearningDeliveryController? deliveryController;
   const ChatExperienceScreen({
     super.key,
     required this.cartilha,
     this.profileDataStore,
     this.progressOwnerId,
     this.savedClassroomContent = false,
+    this.learningContextController,
+    this.deliveryController,
   });
 
   @override
@@ -49,6 +58,21 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   Future<void> _progressSaveQueue = Future<void>.value();
   final String _learningSessionId = LearningEvent.newSessionId();
   late final LearningActivityTracker _activityTracker;
+  late final String? _contextKey;
+  late final Future<String?> _deliveryOwner;
+  LearningDeliveryController? _delivery;
+  bool _ownsDelivery = false;
+  bool _hadSaveFailure = false;
+  bool _startingLesson = false;
+  bool _startingRequest = false;
+  LearningEvent? _startedEvent;
+  String? _startedEventId;
+  String? _pendingActionEventId;
+  VoidCallback? _pendingReadingAction;
+  bool get _canRecordActivities =>
+      !_startingLesson &&
+      _pendingReadingAction == null &&
+      (_delivery?.canRecord ?? true);
 
   int get _totalQuestions => widget.cartilha.sections
       .expand((s) => s.messages)
@@ -79,38 +103,198 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    final learningContext = widget.learningContextController?.snapshot?.context;
+    _deliveryOwner = learningContext != null
+        ? Future.value(learningContext.userId)
+        : _eventQueue.isDurable
+        ? context.read<LearningEventSyncService>().authRepository.localUserId()
+        : Future.value(null);
+    _contextKey = learningContext?.resumeKey(AppConfig.tutorApiUrl);
     _tts.setLanguage('pt-BR');
     _tts.setSpeechRate(0.48);
     _activityTracker = LearningActivityTracker(
       courseId: widget.cartilha.id,
       sessionId: _learningSessionId,
     );
-    unawaited(
-      _enqueueAndSync(
-        LearningEvent.forSession(
-          type: LearningEventType.lessonStarted,
-          courseId: widget.cartilha.id,
-          sessionId: _learningSessionId,
-        ),
-      ),
+    _delivery = widget.deliveryController;
+    if (_delivery == null &&
+        AppConfig.durableLearningOutboxEnabled &&
+        learningContext != null) {
+      final sync = context.read<LearningEventSyncService>();
+      final scope = LearningDeliveryScope(
+        ownerId: learningContext.userId,
+        apiUrl: sync.apiUrl,
+        cohortId: learningContext.cohortId,
+        courseId: learningContext.courseId,
+        courseVersionId: learningContext.courseVersionId,
+      );
+      _ownsDelivery = true;
+      _delivery = LearningDeliveryController(
+        scope: scope,
+        queue: _eventQueue,
+        sync: sync,
+        auth: sync.authRepository,
+        revalidateAccess: () async {
+          final resolved = await widget.learningContextController!.load(
+            scope.cohortId,
+          );
+          final current = resolved?.context;
+          return current != null &&
+              current.userId == scope.ownerId &&
+              current.cohortId == scope.cohortId &&
+              current.courseId == scope.courseId &&
+              current.courseVersionId == scope.courseVersionId &&
+              current.permissions.contains('activity.record');
+        },
+        onDelivered: () async {
+          await widget.learningContextController!.load(scope.cohortId);
+        },
+      );
+    }
+    _delivery?.addListener(_deliveryChanged);
+    final started = LearningEvent.forSession(
+      type: LearningEventType.lessonStarted,
+      courseId: widget.cartilha.id,
+      sessionId: _learningSessionId,
     );
+    if (_delivery != null) {
+      _startingLesson = true;
+      _startedEvent = started;
+      _startedEventId = started.eventId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(_delivery!.refresh());
+        unawaited(_startLesson());
+      });
+    } else {
+      unawaited(_enqueueAndSync(started));
+    }
     _initializeExperience();
   }
 
-  Future<void> _enqueueAndSync(LearningEvent event) async {
-    final syncService = context.read<LearningEventSyncService>();
-    await _eventQueue.enqueue(
-      event.withCourseContext(
-        courseVersionId: widget.cartilha.courseVersionId,
-        classId: widget.cartilha.classId,
-      ),
-    );
-    await syncService.flush();
+  void _deliveryChanged() {
+    if (!mounted) return;
+    final failed =
+        _delivery?.hasUnsavedEvent == true && _delivery?.issue != null;
+    if (failed) _activityTracker.reset();
+    if (failed && !_hadSaveFailure) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scrollController.hasClients) {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
+    _hadSaveFailure = failed;
+    if (_delivery?.lastStoredEventId == _startedEventId &&
+        _delivery?.saving == false &&
+        _delivery?.issue == null) {
+      _startingLesson = false;
+    }
+    setState(() {});
+    _applyStoredAction();
+    if (_startingLesson && !_startingRequest && _delivery?.canRecord == true) {
+      // A failed projection may prevent the initial command from even starting.
+      // Resume that same captured event only when the observed state recovers.
+      scheduleMicrotask(() {
+        if (mounted) unawaited(_startLesson());
+      });
+    }
   }
 
-  void _recordInteraction() {
+  Future<void> _startLesson() async {
+    final event = _startedEvent;
+    if (!mounted ||
+        !_startingLesson ||
+        _startingRequest ||
+        _delivery?.canRecord != true ||
+        event == null) {
+      return;
+    }
+    // A committed event only waits for projection recovery, not another insert.
+    if (_delivery?.lastStoredEventId == event.eventId) {
+      setState(() => _startingLesson = false);
+      return;
+    }
+    _startingRequest = true;
+    try {
+      await _enqueueAndSync(event);
+    } finally {
+      _startingRequest = false;
+    }
+  }
+
+  Future<bool> _enqueueAndSync(LearningEvent event) async {
+    final syncService = context.read<LearningEventSyncService>();
+    var scopedEvent = event.withCourseContext(
+      courseVersionId: widget.cartilha.courseVersionId,
+      classId: widget.cartilha.classId,
+    );
+    final delivery = _delivery;
+    if (delivery != null) {
+      // Scope is captured from the resolved enrollment, before any await. The
+      // controller blocks concurrent actions only until the local commit.
+      return delivery.record(
+        scopedEvent.forLocalOwner(
+          userId: delivery.scope.ownerId,
+          apiUrl: delivery.scope.apiUrl,
+        ),
+      );
+    }
+    final owner = await _deliveryOwner;
+    if (owner != null) {
+      scopedEvent = scopedEvent.forLocalOwner(
+        userId: owner,
+        apiUrl: syncService.apiUrl,
+      );
+    }
+    await _eventQueue.enqueue(scopedEvent);
+    final synced = await syncService.flush();
+    final controller = widget.learningContextController;
+    if (synced > 0 &&
+        mounted &&
+        controller != null &&
+        widget.cartilha.classId != null) {
+      await controller.load(widget.cartilha.classId!);
+    }
+    return true;
+  }
+
+  void _act(VoidCallback action) {
+    if (!_canRecordActivities) return;
     final event = _activityTracker.recordInteraction();
-    if (event != null) unawaited(_enqueueAndSync(event));
+    if (event == null || _delivery == null) {
+      if (event != null) unawaited(_enqueueAndSync(event));
+      action();
+      return;
+    }
+    unawaited(_recordThen(event, action));
+  }
+
+  Future<void> _recordThen(LearningEvent event, VoidCallback action) async {
+    _pendingActionEventId = event.eventId;
+    _pendingReadingAction = action;
+    await _enqueueAndSync(event);
+    _applyStoredAction();
+  }
+
+  void _applyStoredAction() {
+    final delivery = _delivery;
+    if (!mounted ||
+        delivery == null ||
+        delivery.saving ||
+        delivery.hasUnsavedEvent ||
+        delivery.issue != null ||
+        delivery.lastStoredEventId != _pendingActionEventId) {
+      return;
+    }
+    final action = _pendingReadingAction;
+    _pendingReadingAction = null;
+    _pendingActionEventId = null;
+    action?.call();
   }
 
   Future<void> _initializeExperience() async {
@@ -119,6 +303,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       courseVersionId: widget.cartilha.courseVersionId,
       ownerId: widget.progressOwnerId,
       allowLegacy: widget.cartilha.legacyProgressCompatible,
+      contextKey: _contextKey,
     );
     if (!mounted) return;
 
@@ -180,6 +365,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       courseId: widget.cartilha.id,
       courseVersionId: widget.cartilha.courseVersionId,
       ownerId: widget.progressOwnerId,
+      contextKey: _contextKey,
       sectionIndex: _currentSectionIndex,
       messageIndex: _currentMessageIndex,
       questionsAnswered: _questionsAnswered,
@@ -195,6 +381,8 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _delivery?.removeListener(_deliveryChanged);
+    if (_ownsDelivery) _delivery?.dispose();
     _tts.stop();
     super.dispose();
   }
@@ -202,6 +390,9 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) _activityTracker.reset();
+    if (state == AppLifecycleState.resumed && _delivery != null) {
+      unawaited(_delivery!.refresh());
+    }
   }
 
   Future<void> _speak(String text) async {
@@ -223,7 +414,10 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   }
 
   void _advance() {
-    _recordInteraction();
+    _act(_advanceContent);
+  }
+
+  void _advanceContent() {
     final section = widget.cartilha.sections[_currentSectionIndex];
     if (_currentMessageIndex < section.messages.length - 1) {
       setState(() => _currentMessageIndex++);
@@ -235,33 +429,40 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       });
       _displayNextMessage();
     } else {
-      // Fim real do conteúdo — adiciona mensagem de conclusão no chat
-      setState(() {
-        _isCompleted = true;
-        _showOptions = false;
-        _visibleMessages.add(_completionMessage());
-      });
-      _saveProgress();
-      unawaited(
-        _enqueueAndSync(
-          LearningEvent.forSession(
-            type: LearningEventType.lessonCompleted,
-            courseId: widget.cartilha.id,
-            sessionId: _learningSessionId,
-          ),
-        ),
+      final event = LearningEvent.forSession(
+        type: LearningEventType.lessonCompleted,
+        courseId: widget.cartilha.id,
+        sessionId: _learningSessionId,
       );
-      _scrollToBottom();
+      if (_delivery == null) {
+        unawaited(_enqueueAndSync(event));
+        _finishContent();
+      } else {
+        unawaited(_recordThen(event, _finishContent));
+      }
     }
   }
 
+  void _finishContent() {
+    setState(() {
+      _isCompleted = true;
+      _showOptions = false;
+      _visibleMessages.add(_completionMessage());
+    });
+    _saveProgress();
+    _scrollToBottom();
+  }
+
   void _handleOptionClick(Option option) {
-    if (!_showOptions) return;
+    if (!_showOptions || !_canRecordActivities) return;
+    _act(() => _applyOption(option));
+  }
+
+  void _applyOption(Option option) {
     final currentMsg = widget
         .cartilha
         .sections[_currentSectionIndex]
         .messages[_currentMessageIndex];
-    _recordInteraction();
     setState(() {
       _showOptions = false;
       if (currentMsg.isAssessmentQuestion) _questionsAnswered++;
@@ -315,101 +516,149 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.cartilha.title,
-          style: const TextStyle(fontSize: 15),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        actions: [
-          IconButton(
-            tooltip: 'Perguntar ao Tutor de IA',
-            icon: const Icon(Icons.psychology),
-            onPressed: () => Navigator.push(
-              context,
-              trackedRoute(
-                pageId: 'ai_assistant',
-                courseId: widget.cartilha.id,
-                resourceId: 'ai_chat',
-                featureId: 'ai_tutor',
-                builder: (_) => GenUIAssistantScreen(
-                  initialContext: widget.cartilha.title,
-                  contextLabel: widget.cartilha.title,
+    return PopScope(
+      canPop:
+          _delivery?.hasUnsavedEvent != true &&
+          _delivery?.saving != true &&
+          _pendingReadingAction == null,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          final message =
+              _delivery?.hasUnsavedEvent == true || _delivery?.saving == true
+              ? 'Esta atividade ainda não foi salva. Tente salvar novamente antes de sair.'
+              : 'A atividade foi salva. Verifique os envios para retomar antes de sair.';
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(message)));
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.cartilha.title,
+            style: const TextStyle(fontSize: 15),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          actions: [
+            IconButton(
+              tooltip: 'Perguntar ao Tutor de IA',
+              icon: const Icon(Icons.psychology),
+              onPressed: () => Navigator.push(
+                context,
+                trackedRoute(
+                  pageId: 'ai_assistant',
+                  courseId: widget.cartilha.id,
+                  resourceId: 'ai_chat',
+                  featureId: 'ai_tutor',
+                  builder: (_) => GenUIAssistantScreen(
+                    initialContext: widget.cartilha.title,
+                    contextLabel: widget.cartilha.title,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-      body: _isInitializing
-          ? const TdsWaitExperience(
-              title: 'Retomando seu estudo',
-              status: 'Localizando seu último ponto nesta cartilha...',
-              localTip: 'Seu progresso fica salvo neste aparelho.',
-            )
-          : Column(
-              children: [
-                if (widget.savedClassroomContent)
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Text(
-                      'Conteúdo salvo da sua turma. Seu progresso será enviado quando a conexão voltar.',
+          ],
+        ),
+        body: _isInitializing
+            ? const TdsWaitExperience(
+                title: 'Retomando seu estudo',
+                status: 'Localizando seu último ponto nesta cartilha...',
+                localTip: 'Seu progresso fica salvo neste aparelho.',
+              )
+            : Column(
+                children: [
+                  if (widget.savedClassroomContent)
+                    const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(
+                        'Conteúdo salvo da sua turma. Seu progresso será enviado quando a conexão voltar.',
+                      ),
                     ),
-                  ),
-                LinearProgressIndicator(
-                  value: _progress,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFF093AF4),
-                  ),
-                  minHeight: 4,
-                ),
-                Expanded(
-                  child: ResponsiveBody(
-                    maxWidth: 860,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-                      itemCount: _visibleMessages.length,
-                      itemBuilder: (context, index) =>
-                          _buildBubble(_visibleMessages[index]),
+                  LinearProgressIndicator(
+                    value: _progress,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color(0xFF093AF4),
                     ),
+                    minHeight: 4,
                   ),
-                ),
-                if (!_isCompleted && _showOptions)
-                  _buildOptions()
-                else if (!_isCompleted)
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 860),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: ElevatedButton(
-                          onPressed: _advance,
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 48),
+                  if (widget.learningContextController case final controller?)
+                    ListenableBuilder(
+                      listenable: controller,
+                      builder: (context, _) {
+                        final snapshot = controller.snapshot;
+                        final text = snapshot == null
+                            ? (controller.error ??
+                                  'Atualizando o progresso confirmado...')
+                            : 'Progresso confirmado: ${snapshot.progressPercent.toStringAsFixed(1)}%'
+                                  ' • ${snapshot.validatedHours.toStringAsFixed(2)} h'
+                                  '${snapshot.fromCache ? ' • última sincronização' : ''}';
+                        return Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Text(
+                            text,
+                            key: const Key('learning-context-progress'),
                           ),
-                          child: const Text('Continuar'),
-                        ),
+                        );
+                      },
+                    ),
+                  Expanded(
+                    child: ResponsiveBody(
+                      maxWidth: 860,
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                        itemCount:
+                            _visibleMessages.length +
+                            (_delivery == null ? 0 : 1),
+                        itemBuilder: (context, index) {
+                          if (_delivery != null && index == 0) {
+                            return LearningDeliveryStatus(
+                              controller: _delivery!,
+                            );
+                          }
+                          return _buildBubble(
+                            _visibleMessages[index -
+                                (_delivery == null ? 0 : 1)],
+                          );
+                        },
                       ),
                     ),
                   ),
-              ],
-            ),
-      floatingActionButton: _isCompleted
-          ? FloatingActionButton.extended(
-              heroTag: 'cert',
-              icon: const Icon(Icons.workspace_premium, color: Colors.amber),
-              label: const Text(
-                'Solicitar certificado',
-                style: TextStyle(fontSize: 13),
+                  if (!_isCompleted && _showOptions)
+                    _buildOptions()
+                  else if (!_isCompleted)
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 860),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          child: ElevatedButton(
+                            onPressed: _canRecordActivities ? _advance : null,
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 48),
+                            ),
+                            child: const Text('Continuar'),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              backgroundColor: const Color(0xFF093AF4),
-              onPressed: _requestCertificate,
-            )
-          : null,
+        floatingActionButton: _isCompleted
+            ? FloatingActionButton.extended(
+                heroTag: 'cert',
+                icon: const Icon(Icons.workspace_premium, color: Colors.amber),
+                label: const Text(
+                  'Solicitar certificado',
+                  style: TextStyle(fontSize: 13),
+                ),
+                backgroundColor: const Color(0xFF093AF4),
+                onPressed: _requestCertificate,
+              )
+            : null,
+      ),
     );
   }
 
@@ -513,7 +762,9 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
         runSpacing: 8,
         children: currentMsg.options!.map((opt) {
           return ElevatedButton(
-            onPressed: () => _handleOptionClick(opt),
+            onPressed: _canRecordActivities
+                ? () => _handleOptionClick(opt)
+                : null,
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),

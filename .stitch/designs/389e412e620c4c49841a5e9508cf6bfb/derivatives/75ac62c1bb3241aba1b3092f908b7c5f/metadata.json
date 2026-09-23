@@ -1,0 +1,23 @@
+{
+  "transport": "MCP get_screen with name only; schema inspected 2026-09-23",
+  "name": "projects/3740249934950673416/screens/75ac62c1bb3241aba1b3092f908b7c5f",
+  "projectId": "3740249934950673416",
+  "width": "780",
+  "retrievedAt": "2026-09-23T19:08:10.6965424Z",
+  "height": "1768",
+  "deviceType": "MOBILE",
+  "sha256": {
+    "screen.html": "2a8bc95983e51ac46e48b6bb8e21ddd43fc64b1fcdba107af91fb8e13b7c5323",
+    "screen.png": "3f8c223ef37796e876ce41d77fa2a2d94b77563f0feaa5d95d940bc0e68fab1b"
+  },
+  "title": "Home - Aluno - Contexto de Aprendizagem",
+  "screenId": "75ac62c1bb3241aba1b3092f908b7c5f",
+  "sourceScreenId": "389e412e620c4c49841a5e9508cf6bfb",
+  "derivedScreenId": "75ac62c1bb3241aba1b3092f908b7c5f",
+  "purpose": "Home contextual do aluno, Wave 1",
+  "state": "ready",
+  "generatedAt": "2026-09-23T19:08:10.6965424Z",
+  "implementationTarget": "LearningHomeCard in HomeScreen",
+  "referenceImageId": "9731628404551462355",
+  "verifiedPersisted": true
+}

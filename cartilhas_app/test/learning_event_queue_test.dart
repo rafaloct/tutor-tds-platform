@@ -30,15 +30,42 @@ void main() {
     expect(pending.single.toJson(), isNot(contains('name')));
   });
 
-  test('limita crescimento preservando os eventos mais recentes', () async {
-    const queue = LearningEventQueue(maxPending: 2);
-    await queue.enqueue(event('sessao-1', LearningEventType.lessonStarted));
-    await queue.enqueue(event('sessao-2', LearningEventType.lessonStarted));
-    await queue.enqueue(event('sessao-3', LearningEventType.lessonCompleted));
+  test(
+    'não descarta evidência pedagógica quando atinge limite de telemetria',
+    () async {
+      const queue = LearningEventQueue(maxPending: 2);
+      await queue.enqueue(event('sessao-1', LearningEventType.lessonStarted));
+      await queue.enqueue(event('sessao-2', LearningEventType.lessonStarted));
+      await queue.enqueue(event('sessao-3', LearningEventType.lessonCompleted));
 
-    final pending = await queue.pending();
-    expect(pending.map((item) => item.sessionId), ['sessao-2', 'sessao-3']);
-  });
+      final pending = await queue.pending();
+      expect(pending.map((item) => item.sessionId), [
+        'sessao-1',
+        'sessao-2',
+        'sessao-3',
+      ]);
+    },
+  );
+
+  test(
+    'logout preserves owned evidence and never sends local envelope to API',
+    () async {
+      const queue = LearningEventQueue();
+      final owned = event(
+        'owned',
+        LearningEventType.lessonCompleted,
+      ).forLocalOwner(userId: 'student', apiUrl: 'https://staging.example/');
+      await queue.enqueue(owned);
+      await queue.enqueue(event('legacy', LearningEventType.lessonStarted));
+      await queue.clear(preserveOwned: true);
+      final restored = (await const LearningEventQueue().pending()).single;
+      expect(restored.localOwnerId, 'student');
+      expect(restored.localApiUrl, 'https://staging.example');
+      expect(restored.toJson().keys, isNot(contains('local_owner_id')));
+      expect(restored.toJson().keys, isNot(contains('local_api_url')));
+      expect(restored.eventId, owned.eventId);
+    },
+  );
 
   test('ignora armazenamento corrompido e volta a enfileirar', () async {
     SharedPreferences.setMockInitialValues({

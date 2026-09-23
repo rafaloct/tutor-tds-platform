@@ -1,0 +1,32 @@
+{
+  "verified_at": "2026-09-23T19:16:54.724677+00:00",
+  "status": "passed",
+  "flutter_tests": {
+    "files": [
+      "learning_home_test.dart",
+      "home_next_action_test.dart",
+      "learning_context_test.dart",
+      "learner_classrooms_screen_test.dart"
+    ],
+    "passed": 20
+  },
+  "flutter_analyze": "No issues found",
+  "design": {
+    "sourceScreenId": "389e412e620c4c49841a5e9508cf6bfb",
+    "derivedScreenId": "75ac62c1bb3241aba1b3092f908b7c5f",
+    "referenceImageId": "9731628404551462355",
+    "screenshot_and_html_verified": true
+  },
+  "sha256": {
+    "cartilhas_app/lib/features/learning_context/home_selection_repository.dart": "d408a86e572625ab784abd33957d9bc7d785e157ce7d6998ac39b015fff3c61a",
+    "cartilhas_app/lib/features/learning_context/learning_home_controller.dart": "f9d8d08e4fcb270d0742ef9d5a28f44ad626c3bb692ae93ea7cd2dce82170668",
+    "cartilhas_app/lib/features/learning_context/learning_home_card.dart": "814e3b49c1b149b6a57d92f47eb8c46e5fd1b1f8a07e7f1d81c35b5e8b848bee",
+    "cartilhas_app/lib/screens/home_screen.dart": "26b038f4b7bb24a77b574783a8dbe561d160408b81561cdc466f18c8578c8885",
+    "cartilhas_app/test/learning_home_test.dart": "ef37c2d5c6dddd5d7963eab72c0405cc18e2051c91edb9ac3aa3d64d0d7710ca"
+  },
+  "limits": [
+    "Widget/unit tests only; real Android plus staging API acceptance still pending",
+    "Visual parity not approved",
+    "Production flags unchanged"
+  ]
+}

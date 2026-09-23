@@ -1,0 +1,104 @@
+{
+  "provider": "FastAPI Cloud + Supabase",
+  "base_url": "https://tutor-tds-staging.fastapicloud.dev",
+  "deployment_id": "14c2f14d-17c3-4833-9c72-54ea77484b59",
+  "checks": [
+    {
+      "path": "/live",
+      "status": 200,
+      "elapsed_ms": 625
+    },
+    {
+      "path": "/health",
+      "status": 200,
+      "elapsed_ms": 673
+    },
+    {
+      "path": "/auth/login",
+      "status": 200,
+      "elapsed_ms": 1055
+    },
+    {
+      "path": "/auth/login",
+      "status": 200,
+      "elapsed_ms": 993
+    },
+    {
+      "path": "/classes/qa-cohort/learning-context",
+      "status": 200,
+      "elapsed_ms": 2832
+    },
+    {
+      "path": "/classes/qa-cohort/students/f360b09a-b6f6-401b-b973-38a4ab21393a/learning-context",
+      "status": 200,
+      "elapsed_ms": 3024
+    },
+    {
+      "path": "/courses/qa-course",
+      "status": 200,
+      "elapsed_ms": 790
+    },
+    {
+      "path": "/classes/qa-cohort/course",
+      "status": 200,
+      "elapsed_ms": 1725
+    },
+    {
+      "path": "/classes/qa-cohort/learning-context",
+      "status": 401,
+      "elapsed_ms": 204
+    },
+    {
+      "path": "/classes/qa-cohort/students/f360b09a-b6f6-401b-b973-38a4ab21393a/learning-context",
+      "status": 403,
+      "elapsed_ms": 1372
+    }
+  ],
+  "student_context": {
+    "context": {
+      "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "organization_id": "qa-org",
+      "program_id": "qa-program",
+      "cohort_id": "qa-cohort",
+      "membership_id": "c1e10aa8-1f7d-5cc5-954d-22241d1beb24",
+      "role": "student",
+      "course_id": "qa-course",
+      "course_version_id": "qa-edition-1",
+      "enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+      "legacy_enrollment_id": "qa-legacy-enrollment",
+      "permissions": [
+        "content.read",
+        "progress.read",
+        "activity.record"
+      ]
+    },
+    "progress": {
+      "user_id": "f360b09a-b6f6-401b-b973-38a4ab21393a",
+      "name": "Aluno QA Contexto",
+      "enrollment_id": "qa-legacy-enrollment",
+      "context_enrollment_id": "c88cdc38-bfa8-50e2-912e-28100d582201",
+      "status": "active",
+      "planned_hours": 0.0333,
+      "validated_hours": 0.0,
+      "progress_percent": 0.0,
+      "last_activity_at": null,
+      "inactive_days": 0,
+      "alerts": [
+        {
+          "code": "required_activity_pending"
+        },
+        {
+          "code": "below_expected_hours"
+        }
+      ],
+      "baseline_linked": false,
+      "confirmed_sessions": 0,
+      "open_mentorship_cases": 0
+    },
+    "resolved_at": "2026-09-23T19:46:59.675308Z",
+    "contract_version": "cohort-enrollment-v2"
+  },
+  "instructor_same_context_and_progress": true,
+  "tls_verified": true,
+  "android_gate_passed": false
+}

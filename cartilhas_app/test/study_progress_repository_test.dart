@@ -37,6 +37,39 @@ void main() {
     expect(await const StudyProgressRepository().loadLast(), isNull);
   });
 
+  test(
+    'contextual progress isolates cohorts and preserves ambiguous legacy',
+    () async {
+      const repository = StudyProgressRepository();
+      StudyProgress progress(String? key, int index) => StudyProgress(
+        courseId: 'course',
+        courseVersionId: 'v1',
+        ownerId: 'student',
+        contextKey: key,
+        sectionIndex: index,
+        messageIndex: 0,
+        questionsAnswered: 0,
+        showOptions: false,
+        isCompleted: false,
+        updatedAt: DateTime.utc(2026),
+      );
+      await repository.save(progress(null, 9));
+      await repository.save(progress('staging/class-a/enrollment', 1));
+      await repository.save(progress('staging/class-b/enrollment', 2));
+      Future<StudyProgress?> load(String? key) => repository.load(
+        'course',
+        courseVersionId: 'v1',
+        ownerId: 'student',
+        contextKey: key,
+        allowLegacy: true,
+      );
+      expect((await load('staging/class-a/enrollment'))!.sectionIndex, 1);
+      expect((await load('staging/class-b/enrollment'))!.sectionIndex, 2);
+      expect(await load('production/class-a/enrollment'), isNull);
+      expect((await load(null))!.sectionIndex, 9);
+    },
+  );
+
   test('mantém progresso legado e isola versões e contas', () async {
     const repository = StudyProgressRepository();
     StudyProgress progress({String? version, String? owner, int index = 3}) =>
