@@ -127,13 +127,89 @@ function Set-QaNetwork {
     return Wait-QaNetwork -Wifi $Wifi -Mobile $Mobile
 }
 
+function Convert-QaMarkers {
+    param([string]$Logs, [int]$AndroidPid, [long]$StartedAt, [string]$Phase)
+    $allowedActions = @('phase_start', 'account_access', 'course_create', 'editor_open',
+        'draft_save', 'preview_open', 'preview_verified', 'submit_for_review', 'publish',
+        'version_fork', 'catalog_refresh', 'contextual_reader_open',
+        'offline_cached_read_and_queue', 'reconnect_persisted_queue', 'phase_passed')
+    if ($Phase -notin $phases -or $AndroidPid -lt 1) { return }
+    $pattern = '(?m)^\s*(?<epoch>\d+\.\d+)\s+(?<pid>\d+)\s+\d+\s+[VDIWEF]\s+flutter\s*:\s*DYNAMIC_QA phase=(?<phase>[a-z0-9_]+) action=(?<action>[a-z_]+)\s*$'
+    foreach ($match in [regex]::Matches($Logs, $pattern)) {
+        $epoch = [double]::Parse($match.Groups['epoch'].Value, [Globalization.CultureInfo]::InvariantCulture)
+        if ($epoch -lt $StartedAt -or [int]$match.Groups['pid'].Value -ne $AndroidPid -or
+            $match.Groups['phase'].Value -cne $Phase -or $match.Groups['action'].Value -cnotin $allowedActions) { continue }
+        # Reconstruct only public diagnostic fields; never retain the source line.
+        [ordered]@{ epoch = $match.Groups['epoch'].Value; pid = $AndroidPid;
+            phase = $Phase; action = $match.Groups['action'].Value }
+    }
+}
+
+function Register-QaDiagnosticError {
+    param([string]$Phase, [string]$Operation)
+    if ($diagnosticErrorKeys.Add("${Phase}:$Operation")) {
+        $diagnosticErrors.Add([ordered]@{ phase = $Phase; operation = $Operation })
+    }
+}
+
+function Save-QaMarkers {
+    param([string]$Logs, [int]$AndroidPid, [long]$StartedAt, [string]$Phase)
+    try {
+        if ($Phase -notin $phases -or $AndroidPid -lt 1) { return }
+        if (-not $markerRecords.ContainsKey($Phase)) {
+            $markerRecords[$Phase] = [Collections.Generic.List[object]]::new()
+            $markerKeys[$Phase] = [Collections.Generic.HashSet[string]]::new()
+        }
+        foreach ($record in @(Convert-QaMarkers -Logs $Logs -AndroidPid $AndroidPid -StartedAt $StartedAt -Phase $Phase)) {
+            if ($markerKeys[$Phase].Add("$($record.epoch):$($record.pid):$($record.action)")) {
+                $markerRecords[$Phase].Add($record)
+            }
+        }
+        [ordered]@{ run_id = $RunId; phase = $Phase; pid = $AndroidPid; launch_epoch = $StartedAt;
+            captured_at = (Get-Date).ToUniversalTime().ToString('o');
+            markers = $markerRecords[$Phase].ToArray(); used_for_phase_approval = $false } |
+            ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $runDirectory "$Phase.markers.json") -Encoding utf8
+    } catch { Register-QaDiagnosticError $Phase 'filter_or_write' }
+}
+
+function Capture-QaMarkers {
+    param([int]$AndroidPid, [long]$StartedAt, [string]$Phase)
+    if ($Phase -notin $phases -or $AndroidPid -lt 1) { return }
+    try {
+        # Buffered messages remain readable even if this known process exited.
+        $logs = Invoke-AdbChecked @('logcat', "--pid=$AndroidPid", '-d', '-v', 'epoch', '-t', '2000')
+    } catch {
+        Register-QaDiagnosticError $Phase 'logcat_read'
+        return
+    }
+    Save-QaMarkers -Logs $logs -AndroidPid $AndroidPid -StartedAt $StartedAt -Phase $Phase
+}
+
+function Get-QaDiagnosticSummary {
+    $files = [ordered]@{}
+    foreach ($phase in $phases) {
+        if (-not $markerRecords.ContainsKey($phase)) { continue }
+        $path = Join-Path $runDirectory "$phase.markers.json"
+        $records = $markerRecords[$phase]
+        $hash = $null
+        try { $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() }
+        catch { Register-QaDiagnosticError $phase 'marker_file_hash' }
+        $files[$phase] = [ordered]@{ file = "$phase.markers.json"; sha256 = $hash;
+            marker_count = $records.Count; last_marker = $(if ($records.Count) { $records[$records.Count - 1] } else { $null }) }
+    }
+    return [ordered]@{ used_for_phase_approval = $false; files = $files;
+        capture_errors = $diagnosticErrors.ToArray();
+        limitation = 'Only observed PID markers since launch; missing or rotated buffer entries are not inferred.' }
+}
+
 function Wait-VmService {
     param([int]$AndroidPid, [long]$StartedAt)
     $watch = [Diagnostics.Stopwatch]::StartNew()
     try {
         while ($watch.Elapsed.TotalSeconds -lt 45) {
-            if ((Get-QaPid) -ne $AndroidPid) { throw 'QA process exited or changed before driver attachment.' }
             $logs = Invoke-AdbChecked @('logcat', "--pid=$AndroidPid", '-d', '-v', 'epoch', '-t', '2000')
+            Save-QaMarkers -Logs $logs -AndroidPid $AndroidPid -StartedAt $StartedAt -Phase $attemptedPhase
+            if ((Get-QaPid) -ne $AndroidPid) { throw 'QA process exited or changed before driver attachment.' }
             $uriMatches = [regex]::Matches($logs,
                 '(?m)^\s*(?<epoch>\d+\.\d+)\s+[^\r\n]*?(?:Dart VM service|VM Service) is listening on (?<uri>http://[^\s]+)')
             foreach ($uriMatch in @($uriMatches | Select-Object -Last 10)) {
@@ -226,6 +302,7 @@ function Save-RunState {
         next_phase_assumed = $false
         updated_at = (Get-Date).ToUniversalTime().ToString('o')
         cleanup_errors = $cleanupErrors.ToArray()
+        diagnostic_capture_errors = $diagnosticErrors.ToArray()
     } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $runDirectory 'run-state.json') -Encoding utf8
 }
 
@@ -456,6 +533,13 @@ $ownedForwards = [Collections.Generic.List[string]]::new()
 $reports = [Collections.Generic.List[object]]::new()
 $hostReports = [Collections.Generic.List[object]]::new()
 $cleanupErrors = [Collections.Generic.List[string]]::new()
+$diagnosticErrors = [Collections.Generic.List[object]]::new()
+$diagnosticErrorKeys = [Collections.Generic.HashSet[string]]::new()
+$markerRecords = @{}
+$markerKeys = @{}
+$diagnosticPid = $null
+$diagnosticStartedAt = 0L
+$diagnosticPhase = $null
 $environmentNames = @('TDS_QA_DYNAMIC_REPORT_PATH', 'TDS_QA_DYNAMIC_RUN_ID', 'TDS_QA_DYNAMIC_EXPECTED_PHASE')
 $oldEnvironment = @{}
 foreach ($name in $environmentNames) { $oldEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
@@ -502,6 +586,8 @@ try {
     foreach ($phase in $phases) {
         if ($runWatch.Elapsed.TotalMinutes -gt 150) { throw 'The complete gate exceeded its bounded execution window.' }
         $attemptedPhase = $phase
+        $diagnosticPid = $null
+        $diagnosticPhase = $phase
         $boundary = "android_$phase"
         Save-RunState 'RUNNING'
         Assert-SourceHashes
@@ -519,6 +605,8 @@ try {
         if ($started -match 'Error:|Exception') { throw 'QA activity did not start.' }
         $androidPid = Get-QaPid
         if ($null -eq $androidPid -or -not $seenPids.Add($androidPid)) { throw 'Expected a distinct new QA process.' }
+        $diagnosticPid = $androidPid
+        $diagnosticStartedAt = $startedAt
         $remoteVm = Wait-VmService -AndroidPid $androidPid -StartedAt $startedAt
         $hostPort = Invoke-AdbChecked @('forward', 'tcp:0', "tcp:$($remoteVm.Port)")
         if ($hostPort -notmatch '^\d+$') { throw 'ADB did not allocate an owned local forward.' }
@@ -534,8 +622,12 @@ try {
         Write-Host "Validating installed APK: $phase"
         $driveArguments = @('drive', '--debug', '--no-pub', '--no-dds', '-d', $Device,
             '--driver', $driver, '--target', $target, "--use-existing-app=$($localVm.Uri.AbsoluteUri)", '--keep-app-running')
-        $phaseSeconds = Invoke-NativeBounded -Executable $Flutter -CommandArgs $driveArguments -Name $phase `
-            -TimeoutSeconds 1020 -WorkingDirectory $AppRoot
+        try {
+            $phaseSeconds = Invoke-NativeBounded -Executable $Flutter -CommandArgs $driveArguments -Name $phase `
+                -TimeoutSeconds 1020 -WorkingDirectory $AppRoot
+        } finally {
+            Capture-QaMarkers -AndroidPid $androidPid -StartedAt $startedAt -Phase $phase
+        }
         if (-not (Test-Path -LiteralPath $reportPath)) { throw 'Driver produced no phase report; checkpoint may already have advanced.' }
         $phaseReport = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
         if ($phaseReport.status -ne 'passed' -or $phaseReport.report.phase -ne $phase -or
@@ -656,6 +748,9 @@ try {
     $failure = $_
 } finally {
     $runWatch.Stop()
+    if ($null -ne $diagnosticPid) {
+        Capture-QaMarkers -AndroidPid $diagnosticPid -StartedAt $diagnosticStartedAt -Phase $diagnosticPhase
+    }
     foreach ($forward in @($ownedForwards)) {
         try { $null = Invoke-AdbChecked @('forward', '--remove', $forward) }
         catch { $cleanupErrors.Add("forward:$forward") }
@@ -675,6 +770,7 @@ if ($null -ne $failure) {
 if ($cleanupErrors.Count -ne 0 -or $null -eq $candidate) { throw 'Gate cannot pass: cleanup or complete evidence is missing. Inspect run-state.json.' }
 $candidate['cleanup'] = [ordered]@{ verified = $true; qa_process_stopped = $true; owned_forwards_removed = $true; network_restored_to = $initialNetwork }
 $candidate['duration_seconds'] = [math]::Round($runWatch.Elapsed.TotalSeconds, 3)
+$candidate['diagnostics'] = Get-QaDiagnosticSummary
 $candidate | ConvertTo-Json -Depth 60 | Set-Content -LiteralPath $EvidenceFile -Encoding utf8
 $candidate | ConvertTo-Json -Depth 60 | Set-Content -LiteralPath (Join-Path $runDirectory 'evidence.json') -Encoding utf8
 Save-RunState 'PASSED'

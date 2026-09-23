@@ -11,6 +11,7 @@ import 'package:cartilhas_app/features/learning_context/learning_context.dart';
 import 'package:cartilhas_app/features/learning_context/learning_home_card.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event_queue.dart';
+import 'package:cartilhas_app/features/learning_events/learning_event_sync_service.dart';
 import 'package:cartilhas_app/features/study_progress/study_progress_repository.dart';
 import 'package:cartilhas_app/main.dart';
 import 'package:cartilhas_app/models/cartilha.dart';
@@ -22,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // One APK, eight process launches. The checkpoint chooses the next phase; never
@@ -398,9 +400,9 @@ void main() {
           case 'learner_offline':
             _mark('offline_cached_read_and_queue');
             await api.requireOffline();
-            expect(await api.auth.localUserId(), _learner.id);
+            expect(await api.localUserIdBeforeApp(), _learner.id);
             expect(await _pending(), isEmpty);
-            await tester.pumpWidget(const CartilhasApp());
+            await _startApp(tester, api);
             await _expectHome(tester, 1, {
               'progress': state['online_progress'],
             }, offline: true);
@@ -466,7 +468,7 @@ void main() {
             });
           case 'learner_reconnect':
             _mark('reconnect_persisted_queue');
-            expect(await api.auth.localUserId(), _learner.id);
+            expect(await api.localUserIdBeforeApp(), _learner.id);
             final offline = (state['offline_events'] as List)
                 .map((e) => LearningEvent.fromJson(e)!)
                 .toList();
@@ -479,7 +481,7 @@ void main() {
                 event.toStorageJson(),
               );
             }
-            await tester.pumpWidget(const CartilhasApp());
+            await _startApp(tester, api);
             await _waitFor(tester, find.text('Continuar estudo'));
             await _drained(tester);
             final first = await api.context(state['cohort_v1'] as String);
@@ -566,6 +568,7 @@ void main() {
           'course_id': _course,
           'program_id': _program,
           'checkpoint': state,
+          'authenticated_assertions_share_app_repository': api.isBoundToApp,
           ...evidence,
           'limits': [
             'Eight phases; no separate offline_restart phase.',
@@ -868,8 +871,8 @@ Future<void> _signedIn(
   required Map<String, dynamic> evidence,
 }) async {
   _mark('account_access');
-  final current = await api.auth.localUserId();
-  final hasSession = await api.auth.hasSession();
+  final current = await api.localUserIdBeforeApp();
+  final hasSession = await api.hasSessionBeforeApp();
   final accountEvidence = <String, dynamic>{
     'initial_has_session': hasSession,
     'initial_owner_matches_requested_actor': current == actor.id,
@@ -910,7 +913,7 @@ Future<void> _signedIn(
     isTrue,
     reason: 'Refuse logout of an unknown identity.',
   );
-  await tester.pumpWidget(const CartilhasApp());
+  await _startApp(tester, api);
   await _waitUntil(
     tester,
     () async =>
@@ -918,6 +921,22 @@ Future<void> _signedIn(
         _scoped(find.text('Já tenho conta')).evaluate().isNotEmpty,
   );
   var settingsOpen = false;
+  var needsLogin = current != actor.id;
+  if (current == actor.id) {
+    // A local subject is not proof that the server session is still valid.
+    // Let the real Settings verification choose connected or signed-out UI.
+    await _menu(tester, 'Configurações');
+    settingsOpen = true;
+    final connected = await inspectAccountSettings();
+    if (connected) {
+      expect(await api.auth.localUserId(), actor.id);
+      await _back(tester);
+      settingsOpen = false;
+    } else {
+      expect(await api.auth.localUserId(), isNull);
+      needsLogin = true;
+    }
+  }
   if (current != null && current != actor.id) {
     // Existing Settings logout clears these legacy drafts. Refuse that operation
     // if unrelated data would be removed; never clear or rewrite it in the test.
@@ -966,7 +985,7 @@ Future<void> _signedIn(
       expect(await api.auth.localUserId(), isNull);
     }
   }
-  if (current != actor.id) {
+  if (needsLogin) {
     final welcome = _scoped(find.text('Já tenho conta')).evaluate().isNotEmpty;
     if (welcome) {
       await _tap(tester, find.text('Já tenho conta'));
@@ -1015,6 +1034,11 @@ Future<void> _signedIn(
   await _waitFor(tester, find.byType(HomeScreen));
   expect((await api.auth.currentUser()).id, actor.id);
   accountEvidence['final_owner_verified'] = true;
+}
+
+Future<void> _startApp(WidgetTester tester, _Api api) async {
+  await tester.pumpWidget(const CartilhasApp());
+  api.bindToApp(tester);
 }
 
 Future<bool> _accountSettingsReady(WidgetTester tester) async {
@@ -1401,7 +1425,42 @@ void _historyPreserved(List before, List<Map<String, dynamic>> after) {
 }
 
 class _Api {
-  final auth = AuthRepository(apiUrl: AppConfig.tutorApiUrl);
+  // Before app startup this owned repository is used ONLY for local reads.
+  // HTTP assertions must share the app's refresh single-flight coordinator.
+  final _bootstrapAuth = AuthRepository(apiUrl: AppConfig.tutorApiUrl);
+  AuthRepository? _appAuth;
+  AuthRepository get auth =>
+      _appAuth ??
+      (throw StateError('Start the app before authenticated assertions.'));
+  bool get isBoundToApp => _appAuth != null;
+  Future<String?> localUserIdBeforeApp() =>
+      (_appAuth ?? _bootstrapAuth).localUserId();
+  Future<bool> hasSessionBeforeApp() =>
+      (_appAuth ?? _bootstrapAuth).hasSession();
+  void bindToApp(WidgetTester tester) {
+    final materialApp = find.byType(MaterialApp);
+    expect(materialApp, findsOneWidget);
+    final context = tester.element(materialApp);
+    final repository = context.read<AuthRepository>();
+    final sync = context.read<LearningEventSyncService>();
+    expect(
+      identical(repository, sync.authRepository),
+      isTrue,
+      reason:
+          'UI delivery and authenticated assertions must share refresh coordination.',
+    );
+    expect(repository.apiUrl, AppConfig.tutorApiUrl);
+    if (_appAuth != null) {
+      expect(
+        identical(_appAuth, repository),
+        isTrue,
+        reason:
+            'Do not silently replace the running app authentication instance.',
+      );
+    }
+    _appAuth = repository;
+  }
+
   final client = http.Client();
   Uri uri(String path) => Uri.parse('${AppConfig.tutorApiUrl}$path');
   Future<Map<String, dynamic>> get(String path) async {
@@ -1502,7 +1561,8 @@ class _Api {
   }
 
   void dispose() {
-    auth.dispose();
+    // The Provider owns _appAuth and disposes it with CartilhasApp.
+    _bootstrapAuth.dispose();
     client.close();
   }
 }

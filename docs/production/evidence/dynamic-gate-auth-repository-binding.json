@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-23T22:39:50.0308528Z",
+  "boundary": "dynamic_learning_android_auth_assertions",
+  "affected_run_id": "36d9d7a4b07c47908836baebb55b20f4",
+  "diagnosis": {
+    "production_auth_instances": 1,
+    "artificial_assertion_auth_instances": 1,
+    "refresh_coordination": "per AuthRepository instance",
+    "deterministic_two_instance_result": {
+      "refresh_requests": 2,
+      "first_authorized": true,
+      "second_authorized": false,
+      "rotated_session_preserved": false,
+      "clear_count": 1
+    },
+    "separate_late_logout_result": {
+      "session_empty": false,
+      "refresh_rejected": false
+    },
+    "separate_late_logout_scope": "Known issue before Wave2B/production; no product change in this harness correction"
+  },
+  "reproduction": {
+    "command": "flutter test --no-pub test/auth_repository_test.dart --plain-name diagnostic: --reporter expanded",
+    "exit_code": 1,
+    "expected_red_diagnostic_tests": 2,
+    "test_source_path": "tmp/auth-refresh-boundary-reproduction_test.dart",
+    "test_source_sha256": "b81917da68a333aadf8626f167b75081542261677257f851794eac71228f1705",
+    "log_path": "tmp/auth-refresh-boundary-reproduction.log",
+    "log_sha256": "03f3586b327919e8fbb59719073f8390f23963f9801c5b353cb1597e53d01f57",
+    "note": "Temporary failing expectations demonstrate boundary; removed from checked-in suite after copying evidence."
+  },
+  "correction": {
+    "product_changed": false,
+    "unit_test_original_git_blob": "19e634fa5e5d48fce8c2962e10dfe7f901678b4f",
+    "assertion_auth": "Provider AuthRepository; identical to LearningEventSyncService.authRepository",
+    "before_startup": "Local session/subject reads only",
+    "ownership": "Harness disposes bootstrap repository/client only; Provider owns app repository",
+    "invalid_same_actor_session": "Real Settings verification and explicit login UI; no catch-and-relogin workaround",
+    "report_required": "authenticated_assertions_share_app_repository == true",
+    "test_sha256": "2acf34f24f5756af2736953ec746090de74247afadf881422c5f18d87c67894e",
+    "driver_sha256": "e8aa7653b8d7b2898f35867d051c87fbc1b235e62182c048330166c36bb0075f"
+  },
+  "validation": {
+    "flutter_sdk": "3.44.9",
+    "format": "2 files, 1 changed",
+    "analyze_scope": [
+      "integration_test/dynamic_learning_path_test.dart",
+      "test_driver/dynamic_learning_path_driver.dart"
+    ],
+    "analyze_session": 68529,
+    "analyze_exit_code": 0,
+    "analyze_result": "No issues found",
+    "auth_unit_tests": 18,
+    "auth_unit_tests_exit_code": 0,
+    "android_rerun": "NOT_RUN",
+    "full_suite_repeated": false
+  },
+  "limits": [
+    "This is local harness diagnostic evidence, not a fresh HTTPS precheck or completed Android gate.",
+    "Successful rotation in server evidence corroborates ordering but DB does not record the second rejected refresh."
+  ]
+}

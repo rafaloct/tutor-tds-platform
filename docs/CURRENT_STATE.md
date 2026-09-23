@@ -4,11 +4,11 @@
 - CURRENT WAVE: 2A — publicação/consumo remoto; Wave 1 concluída funcionalmente em staging.
 - CURRENT ACCEPTANCE GATE: WAVE 1 APROVADA; três golden paths Android e isolamento HTTPS reais. Produção não promovida.
 - STABLE: MVP, produção e assinatura preservados; API Cloud/Supabase staging saudável.
-- IN PROGRESS: gate 2A Android; seletores corrigidos e curso isolado por execução, com dados anteriores preservados.
+- IN PROGRESS: gate 2A Android; cliente auxiliar corrigido para compartilhar AuthRepository do aplicativo, sem alterar produto.
 - BLOCKED: nenhuma intervenção humana necessária no recorte atual; release mantém gates próprios.
 - DO NOT TOUCH: produção, keystore, KV/certificados antigos, baseline e secrets.
 - LAST VERIFIED: 2026-09-23; Flutter atual 358 + analyze global; API locked 334 e bootstrap atualizado 20; Wave 1 Android seis fases/HTTPS 13 checks. Hashes registrados.
-- NEXT ACTION: repetir as oito fases completas com APK único, curso QA por execução e rascunho anterior preservado.
+- NEXT ACTION: executar novo gate completo com APK único, sessão compartilhada e curso QA exclusivo, sem reset de dados.
 
 ## Completed
 Auditoria, cache Stitch, contrato/contexto v2, migração física 0019 e autorização
@@ -31,6 +31,9 @@ Suíte API completa atual: 334 passaram no runtime locked. Instrumentação 2A:
 15 testes de bootstrap e análise Dart aprovados; checkpoint corrigido `34948bf`.
 Isolamento posterior por run passou 20 testes; análise do harness limpa. Suíte
 Flutter atual completa passou 358 testes, análise global sem problemas.
+Concorrência artificial de auth reproduzida e removida do harness; seus dois
+arquivos passaram analyze e os 18 testes originais de AuthRepository passaram.
+191 hashes de produto/testes unitários/config continuam iguais à suíte completa.
 
 ## Changed contracts
 LearningContext `cohort-enrollment-v2`: identidade física de Membership/Enrollment
@@ -50,6 +53,9 @@ verificados. Teste de fonte 200% precisou rolar até o sliver ser construído; c
 Quiz embutido ainda não é ActivityAttempt contextual: fatia posterior da Wave 2 obrigatória.
 Logout ainda limpa filas legadas de avaliação/check-in; QA 2A recusa essa perda,
 e a próxima fatia deve resolver a fronteira antes de ampliar atividades oficiais.
+Refresh pendente após logout pode restaurar sessão (reprodução controlada);
+corrigir junto à troca de dono antes da fatia 2B/produção. Harness 2A deve usar
+o mesmo AuthRepository do Provider, sem segunda instância concorrente.
 Paridade visual integral, QA físico, build release e Play ainda não aprovados.
 Cloud: https://tutor-tds-staging.fastapicloud.dev; Supabase lgtphbbpgqnzduhtyate.
 Deploy b67f0921-d2c4-400d-a28e-c8832eb268fb; somente dados sintéticos.

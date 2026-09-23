@@ -27,6 +27,7 @@ Future<void> main() async {
           data['run_id'] != runId ||
           data['phase'] != phase ||
           data['completed_phase'] != phase ||
+          data['authenticated_assertions_share_app_repository'] != true ||
           data['pid'] is! int ||
           data['course_id'] != 'qa-dynamic-course-$runId' ||
           data['program_id'] != 'qa-dynamic-program' ||

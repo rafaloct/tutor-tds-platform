@@ -127,3 +127,34 @@
   próprios. Baseline inclui todas as linhas anteriores, que devem permanecer
   idênticas. Não retomar fase presumida nem reduzir a prova de oito processos
   com um APK instalado antes de criar/publicar o novo curso.
+
+## Gate 2A: renovação da sessão no cliente de verificação
+
+- Observed: ensaio `36d9d7a4b07c47908836baebb55b20f4` falhou antes da criação,
+  em `_signedIn`/`AuthRepository._refresh`, com sessão expirada. Nenhuma fase
+  Android aprovada; interromper novas tentativas até reproduzir a fronteira.
+- Expected: reusar a sessão da aplicação sem concorrer com outra renovação.
+- Responsible Boundary: `_Api` do teste cria uma
+  segunda AuthRepository sobre o mesmo armazenamento seguro. Código de produto
+  possui uma instância fornecida pelo Provider em `main.dart`.
+- Evidence: `author_v1.log`, `_signedIn:1016`, `_refresh:245`; APK
+  `981ddc00e85d2c658c6541626dcf2fe2889fec3cf3acb70df56850fb4e2cf912`.
+- Likely Root Cause: access token antigo exige refresh; coordenação de refresh
+  é por instância. Rotação concorrente pode rejeitar a segunda requisição e
+  limpar a sessão recém-renovada. Reprodução controlada (sessão 37546) confirmou
+  dois refreshes, rejeição do segundo e uma limpeza da sessão nova. Inspeção
+  readonly do servidor confirmou rotação válida às 22:28:40; o refresh anterior
+  não havia expirado. Nenhum curso/evento novo; baseline 101 eventos/33 registros
+  idêntico, conforme `evidence/dynamic-learning-third-attempt.json`.
+- Affected Files: `integration_test/dynamic_learning_path_test.dart`; verificar
+  `auth_repository.dart` e sua cobertura antes de decidir alteração de produto.
+- Structural Fix: reproduzir com respostas controladas; alinhar cliente auxiliar
+  ao Provider real após montar CartilhasApp, mantendo só leitura local pré-app.
+  Não criar coordenador global nem contornar a falha com login programático.
+  Documentar separadamente qualquer risco de logout durante requisições pendentes.
+
+Risco separado reproduzido: resposta de refresh pendente pode restaurar tokens
+depois de logout. Não é a causa específica do gate 2A; deve ser corrigido na
+fronteira de sessão/troca de dono antes de ampliar atividades na fatia 2B e antes
+de promoção para produção. Não afirmar que reutilizar o Provider resolve esse
+caso. Reprodução/log temporários preservados para orientar a correção e seu teste.

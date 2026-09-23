@@ -1,0 +1,146 @@
+{
+  "status": "GATE_FAILED_AUTH_BASELINE_PRESERVED",
+  "run_id": "36d9d7a4b07c47908836baebb55b20f4",
+  "verified_at": "2026-09-23T22:32:13.843002+00:00",
+  "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+  "approved_supabase_project": "lgtphbbpgqnzduhtyate",
+  "inspection": {
+    "database_transaction_read_only": true,
+    "sql_statement_kinds": {
+      "SET": 1,
+      "SELECT": 111,
+      "SHOW": 1
+    },
+    "http_requests": [
+      {
+        "method": "GET",
+        "path": "/courses/qa-dynamic-course-36d9d7a4b07c47908836baebb55b20f4",
+        "status": 404
+      }
+    ],
+    "authentication_requests": 0,
+    "mutation_requests": 0,
+    "session_token_or_digest_selected": false
+  },
+  "facts": {
+    "boundary": "android_author_v1",
+    "error": "AuthException: Sua sessão expirou. Entre novamente.",
+    "stack": [
+      "AuthRepository._refresh:245",
+      "AuthRepository.refresh:137",
+      "AuthRepository.authorized:153",
+      "AuthRepository.currentUser:77",
+      "_signedIn:1016"
+    ],
+    "run_course_id": "qa-dynamic-course-36d9d7a4b07c47908836baebb55b20f4",
+    "run_course_absent": true,
+    "dependent_target_tables_absent": {
+      "course_versions": true,
+      "program_courses": true,
+      "classes": true,
+      "enrollments": true,
+      "class_enrollments": true,
+      "learning_events": true
+    },
+    "verified_android_phases": [],
+    "apk_sha256": "981ddc00e85d2c658c6541626dcf2fe2889fec3cf3acb70df56850fb4e2cf912",
+    "sessions": {
+      "persona": "AUTHOR",
+      "queried_columns": [
+        "created_at",
+        "expires_at",
+        "revoked_at"
+      ],
+      "window_utc": {
+        "from": "2026-09-23T22:26:00+00:00",
+        "to": "2026-09-23T22:31:00+00:00"
+      },
+      "total_sessions": 3,
+      "revoked_sessions": 1,
+      "unrevoked_sessions": 2,
+      "expired_sessions_at_inspection": 0,
+      "created_in_window": 1,
+      "revoked_in_window": 1,
+      "relevant_sessions": [
+        {
+          "created_at": "2026-09-23T22:07:05.515156+00:00",
+          "expires_at": "2026-10-23T22:07:06.060618+00:00",
+          "revoked": true,
+          "revoked_at": "2026-09-23T22:28:40.509545+00:00",
+          "expired_at_failure": false
+        },
+        {
+          "created_at": "2026-09-23T22:28:40.686527+00:00",
+          "expires_at": "2026-10-23T22:28:41.007346+00:00",
+          "revoked": false,
+          "revoked_at": null,
+          "expired_at_failure": false
+        }
+      ]
+    },
+    "backend_refresh_contract": "rotate_refresh locks the matching row, refuses revoked/expired refresh sessions, revokes the accepted row and creates a successor in the same committed transaction"
+  },
+  "preservation": {
+    "baseline_sha256": "4106ec2e088cec06567482cddb79def4a71816bb2637716450dfb1df9874a7ab",
+    "baseline_event_count": 101,
+    "current_event_count": 101,
+    "every_initial_event_body_unchanged": true,
+    "initial_event_bodies_sha256": "6e2f179e8f3a9f039a59a2b4f887ec9b776a118ee70b8f9608728bba456e6825",
+    "current_event_bodies_sha256": "6e2f179e8f3a9f039a59a2b4f887ec9b776a118ee70b8f9608728bba456e6825",
+    "initial_core_record_count": 33,
+    "every_initial_core_row_unchanged": true,
+    "added_event_count": 0,
+    "added_event_types": {},
+    "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+    "wave1_progress_percent": 10.0,
+    "wave1_validated_hours": 0.0033,
+    "wave1_second_context_progress_percent": 0.0,
+    "previous_failed_draft_unchanged": true,
+    "previous_failed_draft_content_sha256": "b5e17546b9d660b0efd245a7adb3be5eb044025c7f63bfe6d1c1c505c1fd2fcd"
+  },
+  "hypotheses": [
+    {
+      "claim": "Concurrent refreshes from independent AuthRepository instances may consume the same persisted refresh token; one succeeds and another receives rejection.",
+      "status": "NOT_PROVEN_BY_DATABASE_SNAPSHOT",
+      "support": "Assess session creation/revocation timing together with the client stack and backend one-time rotation contract.",
+      "limits": [
+        "Session rows do not record failed refresh requests or client repository instance identity.",
+        "An unrevoked session does not prove that its successor token remained stored on the device.",
+        "HTTP status and request ordering require client reproduction or sanitized request logs."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "tmp/dynamic-learning-android-36d9d7a4b07c47908836baebb55b20f4/run-state.json",
+      "sha256": "8cc4723f04f9a4ae9af54d1f6d18d93960378f00cd1c59210cc4091dd2703db0",
+      "bytes": 618
+    },
+    {
+      "path": "tmp/dynamic-learning-android-36d9d7a4b07c47908836baebb55b20f4/host-state.baseline.json",
+      "sha256": "9356862f1c93582d7cd7042bd6e6d143c2fd70bb26aa7b093a3ea7483c1d91c7",
+      "bytes": 76695
+    },
+    {
+      "path": "tmp/dynamic-learning-android-36d9d7a4b07c47908836baebb55b20f4/host-state.json",
+      "sha256": "ccf3bf5e64ea85f7878dcacd7bdb593ae7084e4b9f6307f5fa23743cec185ad1",
+      "bytes": 448
+    },
+    {
+      "path": "tmp/dynamic-learning-android-36d9d7a4b07c47908836baebb55b20f4/author_v1.log",
+      "sha256": "104a842bd7dab535e8c25a98216fa4cd4be3366ee8f8a627589e2a8a50b12d12",
+      "bytes": 2390
+    },
+    {
+      "path": "tmp/dynamic-learning-android-36d9d7a4b07c47908836baebb55b20f4/build.log",
+      "sha256": "ea37c134d811f64a9ace0bfa02ee3cc0909642637b499006c1cdb1d420292285",
+      "bytes": 1046
+    },
+    {
+      "path": "docs/production/evidence/dynamic-learning-36d9d7a4b07c47908836baebb55b20f4-before-android.json",
+      "sha256": "bf5a56f0563478b913e5161ce4105199d9773b8a20581549316005f1690ef88b",
+      "bytes": 737
+    }
+  ],
+  "gate_passed": false
+}
