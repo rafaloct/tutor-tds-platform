@@ -44,6 +44,8 @@ progresso/data podem esperar a próxima revalidação. Role global permanece no 
 Overflow StudyHub corrigido sem altura fixa; Home e quatro cenários de largura/fonte
 verificados. Teste de fonte 200% precisou rolar até o sliver ser construído; caso passou.
 Quiz embutido ainda não é ActivityAttempt contextual: fatia posterior da Wave 2 obrigatória.
+Logout ainda limpa filas legadas de avaliação/check-in; QA 2A recusa essa perda,
+e a próxima fatia deve resolver a fronteira antes de ampliar atividades oficiais.
 Paridade visual integral, QA físico, build release e Play ainda não aprovados.
 Cloud: https://tutor-tds-staging.fastapicloud.dev; Supabase lgtphbbpgqnzduhtyate.
 Deploy b67f0921-d2c4-400d-a28e-c8832eb268fb; somente dados sintéticos.

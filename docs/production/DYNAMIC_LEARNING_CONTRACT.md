@@ -97,3 +97,9 @@ antes de declarar aprendizagem dinâmica completa. Não creditar quiz oficial po
 tempo de estudo. Preview atual é conferência estática, sem simulação de progresso.
 Fluxo editorial de devolver revisão para correção também permanece fora de 2A;
 qualquer extensão terá contrato/migration próprios e preservará snapshots.
+
+Fronteira legada a tratar na próxima fatia: `SettingsScreen._logout` ainda limpa
+`AssessmentSyncQueue` e o rascunho de check-in; perfil/estudos antigos não são todos
+separados por usuário. O gate 2A recusa troca de conta se existirem essas pendências,
+sem apagá-las para viabilizar o teste. A outbox contextual aceita na Wave 1 preserva
+eventos identificados; esse aceite não se estende automaticamente às filas legadas.

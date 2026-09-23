@@ -1,0 +1,33 @@
+{
+  "status": "DYNAMIC_GATE_INSTRUMENTATION_VALIDATED_LOCALLY",
+  "verified_at": "2026-09-23T21:54:03.297610+00:00",
+  "integrated_gate_passed": false,
+  "checks": {
+    "bootstrap_unit_contract_tests": {
+      "passed": 15,
+      "duration_seconds": 68.3,
+      "runtime": "tmp/context-cloud-locked-env"
+    },
+    "bootstrap_cli_after_plan_text_edit": {
+      "passed": 1,
+      "duration_seconds": 5.64
+    },
+    "android_test_and_driver_analysis": "No issues found",
+    "powershell_parser_and_plan": "passed",
+    "native_wrapper_output_exit_timeout": "passed",
+    "json_comparison_negative_cases": "passed",
+    "independent_android_and_postgres_interface_review": "passed"
+  },
+  "source_sha256": {
+    "api/ops/bootstrap_dynamic_learning_qa.py": "39e8642dd846cc9b074110234904b4220caedbf5ee632e7e44fcba138d005357",
+    "api/tests/test_dynamic_learning_bootstrap.py": "16bce814ea8358ee532cf1553cd71701bfea34f739db11c20a5eca2c74c809eb",
+    "cartilhas_app/integration_test/dynamic_learning_path_test.dart": "e9dbcca97320ab9c61b28f23d3ae99d34b203101f3a082ccdc18dceb6a61988f",
+    "cartilhas_app/test_driver/dynamic_learning_path_driver.dart": "7e51cae2ac397c8d8890bd413203a69e3d1a67289717a8c40db057070967ec9f",
+    "tooling/test_dynamic_learning_android.ps1": "9b6b2fb32d474aa733c310fa186e9fcb656f2e9d08ea7debba32fbfcd236c63a"
+  },
+  "limits": [
+    "No Android publication flow executed yet",
+    "Only isolated staging synthetic fixtures allowed",
+    "No production/release acceptance"
+  ]
+}
