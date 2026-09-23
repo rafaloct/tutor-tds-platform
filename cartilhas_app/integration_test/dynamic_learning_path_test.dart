@@ -38,10 +38,7 @@ const _program = String.fromEnvironment(
   'QA_DYNAMIC_PROGRAM_ID',
   defaultValue: 'qa-dynamic-program',
 );
-const _course = String.fromEnvironment(
-  'QA_DYNAMIC_COURSE_ID',
-  defaultValue: 'qa-dynamic-course',
-);
+const _course = String.fromEnvironment('QA_DYNAMIC_COURSE_ID');
 const _author = _Actor(
   String.fromEnvironment('QA_DYNAMIC_AUTHOR_ID'),
   String.fromEnvironment('QA_DYNAMIC_AUTHOR_CPF'),
@@ -70,8 +67,13 @@ const _phases = [
 ];
 const _queue = LearningEventQueue();
 const _teachingTypes = {'lesson_started', 'lesson_completed', 'study_activity'};
-String _title(int edition) => 'Curso QA Dynamic edição $edition';
-String _className(int edition) => 'Turma QA Dynamic edição $edition';
+String _tracePhase = 'initializing';
+void _mark(String action) =>
+    debugPrint('DYNAMIC_QA phase=$_tracePhase action=$action');
+String _title(int edition) =>
+    'Curso QA Dynamic ${_runId.substring(0, 8)} edição $edition';
+String _className(int edition) =>
+    'Turma QA Dynamic ${_runId.substring(0, 8)} edição $edition';
 String _block(int index, {int edition = 1}) => index == 0
     ? 'Publicação remota QA: edição $edition preservada.'
     : 'Etapa QA ${index + 1}: cuidar do solo ajuda a conservar a água.';
@@ -103,7 +105,7 @@ void main() {
       expect(AppConfig.durableLearningOutboxEnabled, isTrue);
       expect(RegExp(r'^[a-f0-9]{32}$').hasMatch(_runId), isTrue);
       expect(_program, 'qa-dynamic-program');
-      expect(_course, 'qa-dynamic-course');
+      expect(_course, 'qa-dynamic-course-$_runId');
       for (final actor in [_author, _publisher, _learner]) {
         expect(actor.id, isNotEmpty);
         expect(actor.cpf.length, 11);
@@ -135,6 +137,8 @@ void main() {
         reason: 'Run already complete; never restart it silently.',
       );
       final phase = _phases[index];
+      _tracePhase = phase;
+      _mark('phase_start');
       expect(
         state['pids'] as List,
         isNot(contains(pid)),
@@ -150,6 +154,7 @@ void main() {
             await _signedIn(tester, api, prefs, _author, evidence: evidence);
             expect((await api.auth.currentUser()).role, 'student');
             await _openEditor(tester, api);
+            _mark('course_create');
             await _tap(
               tester,
               find.text('Criar curso'),
@@ -292,6 +297,7 @@ void main() {
               reason:
                   'The preceding learner rejection must leave revision, state and content unchanged.',
             );
+            _mark('version_fork');
             await _tap(tester, find.text('Criar nova versão'), within: _editor);
             final fork = await _editorStatus(tester, api, 'draft');
             expect(fork['version_id'], isNot(_version(state, 1)));
@@ -390,6 +396,7 @@ void main() {
               'old_progress_unchanged': true,
             });
           case 'learner_offline':
+            _mark('offline_cached_read_and_queue');
             await api.requireOffline();
             expect(await api.auth.localUserId(), _learner.id);
             expect(await _pending(), isEmpty);
@@ -458,6 +465,7 @@ void main() {
               'cold_start_retained_edition': 1,
             });
           case 'learner_reconnect':
+            _mark('reconnect_persisted_queue');
             expect(await api.auth.localUserId(), _learner.id);
             final offline = (state['offline_events'] as List)
                 .map((e) => LearningEvent.fromJson(e)!)
@@ -549,6 +557,7 @@ void main() {
         expect(await prefs.setString(key, jsonEncode(state)), isTrue);
         await prefs.reload();
         expect(jsonDecode(prefs.getString(key)!), state);
+        _mark('phase_passed');
         binding.reportData = {
           'run_id': _runId,
           'phase': phase,
@@ -573,8 +582,8 @@ void main() {
   );
 }
 
-Finder get _editor => find.byType(CourseStructureEditor);
-Finder get _reader => find.byType(ChatExperienceScreen);
+Finder get _editor => _scoped(find.byType(CourseStructureEditor));
+Finder get _reader => _scoped(find.byType(ChatExperienceScreen));
 String _version(Map state, int edition) =>
     (state['v$edition'] as Map)['version_id'] as String;
 Map<String, dynamic> _progress(Map value) =>
@@ -652,53 +661,124 @@ Future<void> _waitUntil(
   fail(reason);
 }
 
-Future<void> _waitFor(WidgetTester tester, Finder finder) => _waitUntil(
-  tester,
-  () async => finder.evaluate().isNotEmpty,
-  reason: 'Expected widget: $finder',
+// Route transitions can keep the previous page onstage. Text alone then
+// matches both the editorial row and the preview's EditableText. Restrict the
+// actual target, not only its scroll container, and fail on true ambiguity.
+class _CurrentRouteFinder extends ChainedFinder {
+  _CurrentRouteFinder(super.parent);
+  @override
+  String get description =>
+      '${parent.describeMatch(Plurality.many)} on the current modal route';
+  @override
+  Iterable<Element> filter(Iterable<Element> candidates) =>
+      candidates.where((element) => ModalRoute.of(element)?.isCurrent == true);
+}
+
+class _OuterVerticalScrollableFinder extends ChainedFinder {
+  _OuterVerticalScrollableFinder(super.parent);
+  @override
+  String get description =>
+      '${parent.describeMatch(Plurality.many)} without a parent scrollable on the same route';
+  @override
+  Iterable<Element> filter(Iterable<Element> candidates) => candidates.where((
+    element,
+  ) {
+    final scrollable = element.widget as Scrollable;
+    if (scrollable.axisDirection != AxisDirection.up &&
+        scrollable.axisDirection != AxisDirection.down) {
+      return false;
+    }
+    final route = ModalRoute.of(element);
+    var outermost = true;
+    element.visitAncestorElements((ancestor) {
+      if (ancestor.widget is Scrollable && ModalRoute.of(ancestor) == route) {
+        outermost = false;
+        return false;
+      }
+      return true;
+    });
+    return outermost;
+  });
+}
+
+Finder _scoped(Finder finder, {Finder? within}) => _CurrentRouteFinder(
+  within == null
+      ? finder
+      : find.descendant(
+          of: _CurrentRouteFinder(within),
+          matching: finder,
+          matchRoot: true,
+        ),
 );
 
-Future<void> _reveal(
+Future<void> _waitFor(WidgetTester tester, Finder finder) async {
+  final target = _scoped(finder);
+  await _waitUntil(
+    tester,
+    () async => target.evaluate().isNotEmpty,
+    reason: 'Expected current-route widget: $finder',
+  );
+  expect(
+    target,
+    findsOneWidget,
+    reason: 'A gate selector must identify exactly one current-route widget.',
+  );
+}
+
+Future<Finder> _reveal(
   WidgetTester tester,
   Finder finder, {
   Finder? within,
 }) async {
-  final dialog = find.byType(AlertDialog);
-  final root =
-      within ??
-      (dialog.evaluate().isNotEmpty ? dialog.last : find.byType(Scaffold).last);
-  if (finder.evaluate().isEmpty) {
-    final scroll = find
-        .descendant(of: root, matching: find.byType(Scrollable))
-        .first;
+  final target = _scoped(finder, within: within);
+  if (target.evaluate().isEmpty) {
+    final scroll = _OuterVerticalScrollableFinder(
+      _scoped(find.byType(Scrollable), within: within),
+    );
     await _waitFor(tester, scroll);
     await tester.drag(scroll, const Offset(0, 5000));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.scrollUntilVisible(
-      finder,
+      target,
       300,
       maxScrolls: 40,
       scrollable: scroll,
     );
   }
-  await tester.ensureVisible(finder);
+  expect(
+    target,
+    findsOneWidget,
+    reason:
+        'Ambiguous gate selector: specify its widget type and screen scope.',
+  );
+  await tester.ensureVisible(target);
   await tester.pump(const Duration(milliseconds: 200));
+  return target;
 }
 
 Future<void> _tap(WidgetTester tester, Finder finder, {Finder? within}) async {
-  await _reveal(tester, finder, within: within);
-  final buttons = find.ancestor(
-    of: finder,
-    matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
-  );
+  final target = await _reveal(tester, finder, within: within);
+  final buttons = tester.widget(target) is ButtonStyleButton
+      ? target
+      : _scoped(
+          find.ancestor(
+            of: target,
+            matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+          ),
+        );
   if (buttons.evaluate().isNotEmpty) {
+    expect(buttons, findsOneWidget);
     await _waitUntil(
       tester,
-      () async =>
-          tester.widget<ButtonStyleButton>(buttons.last).onPressed != null,
+      () async => tester.widget<ButtonStyleButton>(buttons).onPressed != null,
     );
   }
-  await tester.tap(finder);
+  await _waitUntil(
+    tester,
+    () async => target.hitTestable().evaluate().isNotEmpty,
+    reason: 'The current-route action did not become hit-testable.',
+  );
+  await tester.tap(target);
   await tester.pump(const Duration(milliseconds: 300));
 }
 
@@ -708,12 +788,13 @@ Future<void> _fill(
   String value, {
   Finder? within,
 }) async {
-  final field = find
-      .byWidgetPredicate(
-        (w) => w is TextField && w.decoration?.labelText == label,
-      )
-      .last;
-  await _reveal(tester, field, within: within);
+  final field = await _reveal(
+    tester,
+    find.byWidgetPredicate(
+      (w) => w is TextField && w.decoration?.labelText == label,
+    ),
+    within: within,
+  );
   await _waitUntil(
     tester,
     () async => tester.widget<TextField>(field).enabled != false,
@@ -724,9 +805,9 @@ Future<void> _fill(
 }
 
 Future<void> _back(WidgetTester tester) async {
-  final button = find.byType(BackButton);
+  final button = _scoped(find.byType(BackButton));
   if (button.evaluate().isNotEmpty) {
-    await _tap(tester, button.last);
+    await _tap(tester, button);
   } else {
     await tester.binding.handlePopRoute();
     await tester.pump(const Duration(milliseconds: 300));
@@ -738,14 +819,20 @@ Future<void> _menu(WidgetTester tester, String label) async {
   while (DateTime.now().isBefore(deadline)) {
     await _waitFor(tester, find.byTooltip('Mais opções'));
     await _tap(tester, find.byTooltip('Mais opções'));
-    final labelFinder = find.text(label);
+    final labelFinder = _scoped(find.text(label));
     if (labelFinder.evaluate().isNotEmpty) {
-      final item = find.ancestor(
-        of: labelFinder,
-        matching: find.byWidgetPredicate((w) => w is PopupMenuItem<String>),
+      final item = _scoped(
+        find.ancestor(
+          of: labelFinder,
+          matching: find.byWidgetPredicate((w) => w is PopupMenuItem<String>),
+        ),
       );
-      if (item.evaluate().isEmpty ||
-          tester.widget<PopupMenuItem<String>>(item.last).enabled) {
+      expect(
+        item,
+        findsOneWidget,
+        reason: 'Menu label must identify its current popup item.',
+      );
+      if (tester.widget<PopupMenuItem<String>>(item).enabled) {
         await _tap(tester, labelFinder);
         return;
       }
@@ -757,6 +844,7 @@ Future<void> _menu(WidgetTester tester, String label) async {
 }
 
 Future<void> _refreshCatalog(WidgetTester tester) async {
+  _mark('catalog_refresh');
   await _menu(tester, 'Atualizar catálogo');
   final catalog = find.descendant(
     of: find.byType(HomeScreen),
@@ -779,6 +867,7 @@ Future<void> _signedIn(
   _Actor actor, {
   required Map<String, dynamic> evidence,
 }) async {
+  _mark('account_access');
   final current = await api.auth.localUserId();
   final hasSession = await api.auth.hasSession();
   final accountEvidence = <String, dynamic>{
@@ -825,8 +914,8 @@ Future<void> _signedIn(
   await _waitUntil(
     tester,
     () async =>
-        find.byType(HomeScreen).evaluate().isNotEmpty ||
-        find.text('Já tenho conta').evaluate().isNotEmpty,
+        _scoped(find.byType(HomeScreen)).evaluate().isNotEmpty ||
+        _scoped(find.text('Já tenho conta')).evaluate().isNotEmpty,
   );
   var settingsOpen = false;
   if (current != null && current != actor.id) {
@@ -878,7 +967,7 @@ Future<void> _signedIn(
     }
   }
   if (current != actor.id) {
-    final welcome = find.text('Já tenho conta').evaluate().isNotEmpty;
+    final welcome = _scoped(find.text('Já tenho conta')).evaluate().isNotEmpty;
     if (welcome) {
       await _tap(tester, find.text('Já tenho conta'));
     } else {
@@ -963,18 +1052,20 @@ Future<bool> _accountSettingsReady(WidgetTester tester) async {
 }
 
 Future<void> _openEditor(WidgetTester tester, _Api api) async {
+  _mark('editor_open');
   final programs = (await api.get('/editor/context'))['programs'] as List;
   final program = programs.singleWhere((p) => p['id'] == _program) as Map;
   await _menu(tester, 'Meus conteúdos');
   await _waitFor(tester, find.byType(CourseEditorCatalogScreen));
-  final chooser = find.byWidgetPredicate(
-    (w) => w is DropdownButtonFormField<String>,
+  final chooser = _scoped(
+    find.byWidgetPredicate((w) => w is DropdownButtonFormField<String>),
+    within: find.byType(CourseEditorCatalogScreen),
   );
   await _waitFor(tester, chooser);
   if (tester.widget<DropdownButtonFormField<String>>(chooser).initialValue !=
       _program) {
     await _tap(tester, chooser);
-    await _tap(tester, find.text(program['name'] as String).last);
+    await _tap(tester, find.text(program['name'] as String));
   }
 }
 
@@ -1017,16 +1108,21 @@ Future<void> _saveEditor(
   _Api api, {
   required String title,
 }) async {
+  _mark('draft_save');
   await _tap(tester, find.text('Salvar rascunho'), within: _editor);
   await _waitUntil(
     tester,
     () async =>
         (await api.editor())['title'] == title &&
-        find.text('Alterações não salvas').evaluate().isEmpty,
+        _scoped(
+          find.text('Alterações não salvas'),
+          within: _editor,
+        ).evaluate().isEmpty,
   );
 }
 
 Future<void> _transition(WidgetTester tester, String action) async {
+  _mark(action == 'Publicar' ? 'publish' : 'submit_for_review');
   await _tap(tester, find.text(action), within: _editor);
   await _waitFor(tester, find.byType(AlertDialog));
   await _tap(tester, find.widgetWithText(FilledButton, 'Confirmar'));
@@ -1046,21 +1142,41 @@ Future<Map<String, dynamic>> _editorStatus(
 }
 
 Future<void> _preview(WidgetTester tester, _Api api, String content) async {
+  _mark('preview_open');
   final before = (await api.events())
       .where((e) => _teachingTypes.contains(e['event_type']))
       .toList();
   await _tap(tester, find.text('Pré-visualizar'), within: _editor);
+  final preview = _scoped(
+    find.ancestor(
+      of: find.text('Pré-visualização'),
+      matching: find.byType(Scaffold),
+    ),
+  );
+  await _waitFor(tester, preview);
   await _waitFor(
     tester,
-    find.text('Leitura de conferência. Não registra progresso nem respostas.'),
+    find.descendant(
+      of: preview,
+      matching: find.text(
+        'Leitura de conferência. Não registra progresso nem respostas.',
+      ),
+    ),
   );
-  await _reveal(tester, find.text(content));
-  expect(find.text('Continuar'), findsNothing);
+  await _reveal(
+    tester,
+    find.byWidgetPredicate(
+      (widget) => widget is SelectableText && widget.data == content,
+    ),
+    within: preview,
+  );
+  expect(_scoped(find.text('Continuar'), within: preview), findsNothing);
   await _back(tester);
   final after = (await api.events())
       .where((e) => _teachingTypes.contains(e['event_type']))
       .toList();
   expect(after, before);
+  _mark('preview_verified');
 }
 
 Future<void> _assertPublic(_Api api, int edition, String version) async {
@@ -1166,6 +1282,7 @@ Future<void> _openReader(
   String version,
   String title,
 ) async {
+  _mark('contextual_reader_open');
   await _tap(
     tester,
     find.text('Continuar estudo'),
@@ -1324,7 +1441,9 @@ class _Api {
       get('/classes/${Uri.encodeComponent(cohort)}/learning-context');
   Future<String> cohort(int edition, String version) async {
     final rows = ((await get('/classes?enrolled_only=true'))['classes'] as List)
-        .where((e) => e['name'] == _className(edition))
+        .where(
+          (e) => e['course_id'] == _course && e['name'] == _className(edition),
+        )
         .toList();
     expect(
       rows,

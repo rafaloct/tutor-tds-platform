@@ -12,10 +12,12 @@ param(
 # QA staging only. One APK build/install, then attach to eight distinct processes.
 # No uninstall, data/log clearing, seed/reset, production credentials or retries.
 # A failed phase can have committed remotely or advanced its checkpoint. Preserve
-# the complete run and diagnose before proposing a continuation with the same APK.
+# the complete run. A diagnosed new run gets its own course; prior drafts/history
+# are included in the baseline and must remain unchanged throughout the new gate.
 $ErrorActionPreference = 'Stop'
 $package = 'com.tutortds_cartilhas.dev'
 $apiBase = 'https://tutor-tds-staging.fastapicloud.dev'
+$courseId = "qa-dynamic-course-$RunId"
 $workspace = Split-Path $PSScriptRoot -Parent
 $python = Join-Path $workspace 'tmp/context-cloud-locked-env/Scripts/python.exe'
 $target = 'integration_test/dynamic_learning_path_test.dart'
@@ -30,6 +32,7 @@ if (-not $Execute) {
     [ordered]@{
         mode = 'PLAN_ONLY_NO_SDK_DEVICE_NETWORK_OR_WRITES'
         run_id = $RunId
+        course_id = $courseId
         device = $Device
         package = $package
         api_url = $apiBase
@@ -173,6 +176,9 @@ function Assert-SourceHashes {
     if ((Get-SourceHashes | ConvertTo-Json -Depth 4 -Compress) -ne $sourceSnapshot) {
         throw 'Sources changed during the gate; preserve this run for diagnosis.'
     }
+    if ((Get-FileHash -LiteralPath $DefinesFile -Algorithm SHA256).Hash.ToLowerInvariant() -ne $sourceDefinesSha256) {
+        throw 'Original operational configuration changed; preserve this run for diagnosis.'
+    }
 }
 
 function ConvertTo-CanonicalValue {
@@ -207,6 +213,7 @@ function Save-RunState {
     param([string]$Status)
     [ordered]@{
         run_id = $RunId
+        course_id = $courseId
         status = $Status
         boundary = $script:boundary
         attempted_phase = $script:attemptedPhase
@@ -280,7 +287,7 @@ function Invoke-HostHook {
     $output = Join-Path $workspace "docs/production/evidence/dynamic-learning-$RunId-$($Phase.Replace('_', '-')).json"
     if (Test-Path -LiteralPath $output) { throw 'Host evidence already exists; never overwrite a hook.' }
     $arguments = @('-m', 'ops.bootstrap_dynamic_learning_qa', '--phase', $Phase, '--run-id', $RunId,
-        '--defines', $DefinesFile, '--runtime-json', $RuntimeFile,
+        '--defines', $operationalDefines, '--runtime-json', $RuntimeFile,
         '--output-state', $hostStatePath, '--output-evidence', $output, '--execute')
     $seconds = Invoke-NativeBounded -Executable $python -CommandArgs $arguments -Name "host-$Phase" `
         -TimeoutSeconds 180 -WorkingDirectory (Join-Path $workspace 'api')
@@ -294,6 +301,12 @@ function Invoke-HostHook {
     if ($record.status -ne $expectedStatus -or $record.phase -ne $Phase -or
         $record.run_id -ne $RunId -or $record.api_base -ne $apiBase) {
         throw 'Host hook evidence does not match the approved phase/target.'
+    }
+    $state = Get-Content -LiteralPath $hostStatePath -Raw | ConvertFrom-Json
+    if ($state.run_id -ne $RunId -or $state.api_base -ne $apiBase -or
+        $state.course_id -ne $courseId -or $state.program_id -ne $configuration.QA_DYNAMIC_PROGRAM_ID -or
+        $state.last_completed_phase -ne $Phase -or $state.baseline_sha256 -ne $record.baseline_sha256) {
+        throw 'Host state must belong to this exact run/course before Android advances.'
     }
     $hostReports.Add([ordered]@{
         phase = $Phase
@@ -325,6 +338,8 @@ if (-not $EvidenceFile.StartsWith($evidenceRoot, [StringComparison]::OrdinalIgno
 }
 if (Test-Path -LiteralPath $runDirectory) { throw 'Run ID already exists; no rerun/reset is supported.' }
 $configuration = Get-Content -LiteralPath $DefinesFile -Raw | ConvertFrom-Json
+$sourceConfiguration = $configuration
+$sourceDefinesSha256 = (Get-FileHash -LiteralPath $DefinesFile -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($configuration.TUTOR_ENVIRONMENT -ne 'staging' -or $configuration.TUTOR_API_URL -ne $apiBase -or
     $configuration.TUTOR_STAGING_API_URL -ne $apiBase -or
     "$($configuration.LEARNING_CONTEXT_ENABLED)".ToLowerInvariant() -ne 'true' -or
@@ -333,6 +348,21 @@ if ($configuration.TUTOR_ENVIRONMENT -ne 'staging' -or $configuration.TUTOR_API_
     $configuration.QA_DYNAMIC_COURSE_ID -ne 'qa-dynamic-course' -or $configuration.TUTOR_GATEWAY_URL) {
     throw 'Expected the exact isolated cloud staging target, flags and synthetic dynamic fixture.'
 }
+# Derive only this run's course in a separate host-only configuration. The source
+# actor fixture and its historical preparation evidence are never overwritten.
+$operationalConfiguration = [ordered]@{}
+foreach ($key in @('TUTOR_ENVIRONMENT', 'TUTOR_API_URL', 'TUTOR_STAGING_API_URL',
+        'LEARNING_CONTEXT_ENABLED', 'DURABLE_LEARNING_OUTBOX_ENABLED', 'QA_DYNAMIC_PROGRAM_ID')) {
+    $operationalConfiguration[$key] = $configuration.$key
+}
+$operationalConfiguration['QA_DYNAMIC_COURSE_ID'] = $courseId
+foreach ($persona in @('AUTHOR', 'PUBLISHER', 'LEARNER', 'OPERATOR')) {
+    foreach ($suffix in @('ID', 'CPF', 'PASSWORD')) {
+        $key = "QA_DYNAMIC_${persona}_$suffix"
+        $operationalConfiguration[$key] = $configuration.$key
+    }
+}
+$configuration = [pscustomobject]$operationalConfiguration
 $appConfiguration = [ordered]@{}
 foreach ($key in @('TUTOR_ENVIRONMENT', 'TUTOR_API_URL', 'TUTOR_STAGING_API_URL',
         'LEARNING_CONTEXT_ENABLED', 'DURABLE_LEARNING_OUTBOX_ENABLED', 'QA_DYNAMIC_PROGRAM_ID', 'QA_DYNAMIC_COURSE_ID')) {
@@ -364,8 +394,8 @@ if ($gate.status -ne 'WAVE1_FUNCTIONAL_STAGING_PASSED' -or $gate.next_wave_allow
     $gate.api_url -ne $apiBase -or $fixture.status -ne 'fixture_prepared' -or
     $fixture.api_base -ne $apiBase -or $fixture.course_absent -ne $true -or
     $fixture.program_id -ne $configuration.QA_DYNAMIC_PROGRAM_ID -or
-    $fixture.course_id -ne $configuration.QA_DYNAMIC_COURSE_ID -or $fixture.wave1_gate_sha256 -ne $gateHash) {
-    throw 'Approved Wave 1 and the prepared course-absent Wave 2 fixture are required.'
+    $fixture.course_id -ne $sourceConfiguration.QA_DYNAMIC_COURSE_ID -or $fixture.wave1_gate_sha256 -ne $gateHash) {
+    throw 'Approved Wave 1 and the original prepared actor fixture are required.'
 }
 foreach ($property in $gate.evidence_sha256.PSObject.Properties) {
     if ((Get-FileHash -LiteralPath (Join-Path $workspace $property.Name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $property.Value) {
@@ -398,9 +428,14 @@ $aapt = Join-Path $buildTools[0].FullName 'aapt.exe'
 if (-not (Test-Path -LiteralPath $aapt)) { throw 'Android manifest inspection tool missing.' }
 $null = New-Item -ItemType Directory -Path $runDirectory
 $appDefines = Join-Path $runDirectory 'app-defines.json'
-& git -C $workspace check-ignore -q -- $appDefines
-if ($LASTEXITCODE -ne 0) { throw 'Synthetic app configuration output must be ignored by Git.' }
+$operationalDefines = Join-Path $runDirectory 'host-defines.json'
+foreach ($output in @($appDefines, $operationalDefines)) {
+    & git -C $workspace check-ignore -q -- $output
+    if ($LASTEXITCODE -ne 0) { throw 'Synthetic configuration output must be ignored by Git.' }
+}
+$operationalConfiguration | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $operationalDefines -Encoding utf8
 $appConfiguration | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $appDefines -Encoding utf8
+Assert-SourceHashes
 $hostStatePath = Join-Path $runDirectory 'host-state.json'
 $nativeWrapper = Join-Path $runDirectory 'invoke-native.ps1'
 @'
@@ -584,6 +619,8 @@ try {
         status = 'DYNAMIC_LEARNING_ANDROID_PATH_PASSED'
         verified_at = (Get-Date).ToUniversalTime().ToString('o')
         run_id = $RunId
+        course_id = $courseId
+        program_id = $configuration.QA_DYNAMIC_PROGRAM_ID
         device = $Device
         app_package = $package
         api_url = $apiBase
@@ -600,6 +637,7 @@ try {
         separate_processes = $true
         all_phases_in_this_run = ($reports.Count -eq 8)
         automatic_resume = $false
+        original_operational_configuration_unchanged = $true
         source_sha256 = $sourceHashes
         source_hash_format = 'SHA256 of raw local file bytes'
         host_runtime = $runtimeIdentity

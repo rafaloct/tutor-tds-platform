@@ -83,6 +83,13 @@ legadas existentes para matrícula/turma; carga sintética de 120 segundos somen
 no programa/curso QA, antes do primeiro estudo. A turma anterior e seus eventos
 devem permanecer intactos. Nenhuma conta, curso ou evento de produção é usado.
 
+Cada ensaio completo usa `qa-dynamic-course-<run_id>` e títulos identificados pela
+execução, reutilizando os mesmos atores/programa sintéticos. O alvo deve estar
+ausente no banco e no catálogo antes da instalação. Rascunhos de ensaios falhos
+permanecem preservados e entram no baseline de hashes da próxima execução.
+Isso permite revalidar criação/publicação no mesmo APK sem apagar evidências nem
+retomar automaticamente uma fase incompleta. Não altera entidades do aplicativo.
+
 Testes: repository/cache; Home widget/retorno; contrato editorial existente;
 integração real de publicação com PostgreSQL/HTTPS/Android. Suíte completa somente
 no gate ou se a extensão afetar o núcleo. Defaults de produção permanecem seguros.

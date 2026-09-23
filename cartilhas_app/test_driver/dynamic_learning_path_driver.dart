@@ -28,7 +28,7 @@ Future<void> main() async {
           data['phase'] != phase ||
           data['completed_phase'] != phase ||
           data['pid'] is! int ||
-          data['course_id'] != 'qa-dynamic-course' ||
+          data['course_id'] != 'qa-dynamic-course-$runId' ||
           data['program_id'] != 'qa-dynamic-program' ||
           data['checkpoint'] is! Map ||
           (data['checkpoint'] as Map)['completed_phase'] != phase ||

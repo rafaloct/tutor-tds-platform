@@ -1,0 +1,212 @@
+{
+  "status": "GATE_FAILED_DRAFT_AND_BASELINE_PRESERVED",
+  "run_id": "1e0de0f062b3481fa18663ebc4cf447f",
+  "verified_at": "2026-09-23T22:14:52.579107+00:00",
+  "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+  "approved_supabase_project": "lgtphbbpgqnzduhtyate",
+  "inspection": {
+    "database_transaction_read_only": true,
+    "sql_statement_kinds": {
+      "SET": 1,
+      "SELECT": 111,
+      "SHOW": 1
+    },
+    "http_requests": [
+      {
+        "method": "GET",
+        "path": "/courses/qa-dynamic-course",
+        "status": 404
+      },
+      {
+        "method": "GET",
+        "path": "/courses",
+        "status": 200
+      }
+    ],
+    "authentication_requests": 0,
+    "mutation_requests": 0
+  },
+  "failure": {
+    "boundary": "android_author_v1",
+    "error": "Bad state: Too many elements",
+    "responsible_boundary": "Flutter integration test preview finder",
+    "stack": [
+      "WidgetController.ensureVisible",
+      "_reveal:684",
+      "_preview:1057",
+      "author_v1:184"
+    ],
+    "verified_android_phases": [],
+    "apk_sha256": "1a5355318d7480e2f75e93bbff5be817a079faf13e7b16e707c9a01ab33f5db1",
+    "gate_passed": false
+  },
+  "database_snapshot": {
+    "program": {
+      "id": "qa-dynamic-program",
+      "institution_id": "qa-org",
+      "name": "Formação QA — publicação dinâmica"
+    },
+    "course": {
+      "id": "qa-dynamic-course",
+      "active": false,
+      "public_projection_sha256": "777b5863d801327b008f5610aa3eb3a4fb47554f056e0961b393075db17a4274"
+    },
+    "offering": {
+      "program_id": "qa-dynamic-program",
+      "course_id": "qa-dynamic-course",
+      "planned_seconds": 144000
+    },
+    "version": {
+      "id": "6807626f-4479-4758-88aa-985495ea208c",
+      "number": 1,
+      "revision": 2,
+      "status": "draft",
+      "creator_persona": "AUTHOR",
+      "content_sha256": "b5e17546b9d660b0efd245a7adb3be5eb044025c7f63bfe6d1c1c505c1fd2fcd",
+      "section_count": 1,
+      "message_count": 7,
+      "blocks": [
+        {
+          "id": "content_8d18184866d2a0194564f998f3ebabed",
+          "version_id": "068ffabd-9a8c-5b18-92e3-67f695c57370",
+          "type": "bot",
+          "content_sha256": "03c36dd15af735a2d816c791bb22e79dec5c88b7ac5938b06bee273262e6710c"
+        },
+        {
+          "id": "content_adaadff5e42da075d0a19ea87521cd8c",
+          "version_id": "a72f1707-0f12-5f14-8171-186b518073a6",
+          "type": "bot",
+          "content_sha256": "dcad8787a29cada1c737d31b45b508496369de807650a5618bcb8ee8525b7e49"
+        },
+        {
+          "id": "content_f264addc0aeb941a1667d519e327bd85",
+          "version_id": "580b651a-efcc-5de7-a145-fad2152d409d",
+          "type": "bot",
+          "content_sha256": "62bedfc29c7d37aba22ac41ef720ed7f23e5f3aaf5b4089b1fd666da23c482ac"
+        },
+        {
+          "id": "content_ea31ae6b3942d3a7a22bf39d4d162b25",
+          "version_id": "a84d07eb-3464-5346-b23c-fdfe11394be1",
+          "type": "bot",
+          "content_sha256": "45d655aad81dc4dc43e05444f61d807ed4435c56c4809c70b4fac2e30693e511"
+        },
+        {
+          "id": "content_b055f14d64414c9e6697458e04f2515b",
+          "version_id": "6f54ba57-5b89-538f-8356-d673e52f1872",
+          "type": "bot",
+          "content_sha256": "3320f29cf903682c1046419aab8441f71644053e840cf9dee1c9e2930cc7edc3"
+        },
+        {
+          "id": "content_84a3bc1762b65adf642e9fa1db7a8807",
+          "version_id": "de96a6df-2833-5b63-b8ab-f7f5eb9fc788",
+          "type": "bot",
+          "content_sha256": "69784f2a9c1012b8022d1da1d459410f276d8e3ac4f2ccc34d0c18303e137628"
+        },
+        {
+          "id": "content_7a46c9beb8e0097f8bd69b60daf9a89f",
+          "version_id": "631f2a3c-8768-50a5-828c-4ed0517fab8e",
+          "type": "bot",
+          "content_sha256": "4677c1aa3cf469b267976de41bf7f9985c3c857b14843328ec80740f6d034637"
+        }
+      ]
+    },
+    "transitions": [
+      {
+        "id": "47a0c8bb-999a-4559-b4b7-15f2a742cff3",
+        "version_id": "6807626f-4479-4758-88aa-985495ea208c",
+        "from_status": null,
+        "to_status": "draft",
+        "actor_persona": "AUTHOR",
+        "actor_role": "teacher"
+      }
+    ],
+    "transition_rows_sha256": "caff610a9347a409953a9f21116a0291b6b739d920bdb480afa5bf41b01e5c24",
+    "dynamic_bindings": {
+      "classes": 0,
+      "enrollments": 0,
+      "class_enrollments": 0
+    },
+    "dynamic_event_types": {
+      "feature_used": 1,
+      "page_viewed": 9
+    },
+    "dynamic_teaching_event_count": 0
+  },
+  "preservation": {
+    "baseline_sha256": "8499474d46648a09d4322903c1c7f30bc27c8adcd9696628d8d8eaf68e468c95",
+    "baseline_event_count": 79,
+    "current_event_count": 101,
+    "every_initial_event_body_unchanged": true,
+    "initial_event_bodies_sha256": "b388cc741131fac69afa01d3525cf659fc451fc0909c09e65b9fa0d8de52b229",
+    "current_event_bodies_sha256": "6e2f179e8f3a9f039a59a2b4f887ec9b776a118ee70b8f9608728bba456e6825",
+    "initial_core_record_count": 29,
+    "every_initial_core_row_unchanged": true,
+    "added_event_count": 22,
+    "added_event_types": {
+      "page_viewed": 18,
+      "feature_used": 4
+    },
+    "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+    "wave1_progress_percent": 10.0,
+    "wave1_validated_hours": 0.0033,
+    "wave1_second_context_progress_percent": 0.0
+  },
+  "artifacts": [
+    {
+      "path": "tmp/dynamic-learning-android-1e0de0f062b3481fa18663ebc4cf447f/run-state.json",
+      "sha256": "ccc17151aaabe60142c0e44a073acc91603f76cabaae162579b59eceec2ba08e",
+      "bytes": 548
+    },
+    {
+      "path": "tmp/dynamic-learning-android-1e0de0f062b3481fa18663ebc4cf447f/host-state.baseline.json",
+      "sha256": "da613a359c3a0bb933315fb3f5cdd23c646db82564ea65bf121b0a6f45be2636",
+      "bytes": 60752
+    },
+    {
+      "path": "tmp/dynamic-learning-android-1e0de0f062b3481fa18663ebc4cf447f/host-state.json",
+      "sha256": "fe8917d114677b7361289a820716fa3e3576e9ceef542fdeb4937b675b0b89e5",
+      "bytes": 414
+    },
+    {
+      "path": "tmp/dynamic-learning-android-1e0de0f062b3481fa18663ebc4cf447f/author_v1.log",
+      "sha256": "788399d51df44650177381b9f9d07c78f0eec4afe320f1a320bd95459fab36f3",
+      "bytes": 23047
+    },
+    {
+      "path": "tmp/dynamic-learning-android-1e0de0f062b3481fa18663ebc4cf447f/build.log",
+      "sha256": "42193ab488205d1f4fd32913554f6c020e5054c3148ec8048077802658bd3493",
+      "bytes": 1046
+    },
+    {
+      "path": "docs/production/evidence/dynamic-learning-1e0de0f062b3481fa18663ebc4cf447f-before-android.json",
+      "sha256": "8cf370f1211429b15762f313b3f518e6f1d8c85cc04cbce3bf03dcafc3af3494",
+      "bytes": 703
+    },
+    {
+      "path": "tooling/test_dynamic_learning_android.ps1",
+      "sha256": "9b6b2fb32d474aa733c310fa186e9fcb656f2e9d08ea7debba32fbfcd236c63a",
+      "bytes": 36084
+    },
+    {
+      "path": "cartilhas_app/integration_test/dynamic_learning_path_test.dart",
+      "sha256": "7e58e3be866c98cc50c90a454f267a75627e1ca3c94b4d681cb057079bff7d27",
+      "bytes": 50681
+    },
+    {
+      "path": "api/ops/bootstrap_dynamic_learning_qa.py",
+      "sha256": "39e8642dd846cc9b074110234904b4220caedbf5ee632e7e44fcba138d005357",
+      "bytes": 37587
+    }
+  ],
+  "recovery_assessment": {
+    "preserve_failed_draft": true,
+    "resume_unchanged_runner_supported": false,
+    "recommended": "Fresh complete run with course_id deterministically derived from its new run_id; preserve this draft as baseline history.",
+    "must_retain": [
+      "failed run evidence and APK identity",
+      "draft version, content and transition",
+      "all initial event bodies and original Wave 1 progress"
+    ],
+    "acceptance_limit": "No publication or downstream learning phase passed; this read-only audit does not approve Gate 2A."
+  }
+}

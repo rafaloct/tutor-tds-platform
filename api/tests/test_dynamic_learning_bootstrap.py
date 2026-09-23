@@ -11,11 +11,15 @@ from sqlalchemy import event, func, select
 from sqlalchemy.orm import Session
 
 from app.main import create_app
-from app.models import ClassEnrollment, Classroom, CourseVersionTransition, Enrollment, LearningEventRecord
+from app.models import ClassEnrollment, Classroom, Course, CourseVersion, CourseVersionTransition, Enrollment, LearningEventRecord
 from ops import bootstrap_dynamic_learning_qa as host
 from ops import prepare_dynamic_learning_qa as fixture
 from ops.seed_context_android import SeedSafetyError
 from test_dynamic_learning_qa import dynamic_database, inputs, seeded_database
+
+
+RUN_ID = 'a' * 32
+COURSE_ID = fixture.COURSE_ID + '-' + RUN_ID
 
 
 class LocalHttp:
@@ -36,6 +40,7 @@ def bootstrap_data(dynamic_database):
     database, settings, wave1_client, approval = dynamic_database
     with Session(database.engine) as session, session.begin():
         defines, _ = fixture.ensure_fixture(session, settings, wave1_client, approval)
+    defines['QA_DYNAMIC_COURSE_ID'] = COURSE_ID
     runtime, _ = inputs()
     with TestClient(create_app(settings=settings)) as client:
         yield database, settings, wave1_client, approval, defines, runtime, LocalHttp(client)
@@ -50,17 +55,17 @@ def publish_via_editor(http, defines, previous=None):
             'password': defines[f'QA_DYNAMIC_{persona}_PASSWORD']})['access_token']
     if previous is None:
         draft = http.request('POST', '/courses', token=tokens['AUTHOR'], expected=201,
-            body={'course_id': host.COURSE_ID, 'program_id': host.PROGRAM_ID, 'title': 'Curso QA dinâmico', 'author': 'QA'})
+            body={'course_id': COURSE_ID, 'program_id': host.PROGRAM_ID, 'title': 'Curso QA dinâmico', 'author': 'QA'})
     else:
-        draft = http.request('POST', f'/courses/{host.COURSE_ID}/versions', token=tokens['AUTHOR'], expected=201,
+        draft = http.request('POST', f'/courses/{COURSE_ID}/versions', token=tokens['AUTHOR'], expected=201,
             body={'source_version_id': previous['version_id']})
-    saved = http.request('PATCH', f'/courses/{host.COURSE_ID}', token=tokens['AUTHOR'], body={
+    saved = http.request('PATCH', f'/courses/{COURSE_ID}', token=tokens['AUTHOR'], body={
         'version_id': draft['version_id'], 'expected_revision': draft['revision'], 'title': 'Curso QA dinâmico',
         'author': 'QA', 'sections': [{'id': 'module', 'title': 'Módulo QA', 'messages': [
             {'id': 'intro', 'type': 'bot', 'content': f"Conteúdo da edição {draft['version_number']}"}]}]})
-    reviewed = http.request('POST', f'/courses/{host.COURSE_ID}/submit', token=tokens['AUTHOR'], body={
+    reviewed = http.request('POST', f'/courses/{COURSE_ID}/submit', token=tokens['AUTHOR'], body={
         'version_id': saved['version_id'], 'expected_revision': saved['revision']})
-    return http.request('POST', f'/courses/{host.COURSE_ID}/publish', token=tokens['PUBLISHER'], body={
+    return http.request('POST', f'/courses/{COURSE_ID}/publish', token=tokens['PUBLISHER'], body={
         'version_id': reviewed['version_id'], 'expected_revision': reviewed['revision']})
 
 
@@ -79,15 +84,24 @@ def record_study(http, defines, state, identity, occurred_at):
     token = http.request('POST', '/auth/login', body={'cpf': defines['QA_DYNAMIC_LEARNER_CPF'],
         'password': defines['QA_DYNAMIC_LEARNER_PASSWORD']})['access_token']
     return http.request('POST', '/events', token=token, expected=201, body={
-        'event_id': identity, 'event_type': 'study_activity', 'course_id': host.COURSE_ID,
+        'event_id': identity, 'event_type': 'study_activity', 'course_id': COURSE_ID,
         'session_id': identity, 'occurred_at': occurred_at.isoformat(), 'active_seconds': 3,
         'payload': {'class_id': state['v1']['class_id'], 'course_version_id': state['v1']['version_id']}})
 
 
+def create_preserved_draft(http, defines):
+    token = http.request('POST', '/auth/login', body={'cpf': defines['QA_DYNAMIC_AUTHOR_CPF'],
+        'password': defines['QA_DYNAMIC_AUTHOR_PASSWORD']})['access_token']
+    return http.request('POST', '/courses', token=token, expected=201,
+        body={'course_id': fixture.COURSE_ID, 'program_id': host.PROGRAM_ID,
+            'title': 'Rascunho da tentativa anterior', 'author': 'QA'})
+
+
 def test_real_api_bootstraps_preserve_history_and_same_legacy_enrollment_across_editions(bootstrap_data):
     database, _, wave1_client, approval, defines, runtime, http = bootstrap_data
+    prior_draft = create_preserved_draft(http, defines)
     before, captured, baseline = host.before_android(database.engine, defines, runtime, wave1_client,
-        approval, http, 'unit-run')
+        approval, http, RUN_ID)
     assert captured['status'] == 'baseline_captured' and captured['baseline_event_count'] == 74
     first = publish_via_editor(http, defines)
     state, first_evidence = run_phase(bootstrap_data, 'after_v1', before)
@@ -118,8 +132,11 @@ def test_real_api_bootstraps_preserve_history_and_same_legacy_enrollment_across_
     assert final['v2']['progress']['progress_percent'] == 0
     assert evidence['editorial_ledger']['transition_count'] == 7
     with Session(database.engine) as session:
-        assert session.scalar(select(func.count()).select_from(Enrollment).where(Enrollment.course_id == host.COURSE_ID)) == 1
-        assert session.scalar(select(func.count()).select_from(ClassEnrollment).where(ClassEnrollment.course_id == host.COURSE_ID)) == 2
+        assert session.scalar(select(func.count()).select_from(Enrollment).where(Enrollment.course_id == COURSE_ID)) == 1
+        assert session.scalar(select(func.count()).select_from(ClassEnrollment).where(ClassEnrollment.course_id == COURSE_ID)) == 2
+        assert session.get(CourseVersion, prior_draft['version_id']).status == 'draft'
+        assert session.get(Course, fixture.COURSE_ID).active is False
+        assert session.get(Classroom, state['v1']['class_id']).name == f'Turma QA Dynamic {RUN_ID[:8]} edição 1'
     serialized = json.dumps(evidence)
     for persona in fixture.PERSONAS:
         assert defines[f'QA_DYNAMIC_{persona}_PASSWORD'] not in serialized
@@ -142,7 +159,7 @@ def test_unbound_study_blocks_legacy_enrollment_backfill_before_any_command(boot
     publish_via_editor(http, defines)
     with Session(database.engine) as session, session.begin():
         session.add(LearningEventRecord(event_id='unbound-study', user_id=defines['QA_DYNAMIC_LEARNER_ID'],
-            course_id=host.COURSE_ID, event_type='study_activity', session_id='unbound',
+            course_id=COURSE_ID, event_type='study_activity', session_id='unbound',
             occurred_at=datetime.now(timezone.utc), active_seconds=3, validated_seconds=3, payload={}))
     with pytest.raises(SeedSafetyError, match='Workload|Unbound'):
         run_phase(bootstrap_data, 'after_v1')
@@ -165,8 +182,8 @@ def test_retry_recovers_partial_http_success_without_duplicate_class_or_enrollme
     monkeypatch.setattr(http, 'request', request)
     state, _ = run_phase(bootstrap_data, 'after_v1')
     with Session(database.engine) as session:
-        assert session.scalar(select(func.count()).select_from(Classroom).where(Classroom.course_id == host.COURSE_ID)) == 1
-        assert session.scalar(select(func.count()).select_from(Enrollment).where(Enrollment.course_id == host.COURSE_ID)) == 1
+        assert session.scalar(select(func.count()).select_from(Classroom).where(Classroom.course_id == COURSE_ID)) == 1
+        assert session.scalar(select(func.count()).select_from(Enrollment).where(Enrollment.course_id == COURSE_ID)) == 1
     assert state['v1']['context']['legacy_enrollment_id']
 
 
@@ -226,8 +243,10 @@ def test_readonly_inspector_issues_no_database_mutation_statements(bootstrap_dat
 def test_host_allowlist_cannot_publish_or_target_foreign_class(bootstrap_data):
     database, _, _, _, defines, _, http = bootstrap_data
     flow = host.Bootstrap(defines, host.ReadOnlyInspector(database.engine, defines), http)
-    for method, path, body in [('POST', f'/courses/{host.COURSE_ID}/publish', {}),
+    for method, path, body in [('POST', f'/courses/{COURSE_ID}/publish', {}),
             ('POST', f'/admin/classes/{uuid4()}/students/{defines["QA_DYNAMIC_LEARNER_ID"]}', None),
+            ('PUT', f'/admin/programs/{host.PROGRAM_ID}/courses/{fixture.COURSE_ID}/workload',
+                {'planned_hours': 120 / 3600}),
             ('POST', '/admin/enrollments', {'program_id': 'qa-program', 'course_id': 'qa-course'})]:
         with pytest.raises(SeedSafetyError):
             flow.command(method, path, body)
@@ -236,12 +255,14 @@ def test_host_allowlist_cannot_publish_or_target_foreign_class(bootstrap_data):
 
 @pytest.mark.parametrize('key,value', [('TUTOR_API_URL', 'https://production.test'),
     ('QA_DYNAMIC_PROGRAM_ID', 'qa-program'), ('QA_DYNAMIC_OPERATOR_ID', 'not-a-uuid'),
-    ('QA_DYNAMIC_LEARNER_CPF', '12345678909'), ('QA_DYNAMIC_AUTHOR_PASSWORD', 'other-password')])
+    ('QA_DYNAMIC_LEARNER_CPF', '12345678909'), ('QA_DYNAMIC_AUTHOR_PASSWORD', 'other-password'),
+    ('QA_DYNAMIC_COURSE_ID', fixture.COURSE_ID),
+    ('QA_DYNAMIC_COURSE_ID', fixture.COURSE_ID + '-' + 'b' * 32)])
 def test_host_target_and_persona_guards_reject_mismatch(bootstrap_data, key, value):
     *_, defines, runtime, _ = bootstrap_data
     changed = {**defines, key: value}
     with pytest.raises(SeedSafetyError):
-        host.validate_defines(changed, runtime)
+        host.validate_defines(changed, runtime, RUN_ID)
 
 
 def test_default_cli_plan_uses_no_remote_service(bootstrap_data, tmp_path, monkeypatch, capsys):
@@ -254,12 +275,59 @@ def test_default_cli_plan_uses_no_remote_service(bootstrap_data, tmp_path, monke
         pytest.fail('Plan must not connect to remote services')
     monkeypatch.setattr(host, 'Database', no_remote)
     monkeypatch.setattr(host, 'HostHttp', no_remote)
-    host.main(['--phase', 'before_android', '--defines', str(private), '--runtime-json', str(config),
+    host.main(['--phase', 'before_android', '--run-id', RUN_ID, '--defines', str(private), '--runtime-json', str(config),
         '--output-state', str(host.ROOT / 'tmp/unit-bootstrap-plan.json'),
         '--output-evidence', str(host.ROOT / 'docs/production/evidence/unit-bootstrap-plan.json')])
     output = capsys.readouterr().out
     result = json.loads(output)
     assert result['remote_access'] is False and result['phase'] == 'before_android'
-    assert result['run_id'] == 'unit-bootstrap-plan'
+    assert result['run_id'] == RUN_ID and result['course_id'] == COURSE_ID
     assert 'confirm course absent in database and public catalog' in result['commands']
     assert defines['QA_DYNAMIC_OPERATOR_PASSWORD'] not in output
+
+
+def test_baseline_captures_prior_draft_without_database_or_http_writes(bootstrap_data):
+    database, settings, wave1_client, approval, defines, runtime, http = bootstrap_data
+    prior_draft = create_preserved_draft(http, defines)
+    sent = len(http.sent)
+    statements = []
+    def collect(connection, cursor, statement, parameters, context, executemany):
+        statements.append(statement.lstrip().split()[0].upper())
+    event.listen(database.engine, 'before_cursor_execute', collect)
+    try:
+        state, evidence, baseline = host.before_android(database.engine, defines, runtime, wave1_client,
+            approval, http, RUN_ID)
+    finally:
+        event.remove(database.engine, 'before_cursor_execute', collect)
+    assert statements and not {'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP'}.intersection(statements)
+    assert http.sent[sent:] == [('GET', '/courses/' + COURSE_ID, None)]
+    assert state['course_id'] == COURSE_ID and evidence['baseline_event_count'] == 74
+    assert json.dumps([prior_draft['version_id']], separators=(',', ':')) in baseline['history']['core']['course_versions']
+    with Session(database.engine) as session:
+        with pytest.raises(SeedSafetyError, match='must be absent'):
+            fixture.ensure_fixture(session, settings, wave1_client, approval)
+
+
+def test_baseline_refuses_existing_run_course_without_any_commands(bootstrap_data):
+    database, _, wave1_client, approval, defines, runtime, http = bootstrap_data
+    publish_via_editor(http, defines)
+    sent = len(http.sent)
+    with pytest.raises(SeedSafetyError, match='must be absent'):
+        host.before_android(database.engine, defines, runtime, wave1_client, approval, http, RUN_ID)
+    assert len(http.sent) == sent
+
+
+def test_run_namespace_mismatch_is_rejected_before_remote_access(bootstrap_data, tmp_path, monkeypatch):
+    *_, defines, runtime, _ = bootstrap_data
+    private, config = tmp_path / 'operational.json', tmp_path / 'runtime.json'
+    private.write_text(json.dumps(defines), encoding='utf-8')
+    config.write_text(json.dumps(runtime), encoding='utf-8')
+    def no_remote(*args, **kwargs):
+        pytest.fail('Mismatched run must fail before connecting')
+    monkeypatch.setattr(host, 'Database', no_remote)
+    monkeypatch.setattr(host, 'HostHttp', no_remote)
+    with pytest.raises(SystemExit, match='run identifier disagree'):
+        host.main(['--phase', 'before_android', '--run-id', 'b' * 32, '--execute',
+            '--defines', str(private), '--runtime-json', str(config),
+            '--output-state', str(host.ROOT / 'tmp/unit-bootstrap-plan.json'),
+            '--output-evidence', str(host.ROOT / 'docs/production/evidence/unit-bootstrap-plan.json')])

@@ -101,3 +101,29 @@
   propriedade/pendências; registrar eventual invalidação de sessão. Não capturar
   a exceção para prosseguir nem limpar dados. Manter tentativa falha e verificar
   banco/histórico antes de novo ensaio completo; não reseedar o ambiente.
+
+## Gate 2A: prévia com texto repetido entre rotas
+
+- Observed: execução `1e0de0f062b3481fa18663ebc4cf447f` passou pelo acesso,
+  criou/salvou o rascunho e falhou em `_preview`/`_reveal` com
+  `Bad state: Too many elements`. A primeira falha de sessão não se repetiu.
+- Expected: conferir o conteúdo na rota de prévia, sem atingir o editor anterior.
+- Responsible Boundary: seletores do teste de integração durante transição de rota.
+- Evidence: `author_v1.log` preservado no diretório da execução; stack aponta
+  `WidgetController.ensureVisible`, teste linhas 684/1057/184. Auditoria somente
+  leitura em `evidence/dynamic-learning-second-attempt.json`: draft revisão 2,
+  sete blocos, uma transição de criação, zero estudo/matrícula/turma dinâmica.
+  Todos os 79 eventos e 29 registros iniciais intactos; total 101 após telemetria;
+  progresso Wave 1 continua 10%, segunda matrícula 0%. A fase não está aprovada.
+- Likely Root Cause: `find.text(content)` também encontra o texto no editor;
+  o aviso de prévia pode aparecer antes de terminar a transição. `within`
+  selecionava apenas o scrollable, sem limitar o alvo de `ensureVisible`.
+- Affected Files: `integration_test/dynamic_learning_path_test.dart`, driver e
+  runner/bootstrap de QA para isolar os próximos ensaios; sem mudança de produto.
+- Structural Fix: selecionar dentro da rota corrente e do componente esperado,
+  exigir unicidade e limitar efetivamente o alvo por `within`. Não escolher
+  arbitrariamente o primeiro resultado nem ocultar a exceção. Preservar o curso
+  já criado; novos ensaios completos usam `qa-dynamic-course-<run_id>` com títulos
+  próprios. Baseline inclui todas as linhas anteriores, que devem permanecer
+  idênticas. Não retomar fase presumida nem reduzir a prova de oito processos
+  com um APK instalado antes de criar/publicar o novo curso.

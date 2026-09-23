@@ -24,7 +24,9 @@ intenção; Stitch descreve referência visual, somente após inspeção dos art
   Expected, Responsible Boundary, Evidence, Likely Root Cause, Affected Files,
   Structural Fix.
 - SDK histórico validado: `C:/Users/Usuario/flutter-3.44.9/bin/flutter.bat`;
-  não assumir que o SDK do PATH é o mesmo. Python local: `api/.venv/Scripts/python.exe`.
+  executar Flutter pelo junction ASCII `C:/Users/Usuario/.codex/tmp/tutor-tds-context-qa`.
+  Não assumir que o SDK do PATH é o mesmo. Python validado com `api/uv.lock`:
+  `tmp/context-cloud-locked-env/Scripts/python.exe`; `api/.venv` é histórico.
 - Atualizar memória compacta e matrizes ao concluir tarefa. Intervenções externas
   precisam de Reason, Exact human action e What remains unblocked.
 - Ordem posterior: Dynamic Learning, Classroom, Pergunta ao Vivo, Certificates,

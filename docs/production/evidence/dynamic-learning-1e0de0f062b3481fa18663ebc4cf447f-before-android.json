@@ -1,0 +1,20 @@
+{
+  "status": "baseline_captured",
+  "phase": "before_android",
+  "run_id": "1e0de0f062b3481fa18663ebc4cf447f",
+  "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+  "course_absent_in_database_and_catalog": true,
+  "baseline_sha256": "8499474d46648a09d4322903c1c7f30bc27c8adcd9696628d8d8eaf68e468c95",
+  "baseline_event_count": 79,
+  "initial_core_record_count": 29,
+  "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+  "original_progress_percent": 10.0,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/courses/qa-dynamic-course",
+      "status": 404
+    }
+  ],
+  "verified_at": "2026-09-23T22:05:03.210647+00:00"
+}

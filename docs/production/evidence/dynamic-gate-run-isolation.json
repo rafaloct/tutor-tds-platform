@@ -1,0 +1,52 @@
+{
+  "status": "LOCAL_RUN_ISOLATION_CHECKS_PASSED",
+  "verified_at": "2026-09-23T22:23:56.040098+00:00",
+  "scope": "Wave 2A host bootstrap isolated by deterministic run course; historical failed draft retained",
+  "executed_checks": [
+    {
+      "command": "..\\tmp\\context-cloud-locked-env\\Scripts\\python.exe -m pytest tests/test_dynamic_learning_bootstrap.py -x",
+      "working_directory": "api",
+      "session_id": 86508,
+      "exit_code": 0,
+      "passed": 20,
+      "duration_seconds": 155.84,
+      "warnings": [
+        "Existing Starlette TestClient httpx deprecation",
+        "Existing AnyIO BlockingPortal alias deprecation"
+      ],
+      "log": {
+        "persistent_file": null,
+        "tool_session": 86508,
+        "completion_chunk_id": "ca9caa",
+        "summary": "20 passed, 2 warnings in 155.84s (0:02:35)"
+      }
+    },
+    {
+      "command": "git diff --check -- api/ops/bootstrap_dynamic_learning_qa.py api/tests/test_dynamic_learning_bootstrap.py",
+      "exit_code": 0,
+      "result": "No whitespace errors; Git reported its configured future LF-to-CRLF conversion"
+    }
+  ],
+  "coverage": [
+    "Exact course_id qa-dynamic-course-<32 lowercase hex run_id>; mismatches rejected before remote connection",
+    "Separate read-only gate preflight preserves strict initial fixture and validates original identities, scopes, context and progress",
+    "Prior failed draft included in baseline and preserved through publication, two contextual cohorts and final history checks",
+    "New run target must be absent before APK installation",
+    "before_android performs only database reads and public HTTP GET",
+    "Administrative command allowlist and workload apply only to current run course",
+    "Classroom names include validated run prefix; old course workloads and bindings are protected",
+    "Existing idempotency, partial HTTP recovery, revocation, duplicate classroom, offline advance and seven-transition ledger checks retained"
+  ],
+  "source_sha256": {
+    "api/ops/bootstrap_dynamic_learning_qa.py": "640f6c07d8b086134da841725e358fe877bea4bd8d5d0e79d44917cdbbac6407",
+    "api/tests/test_dynamic_learning_bootstrap.py": "285f89e6fb1eb96de46be5a8b7d55f7bbc823578f533a5a503b561693585023f",
+    "api/ops/prepare_dynamic_learning_qa.py": "42c77a98b3dfc6110a3f8a19e8f11980f31997d10befd578a550086a98b5e32d"
+  },
+  "received_checks": [],
+  "limitations": [
+    "No new staging gate has been executed or approved by this local evidence",
+    "No production code, schema, API deployment or original fixture seed was changed",
+    "Android and runner checks are reported separately by their executing agents; no SDK/ADB was invoked by this verifier",
+    "Previous failed run diagnosis remains in dynamic-learning-second-attempt.json; historical prechecks are unchanged"
+  ]
+}
