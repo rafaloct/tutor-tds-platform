@@ -62,3 +62,24 @@
 - Affected Files: nenhuma mudança da API/autorização/TLS.
 - Structural Fix: usar identificação verdadeira do verificador e verificar
   separadamente o cliente Android; não representar esse teste como aceite mobile.
+
+## Catálogo atualizado → central de estudo — primeira falha identificada
+
+- Observed: recorte 61568 passou 29 testes; navegação com edição nova produziu
+  RenderFlex overflow de 18px na base de um card da central de estudo.
+- Expected: recurso legível e acessível após atualizar o catálogo, inclusive
+  quando título/descrição quebram linhas ou a fonte está ampliada.
+- Responsible Boundary: StudyHubScreen / _ResourceCard, layout de altura fixa.
+- Evidence: home_catalog_refresh_test, caso bottom learning destination waits;
+  viewport 1000x1600/DPR1; SliverGrid mainAxisExtent=174 + Column com Spacer.
+- Likely Root Cause: conteúdo exige cerca de 152px internos após quebra do
+  título; margem/padding deixam cerca de 134px no card fixo. O mesmo limite
+  não acompanha fonte ampliada. Não houve segunda tentativa desse erro.
+- Affected Files: study_hub_screen.dart; study_hub_test.dart.
+- Structural Fix: Wrap com os mesmos breakpoints/colunas, cards de altura
+  natural e espaçamento fixo; descrição pode crescer. Preservar ordem/ações.
+  Regressões 320/1000px, fonte 100%/200%; validar sem alterar o viewport do
+  teste que revelou o problema ou ocultar exceções. Recorte Home/StudyHub passou
+  9 casos; o décimo expôs apenas ensureVisible antes de construir o sliver no
+  teste 320px/200%. Corrigido para scrollUntilVisible limitado; repetição isolada
+  passou. O overflow original e os quatro cenários responsivos foram verificados.

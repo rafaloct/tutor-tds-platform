@@ -1,0 +1,45 @@
+{
+  "status": "fixture_prepared",
+  "created": true,
+  "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+  "project_sha256": "551997fd3e34c4b92af821fd15c2d6939763d56153be843ba355746346badd66",
+  "program_id": "qa-dynamic-program",
+  "course_id": "qa-dynamic-course",
+  "course_absent": true,
+  "personas": {
+    "AUTHOR": {
+      "global_role": "student",
+      "program_role": "teacher"
+    },
+    "PUBLISHER": {
+      "global_role": "student",
+      "program_role": "coordinator"
+    },
+    "LEARNER": {
+      "global_role": "student",
+      "program_role": "student"
+    },
+    "OPERATOR": {
+      "global_role": "admin",
+      "program_role": null
+    }
+  },
+  "original_unchanged": {
+    "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+    "all_events_sha256": "99891f766c79de90acb082a864c60940c4296e86976c9807468e378009a6beaf",
+    "all_events_count": 76
+  },
+  "approved_event_bodies_verified": 31,
+  "wave1_gate_sha256": "7a00a5b43cca7a33dc50ed9b9d55306243e90b7200a187bba10be370ecb124ac",
+  "evidence_sha256": {
+    "docs/production/evidence/cloud-context-isolation.json": "8ab1222b51399b600c54d01e8aedb9f4881e85353af7d6b59edb216272a44054",
+    "docs/production/evidence/context-android-gate.json": "79348f39a8bf90cfb83ae14840ececaf4d18f343cebfc45f5f31a45f7a129139"
+  },
+  "limitations": [
+    "Synthetic staging identities only; no course, version, enrollment or event created",
+    "Operator is reserved for legacy administrative fixture commands, never pedagogical publication",
+    "Historical event bodies cover the Android evidence subset; all current rows are hashed before/after",
+    "Sync delivery status may legitimately change after historical acceptance"
+  ],
+  "verified_at": "2026-09-23T21:29:37.138254+00:00"
+}

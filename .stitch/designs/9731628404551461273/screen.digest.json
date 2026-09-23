@@ -1,0 +1,17 @@
+{
+  "screenId": "9731628404551461273",
+  "title": "TDS Classroom — Professor, sessão ativa (imagem importada)",
+  "actor": "teacher",
+  "route": "N/A — mapear ao fluxo de encontro na Wave 3",
+  "regions": ["header Classroom/professor", "identificação do encontro", "sessão ativa e presença", "ações de turma", "encerrar encontro", "navegação inferior"],
+  "components": ["cartão do encontro", "indicador ao vivo", "resumo de presença", "Abrir QR", "Enviar atividade", "Turma agora", "Pergunta ao vivo", "Aviso", "Evidência", "Observação", "Encerrar encontro"],
+  "actions": ["abrir check-in/check-out", "enviar atividade", "consultar turma", "iniciar pergunta ao vivo", "emitir aviso", "consultar evidência", "registrar observação", "revisar frequência e encerrar encontro"],
+  "states": ["session_open"],
+  "designTokens": {"header": "azul TDS", "surface": "branco", "statusOpen": "verde", "classSummary": "lilás", "closeAction": "âmbar", "cards": "cantos arredondados"},
+  "domainEntities": ["Cohort", "Membership", "Progress"],
+  "repositories": [],
+  "endpoints": [],
+  "analyticsEvents": [],
+  "offlineBehavior": "Não definido pela imagem; contrato funcional a auditar na Wave 3",
+  "implementationStatus": "STITCH_ONLY"
+}

@@ -1,7 +1,7 @@
-# API matrix — recorte Wave 1
+# API matrix — Wave 1 aceita e Wave 2 ativa
 
 Contratos reais em FastAPI/Pydantic; OpenAPI gerado em `/openapi.json`.
-Esta matriz cobre a jornada atual; expandir ao auditar cada wave, sem inventar
+Esta matriz cobre as jornadas auditadas; expandir a cada wave, sem inventar
 endpoints de Pergunta ao Vivo. LearningContext real está descrito abaixo.
 Status STAGING aplica-se somente ao recorte funcional da Wave 1 exercitado pelas
 jornadas, não a todos os consumidores legados da rota. Resultados atuais em
@@ -39,3 +39,25 @@ a linhagem. StudentProgress.enrollment_id mantém semântica legada e adiciona
 context_enrollment_id. Comandos /admin/classes, inclusão de aluno/monitor e
 PUT /classes/{id}/students/{user_id} gravam vínculo físico na mesma transação;
 test_learning_context cobre escrita/retry e negação de equipe revogada.
+
+## Publicação dinâmica — Wave 2A
+
+Rotas/editor existentes, auditados em `0081ab0`; gate integrado de publicação no
+mesmo APK ainda pendente. Contrato: `DYNAMIC_LEARNING_CONTRACT.md`. Preview é local
+e estático, sem endpoint novo. Os snapshots mantêm sections/messages existentes.
+
+| Method | Path | Authentication | Permission | Request | Response | Consumer | Repository | Tables | Test | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| GET | /editor/context | Bearer access_claims | ProgramMembership editorial ativa; admin legado preservado | sem body | programs com capacidade editorial | catálogo editorial | CourseEditorRepository | programs; program_memberships | test_course_editor; course_editor_repository_test | PARTIAL |
+| GET | /editor/courses | Bearer access_claims | autor/equipe no programa permitido | program_id | courses editáveis com versão/revisão/permissões | catálogo editorial | CourseEditorRepository | courses; course_versions; program_courses; program_memberships | test_course_editor; course_editor_screen_test | PARTIAL |
+| GET | /editor/courses/{course_id} | Bearer access_claims | escopo editorial e ownership quando exigido | course_id; version_id opcional | edição, conteúdo e permissões | editor | CourseEditorRepository | courses; course_versions; program_courses; program_memberships | test_course_editor; course_editor_repository_test | PARTIAL |
+| POST | /courses | Bearer access_claims | editor ativo no programa | CourseCreate: program_id, course_id, title, author | rascunho criado | editor | CourseEditorRepository | courses; course_versions; program_courses | test_course_editor; course_editor_repository_test | PARTIAL |
+| PATCH | /courses/{course_id} | Bearer access_claims | rascunho editável do autor/gestor autorizado | DraftUpdate: version_id, expected_revision, title, author, sections, links opcionais | edição/revisão atualizadas; 409 obsoleta | editor | CourseEditorRepository | courses; course_versions | test_course_editor; course_editor_repository_test | PARTIAL |
+| POST | /courses/{course_id}/submit | Bearer access_claims | autor/gestor autorizado; conteúdo válido | VersionAction: version_id, expected_revision | in_review e permissões atualizadas | editor | CourseEditorRepository | course_versions; course_version_transitions | test_course_editor; course_editor_screen_test | PARTIAL |
+| POST | /courses/{course_id}/publish | Bearer access_claims | coordenador/admin no escopo; compartilhamento exige todos os programas | VersionAction | published; projeção pública e histórico | editor; catálogo; app matriculado por snapshot | CourseEditorRepository; CourseRepository | courses; course_versions; course_version_transitions; program_courses | test_course_editor; test_classroom_course_versions | PARTIAL |
+| POST | /courses/{course_id}/archive | Bearer access_claims | gestor autorizado | VersionAction | archived; turmas mantêm snapshot autorizado | editor | CourseEditorRepository | courses; course_versions; course_version_transitions | test_course_editor; test_classroom_course_versions | PARTIAL |
+| POST | /courses/{course_id}/versions | Bearer access_claims | editor autorizado para nova edição | VersionFork: source_version_id | novo rascunho ligado à versão anterior | editor | CourseEditorRepository | course_versions | test_course_editor; course_editor_repository_test | PARTIAL |
+
+Os comandos legados de preparação de programa/matrícula/turma continuam exigindo
+admin global; sua migração não foi implicitamente declarada pelo gate editorial.
+Nenhuma operação de IA ou LearningEvent cria esses vínculos.

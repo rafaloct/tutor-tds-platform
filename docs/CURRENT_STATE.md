@@ -1,14 +1,14 @@
 # CURRENT STATE
 
-- CURRENT RELEASE: código `1.4.0+13`; produção histórica `1.2.0+11`, não revalidada na Play. Base `fb50a57`.
-- CURRENT WAVE: 1 — Context Core concluída funcionalmente em staging; transição à Wave 2.
+- CURRENT RELEASE: código `1.4.0+13`; produção histórica `1.2.0+11`, não revalidada na Play. Checkpoint Wave 1 `0081ab0`.
+- CURRENT WAVE: 2A — publicação/consumo remoto; Wave 1 concluída funcionalmente em staging.
 - CURRENT ACCEPTANCE GATE: WAVE 1 APROVADA; três golden paths Android e isolamento HTTPS reais. Produção não promovida.
 - STABLE: MVP, produção e assinatura preservados; API Cloud/Supabase staging saudável.
-- IN PROGRESS: consolidar checkpoint e auditar a menor fatia Dynamic Learning existente.
+- IN PROGRESS: gate 2A com APK único; cache público por API, refresh e layout StudyHub corrigidos e verificados em testes locais.
 - BLOCKED: nenhuma intervenção humana necessária no recorte atual; release mantém gates próprios.
 - DO NOT TOUCH: produção, keystore, KV/certificados antigos, baseline e secrets.
 - LAST VERIFIED: 2026-09-23; Flutter 344 + analyze; API locked 281; isolamento runner 15; Android 16 seis fases; HTTPS 13 checks/4 negações. Hashes conferidos.
-- NEXT ACTION: Wave 2 contract-first: publicação dinâmica sem rebuild e versão da turma imutável; preservar gate Wave 1.
+- NEXT ACTION: executar oito fases editoriais no mesmo APK e provar publicação/edição fixa sem rebuild; harness de reinício já aprovado.
 
 ## Completed
 Auditoria, cache Stitch, contrato/contexto v2, migração física 0019 e autorização
@@ -20,6 +20,13 @@ Alembic/seed sintético e deploy locked validado. Candidato temporário VPS remo
 VPS original saudável. Android real passou seis fases: baseline 5% → 7,5% → 10%,
 reinícios, pendência visível, replay sem duplicata e professor com projeção idêntica.
 HTTPS negou acesso indevido e conservou segunda matrícula em 0%, sem alterar histórico.
+Preview debug normal sem credenciais QA compilado/instalado; não é release.
+Auditoria Wave 2 e contrato 2A concluídos; editor/snapshots existentes serão reutilizados.
+Fixture 2A aplicada: quatro identidades e programa isolado, curso ainda ausente;
+76 eventos preservados. Preparação passou 23 testes locais e guardas reais de staging.
+Preflight HTTPS editorial passou 10 checks; aluno sem acesso ao editor. Analyze
+dos oito arquivos alterados sem problemas; StudyHub 5/5 após correção. Harness
+Android comprovou dois processos com APK idêntico, uma compilação/instalação.
 
 ## Changed contracts
 LearningContext `cohort-enrollment-v2`: identidade física de Membership/Enrollment
@@ -28,10 +35,15 @@ compartilhado, separado da posição local. GET não faz backfill. Eventos mant�
 `LEARNING_CONTEXT_ENABLED` e `DURABLE_LEARNING_OUTBOX_ENABLED`: false por padrão,
 true apenas no candidato QA. Contrato de entrega acrescenta projeção local e retry
 escopados, sem tabela/endpoint novo; implementação verificada localmente e no Android.
+2A isola cache público por API e permite recarga; nenhuma migration/API nova.
+Correções locais de catálogo/layout registradas no checkpoint `14aaf27`.
 
 ## Known issues
 Retenção de recibos antes da promoção final. Ack global atualiza entrega, mas
 progresso/data podem esperar a próxima revalidação. Role global permanece no legado.
+Overflow StudyHub corrigido sem altura fixa; Home e quatro cenários de largura/fonte
+verificados. Teste de fonte 200% precisou rolar até o sliver ser construído; caso passou.
+Quiz embutido ainda não é ActivityAttempt contextual: fatia posterior da Wave 2 obrigatória.
 Paridade visual integral, QA físico, build release e Play ainda não aprovados.
 Cloud: https://tutor-tds-staging.fastapicloud.dev; Supabase lgtphbbpgqnzduhtyate.
 Deploy b67f0921-d2c4-400d-a28e-c8832eb268fb; somente dados sintéticos.
@@ -42,5 +54,5 @@ expansão simultânea de contrato central. Wave 1: ver production/WAVE1_ACCEPTAN
 
 ## Relevant files
 `production/WAVE1_ACCEPTANCE.md`, `production/LEARNING_DELIVERY_CONTRACT.md`,
-`production/OUTBOX_CONTRACT.md`, `production/TRACEABILITY_MATRIX.md`,
+`production/DYNAMIC_LEARNING_CONTRACT.md`, `production/TRACEABILITY_MATRIX.md`,
 `production/API_MATRIX.md`, `production/CLOUD_STAGING.md`, `production/evidence/`.

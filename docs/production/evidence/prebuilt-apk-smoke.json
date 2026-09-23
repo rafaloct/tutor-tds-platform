@@ -1,0 +1,75 @@
+{
+  "status": "PREBUILT_APK_TWO_PROCESS_SMOKE_PASSED",
+  "verified_at": "2026-09-23T21:35:09.8503433Z",
+  "run_id": "d60b4842333140f0a66e74039b9caa0b",
+  "device": "emulator-5556",
+  "package": "com.tutortds_cartilhas.dev",
+  "build_count": 1,
+  "install_count": 1,
+  "apk_sha256": "7ab1f5490e212e527ef05ff190cc9d58140dd837012a738edf533c64ea6f503c",
+  "before_install": {
+    "sha256": "c18986c6bee495813ac0845083693f709ca8d8a2b23e6e8edc1199f575e81ee0",
+    "first_install_time": "2026-09-23 19:51:43",
+    "last_update_time": "2026-09-23 21:04:58"
+  },
+  "installed": {
+    "sha256": "7ab1f5490e212e527ef05ff190cc9d58140dd837012a738edf533c64ea6f503c",
+    "first_install_time": "2026-09-23 19:51:43",
+    "last_update_time": "2026-09-23 21:34:39"
+  },
+  "phases": [
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "d60b4842333140f0a66e74039b9caa0b",
+        "phase": "seed",
+        "pid": 15893,
+        "first_pid": 15893,
+        "nonce": "add18125fdfdf4abc5b71fd3571cf04a",
+        "created_at": "2026-09-23T21:34:53.845017Z",
+        "other_preferences_unchanged": true,
+        "production_app_started": false,
+        "http_used": false
+      }
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "d60b4842333140f0a66e74039b9caa0b",
+        "phase": "verify",
+        "pid": 16012,
+        "first_pid": 15893,
+        "nonce": "add18125fdfdf4abc5b71fd3571cf04a",
+        "created_at": "2026-09-23T21:34:53.845017Z",
+        "other_preferences_unchanged": true,
+        "production_app_started": false,
+        "http_used": false
+      }
+    }
+  ],
+  "source_sha256": {
+    "target": "0a739f9f8c7f6e75ece8f84be80742ebb215db706151010ed1ac231dcacfe74c",
+    "driver": "43583cc31ab75416e9b7cb7eb838eb01020834a0bec7cbdb750e92637a20b8a0",
+    "runner": "1bf97590791e74c3b6444eb3e4ef01109808eb00f8f30702ccb487163526fa3f"
+  },
+  "limits": [
+    "Harness smoke only; no course publication or production acceptance.",
+    "QA instrumented APK remains installed and is stopped; app/user/outbox data is not cleared."
+  ],
+  "execution": {
+    "command": "& .\\tooling\\test_prebuilt_apk_smoke.ps1 -Execute -Device emulator-5556",
+    "exit_code": 0,
+    "flutter_sdk": "3.44.9",
+    "build_assemble_debug_seconds": 115.1,
+    "source_directory": "tmp/prebuilt-apk-smoke-d60b4842333140f0a66e74039b9caa0b",
+    "source_file_sha256": {
+      "evidence.json": "53d05d1d2cb1fedc88f101b9b55aa002acd4aed7a9baa04a6badb8f8138e1560",
+      "build.log": "ceb9ff3e7616b4012d7f0d6bf1899a3087e42c85ccb2ff2272cf0010008d0486",
+      "seed.json": "e6b14eb87bb7de2d341729f939bdc5a69a4c7ca6510799843cd9b6c5cc3632db",
+      "seed.log": "3e7a34e2ce4c9b8c0d8dd227b552d4bc0ab717a3b28ae48d74999cac19b724e5",
+      "verify.json": "1dce35dc7a70a060a25fec4cad90c5178bcfc9314c81f70e6804e038822b48d8",
+      "verify.log": "301ec282d1490502248e0a9592c4c823acf9a01d4b4f015b521d83314a4daedb"
+    },
+    "verification": "Raw source hashes and both driver reports/logs matched; no credentials or VM Service URI included in this evidence."
+  }
+}

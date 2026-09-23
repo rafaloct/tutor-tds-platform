@@ -1,0 +1,48 @@
+{
+  "projectId": "3740249934950673416",
+  "checkedAt": "2026-09-23T21:19:08.9860740Z",
+  "purpose": "Wave 2: verificar equivalente editorial antes de alterar UI existente",
+  "screens": [
+    {
+      "screenId": "710d78133ac5418e8a851bc4fb51e58c",
+      "title": "Modal - Pergunta ao Vivo"
+    },
+    {
+      "screenId": "389e412e620c4c49841a5e9508cf6bfb",
+      "title": "TDS Classroom - Professor"
+    },
+    {
+      "screenId": "9731628404551462355",
+      "title": "ChatGPT Image 21 de set. de 2026, 10_28_39.png"
+    },
+    {
+      "screenId": "97a084d7bb0e4186881827f945a7269e",
+      "title": "Pergunta ao Vivo - Respostas em Tempo Real (Professor)"
+    },
+    {
+      "screenId": "c3f1ab69d3cc4539ba72db0e5041a81d",
+      "title": "Cartilha TDS - Ver no Conteúdo (Ponto Exato)"
+    },
+    {
+      "screenId": "c7a2b0ee0b1e4bb4807f3097c7098986",
+      "title": "Tutor IA - Dúvida sobre a Pergunta ao Vivo"
+    },
+    {
+      "screenId": "31da4ef94daf43efaf35dab2a2b239a5",
+      "title": "Pergunta ao Vivo - Votação Encerrada (Professor)"
+    },
+    {
+      "screenId": "2eca8d72d4674a62a4edd4a9c7a29a89",
+      "title": "Pergunta ao Vivo - Gabarito e Pontuação (Aluno)"
+    },
+    {
+      "screenId": "9a2a68ce8fbd4123936e987c8d2d738e",
+      "title": "Pergunta ao Vivo - Visão do Aluno"
+    },
+    {
+      "screenId": "9731628404551461273",
+      "title": "ChatGPT Image 21 de set. de 2026, 10_28_26.png"
+    }
+  ],
+  "result": "10 telas listadas; composições importadas inspecionadas. Entrada Home creator está na região 11 de 9731628404551462355; nenhuma tela editorial independente identificada. Derivados locais mantêm metadados próprios."
+}
