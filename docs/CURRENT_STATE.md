@@ -156,3 +156,14 @@ no teste e bytes originais preservados por `.gitattributes`, sem alterar hashes.
 Os dois testes antes falhos e a rejeição de adulteração passaram (3/3); a prova
  de bytes consta em `production/CI_REPRODUCIBILITY_ISSUE10.md`. Merge depende do
 CI do PR #9; consultar GitHub para estado final. Produção e freeze preservados.
+
+## 2026-10-02: Issue #4 catalog policy decision and candidate
+
+Rafael approved remote-authoritative catalog snapshots, including a valid empty
+list. Offline uses the last valid API-scoped snapshot, including empty; bundled
+assets only bootstrap when no valid snapshot exists. This supersedes the former
+QA cache-plus-nine-assets exception without changing its historical evidence.
+Candidate removes the union/empty fallback and rejects malformed snapshots as
+failures, not withdrawals. Details and limits: production/ISSUE4_CATALOG_POLICY.md.
+Targeted test evidence belongs on the PR; no physical E2E or release acceptance
+is inferred. Flag default, production, enrollment/progress and assets preserved.

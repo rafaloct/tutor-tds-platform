@@ -15,7 +15,6 @@ class CourseRepository {
     required this.apiUrl,
     CourseHttpGet? httpGet,
     LocalCourseLoader? localLoader,
-    this.fallbackOnEmpty = false,
   }) : _httpGet = httpGet ?? http.get,
        _localLoader = localLoader ?? _loadBundledCourses;
 
@@ -28,7 +27,6 @@ class CourseRepository {
     apiUrl: remoteCatalogEnabled ? apiUrl : '',
     httpGet: httpGet,
     localLoader: localLoader,
-    fallbackOnEmpty: remoteCatalogEnabled,
   );
 
   static const _assetPaths = [
@@ -44,34 +42,33 @@ class CourseRepository {
   ];
 
   final String apiUrl;
-  final bool fallbackOnEmpty;
   final CourseHttpGet _httpGet;
   final LocalCourseLoader _localLoader;
+  List<Cartilha>? _latestRemoteSnapshot;
 
   String get _apiBase => apiUrl.trim().replaceFirst(RegExp(r'/+$'), '');
   String get _cacheKey =>
       'courses:remote_cache:v2:${Uri.encodeComponent(_apiBase)}';
 
   Future<List<Cartilha>> fetchAll() async {
-    if (_apiBase.isNotEmpty) {
-      try {
-        final remote = await _fetchRemote();
-        await _saveCache(remote);
-        if (remote.isNotEmpty || !fallbackOnEmpty) return _sorted(remote);
-      } on Object {
-        final cached = await _loadCache();
-        if (cached != null && (cached.isNotEmpty || !fallbackOnEmpty)) {
-          if (!fallbackOnEmpty) return _sorted(cached);
-          final bundled = await _localLoader();
-          final ids = cached.map((course) => course.id).toSet();
-          return _sorted([
-            ...cached,
-            ...bundled.where((course) => !ids.contains(course.id)),
-          ]);
-        }
-      }
+    if (_apiBase.isEmpty) return _sorted(await _localLoader());
+    final List<Cartilha> remote;
+    try {
+      remote = await _fetchRemote();
+    } on Object {
+      final cached = _latestRemoteSnapshot ?? await _loadCache();
+      if (cached != null) return _sorted(cached);
+      return _sorted(await _localLoader());
     }
-    return _sorted(await _localLoader());
+    // Empty is a valid editorial snapshot, not an invitation to restore assets.
+    _latestRemoteSnapshot = List<Cartilha>.unmodifiable(remote);
+    try {
+      await _saveCache(remote);
+    } on Object {
+      // A storage failure must not replace a valid response with stale content.
+      // This snapshot remains authoritative in memory; persistence is best effort.
+    }
+    return _sorted(remote);
   }
 
   Future<List<Cartilha>> _fetchRemote() async {
@@ -114,11 +111,18 @@ class CourseRepository {
     if (raw is! List<dynamic>) {
       throw const FormatException('Contrato de catálogo inválido.');
     }
-    return raw
-        .whereType<Map<String, dynamic>>()
-        .map(Cartilha.fromJson)
-        .where((course) => course.id.isNotEmpty && course.title.isNotEmpty)
-        .toList();
+    final courses = <Cartilha>[];
+    for (final item in raw) {
+      if (item is! Map<String, dynamic>) {
+        throw const FormatException('Item de catálogo inválido.');
+      }
+      final course = Cartilha.fromJson(item);
+      if (course.id.trim().isEmpty || course.title.trim().isEmpty) {
+        throw const FormatException('Identidade de curso inválida.');
+      }
+      courses.add(course);
+    }
+    return courses;
   }
 
   static List<Cartilha> _sorted(List<Cartilha> courses) {
