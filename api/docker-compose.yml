@@ -16,6 +16,7 @@ services:
   api:
     build: .
     environment:
+      TUTOR_ENVIRONMENT: development
       DATABASE_URL: postgresql+psycopg://tutor_tds:local-development-only@db:5432/tutor_tds
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8080
       JWT_SECRET: ${JWT_SECRET:?configure JWT_SECRET in api/.env}
@@ -33,6 +34,7 @@ services:
     profiles: ["sync"]
     build: .
     environment:
+      TUTOR_ENVIRONMENT: development
       DATABASE_URL: postgresql+psycopg://tutor_tds:local-development-only@db:5432/tutor_tds
       GOOGLE_SHEET_ID: ${GOOGLE_SHEET_ID:-}
       GOOGLE_SHEET_RANGE: ${GOOGLE_SHEET_RANGE:-EventosAPI!A:J}

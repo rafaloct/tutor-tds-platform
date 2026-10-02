@@ -35,6 +35,15 @@ fun httpsUri(variable: String, value: String): URI {
 }
 
 fun validateDebugStagingDefines(defines: Map<String, String>) {
+    val isolatedQa = defines["DYNAMIC_QA_ISOLATED_PACKAGE"]
+    if (isolatedQa != null && isolatedQa !in setOf("true", "false")) {
+        throw GradleException("DYNAMIC_QA_ISOLATED_PACKAGE deve ser true ou false.")
+    }
+    if (isolatedQa == "true" &&
+        (defines["TUTOR_API_URL"] != "https://tutor-tds-staging.fastapicloud.dev" ||
+            !defines["DYNAMIC_QA_RUN_ID"].orEmpty().matches(Regex("^[a-f0-9]{32}$")))) {
+        throw GradleException("QA isolado exige staging Cloud e identificador de execucao valido.")
+    }
     if (defines["TUTOR_ENVIRONMENT"] != "staging") {
         throw GradleException(
             "Build debug bloqueado: defina TUTOR_ENVIRONMENT=staging via --dart-define-from-file.",
@@ -78,6 +87,10 @@ fun validateDebugStagingDefines(defines: Map<String, String>) {
 }
 
 fun validateReleaseProductionDefines(defines: Map<String, String>) {
+    if (defines["DYNAMIC_QA_ISOLATED_PACKAGE"] == "true" ||
+        defines.keys.any { it.startsWith("QA_DYNAMIC_") || it.startsWith("DYNAMIC_QA_") }) {
+        throw GradleException("Build release bloqueado: configuracao sintetica de QA presente.")
+    }
     if (defines["TUTOR_ENVIRONMENT"] != "production") {
         throw GradleException(
             "Build release bloqueado: TUTOR_ENVIRONMENT deve ser production.",
@@ -90,6 +103,15 @@ fun validateReleaseProductionDefines(defines: Map<String, String>) {
         "PRIVACY_POLICY_URL" to "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
         "ACCOUNT_DELETION_URL" to "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html",
     )
+    val inactiveFlags = setOf(
+        "REMOTE_CATALOG_ENABLED", "LEARNING_CONTEXT_ENABLED",
+        "DURABLE_LEARNING_OUTBOX_ENABLED", "JOURNEY_TRACEABILITY_ENABLED",
+        "SIGNED_SUPPORT_IDENTITY",
+    )
+    if (defines.keys.any { it !in approvedValues.keys && it !in inactiveFlags && it != "TUTOR_ENVIRONMENT" } ||
+        inactiveFlags.any { defines[it] != "false" }) {
+        throw GradleException("Build release bloqueado: defines ou flags não aprovados para produção.")
+    }
     approvedValues.forEach { (variable, approvedValue) ->
         val actual = httpsUri(variable, defines[variable].orEmpty())
         val approved = URI(approvedValue).normalize()
@@ -201,7 +223,10 @@ android {
     buildTypes {
         debug {
             // Permite testes USB lado a lado com a versão instalada pela Play.
-            applicationIdSuffix = ".dev"
+            val qaDefines = decodeDartDefines(project.findProperty("dart-defines")?.toString())
+            val isolatedQa = qaDefines["DYNAMIC_QA_ISOLATED_PACKAGE"] == "true"
+            applicationIdSuffix = if (isolatedQa) ".dev.dynamicqa.r${qaDefines["DYNAMIC_QA_RUN_ID"].orEmpty()}" else ".dev"
+            manifestPlaceholders["debugAppLabel"] = if (isolatedQa) "Tutor TDS QA" else "Tutor TDS DEV"
             versionNameSuffix = "-dev"
         }
         release {

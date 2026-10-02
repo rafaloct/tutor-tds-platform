@@ -190,7 +190,20 @@ class ReleaseReadinessVerifier {
           'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html',
       'ACCOUNT_DELETION_URL':
           'https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html',
+      'REMOTE_CATALOG_ENABLED': false,
+      'LEARNING_CONTEXT_ENABLED': false,
+      'DURABLE_LEARNING_OUTBOX_ENABLED': false,
+      'JOURNEY_TRACEABILITY_ENABLED': false,
+      'SIGNED_SUPPORT_IDENTITY': false,
     };
+    if (config.keys.any((key) => !expected.containsKey(key))) {
+      issues.add(
+        const ReleaseVerificationIssue(
+          'production_config_mismatch',
+          'Configuração de produção contém define não aprovado.',
+        ),
+      );
+    }
     for (final entry in expected.entries) {
       if (config[entry.key] != entry.value) {
         issues.add(

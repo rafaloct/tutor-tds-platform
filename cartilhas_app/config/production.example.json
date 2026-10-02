@@ -3,5 +3,10 @@
   "TUTOR_GATEWAY_URL": "https://tutor-tds-gateway.tdsipex.workers.dev",
   "TUTOR_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-api",
   "PRIVACY_POLICY_URL": "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
-  "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html"
+  "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html",
+  "REMOTE_CATALOG_ENABLED": false,
+  "LEARNING_CONTEXT_ENABLED": false,
+  "DURABLE_LEARNING_OUTBOX_ENABLED": false,
+  "JOURNEY_TRACEABILITY_ENABLED": false,
+  "SIGNED_SUPPORT_IDENTITY": false
 }

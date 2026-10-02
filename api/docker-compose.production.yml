@@ -26,6 +26,7 @@ services:
     build: .
     restart: unless-stopped
     environment:
+      TUTOR_ENVIRONMENT: production
       DATABASE_URL: postgresql+psycopg://tutor_tds:${POSTGRES_PASSWORD}@db:5432/tutor_tds
       ALLOWED_ORIGINS: https://cartilhas.ipexdesenvolvimento.cloud
       PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:?configure PUBLIC_API_BASE_URL}
@@ -37,6 +38,9 @@ services:
       CLOUDFLARE_STREAM_DELIVERY_BASE_URL: ${CLOUDFLARE_STREAM_DELIVERY_BASE_URL:-}
       COMMERCIAL_SIMULATION_ENABLED: ${COMMERCIAL_SIMULATION_ENABLED:-false}
       PAYMENT_ADAPTER: disabled
+      LEARNING_CONTEXT_ENABLED: ${LEARNING_CONTEXT_ENABLED:-false}
+      JOURNEY_TRACEABILITY_ENABLED: ${JOURNEY_TRACEABILITY_ENABLED:-false}
+      SHEETS_PSEUDONYM_SECRET: ${SHEETS_PSEUDONYM_SECRET:-}
     command: >-
       sh -c "alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"
@@ -71,15 +75,17 @@ services:
     logging: *bounded-logging
 
   sync-worker:
+    profiles: ["sheets-sync"]
     image: ${PRODUCTION_API_IMAGE:-tutor-tds-api:production-local}
     build: .
     restart: unless-stopped
     environment:
+      TUTOR_ENVIRONMENT: production
       DATABASE_URL: postgresql+psycopg://tutor_tds:${POSTGRES_PASSWORD}@db:5432/tutor_tds
-      GOOGLE_SHEET_ID: ${GOOGLE_SHEET_ID:?configure GOOGLE_SHEET_ID}
+      GOOGLE_SHEET_ID: ${GOOGLE_SHEET_ID:-}
       GOOGLE_SHEET_RANGE: ${GOOGLE_SHEET_RANGE:-EventosAPI!A:J}
-      GOOGLE_SERVICE_ACCOUNT_JSON: ${GOOGLE_SERVICE_ACCOUNT_JSON:?configure GOOGLE_SERVICE_ACCOUNT_JSON}
-      SHEETS_PSEUDONYM_SECRET: ${SHEETS_PSEUDONYM_SECRET:?configure SHEETS_PSEUDONYM_SECRET}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${GOOGLE_SERVICE_ACCOUNT_JSON:-}
+      SHEETS_PSEUDONYM_SECRET: ${SHEETS_PSEUDONYM_SECRET:-}
       SYNC_BATCH_SIZE: ${SYNC_BATCH_SIZE:-100}
       SYNC_POLL_SECONDS: ${SYNC_POLL_SECONDS:-30}
       SYNC_MAX_ATTEMPTS: ${SYNC_MAX_ATTEMPTS:-3}

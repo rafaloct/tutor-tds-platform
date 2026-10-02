@@ -25,6 +25,7 @@ services:
     build: .
     restart: unless-stopped
     environment:
+      TUTOR_ENVIRONMENT: staging
       DATABASE_URL: postgresql+psycopg://tutor_tds_staging:${STAGING_POSTGRES_PASSWORD}@db-staging:5432/tutor_tds_staging
       ALLOWED_ORIGINS: ${STAGING_ALLOWED_ORIGINS:?configure STAGING_ALLOWED_ORIGINS}
       PUBLIC_API_BASE_URL: ${STAGING_PUBLIC_API_BASE_URL:?configure STAGING_PUBLIC_API_BASE_URL}
@@ -41,6 +42,8 @@ services:
       SIGNED_SUPPORT_IDENTITY: ${SIGNED_SUPPORT_IDENTITY:-false}
       CERTIFICATE_APPROVAL_REQUIRED: ${STAGING_CERTIFICATE_APPROVAL_REQUIRED:-false}
       LEARNING_CONTEXT_ENABLED: ${STAGING_LEARNING_CONTEXT_ENABLED:-false}
+      JOURNEY_TRACEABILITY_ENABLED: ${STAGING_JOURNEY_TRACEABILITY_ENABLED:-false}
+      SHEETS_PSEUDONYM_SECRET: ${STAGING_SHEETS_PSEUDONYM_SECRET:-}
     command: >-
       sh -c "alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers"
@@ -77,6 +80,7 @@ services:
     build: .
     restart: unless-stopped
     environment:
+      TUTOR_ENVIRONMENT: staging
       DATABASE_URL: postgresql+psycopg://tutor_tds_staging:${STAGING_POSTGRES_PASSWORD}@db-staging:5432/tutor_tds_staging
       GOOGLE_SHEET_ID: ${STAGING_GOOGLE_SHEET_ID:-}
       GOOGLE_SHEET_RANGE: ${STAGING_GOOGLE_SHEET_RANGE:-EventosAPI-Staging!A:J}

@@ -6,6 +6,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from app.config import Settings
 from app.database import normalize_database_url
 from app.models import Base
 
@@ -15,6 +16,8 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 database_url = os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+if os.getenv("TUTOR_ENVIRONMENT", "").strip().lower() in {"staging", "production"}:
+    Settings.from_environment().validate_database_url(database_url)
 if database_url:
     config.set_main_option(
         "sqlalchemy.url", normalize_database_url(database_url).replace("%", "%%")

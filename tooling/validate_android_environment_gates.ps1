@@ -68,6 +68,11 @@ $production = [ordered]@{
     TUTOR_GATEWAY_URL = 'https://tutor-tds-gateway.tdsipex.workers.dev'
     PRIVACY_POLICY_URL = 'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html'
     ACCOUNT_DELETION_URL = 'https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html'
+    REMOTE_CATALOG_ENABLED = 'false'
+    LEARNING_CONTEXT_ENABLED = 'false'
+    DURABLE_LEARNING_OUTBOX_ENABLED = 'false'
+    JOURNEY_TRACEABILITY_ENABLED = 'false'
+    SIGNED_SUPPORT_IDENTITY = 'false'
 }
 
 Invoke-GateCase -Name 'debug aceita staging aprovado' `
@@ -80,6 +85,21 @@ $cloudStaging.TUTOR_API_URL = 'https://tutor-tds-staging.fastapicloud.dev'
 $cloudStaging.TUTOR_STAGING_API_URL = $cloudStaging.TUTOR_API_URL
 Invoke-GateCase -Name 'debug aceita app Cloud staging aprovado' `
     -Task ':app:preDebugBuild' -Defines $cloudStaging -ShouldPass $true
+
+$isolated = [ordered]@{}
+foreach ($entry in $cloudStaging.GetEnumerator()) { $isolated[$entry.Key] = $entry.Value }
+$isolated.DYNAMIC_QA_ISOLATED_PACKAGE = 'true'
+$isolated.DYNAMIC_QA_RUN_ID = '11111111111111111111111111111111'
+Invoke-GateCase -Name 'debug aceita QA fisico isolado' `
+    -Task ':app:preDebugBuild' -Defines $isolated -ShouldPass $true
+$isolated.DYNAMIC_QA_RUN_ID = 'invalid'
+Invoke-GateCase -Name 'debug rejeita QA isolado sem run valido' `
+    -Task ':app:preDebugBuild' -Defines $isolated -ShouldPass $false
+$isolated.DYNAMIC_QA_RUN_ID = '11111111111111111111111111111111'
+$isolated.TUTOR_API_URL = $staging.TUTOR_API_URL
+$isolated.TUTOR_STAGING_API_URL = $staging.TUTOR_API_URL
+Invoke-GateCase -Name 'debug rejeita QA isolado fora do Cloud autorizado' `
+    -Task ':app:preDebugBuild' -Defines $isolated -ShouldPass $false
 
 $unapproved = [ordered]@{}
 foreach ($entry in $cloudStaging.GetEnumerator()) {
@@ -120,3 +140,6 @@ Invoke-GateCase -Name 'release rejeita gateway nao aprovado' `
     -Task ':app:preReleaseBuild' -Defines $wrongGateway -ShouldPass $false
 
 Write-Output 'Matriz de ambiente Android aprovada; nenhum APK ou AAB foi gerado.'
+# The last case intentionally fails Gradle. Do not leak that expected rejection
+# as the validation script's status to its caller.
+$global:LASTEXITCODE = 0

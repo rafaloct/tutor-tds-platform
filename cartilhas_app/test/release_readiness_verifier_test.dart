@@ -141,6 +141,37 @@ void main() {
     );
   });
 
+  for (final unsafe in [
+    {'TUTOR_API_URL': 'http://127.0.0.1:8000'},
+    {'EXTRA_ENDPOINT': 'https://tutor-tds-staging.fastapicloud.dev'},
+    {'EXTRA_ENDPOINT': 'https://tutor-tds.local'},
+    {'REMOTE_CATALOG_ENABLED': true},
+    {'JOURNEY_TRACEABILITY_ENABLED': true},
+  ]) {
+    test('bloqueia configuração produtiva insegura: ${unsafe.keys.first}', () {
+      final file = File('${root.path}/config/production.json');
+      final config =
+          jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+      config.addAll(unsafe);
+      file.writeAsStringSync(jsonEncode(config));
+      _writeStatus(
+        root,
+        buildAllowed: true,
+        physicalStatus: 'passed',
+        artifactStatus: 'superseded',
+        uploadAllowed: false,
+      );
+      final result = ReleaseReadinessVerifier(
+        root: root,
+        verifySigningIdentity: false,
+      ).verify(ReleaseIntent.build);
+      expect(
+        result.issues.map((issue) => issue.code),
+        contains('production_config_mismatch'),
+      );
+    });
+  }
+
   test('falha fechado quando a lista de evidência física está ausente', () {
     _writeStatus(
       root,
@@ -201,6 +232,11 @@ validateReleaseFreezeState(rootProject.file(
           'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html',
       'ACCOUNT_DELETION_URL':
           'https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html',
+      'REMOTE_CATALOG_ENABLED': false,
+      'LEARNING_CONTEXT_ENABLED': false,
+      'DURABLE_LEARNING_OUTBOX_ENABLED': false,
+      'JOURNEY_TRACEABILITY_ENABLED': false,
+      'SIGNED_SUPPORT_IDENTITY': false,
     }),
   );
   write(

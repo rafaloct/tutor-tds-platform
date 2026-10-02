@@ -31,19 +31,25 @@ class Settings:
     chatwoot_identity_namespace: str | None = None
     certificate_approval_required: bool = False
     learning_context_enabled: bool = False
+    journey_traceability_enabled: bool = False
+    environment: str = "development"
 
     @classmethod
     def from_environment(cls) -> "Settings":
+        environment = os.getenv("TUTOR_ENVIRONMENT", "development").strip().lower()
+        if environment not in {"development", "staging", "production"}:
+            raise RuntimeError("TUTOR_ENVIRONMENT deve ser development, staging ou production.")
+        database_url = os.getenv("DATABASE_URL")
+        if environment in {"staging", "production"} and not database_url:
+            raise RuntimeError("DATABASE_URL PostgreSQL é obrigatória em staging e production.")
         origins = tuple(
             item.strip()
             for item in os.getenv("ALLOWED_ORIGINS", "").split(",")
             if item.strip()
         )
-        return cls(
-            database_url=os.getenv(
-                "DATABASE_URL",
-                "sqlite+pysqlite:///./tutor_tds_local.db",
-            ),
+        settings = cls(
+            database_url=database_url or "sqlite+pysqlite:///./tutor_tds_local.db",
+            environment=environment,
             allowed_origins=origins,
             jwt_secret=os.getenv("JWT_SECRET"),
             cpf_pepper=os.getenv("CPF_PEPPER"),
@@ -80,7 +86,27 @@ class Settings:
             chatwoot_identity_namespace=os.getenv("CHATWOOT_IDENTITY_NAMESPACE"),
             certificate_approval_required=os.getenv("CERTIFICATE_APPROVAL_REQUIRED", "false").lower() in {"1", "true", "yes"},
             learning_context_enabled=os.getenv("LEARNING_CONTEXT_ENABLED", "false").lower() in {"1", "true", "yes"},
+            journey_traceability_enabled=os.getenv("JOURNEY_TRACEABILITY_ENABLED", "false").lower() in {"1", "true", "yes"},
         )
+        settings.validate_database_url()
+        return settings
+
+    def validate_database_url(self, url: str | None = None) -> None:
+        if self.environment not in {"staging", "production"}:
+            return
+        parsed = urlsplit(url or self.database_url)
+        host = (parsed.hostname or "").lower()
+        if (
+            parsed.scheme not in {"postgres", "postgresql", "postgresql+psycopg"}
+            or not parsed.username
+            or not parsed.password
+            or not parsed.path.strip("/")
+            or host in {"localhost", "127.0.0.1", "::1", "10.0.2.2"}
+            or host.endswith(".local")
+            or (self.environment == "production" and ("staging" in host or "lgtphbbpgqnzduhtyate" in host))
+            or (self.environment == "staging" and host == "db")
+        ):
+            raise RuntimeError("DATABASE_URL exige PostgreSQL persistente do ambiente, fora de SQLite/localhost.")
 
     def require_auth_secrets(self) -> tuple[str, str]:
         if not self.jwt_secret or len(self.jwt_secret) < 32:

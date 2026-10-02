@@ -13,56 +13,35 @@ void main(List<String> arguments) {
   late final Map<String, dynamic> config;
   try {
     config = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
-  } on Object catch (error) {
-    stderr.writeln('JSON de produção inválido: $error');
+  } on Object {
+    stderr.writeln('JSON de produção inválido.');
     exitCode = 2;
     return;
   }
 
-  const forbidden = {
-    'ANYTHING_LLM_API_KEY',
-    'OPENAI_API_KEY',
-    'ANTHROPIC_API_KEY',
-    'GEMINI_API_KEY',
+  const expected = <String, Object>{
+    'TUTOR_ENVIRONMENT': 'production',
+    'TUTOR_API_URL': 'https://ead.ipexdesenvolvimento.cloud/tutor-api',
+    'TUTOR_GATEWAY_URL': 'https://tutor-tds-gateway.tdsipex.workers.dev',
+    'PRIVACY_POLICY_URL':
+        'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html',
+    'ACCOUNT_DELETION_URL':
+        'https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html',
+    'REMOTE_CATALOG_ENABLED': false,
+    'LEARNING_CONTEXT_ENABLED': false,
+    'DURABLE_LEARNING_OUTBOX_ENABLED': false,
+    'JOURNEY_TRACEABILITY_ENABLED': false,
+    'SIGNED_SUPPORT_IDENTITY': false,
   };
-  final leakedKeys = config.keys.where(forbidden.contains).toList();
-  if (leakedKeys.isNotEmpty) {
+  if (config.length != expected.length ||
+      expected.entries.any((entry) => config[entry.key] != entry.value)) {
     stderr.writeln(
-      'Build bloqueado: remova segredos do AAB (${leakedKeys.join(', ')}).',
+      'Build bloqueado: configuração de produção contém endpoint, flag ou campo não aprovado.',
     );
     exitCode = 1;
     return;
   }
-
-  final rawGateway = config['TUTOR_GATEWAY_URL'];
-  final gateway = rawGateway is String ? Uri.tryParse(rawGateway) : null;
-  if (gateway == null || gateway.scheme != 'https' || gateway.host.isEmpty) {
-    stderr.writeln('TUTOR_GATEWAY_URL deve ser uma URL HTTPS válida.');
-    exitCode = 1;
-    return;
-  }
-
-  final rawApi = config['TUTOR_API_URL'];
-  final api = rawApi is String ? Uri.tryParse(rawApi) : null;
-  if (api == null || api.scheme != 'https' || api.host.isEmpty) {
-    stderr.writeln(
-      'TUTOR_API_URL deve ser uma URL HTTPS válida; conta e analytics não podem ficar desconectados em produção.',
-    );
-    exitCode = 1;
-    return;
-  }
-
-  for (final key in const ['PRIVACY_POLICY_URL', 'ACCOUNT_DELETION_URL']) {
-    final rawValue = config[key];
-    final value = rawValue is String ? Uri.tryParse(rawValue) : null;
-    if (value == null || value.scheme != 'https' || value.host.isEmpty) {
-      stderr.writeln('$key deve ser uma URL HTTPS pública e válida.');
-      exitCode = 1;
-      return;
-    }
-  }
-
   stdout.writeln(
-    'Configuração de produção validada: nenhum segredo de IA será compilado.',
+    'Configuração de produção validada para preflight; gates de release ainda são obrigatórios.',
   );
 }

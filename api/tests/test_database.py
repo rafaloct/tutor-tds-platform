@@ -8,7 +8,68 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.pool import StaticPool
 
+from app.config import Settings
 from app.database import Database, normalize_database_url
+
+
+def test_development_keeps_local_sqlite_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.setenv("TUTOR_ENVIRONMENT", "development")
+    assert Settings.from_environment().database_url.startswith("sqlite")
+
+
+@pytest.mark.parametrize("environment", ["staging", "production"])
+def test_managed_environments_require_database_url(monkeypatch: pytest.MonkeyPatch, environment: str) -> None:
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.setenv("TUTOR_ENVIRONMENT", environment)
+    with pytest.raises(RuntimeError, match="DATABASE_URL"):
+        Settings.from_environment()
+
+
+def test_staging_rejects_sqlite(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DATABASE_URL", "sqlite+pysqlite:///./staging.db")
+    monkeypatch.setenv("TUTOR_ENVIRONMENT", "staging")
+    with pytest.raises(RuntimeError, match="DATABASE_URL"):
+        Settings.from_environment()
+
+
+@pytest.mark.parametrize("url", [
+    "sqlite+pysqlite:///./tutor_tds_local.db",
+    "postgresql+psycopg://user:example@localhost:5432/db",
+    "postgresql+psycopg://user:example@127.0.0.1:5432/db",
+    "postgresql+psycopg://user:example@lgtphbbpgqnzduhtyate.supabase.co/db",
+    "postgresql+psycopg://user:example@db.staging.internal/db",
+])
+def test_production_rejects_nonproduction_database(monkeypatch: pytest.MonkeyPatch, url: str) -> None:
+    monkeypatch.setenv("TUTOR_ENVIRONMENT", "production")
+    monkeypatch.setenv("DATABASE_URL", url)
+    with pytest.raises(RuntimeError, match="DATABASE_URL"):
+        Settings.from_environment()
+
+
+def test_production_accepts_persistent_compose_postgres(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TUTOR_ENVIRONMENT", "production")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://user:example@db:5432/tutor_tds")
+    assert Settings.from_environment().database_url.endswith("/tutor_tds")
+
+
+@pytest.mark.parametrize("environment", ["staging", "production"])
+def test_managed_alembic_rejects_missing_environment_url(monkeypatch: pytest.MonkeyPatch, environment: str) -> None:
+    monkeypatch.setenv("TUTOR_ENVIRONMENT", environment)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    with pytest.raises(RuntimeError, match="DATABASE_URL"):
+        command.upgrade(Config("alembic.ini", output_buffer=StringIO()), "20260920_0001", sql=True)
+
+
+def test_production_app_rejects_sqlite_override() -> None:
+    from app.main import create_app
+
+    settings = Settings(
+        database_url="postgresql+psycopg://user:example@db:5432/tutor_tds",
+        allowed_origins=(), environment="production",
+    )
+    with pytest.raises(RuntimeError, match="DATABASE_URL"):
+        create_app(database_url="sqlite+pysqlite:///:memory:", settings=settings)
 
 
 @pytest.mark.parametrize("scheme", ["postgres", "postgresql", "postgresql+psycopg"])

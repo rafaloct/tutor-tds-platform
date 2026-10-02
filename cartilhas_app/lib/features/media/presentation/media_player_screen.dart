@@ -112,7 +112,7 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
           : progress?.positionSeconds ?? 0;
       await controller.loadHtmlString(
         buildSecureMediaHtml(playable, initialPositionSeconds: initial),
-        baseUrl: 'https://tutor-tds.local',
+        baseUrl: 'https://tutor-tds.invalid',
       );
       if (mounted) setState(() {});
     } on MediaRepositoryException catch (error) {
@@ -138,7 +138,7 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
     if (!request.isMainFrame) return true;
     final uri = Uri.tryParse(request.url);
     if (uri == null || uri.scheme != 'https') return false;
-    if (uri.host == 'tutor-tds.local') return true;
+    if (uri.host == 'tutor-tds.invalid') return true;
     final playbackHost = _media.playbackUrl?.host;
     if (playbackHost != null && uri.host == playbackHost) return true;
     return _host(uri.host, 'youtube.com') ||

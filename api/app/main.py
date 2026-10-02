@@ -43,6 +43,7 @@ def create_app(
     settings: Settings | None = None,
 ) -> FastAPI:
     resolved = settings or Settings.from_environment()
+    resolved.validate_database_url(database_url or resolved.database_url)
     database = Database(database_url or resolved.database_url)
 
     @asynccontextmanager
