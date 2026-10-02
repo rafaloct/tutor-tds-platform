@@ -846,6 +846,8 @@ class StudentBaseline(Base):
     __tablename__ = "student_baselines"
     __table_args__ = (
         UniqueConstraint("class_id", "user_id", name="uq_student_baseline_class_person"),
+        UniqueConstraint("bi_source_record_id", name="uq_student_baseline_bi_reference"),
+        ForeignKeyConstraint(["bi_source_record_id", "user_id"], ["baseline_source_records.id", "baseline_source_records.user_id"], name="fk_student_baseline_bi_owner"),
         ForeignKeyConstraint(["source_record_id", "user_id"], ["baseline_source_records.id", "baseline_source_records.user_id"], name="fk_student_baseline_source_owner"),
         ForeignKeyConstraint(["class_id", "program_id", "course_id"], ["classes.id", "classes.program_id", "classes.course_id"], name="fk_student_baseline_class"),
         ForeignKeyConstraint(["enrollment_id", "user_id", "program_id", "course_id"], ["enrollments.id", "enrollments.user_id", "enrollments.program_id", "enrollments.course_id"], name="fk_student_baseline_enrollment", ondelete="CASCADE"),
@@ -858,6 +860,7 @@ class StudentBaseline(Base):
     program_id: Mapped[str] = mapped_column(String(36), nullable=False)
     course_id: Mapped[str] = mapped_column(String(120), nullable=False)
     source_record_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    bi_source_record_id: Mapped[str | None] = mapped_column(String(36))
     baseline_date: Mapped[date] = mapped_column(Date, nullable=False)
     territory_id: Mapped[str | None] = mapped_column(String(120))
     revision: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -28,8 +28,38 @@ class AuthRepository {
   final http.Client _client;
   final AuthTokenStore _tokenStore;
   Future<AuthSession>? _refreshInFlight;
+  int _sessionGeneration = 0;
+  Future<void> _tokenOperations = Future<void>.value();
+
+  void _checkGeneration(int generation) {
+    if (generation != _sessionGeneration) {
+      throw const AuthException(
+        'A conta mudou. Entre novamente para continuar.',
+      );
+    }
+  }
+
+  // Serialize secure-storage mutations. A logout queued during a write must
+  // finish after it; stale responses must never clear or overwrite a new account.
+  Future<void> _mutateTokens(Future<void> Function() operation) {
+    final result = _tokenOperations.then((_) => operation());
+    _tokenOperations = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return result;
+  }
+
+  Future<void> _writeSession(AuthSession session, int generation) async {
+    await _mutateTokens(() async {
+      _checkGeneration(generation);
+      await _tokenStore.write(session.tokens);
+    });
+    _checkGeneration(generation);
+  }
 
   bool get isConfigured => apiUrl.trim().isNotEmpty;
+  int get sessionGeneration => _sessionGeneration;
 
   Future<bool> hasSession() async => (await _readTokens()) != null;
 
@@ -87,7 +117,7 @@ class AuthRepository {
       );
       if (response.statusCode != 200) {
         if (response.statusCode == 401) {
-          await _tokenStore.clear();
+          await logout();
         }
         throw const AuthException('Não foi possível validar sua conta.');
       }
@@ -121,7 +151,7 @@ class AuthRepository {
         }
         throw const AuthException('Não foi possível excluir sua conta agora.');
       }
-      await _tokenStore.clear();
+      await logout();
     } on AuthException {
       rethrow;
     } on Object {
@@ -143,19 +173,28 @@ class AuthRepository {
     Future<http.Response> Function(String accessToken) request,
   ) async {
     _requireConfigured();
+    final generation = _sessionGeneration;
     var tokens = await _readTokens();
+    _checkGeneration(generation);
     if (tokens == null) {
       throw const AuthException('Entre na sua conta para continuar.');
     }
     var response = await request(tokens.accessToken);
+    _checkGeneration(generation);
     if (response.statusCode != 401) return response;
 
     final session = await refresh();
+    _checkGeneration(generation);
     response = await request(session.tokens.accessToken);
+    _checkGeneration(generation);
     return response;
   }
 
-  Future<void> logout() => _tokenStore.clear();
+  Future<void> logout() {
+    _sessionGeneration++;
+    _refreshInFlight = null;
+    return _mutateTokens(_tokenStore.clear);
+  }
 
   /// Fetches a server-signed support identity; never caches or signs locally.
   Future<Map<String, String>> supportIdentity() async {
@@ -202,6 +241,8 @@ class AuthRepository {
     required int expectedStatus,
   }) async {
     _requireConfigured();
+    final generation = ++_sessionGeneration;
+    _refreshInFlight = null;
     try {
       final response = await _client
           .post(
@@ -210,11 +251,12 @@ class AuthRepository {
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 12));
+      _checkGeneration(generation);
       if (response.statusCode != expectedStatus) {
         throw AuthException(_messageFor(response.statusCode));
       }
       final session = _decodeSession(response.body);
-      await _tokenStore.write(session.tokens);
+      await _writeSession(session, generation);
       return session;
     } on AuthException {
       rethrow;
@@ -225,7 +267,9 @@ class AuthRepository {
 
   Future<AuthSession> _refresh() async {
     _requireConfigured();
+    final generation = _sessionGeneration;
     final tokens = await _readTokens();
+    _checkGeneration(generation);
     if (tokens == null) {
       throw const AuthException('Entre na sua conta para continuar.');
     }
@@ -240,12 +284,13 @@ class AuthRepository {
             .timeout(const Duration(seconds: 12)),
         'Não foi possível renovar sua sessão agora.',
       );
+      _checkGeneration(generation);
       if (response.statusCode != 200) {
-        await _tokenStore.clear();
+        await logout();
         throw const AuthException('Sua sessão expirou. Entre novamente.');
       }
       final session = _decodeSession(response.body);
-      await _tokenStore.write(session.tokens);
+      await _writeSession(session, generation);
       return session;
     } on AuthException {
       rethrow;
@@ -279,6 +324,7 @@ class AuthRepository {
 
   Future<AuthTokens?> _readTokens() async {
     try {
+      await _tokenOperations;
       return await _tokenStore.read();
     } on Object {
       throw const AuthException('Não foi possível acessar sua sessão segura.');

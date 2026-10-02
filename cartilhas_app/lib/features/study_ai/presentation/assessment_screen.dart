@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../analytics/telemetry_route.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 
@@ -595,7 +596,10 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   void _askTutor(StudyQuestion question) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      trackedRoute(
+        pageId: 'tutor',
+        featureId: 'tutor_help',
+        courseId: widget.resolvedCourseId,
         builder: (_) => GenUIAssistantScreen(
           contextLabel: widget.topic,
           initialContext:

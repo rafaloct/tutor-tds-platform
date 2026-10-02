@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+from unittest.mock import patch
 from urllib.parse import urlsplit
 
 from fastapi.testclient import TestClient
@@ -154,16 +156,20 @@ def test_media_editorial_events_score_and_simulated_ledger() -> None:
             json=events[0] | {"event_id": "invalid-extra", "payload": events[0]["payload"] | {"position_seconds": "500"}},
             headers=bearer(accounts["student"]),
         )
-        rating = client.put(
-            f"/media/{media_id}/rating",
-            headers=bearer(accounts["student"]),
-            json={"rating": 5},
-        )
-        rating_retry = client.put(
-            f"/media/{media_id}/rating",
-            headers=bearer(accounts["student"]),
-            json={"rating": 5},
-        )
+        # Rating timestamps are server-owned. Keep this synthetic rating inside
+        # the same September window as the events, regardless of today's date.
+        with patch("app.media.datetime", wraps=datetime) as media_clock:
+            media_clock.now.return_value = datetime(2026, 9, 20, 12, 11, tzinfo=timezone.utc)
+            rating = client.put(
+                f"/media/{media_id}/rating",
+                headers=bearer(accounts["student"]),
+                json={"rating": 5},
+            )
+            rating_retry = client.put(
+                f"/media/{media_id}/rating",
+                headers=bearer(accounts["student"]),
+                json={"rating": 5},
+            )
         own_rating = client.get(
             f"/media/{media_id}/rating", headers=bearer(accounts["student"])
         )

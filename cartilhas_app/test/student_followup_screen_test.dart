@@ -25,6 +25,7 @@ void main() {
   Future<ClassroomRepository> showScreen(
     WidgetTester tester, {
     required Future<http.Response> Function(http.Request) handler,
+    bool journeyEnabled = false,
   }) async {
     final repo = ClassroomRepository(
       apiUrl: 'https://example.test',
@@ -45,6 +46,7 @@ void main() {
         home: StudentFollowupScreen(
           repository: repo,
           staffId: 'teacher',
+          journeyEnabled: journeyEnabled,
           classroom: ClassroomDetails(
             id: 'class-a',
             programId: 'p',
@@ -80,6 +82,122 @@ void main() {
     await tester.pumpAndSettle();
     return repo;
   }
+
+  testWidgets(
+    'BI inscription requires review, persists and rereads confirmed identity',
+    (tester) async {
+      Map<String, dynamic>? saved;
+      await showScreen(
+        tester,
+        journeyEnabled: true,
+        handler: (request) async {
+          if (request.method == 'PUT') {
+            saved = {
+              ...jsonDecode(request.body) as Map<String, dynamic>,
+              'revision': 1,
+            };
+            return http.Response(jsonEncode(saved), 200);
+          }
+          return http.Response(
+            jsonEncode(
+              request.url.path.endsWith('/baseline')
+                  ? {'baseline': saved, 'history': []}
+                  : {'items': [], 'total': 0},
+            ),
+            200,
+          );
+        },
+      );
+      expect(
+        find.text('Inscrição do programa: vínculo pendente'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Conferir vínculo do baseline'));
+      await tester.pumpAndSettle();
+      await fillField(tester, 'ID local do registro', 'tablet-123');
+      await fillField(tester, 'Data da coleta (AAAA-MM-DD)', '2026-09-21');
+      await fillField(
+        tester,
+        'Inscrição no BI (ex.: DIG-0001; opcional)',
+        'DIG-0001',
+      );
+      await fillField(
+        tester,
+        'Justificativa da vinculação',
+        'Inscrição e formulário conferidos',
+      );
+      expect(
+        tester
+            .widget<FilledButton>(
+              find.widgetWithText(FilledButton, 'Salvar online'),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tester.ensureVisible(find.byType(Checkbox).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Checkbox).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Salvar online'));
+      await tester.pumpAndSettle();
+      expect(saved!['bi_record_id'], 'DIG-0001');
+      expect(find.text('Inscrição do programa: DIG-0001'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'Confirmed BI reference does not require a missing tablet record code',
+    (tester) async {
+      Map<String, dynamic>? saved;
+      await showScreen(
+        tester,
+        journeyEnabled: true,
+        handler: (request) async {
+          if (request.method == 'PUT') {
+            saved = {
+              ...jsonDecode(request.body) as Map<String, dynamic>,
+              'revision': 1,
+            };
+            return http.Response(jsonEncode(saved), 200);
+          }
+          return http.Response(
+            jsonEncode(
+              request.url.path.endsWith('/baseline')
+                  ? {'baseline': saved, 'history': []}
+                  : {'items': [], 'total': 0},
+            ),
+            200,
+          );
+        },
+      );
+      await tester.tap(find.text('Conferir vínculo do baseline'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('baseline-bi-reference')));
+      await tester.pumpAndSettle();
+      expect(find.text('ID local do registro'), findsNothing);
+      await fillField(tester, 'Data da coleta (AAAA-MM-DD)', '2026-09-21');
+      await fillField(
+        tester,
+        'Inscrição no BI (ex.: DIG-0001; opcional)',
+        'DIG-0099',
+      );
+      await fillField(
+        tester,
+        'Justificativa da vinculação',
+        'Rafael conferiu a ficha original do BI',
+      );
+      await tester.ensureVisible(find.byType(Checkbox).last);
+      await tester.tap(find.byType(Checkbox).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Salvar online'));
+      await tester.pumpAndSettle();
+      expect(saved!['source'], 'fabric:tds-inscription-v1');
+      expect(saved!['record_id'], 'DIG-0099');
+      expect(saved!['bi_record_id'], 'DIG-0099');
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('baseline save rereads server state with explicit consent', (
     tester,

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../config/app_config.dart';
 import '../../services/privacy_preferences.dart';
 import '../auth/data/auth_repository.dart';
 import 'learning_event_queue.dart';
@@ -61,7 +62,7 @@ class LearningEventSyncService {
       for (final event in events) {
         // A legacy event without an owner cannot be assigned to whoever logs in
         // next. Keep it for explicit reconciliation, never infer its owner.
-        if (queue.isDurable && event.localOwnerId == null) continue;
+        if ((queue.isDurable || AppConfig.journeyTraceabilityEnabled) && event.localOwnerId == null) continue;
         if (event.localOwnerId != null &&
             (event.localApiUrl != apiUrl.replaceFirst(RegExp(r'/+$'), '') ||
                 event.localOwnerId != await authRepository.localUserId())) {

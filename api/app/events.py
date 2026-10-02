@@ -26,6 +26,7 @@ EventType = Literal[
     "page_viewed",
     "resource_opened",
     "feature_used",
+    "screen_engagement",
     "video_started",
     "video_checkpoint",
     "video_completed",
@@ -37,6 +38,7 @@ TELEMETRY_PAYLOAD_KEYS = {
     "page_viewed": "page_id",
     "resource_opened": "resource_id",
     "feature_used": "feature_id",
+    "screen_engagement": "page_id",
 }
 VIDEO_EVENT_TYPES = {
     "video_started",
@@ -74,10 +76,11 @@ class EventCreate(BaseModel):
 
     @model_validator(mode="after")
     def require_activity_duration(self) -> "EventCreate":
-        if self.event_type == "study_activity" and self.active_seconds is None:
-            raise ValueError("study_activity exige active_seconds")
-        if self.event_type != "study_activity" and self.active_seconds is not None:
-            raise ValueError("active_seconds é exclusivo de study_activity")
+        duration_types = {"study_activity", "screen_engagement"}
+        if self.event_type in duration_types and self.active_seconds is None:
+            raise ValueError("evento de duração exige active_seconds")
+        if self.event_type not in duration_types and self.active_seconds is not None:
+            raise ValueError("active_seconds não permitido neste evento")
         expected_key = TELEMETRY_PAYLOAD_KEYS.get(self.event_type)
         if self.event_type in VIDEO_EVENT_TYPES:
             expected = {"media_id", "module_id"}
@@ -140,6 +143,9 @@ def event_claims(
     # uses contextual authorization while the additive flag is enabled.
     if claims["role"] == "student":
         return claims
+    if request.app.state.settings.journey_traceability_enabled and payload.event_type in TELEMETRY_PAYLOAD_KEYS:
+        # Authenticated account analytics does not grant academic permissions.
+        return claims
     if (
         request.app.state.settings.learning_context_enabled
         and payload.event_type in VERSIONED_EVENT_TYPES
@@ -161,6 +167,8 @@ def create_event(
 ) -> EventResponse:
     request.state.trace_id = payload.event_id
     request.state.attempt = "new"
+    if payload.event_type == "screen_engagement" and not request.app.state.settings.journey_traceability_enabled:
+        raise HTTPException(status_code=404, detail="Tempo de tela ainda não habilitado.")
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         existing = session.get(LearningEventRecord, payload.event_id)

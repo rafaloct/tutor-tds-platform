@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import '../../../config/app_config.dart';
 import '../data/classroom_repository.dart';
 import '../models/classroom_models.dart';
 
@@ -11,17 +12,19 @@ class StudentFollowupScreen extends StatefulWidget {
     required this.classroom,
     required this.students,
     required this.staffId,
+    this.journeyEnabled = AppConfig.journeyTraceabilityEnabled,
   });
   final ClassroomRepository repository;
   final ClassroomDetails classroom;
   final List<ClassroomStudent> students;
   final String staffId;
+  final bool journeyEnabled;
   @override
   State<StudentFollowupScreen> createState() => _StudentFollowupScreenState();
 }
 
 class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
-  String? _student, _error;
+  String? _student, _error, _personId;
   Map<String, dynamic>? _baseline;
   List<Map<String, dynamic>> _cases = [];
   List<Map<String, dynamic>> _mentors = [];
@@ -36,6 +39,7 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
       _ready = false;
       if (!more) {
         _baseline = null;
+        _personId = null;
         _cases = [];
       }
     });
@@ -52,6 +56,7 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
       if (!mounted) return;
       setState(() {
         _baseline = baseline['baseline'] as Map<String, dynamic>?;
+        _personId = baseline['pessoa_id'] as String?;
         _cases = [
           ..._cases,
           ...(cases['items'] as List).cast<Map<String, dynamic>>(),
@@ -86,6 +91,10 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
     );
     final form = GlobalKey<FormState>();
     var confirmed = false;
+    var biReferenceOnly =
+        baseline &&
+        widget.journeyEnabled &&
+        _baseline?['source'] == 'fabric:tds-inscription-v1';
     final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -102,109 +111,147 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
                     Text(
                       'Aluno: ${widget.students.firstWhere((s) => s.userId == _student).name}\nRegistre somente contexto pedagógico necessário, sem dados sensíveis.',
                     ),
-                    for (final entry in controllers.entries)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: entry.key == 'mentor_id'
-                            ? DropdownButtonFormField<String>(
-                                initialValue:
-                                    _mentors.any(
-                                      (m) => m['user_id'] == entry.value.text,
-                                    )
-                                    ? entry.value.text
-                                    : null,
-                                isExpanded: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Responsável da equipe',
-                                ),
-                                items: _mentors
-                                    .map(
-                                      (m) => DropdownMenuItem(
-                                        value: m['user_id'] as String,
-                                        child: Text(m['name'] as String),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (value) =>
-                                    entry.value.text = value ?? '',
-                                validator: (value) => value == null
-                                    ? 'Selecione um responsável ativo.'
-                                    : null,
-                              )
-                            : entry.key == 'status'
-                            ? DropdownButtonFormField<String>(
-                                initialValue: entry.value.text,
-                                isExpanded: true,
-                                decoration: InputDecoration(
-                                  labelText: labels[entry.key],
-                                ),
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: 'open',
-                                    child: Text('Aberta'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'in_progress',
-                                    child: Text('Em acompanhamento'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'closed',
-                                    child: Text('Encerrada'),
-                                  ),
-                                ],
-                                onChanged: (value) => entry.value.text = value!,
-                              )
-                            : TextFormField(
-                                controller: entry.value,
-                                decoration: InputDecoration(
-                                  labelText: labels[entry.key],
-                                ),
-                                maxLength: entry.key == 'reason'
-                                    ? 500
-                                    : (entry.key == 'objective' ||
-                                          entry.key == 'next_action')
-                                    ? 1000
-                                    : 240,
-                                validator: (value) {
-                                  final text = value?.trim() ?? '';
-                                  if (entry.key == 'territory_id') return null;
-                                  if (text.isEmpty) {
-                                    return 'Preencha este campo.';
-                                  }
-                                  if ([
-                                        'reason',
-                                        'objective',
-                                        'next_action',
-                                      ].contains(entry.key) &&
-                                      text.length < 3) {
-                                    return 'Use pelo menos 3 caracteres.';
-                                  }
-                                  if (entry.key == 'baseline_date') {
-                                    final date = DateTime.tryParse(text);
-                                    if (date == null ||
-                                        !RegExp(
-                                          r'^\d{4}-\d{2}-\d{2}$',
-                                        ).hasMatch(text) ||
-                                        date.toIso8601String().substring(
-                                              0,
-                                              10,
-                                            ) !=
-                                            text) {
-                                      return 'Use uma data válida: AAAA-MM-DD.';
-                                    }
-                                  }
-                                  return null;
-                                },
-                              ),
+                    if (baseline &&
+                        widget.journeyEnabled &&
+                        _baseline == null) ...[
+                      const Text(
+                        'Se não houver ficha de baseline, mantenha o vínculo pendente e realize a coleta. Não crie um registro fictício.',
                       ),
+                      CheckboxListTile(
+                        key: const ValueKey('baseline-bi-reference'),
+                        contentPadding: EdgeInsets.zero,
+                        value: biReferenceOnly,
+                        onChanged: (value) =>
+                            update(() => biReferenceOnly = value ?? false),
+                        title: const Text(
+                          'Usar a inscrição conferida do BI como referência da coleta',
+                        ),
+                      ),
+                    ],
+                    for (final entry in controllers.entries)
+                      if (!(biReferenceOnly &&
+                          const {'source', 'record_id'}.contains(entry.key)))
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: entry.key == 'mentor_id'
+                              ? DropdownButtonFormField<String>(
+                                  initialValue:
+                                      _mentors.any(
+                                        (m) => m['user_id'] == entry.value.text,
+                                      )
+                                      ? entry.value.text
+                                      : null,
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Responsável da equipe',
+                                  ),
+                                  items: _mentors
+                                      .map(
+                                        (m) => DropdownMenuItem(
+                                          value: m['user_id'] as String,
+                                          child: Text(m['name'] as String),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) =>
+                                      entry.value.text = value ?? '',
+                                  validator: (value) => value == null
+                                      ? 'Selecione um responsável ativo.'
+                                      : null,
+                                )
+                              : entry.key == 'status'
+                              ? DropdownButtonFormField<String>(
+                                  initialValue: entry.value.text,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: labels[entry.key],
+                                  ),
+                                  items: const [
+                                    DropdownMenuItem(
+                                      value: 'open',
+                                      child: Text('Aberta'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'in_progress',
+                                      child: Text('Em acompanhamento'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'closed',
+                                      child: Text('Encerrada'),
+                                    ),
+                                  ],
+                                  onChanged: (value) =>
+                                      entry.value.text = value!,
+                                )
+                              : TextFormField(
+                                  controller: entry.value,
+                                  decoration: InputDecoration(
+                                    labelText: labels[entry.key],
+                                  ),
+                                  maxLength: entry.key == 'reason'
+                                      ? 500
+                                      : entry.key == 'bi_record_id'
+                                      ? 120
+                                      : (entry.key == 'objective' ||
+                                            entry.key == 'next_action')
+                                      ? 1000
+                                      : 240,
+                                  validator: (value) {
+                                    final text = value?.trim() ?? '';
+                                    if (entry.key == 'territory_id') {
+                                      return null;
+                                    }
+                                    if (entry.key == 'bi_record_id') {
+                                      if (biReferenceOnly && text.isEmpty) {
+                                        return 'Informe a inscrição conferida do BI.';
+                                      }
+                                      if (text.isEmpty ||
+                                          RegExp(
+                                            r'^[A-Za-z0-9][A-Za-z0-9_.:-]*$',
+                                          ).hasMatch(text)) {
+                                        return null;
+                                      }
+                                      return 'Copie o ID da inscrição conferida.';
+                                    }
+                                    if (text.isEmpty) {
+                                      return 'Preencha este campo.';
+                                    }
+                                    if ([
+                                          'reason',
+                                          'objective',
+                                          'next_action',
+                                        ].contains(entry.key) &&
+                                        text.length < 3) {
+                                      return 'Use pelo menos 3 caracteres.';
+                                    }
+                                    if (entry.key == 'baseline_date') {
+                                      final date = DateTime.tryParse(text);
+                                      if (date == null ||
+                                          !RegExp(
+                                            r'^\d{4}-\d{2}-\d{2}$',
+                                          ).hasMatch(text) ||
+                                          date.toIso8601String().substring(
+                                                0,
+                                                10,
+                                              ) !=
+                                              text) {
+                                        return 'Use uma data válida: AAAA-MM-DD.';
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                ),
+                        ),
                     if (baseline)
                       CheckboxListTile(
                         contentPadding: EdgeInsets.zero,
                         value: confirmed,
                         onChanged: (value) =>
                             update(() => confirmed = value ?? false),
-                        title: const Text(
-                          'Conferi que este formulário pertence ao aluno selecionado.',
+                        title: Text(
+                          widget.journeyEnabled
+                              ? 'Conferi que o formulário e a inscrição informados pertencem ao aluno selecionado.'
+                              : 'Conferi que este formulário pertence ao aluno selecionado.',
                         ),
                       ),
                   ],
@@ -225,8 +272,14 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
                         Navigator.pop(
                           context,
                           controllers.map(
-                            (key, controller) =>
-                                MapEntry(key, controller.text.trim()),
+                            (key, controller) => MapEntry(
+                              key,
+                              biReferenceOnly && key == 'source'
+                                  ? 'fabric:tds-inscription-v1'
+                                  : biReferenceOnly && key == 'record_id'
+                                  ? controllers['bi_record_id']!.text.trim()
+                                  : controller.text.trim(),
+                            ),
                           ),
                         );
                       }
@@ -254,6 +307,8 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
         'record_id': _baseline?['record_id'] as String? ?? '',
         'baseline_date': _baseline?['baseline_date'] as String? ?? '',
         'territory_id': _baseline?['territory_id'] as String? ?? '',
+        if (widget.journeyEnabled)
+          'bi_record_id': _baseline?['bi_record_id'] as String? ?? '',
         'reason': '',
       },
       {
@@ -261,6 +316,7 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
         'record_id': 'ID local do registro',
         'baseline_date': 'Data da coleta (AAAA-MM-DD)',
         'territory_id': 'Território (opcional)',
+        'bi_record_id': 'Inscrição no BI (ex.: DIG-0001; opcional)',
         'reason': 'Justificativa da vinculação',
       },
       baseline: true,
@@ -273,6 +329,9 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
         source: values['source']!,
         recordId: values['record_id']!,
         baselineDate: values['baseline_date']!,
+        biRecordId: values['bi_record_id']?.isNotEmpty == true
+            ? values['bi_record_id']
+            : null,
         territoryId: values['territory_id']!.isEmpty
             ? null
             : values['territory_id'],
@@ -486,6 +545,8 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
             child: const Text('Atualizar acompanhamento'),
           ),
         if (_ready) ...[
+          if (widget.journeyEnabled && _personId != null)
+            SelectableText('ID de acompanhamento: $_personId'),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -501,6 +562,12 @@ class _StudentFollowupScreenState extends State<StudentFollowupScreen> {
                   if (_baseline != null)
                     Text(
                       '${_baseline!['source']} • ${_baseline!['record_id']}\nColeta: ${_baseline!['baseline_date']}',
+                    ),
+                  if (widget.journeyEnabled)
+                    Text(
+                      _baseline?['bi_record_id'] == null
+                          ? 'Inscrição do programa: vínculo pendente'
+                          : 'Inscrição do programa: ${_baseline!['bi_record_id']}',
                     ),
                   TextButton(
                     onPressed: _busy ? null : _saveBaseline,

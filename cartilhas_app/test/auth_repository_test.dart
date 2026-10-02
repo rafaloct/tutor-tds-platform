@@ -79,6 +79,71 @@ String sessionJson({
 });
 
 void main() {
+  for (final status in [200, 401]) {
+    test(
+      'late refresh $status cannot restore logout or clear next login',
+      () async {
+        final store = storedSession();
+        final started = Completer<void>();
+        final response = Completer<http.Response>();
+        final repository = AuthRepository(
+          apiUrl: 'https://api.example',
+          tokenStore: store,
+          client: MockClient((request) async {
+            if (request.url.path == '/auth/refresh') {
+              started.complete();
+              return response.future;
+            }
+            return http.Response(sessionJson(accessToken: 'next-account'), 200);
+          }),
+        );
+        final refresh = repository.refresh();
+        final rejected = expectLater(refresh, throwsA(fallbackError(false)));
+        await started.future;
+        await repository.logout();
+        await repository.login(cpf: 'synthetic', password: 'synthetic');
+        response.complete(http.Response(sessionJson(), status));
+        await rejected;
+        expect(store.value!.accessToken, 'next-account');
+        expect(store.writes, 1);
+        repository.dispose();
+      },
+    );
+  }
+  test('logout rejects pending login and authenticated response', () async {
+    final store = storedSession();
+    final response = Completer<http.Response>();
+    final started = Completer<void>();
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      tokenStore: store,
+      client: MockClient((_) async {
+        started.complete();
+        return response.future;
+      }),
+    );
+    final login = repository.login(cpf: 'synthetic', password: 'synthetic');
+    final rejected = expectLater(login, throwsA(fallbackError(false)));
+    await started.future;
+    await repository.logout();
+    response.complete(http.Response(sessionJson(), 200));
+    await rejected;
+    expect(store.value, isNull);
+    expect(store.writes, 0);
+    store.value = const AuthTokens(accessToken: 'a', refreshToken: 'r');
+    final result = Completer<http.Response>();
+    final requested = Completer<void>();
+    final request = repository.authorized((_) {
+      requested.complete();
+      return result.future;
+    });
+    final stale = expectLater(request, throwsA(fallbackError(false)));
+    await requested.future;
+    await repository.logout();
+    result.complete(http.Response('{}', 200));
+    await stale;
+    repository.dispose();
+  });
   test(
     'localUserId only decodes subject and performs no network or writes',
     () async {

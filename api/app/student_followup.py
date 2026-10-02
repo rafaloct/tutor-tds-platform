@@ -17,11 +17,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .auth import access_claims
+from .sync_worker import _pseudonym
 from .evidence import _active_student, _class, _is_staff, _staff
 from .models import BaselineRevision, BaselineSourceRecord, ClassEnrollment, ClassMonitor, Classroom, Enrollment, MentorshipCase, MentorshipRevision, ProgramMembership, StudentBaseline, User
 
 router = APIRouter(tags=["student-followup"])
 CASE_FIELDS = {"mentor_id", "objective", "next_action", "status"}
+BI_SOURCE = "fabric:tds-inscription-v1"
 
 
 class HumanAction(BaseModel):
@@ -36,6 +38,7 @@ class BaselinePut(HumanAction):
     record_id: str = Field(min_length=1, max_length=240)
     baseline_date: date
     territory_id: str | None = Field(default=None, min_length=1, max_length=120)
+    bi_record_id: str | None = Field(default=None, min_length=1, max_length=120, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
 
     @field_validator("record_id", "territory_id")
     @classmethod
@@ -112,7 +115,11 @@ def _baseline_snapshot(session, record):
 
 def _baseline_view(session, record):
     audit = session.scalar(select(BaselineRevision).where(BaselineRevision.baseline_id == record.id, BaselineRevision.revision == record.revision))
-    return _baseline_snapshot(session, record) | {"reviewed_by": audit.actor_user_id if audit else None}
+    snapshot = _baseline_snapshot(session, record)
+    bi = session.get(BaselineSourceRecord, record.bi_source_record_id) if record.bi_source_record_id else None
+    if bi is not None or (audit and "bi_record_id" in audit.snapshot):
+        snapshot["bi_record_id"] = bi.record_id if bi else None
+    return snapshot | {"reviewed_by": audit.actor_user_id if audit else None}
 
 
 def _case_snapshot(record):
@@ -154,15 +161,20 @@ def get_baseline(class_id: str, user_id: str, request: Request, claims=Depends(a
     with Session(request.app.state.database.engine) as session:
         classroom = _scope(session, class_id, claims)
         link = _student(session, classroom, user_id)
+        settings = request.app.state.settings
+        secret = settings.sheets_pseudonym_secret
+        identity = {'pessoa_id': _pseudonym(secret, user_id)} if settings.journey_traceability_enabled and secret and len(secret) >= 32 else {}
         record = session.scalar(select(StudentBaseline).where(StudentBaseline.class_id == class_id, StudentBaseline.user_id == user_id))
         if record is None:
-            return {"baseline": None, "history": []}
+            return {"baseline": None, "history": []} | identity
         _lineage(record, link)
-        return {"baseline": _baseline_view(session, record), "history": _history(session, BaselineRevision, BaselineRevision.baseline_id == record.id)}
+        return {"baseline": _baseline_view(session, record), "history": _history(session, BaselineRevision, BaselineRevision.baseline_id == record.id)} | identity
 
 
 @router.put("/classes/{class_id}/students/{user_id}/baseline")
 def put_baseline(class_id: str, user_id: str, payload: BaselinePut, request: Request, claims=Depends(access_claims)):
+    if "bi_record_id" in payload.model_fields_set and not request.app.state.settings.journey_traceability_enabled:
+        raise HTTPException(404, "Vínculo de rastreio ainda não habilitado.")
     with Session(request.app.state.database.engine) as session:
         classroom = _scope(session, class_id, claims, lock=True)
         link = _student(session, classroom, user_id)
@@ -171,8 +183,11 @@ def put_baseline(class_id: str, user_id: str, payload: BaselinePut, request: Req
             _lineage(record, link)
         previous = session.scalar(select(BaselineRevision).where(BaselineRevision.idempotency_key == payload.idempotency_key))
         fields = {"source": payload.source, "record_id": payload.record_id, "baseline_date": payload.baseline_date.isoformat(), "territory_id": payload.territory_id}
+        bi_changed = "bi_record_id" in payload.model_fields_set
+        if bi_changed:
+            fields["bi_record_id"] = payload.bi_record_id
         if previous is not None:
-            if record is None or previous.baseline_id != record.id or previous.actor_user_id != claims["sub"] or previous.revision != payload.expected_revision + 1 or previous.reason != payload.reason or any(previous.snapshot[name] != value for name, value in fields.items()):
+            if record is None or previous.baseline_id != record.id or previous.actor_user_id != claims["sub"] or previous.revision != payload.expected_revision + 1 or previous.reason != payload.reason or any(previous.snapshot.get(name) != value for name, value in fields.items()):
                 raise HTTPException(409, "Idempotência divergente.")
             return previous.snapshot | {"reviewed_by": previous.actor_user_id}
         if (record.revision if record else 0) != payload.expected_revision:
@@ -182,6 +197,27 @@ def put_baseline(class_id: str, user_id: str, payload: BaselinePut, request: Req
             raise HTTPException(409, "Referência já vinculada; revisão humana necessária.")
         now = datetime.now(timezone.utc)
         try:
+            bi_id = record.bi_source_record_id if record else None
+            if bi_changed:
+                bi_id = None
+                if payload.bi_record_id is not None:
+                    bi = session.scalar(select(BaselineSourceRecord).where(BaselineSourceRecord.source == BI_SOURCE, BaselineSourceRecord.record_id == payload.bi_record_id))
+                    if bi is not None and bi.user_id != user_id:
+                        raise HTTPException(409, "Inscrição do BI já reservada a outra pessoa; revisão humana necessária.")
+                    if bi is None:
+                        bi = BaselineSourceRecord(id=str(uuid4()), source=BI_SOURCE, record_id=payload.bi_record_id, user_id=user_id)
+                        session.add(bi)
+                        session.flush()
+                    bi_id = bi.id
+            if source is None:
+                # A reviewed BI inscription can itself be the original source.
+                # Reuse the reservation just created above instead of inserting
+                # the same natural key twice or inventing a tablet reference.
+                source = session.scalar(select(BaselineSourceRecord).where(
+                    BaselineSourceRecord.source == payload.source,
+                    BaselineSourceRecord.record_id == payload.record_id))
+                if source is not None and source.user_id != user_id:
+                    raise HTTPException(409, "Referência já vinculada; revisão humana necessária.")
             if source is None:
                 source = BaselineSourceRecord(id=str(uuid4()), source=payload.source, record_id=payload.record_id, user_id=user_id)
                 session.add(source)
@@ -189,13 +225,18 @@ def put_baseline(class_id: str, user_id: str, payload: BaselinePut, request: Req
             if record is None:
                 record = StudentBaseline(id=str(uuid4()), class_id=class_id, user_id=user_id, enrollment_id=link.enrollment_id, program_id=classroom.program_id, course_id=classroom.course_id, source_record_id=source.id, baseline_date=payload.baseline_date, territory_id=payload.territory_id, revision=1, reviewed_at=now)
                 session.add(record)
+                record.bi_source_record_id = bi_id
                 session.flush()
             else:
-                result = session.execute(update(StudentBaseline).where(StudentBaseline.id == record.id, StudentBaseline.revision == payload.expected_revision).values(source_record_id=source.id, baseline_date=payload.baseline_date, territory_id=payload.territory_id, revision=payload.expected_revision + 1, reviewed_at=now), execution_options={"synchronize_session": False})
+                result = session.execute(update(StudentBaseline).where(StudentBaseline.id == record.id, StudentBaseline.revision == payload.expected_revision).values(source_record_id=source.id, bi_source_record_id=bi_id, baseline_date=payload.baseline_date, territory_id=payload.territory_id, revision=payload.expected_revision + 1, reviewed_at=now), execution_options={"synchronize_session": False})
                 if result.rowcount != 1:
                     raise HTTPException(409, "Vínculo alterado; recarregue.")
                 session.refresh(record)
-            session.add(BaselineRevision(id=str(uuid4()), baseline_id=record.id, revision=record.revision, actor_user_id=claims["sub"], actor_role=_role(session, classroom, claims), reason=payload.reason, occurred_at=now, idempotency_key=payload.idempotency_key, snapshot=_baseline_snapshot(session, record)))
+            snapshot = _baseline_snapshot(session, record)
+            if bi_changed or record.bi_source_record_id:
+                bi_ref = session.get(BaselineSourceRecord, record.bi_source_record_id) if record.bi_source_record_id else None
+                snapshot["bi_record_id"] = bi_ref.record_id if bi_ref else None
+            session.add(BaselineRevision(id=str(uuid4()), baseline_id=record.id, revision=record.revision, actor_user_id=claims["sub"], actor_role=_role(session, classroom, claims), reason=payload.reason, occurred_at=now, idempotency_key=payload.idempotency_key, snapshot=snapshot))
             _commit(session)
         except IntegrityError as error:
             session.rollback()

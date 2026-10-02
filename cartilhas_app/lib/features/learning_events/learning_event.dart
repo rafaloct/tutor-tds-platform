@@ -8,6 +8,7 @@ enum LearningEventType {
   pageViewed,
   resourceOpened,
   featureUsed,
+  screenEngagement,
   videoStarted,
   videoCheckpoint,
   videoCompleted,
@@ -23,6 +24,7 @@ extension LearningEventTypeValue on LearningEventType {
     LearningEventType.pageViewed => 'page_viewed',
     LearningEventType.resourceOpened => 'resource_opened',
     LearningEventType.featureUsed => 'feature_used',
+    LearningEventType.screenEngagement => 'screen_engagement',
     LearningEventType.videoStarted => 'video_started',
     LearningEventType.videoCheckpoint => 'video_checkpoint',
     LearningEventType.videoCompleted => 'video_completed',
@@ -98,7 +100,8 @@ class LearningEvent {
   bool get isTelemetry =>
       type == LearningEventType.pageViewed ||
       type == LearningEventType.resourceOpened ||
-      type == LearningEventType.featureUsed;
+      type == LearningEventType.featureUsed ||
+      type == LearningEventType.screenEngagement;
 
   bool get isVideo => switch (type) {
     LearningEventType.videoStarted ||
@@ -134,10 +137,12 @@ class LearningEvent {
     required String courseId,
     required String sessionId,
     required int sequence,
+    int? activeSeconds,
     DateTime? occurredAt,
   }) {
     final payloadKey = switch (type) {
       LearningEventType.pageViewed => 'page_id',
+      LearningEventType.screenEngagement => 'page_id',
       LearningEventType.resourceOpened => 'resource_id',
       LearningEventType.featureUsed => 'feature_id',
       _ => throw ArgumentError.value(
@@ -156,6 +161,11 @@ class LearningEvent {
         'Identificador inválido.',
       );
     }
+    if (type == LearningEventType.screenEngagement
+        ? activeSeconds == null || activeSeconds < 1 || activeSeconds > 60
+        : activeSeconds != null) {
+      throw ArgumentError.value(activeSeconds, 'activeSeconds');
+    }
     return LearningEvent(
       eventId: '$sessionId:${type.apiValue}:$sequence',
       type: type,
@@ -163,6 +173,7 @@ class LearningEvent {
       sessionId: sessionId,
       occurredAt: occurredAt ?? DateTime.now(),
       payload: {payloadKey: targetId},
+      activeSeconds: activeSeconds,
     );
   }
 
@@ -341,11 +352,14 @@ class LearningEvent {
         sessionId.isEmpty ||
         occurredAt == null ||
         type == null ||
-        (type == LearningEventType.studyActivity &&
+        ((type == LearningEventType.studyActivity ||
+                type == LearningEventType.screenEngagement) &&
             (activeSeconds is! int ||
                 activeSeconds < 1 ||
                 activeSeconds > 60)) ||
-        (type != LearningEventType.studyActivity && activeSeconds != null) ||
+        (type != LearningEventType.studyActivity &&
+            type != LearningEventType.screenEngagement &&
+            activeSeconds != null) ||
         !_validPayload(type, payload)) {
       return null;
     }
@@ -368,6 +382,7 @@ class LearningEvent {
   ) {
     final expectedKey = switch (type) {
       LearningEventType.pageViewed => 'page_id',
+      LearningEventType.screenEngagement => 'page_id',
       LearningEventType.resourceOpened => 'resource_id',
       LearningEventType.featureUsed => 'feature_id',
       _ => null,

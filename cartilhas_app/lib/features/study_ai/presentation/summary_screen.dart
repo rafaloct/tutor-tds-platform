@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../analytics/telemetry_route.dart';
 
 import '../data/study_ai_service.dart';
 import '../data/study_summary_repository.dart';
@@ -123,14 +124,22 @@ class _SummaryScreenState extends State<SummaryScreen> {
   void _openCards() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => FlashcardsScreen(topic: widget.topic)),
+      trackedRoute(
+        pageId: 'flashcards',
+        courseId: widget.resolvedCourseId,
+        featureId: 'flashcards',
+        builder: (_) => FlashcardsScreen(topic: widget.topic),
+      ),
     );
   }
 
   void _openQuiz() {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      trackedRoute(
+        pageId: 'assessment',
+        courseId: widget.resolvedCourseId,
+        featureId: 'quiz',
         builder: (_) => AssessmentScreen(
           topic: widget.topic,
           courseId: widget.resolvedCourseId,
