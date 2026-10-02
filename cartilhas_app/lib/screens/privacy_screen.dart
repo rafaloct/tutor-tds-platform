@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 
 import '../services/privacy_preferences.dart';
 import '../widgets/responsive_body.dart';
@@ -49,6 +50,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
               body:
                   'Quando você usa o Tutor de IA, a pergunta digitada ou transcrita é enviada ao serviço de inteligência artificial do Programa TDS para gerar a resposta. CPF e WhatsApp não são incluídos nessa conversa.',
             ),
+            if (AppConfig.journeyTraceabilityEnabled)
+              const _PrivacySection(
+                title: 'Acompanhamento opcional',
+                body:
+                    'Com uma nova autorização, sua conta pode registrar telas e recursos acessados, tempo estimado de uso, pedidos de ajuda e avaliações do Tutor. O relatório não recebe o texto das perguntas. A contagem pausa com o app em segundo plano e após inatividade. Tempo em tela não determina frequência, matrícula ou certificado. Você pode retirar a autorização nas Configurações.',
+              ),
             const _PrivacySection(
               title: 'Microfone',
               body:
@@ -111,7 +118,9 @@ class PrivacyConsentScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Se você escolheu criar uma conta online, os dados necessários ao cadastro foram enviados conforme informado nessa ação. Separadamente, para acompanhar sua formação, o Programa TDS pode receber os eventos de início e conclusão das cartilhas. Você pode continuar usando o conteúdo sem autorizar esse acompanhamento. A emissão de certificado tem uma confirmação de privacidade própria, mostrada somente quando você solicitar.',
+                  AppConfig.journeyTraceabilityEnabled
+                      ? 'Com sua autorização, a equipe TDS poderá acompanhar sua participação: telas e recursos acessados, tempo estimado com o app aberto, pedidos de ajuda e avaliações do Tutor. Esse acompanhamento usa sua conta e não registra o texto das perguntas nos relatórios de uso. Tempo em tela não determina frequência ou certificado. Você pode continuar usando o conteúdo sem autorizar e mudar sua escolha nas Configurações. A emissão de certificado tem confirmação própria.'
+                      : 'Se você escolheu criar uma conta online, os dados necessários ao cadastro foram enviados conforme informado nessa ação. Separadamente, para acompanhar sua formação, o Programa TDS pode receber os eventos de início e conclusão das cartilhas. Você pode continuar usando o conteúdo sem autorizar esse acompanhamento. A emissão de certificado tem uma confirmação de privacidade própria, mostrada somente quando você solicitar.',
                   textAlign: TextAlign.center,
                   style: TextStyle(height: 1.5),
                 ),

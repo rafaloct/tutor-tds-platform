@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'chatwoot_screen.dart';
+import '../config/app_config.dart';
+import '../features/analytics/app_telemetry_service.dart';
 import '../features/analytics/telemetry_route.dart';
 import '../widgets/responsive_body.dart';
 
@@ -94,7 +97,9 @@ class GuideScreen extends StatelessWidget {
                 body:
                     'Em cada cartilha na tela inicial há um botão azul "PDF". '
                     'Toque nele para abrir a versão completa da cartilha no Google Drive — '
-                    'você pode ler, salvar ou imprimir.',
+                    'você pode ler, salvar ou imprimir. Para ler sem internet, salve o PDF '
+                    'no aplicativo de leitura. O tempo de leitura fora do Tutor TDS não '
+                    'é acompanhado pelo app.',
               ),
               _Section(
                 icon: Icons.menu_book,
@@ -284,6 +289,12 @@ class _HelpButton extends StatelessWidget {
 
 // Abre o bottom sheet de ajuda com 2 opções — WhatsApp ou Chat no App
 void showHumanHelpSheet(BuildContext context, {String? duvida}) {
+  if (AppConfig.journeyTraceabilityEnabled) {
+    context
+        .read<AppTelemetryService>()
+        .trackFeature(featureId: 'human_help_requested')
+        .catchError((Object _) => 0);
+  }
   showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(

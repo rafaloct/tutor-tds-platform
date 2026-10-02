@@ -1,0 +1,23 @@
+{
+  "status": "14_gate_expectations_passed",
+  "cases": [
+    "OK debug aceita staging aprovado: aceito",
+    "OK debug aceita app Cloud staging aprovado: aceito",
+    "OK debug aceita QA fisico isolado: aceito",
+    "OK debug rejeita QA isolado sem run valido: bloqueado",
+    "OK debug rejeita QA isolado fora do Cloud autorizado: bloqueado",
+    "OK debug rejeita outro app no mesmo provedor: bloqueado",
+    "OK debug rejeita Cloud sem HTTPS: bloqueado",
+    "OK debug rejeita bases staging divergentes: bloqueado",
+    "OK debug rejeita producao: bloqueado",
+    "OK release respeita congelamento com configuracao produtiva: bloqueado",
+    "OK release rejeita staging: bloqueado",
+    "OK release rejeita Cloud staging: bloqueado",
+    "OK release rejeita configuracao vazia: bloqueado",
+    "OK release rejeita gateway nao aprovado: bloqueado"
+  ],
+  "log_sha256": "fc99f9f06545931ecec652483f3051accb89a11dbcbc54a2d5716c8292cd7720",
+  "apk_built_by_this_check": false,
+  "release_freeze_preserved": true,
+  "wrapper_note": "Caller inherited exit 1 from final expected Gradle rejection; completion and 14 cases verified. Script now resets LASTEXITCODE only after all checks pass; matrix not rerun after that status-only fix."
+}

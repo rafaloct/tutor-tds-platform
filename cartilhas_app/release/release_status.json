@@ -32,15 +32,23 @@
     },
     {
       "id": "classroom_cold_offline_xiaomi",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Salvar edição da turma, fechar e reabrir app sem rede, preservar conta/versão/progresso, reconectar e conferir eventos; revogação não pode reabrir cache."
+      "description": "Salvar edição da turma, fechar e reabrir app sem rede, preservar conta/versão/progresso, reconectar e conferir eventos; revogação não pode reabrir cache.",
+      "verified_at": "2026-10-01T18:21:16.294523+00:00",
+      "evidence": "docs/production/evidence/classroom-access-physical-acceptance-2026-10-01.json",
+      "evidence_sha256": "f352df6ffac0d401b8ef64ac1dbcaa95285faef59b3f14a7f2594c4c569ec12c",
+      "scope": "POCO físico; leitura e fila após reabertura offline, sincronização sem duplicata, outra conta e revogação conhecida; staging sintético, sem liberar release."
     },
     {
       "id": "course_versioning_xiaomi",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Editor por papel, nova publicação sem alterar turma anterior, eventos versionados e replay offline no Xiaomi com API staging atualizada."
+      "description": "Editor por papel, nova publicação sem alterar turma anterior, eventos versionados e replay offline no Xiaomi com API staging atualizada.",
+      "verified_at": "2026-10-01T17:49:31.2760801Z",
+      "evidence": "docs/production/evidence/wave2a-physical-acceptance-2026-10-01.json",
+      "evidence_sha256": "3f0fc666965d1b63ecbbf364cc318ccf2e71a594842623905efc71df51c56877",
+      "scope": "POCO físico, oito fases Android e quatro verificações host; staging sintético; não libera a release."
     },
     {
       "id": "evidence_offline_xiaomi",

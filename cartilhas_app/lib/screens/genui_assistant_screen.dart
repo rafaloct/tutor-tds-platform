@@ -14,6 +14,7 @@ import '../widgets/tutor_conversation_starter.dart';
 import '../widgets/tutor_response_card.dart';
 import 'guide_screen.dart';
 import '../features/analytics/app_telemetry_service.dart';
+import '../features/analytics/telemetry_route.dart';
 import '../features/study_ai/presentation/assessment_screen.dart';
 import '../features/study_ai/presentation/flashcards_screen.dart';
 import '../models/chat_message.dart';
@@ -174,7 +175,12 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
 
   void _trackTutorFeedback(TutorResponseFeedback feedback) {
     final telemetry = Provider.of<AppTelemetryService?>(context, listen: false);
-    telemetry?.trackFeature(featureId: 'tutor_feedback_${feedback.name}');
+    final id = switch (feedback) {
+      TutorResponseFeedback.useful => 'useful',
+      TutorResponseFeedback.notUseful => 'not_useful',
+      TutorResponseFeedback.report => 'report',
+    };
+    telemetry?.trackFeature(featureId: 'tutor_feedback_$id');
     _showSnack(
       feedback == TutorResponseFeedback.report
           ? 'Problema registrado para análise.'
@@ -192,14 +198,20 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   void _openCards() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => FlashcardsScreen(topic: _studyTopic)),
+      trackedRoute(
+        pageId: 'flashcards',
+        featureId: 'flashcards',
+        builder: (_) => FlashcardsScreen(topic: _studyTopic),
+      ),
     );
   }
 
   void _openQuiz() {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      trackedRoute(
+        pageId: 'assessment',
+        featureId: 'quiz',
         builder: (_) => AssessmentScreen(
           topic: _studyTopic,
           courseId: _studyTopic,
@@ -252,6 +264,11 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   void _sendMessage([String? message, bool hidden = false]) async {
     final text = message ?? _controller.text.trim();
     if (text.isEmpty || !mounted || _isLoading) return;
+
+    final telemetry = Provider.of<AppTelemetryService?>(context, listen: false);
+    if (telemetry?.journeyEnabled == true) {
+      telemetry?.trackFeature(featureId: 'tutor_help_requested');
+    }
 
     setState(() {
       if (!hidden) _messages.add(ChatMessage(role: 'user', text: text));

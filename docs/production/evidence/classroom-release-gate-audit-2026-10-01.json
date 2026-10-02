@@ -1,0 +1,14 @@
+{
+  "status": "release_correctly_blocked",
+  "passed_physical_gates": ["course_versioning_xiaomi", "classroom_cold_offline_xiaomi"],
+  "remaining_physical_gates": ["certificate_human_approval_e2e", "evidence_offline_xiaomi"],
+  "release_build_allowed": false,
+  "artifact_upload_allowed": false,
+  "audit_command": "dart run tool/verify_release_readiness.dart --intent=build",
+  "audit_exit_code": 1,
+  "audit_issues": ["physical_evidence_pending", "release_build_frozen"],
+  "signing_or_configuration_issues_reported": false,
+  "classroom_acceptance_sha256": "f352df6ffac0d401b8ef64ac1dbcaa95285faef59b3f14a7f2594c4c569ec12c",
+  "source_files_checked": 123,
+  "production_changed": false
+}

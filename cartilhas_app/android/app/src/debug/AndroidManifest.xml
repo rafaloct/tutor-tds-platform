@@ -2,6 +2,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <application
-        android:label="Tutor TDS DEV"
+        android:label="${debugAppLabel}"
         tools:replace="android:label" />
 </manifest>

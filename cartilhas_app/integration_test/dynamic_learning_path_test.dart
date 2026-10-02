@@ -755,11 +755,37 @@ Future<Finder> _reveal(
         'Ambiguous gate selector: specify its widget type and screen scope.',
   );
   await tester.ensureVisible(target);
+  // Real Android IME/scroll animations can continue after ensureVisible and
+  // recycle a lazy ListView child. Settle the scroll before using its finder.
+  final scrollables = _OuterVerticalScrollableFinder(
+    _scoped(find.byType(Scrollable), within: within),
+  );
+  await _waitUntil(
+    tester,
+    () async => scrollables.evaluate().every(
+      (element) => !((element as StatefulElement).state as ScrollableState)
+          .position
+          .isScrollingNotifier
+          .value,
+    ),
+    reason: 'The current-route scroll did not settle before interaction.',
+  );
   await tester.pump(const Duration(milliseconds: 200));
+  expect(
+    target,
+    findsOneWidget,
+    reason: 'The revealed action left the viewport.',
+  );
   return target;
 }
 
 Future<void> _tap(WidgetTester tester, Finder finder, {Finder? within}) async {
+  // Finishing an edit does not synchronously close the physical Android IME.
+  // Remove text focus and wait for its viewport change before scrolling to an
+  // action. This changes no app data and never retries the action itself.
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pump(const Duration(milliseconds: 300));
+  await _waitUntil(tester, () async => tester.view.viewInsets.bottom == 0);
   final target = await _reveal(tester, finder, within: within);
   final buttons = tester.widget(target) is ButtonStyleButton
       ? target

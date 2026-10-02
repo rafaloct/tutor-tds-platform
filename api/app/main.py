@@ -27,6 +27,7 @@ from .presence import router as presence_router
 from .student_followup import router as student_followup_router
 from .hours import router as hours_router
 from .learning_context import router as learning_context_router
+from .journey_export import router as journey_export_router
 from .media import admin_router as media_admin_router
 from .media import creator_router as creator_media_router
 from .media import router as media_router
@@ -74,6 +75,7 @@ def create_app(
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
     application.include_router(learning_context_router)
+    application.include_router(journey_export_router)
     application.include_router(certificates_router)
     application.include_router(certificate_requests_router)
     application.include_router(commercial_router)

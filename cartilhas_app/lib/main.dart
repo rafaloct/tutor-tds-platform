@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -107,8 +109,17 @@ class _AppView extends StatefulWidget {
   State<_AppView> createState() => _AppViewState();
 }
 
-class _AppViewState extends State<_AppView> {
+class _AppViewState extends State<_AppView> with WidgetsBindingObserver {
   TelemetryNavigatorObserver? _telemetryObserver;
+  Timer? _screenHeartbeat;
+
+  @override
+  void initState() {
+    super.initState();
+    if (AppConfig.journeyTraceabilityEnabled) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -116,6 +127,27 @@ class _AppViewState extends State<_AppView> {
     _telemetryObserver ??= TelemetryNavigatorObserver(
       context.read<AppTelemetryService>(),
     );
+    if (AppConfig.journeyTraceabilityEnabled) {
+      _screenHeartbeat ??= Timer.periodic(const Duration(seconds: 15), (_) {
+        context.read<AppTelemetryService>().heartbeatScreen().catchError(
+          (Object _) {},
+        );
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    context.read<AppTelemetryService>().setForeground(
+      state == AppLifecycleState.resumed,
+    );
+  }
+
+  @override
+  void dispose() {
+    _screenHeartbeat?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -137,7 +169,14 @@ class _AppViewState extends State<_AppView> {
         navigatorObservers: [_telemetryObserver!],
         builder: (context, child) => ColoredBox(
           color: Theme.of(context).scaffoldBackgroundColor,
-          child: SafeArea(top: false, child: child ?? const SizedBox.shrink()),
+          child: Listener(
+            onPointerDown: (_) => context.read<AppTelemetryService>().touch(),
+            onPointerSignal: (_) => context.read<AppTelemetryService>().touch(),
+            child: SafeArea(
+              top: false,
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         ),
         home: const WelcomeScreen(),
       ),

@@ -388,7 +388,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     secondary: const Icon(Icons.sync_lock_outlined),
                     title: const Text('Compartilhar progresso pedagógico'),
                     subtitle: const Text(
-                      'Permite enviar cadastro e eventos de início/conclusão à equipe TDS.',
+                      AppConfig.journeyTraceabilityEnabled
+                        ? 'Autoriza acompanhar telas, tempo estimado, progresso e pedidos de ajuda na sua conta.'
+                        : 'Permite enviar cadastro e eventos de início/conclusão à equipe TDS.',
                     ),
                   ),
                   const Divider(height: 1),
