@@ -60,10 +60,7 @@ void main() {
       httpGet: (_) async => http.Response('offline', 503),
       localLoader: () async => [course('local', 'Local')],
     );
-    expect((await repository.fetchAll()).map((item) => item.id), [
-      'cached',
-      'local',
-    ]);
+    expect((await repository.fetchAll()).map((item) => item.id), ['cached']);
   });
 
   test('flag true sem cache recorre aos assets locais', () async {
@@ -90,14 +87,14 @@ void main() {
     expect((await repository.fetchAll()).single.id, 'remote');
   });
 
-  test('flag true nunca mostra catálogo vazio se assets existem', () async {
+  test('flag true respeita catálogo vazio mesmo com assets', () async {
     final repository = CourseRepository.forCatalog(
       apiUrl: 'https://api.example',
       remoteCatalogEnabled: true,
       httpGet: (_) async => http.Response('{"courses":[]}', 200),
       localLoader: () async => [course('local', 'Local')],
     );
-    expect((await repository.fetchAll()).single.id, 'local');
+    expect(await repository.fetchAll(), isEmpty);
   });
 
   test('usa catálogo remoto e mantém ordenação', () async {
