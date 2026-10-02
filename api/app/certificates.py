@@ -12,6 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .auth import require_roles
+from .certificate_requests import _context, _request_eligibility
 from .config import Settings
 from .database import Database
 from .models import (
@@ -111,26 +112,68 @@ def create_reference(
                 return _serialize(existing)
             raise HTTPException(status_code=409, detail="Código de certificado em conflito.")
 
-        enrollment = session.scalar(
-            select(Enrollment).where(
-                Enrollment.user_id == claims["sub"],
-                Enrollment.program_id == payload.program_id,
-                Enrollment.course_id == payload.course_id,
-                Enrollment.status == "active",
-            )
+        enrollment_query = select(Enrollment).where(
+            Enrollment.user_id == claims["sub"],
+            Enrollment.program_id == payload.program_id,
+            Enrollment.course_id == payload.course_id,
+            Enrollment.status == "active",
         )
+        if settings.certificate_approval_required:
+            enrollments = session.scalars(enrollment_query).all()
+            if len(enrollments) != 1:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Emissão exige um contexto ativo de matrícula não ambíguo.",
+                )
+            enrollment = enrollments[0]
+        else:
+            enrollment = session.scalar(enrollment_query)
         if enrollment is None:
             raise HTTPException(status_code=422, detail="Matrícula ativa não encontrada.")
         if settings.certificate_approval_required:
-            approved = session.scalar(select(CertificateRequest).where(
+            approved_query = select(CertificateRequest).where(
                 CertificateRequest.enrollment_id == enrollment.id,
                 CertificateRequest.user_id == claims["sub"],
+                CertificateRequest.program_id == payload.program_id,
+                CertificateRequest.course_id == payload.course_id,
                 CertificateRequest.status == "approved",
-            ))
-            if approved is None:
+            )
+            if payload.class_id is None:
+                approved_query = approved_query.where(CertificateRequest.class_id.is_(None))
+            else:
+                approved_query = approved_query.where(CertificateRequest.class_id == payload.class_id)
+            approved_requests = session.scalars(approved_query).all()
+            if len(approved_requests) != 1:
                 raise HTTPException(status_code=422, detail="Emissão exige aprovação humana da matrícula e edição.")
-            if payload.class_id is not None and approved.class_id != payload.class_id:
-                raise HTTPException(status_code=422, detail="A aprovação não corresponde à turma informada.")
+            approved = approved_requests[0]
+            try:
+                context = _context(
+                    session,
+                    approved.user_id,
+                    approved.enrollment_id,
+                    approved.course_version_id,
+                    approved.class_id,
+                )
+            except HTTPException as exc:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Aprovação sem contexto ativo para emissão.",
+                ) from exc
+            approved_enrollment, _, _, _, approved_program, _, _ = context
+            if (
+                approved_enrollment.id != enrollment.id
+                or approved.user_id != claims["sub"]
+                or approved.program_id != payload.program_id
+                or approved.course_id != payload.course_id
+                or approved_program.id != payload.program_id
+                or approved.class_id != payload.class_id
+            ):
+                raise HTTPException(status_code=422, detail="A aprovação não corresponde ao contexto informado.")
+            if not _request_eligibility(session, approved)["eligible"]:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Carga horária/conclusão desta matrícula e edição ainda não elegível.",
+                )
         offering = session.get(
             ProgramCourse, (payload.program_id, payload.course_id)
         )
