@@ -8,6 +8,7 @@ $workspace = Split-Path $PSScriptRoot -Parent
 $appRoot = Join-Path $workspace 'cartilhas_app'
 $apiRoot = Join-Path $workspace 'api'
 $expectedApi = 'https://ead.ipexdesenvolvimento.cloud/tutor-api'
+. (Join-Path $PSScriptRoot 'Test-ProductionBackendIdentity.ps1')
 
 function Require([bool]$Condition, [string]$Reason) {
     if (-not $Condition) { throw "PRODUCTION_RELEASE_READY=false: $Reason" }
@@ -68,6 +69,12 @@ try {
         $localSchema = ($heads[0] -split '\s+')[0]
         Require ($version.schema_version -eq $localSchema) 'revision de produção diverge do HEAD Alembic.'
     } finally { Pop-Location }
+    try {
+        Assert-ProductionBackendIdentity -VersionResponse $version -ExpectedSchemaVersion $localSchema `
+            -CandidateVersionName $status.release.version_name -CandidateVersionCode $status.release.version_code | Out-Null
+    } catch {
+        throw ('PRODUCTION_RELEASE_READY=false: ' + $_.Exception.Message)
+    }
     $flutterVersion = & $Flutter --version --machine | ConvertFrom-Json
     Require ($LASTEXITCODE -eq 0 -and $flutterVersion.frameworkVersion -eq '3.44.9') 'Flutter SDK diferente do validado.'
     if ($PreflightOnly) {
