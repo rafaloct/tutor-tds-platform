@@ -39,3 +39,15 @@ Nao foi consultado endpoint produtivo, nem gerado APK/AAB, tag ou deploy.
 Nao foi executada suite completa Flutter/API. O workflow atual cobre api/**;
 esta validacao PowerShell local nao deve ser anunciada como novo CI remoto.
 Issue #3 continua aberta ate seus demais requisitos e provas reais.
+
+## Independent CI follow-up
+
+A dedicated workflow now runs the existing 31 offline cases on Windows
+PowerShell 5.1 and PowerShell 7 (windows-2022). It watches the helper, its
+tests, build_production.ps1 and itself. Pull requests are checked; push runs
+are limited to consolidation to avoid duplicating every feature-branch run.
+Checkout remains pinned, does not persist credentials, and uses contents:read.
+No real production preflight, application build, deployment or secret is used.
+The agent reran the existing focused script once: 31/31 passed locally.
+Remote CI outcome is recorded in PR #12 after completion, not inferred here.
+Earlier evidence and the conservative minimum-build contract above are preserved.
