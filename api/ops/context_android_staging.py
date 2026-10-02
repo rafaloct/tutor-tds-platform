@@ -27,6 +27,7 @@ def main():
     parser.add_argument('action', choices=['start','status','stop'])
     parser.add_argument('--state-dir', required=True)
     parser.add_argument('--image')
+    parser.add_argument('--journey', action='store_true', help='Enable traceability only on this disposable QA stack')
     args = parser.parse_args()
     root = Path(args.state_dir).resolve()
     if root.parent != Path('/opt') or not root.name.startswith('tutor-tds-context-android-qa-'):
@@ -73,6 +74,8 @@ def main():
         'JWT_SECRET':secrets.token_urlsafe(48),'CPF_PEPPER':secrets.token_urlsafe(48),
         'PUBLIC_API_BASE_URL':BASE_URL,'LEARNING_CONTEXT_ENABLED':'true','PAYMENT_ADAPTER':'disabled',
         'QA_STUDENT_PASSWORD':student_password,'QA_TEACHER_PASSWORD':teacher_password}
+    if args.journey:
+        env.update(JOURNEY_TRACEABILITY_ENABLED='true', SHEETS_PSEUDONYM_SECRET=secrets.token_urlsafe(48))
     env_file=root/'api.env';env_file.write_text(''.join(f'{k}={v}\n' for k,v in env.items()));env_file.chmod(0o600)
     labels=['--label',f'tds.purpose={PURPOSE}','--label',f'tds.run={run}']
     docker('network','create','--internal',*labels,network);remember('network',network)
@@ -110,9 +113,15 @@ def main():
         'QA_STUDENT_CPF':'12345678909','QA_TEACHER_CPF':'11144477735',
         'QA_STUDENT_PASSWORD':student_password,'QA_TEACHER_PASSWORD':teacher_password,
         'QA_STUDENT_ID':seeded['student_id'],'QA_TEACHER_ID':seeded['teacher_id']}
+    if args.journey:
+        client['JOURNEY_TRACEABILITY_ENABLED'] = 'true'
     client_file=root/'client-defines.json';client_file.write_text(json.dumps(client,indent=2)+'\n');client_file.chmod(0o600)
     # Only now expose the fully migrated, seeded API on the existing staging route.
     docker('network','connect','dokploy-network',api)
+    # Refresh Docker discovery after attaching the routed network. Otherwise
+    # Traefik can retain the private DB-network IP discovered at container start.
+    # Only this run-owned API is restarted; existing services are untouched.
+    docker('restart',api)
     state['status']='running';state_file.write_text(json.dumps(state,indent=2)+'\n')
     print(json.dumps({'status':'running','state_dir':str(root),'api':api,'database':database,'base_url':BASE_URL,
         'production_changed':False,'existing_staging_containers_changed':False}))

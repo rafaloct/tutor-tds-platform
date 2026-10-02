@@ -15,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--base-image', required=True)
     parser.add_argument('--source-sha256', required=True)
+    parser.add_argument('--slice', choices=('context', 'journey'), default='context')
     args = parser.parse_args()
     if len(args.source_sha256) != 64 or any(c not in '0123456789abcdef' for c in args.source_sha256):
         raise SystemExit('Invalid source digest')
@@ -61,17 +62,19 @@ def main():
             time.sleep(1)
         else:
             raise RuntimeError('Isolated PostgreSQL did not become ready')
+        test_files = ['tests/test_context_memberships.py', 'tests/test_context_golden_path.py'] if args.slice == 'context' else ['tests/test_journey_migration.py']
         result, output = run(['docker', 'run', '--rm', '--network', network,
             '--label', 'tds.purpose=context-gate', '--memory', '512m', '--cpus', '1',
             '-e', f'TDS_CONTEXT_GATE_DATABASE_URL=postgresql+psycopg://tds_context_gate:{password}@{database}:5432/tds_context_gate',
             '-e', f'TDS_CONTEXT_MIGRATION_DATABASE_URL=postgresql+psycopg://tds_context_gate:{password}@{database}:5432/tds_context_gate',
-            image, 'python', '-m', 'pytest', 'tests/test_context_memberships.py', 'tests/test_context_golden_path.py', '-q'])
+            '-e', f'TDS_JOURNEY_GATE_DATABASE_URL=postgresql+psycopg://tds_context_gate:{password}@{database}:5432/tds_context_gate',
+            image, 'python', '-m', 'pytest', *test_files, '-o', 'addopts=', '-q', '--tb=short'])
         record = {'status': 'passed', 'source_sha256': args.source_sha256,
                   'image': image, 'base_image': args.base_image,
-                  'tests': ['test_context_memberships.py', 'test_context_golden_path.py'], 'database': 'PostgreSQL 16, isolated tmpfs',
+                  'tests': test_files, 'slice': args.slice, 'database': 'PostgreSQL 16, isolated tmpfs',
                   'limits': 'API TestClient plus real PostgreSQL; not mobile or public staging HTTP QA',
                   'output': output[-6000:]}
-        (root / 'context-postgres-gate.json').write_text(json.dumps(record, indent=2) + '\n')
+        (root / f'{args.slice}-postgres-gate.json').write_text(json.dumps(record, indent=2) + '\n')
         print(json.dumps(record), flush=True)
     finally:
         for kind, name in reversed(created):

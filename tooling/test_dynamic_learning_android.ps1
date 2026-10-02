@@ -1,6 +1,6 @@
 param(
     [switch]$Execute,
-    [ValidateSet('emulator-5556')][string]$Device = 'emulator-5556',
+    [ValidateSet('emulator-5556', 'ZT6HPRHQHATSEQPR')][string]$Device = 'emulator-5556',
     [ValidatePattern('^[a-f0-9]{32}$')][string]$RunId = ([guid]::NewGuid().ToString('N')),
     [string]$Flutter = 'C:/Users/Usuario/flutter-3.44.9/bin/flutter.bat',
     [string]$Adb = 'C:/Users/Usuario/AppData/Local/Android/sdk/platform-tools/adb.exe',
@@ -15,7 +15,8 @@ param(
 # the complete run. A diagnosed new run gets its own course; prior drafts/history
 # are included in the baseline and must remain unchanged throughout the new gate.
 $ErrorActionPreference = 'Stop'
-$package = 'com.tutortds_cartilhas.dev'
+$physicalDevice = $Device -eq 'ZT6HPRHQHATSEQPR'
+$package = if ($physicalDevice) { "com.tutortds_cartilhas.dev.dynamicqa.r$RunId" } else { 'com.tutortds_cartilhas.dev' }
 $apiBase = 'https://tutor-tds-staging.fastapicloud.dev'
 $courseId = "qa-dynamic-course-$RunId"
 $workspace = Split-Path $PSScriptRoot -Parent
@@ -54,6 +55,14 @@ function Invoke-AdbChecked {
     $exitCode = $LASTEXITCODE
     $result = ($lines | ForEach-Object { $_.ToString() }) -join "`n"
     if ($exitCode -ne 0 -and -not ($AllowMissingProcess -and $exitCode -eq 1 -and -not $result.Trim())) {
+        if ($CommandArgs[0] -eq 'install') {
+            # Keep only Android's public failure code, never unrestricted logs.
+            $codes = @([regex]::Matches($result, '\bINSTALL_(?:FAILED_[A-Z_]+|CANCELED_BY_USER)\b') |
+                ForEach-Object Value | Sort-Object -Unique)
+            [ordered]@{ exit_code = $exitCode; codes = $codes; package = $package } |
+                ConvertTo-Json | Set-Content -LiteralPath (Join-Path $runDirectory 'install-error.json') -Encoding utf8
+            throw "QA installation failed: $($codes -join ', '). Existing apps and this run must be preserved."
+        }
         throw "ADB command failed at $($CommandArgs[0]); exit $exitCode."
     }
     return $result.Trim()
@@ -89,6 +98,31 @@ function Get-InstalledIdentity {
     }
 }
 
+# Play installations may contain split APKs. Record every APK and installation
+# metadata without launching, stopping, copying or accessing these apps' data.
+function Get-ProtectedPackages {
+    $identities = [ordered]@{}
+    foreach ($protected in @('com.tutortds_cartilhas', 'com.tutortds_cartilhas.dev')) {
+        $locations = Invoke-AdbChecked @('shell', 'pm', 'path', $protected)
+        if (-not $locations) { throw "Protected application is missing: $protected." }
+        $hashes = [ordered]@{}
+        foreach ($location in ($locations -split "`n" | Sort-Object)) {
+            $match = [regex]::Match($location.Trim(), '^package:(/data/app/[A-Za-z0-9_./=+~\-]+\.apk)$')
+            if (-not $match.Success) { throw 'Unexpected protected APK path.' }
+            $line = Invoke-AdbChecked @('shell', 'sha256sum', $match.Groups[1].Value)
+            $hash = [regex]::Match($line, '^([a-fA-F0-9]{64})\s')
+            if (-not $hash.Success) { throw 'Could not hash protected APK.' }
+            $hashes[$match.Groups[1].Value] = $hash.Groups[1].Value.ToLowerInvariant()
+        }
+        $details = Invoke-AdbChecked @('shell', 'dumpsys', 'package', $protected)
+        $metadata = @([regex]::Matches($details, '(?m)^\s*(?:firstInstallTime|lastUpdateTime|versionCode|versionName)=.+$') |
+            ForEach-Object { $_.Value.Trim() })
+        if ($metadata.Count -lt 4) { throw 'Missing protected package metadata.' }
+        $identities[$protected] = [ordered]@{ apks = $hashes; metadata = $metadata }
+    }
+    return $identities
+}
+
 function Assert-InstalledIdentity {
     param($Expected)
     $actual = Get-InstalledIdentity
@@ -114,7 +148,7 @@ function Wait-QaNetwork {
             if ($actual.wifi -eq $Wifi -and $actual.mobile -eq $Mobile) { return $actual }
             Start-Sleep -Milliseconds 300
         }
-        throw 'Emulator network settings did not reach the requested state.'
+        throw 'QA device network settings did not reach the requested state.'
     } finally { $watch.Stop() }
 }
 
@@ -231,7 +265,8 @@ function Get-SourceHashes {
     $hashes = [ordered]@{}
     $sources = @(Get-ChildItem -LiteralPath (Join-Path $AppRoot 'lib') -Recurse -File -Filter '*.dart')
     foreach ($relative in @($target, $driver, 'pubspec.yaml', 'pubspec.lock',
-            'android/app/build.gradle.kts', 'android/app/src/main/AndroidManifest.xml')) {
+            'android/app/build.gradle.kts', 'android/app/src/main/AndroidManifest.xml',
+            'android/app/src/debug/AndroidManifest.xml')) {
         $sources += Get-Item -LiteralPath (Join-Path $AppRoot $relative)
     }
     foreach ($file in @($sources | Sort-Object FullName)) {
@@ -291,6 +326,11 @@ function Save-RunState {
         run_id = $RunId
         course_id = $courseId
         status = $Status
+        device = $Device
+        app_package = $package
+        protected_packages_verified = $protectedVerified
+        protected_packages_before = $protectedBefore
+        protected_packages_after = $protectedAfter
         boundary = $script:boundary
         attempted_phase = $script:attemptedPhase
         last_verified_phase = $script:lastVerifiedPhase
@@ -459,7 +499,9 @@ foreach ($persona in $expectedCpfs.Keys) {
     }
 }
 $appConfiguration['DYNAMIC_QA_RUN_ID'] = $RunId
-if ($appConfiguration.Count -ne 17 -or @($appConfiguration.Keys | Where-Object { $_ -match 'OPERATOR' }).Count -ne 0) {
+if ($physicalDevice) { $appConfiguration['DYNAMIC_QA_ISOLATED_PACKAGE'] = 'true' }
+$expectedDefineCount = if ($physicalDevice) { 18 } else { 17 }
+if ($appConfiguration.Count -ne $expectedDefineCount -or @($appConfiguration.Keys | Where-Object { $_ -match 'OPERATOR' }).Count -ne 0) {
     throw 'APK configuration must contain only the explicit three-persona whitelist.'
 }
 $gatePath = Join-Path $workspace 'docs/production/evidence/wave1-acceptance.json'
@@ -488,14 +530,26 @@ $runtimeIdentity = [ordered]@{
     uv_lock_sha256 = $sourceHashes['api/uv.lock']
     pyproject_sha256 = $sourceHashes['api/pyproject.toml']
 }
-if ((Invoke-AdbChecked @('get-state')) -ne 'device' -or
-    (Invoke-AdbChecked @('shell', 'getprop', 'ro.kernel.qemu')) -ne '1') { throw 'Only the approved running QA emulator is allowed.' }
-$beforeInstall = Get-InstalledIdentity
+if ((Invoke-AdbChecked @('get-state')) -ne 'device') { throw 'The approved QA device must be connected.' }
+$protectedBefore = $null
+$protectedAfter = $null
+$protectedVerified = $false
+$beforeInstall = $null
+if ($physicalDevice) {
+    if ((Invoke-AdbChecked @('shell', 'getprop', 'ro.product.model')) -ne '2311DRK48G' -or
+        (Invoke-AdbChecked @('shell', 'getprop', 'ro.kernel.qemu')) -eq '1') { throw 'Unexpected physical QA device.' }
+    $present = Invoke-AdbChecked @('shell', 'pm', 'list', 'packages', $package)
+    if ($present -match "(?m)^package:$([regex]::Escape($package))$") { throw 'Isolated QA package already exists; preserve it and diagnose before any new run.' }
+    $protectedBefore = Get-ProtectedPackages
+} else {
+    if ((Invoke-AdbChecked @('shell', 'getprop', 'ro.kernel.qemu')) -ne '1') { throw 'Unexpected QA emulator.' }
+    $beforeInstall = Get-InstalledIdentity
+}
 $initialPid = Get-QaPid
 $initialNetwork = Get-QaNetwork
 if ($initialNetwork.wifi -notin @('0', '1') -or $initialNetwork.mobile -notin @('0', '1') -or
     ($initialNetwork.wifi -ne '1' -and $initialNetwork.mobile -ne '1')) {
-    throw 'The QA emulator must start online with readable network settings.'
+    throw 'The QA device must start online with readable network settings.'
 }
 $sdkRoot = Split-Path (Split-Path $Adb -Parent) -Parent
 $buildTools = @(Get-ChildItem -LiteralPath (Join-Path $sdkRoot 'build-tools') -Directory |
@@ -564,6 +618,7 @@ try {
         -TimeoutSeconds 600 -WorkingDirectory $AppRoot
     $apk = Join-Path $AppRoot 'build/app/outputs/flutter-apk/app-debug.apk'
     $apkHash = (Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash.ToLowerInvariant()
+    Copy-Item -LiteralPath $apk -Destination (Join-Path $runDirectory 'qa.apk')
     $badging = (& $aapt dump badging $apk 2>&1) -join "`n"
     if ($LASTEXITCODE -ne 0) { throw 'Could not inspect built QA APK.' }
     $packageMatch = [regex]::Match($badging, "(?m)^package: name='([^']+)'")
@@ -574,10 +629,15 @@ try {
     $boundary = 'single_install'
     Save-RunState 'RUNNING'
     Stop-QaProcess
+    if ($physicalDevice) {
+        Write-Host 'POCO: installation begins in 15 seconds; confirm Tutor TDS QA on the unlocked device.'
+        Start-Sleep -Seconds 15
+    }
     $installResult = Invoke-AdbChecked @('install', '-t', '-r', $apk)
     if ($installResult -notmatch '(?m)^Success\s*$' -or $installResult -match 'Failure') { throw 'QA APK installation failed; no uninstall fallback is allowed.' }
     $installed = Get-InstalledIdentity
-    if ($installed.sha256 -ne $apkHash -or $installed.first_install_time -ne $beforeInstall.first_install_time) {
+    if ($installed.sha256 -ne $apkHash -or
+        ($null -ne $beforeInstall -and $installed.first_install_time -ne $beforeInstall.first_install_time)) {
         throw 'Installed APK differs or original installation continuity was lost.'
     }
     $null = Set-QaNetwork -Wifi '1' -Mobile '1'
@@ -714,6 +774,7 @@ try {
         course_id = $courseId
         program_id = $configuration.QA_DYNAMIC_PROGRAM_ID
         device = $Device
+        physical_device = $physicalDevice
         app_package = $package
         api_url = $apiBase
         golden_path = 'course_publication_path'
@@ -740,7 +801,7 @@ try {
         exact_final_android_host_progress = $true
         exact_final_android_host_contexts = $true
         exact_final_android_host_editions = $true
-        limits = @('Synthetic staging emulator and instrumented debug APK only; no release claim.',
+        limits = @('Synthetic staging and instrumented debug APK only; no release claim.',
             'Wave 2A publication/read/cache flow; contextual ActivityAttempt belongs to the subsequent slice.',
             'Existing app/user/outbox data and failed-run artifacts are preserved; no automatic resume.')
     }
@@ -758,6 +819,16 @@ try {
     try { Stop-QaProcess } catch { $cleanupErrors.Add('QA process could not be stopped') }
     try { $null = Set-QaNetwork -Wifi $initialNetwork.wifi -Mobile $initialNetwork.mobile }
     catch { $cleanupErrors.Add('Initial network settings could not be restored/verified') }
+    if ($physicalDevice) {
+        try {
+            $protectedAfter = Get-ProtectedPackages
+            Assert-JsonEqual $protectedBefore $protectedAfter 'protected Play/DEV packages'
+            $protectedVerified = $true
+            if ($null -ne $candidate) {
+                $candidate['protected_packages'] = [ordered]@{ before = $protectedBefore; after = $protectedAfter; unchanged = $true }
+            }
+        } catch { $cleanupErrors.Add('Protected Play/DEV package identity could not be verified') }
+    }
     foreach ($name in $environmentNames) {
         try { [Environment]::SetEnvironmentVariable($name, $oldEnvironment[$name], 'Process') }
         catch { $cleanupErrors.Add("environment:$name") }
