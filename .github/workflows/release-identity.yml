@@ -1,0 +1,39 @@
+name: Tutor TDS release identity gate
+
+on:
+  pull_request:
+    paths:
+      - "tooling/build_production.ps1"
+      - "tooling/Test-ProductionBackendIdentity.ps1"
+      - "tooling/test_production_backend_identity.ps1"
+      - ".github/workflows/release-identity.yml"
+  push:
+    branches: [codex/onda-0-consolidacao]
+    paths:
+      - "tooling/build_production.ps1"
+      - "tooling/Test-ProductionBackendIdentity.ps1"
+      - "tooling/test_production_backend_identity.ps1"
+      - ".github/workflows/release-identity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-identity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-test:
+    runs-on: windows-2022
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Run offline identity test with Windows PowerShell 5.1
+        shell: powershell
+        run: .\tooling\test_production_backend_identity.ps1
+      - name: Run offline identity test with PowerShell 7
+        shell: pwsh
+        run: .\tooling\test_production_backend_identity.ps1
