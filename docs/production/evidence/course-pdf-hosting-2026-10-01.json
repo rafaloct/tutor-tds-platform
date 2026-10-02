@@ -1,0 +1,148 @@
+{
+  "status": "hosting_audit_completed",
+  "verified_at": "2026-10-01T18:07:28.672011+00:00",
+  "production_catalog_sha256": "2cdc98502e994211f0d89a877d55633e0131b602500260d862e099dd46bc45bc",
+  "courses": [
+    {
+      "course_id": "agricultura-sustentavel",
+      "download_url": "https://drive.google.com/file/d/1EIoyoCKBQAlvyGZU-7ATNylY18SIyb4m/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "Agricultura Sustentável - Cartilha - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "atendimento-cliente",
+      "download_url": "https://drive.google.com/file/d/1fwUY22DnXLUqa4yOYGOssepOO8HXbSM9/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "Atendimento ao Cliente - Cartilha - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "audiovisual",
+      "download_url": "https://drive.google.com/file/d/1fPAdXQDn7Hult1XYzJtFY3TNDNJtA6Kq/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "Audiovisual - CARTILHA - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "cooperativismo",
+      "download_url": "https://drive.google.com/file/d/1oet1ol6TD2bvW3hYuqWew_8NVAuaxBKo/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "Cooperativismo - CARTILHA - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "economia-lar",
+      "download_url": "https://drive.google.com/file/d/180gptw_rGSTa9bvK7v6YYhIrFn846ifo/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "Economia do Lar - Cartilha - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "educacao-financeira",
+      "download_url": "https://drive.google.com/file/d/1dwHJKEctoaz0qZ2Lf2LKvsaFXiP7W3lE/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "Ed. Financeira - CARTILHA - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "sim-sima",
+      "download_url": "https://drive.google.com/file/d/1nlOUG9xT8WRsj3oFNl7LqTiaSjHx0aVl/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "SIM e SIMA - Cartilha - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "ia-cartilha",
+      "download_url": "https://drive.google.com/file/d/1vjwT_uoi_tw2rmSL2Y4kldjkqo5P-n4f/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "IA - CARTILHA - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    },
+    {
+      "course_id": "saf",
+      "download_url": "https://drive.google.com/file/d/1H-DpKPxnqwUjOUZfX6UDc5ewiOX-wijY/view",
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "title": "SAF - CARTILHA - TDS 2026.pdf - Google Drive",
+      "login_redirect": false,
+      "pdf_bytes_validated": false
+    }
+  ],
+  "local_originals": [
+    {
+      "name": "Agricultura Sustentável - Cartilha - TDS 2026.pdf",
+      "bytes": 15456861,
+      "sha256": "2ff77f94a5e14e695cfa11b9e51cae1dbf2f840ee12bacb7c7821555eb4ee0fc"
+    },
+    {
+      "name": "Atendimento ao Cliente - Cartilha - TDS 2026.pdf",
+      "bytes": 12884363,
+      "sha256": "1fcae9c36debe6e6d88c2ecf30ef8c1bea8b7c601d072884a25064fea06e475f"
+    },
+    {
+      "name": "Audiovisual - CARTILHA - TDS 2026.pdf",
+      "bytes": 7952948,
+      "sha256": "c09f5e9e6bdcc92cda535b742b40bb37b433f3cff75336e82e2d34981667812e"
+    },
+    {
+      "name": "Cooperativismo - CARTILHA - TDS 2026.pdf",
+      "bytes": 15405631,
+      "sha256": "86a79c14afc613e335cb662b5228a8cd79df3c8cd0ca1e8f58a31399224f2af4"
+    },
+    {
+      "name": "Economia do Lar - Cartilha - TDS 2026.pdf",
+      "bytes": 18218144,
+      "sha256": "fae2ad89a4a2c48aa9fd8bcd3136a07b69e18a988e27e930c289727e5fd3b6f0"
+    },
+    {
+      "name": "Ed. Financeira - CARTILHA - TDS 2026.pdf",
+      "bytes": 6581296,
+      "sha256": "c3d90ed88919191f6ae5c4d1f7c18f182651415a60eebc1b2563a3f975ff3c02"
+    },
+    {
+      "name": "IA - CARTILHA - TDS 2026.pdf",
+      "bytes": 9472927,
+      "sha256": "1f2a545931899de821d3c734acf840d8b06a04b1ed6c3eda029576c89d3ef3af"
+    },
+    {
+      "name": "SAF - CARTILHA - TDS 2026.pdf",
+      "bytes": 15457007,
+      "sha256": "e6ea47cd96e60723e0898cb6baee24077b7101b9939b1330b05fcd12ad1f68e5"
+    },
+    {
+      "name": "SIM e SIMA - Cartilha - TDS 2026.pdf",
+      "bytes": 7102374,
+      "sha256": "1f804b761aa8212856294080ece632872c3b9e280cc0f411cc064908a541f8e1"
+    }
+  ],
+  "ia_drive_metadata": {
+    "file_id": "1vjwT_uoi_tw2rmSL2Y4kldjkqo5P-n4f",
+    "mime_type": "application/pdf",
+    "bytes": 9472927,
+    "source": "Google Drive get_file_metadata authenticated read",
+    "permissions_returned": false
+  },
+  "limits": [
+    "Public HTML viewer pages and authenticated IA metadata checked; not a PDF rendering or download acceptance.",
+    "No Drive file, permission or production link was changed.",
+    "Interactive JSON is bundled/API content; PDF is external; certificate PDF generation is separate.",
+    "External PDF page time and completion cannot be inferred from a launch request."
+  ]
+}
