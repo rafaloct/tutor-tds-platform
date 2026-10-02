@@ -66,8 +66,28 @@ class TelemetryNavigatorObserver extends NavigatorObserver {
     }
   }
 
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didRemove(route, previousRoute);
+    if (previousRoute != null && previousRoute.isCurrent) {
+      _track(previousRoute, includeAccessEvents: false);
+    }
+  }
+
   void _track(Route<dynamic> route, {bool includeAccessEvents = true}) {
     final data = route.settings.arguments;
+    final page = data is TelemetryRouteData
+        ? data.pageId
+        : route.settings.name == '/'
+        ? 'welcome'
+        : null;
+    // Unsupported routes and modal dialogs suspend attribution to the old page.
+    unawaitedScreen(
+      page,
+      data is TelemetryRouteData
+          ? data.courseId
+          : AppTelemetryService.applicationCourseId,
+    );
     if (data is TelemetryRouteData) {
       _enqueue(
         () => telemetry.trackPage(
@@ -83,6 +103,12 @@ class TelemetryNavigatorObserver extends NavigatorObserver {
     if (route.settings.name == '/') {
       _enqueue(() => telemetry.trackPage(pageId: 'welcome'));
     }
+  }
+
+  void unawaitedScreen(String? pageId, String courseId) {
+    telemetry
+        .screenShown(pageId: pageId, courseId: courseId)
+        .catchError((Object _) {});
   }
 
   void _enqueue(Future<int> Function() operation) {
