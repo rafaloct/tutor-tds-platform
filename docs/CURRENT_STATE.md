@@ -144,3 +144,15 @@ deploy `f060ca99-4715-4265-8466-9249329a8e1a`; somente dados sintéticos.
 
 ## Artefato de comunicação — 29/09/2026
 Pré-pitch vigente: `outputs/Tutor_TDS_Pre_Pitch_Identidade_TDS_29-09-2026.pptx`, sete slides com identidade/logomarca oficiais TDS, negócio, produto e staging. Capturas existentes reaproveitadas; produção histórica, testes e hipóteses comerciais distinguidos. Originais/versões anteriores preservados. Sem alterações de app/API/release. Rastreabilidade: `production/PITCH_EVIDENCE_2026-09-29.md`.
+
+## Checkpoint GitHub / Issue #10 — 02/10/2026
+
+GitHub privado `rafaloct/tutor-tds-platform` já recebeu a consolidação; notas
+anteriores sobre ausência de remote são históricas. PR #9 contém `/version`,
+com 4/4 testes locais e validação no FastAPI Cloud staging registrada no Issue #1.
+O CI da integração revelou dois problemas antigos: relógio no teste de hierarquia
+ e conversão CRLF/LF de evidências. Correção isolada no Issue #10: relógio apenas
+no teste e bytes originais preservados por `.gitattributes`, sem alterar hashes.
+Os dois testes antes falhos e a rejeição de adulteração passaram (3/3); a prova
+ de bytes consta em `production/CI_REPRODUCIBILITY_ISSUE10.md`. Merge depende do
+CI do PR #9; consultar GitHub para estado final. Produção e freeze preservados.

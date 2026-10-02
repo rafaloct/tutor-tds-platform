@@ -1,0 +1,5 @@
+# These historical proofs are SHA-256 checked as exact bytes by Wave 1.
+# Preserve the approved CRLF bytes on every platform; do not change their hashes.
+# Other source files retain their existing policy. See CI_REPRODUCIBILITY_ISSUE10.md.
+docs/production/evidence/cloud-context-isolation.json -text whitespace=cr-at-eol
+docs/production/evidence/context-android-gate.json -text whitespace=cr-at-eol

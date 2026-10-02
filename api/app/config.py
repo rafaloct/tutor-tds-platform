@@ -32,6 +32,8 @@ class Settings:
     certificate_approval_required: bool = False
     learning_context_enabled: bool = False
     journey_traceability_enabled: bool = False
+    minimum_supported_app_version: str = "1.2.0+11"
+    compatibility_verified: bool = False
     environment: str = "development"
 
     @classmethod
@@ -87,7 +89,11 @@ class Settings:
             certificate_approval_required=os.getenv("CERTIFICATE_APPROVAL_REQUIRED", "false").lower() in {"1", "true", "yes"},
             learning_context_enabled=os.getenv("LEARNING_CONTEXT_ENABLED", "false").lower() in {"1", "true", "yes"},
             journey_traceability_enabled=os.getenv("JOURNEY_TRACEABILITY_ENABLED", "false").lower() in {"1", "true", "yes"},
+            minimum_supported_app_version=os.getenv("MINIMUM_SUPPORTED_APP_VERSION", "1.2.0+11").strip(),
+            compatibility_verified=os.getenv("COMPATIBILITY_VERIFIED", "false").lower() in {"1", "true", "yes"},
         )
+        if not settings.minimum_supported_app_version:
+            raise RuntimeError("MINIMUM_SUPPORTED_APP_VERSION não pode ser vazio.")
         settings.validate_database_url()
         return settings
 

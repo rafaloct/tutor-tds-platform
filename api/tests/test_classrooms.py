@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timezone
 
 from fastapi.testclient import TestClient
+import pytest
+
+import app.classrooms as classrooms_module
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -61,7 +64,16 @@ def bearer(token: object) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_classroom_preserves_teacher_monitor_student_hierarchy() -> None:
+def test_classroom_preserves_teacher_monitor_student_hierarchy(monkeypatch: pytest.MonkeyPatch) -> None:
+    # This scenario starts on the first course day, regardless of the runner date.
+    # Freeze only the pedagogical clock; authentication and other tests are untouched.
+    class ClassroomDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            instant = cls(2026, 10, 1, 12, tzinfo=timezone.utc)
+            return instant.replace(tzinfo=None) if tz is None else instant.astimezone(tz)
+
+    monkeypatch.setattr(classrooms_module, "datetime", ClassroomDateTime)
     client, app = make_client()
     with client:
         accounts = {role: register(client, role) for role in CPFS}
