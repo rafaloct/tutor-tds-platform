@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .analytics import router as analytics_router
@@ -121,6 +122,34 @@ def create_app(
         with Session(db.engine) as session:
             session.execute(text("SELECT 1"))
         return {"status": "ok", "database": "available"}
+
+    @application.get("/version")
+    def version(request: Request) -> dict[str, object]:
+        """Public deployment identity without exposing infrastructure secrets."""
+        db: Database = request.app.state.database
+        try:
+            with Session(db.engine) as session:
+                revisions = session.execute(
+                    text("SELECT version_num FROM alembic_version ORDER BY version_num")
+                ).scalars().all()
+        except SQLAlchemyError as exc:
+            raise HTTPException(
+                status_code=503,
+                detail="Schema version unavailable.",
+            ) from exc
+        if len(revisions) != 1:
+            raise HTTPException(
+                status_code=503,
+                detail="Schema version unavailable.",
+            )
+        settings: Settings = request.app.state.settings
+        return {
+            "api_version": request.app.version,
+            "schema_version": revisions[0],
+            "minimum_supported_app_version": settings.minimum_supported_app_version,
+            "environment": settings.environment,
+            "compatibility_verified": settings.compatibility_verified,
+        }
 
     @application.get("/courses")
     def courses(request: Request) -> dict[str, list[dict[str, object]]]:
