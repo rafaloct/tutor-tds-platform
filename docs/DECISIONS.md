@@ -55,3 +55,96 @@
     Atualiza as pendências históricas dos itens 8/10/16; próxima wave autorizada
     pelo contrato é Dynamic Learning. Manter Course/CourseVersion/editor existentes;
     não duplicar domínio nem remover os limites de release/QA físico.
+
+18. 2026-09-23: fatia 2A aprovada funcionalmente em staging, execução
+    `b65cb8de005444fb9ac707e1d9c6f5f8`. Um APK comprovou publicação de duas
+    edições, turma fixada, progresso compartilhado e offline sem duplicatas.
+    Sem nova migration/API. Wave 2 continua aberta: corrigir refresh após logout
+    e concluir tentativas contextuais na fatia 2B antes da próxima wave.
+    `production/WAVE2A_ACCEPTANCE.md` delimita evidências e pendências de produção.
+
+19. 2026-10-01: usuário priorizou rastreio incremental e escolheu piloto IA e
+    Inclusão Digital em Palmas, Itaguatins e Augustinópolis, conferido por Rafael.
+    Reusar Auth/matrícula/baseline/source/history; migration 0020 aditiva, sem
+    migração central concorrente. Identidade existe antes da ficha; preservar
+    pendência quando ela faltar. Source BI real pode substituir a necessidade
+    de um código histórico de tablet, sem fabricar ficha/resposta. Telemetria
+    exige novo consentimento e não concede resultado acadêmico. BI recebe overlay
+    separado; fontes originais e KV preservados. Flags false, release congelada.
+    Rafael confirmou 11–30/10/2026 e 40h; ia-cartilha localizado no catálogo
+    público de produção. Não duplicar curso; resolver oferta/edição autorizadas.
+    QA físico e migração isolada concluídos, ambiente temporário removido.
+    Refresh/render do BI e gates de release continuam necessários.
+    Rafael confirmou cartilha atual e ausência de conta online. Reutilizar
+    cadastro seguro existente e atribuição administrativa de equipe; não criar
+    conta fictícia nem pedir senha no chat. Conteúdo público referenciado por
+    hash; publicação/fixação de edição ainda deve usar contrato canônico.
+
+20. 2026-10-01: Astra executa preparação e validação técnica; não transferir ao
+    usuário testes que podem ser automatizados. Cópia real de produção restaurada
+    isoladamente e migrada 0005→0020, dados originais preservados e catálogo
+    compatível com imagem antiga. Edição v1 de ia-cartilha resolvida pelo contrato
+    legado. Backup criptografado fora do VPS verificado. Sem promoção de ambiente.
+    BI aberto no Desktop após correção TMDL; nova fonte de uso fica em cópia Sheets
+    privada de homologação, com dados explicitamente sintéticos e fonte original
+    preservada. Refresh/filtros aguardam clique humano no modal WebView2 que a
+    ferramenta não conseguiu acionar. Instituição e conta Rafael ainda reais,
+    não inferidas. Flags false; release exige seus gates antes de qualquer AAB.
+
+21. 2026-10-01: Rafael confirmou IPEX como instituição responsável pelas três
+    turmas do piloto TDS. Planos de cadastro/ativação atualizados; preservar curso,
+    cidades, 11–30/10 e 40h. Reutilizar Institution existente equivalente antes
+    de criar; confirmação institucional não fabrica conta, matrícula ou vínculo
+    de baseline. Cadastro pessoal de Rafael continua pendente.
+
+22. 2026-10-01: após login Google pelo titular, validar o BI com duas contas QA
+    pendentes e três atividades; filtro por pessoa passou. Refresh revelou tipos
+    any das consultas legadas convertidos em string, quebrando SUM. Fixar tipos
+    int64 na saída de Baseline/ComplementoBaseline somente na cópia, preservando
+    nulos, fontes e regras. Cartões antigos voltaram a calcular; 17 páginas e
+    Jornada preservadas. Erros legados de dados (68 Baseline/65 Jornada) continuam
+    explícitos, com data inválida observada; não inferir correção nem declarar
+    aceitação integral do BI. Sem publicação Fabric/Play ou alteração de produção.
+
+23. 2026-10-01: restaurar staging Cloud existente e preservado, sem recriar contas
+    ou banco. Backup externo verificável antes de 0019→0020; valores anteriores
+    das 42 tabelas permaneceram iguais. Deploy f060ca99-4715-4265-8466-9249329a8e1a
+    com 62 dependências do lock. Docker candidato também usa lock/bases por digest;
+    imagem não implantada e Git/proveniência de release ainda pendentes. QA físico
+    usa pacote debug exclusivo por run para preservar Play, DEV e ensaios falhos.
+    Uma recuperação só foi admitida após comprovar que o APK exato já instalado
+    nunca havia sido lançado; nenhum replay de fase Android com mutações.
+    Resultado físico deve fechar somente o gate demonstrado, mantendo freeze e
+    os demais gates. Emissão autenticada API→Worker/KV continua lacuna de
+    implementação da fatia Certificates; aprovação de pedido não equivale a emissão.
+    Fechamento: oito fases/quatro hooks passaram no POCO, evidência
+    wave2a-physical-acceptance-2026-10-01.json. Apenas course_versioning_xiaomi
+    marcado passed; três gates físicos e release_build_allowed=false preservados.
+
+24. 2026-10-01: manter as nove cartilhas PDF nos links Google Drive existentes;
+    estudo interativo JSON e PDF externo são caminhos distintos. Auditoria HTTP
+    do viewer não equivale a renderização Android. Botão PDF passa por controller
+    com tratamento de falha e registro consentido de pedido de abertura, sem
+    crédito de estudo ou inferência de leitura. Reusar eventos/outbox/export,
+    sem SaaS, storage ou migração novos. URL congelada na edição não congela os
+    bytes do Drive. Gate de Classroom/revogação usa turma sintética nova e pacote
+    QA próprio, preservando os vínculos dos runs aprovados; revogação é fixture
+    controlada de staging, não implementação de comando administrativo.
+    Resultado: run abbdfe6c3fd54366b26c46d1d6075954 passou oito fases no POCO,
+    após confirmação presencial da instalação. Congelar o APK e não repetir
+    fases/fixtures foi preservado. Gate classroom_cold_offline_xiaomi fechado;
+    PDF renderizado após seleção manual de conta Drive, um evento sem crédito.
+    Certificado e Evidence offline continuam pendentes; freeze inalterado.
+
+25. 2026-10-02: contrato de ambientes protege DEVELOPMENT/STAGING/PRODUCTION;
+    GitHub/commit/tag ainda não comprovados, nenhum push automático. API/Alembic
+    candidato rejeitam production sem DATABASE_URL PostgreSQL explícita; compose
+    candidato declara TUTOR_ENVIRONMENT=production, sem deploy. Endpoint IPEX
+    /tutor-api/health 200 com TLS válido não comprova volume/schema/restore;
+    /version e /live ainda 404 em produção. Config ignorada atual não passou
+    preflight; gates release restringem endpoints e flags false, sem alterar
+    release_status.json. Outputs/evidências preservados; BI/artefatos locais
+    precisam de custódia independente antes de dois desktops equivalentes.
+    PRODUCTION_RELEASE_READY=false até GitHub/proveniência, offsite+restore,
+    schema/upgrade e decisão editorial de fallback offline. Measurement v1
+    mantém baseline papel→planilha; etapas não validadas ficam null.

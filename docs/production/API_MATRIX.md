@@ -12,7 +12,7 @@ jornadas, não a todos os consumidores legados da rota. Resultados atuais em
 | POST | /auth/login | CPF/senha | credenciais válidas | LoginRequest | TokenResponse | login Flutter | AuthRepository | users; sessions | test_auth | STAGING |
 | POST | /auth/refresh | refresh token | sessão válida | RefreshRequest | TokenResponse | sessão Flutter | AuthRepository | sessions; users | test_auth | IMPLEMENTED |
 | GET | /auth/me | Bearer | própria identidade | sem body | PublicUser (role legado) | Flutter | AuthRepository | users; sessions | test_auth | STAGING |
-| GET | /courses | público | catálogo publicado | sem body | courses[] com edição publicada | Home | CourseRepository | courses; course_versions | test_api; course_repository_test | IMPLEMENTED |
+| GET | /courses | público | catálogo publicado | sem body | courses[] com edição publicada | Home | CourseRepository | courses; course_versions | test_api; course_repository_test | STAGING |
 | GET | /courses/{course_id} | público | curso ativo | course_id | conteúdo da edição pública | leitor público | CourseRepository | courses; course_versions | test_classroom_course_versions | STAGING |
 | GET | /classes | Bearer | escopo legado; enrolled_only exige vínculos ativos após correção | enrolled_only bool | ClassroomPage | Minhas turmas/equipe | ClassroomRepository | classes; cohort_memberships; class_enrollments; enrollments; program_memberships; class_monitors | test_context_access_revocation; test_classrooms | STAGING |
 | GET | /classes/{class_id}/course | Bearer | _active_student ou _staff; programa ativo após correção | class_id | conteúdo snapshot + course_version_id/version_id/version_number/class_id | leitor da turma | ClassroomRepository; LearnerOfflineRepository | classes; cohort_memberships; class_enrollments; enrollments; program_memberships; course_versions | test_context_access_revocation; test_classroom_course_versions | STAGING |
@@ -42,22 +42,77 @@ test_learning_context cobre escrita/retry e negação de equipe revogada.
 
 ## Publicação dinâmica — Wave 2A
 
-Rotas/editor existentes, auditados em `0081ab0`; gate integrado de publicação no
-mesmo APK ainda pendente. Contrato: `DYNAMIC_LEARNING_CONTRACT.md`. Preview é local
-e estático, sem endpoint novo. Os snapshots mantêm sections/messages existentes.
+Rotas/editor existentes; gate integrado no mesmo APK aprovado em staging conforme
+`WAVE2A_ACCEPTANCE.md`. Contrato: `DYNAMIC_LEARNING_CONTRACT.md`. Preview é local
+e estático, sem endpoint novo. Snapshots mantêm sections/messages existentes.
+Arquivamento manual continua PARTIAL: o gate exercitou somente o arquivamento
+automático da edição anterior ao publicar a seguinte.
 
 | Method | Path | Authentication | Permission | Request | Response | Consumer | Repository | Tables | Test | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| GET | /editor/context | Bearer access_claims | ProgramMembership editorial ativa; admin legado preservado | sem body | programs com capacidade editorial | catálogo editorial | CourseEditorRepository | programs; program_memberships | test_course_editor; course_editor_repository_test | PARTIAL |
-| GET | /editor/courses | Bearer access_claims | autor/equipe no programa permitido | program_id | courses editáveis com versão/revisão/permissões | catálogo editorial | CourseEditorRepository | courses; course_versions; program_courses; program_memberships | test_course_editor; course_editor_screen_test | PARTIAL |
-| GET | /editor/courses/{course_id} | Bearer access_claims | escopo editorial e ownership quando exigido | course_id; version_id opcional | edição, conteúdo e permissões | editor | CourseEditorRepository | courses; course_versions; program_courses; program_memberships | test_course_editor; course_editor_repository_test | PARTIAL |
-| POST | /courses | Bearer access_claims | editor ativo no programa | CourseCreate: program_id, course_id, title, author | rascunho criado | editor | CourseEditorRepository | courses; course_versions; program_courses | test_course_editor; course_editor_repository_test | PARTIAL |
-| PATCH | /courses/{course_id} | Bearer access_claims | rascunho editável do autor/gestor autorizado | DraftUpdate: version_id, expected_revision, title, author, sections, links opcionais | edição/revisão atualizadas; 409 obsoleta | editor | CourseEditorRepository | courses; course_versions | test_course_editor; course_editor_repository_test | PARTIAL |
-| POST | /courses/{course_id}/submit | Bearer access_claims | autor/gestor autorizado; conteúdo válido | VersionAction: version_id, expected_revision | in_review e permissões atualizadas | editor | CourseEditorRepository | course_versions; course_version_transitions | test_course_editor; course_editor_screen_test | PARTIAL |
-| POST | /courses/{course_id}/publish | Bearer access_claims | coordenador/admin no escopo; compartilhamento exige todos os programas | VersionAction | published; projeção pública e histórico | editor; catálogo; app matriculado por snapshot | CourseEditorRepository; CourseRepository | courses; course_versions; course_version_transitions; program_courses | test_course_editor; test_classroom_course_versions | PARTIAL |
+| GET | /editor/context | Bearer access_claims | ProgramMembership editorial ativa; admin legado preservado | sem body | programs com capacidade editorial | catálogo editorial | CourseEditorRepository | programs; program_memberships | test_course_editor; course_editor_repository_test | STAGING |
+| GET | /editor/courses | Bearer access_claims | autor/equipe no programa permitido | program_id | courses editáveis com versão/revisão/permissões | catálogo editorial | CourseEditorRepository | courses; course_versions; program_courses; program_memberships | test_course_editor; course_editor_screen_test | STAGING |
+| GET | /editor/courses/{course_id} | Bearer access_claims | escopo editorial e ownership quando exigido | course_id; version_id opcional | edição, conteúdo e permissões | editor | CourseEditorRepository | courses; course_versions; program_courses; program_memberships | test_course_editor; course_editor_repository_test | STAGING |
+| POST | /courses | Bearer access_claims | editor ativo no programa | CourseCreate: program_id, course_id, title, author | rascunho criado | editor | CourseEditorRepository | courses; course_versions; program_courses | test_course_editor; course_editor_repository_test | STAGING |
+| PATCH | /courses/{course_id} | Bearer access_claims | rascunho editável do autor/gestor autorizado | DraftUpdate: version_id, expected_revision, title, author, sections, links opcionais | edição/revisão atualizadas; 409 obsoleta | editor | CourseEditorRepository | courses; course_versions | test_course_editor; course_editor_repository_test | STAGING |
+| POST | /courses/{course_id}/submit | Bearer access_claims | autor/gestor autorizado; conteúdo válido | VersionAction: version_id, expected_revision | in_review e permissões atualizadas | editor | CourseEditorRepository | course_versions; course_version_transitions | test_course_editor; course_editor_screen_test | STAGING |
+| POST | /courses/{course_id}/publish | Bearer access_claims | coordenador/admin no escopo; compartilhamento exige todos os programas | VersionAction | published; projeção pública e histórico | editor; catálogo; app matriculado por snapshot | CourseEditorRepository; CourseRepository | courses; course_versions; course_version_transitions; program_courses | test_course_editor; test_classroom_course_versions | STAGING |
 | POST | /courses/{course_id}/archive | Bearer access_claims | gestor autorizado | VersionAction | archived; turmas mantêm snapshot autorizado | editor | CourseEditorRepository | courses; course_versions; course_version_transitions | test_course_editor; test_classroom_course_versions | PARTIAL |
-| POST | /courses/{course_id}/versions | Bearer access_claims | editor autorizado para nova edição | VersionFork: source_version_id | novo rascunho ligado à versão anterior | editor | CourseEditorRepository | course_versions | test_course_editor; course_editor_repository_test | PARTIAL |
+| POST | /courses/{course_id}/versions | Bearer access_claims | editor autorizado para nova edição | VersionFork: source_version_id | novo rascunho ligado à versão anterior | editor | CourseEditorRepository | course_versions | test_course_editor; course_editor_repository_test | STAGING |
 
 Os comandos legados de preparação de programa/matrícula/turma continuam exigindo
 admin global; sua migração não foi implicitamente declarada pelo gate editorial.
 Nenhuma operação de IA ou LearningEvent cria esses vínculos.
+
+## Identidade e jornada — QA isolado, 01/10/2026
+
+Recorte priorizado pelo usuário; `JOURNEY_TRACEABILITY_ENABLED=false` por padrão
+na API e Flutter. STAGING abaixo registra apenas QA sintético isolado, removido
+após os gates; não modifica a aprovação da produção ou do BI. Contrato em
+`TDS_JOURNEY_TRACEABILITY_CONTRACT.md`, evidências em `TDS_JOURNEY_QA_2026-10-01.md`.
+
+| Method | Path | Authentication | Permission | Request | Response | Consumer | Repository | Tables | Test | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| GET | /classes/{class_id}/students/{user_id}/baseline | Bearer access_claims | equipe no escopo, aluno/vínculos ativos | class_id; user_id | baseline/histórico existentes; pessoa_id HMAC opcional com flag/segredo, inclusive sem ficha | acompanhamento Rafael | ClassroomRepository | users; class_enrollments; student_baselines; baseline_source_records; baseline_revisions | test_student_followup; test_journey_traceability; journey_baseline_control_test | STAGING |
+| PUT | /classes/{class_id}/students/{user_id}/baseline | Bearer access_claims | equipe atual; confirmação humana; flag para bi_record_id | revisão esperada, data real, motivo, idempotência; bi_record_id opcional | snapshot auditado; replay exato; 409 conflito; omissão preserva ponte; null explícito desvincula com auditoria | acompanhamento Rafael | ClassroomRepository | student_baselines; baseline_source_records; baseline_revisions | test_journey_traceability; test_journey_migration; student_followup_screen_test; journey_baseline_control_test | STAGING |
+| POST | /events | Bearer access_claims | conta autenticada; flag para screen_engagement; consentimento no cliente | screen_engagement com page_id estável e 1–60 active_seconds; tipos analíticos existentes | recibo idempotente; validated_seconds=0 para tempo de tela | telemetria consentida | AppTelemetryService; LearningEventSyncService; SqliteLearningOutbox | learning_events; SQLite learning_outbox existente | test_journey_traceability; screen_engagement_test; journey_privacy_preferences_test; journey_traceability_test | STAGING |
+| GET | /classes/{class_id}/journey-export | Bearer access_claims | equipe da turma; flag e HMAC configurados | limit 1–100; offset | tds-journey-v1; ponte conferida/projeção canônica; pendências explícitas; sem PII; resultados não comprovados null | exportador BI | ops/export_tds_journey.py | users; class_enrollments; student_baselines; baseline_source_records; learning_events; certificate_references; program_courses | test_journey_traceability; test_journey_export_tools; journey_baseline_control_test | STAGING |
+| GET | /classes/{class_id}/journey-activity | Bearer access_claims | equipe da turma; vínculos ativos; flag e HMAC configurados | since/until com timezone; limit 1–500; offset | tds-activity-v1; eventos sanitizados por pessoa, inclusive baseline pendente; sem atribuição automática de turma | exportador BI | ops/export_tds_journey.py | users; class_enrollments; learning_events; vínculos existentes | test_journey_traceability; test_journey_export_tools; journey_traceability_test | STAGING |
+
+Migration 0020 acrescenta coluna/índice/FK em student_baselines; reusa reservas e
+histórico. Guards anteriores preservados em SQLite/PostgreSQL. Rastreio e IA
+não concedem matrícula, frequência, carga horária ou certificado. Alteração de
+sessão invalida requests pendentes antes de aceitar tokens/respostas no Flutter.
+
+Continuação 01/10: ensaio cec516308697 restaurou produção 0005 em banco isolado,
+migrou até 0020 e conservou todas as colunas anteriores. API antiga iniciou na
+cópia atualizada e retornou catálogo com mesmos valores legados. Rotas antigas
+presentes no OpenAPI candidato; mudanças de schema identificadas no relatório,
+sem inferir cobertura total de compatibilidade. Flags mantidas false e segredo
+de pseudônimo agora mapeado para API em ambos os composes; config validada sem
+deploy. Os status funcionais acima não representam promoção de produção.
+
+Continuação Cloud: projeto staging restaurado, backup custom copiado para fora
+do VPS, migration 0019→0020 com fingerprints das colunas anteriores de 42 tabelas
+iguais. Deployment f060ca99-4715-4265-8466-9249329a8e1a saudável; sete contas QA
+preservadas. Flag de jornada ainda false nesse staging. Dockerfile candidato
+passa a instalar uv.lock, com 62 dependências conferidas e oito testes do recorte
+aprovados; imagem não implantada e proveniência Git de release ainda pendente.
+Evidências cloud-staging-journey-migration, cloud-staging-journey-deploy e
+journey-locked-api-candidate de 2026-10-01. Nenhuma nova API ou migração central.
+
+PDF, 01/10: o botão reutiliza POST /events (feature_used, feature_id
+course_pdf_open_requested) e a exportação sanitizada existente. Teste de API
+confirma recibo/replay idempotente, validated_seconds=0, exportação por equipe e
+403 para aluno exportador. Nenhuma rota, armazenamento ou coluna nova. O evento
+não prova download, leitura nem conclusão; course_id permanece no evento interno,
+sem nova dimensão/medida adicionada ao BI. Abertura usa o link HTTPS externo do
+catálogo. Contrato: COURSE_PDF_CONTRACT.md; hospedagem auditada em
+evidence/course-pdf-hosting-2026-10-01.json.
+
+Físico 01/10: oito fases do run abbdfe6c3fd54366b26c46d1d6075954 aprovadas.
+Classroom recusou outra conta e a matrícula sintética revogada; cache não abriu
+após revogação conhecida e nova perda de rede. A sincronização confirmou dois
+eventos offline uma vez; pedido de PDF também recebido uma vez com zero crédito.
+Histórico prévio preservado (332 eventos/77 registros). Sem endpoint novo ou
+deploy; ver evidence/classroom-access-physical-acceptance-2026-10-01.json.

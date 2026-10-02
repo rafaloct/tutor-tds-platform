@@ -1,0 +1,95 @@
+{
+  "status": "failed_preserved_for_diagnosis",
+  "verified_at": "2026-10-01T17:32:14.971474+00:00",
+  "run": {
+    "run_id": "21004481ad774d1e85a9f477ee661d37",
+    "course_id": "qa-dynamic-course-21004481ad774d1e85a9f477ee661d37",
+    "status": "FAILED_PRESERVED_FOR_DIAGNOSIS",
+    "device": "ZT6HPRHQHATSEQPR",
+    "app_package": "com.tutortds_cartilhas.dev.dynamicqa",
+    "protected_packages_verified": true,
+    "protected_packages_before": {
+      "com.tutortds_cartilhas": {
+        "apks": {
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/base.apk": "cc1ed1778c62a255003876f6b7b08efd4de9e91416440161bb959ede12d14d18",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.arm64_v8a.apk": "66fb8df9f76ca31d874cf9120e0981362762655696d6cc14f1286d0014ae6ad3",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.es.apk": "25fed76e341f33b0756fd5653a0ea920a7279c134dc393695aed738d15fa653d",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.pt.apk": "a735877c89d07f690920eb0939efc7e216c6fcddfa2fbb567d6aebb5c245b60b",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.xxhdpi.apk": "edfd36356205fe1cb9935d047a173b13144c844b3ad2f2cbf9827acf669a32f0"
+        },
+        "metadata": [
+          "versionCode=11 minSdk=32 targetSdk=36",
+          "versionName=1.2.0",
+          "lastUpdateTime=2026-08-25 08:29:43",
+          "firstInstallTime=2026-06-19 14:12:19"
+        ]
+      },
+      "com.tutortds_cartilhas.dev": {
+        "apks": {
+          "/data/app/~~zZ5bMJYjrz9Wc3FCBvW31w==/com.tutortds_cartilhas.dev-KaTFabiwwaxZ2G7vJK_P2Q==/base.apk": "8ceccdf33d42dbb60979eca761aa680f92598cf5999508e2012ca9706563b349"
+        },
+        "metadata": [
+          "versionCode=13 minSdk=24 targetSdk=36",
+          "versionName=1.4.0-dev",
+          "lastUpdateTime=2026-10-01 12:49:06",
+          "firstInstallTime=2026-09-20 14:04:46"
+        ]
+      }
+    },
+    "protected_packages_after": {
+      "com.tutortds_cartilhas": {
+        "apks": {
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/base.apk": "cc1ed1778c62a255003876f6b7b08efd4de9e91416440161bb959ede12d14d18",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.arm64_v8a.apk": "66fb8df9f76ca31d874cf9120e0981362762655696d6cc14f1286d0014ae6ad3",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.es.apk": "25fed76e341f33b0756fd5653a0ea920a7279c134dc393695aed738d15fa653d",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.pt.apk": "a735877c89d07f690920eb0939efc7e216c6fcddfa2fbb567d6aebb5c245b60b",
+          "/data/app/~~pqF64_IBbljs6FCSTw1rcQ==/com.tutortds_cartilhas-c-f1OCE4D_mCo2ZtR7JF0Q==/split_config.xxhdpi.apk": "edfd36356205fe1cb9935d047a173b13144c844b3ad2f2cbf9827acf669a32f0"
+        },
+        "metadata": [
+          "versionCode=11 minSdk=32 targetSdk=36",
+          "versionName=1.2.0",
+          "lastUpdateTime=2026-08-25 08:29:43",
+          "firstInstallTime=2026-06-19 14:12:19"
+        ]
+      },
+      "com.tutortds_cartilhas.dev": {
+        "apks": {
+          "/data/app/~~zZ5bMJYjrz9Wc3FCBvW31w==/com.tutortds_cartilhas.dev-KaTFabiwwaxZ2G7vJK_P2Q==/base.apk": "8ceccdf33d42dbb60979eca761aa680f92598cf5999508e2012ca9706563b349"
+        },
+        "metadata": [
+          "versionCode=13 minSdk=24 targetSdk=36",
+          "versionName=1.4.0-dev",
+          "lastUpdateTime=2026-10-01 12:49:06",
+          "firstInstallTime=2026-09-20 14:04:46"
+        ]
+      }
+    },
+    "boundary": "android_author_v1",
+    "attempted_phase": "author_v1",
+    "last_verified_phase": null,
+    "verified_phases": [],
+    "verified_host_hooks": [
+      "before_android"
+    ],
+    "apk_sha256": "5490292f98f85182466d10bb982aab7dedfbdd9637e19074dabace547a99da78",
+    "checkpoint_may_have_advanced": true,
+    "automatic_resume": false,
+    "next_phase_assumed": false,
+    "updated_at": "2026-10-01T17:28:03.3426390Z",
+    "cleanup_errors": [],
+    "diagnostic_capture_errors": []
+  },
+  "failure": {
+    "boundary": "Android QA selector after reveal",
+    "observed": "StateError: No element in _tap, called by _preview; draft_save and preview_open markers present",
+    "expected": "Preview action remains mounted and hittable when tapped",
+    "likely_root_cause": "Physical IME/scroll changes viewport after ensureVisible; emulator timing is insufficient",
+    "structural_fix": "Unfocus edit and wait for native keyboard inset and scroll to settle; assert the target still exists before interacting",
+    "affected_files": [
+      "cartilhas_app/integration_test/dynamic_learning_path_test.dart"
+    ],
+    "no_action_replayed": true
+  },
+  "log_sha256": "17a5f12eae6d01342c4d5b75858307083c66a88dcd3e2e4fb56bb87e8909ae7d",
+  "production_ready": false
+}

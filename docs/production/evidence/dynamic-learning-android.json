@@ -1,0 +1,3299 @@
+{
+  "status": "DYNAMIC_LEARNING_ANDROID_PATH_PASSED",
+  "verified_at": "2026-09-23T22:54:11.3795377Z",
+  "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+  "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+  "program_id": "qa-dynamic-program",
+  "device": "emulator-5556",
+  "app_package": "com.tutortds_cartilhas.dev",
+  "api_url": "https://tutor-tds-staging.fastapicloud.dev",
+  "golden_path": "course_publication_path",
+  "wave": "2A",
+  "production_ready": false,
+  "build_count": 1,
+  "install_count": 1,
+  "build_seconds": 95.888,
+  "apk_sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+  "before_install": {
+    "sha256": "981ddc00e85d2c658c6541626dcf2fe2889fec3cf3acb70df56850fb4e2cf912",
+    "first_install_time": "2026-09-23 19:51:43",
+    "last_update_time": "2026-09-23 22:28:12"
+  },
+  "installed": {
+    "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+    "first_install_time": "2026-09-23 19:51:43",
+    "last_update_time": "2026-09-23 22:42:40"
+  },
+  "after_all_phases": {
+    "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+    "first_install_time": "2026-09-23 19:51:43",
+    "last_update_time": "2026-09-23 22:42:40"
+  },
+  "separate_processes": true,
+  "all_phases_in_this_run": true,
+  "automatic_resume": false,
+  "original_operational_configuration_unchanged": true,
+  "source_sha256": {
+    "cartilhas_app/android/app/build.gradle.kts": "4c3b4741e5875c77df613c44d9c3db9764149efb7878c116ecedd4d020784a61",
+    "cartilhas_app/android/app/src/main/AndroidManifest.xml": "39d620f03f94b544ab96c582f082223f4728d4b6efa204dd574d194944f742e1",
+    "cartilhas_app/integration_test/dynamic_learning_path_test.dart": "2acf34f24f5756af2736953ec746090de74247afadf881422c5f18d87c67894e",
+    "cartilhas_app/lib/config/app_config.dart": "8740c6722b2fbbce73de0e127cfe634d5bf0210d2ff9102b95728bd09932e2b4",
+    "cartilhas_app/lib/features/analytics/app_telemetry_service.dart": "be9f4ffde312ef90a887ba55a17c7c7d2c7d862bba8ad979590aba33a1b1741e",
+    "cartilhas_app/lib/features/analytics/telemetry_route.dart": "856de6d79c8838646206effe11340de919cde165a067e40d3f33927d95d145f8",
+    "cartilhas_app/lib/features/auth/data/account_data_deletion_service.dart": "cf8341b6c2c6d01e52f2f66c5a019090a918dd953e8e1899b5ceefef7d2f414f",
+    "cartilhas_app/lib/features/auth/data/auth_repository.dart": "e5122c05809401406561b371301ea98f99128f76da3d85f344fd404c5283d2e4",
+    "cartilhas_app/lib/features/auth/data/auth_token_store.dart": "bb40aaafe9b3f799443d7aa62c72464d1b53943d020c2d4e0e0b71b0446643e7",
+    "cartilhas_app/lib/features/auth/models/auth_session.dart": "03aaf0f9e8228b009faca447ee4d9a922303657e5f7df11d383238b3fab040a9",
+    "cartilhas_app/lib/features/auth/presentation/account_login_dialog.dart": "0e22c5ad272f76e02e0eaf905f6a9c4c7cae44c3b1cf1845f68e7df7d0289c93",
+    "cartilhas_app/lib/features/certificates/data/certificate_pdf_service.dart": "3b6c4ad841ca17fcbf766893b85bee8e792d274ef0eb29c3211cce1fc283cdf9",
+    "cartilhas_app/lib/features/certificates/data/certificate_repository.dart": "2197cb620c3eca839ed3d8a5b1dda0935353b29e1029ae1b480005ca076feb46",
+    "cartilhas_app/lib/features/certificates/data/certificate_request_repository.dart": "18f77abe90529a9e1b1486da69822f503b733cdbd94b71213fe360cecd54df75",
+    "cartilhas_app/lib/features/certificates/data/certificate_service.dart": "9bdd659040d35e4804f6e78c6cdec3798b7f57ffe402b6df81ca701b022bd737",
+    "cartilhas_app/lib/features/certificates/models/certificate_record.dart": "23a0e64e1473d503790b5ad58631c83d2d324b8559a504996e4f52df76a2554c",
+    "cartilhas_app/lib/features/certificates/models/certificate_request.dart": "360fd403c3391e9d10a198b9a848bea20e6df524325555b558ac1bcff3838243",
+    "cartilhas_app/lib/features/certificates/presentation/certificate_details_screen.dart": "3e083dc558bc4d79ac9845eae0640961cac66d7c2f9cd0edefc156de07733757",
+    "cartilhas_app/lib/features/certificates/presentation/certificate_requests_screen.dart": "d2f83822144992d1cfbe6304d6285e4ad9246e9358868731cd683fa2c6e4b2da",
+    "cartilhas_app/lib/features/certificates/presentation/certificate_wallet_screen.dart": "f2bbbb5317628266ae7aa15aa9808b7ea427a6c2cc6aae7792b23cbe17ce9374",
+    "cartilhas_app/lib/features/classrooms/application/team_capability.dart": "6d7e81a9ea461042b1e0255852d6061b3ddad36bb131ea3c8af7b3f66899cb75",
+    "cartilhas_app/lib/features/classrooms/data/classroom_repository.dart": "4b47981213eb474e30a1a14aac7188e10b6e7de68f7aad223a9e60679900d1c7",
+    "cartilhas_app/lib/features/classrooms/data/learner_offline_repository.dart": "ba1c6ff6de87fd3da7dd2c5fc89c267c313f0413502837f42d33b27358c08c37",
+    "cartilhas_app/lib/features/classrooms/models/classroom_models.dart": "5b7d0902b3b48dda0005293921f2762e1bfb3287b7a7d5bdf757a5b8d2d9c0cc",
+    "cartilhas_app/lib/features/classrooms/presentation/classroom_dashboard_screen.dart": "e79ad94736113d36ea01d49585c75b9571593cfd79de5cc6e9a04c8f24b74cb8",
+    "cartilhas_app/lib/features/classrooms/presentation/classroom_roster_screen.dart": "159c52c76a3d3d5bdcc67d78b0c85638a476bd9a9a801760771a95087bdd3d72",
+    "cartilhas_app/lib/features/classrooms/presentation/learner_classrooms_screen.dart": "29ee9f4d9ea03dc61ca18c75dd09e70c73faeb3776d42a635bc486e9528599ed",
+    "cartilhas_app/lib/features/classrooms/presentation/monitor_exceptions_view.dart": "8c8d1cb8ccd7a304aa1b1ca4e962d17fb190b6a9180ffc2666d66f209858a338",
+    "cartilhas_app/lib/features/classrooms/presentation/student_followup_screen.dart": "f78910c294793833952fa3f95d2d2b1728a16f984a3bfe353bd74a942b5dfc44",
+    "cartilhas_app/lib/features/course_editor/data/course_editor_repository.dart": "bc35fa729de05103ebb7208cd366dbbba1ba74237ba3c0a441924b7c6cedeab0",
+    "cartilhas_app/lib/features/course_editor/models/course_editor_models.dart": "06abf6f4165b3bdff168de0b3f038702b411654661f846bc244b7be0991c569d",
+    "cartilhas_app/lib/features/course_editor/presentation/course_editor_screen.dart": "629f4319b17f58a423ab99ae68357eb494455a58b3c7ea1fa34eee3a81ded30c",
+    "cartilhas_app/lib/features/course_editor/presentation/course_structure_editor.dart": "cd0234391f139f9ce5c12703a0c156707402e9d40880c24d5e521025cd819f36",
+    "cartilhas_app/lib/features/course_editor/presentation/message_editor_dialog.dart": "366de46a7163137b2bae3c69215f222002e9dca9dff90ba92f1e2707a2c2769a",
+    "cartilhas_app/lib/features/courses/data/course_repository.dart": "fd405801e3a6e444808fb7844eb97b74f467b3419ecf5e7de810a118c3411b2a",
+    "cartilhas_app/lib/features/evidence/data/checkin_draft_store.dart": "2260d4519ac992644fa593380fe777dbb59a263478f939280a438638e93f1550",
+    "cartilhas_app/lib/features/evidence/data/evidence_repository.dart": "8f2873359aa36c83fda655f1361053706d423eba51f59761ca439ecc29b8b788",
+    "cartilhas_app/lib/features/evidence/models/evidence_models.dart": "afc8df7e684a2672e60df641001de6bb707ef7e49198b8b9b474c28d052ec14a",
+    "cartilhas_app/lib/features/evidence/presentation/evidence_checkin_screen.dart": "6b3723f8563016d5a5d6b60457b5b0bb58eb1dd22404e69cd01f8100a6ef5fbb",
+    "cartilhas_app/lib/features/evidence/presentation/evidence_staff_screen.dart": "4f2166572421abf647c3e4f2e3d8fac3a2c74e5323ef637c08002d139031f832",
+    "cartilhas_app/lib/features/evidence/presentation/session_presence_screen.dart": "9442c47b2ce85647b2558169d8c47fac6429518e7fd79108ede5331ced9bc762",
+    "cartilhas_app/lib/features/learning_context/home_selection_repository.dart": "d408a86e572625ab784abd33957d9bc7d785e157ce7d6998ac39b015fff3c61a",
+    "cartilhas_app/lib/features/learning_context/learning_context_controller.dart": "921d9afbf67fc2b1a8ddef4f7db55c4937e1dfc0e0ed3af82cf55517fdddc170",
+    "cartilhas_app/lib/features/learning_context/learning_context_repository.dart": "da4ffd6058478cda6075b19dddc078841d0f3f1295c65f44491b7fb23a87d9a4",
+    "cartilhas_app/lib/features/learning_context/learning_context.dart": "853620deb4a178caf919ef84748ff5a501a6e95bc2674a45628bfe19dc881869",
+    "cartilhas_app/lib/features/learning_context/learning_home_card.dart": "8628ea39d8c0bfd242ecc076331351c5e29795a1db4557d0e434bcd16da88469",
+    "cartilhas_app/lib/features/learning_context/learning_home_controller.dart": "f9d8d08e4fcb270d0742ef9d5a28f44ad626c3bb692ae93ea7cd2dce82170668",
+    "cartilhas_app/lib/features/learning_events/learning_activity_tracker.dart": "e174203ade2b84042d5bf51b804b548a3b628c1c71b26e3cfbaf2be328ded30b",
+    "cartilhas_app/lib/features/learning_events/learning_delivery_controller.dart": "3bceeeb16372319a0389478de0972533e8311a330547fad4a03d7f3cfd342e8f",
+    "cartilhas_app/lib/features/learning_events/learning_delivery_status.dart": "ec4dabb0d0c4828144c441b847a854ed805b7d006206d0fd5726982e572db070",
+    "cartilhas_app/lib/features/learning_events/learning_event_queue.dart": "5ff62825c30dd1d084ac423cbd3807860c9b0d0a96aba71ab7c5bbc360939008",
+    "cartilhas_app/lib/features/learning_events/learning_event_sync_lifecycle.dart": "5169ece3e94e3e415625cf6aad238ddeb488caeee7e1e632dedc01a7b01a017d",
+    "cartilhas_app/lib/features/learning_events/learning_event_sync_service.dart": "6b2f5fbea7ba0cd5eb0d71592a71cab9fc3a8a9c36314f16f00c1ed1fd17d17b",
+    "cartilhas_app/lib/features/learning_events/learning_event.dart": "9d3a321b42d80ba1566642951e40c5564a264374cc21fe3a949f9c7b2fc461f2",
+    "cartilhas_app/lib/features/learning_events/learning_outbox.dart": "eee0e0ee2b7f2920cd54145e6d1cd84ce59c9482e0b3cbf4c1dcbb18f5f15fb8",
+    "cartilhas_app/lib/features/learning_events/sqlite_learning_outbox.dart": "8c3971f8e2d2fc5f93b7ece84b75969dd0f866d44abea81e9bc1ea2251ef9bc7",
+    "cartilhas_app/lib/features/media/data/media_event_tracker.dart": "34034cba8f5404e58ca7eecd8ddbf9ef2446615f16cf118cf282915d14fe3360",
+    "cartilhas_app/lib/features/media/data/media_progress_repository.dart": "f51e3ccf29db207bcd81b7183040c2c99d604de41e207b44c6e2ea73af800557",
+    "cartilhas_app/lib/features/media/data/media_repository.dart": "6d06df13bd57d494d325cb1e38aee39abcec5fbeb8b0bfde85d1cbe80603174a",
+    "cartilhas_app/lib/features/media/models/media_models.dart": "461616dcbaef7da4d1e2ba01bee465f50615b7d41a78d0ee86285926e914524a",
+    "cartilhas_app/lib/features/media/presentation/media_catalog_screen.dart": "d08da04ed41a7da9b630f216625f5955a4eedb76a9d28c626d419e6720f25f3b",
+    "cartilhas_app/lib/features/media/presentation/media_player_screen.dart": "ce0d937ba0cd83caeea683c813b805d38b35cd9bcf2cdd763a203603efc232a1",
+    "cartilhas_app/lib/features/media/presentation/secure_media_embed.dart": "cc9796166a7ef0deec72b68e45bc54c88814b5121f0880679347e404e4c3b6fa",
+    "cartilhas_app/lib/features/profile/data/profile_data_store.dart": "b05d4ed239372d1c8656593d9748d4177b64d00072d5bc89715230dc31a6ef68",
+    "cartilhas_app/lib/features/study_ai/data/assessment_attempt_repository.dart": "589f82180f8fecfdc922c10f1c41ae2466ffa41a5f6f6eefc6996fe33337c976",
+    "cartilhas_app/lib/features/study_ai/data/assessment_sync_queue.dart": "ef5f063fcc9cdb97691793d25da66f9671bb6421b1de1f87837907b42bf38beb",
+    "cartilhas_app/lib/features/study_ai/data/assessment_sync_service.dart": "0d80d65b3d77498b03e96dddd5d0d9e8b64d5fb3162607165afa3280057136a6",
+    "cartilhas_app/lib/features/study_ai/data/study_ai_service.dart": "ef1191ac072efe9975604948cbdb0be39cd4338ef9b1e6f99ed117e3845e1d97",
+    "cartilhas_app/lib/features/study_ai/data/study_summary_repository.dart": "3103874c3a7e2f1d40dc6c59e3ab2dab16704a1b687c3b38cb60cbd4a1ed50c6",
+    "cartilhas_app/lib/features/study_ai/models/assessment_sync_models.dart": "f8ebcc2496f82006cd6fb0b35ffa3dfe396f49797f8b77893cd3f606dd0c6898",
+    "cartilhas_app/lib/features/study_ai/models/study_models.dart": "27ac6095988647245d43abd9552ea8f823a88079cd26385a5a80695756e0619e",
+    "cartilhas_app/lib/features/study_ai/presentation/assessment_feedback_card.dart": "70de8d7efd5946a7c784d40e1715ea0323928498b7b2a3cfa09bf969df14bef2",
+    "cartilhas_app/lib/features/study_ai/presentation/assessment_screen.dart": "b82f47d895b8adc4090d31a729b907c7eff67bf7cec047462a36a189d516659a",
+    "cartilhas_app/lib/features/study_ai/presentation/flashcard_review_status.dart": "fe6d8704ca1b4c2217a5c7b00b5c52e7bd879c5b7fca99586fa1f2ca5ffaebd4",
+    "cartilhas_app/lib/features/study_ai/presentation/flashcards_screen.dart": "980de6cb84cab78790a4f6b5df253057ca27ec8cc521a19e59b67e832ff4ac89",
+    "cartilhas_app/lib/features/study_ai/presentation/study_async_view.dart": "a72527fb1667ae62b5eb42598fa70039593a89e47d132888309a6862eb2c13aa",
+    "cartilhas_app/lib/features/study_ai/presentation/study_generation_controls.dart": "fa43459abf05a0753ea28f4c257b0860c35fdc2a88b297d56a0fb3a883cff8bb",
+    "cartilhas_app/lib/features/study_ai/presentation/study_hub_screen.dart": "8186484b3d02e0c4612c0213bea7e75cb44c4db8e74404d3356e72f626da2d53",
+    "cartilhas_app/lib/features/study_ai/presentation/study_material_controller.dart": "c4bab4353dfd2344c30409e86463ab7c58a75ad2dd2e23d82b818c250d7285a6",
+    "cartilhas_app/lib/features/study_ai/presentation/summary_screen.dart": "8fd48829b212a9bbd273e8d2eb4abe201a6c4bdb04fc2dea542462cb5a3fae21",
+    "cartilhas_app/lib/features/study_progress/study_progress_repository.dart": "745909ca563724b0fd5778441269609812083255ad3ec94a45fdef1caf6678e0",
+    "cartilhas_app/lib/genui/atui_models.dart": "e31307703782e85675a318644c28f70002097dc0c7a45abaf8d41e8f0a71d81c",
+    "cartilhas_app/lib/genui/atui_parser.dart": "0cbd87a5bbfc2b4e26d5e8f2a2f67e5a0d453535a06f398350cd544c5acb9ffc",
+    "cartilhas_app/lib/genui/genui_renderer.dart": "3b87257e425c18dfe278cb3835da04f6b1cfc5b10f00c0aef6b62a9081644ade",
+    "cartilhas_app/lib/main.dart": "91f3b2d776ffef1eae6ad9c85cfe23604927c659b3e45639e1a32081348be60f",
+    "cartilhas_app/lib/models/cartilha.dart": "ef51d6716001eafb745b1cecc08a33bd209fb09943e6a67391ceeda9a89dc113",
+    "cartilhas_app/lib/models/cartilha.g.dart": "585c58a90bd3cb94350b3f5c5adb54e116cea21c5143834696cef01c05136011",
+    "cartilhas_app/lib/models/chat_message.dart": "a1746ab81c56d5d13398629a7008ce5a0ab4c4ffbc5e2cbbde238402bc846454",
+    "cartilhas_app/lib/models/genui_response.dart": "0089b5c944a9939bf2d982e4a45be0ea22d6f3ee7e2cfefeb4c30bacf8c6015a",
+    "cartilhas_app/lib/screens/about_screen.dart": "54f00fca0a2d6d3a2157df8d08965ccc74c8f249a0ab34178586214c72a47991",
+    "cartilhas_app/lib/screens/ai_assistant_screen.dart": "915fa6bcaee31d9c8dda4cfc415aa00b55688885ba97bd7d623a10eecd7d1903",
+    "cartilhas_app/lib/screens/cadunico_screen.dart": "845fa34463dda25c0e26b20383093d156aec3675cc0670800e56ba34cc038d7a",
+    "cartilhas_app/lib/screens/chat_experience_screen.dart": "def1828885585d0023b716e5324d897be81b5bb6aa4e62ab734ed0b71dfe1ca1",
+    "cartilhas_app/lib/screens/chatwoot_screen.dart": "a873ffd2b45f6ea87ec2dfaff8b8b606071dd1d8ef274f5b157a13d1fe1112b0",
+    "cartilhas_app/lib/screens/genui_assistant_screen.dart": "076ce1693a64fb88932d937b771133858da75e28b18ff0d278203336f2cf14fa",
+    "cartilhas_app/lib/screens/glossary_screen.dart": "92179cc4dbec8d43244e0de500d8adac79cb57ed4c44452a7363c2a225cd797b",
+    "cartilhas_app/lib/screens/guide_screen.dart": "3955547aa013f93a8f1945256e0dcfeb1257d9eeb3227afd43e00497acdd73f7",
+    "cartilhas_app/lib/screens/home_screen.dart": "18500b3459f36bdd909bde594174347b563b624667fdabe56e5e908c5f071bb7",
+    "cartilhas_app/lib/screens/onboarding_screen.dart": "69bf10de0e7f55f280e052f7739602fd5837cfff7f632639bc03ebe010c91b77",
+    "cartilhas_app/lib/screens/privacy_screen.dart": "2baf7c46c0e8f114f63b311197df35518bfdcae802e846e057093be80239ab5e",
+    "cartilhas_app/lib/screens/settings_screen.dart": "87ba092820ce5fd9c83b882372ab40deccfddc20efb652f56c9b9343af508ed1",
+    "cartilhas_app/lib/screens/welcome_screen.dart": "5fffd71da49d911b2f245f85437a4ebb949e9e3bb0dd7beb3eddbc27b3b53323",
+    "cartilhas_app/lib/services/anything_llm_service.dart": "cd87d7d1411bc5656801a02fe0da5bc282c3094546cc886ad969b20f8e188525",
+    "cartilhas_app/lib/services/chatwoot_script_value.dart": "28bd97f6d52cd3c457729f836a1b453840bb791c5826a82f1fda299e9c996867",
+    "cartilhas_app/lib/services/chatwoot_web_impl.dart": "0461d715c88640451574c0f0ad89af6962b074294d2231a4828a366d07fd3491",
+    "cartilhas_app/lib/services/chatwoot_web_stub.dart": "a2150224a9f74185842fb0bf28dc3d52c95a00bb8cb5d522bee526e84576719d",
+    "cartilhas_app/lib/services/privacy_preferences.dart": "dc50d4e99c2881bd3b22363dbd1c9655d70fdd4cb34bd85ceac938ef95a86d51",
+    "cartilhas_app/lib/services/theme_controller.dart": "b885db5110a1bd4f0f831b2f1f94a52e6d5c86a1c8b1706c6852cd395f572829",
+    "cartilhas_app/lib/theme/app_theme.dart": "98b81f1075c6d19359ead797d847f89dbc0e31eaf7e97ae0c15bb2006b576081",
+    "cartilhas_app/lib/widgets/linkify_text.dart": "3fa196379d5301ea3377cb0ad3521db79ca1f4c9fda63e029d2aeb1c15998f84",
+    "cartilhas_app/lib/widgets/responsive_body.dart": "3983ba3ab73429265fc8aaa9d2beda4a5d3553b8c65d95baeafd214222b0bda2",
+    "cartilhas_app/lib/widgets/study_resume_card.dart": "0ee30420cb989c9872a5f428643ed20ebda270224798d8d85eac7aa378574364",
+    "cartilhas_app/lib/widgets/tds_brand_stripe.dart": "a7f30137171796da4987efd1786b2d12ef0ee8cd718807f80d6220c30d477eb2",
+    "cartilhas_app/lib/widgets/tds_wait_experience.dart": "4768a66ea46002f458b8b46114bc19d1048772503411045cb6c0fcba3b5b6192",
+    "cartilhas_app/lib/widgets/tutor_conversation_starter.dart": "ee1c831131d46686358539c87d5150d50703b2b0f2d7032c17f8e1f9aa7e6a13",
+    "cartilhas_app/lib/widgets/tutor_response_card.dart": "65b28d815cf3cac9daa36853d72cc7cb93c733d72fbf33e7c7b56186814a0663",
+    "cartilhas_app/pubspec.lock": "283edafe7597229246e836effc9c3e7c65a111d5d7892539bc97e877ec0d3636",
+    "cartilhas_app/pubspec.yaml": "0e13575fad7c39687734e9b92ac174ab5a0c782806b34eaf94a931d48e08274a",
+    "cartilhas_app/test_driver/dynamic_learning_path_driver.dart": "e8aa7653b8d7b2898f35867d051c87fbc1b235e62182c048330166c36bb0075f",
+    "tooling/test_dynamic_learning_android.ps1": "5142bffedfee46cd4cebfccf34e42d5ef4344bb6676e34db8fe763dd5ae22b70",
+    "api/ops/bootstrap_dynamic_learning_qa.py": "640f6c07d8b086134da841725e358fe877bea4bd8d5d0e79d44917cdbbac6407",
+    "api/ops/prepare_dynamic_learning_qa.py": "42c77a98b3dfc6110a3f8a19e8f11980f31997d10befd578a550086a98b5e32d",
+    "api/ops/verify_cloud_context_isolation.py": "a4c7636e94d97d07bf13d1527adb00b620ab5eb9b981db6ba7355d3870e9b811",
+    "api/ops/seed_context_android.py": "176423f1213f3c4fea70fba5723cdfab1619e5e94fa3b9560acfd3e538b253c8",
+    "api/app/auth.py": "0e9a2f9e205c2321f2bad17cacf83538d31c2ea42354f8a5702c36c624dfa317",
+    "api/app/config.py": "9d7e9021f3dd59a5b228cd31df1f751199cac387d907f00ef3035fd4ec6505a5",
+    "api/app/database.py": "7ef945cc1cfcd6f2ba842dab2ab44d207e1be670d39b13394df59ecdd7cd47cf",
+    "api/app/models.py": "bd23ea54f0645143c822a28f2f0aa7419bf6eb33447be29439078e69942ebf76",
+    "api/app/context_memberships.py": "83e79e34193ee482969a9b2bb2e3afc572988881deab3a4e53ac75f5f93d9df1",
+    "api/app/learning_context.py": "a8e55eb5097662cf96de754d825b719ccf87d6c2fa2de6fa5ec58a31c9826531",
+    "api/pyproject.toml": "e6f5ddd4d65f1c5c9d6285f2ebc86cd316a1e10371ba466c0f3e856d3ad724d2",
+    "api/uv.lock": "d76252d2f340f9e1cf311b84ed8455c7be35d9711ef5482d28cb30237bee1420"
+  },
+  "source_hash_format": "SHA256 of raw local file bytes",
+  "host_runtime": {
+    "python": "tmp/context-cloud-locked-env/Scripts/python.exe",
+    "python_executable_sha256": "41b0358d661a6be6c3ab18409016f353a20a236b2322df4639f99f1b9879bf26",
+    "environment_metadata_sha256": "d853292d35eaf27d325c1034f8d642f6e02db88699da15178874cb2573a76074",
+    "uv_lock_sha256": "d76252d2f340f9e1cf311b84ed8455c7be35d9711ef5482d28cb30237bee1420",
+    "pyproject_sha256": "e6f5ddd4d65f1c5c9d6285f2ebc86cd316a1e10371ba466c0f3e856d3ad724d2"
+  },
+  "wave1_gate_sha256": "7a00a5b43cca7a33dc50ed9b9d55306243e90b7200a187bba10be370ecb124ac",
+  "fixture_sha256": "faeac4f3570b9d513f3d3c26c3c1b53e5a26c3829b151feccd938efb7989a38f",
+  "phases": [
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "author_v1",
+        "pid": 19066,
+        "completed_phase": "author_v1",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 3,
+            "status": "in_review",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "author_v1"
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "account_access": {
+          "initial_has_session": false,
+          "initial_owner_matches_requested_actor": false,
+          "settings_state": "signed_out",
+          "resolved_has_session": false,
+          "resolved_owner_matches_initial": true,
+          "session_invalidated_during_verification": false,
+          "final_owner_verified": true
+        },
+        "draft_not_public": true,
+        "author_global_role": "student",
+        "author_publish_status": 403,
+        "preview_without_learning_events": true,
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 58.749,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "1",
+        "mobile": "1"
+      },
+      "driver_report_sha256": "523d7b9ea0f0d61edf7b4c65b62197edb19c777dd0f1062da8ea3ca3f28c080d",
+      "driver_log_sha256": "e5ab4c79524939a7427a018a879e31042f09e640f96926af4db7b499029f2e7c"
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "publisher_v1",
+        "pid": 19310,
+        "completed_phase": "publisher_v1",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066,
+            19310
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "publisher_v1"
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "account_access": {
+          "initial_has_session": true,
+          "initial_owner_matches_requested_actor": false,
+          "settings_state": "connected",
+          "resolved_has_session": true,
+          "resolved_owner_matches_initial": true,
+          "session_invalidated_during_verification": false,
+          "final_owner_verified": true
+        },
+        "host_next_action": "after_v1: provision cohort/enrollment before learner_v1",
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 31.287,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "1",
+        "mobile": "1"
+      },
+      "driver_report_sha256": "7ba151aa270e54f76cb8bdada053221111a8396e6b05c9be624ee2f7577a6b31",
+      "driver_log_sha256": "5f56348c17872ace6449c705f8e1b708096221f515724bff6779b41e89ca635e"
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "learner_v1",
+        "pid": 19546,
+        "completed_phase": "learner_v1",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066,
+            19310,
+            19546
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "learner_v1",
+          "cohort_v1": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+          "context_v1": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "online_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0008,
+            "progress_percent": 2.5,
+            "last_activity_at": "2026-09-23T22:46:20.966729Z",
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "online_events": [
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "online_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 2,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:46:21.149586Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          }
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "account_access": {
+          "initial_has_session": true,
+          "initial_owner_matches_requested_actor": false,
+          "settings_state": "connected",
+          "resolved_has_session": true,
+          "resolved_owner_matches_initial": true,
+          "session_invalidated_during_verification": false,
+          "final_owner_verified": true
+        },
+        "learner_editor_status": 403,
+        "learner_publish_status": 404,
+        "denied_publication_unchanged": true,
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 84.616,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "1",
+        "mobile": "1"
+      },
+      "driver_report_sha256": "c45828f03369ca80cc3e117ce2819a3fa21e1fe43e3b460135bd083c5f558ae5",
+      "driver_log_sha256": "bacbc3ef1db6acfb525297adc496d407927aa85696ae0ef0c00b1f0adf92db54"
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "author_v2",
+        "pid": 19821,
+        "completed_phase": "author_v2",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066,
+            19310,
+            19546,
+            19821
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "author_v2",
+          "cohort_v1": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+          "context_v1": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "online_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0008,
+            "progress_percent": 2.5,
+            "last_activity_at": "2026-09-23T22:46:20.966729Z",
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "online_events": [
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "online_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 2,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:46:21.149586Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          },
+          "v2": {
+            "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "version_number": 2,
+            "revision": 3,
+            "status": "in_review",
+            "title": "Curso QA Dynamic b65cb8de edição 2",
+            "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+            "sections_sha256": "d2f526a5ad5e9e75a4b3f103ec728b794066112096828369fa724cd8a51975a6"
+          }
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "account_access": {
+          "initial_has_session": true,
+          "initial_owner_matches_requested_actor": false,
+          "settings_state": "connected",
+          "resolved_has_session": true,
+          "resolved_owner_matches_initial": true,
+          "session_invalidated_during_verification": false,
+          "final_owner_verified": true
+        },
+        "stale_revision_status": 409,
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 55.69,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "1",
+        "mobile": "1"
+      },
+      "driver_report_sha256": "52fd7c092502cdbb740b6c687fb65ebc3f024b274fcf7adbd9021412273f3766",
+      "driver_log_sha256": "1f572f4bad263e0a621499ebf8f89fce773bfa5b13034d017ac34a6011a4ee08"
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "publisher_v2",
+        "pid": 20060,
+        "completed_phase": "publisher_v2",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066,
+            19310,
+            19546,
+            19821,
+            20060
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "publisher_v2",
+          "cohort_v1": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+          "context_v1": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "online_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0008,
+            "progress_percent": 2.5,
+            "last_activity_at": "2026-09-23T22:46:20.966729Z",
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "online_events": [
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "online_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 2,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:46:21.149586Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          },
+          "v2": {
+            "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "version_number": 2,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 2",
+            "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+            "sections_sha256": "d2f526a5ad5e9e75a4b3f103ec728b794066112096828369fa724cd8a51975a6"
+          }
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "account_access": {
+          "initial_has_session": true,
+          "initial_owner_matches_requested_actor": false,
+          "settings_state": "connected",
+          "resolved_has_session": true,
+          "resolved_owner_matches_initial": true,
+          "session_invalidated_during_verification": false,
+          "final_owner_verified": true
+        },
+        "old_snapshot_unchanged": true,
+        "host_next_action": "after_v2: provision cohort/enrollment before learner_after_v2",
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 32.956,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "1",
+        "mobile": "1"
+      },
+      "driver_report_sha256": "314ec86986f75b72fb369a3ba443d33beff25db604f59d48d41cee4b5d8995be",
+      "driver_log_sha256": "9f5a57f0ae5c8e7ce605c40190306e2ec5aed1d8e3abbcb9cc41fa1a5d22d272"
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "learner_after_v2",
+        "pid": 20300,
+        "completed_phase": "learner_after_v2",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066,
+            19310,
+            19546,
+            19821,
+            20060,
+            20300
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "learner_after_v2",
+          "cohort_v1": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+          "context_v1": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "online_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0008,
+            "progress_percent": 2.5,
+            "last_activity_at": "2026-09-23T22:46:20.966729Z",
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "online_events": [
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "online_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 2,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:46:21.149586Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          },
+          "v2": {
+            "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "version_number": 2,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 2",
+            "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+            "sections_sha256": "d2f526a5ad5e9e75a4b3f103ec728b794066112096828369fa724cd8a51975a6"
+          },
+          "cohort_v2": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+          "context_v2": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+            "membership_id": "8bfaeaac-5c9f-59db-8c74-ffc4c1f5faf9",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "before_offline_events": [
+            {
+              "event_id": "1790203889828914-Y_SQe23vfRoo9fV_:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203889828914-Y_SQe23vfRoo9fV_",
+              "occurred_at": "2026-09-23T22:51:29.829374Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+                "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:15",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.611756Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:14",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.594053Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203855546477-LsqM2AJ3BbF0gzb1:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203855546477-LsqM2AJ3BbF0gzb1",
+              "occurred_at": "2026-09-23T22:50:55.55059Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.261538Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.228725Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ]
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "account_access": {
+          "initial_has_session": true,
+          "initial_owner_matches_requested_actor": false,
+          "settings_state": "connected",
+          "resolved_has_session": true,
+          "resolved_owner_matches_initial": true,
+          "session_invalidated_during_verification": false,
+          "final_owner_verified": true
+        },
+        "public_edition": 2,
+        "old_cohort_edition": 1,
+        "new_cohort_progress": 0,
+        "old_progress_unchanged": true,
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 103.742,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "1",
+        "mobile": "1"
+      },
+      "driver_report_sha256": "2c7b58f8627f18df2f4b5610b77ecfec199b99ba6e3457b5d9aa3773412af5c4",
+      "driver_log_sha256": "30640863a687d90f06ba9b99f6b566324e166d45e4ff8d524b05c4bd157f45d5"
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "learner_offline",
+        "pid": 20605,
+        "completed_phase": "learner_offline",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066,
+            19310,
+            19546,
+            19821,
+            20060,
+            20300,
+            20605
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "learner_offline",
+          "cohort_v1": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+          "context_v1": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "online_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0008,
+            "progress_percent": 2.5,
+            "last_activity_at": "2026-09-23T22:46:20.966729Z",
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "online_events": [
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "online_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 2,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:46:21.149586Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          },
+          "v2": {
+            "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "version_number": 2,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 2",
+            "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+            "sections_sha256": "d2f526a5ad5e9e75a4b3f103ec728b794066112096828369fa724cd8a51975a6"
+          },
+          "cohort_v2": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+          "context_v2": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+            "membership_id": "8bfaeaac-5c9f-59db-8c74-ffc4c1f5faf9",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "before_offline_events": [
+            {
+              "event_id": "1790203889828914-Y_SQe23vfRoo9fV_:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203889828914-Y_SQe23vfRoo9fV_",
+              "occurred_at": "2026-09-23T22:51:29.829374Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+                "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:15",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.611756Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:14",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.594053Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203855546477-LsqM2AJ3BbF0gzb1:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203855546477-LsqM2AJ3BbF0gzb1",
+              "occurred_at": "2026-09-23T22:50:55.55059Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.261538Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.228725Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "offline_events": [
+            {
+              "event_id": "1790203927404443-NkAxSnPAyJ3jDHCa:page_viewed:3",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203927404443-NkAxSnPAyJ3jDHCa",
+              "occurred_at": "2026-09-23T22:52:12.117808Z",
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            },
+            {
+              "event_id": "1790203927404443-NkAxSnPAyJ3jDHCa:feature_used:4",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203927404443-NkAxSnPAyJ3jDHCa",
+              "occurred_at": "2026-09-23T22:52:12.141636Z",
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            },
+            {
+              "event_id": "1790203932375692-z3dftpOkast7W_Rp:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203932375692-z3dftpOkast7W_Rp",
+              "occurred_at": "2026-09-23T22:52:12.380957Z",
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            },
+            {
+              "event_id": "1790203932375692-z3dftpOkast7W_Rp:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203932375692-z3dftpOkast7W_Rp",
+              "occurred_at": "2026-09-23T22:52:17.143965Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            }
+          ],
+          "offline_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 4,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:52:17.296926Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          }
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "network_unreachable": true,
+        "pending_visible": true,
+        "cold_start_retained_edition": 1,
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 8.868,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "0",
+        "mobile": "0"
+      },
+      "driver_report_sha256": "f3e7258882eeb66486fc7a2cfda0a02f316f935d8480cd4fde0d9c1faaadb77b",
+      "driver_log_sha256": "39c7319e9e13a37e989d7f77c6e19fd1bce1728f3e879b175e097663b1127803"
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "phase": "learner_reconnect",
+        "pid": 20935,
+        "completed_phase": "learner_reconnect",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "checkpoint": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "pids": [
+            19066,
+            19310,
+            19546,
+            19821,
+            20060,
+            20300,
+            20605,
+            20935
+          ],
+          "v1": {
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 1",
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "sections_sha256": "5db02ece7e5b6b2b5b74b81a5e5cb3101ca886dcedbda1b0638425b036656071"
+          },
+          "completed_phase": "learner_reconnect",
+          "cohort_v1": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+          "context_v1": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "online_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0008,
+            "progress_percent": 2.5,
+            "last_activity_at": "2026-09-23T22:46:20.966729Z",
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "online_events": [
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "online_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 2,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:46:21.149586Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          },
+          "v2": {
+            "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "version_number": 2,
+            "revision": 4,
+            "status": "published",
+            "title": "Curso QA Dynamic b65cb8de edição 2",
+            "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+            "sections_sha256": "d2f526a5ad5e9e75a4b3f103ec728b794066112096828369fa724cd8a51975a6"
+          },
+          "cohort_v2": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+          "context_v2": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "organization_id": "qa-org",
+            "program_id": "qa-dynamic-program",
+            "cohort_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+            "membership_id": "8bfaeaac-5c9f-59db-8c74-ffc4c1f5faf9",
+            "role": "student",
+            "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+            "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "permissions": [
+              "content.read",
+              "progress.read",
+              "activity.record"
+            ]
+          },
+          "before_offline_events": [
+            {
+              "event_id": "1790203889828914-Y_SQe23vfRoo9fV_:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203889828914-Y_SQe23vfRoo9fV_",
+              "occurred_at": "2026-09-23T22:51:29.829374Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+                "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:15",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.611756Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:14",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.594053Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203855546477-LsqM2AJ3BbF0gzb1:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203855546477-LsqM2AJ3BbF0gzb1",
+              "occurred_at": "2026-09-23T22:50:55.55059Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.261538Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.228725Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ],
+          "offline_events": [
+            {
+              "event_id": "1790203927404443-NkAxSnPAyJ3jDHCa:page_viewed:3",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203927404443-NkAxSnPAyJ3jDHCa",
+              "occurred_at": "2026-09-23T22:52:12.117808Z",
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            },
+            {
+              "event_id": "1790203927404443-NkAxSnPAyJ3jDHCa:feature_used:4",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203927404443-NkAxSnPAyJ3jDHCa",
+              "occurred_at": "2026-09-23T22:52:12.141636Z",
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            },
+            {
+              "event_id": "1790203932375692-z3dftpOkast7W_Rp:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203932375692-z3dftpOkast7W_Rp",
+              "occurred_at": "2026-09-23T22:52:12.380957Z",
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            },
+            {
+              "event_id": "1790203932375692-z3dftpOkast7W_Rp:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203932375692-z3dftpOkast7W_Rp",
+              "occurred_at": "2026-09-23T22:52:17.143965Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "local_owner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "local_api_url": "https://tutor-tds-staging.fastapicloud.dev"
+            }
+          ],
+          "offline_position": {
+            "courseId": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "sectionIndex": 0,
+            "messageIndex": 4,
+            "questionsAnswered": 0,
+            "showOptions": false,
+            "isCompleted": false,
+            "updatedAt": "2026-09-23T22:52:17.296926Z",
+            "courseVersionId": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "ownerId": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "contextKey": "[\"https://tutor-tds-staging.fastapicloud.dev\",\"ed42703a-491c-406e-aa0c-50ad195394af\",\"2954e406-e77c-4091-b16e-9efc58d76b7f\",\"8c15b777-7d31-5e27-86b7-b9d77ce09603\",\"5b54f453-7bdd-4826-bf38-7273a922ff60\",\"342b2aee-ef99-436d-8313-a48a83187eb5\"]"
+          },
+          "final_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0017,
+            "progress_percent": 5.0,
+            "last_activity_at": "2026-09-23T22:52:17.143965Z",
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "final_v2_progress": {
+            "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+            "name": "Aluno QA Dynamic Learning",
+            "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+            "context_enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+            "status": "active",
+            "planned_hours": 0.0333,
+            "validated_hours": 0.0,
+            "progress_percent": 0.0,
+            "last_activity_at": null,
+            "inactive_days": 0,
+            "alerts": [
+              {
+                "code": "required_activity_pending"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "open_mentorship_cases": 0
+          },
+          "final_events": [
+            {
+              "event_id": "1790203989877532-V6RqXMh28wsKmBRi:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203989877532-V6RqXMh28wsKmBRi",
+              "occurred_at": "2026-09-23T22:53:09.883411Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203949854555-kIleJ_qTdWuFSx5D:feature_used:4",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203949854555-kIleJ_qTdWuFSx5D",
+              "occurred_at": "2026-09-23T22:53:09.82178Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203949854555-kIleJ_qTdWuFSx5D:page_viewed:3",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203949854555-kIleJ_qTdWuFSx5D",
+              "occurred_at": "2026-09-23T22:53:09.800952Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203932375692-z3dftpOkast7W_Rp:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203932375692-z3dftpOkast7W_Rp",
+              "occurred_at": "2026-09-23T22:52:17.143965Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203932375692-z3dftpOkast7W_Rp:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203932375692-z3dftpOkast7W_Rp",
+              "occurred_at": "2026-09-23T22:52:12.380957Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203927404443-NkAxSnPAyJ3jDHCa:feature_used:4",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203927404443-NkAxSnPAyJ3jDHCa",
+              "occurred_at": "2026-09-23T22:52:12.141636Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203927404443-NkAxSnPAyJ3jDHCa:page_viewed:3",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203927404443-NkAxSnPAyJ3jDHCa",
+              "occurred_at": "2026-09-23T22:52:12.117808Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203889828914-Y_SQe23vfRoo9fV_:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203889828914-Y_SQe23vfRoo9fV_",
+              "occurred_at": "2026-09-23T22:51:29.829374Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+                "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:15",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.611756Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:14",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:51:29.594053Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203855546477-LsqM2AJ3BbF0gzb1:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203855546477-LsqM2AJ3BbF0gzb1",
+              "occurred_at": "2026-09-23T22:50:55.55059Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.261538Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203809799062-mrBdhmcTkdPTaVFj:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203809799062-mrBdhmcTkdPTaVFj",
+              "occurred_at": "2026-09-23T22:50:55.228725Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:study_activity:1",
+              "event_type": "study_activity",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:20.966729Z",
+              "active_seconds": 3,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 3
+            },
+            {
+              "event_id": "1790203576362952-CXUdHhyzNpb7W6OL:lesson_started",
+              "event_type": "lesson_started",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203576362952-CXUdHhyzNpb7W6OL",
+              "occurred_at": "2026-09-23T22:46:16.369043Z",
+              "active_seconds": null,
+              "payload": {
+                "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+                "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:feature_used:12",
+              "event_type": "feature_used",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.32356Z",
+              "active_seconds": null,
+              "payload": {
+                "feature_id": "contextual_home_continue"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            },
+            {
+              "event_id": "1790203543534831-XG7G2TDhwdRp5SH-:page_viewed:11",
+              "event_type": "page_viewed",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "session_id": "1790203543534831-XG7G2TDhwdRp5SH-",
+              "occurred_at": "2026-09-23T22:46:16.289473Z",
+              "active_seconds": null,
+              "payload": {
+                "page_id": "classroom_course"
+              },
+              "sync_status": "pending",
+              "validated_seconds": 0
+            }
+          ]
+        },
+        "authenticated_assertions_share_app_repository": true,
+        "pending_survived_process_restart": true,
+        "identical_replay_status": 200,
+        "duplicate_evidence": false,
+        "second_enrollment_progress": 0,
+        "v1_progress": {
+          "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+          "name": "Aluno QA Dynamic Learning",
+          "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+          "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+          "status": "active",
+          "planned_hours": 0.0333,
+          "validated_hours": 0.0017,
+          "progress_percent": 5.0,
+          "last_activity_at": "2026-09-23T22:52:17.143965Z",
+          "inactive_days": 0,
+          "alerts": [
+            {
+              "code": "required_activity_pending"
+            }
+          ],
+          "baseline_linked": false,
+          "confirmed_sessions": 0,
+          "open_mentorship_cases": 0
+        },
+        "v2_progress": {
+          "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+          "name": "Aluno QA Dynamic Learning",
+          "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+          "context_enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+          "status": "active",
+          "planned_hours": 0.0333,
+          "validated_hours": 0.0,
+          "progress_percent": 0.0,
+          "last_activity_at": null,
+          "inactive_days": 0,
+          "alerts": [
+            {
+              "code": "required_activity_pending"
+            }
+          ],
+          "baseline_linked": false,
+          "confirmed_sessions": 0,
+          "open_mentorship_cases": 0
+        },
+        "limits": [
+          "Eight phases; no separate offline_restart phase.",
+          "Seven bot blocks; contextual quiz attempts remain Wave 2B.",
+          "Transition audit rows are verified by the host; the app API exposes editorial snapshots only.",
+          "No release or production acceptance."
+        ]
+      },
+      "duration_seconds": 51.023,
+      "installed": {
+        "sha256": "670e3aea05116608421d68edd38eaaec7cda4566a82a2997c3beb7f2482c64fa",
+        "first_install_time": "2026-09-23 19:51:43",
+        "last_update_time": "2026-09-23 22:42:40"
+      },
+      "network_settings": {
+        "wifi": "1",
+        "mobile": "1"
+      },
+      "driver_report_sha256": "bfbf69310d861e8823a1fa7f7df2cea1ab958cdc7c1dcd1c9103ff8a3066ab47",
+      "driver_log_sha256": "fb50bab05f84c68ed37e9b277931dbdce5a13f79b90d79036fad541d0003d459"
+    }
+  ],
+  "host_hooks": [
+    {
+      "phase": "before_android",
+      "duration_seconds": 18.934,
+      "evidence_path": "docs/production/evidence/dynamic-learning-b65cb8de005444fb9ac707e1d9c6f5f8-before-android.json",
+      "sha256": "bab2ce7f9cc44d96bdb11b897dbf6c281ff1dbc0a8170c55e05d88bc8f29ff38",
+      "report": {
+        "status": "baseline_captured",
+        "phase": "before_android",
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+        "course_absent_in_database_and_catalog": true,
+        "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364",
+        "baseline_event_count": 101,
+        "initial_core_record_count": 33,
+        "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+        "original_progress_percent": 10.0,
+        "requests": [
+          {
+            "method": "GET",
+            "path": "/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "status": 404
+          }
+        ],
+        "verified_at": "2026-09-23T19:40:52.843669-03:00"
+      }
+    },
+    {
+      "phase": "after_v1",
+      "duration_seconds": 47.281,
+      "evidence_path": "docs/production/evidence/dynamic-learning-b65cb8de005444fb9ac707e1d9c6f5f8-after-v1.json",
+      "sha256": "2e0a82a1898696c10bd513c64613cf7a755bff79351884c54bace6d344ab644e",
+      "report": {
+        "status": "bootstrap_passed",
+        "phase": "after_v1",
+        "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "planned_seconds": 120,
+        "synthetic_workload": "120 seconds for QA only; set before enrollment and preserved after study",
+        "before": {
+          "all_events_count": 136,
+          "all_events_sha256": "9017116ff5f6eac32998b8baf99b157f554ece0ef6fab336ada4ae6f7f85722e",
+          "protected_sha256": "50097f7ad1b19eafa74ceef8772f1ac282dc6dd126fc3d6666aa14ffcee31c2f"
+        },
+        "after": {
+          "all_events_count": 136,
+          "all_events_sha256": "9017116ff5f6eac32998b8baf99b157f554ece0ef6fab336ada4ae6f7f85722e",
+          "protected_sha256": "50097f7ad1b19eafa74ceef8772f1ac282dc6dd126fc3d6666aa14ffcee31c2f"
+        },
+        "state": {
+          "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "learner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+          "planned_seconds": 120,
+          "v1": {
+            "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "content": {
+              "sections": [
+                {
+                  "id": "module_3deb55ad079384246eba08d24b856621",
+                  "title": "Aprendizagem dinâmica QA",
+                  "messages": [
+                    {
+                      "id": "content_1c38ce6c532e90931444555c22003703",
+                      "type": "bot",
+                      "content": "Publicação remota QA: edição 1 preservada.",
+                      "version_id": "44a66812-07a3-5db2-9d13-a90c80b145b5"
+                    },
+                    {
+                      "id": "content_ab2e8dd9a2196d3a319452f5aa475b16",
+                      "type": "bot",
+                      "content": "Etapa QA 2: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "75b93e4b-76dc-5e29-824b-0b7ffbb60706"
+                    },
+                    {
+                      "id": "content_81a6b01e25fe34770ed68961328f9976",
+                      "type": "bot",
+                      "content": "Etapa QA 3: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "10583e19-b63a-503c-bed8-b29ae8090ca8"
+                    },
+                    {
+                      "id": "content_492dc0469513988674462b5bad750acd",
+                      "type": "bot",
+                      "content": "Etapa QA 4: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "81da58bf-1cb7-5652-bbec-9f324c54be54"
+                    },
+                    {
+                      "id": "content_d3a557ccda3a3eec08b2235ffccec7e0",
+                      "type": "bot",
+                      "content": "Etapa QA 5: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "0294d1d5-f4e6-579c-9ea0-1197cdc5316a"
+                    },
+                    {
+                      "id": "content_c4279a866e7b4887a22c2c4c4ad011ef",
+                      "type": "bot",
+                      "content": "Etapa QA 6: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "93f143a7-ecd6-5457-b032-34af22ef9aaa"
+                    },
+                    {
+                      "id": "content_63d023a40f41488a5aacae329592d3e0",
+                      "type": "bot",
+                      "content": "Etapa QA 7: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "33b4dabb-efe0-5cb2-8f62-cad4c2d3358a"
+                    }
+                  ],
+                  "version_id": "c4b36d44-58f8-5e83-91b2-855a8d22b880"
+                }
+              ],
+              "id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "title": "Curso QA Dynamic b65cb8de edição 1",
+              "author": "Equipe QA Dynamic"
+            },
+            "context": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "organization_id": "qa-org",
+              "program_id": "qa-dynamic-program",
+              "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+              "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+              "role": "student",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+              "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+              "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "permissions": [
+                "content.read",
+                "progress.read",
+                "activity.record"
+              ]
+            },
+            "progress": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "name": "Aluno QA Dynamic Learning",
+              "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+              "status": "active",
+              "planned_hours": 0.0333,
+              "validated_hours": 0.0,
+              "progress_percent": 0.0,
+              "last_activity_at": null,
+              "inactive_days": 0,
+              "alerts": [
+                {
+                  "code": "required_activity_pending"
+                }
+              ],
+              "baseline_linked": false,
+              "confirmed_sessions": 0,
+              "open_mentorship_cases": 0
+            }
+          },
+          "last_completed_phase": "after_v1",
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364",
+          "baseline_event_count": 101
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/editor/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8?version_id=342b2aee-ef99-436d-8313-a48a83187eb5",
+            "status": 200
+          },
+          {
+            "method": "PUT",
+            "path": "/admin/programs/qa-dynamic-program/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8/workload",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/admin/enrollments",
+            "status": 201
+          },
+          {
+            "method": "POST",
+            "path": "/admin/classes",
+            "status": 201
+          },
+          {
+            "method": "POST",
+            "path": "/admin/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/students/ed42703a-491c-406e-aa0c-50ad195394af",
+            "status": 201
+          },
+          {
+            "method": "GET",
+            "path": "/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/editor/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8?version_id=342b2aee-ef99-436d-8313-a48a83187eb5",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/course",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+            "status": 200
+          }
+        ],
+        "verified_at": "2026-09-23T19:45:31.782667-03:00",
+        "limitations": [
+          "Synthetic staging bootstrap only; course publication remains in coordinator UI",
+          "No direct database writes; partial HTTP success is preserved and rechecked on the next run"
+        ],
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364"
+      }
+    },
+    {
+      "phase": "after_v2",
+      "duration_seconds": 59.599,
+      "evidence_path": "docs/production/evidence/dynamic-learning-b65cb8de005444fb9ac707e1d9c6f5f8-after-v2.json",
+      "sha256": "5eefce271b2a44b4e6bab1f1af986577a0b81b45aa9192758701f39596bc6794",
+      "report": {
+        "status": "bootstrap_passed",
+        "phase": "after_v2",
+        "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "program_id": "qa-dynamic-program",
+        "planned_seconds": 120,
+        "synthetic_workload": "120 seconds for QA only; set before enrollment and preserved after study",
+        "before": {
+          "all_events_count": 180,
+          "all_events_sha256": "7c24b913d7e4f6c9f888a897d8f165caff67bf8f60030ef5d515f21be0380ba3",
+          "protected_sha256": "705715bc15c8a34e634662da925b92b8cefa95d2a5e5cd15256b3761110b57f5"
+        },
+        "after": {
+          "all_events_count": 180,
+          "all_events_sha256": "7c24b913d7e4f6c9f888a897d8f165caff67bf8f60030ef5d515f21be0380ba3",
+          "protected_sha256": "705715bc15c8a34e634662da925b92b8cefa95d2a5e5cd15256b3761110b57f5"
+        },
+        "state": {
+          "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "learner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+          "planned_seconds": 120,
+          "v2": {
+            "class_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+            "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "version_number": 2,
+            "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+            "content": {
+              "sections": [
+                {
+                  "id": "module_3deb55ad079384246eba08d24b856621",
+                  "title": "Aprendizagem dinâmica QA",
+                  "messages": [
+                    {
+                      "id": "content_1c38ce6c532e90931444555c22003703",
+                      "type": "bot",
+                      "content": "Publicação remota QA: edição 2 preservada.",
+                      "version_id": "e0a9a4b4-c1d1-5164-8626-4e780405d389"
+                    },
+                    {
+                      "id": "content_ab2e8dd9a2196d3a319452f5aa475b16",
+                      "type": "bot",
+                      "content": "Etapa QA 2: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "75b93e4b-76dc-5e29-824b-0b7ffbb60706"
+                    },
+                    {
+                      "id": "content_81a6b01e25fe34770ed68961328f9976",
+                      "type": "bot",
+                      "content": "Etapa QA 3: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "10583e19-b63a-503c-bed8-b29ae8090ca8"
+                    },
+                    {
+                      "id": "content_492dc0469513988674462b5bad750acd",
+                      "type": "bot",
+                      "content": "Etapa QA 4: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "81da58bf-1cb7-5652-bbec-9f324c54be54"
+                    },
+                    {
+                      "id": "content_d3a557ccda3a3eec08b2235ffccec7e0",
+                      "type": "bot",
+                      "content": "Etapa QA 5: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "0294d1d5-f4e6-579c-9ea0-1197cdc5316a"
+                    },
+                    {
+                      "id": "content_c4279a866e7b4887a22c2c4c4ad011ef",
+                      "type": "bot",
+                      "content": "Etapa QA 6: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "93f143a7-ecd6-5457-b032-34af22ef9aaa"
+                    },
+                    {
+                      "id": "content_63d023a40f41488a5aacae329592d3e0",
+                      "type": "bot",
+                      "content": "Etapa QA 7: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "33b4dabb-efe0-5cb2-8f62-cad4c2d3358a"
+                    }
+                  ],
+                  "version_id": "6ba39889-51bb-53e6-8dc0-6c2c4fbbf217"
+                }
+              ],
+              "id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "title": "Curso QA Dynamic b65cb8de edição 2",
+              "author": "Equipe QA Dynamic"
+            },
+            "context": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "organization_id": "qa-org",
+              "program_id": "qa-dynamic-program",
+              "cohort_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+              "membership_id": "8bfaeaac-5c9f-59db-8c74-ffc4c1f5faf9",
+              "role": "student",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+              "enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+              "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "permissions": [
+                "content.read",
+                "progress.read",
+                "activity.record"
+              ]
+            },
+            "progress": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "name": "Aluno QA Dynamic Learning",
+              "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "context_enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+              "status": "active",
+              "planned_hours": 0.0333,
+              "validated_hours": 0.0,
+              "progress_percent": 0.0,
+              "last_activity_at": null,
+              "inactive_days": 0,
+              "alerts": [
+                {
+                  "code": "required_activity_pending"
+                }
+              ],
+              "baseline_linked": false,
+              "confirmed_sessions": 0,
+              "open_mentorship_cases": 0
+            }
+          },
+          "v1": {
+            "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "content": {
+              "sections": [
+                {
+                  "id": "module_3deb55ad079384246eba08d24b856621",
+                  "title": "Aprendizagem dinâmica QA",
+                  "messages": [
+                    {
+                      "id": "content_1c38ce6c532e90931444555c22003703",
+                      "type": "bot",
+                      "content": "Publicação remota QA: edição 1 preservada.",
+                      "version_id": "44a66812-07a3-5db2-9d13-a90c80b145b5"
+                    },
+                    {
+                      "id": "content_ab2e8dd9a2196d3a319452f5aa475b16",
+                      "type": "bot",
+                      "content": "Etapa QA 2: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "75b93e4b-76dc-5e29-824b-0b7ffbb60706"
+                    },
+                    {
+                      "id": "content_81a6b01e25fe34770ed68961328f9976",
+                      "type": "bot",
+                      "content": "Etapa QA 3: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "10583e19-b63a-503c-bed8-b29ae8090ca8"
+                    },
+                    {
+                      "id": "content_492dc0469513988674462b5bad750acd",
+                      "type": "bot",
+                      "content": "Etapa QA 4: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "81da58bf-1cb7-5652-bbec-9f324c54be54"
+                    },
+                    {
+                      "id": "content_d3a557ccda3a3eec08b2235ffccec7e0",
+                      "type": "bot",
+                      "content": "Etapa QA 5: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "0294d1d5-f4e6-579c-9ea0-1197cdc5316a"
+                    },
+                    {
+                      "id": "content_c4279a866e7b4887a22c2c4c4ad011ef",
+                      "type": "bot",
+                      "content": "Etapa QA 6: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "93f143a7-ecd6-5457-b032-34af22ef9aaa"
+                    },
+                    {
+                      "id": "content_63d023a40f41488a5aacae329592d3e0",
+                      "type": "bot",
+                      "content": "Etapa QA 7: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "33b4dabb-efe0-5cb2-8f62-cad4c2d3358a"
+                    }
+                  ],
+                  "version_id": "c4b36d44-58f8-5e83-91b2-855a8d22b880"
+                }
+              ],
+              "id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "title": "Curso QA Dynamic b65cb8de edição 1",
+              "author": "Equipe QA Dynamic"
+            },
+            "context": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "organization_id": "qa-org",
+              "program_id": "qa-dynamic-program",
+              "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+              "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+              "role": "student",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+              "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+              "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "permissions": [
+                "content.read",
+                "progress.read",
+                "activity.record"
+              ]
+            },
+            "progress": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "name": "Aluno QA Dynamic Learning",
+              "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+              "status": "active",
+              "planned_hours": 0.0333,
+              "validated_hours": 0.0008,
+              "progress_percent": 2.5,
+              "last_activity_at": "2026-09-23T22:46:20.966729Z",
+              "inactive_days": 0,
+              "alerts": [
+                {
+                  "code": "required_activity_pending"
+                }
+              ],
+              "baseline_linked": false,
+              "confirmed_sessions": 0,
+              "open_mentorship_cases": 0
+            }
+          },
+          "last_completed_phase": "after_v2",
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364",
+          "baseline_event_count": 101
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/editor/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8?version_id=6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/course",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/admin/classes",
+            "status": 201
+          },
+          {
+            "method": "POST",
+            "path": "/admin/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/students/ed42703a-491c-406e-aa0c-50ad195394af",
+            "status": 201
+          },
+          {
+            "method": "GET",
+            "path": "/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/editor/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8?version_id=6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/course",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/course",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+            "status": 200
+          }
+        ],
+        "verified_at": "2026-09-23T19:49:57.374211-03:00",
+        "limitations": [
+          "Synthetic staging bootstrap only; course publication remains in coordinator UI",
+          "No direct database writes; partial HTTP success is preserved and rechecked on the next run"
+        ],
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364"
+      }
+    },
+    {
+      "phase": "after_android",
+      "duration_seconds": 49.114,
+      "evidence_path": "docs/production/evidence/dynamic-learning-b65cb8de005444fb9ac707e1d9c6f5f8-after-android.json",
+      "sha256": "6733e095117186b03ca0d4d6e72dc8f9468654b4fb1db48833b15fc70d33dde7",
+      "report": {
+        "status": "history_preservation_passed",
+        "phase": "after_android",
+        "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+        "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+        "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364",
+        "initial_events_preserved": 101,
+        "current_event_count": 209,
+        "initial_core_records_preserved": 33,
+        "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+        "original_progress_percent": 10.0,
+        "editorial_ledger": {
+          "transition_count": 7,
+          "sha256": "88307473de0257e5cb72859ddfd6039bed2d72d4258865b65bb68605ec14b407"
+        },
+        "state": {
+          "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+          "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+          "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+          "program_id": "qa-dynamic-program",
+          "learner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+          "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364",
+          "baseline_event_count": 101,
+          "v1": {
+            "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+            "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+            "version_number": 1,
+            "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+            "content": {
+              "sections": [
+                {
+                  "id": "module_3deb55ad079384246eba08d24b856621",
+                  "title": "Aprendizagem dinâmica QA",
+                  "messages": [
+                    {
+                      "id": "content_1c38ce6c532e90931444555c22003703",
+                      "type": "bot",
+                      "content": "Publicação remota QA: edição 1 preservada.",
+                      "version_id": "44a66812-07a3-5db2-9d13-a90c80b145b5"
+                    },
+                    {
+                      "id": "content_ab2e8dd9a2196d3a319452f5aa475b16",
+                      "type": "bot",
+                      "content": "Etapa QA 2: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "75b93e4b-76dc-5e29-824b-0b7ffbb60706"
+                    },
+                    {
+                      "id": "content_81a6b01e25fe34770ed68961328f9976",
+                      "type": "bot",
+                      "content": "Etapa QA 3: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "10583e19-b63a-503c-bed8-b29ae8090ca8"
+                    },
+                    {
+                      "id": "content_492dc0469513988674462b5bad750acd",
+                      "type": "bot",
+                      "content": "Etapa QA 4: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "81da58bf-1cb7-5652-bbec-9f324c54be54"
+                    },
+                    {
+                      "id": "content_d3a557ccda3a3eec08b2235ffccec7e0",
+                      "type": "bot",
+                      "content": "Etapa QA 5: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "0294d1d5-f4e6-579c-9ea0-1197cdc5316a"
+                    },
+                    {
+                      "id": "content_c4279a866e7b4887a22c2c4c4ad011ef",
+                      "type": "bot",
+                      "content": "Etapa QA 6: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "93f143a7-ecd6-5457-b032-34af22ef9aaa"
+                    },
+                    {
+                      "id": "content_63d023a40f41488a5aacae329592d3e0",
+                      "type": "bot",
+                      "content": "Etapa QA 7: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "33b4dabb-efe0-5cb2-8f62-cad4c2d3358a"
+                    }
+                  ],
+                  "version_id": "c4b36d44-58f8-5e83-91b2-855a8d22b880"
+                }
+              ],
+              "id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "title": "Curso QA Dynamic b65cb8de edição 1",
+              "author": "Equipe QA Dynamic"
+            },
+            "context": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "organization_id": "qa-org",
+              "program_id": "qa-dynamic-program",
+              "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+              "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+              "role": "student",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+              "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+              "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "permissions": [
+                "content.read",
+                "progress.read",
+                "activity.record"
+              ]
+            },
+            "progress": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "name": "Aluno QA Dynamic Learning",
+              "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+              "status": "active",
+              "planned_hours": 0.0333,
+              "validated_hours": 0.0017,
+              "progress_percent": 5.0,
+              "last_activity_at": "2026-09-23T22:52:17.143965Z",
+              "inactive_days": 0,
+              "alerts": [
+                {
+                  "code": "required_activity_pending"
+                }
+              ],
+              "baseline_linked": false,
+              "confirmed_sessions": 0,
+              "open_mentorship_cases": 0
+            }
+          },
+          "v2": {
+            "class_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+            "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "version_number": 2,
+            "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+            "content": {
+              "sections": [
+                {
+                  "id": "module_3deb55ad079384246eba08d24b856621",
+                  "title": "Aprendizagem dinâmica QA",
+                  "messages": [
+                    {
+                      "id": "content_1c38ce6c532e90931444555c22003703",
+                      "type": "bot",
+                      "content": "Publicação remota QA: edição 2 preservada.",
+                      "version_id": "e0a9a4b4-c1d1-5164-8626-4e780405d389"
+                    },
+                    {
+                      "id": "content_ab2e8dd9a2196d3a319452f5aa475b16",
+                      "type": "bot",
+                      "content": "Etapa QA 2: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "75b93e4b-76dc-5e29-824b-0b7ffbb60706"
+                    },
+                    {
+                      "id": "content_81a6b01e25fe34770ed68961328f9976",
+                      "type": "bot",
+                      "content": "Etapa QA 3: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "10583e19-b63a-503c-bed8-b29ae8090ca8"
+                    },
+                    {
+                      "id": "content_492dc0469513988674462b5bad750acd",
+                      "type": "bot",
+                      "content": "Etapa QA 4: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "81da58bf-1cb7-5652-bbec-9f324c54be54"
+                    },
+                    {
+                      "id": "content_d3a557ccda3a3eec08b2235ffccec7e0",
+                      "type": "bot",
+                      "content": "Etapa QA 5: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "0294d1d5-f4e6-579c-9ea0-1197cdc5316a"
+                    },
+                    {
+                      "id": "content_c4279a866e7b4887a22c2c4c4ad011ef",
+                      "type": "bot",
+                      "content": "Etapa QA 6: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "93f143a7-ecd6-5457-b032-34af22ef9aaa"
+                    },
+                    {
+                      "id": "content_63d023a40f41488a5aacae329592d3e0",
+                      "type": "bot",
+                      "content": "Etapa QA 7: cuidar do solo ajuda a conservar a água.",
+                      "version_id": "33b4dabb-efe0-5cb2-8f62-cad4c2d3358a"
+                    }
+                  ],
+                  "version_id": "6ba39889-51bb-53e6-8dc0-6c2c4fbbf217"
+                }
+              ],
+              "id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "title": "Curso QA Dynamic b65cb8de edição 2",
+              "author": "Equipe QA Dynamic"
+            },
+            "context": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "organization_id": "qa-org",
+              "program_id": "qa-dynamic-program",
+              "cohort_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+              "membership_id": "8bfaeaac-5c9f-59db-8c74-ffc4c1f5faf9",
+              "role": "student",
+              "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+              "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+              "enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+              "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "permissions": [
+                "content.read",
+                "progress.read",
+                "activity.record"
+              ]
+            },
+            "progress": {
+              "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+              "name": "Aluno QA Dynamic Learning",
+              "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+              "context_enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+              "status": "active",
+              "planned_hours": 0.0333,
+              "validated_hours": 0.0,
+              "progress_percent": 0.0,
+              "last_activity_at": null,
+              "inactive_days": 0,
+              "alerts": [
+                {
+                  "code": "required_activity_pending"
+                }
+              ],
+              "baseline_linked": false,
+              "confirmed_sessions": 0,
+              "open_mentorship_cases": 0
+            }
+          },
+          "last_completed_phase": "after_android",
+          "planned_seconds": 120
+        },
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "POST",
+            "path": "/auth/login",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/auth/me",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/editor/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8?version_id=6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/course",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/course",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/learning-context",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+            "status": 200
+          }
+        ],
+        "verified_at": "2026-09-23T19:54:09.806239-03:00",
+        "limitations": [
+          "Allows new records while requiring every initial event body and core row hash to remain identical",
+          "Does not replace the eight Android phase assertions or approve production"
+        ]
+      }
+    }
+  ],
+  "exact_final_android_host_progress": true,
+  "exact_final_android_host_contexts": true,
+  "exact_final_android_host_editions": true,
+  "limits": [
+    "Synthetic staging emulator and instrumented debug APK only; no release claim.",
+    "Wave 2A publication/read/cache flow; contextual ActivityAttempt belongs to the subsequent slice.",
+    "Existing app/user/outbox data and failed-run artifacts are preserved; no automatic resume."
+  ],
+  "cleanup": {
+    "verified": true,
+    "qa_process_stopped": true,
+    "owned_forwards_removed": true,
+    "network_restored_to": {
+      "wifi": "1",
+      "mobile": "1"
+    }
+  },
+  "duration_seconds": 817.381,
+  "diagnostics": {
+    "used_for_phase_approval": false,
+    "files": {
+      "author_v1": {
+        "file": "author_v1.markers.json",
+        "sha256": "70939dd9fcefe36f99b69954887dc2421d162a9175118d5081ef7b98a73fe85b",
+        "marker_count": 9,
+        "last_marker": {
+          "epoch": "1790203439.962",
+          "pid": 19066,
+          "phase": "author_v1",
+          "action": "phase_passed"
+        }
+      },
+      "publisher_v1": {
+        "file": "publisher_v1.markers.json",
+        "sha256": "66d3b22b088b5660669fe23cd7a94b9ba27cf527c60902038289a482ebd7ee4a",
+        "marker_count": 5,
+        "last_marker": {
+          "epoch": "1790203487.254",
+          "pid": 19310,
+          "phase": "publisher_v1",
+          "action": "phase_passed"
+        }
+      },
+      "learner_v1": {
+        "file": "learner_v1.markers.json",
+        "sha256": "0476d9911c420ca3a5ad016ab8286b91d0ce96f249353c5df621ce169e333cb6",
+        "marker_count": 5,
+        "last_marker": {
+          "epoch": "1790203629.961",
+          "pid": 19546,
+          "phase": "learner_v1",
+          "action": "phase_passed"
+        }
+      },
+      "author_v2": {
+        "file": "author_v2.markers.json",
+        "sha256": "0e640156510d71910557703ddb049fef62bcab473061e95f76c1fbbfb0935119",
+        "marker_count": 9,
+        "last_marker": {
+          "epoch": "1790203696.837",
+          "pid": 19821,
+          "phase": "author_v2",
+          "action": "phase_passed"
+        }
+      },
+      "publisher_v2": {
+        "file": "publisher_v2.markers.json",
+        "sha256": "7512238fc4482143283d5b6865d625565bd43ad62565a76c3e01d1b188375343",
+        "marker_count": 5,
+        "last_marker": {
+          "epoch": "1790203739.820",
+          "pid": 20060,
+          "phase": "publisher_v2",
+          "action": "phase_passed"
+        }
+      },
+      "learner_after_v2": {
+        "file": "learner_after_v2.markers.json",
+        "sha256": "f2932021b3e5f44790274e5e0daf740854c6c9650f394870a8eb14c05b993d2d",
+        "marker_count": 6,
+        "last_marker": {
+          "epoch": "1790203915.560",
+          "pid": 20300,
+          "phase": "learner_after_v2",
+          "action": "phase_passed"
+        }
+      },
+      "learner_offline": {
+        "file": "learner_offline.markers.json",
+        "sha256": "46c0ea601f8b125474dbf4c666dc04a7cc317e3e63b5ae603737dac8c333fef7",
+        "marker_count": 4,
+        "last_marker": {
+          "epoch": "1790203937.778",
+          "pid": 20605,
+          "phase": "learner_offline",
+          "action": "phase_passed"
+        }
+      },
+      "learner_reconnect": {
+        "file": "learner_reconnect.markers.json",
+        "sha256": "aa1f7bd8f61fd085c96a2ac1165a0776655cb8903b6473cfcac300194de0459f",
+        "marker_count": 4,
+        "last_marker": {
+          "epoch": "1790204003.625",
+          "pid": 20935,
+          "phase": "learner_reconnect",
+          "action": "phase_passed"
+        }
+      }
+    },
+    "capture_errors": [],
+    "limitation": "Only observed PID markers since launch; missing or rotated buffer entries are not inferred."
+  }
+}

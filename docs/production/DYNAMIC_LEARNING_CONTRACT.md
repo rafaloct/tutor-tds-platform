@@ -1,6 +1,7 @@
 # Wave 2 — Dynamic Learning
 
-Status: PARTIAL. Base: Wave 1 aprovada em `0081ab0`; preservar LearningContext v2,
+Status: fatia 2A STAGING, aceite em `WAVE2A_ACCEPTANCE.md`; Wave 2 ainda PARTIAL.
+Base: Wave 1 aprovada em `0081ab0`; preservar LearningContext v2,
 matrícula contextual, fila e os três golden paths. Auditoria de código identifica
 editor/publicação reais; não criar outro Studio ou outra representação de curso.
 
@@ -33,6 +34,18 @@ Não há necessidade demonstrada de nova migration/tabela/endpoint.
 | Permissions | programa ativo e ownership do rascunho; publicação só coordenador/admin permitido; aluno não edita; seleção/cache não concede acesso |
 | Acceptance Criteria | gate abaixo, negativas e regressões de cache/Home; mesma assinatura/hash do APK entre publicação e consumo |
 | Must Not | rebuild para incluir conteúdo; trocar edição de turma pelo catálogo; misturar caches de APIs; resetar histórico; simular publicação/progresso |
+
+Recorte isolado de catálogo público (02/10/2026): `REMOTE_CATALOG_ENABLED=false`
+por padrão usa somente os nove assets locais, independentemente de
+`TUTOR_API_URL`. Com flag true e URL de staging, o fluxo é GET /courses sem
+login → cache por URL → assets. Sem rede, os nove assets complementam o cache
+remoto por ID para que continuem disponíveis; um catálogo remoto vazio com a
+flag ligada também recorre aos assets. Essa exceção opt-in **difere** do Empty
+State de 2A, que preserva retirada editorial como lista vazia. Não promover
+esta política de fallback para produção sem decidir explicitamente como
+conciliar retirada editorial e garantia offline dos nove cursos. O QA separado
+em `evidence/remote-catalog-qa-2026-10-02.json` não ativa LearningContext,
+outbox, telemetria de jornada, certificados ou matrícula.
 
 ## Menores correções identificadas
 
@@ -95,6 +108,29 @@ integração real de publicação com PostgreSQL/HTTPS/Android. Suíte completa 
 no gate ou se a extensão afetar o núcleo. Defaults de produção permanecem seguros.
 
 ## Limites e sequência da Wave 2
+
+### Extensão física do gate 2A — 01/10/2026
+
+Reutilizar as oito fases no POCO autorizado `ZT6HPRHQHATSEQPR`, modelo
+`2311DRK48G`. `DYNAMIC_QA_ISOLATED_PACKAGE=true` cria somente em debug o
+pacote `com.tutortds_cartilhas.dev.dynamicqa.r<run_id>`, rótulo Tutor TDS QA. Exige o
+staging Cloud aprovado e run ID; defines sintéticos são proibidos no gate de
+release. O runner exige pacote QA ausente e compara todos os APKs e metadados
+de instalação dos aplicativos Play/DEV antes/depois, sem abrir suas sessões.
+Cada execução nova tem sandbox própria; o primeiro ensaio físico usou o sufixo
+fixo `.dev.dynamicqa`, preservado após falha. Não desinstalar, limpar dados ou
+retomar automaticamente uma fase falha. Preservar evidências
+e restaurar a rede inicial, inclusive em falha. Offline usa o mesmo teste
+existente e não altera autorização. Aprovação deste recorte pode fechar apenas
+`course_versioning_xiaomi`; revogação de cache, Evidence e emissão de certificados
+continuam exigindo suas evidências próprias. Nenhuma promoção automática.
+
+Recuperação excepcional registrada no run 3c2d38851f024a1eb50667aa86dc7ce0:
+falha de leitura ADB ocorreu após instalar e antes de lançar qualquer fase.
+Hash instalado/local e notLaunched=true foram conferidos antes de iniciar;
+execução em subdiretório próprio, baseline novo somente leitura, sem recompilar,
+reinstalar ou repetir fase Android. Original preservado. Esse procedimento
+delimitado não autoriza retomar uma fase com mutações ou limpar checkpoints.
 
 O gate 2A não encerra sozinho a Wave 2. Atividades `quiz/question` embutidas ainda
 não persistem resposta por bloco como ActivityAttempt contextual; o leitor perde

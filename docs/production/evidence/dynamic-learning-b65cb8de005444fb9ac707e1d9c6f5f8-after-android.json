@@ -1,0 +1,302 @@
+{
+  "status": "history_preservation_passed",
+  "phase": "after_android",
+  "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+  "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+  "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364",
+  "initial_events_preserved": 101,
+  "current_event_count": 209,
+  "initial_core_records_preserved": 33,
+  "original_context_sha256": "f0bb10f49856defc00b592ff8b00ac985b49d0d7d543eba5caa8d3aa820951f4",
+  "original_progress_percent": 10.0,
+  "editorial_ledger": {
+    "transition_count": 7,
+    "sha256": "88307473de0257e5cb72859ddfd6039bed2d72d4258865b65bb68605ec14b407"
+  },
+  "state": {
+    "run_id": "b65cb8de005444fb9ac707e1d9c6f5f8",
+    "api_base": "https://tutor-tds-staging.fastapicloud.dev",
+    "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+    "program_id": "qa-dynamic-program",
+    "learner_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+    "baseline_sha256": "aaf69eeddf068e6c8c446beed0087242c03828d140286d53386719b83168d364",
+    "baseline_event_count": 101,
+    "v1": {
+      "class_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+      "version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+      "version_number": 1,
+      "content_sha256": "93a2b9381911c2f99b0a227e407bb873599bde0fa32a6c773b5996afb2da033c",
+      "content": {
+        "sections": [
+          {
+            "id": "module_3deb55ad079384246eba08d24b856621",
+            "title": "Aprendizagem dinâmica QA",
+            "messages": [
+              {
+                "id": "content_1c38ce6c532e90931444555c22003703",
+                "type": "bot",
+                "content": "Publicação remota QA: edição 1 preservada.",
+                "version_id": "44a66812-07a3-5db2-9d13-a90c80b145b5"
+              },
+              {
+                "id": "content_ab2e8dd9a2196d3a319452f5aa475b16",
+                "type": "bot",
+                "content": "Etapa QA 2: cuidar do solo ajuda a conservar a água.",
+                "version_id": "75b93e4b-76dc-5e29-824b-0b7ffbb60706"
+              },
+              {
+                "id": "content_81a6b01e25fe34770ed68961328f9976",
+                "type": "bot",
+                "content": "Etapa QA 3: cuidar do solo ajuda a conservar a água.",
+                "version_id": "10583e19-b63a-503c-bed8-b29ae8090ca8"
+              },
+              {
+                "id": "content_492dc0469513988674462b5bad750acd",
+                "type": "bot",
+                "content": "Etapa QA 4: cuidar do solo ajuda a conservar a água.",
+                "version_id": "81da58bf-1cb7-5652-bbec-9f324c54be54"
+              },
+              {
+                "id": "content_d3a557ccda3a3eec08b2235ffccec7e0",
+                "type": "bot",
+                "content": "Etapa QA 5: cuidar do solo ajuda a conservar a água.",
+                "version_id": "0294d1d5-f4e6-579c-9ea0-1197cdc5316a"
+              },
+              {
+                "id": "content_c4279a866e7b4887a22c2c4c4ad011ef",
+                "type": "bot",
+                "content": "Etapa QA 6: cuidar do solo ajuda a conservar a água.",
+                "version_id": "93f143a7-ecd6-5457-b032-34af22ef9aaa"
+              },
+              {
+                "id": "content_63d023a40f41488a5aacae329592d3e0",
+                "type": "bot",
+                "content": "Etapa QA 7: cuidar do solo ajuda a conservar a água.",
+                "version_id": "33b4dabb-efe0-5cb2-8f62-cad4c2d3358a"
+              }
+            ],
+            "version_id": "c4b36d44-58f8-5e83-91b2-855a8d22b880"
+          }
+        ],
+        "id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "title": "Curso QA Dynamic b65cb8de edição 1",
+        "author": "Equipe QA Dynamic"
+      },
+      "context": {
+        "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+        "organization_id": "qa-org",
+        "program_id": "qa-dynamic-program",
+        "cohort_id": "2954e406-e77c-4091-b16e-9efc58d76b7f",
+        "membership_id": "8c15b777-7d31-5e27-86b7-b9d77ce09603",
+        "role": "student",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "course_version_id": "342b2aee-ef99-436d-8313-a48a83187eb5",
+        "enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+        "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+        "permissions": [
+          "content.read",
+          "progress.read",
+          "activity.record"
+        ]
+      },
+      "progress": {
+        "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+        "name": "Aluno QA Dynamic Learning",
+        "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+        "context_enrollment_id": "17cfca75-9257-5257-96df-c0ea6a5c0816",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0017,
+        "progress_percent": 5.0,
+        "last_activity_at": "2026-09-23T22:52:17.143965Z",
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      }
+    },
+    "v2": {
+      "class_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+      "version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+      "version_number": 2,
+      "content_sha256": "0dadb279b017167960fbfde21002d5b8699fdecc88ba156aa30bdbcd435e30d8",
+      "content": {
+        "sections": [
+          {
+            "id": "module_3deb55ad079384246eba08d24b856621",
+            "title": "Aprendizagem dinâmica QA",
+            "messages": [
+              {
+                "id": "content_1c38ce6c532e90931444555c22003703",
+                "type": "bot",
+                "content": "Publicação remota QA: edição 2 preservada.",
+                "version_id": "e0a9a4b4-c1d1-5164-8626-4e780405d389"
+              },
+              {
+                "id": "content_ab2e8dd9a2196d3a319452f5aa475b16",
+                "type": "bot",
+                "content": "Etapa QA 2: cuidar do solo ajuda a conservar a água.",
+                "version_id": "75b93e4b-76dc-5e29-824b-0b7ffbb60706"
+              },
+              {
+                "id": "content_81a6b01e25fe34770ed68961328f9976",
+                "type": "bot",
+                "content": "Etapa QA 3: cuidar do solo ajuda a conservar a água.",
+                "version_id": "10583e19-b63a-503c-bed8-b29ae8090ca8"
+              },
+              {
+                "id": "content_492dc0469513988674462b5bad750acd",
+                "type": "bot",
+                "content": "Etapa QA 4: cuidar do solo ajuda a conservar a água.",
+                "version_id": "81da58bf-1cb7-5652-bbec-9f324c54be54"
+              },
+              {
+                "id": "content_d3a557ccda3a3eec08b2235ffccec7e0",
+                "type": "bot",
+                "content": "Etapa QA 5: cuidar do solo ajuda a conservar a água.",
+                "version_id": "0294d1d5-f4e6-579c-9ea0-1197cdc5316a"
+              },
+              {
+                "id": "content_c4279a866e7b4887a22c2c4c4ad011ef",
+                "type": "bot",
+                "content": "Etapa QA 6: cuidar do solo ajuda a conservar a água.",
+                "version_id": "93f143a7-ecd6-5457-b032-34af22ef9aaa"
+              },
+              {
+                "id": "content_63d023a40f41488a5aacae329592d3e0",
+                "type": "bot",
+                "content": "Etapa QA 7: cuidar do solo ajuda a conservar a água.",
+                "version_id": "33b4dabb-efe0-5cb2-8f62-cad4c2d3358a"
+              }
+            ],
+            "version_id": "6ba39889-51bb-53e6-8dc0-6c2c4fbbf217"
+          }
+        ],
+        "id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "title": "Curso QA Dynamic b65cb8de edição 2",
+        "author": "Equipe QA Dynamic"
+      },
+      "context": {
+        "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+        "organization_id": "qa-org",
+        "program_id": "qa-dynamic-program",
+        "cohort_id": "618968bc-998c-4cd0-987e-90ffb1716d7d",
+        "membership_id": "8bfaeaac-5c9f-59db-8c74-ffc4c1f5faf9",
+        "role": "student",
+        "course_id": "qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+        "course_version_id": "6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+        "enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+        "legacy_enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+        "permissions": [
+          "content.read",
+          "progress.read",
+          "activity.record"
+        ]
+      },
+      "progress": {
+        "user_id": "ed42703a-491c-406e-aa0c-50ad195394af",
+        "name": "Aluno QA Dynamic Learning",
+        "enrollment_id": "5b54f453-7bdd-4826-bf38-7273a922ff60",
+        "context_enrollment_id": "f99c41ad-ef75-5d30-a89b-14574cbabc56",
+        "status": "active",
+        "planned_hours": 0.0333,
+        "validated_hours": 0.0,
+        "progress_percent": 0.0,
+        "last_activity_at": null,
+        "inactive_days": 0,
+        "alerts": [
+          {
+            "code": "required_activity_pending"
+          }
+        ],
+        "baseline_linked": false,
+        "confirmed_sessions": 0,
+        "open_mentorship_cases": 0
+      }
+    },
+    "last_completed_phase": "after_android",
+    "planned_seconds": 120
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/editor/courses/qa-dynamic-course-b65cb8de005444fb9ac707e1d9c6f5f8?version_id=6baa8a25-2075-493f-9e06-3ea5eb5a9779",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/course",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/learning-context",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/2954e406-e77c-4091-b16e-9efc58d76b7f/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/course",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/learning-context",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/classes/618968bc-998c-4cd0-987e-90ffb1716d7d/students/ed42703a-491c-406e-aa0c-50ad195394af/learning-context",
+      "status": 200
+    }
+  ],
+  "verified_at": "2026-09-23T22:54:09.806239+00:00",
+  "limitations": [
+    "Allows new records while requiring every initial event body and core row hash to remain identical",
+    "Does not replace the eight Android phase assertions or approve production"
+  ]
+}

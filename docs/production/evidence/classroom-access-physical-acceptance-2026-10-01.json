@@ -1,0 +1,71 @@
+{
+  "status": "CLASSROOM_COLD_OFFLINE_PHYSICAL_STAGING_PASSED",
+  "release_gate": "classroom_cold_offline_xiaomi",
+  "verified_at": "2026-10-01T18:21:16.294523+00:00",
+  "run_id": "abbdfe6c3fd54366b26c46d1d6075954",
+  "device": "ZT6HPRHQHATSEQPR",
+  "device_model": "2311DRK48G",
+  "app_package": "com.tutortds_cartilhas.dev.dynamicqa.rabbdfe6c3fd54366b26c46d1d6075954",
+  "apk_sha256": "c1864113d395948e06c6fa95dc06d25204a3f10e4b42a99c3efa510440874ec2",
+  "api_url": "https://tutor-tds-staging.fastapicloud.dev",
+  "android_phases": [
+    "online",
+    "cold_offline",
+    "offline_restart",
+    "reconnect",
+    "wrong_account",
+    "revoked_online",
+    "revoked_offline",
+    "pdf"
+  ],
+  "distinct_processes": 8,
+  "source_files_checked": 123,
+  "cohort_id": "a3d8e203-d5e9-4fe5-9f28-1020a21e6368",
+  "course_id": "qa-dynamic-course-3c2d38851f024a1eb50667aa86dc7ce0",
+  "course_version_id": "6335cdee-b85c-459b-b635-122f557273c6",
+  "online_progress_percent": 2.5,
+  "reconnected_progress_percent": 5.0,
+  "offline_event_count_verified_once": 2,
+  "initial_events_preserved": 332,
+  "initial_core_records_preserved": 77,
+  "wrong_account_denied": true,
+  "known_revocation_denied_online_and_offline": true,
+  "revocation_method": "Scoped fixture update on new synthetic cohort only; not an administrative product flow",
+  "pdf": {
+    "hosting": "Existing Google Drive URL",
+    "url": "https://drive.google.com/file/d/1vjwT_uoi_tw2rmSL2Y4kldjkqo5P-n4f/view",
+    "opened_from_real_course_pdf_button": true,
+    "viewer_account_selection": "Completed manually by Rafael",
+    "rendering_confirmed_by_user": "Sim, o PDF abriu",
+    "rendering_observed": "PDF title IA - CARTILHA - T... and FUNDAMENTOS TEORICOS page visible in Android external viewer",
+    "request_event_received_once": true,
+    "validated_seconds": 0,
+    "page_and_reading_time_tracking": false,
+    "offline_pdf_download_verified": false
+  },
+  "protected_play_and_dev_unchanged": true,
+  "network_restored": true,
+  "qa_process_stopped": true,
+  "installation": "Same preserved APK installed after human ready confirmation; no prior Android phase replayed",
+  "evidence_sha256": {
+    "docs/production/evidence/classroom-access-abbdfe6c3fd54366b26c46d1d6075954-android-install-resume-human-ready.json": "3359459c4643dee18d92b457524154e22901dc4be8d1ff9e8b9979c80e416682",
+    "docs/production/evidence/classroom-access-abbdfe6c3fd54366b26c46d1d6075954-prepare.json": "b1c96f927bad70d443c0cef6c77eebe68af29423b4dc94b3931c6cd9169f085b",
+    "docs/production/evidence/classroom-access-abbdfe6c3fd54366b26c46d1d6075954-revoke.json": "ec025ab40adb21560a197f4cdb06678c5846dd594cf73c55256988d7d396bf19",
+    "docs/production/evidence/classroom-access-abbdfe6c3fd54366b26c46d1d6075954-verify.json": "1830a806aa1d7846cbbd8ce70386936af4bd0548fb9347036b2bb259f23d43f1",
+    "docs/production/evidence/classroom-access-abbdfe6c3fd54366b26c46d1d6075954-android.json": "f1dcd99c118e4f21d68dc8e9d81ff8898e38fa5a1131029f77a06478e671d20a",
+    "docs/production/evidence/classroom-access-abbdfe6c3fd54366b26c46d1d6075954-android-install-resume.json": "de970a1223629975b5aaf16e654d673a6abe447e06fd1505c0455ea87851dc63",
+    "docs/production/evidence/course-pdf-poco-2026-10-01.png": "b6a833069e0feae044e8599343cf599a4a4d764bba8ebeddc6fcdeeef6914344"
+  },
+  "release_build_allowed": false,
+  "production_ready": false,
+  "remaining_physical_gates": [
+    "certificate_human_approval_e2e",
+    "evidence_offline_xiaomi"
+  ],
+  "limits": [
+    "Synthetic staging, real repositories and feature screens in isolated instrumented debug APK; not distribution build.",
+    "Existing Google Drive file is not frozen by the course-version URL.",
+    "PDF request is analytical intent, not reading, presence or completion.",
+    "No production revocation command, certificate issuance, Evidence offline or full Wave 2 acceptance."
+  ]
+}

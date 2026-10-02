@@ -1,0 +1,55 @@
+{
+  "status": "COURSE_VERSIONING_PHYSICAL_STAGING_PASSED",
+  "verified_at": "2026-10-01T17:49:31.2760801Z",
+  "release_gate": "course_versioning_xiaomi",
+  "run_id": "3c2d38851f024a1eb50667aa86dc7ce0",
+  "device": "ZT6HPRHQHATSEQPR",
+  "device_model": "2311DRK48G",
+  "app_package": "com.tutortds_cartilhas.dev.dynamicqa.r3c2d38851f024a1eb50667aa86dc7ce0",
+  "api_url": "https://tutor-tds-staging.fastapicloud.dev",
+  "cloud_deployment_id": "f060ca99-4715-4265-8466-9249329a8e1a",
+  "apk_sha256": "c59d4044e6a9718ec60f6f9dcb0c9d012117afe0693efd2aa6cafab0ce6a02dd",
+  "android_phases": 8,
+  "host_hooks": 4,
+  "source_files_checked": 135,
+  "v1_progress_percent": 5,
+  "v2_progress_percent": 0,
+  "initial_events_preserved": 224,
+  "initial_core_records_preserved": 57,
+  "current_events": 332,
+  "editorial_transitions": 7,
+  "protected_play_and_dev_unchanged": true,
+  "network_restored": true,
+  "qa_process_stopped": true,
+  "recovery": {
+    "type": "diagnosed_before_first_android_launch",
+    "parent_run": "3c2d38851f024a1eb50667aa86dc7ce0",
+    "build_count_this_execution": 0,
+    "install_count_this_execution": 0,
+    "parent_apk_sha256": "c59d4044e6a9718ec60f6f9dcb0c9d012117afe0693efd2aa6cafab0ce6a02dd",
+    "original_failure_evidence_preserved": true
+  },
+  "evidence_sha256": {
+    "docs/production/evidence/dynamic-learning-poco-2026-10-01.json": "5239f8b9b6babcea7276331bc619ab7052de1bd4628e4275487a23614133dd92",
+    "docs/production/evidence/dynamic-learning-3c2d38851f024a1eb50667aa86dc7ce0-prelaunch-recovery-before-android.json": "ff6b66e4e3f0454e29ef8825df6ff257f61eb747bd515294dd727a05fcf2aac1",
+    "docs/production/evidence/dynamic-learning-3c2d38851f024a1eb50667aa86dc7ce0-prelaunch-recovery-after-v1.json": "a9f0e44e430ad4aece81b39d6cf5736abc6c322dbab263f87f4576ce1302ba67",
+    "docs/production/evidence/dynamic-learning-3c2d38851f024a1eb50667aa86dc7ce0-prelaunch-recovery-after-v2.json": "6e0794df3bed5155c40e7256c570a802bf8f1525efb01ca2c47e73ef30e8662d",
+    "docs/production/evidence/dynamic-learning-3c2d38851f024a1eb50667aa86dc7ce0-prelaunch-recovery-after-android.json": "cff92f33bd3903c30063cacc5d9884d33d36971957a4ceeb10491100f1f19c12",
+    "docs/production/evidence/dynamic-learning-poco-2026-10-01-attempt2.json": "d6a3090a5b58898ba7fee1a1886ae8f83b35249e5e300439b27d27f4a3b291b6",
+    "docs/production/evidence/dynamic-learning-poco-2026-10-01-attempt3-prelaunch.json": "c29b6ae3dff59ec96fe39a4b9bdf3155a8a47e5b9eab8dfb4428805158ee127a",
+    "docs/production/evidence/cloud-staging-journey-deploy-2026-10-01.json": "3b2300fabb64f5c62009ca927469765112e506ce81d6b2269e981de8743541e8",
+    "docs/production/evidence/cloud-staging-journey-migration-2026-10-01.json": "f5097975fb7ac988955a02a979c5b7c8880f15e15a9892991eb3f67ba91410ac"
+  },
+  "release_build_allowed": false,
+  "production_ready": false,
+  "remaining_physical_gates": [
+    "certificate_human_approval_e2e",
+    "classroom_cold_offline_xiaomi",
+    "evidence_offline_xiaomi"
+  ],
+  "limits": [
+    "Synthetic staging and instrumented debug APK; not distributable.",
+    "No separate offline revocation, evidence check-in or authenticated certificate issuance acceptance.",
+    "Wave 2B contextual ActivityAttempt and release provenance remain separate work."
+  ]
+}

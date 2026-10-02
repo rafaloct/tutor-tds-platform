@@ -1,5 +1,17 @@
 # Staging gerenciado — FastAPI Cloud + Supabase
 
+Atualização 01/10/2026: projeto Supabase encontrado pausado e restaurado para
+ACTIVE_HEALTHY. Preservados sete usuários sintéticos. Backup custom do schema
+public, cópia fora do VPS e leitura do índice pg_restore verificados antes da
+migration 0019→0020. Fingerprints de todas as colunas anteriores das 42 tabelas
+permaneceram iguais. Não houve reset, seed nem escrita em produção.
+
+Deployment `f060ca99-4715-4265-8466-9249329a8e1a` concluído, /live e /health 200.
+Os logs mostram 62 pacotes, todos com versões idênticas ao uv.lock. Python Cloud
+3.13.15; ambiente local de QA 3.13.9: não declarar runtimes idênticos. Flag de
+jornada segue false por default. Evidências `cloud-staging-journey-migration-2026-10-01.json`
+e `cloud-staging-journey-deploy-2026-10-01.json`. QA físico ainda é etapa distinta.
+
 Configuração de staging da Wave 1. O pacote local e a allowlist Android possuem
 evidências próprias; deployment e jornada completa exigem validação específica.
 Escopo autorizado: hospedar a API existente no FastAPI Cloud e seu PostgreSQL
@@ -53,7 +65,11 @@ diretório for preparado fora do checkout Git. Nunca copiar secrets para `app/`.
 O extra `standard` não altera rotas nem substitui o servidor atual; verificar
 a resolução das dependências no build antes de aprovar o candidato. `uv.lock` fixa o runtime existente e as ferramentas novas; instalação isolada
 Python 3.13.9 passou em 281 testes. Confirmar uso do lock nos logs do build Cloud.
-O Docker legado ainda usa pip/pyproject; não confundir seu build com o lock Cloud.
+As imagens já implantadas na VPS mantêm o empacotamento histórico. Em 01/10,
+o Dockerfile candidato passou a usar bases Python/uv por digest e uv sync
+--locked; 62 dependências conferidas e oito testes do recorte passaram. Esse
+candidato não foi implantado e ainda requer revisão Git para proveniência de
+release. Ver evidence/journey-locked-api-candidate-2026-10-01.json.
 
 O primeiro deploy CLI deve enviar somente `api/` com diretório da aplicação
 vazio na configuração remota. Se futuramente vincular o monorepo inteiro via

@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "phase": "revoke",
+  "run_id": "abbdfe6c3fd54366b26c46d1d6075954",
+  "class_id": "a3d8e203-d5e9-4fe5-9f28-1020a21e6368",
+  "course_id": "qa-dynamic-course-3c2d38851f024a1eb50667aa86dc7ce0",
+  "version_id": "6335cdee-b85c-459b-b635-122f557273c6",
+  "fixture_status": "revoked_for_qa",
+  "initial_events_preserved": 332,
+  "initial_core_records_preserved": 77,
+  "requests": [],
+  "production_changed": false,
+  "verified_at": "2026-10-01T18:19:06.191155+00:00"
+}
