@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "run_id": "1f7dfd9fa41d4d30b2ea63a6625a0d13",
+  "device": "ZT6HPRHQHATSEQPR",
+  "apk_sha256": "4f54429f51bbfec9b1f5b0c9f88fb71640114ee92ef0214e29bd7d083225801e",
+  "original_dev_apk_sha256": "8ceccdf33d42dbb60979eca761aa680f92598cf5999508e2012ca9706563b349",
+  "phase": "reconnect",
+  "production_unchanged": true,
+  "network_restored": true,
+  "dev_binary_restored": true,
+  "reports": [
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "1f7dfd9fa41d4d30b2ea63a6625a0d13",
+        "phase": "online",
+        "pid": 13228,
+        "package": "com.tutortds_cartilhas.dev",
+        "api": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+        "production_changed": false,
+        "assertions": {
+          "ui_login_and_consent": true,
+          "reviewed_bridge": true,
+          "home_and_tutor_duration": true,
+          "help_request_without_question_text": true,
+          "account_switch": true,
+          "learning_hours": 0,
+          "attendance": null,
+          "certificate": null
+        }
+      }
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "1f7dfd9fa41d4d30b2ea63a6625a0d13",
+        "phase": "offline",
+        "pid": 13597,
+        "package": "com.tutortds_cartilhas.dev",
+        "api": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+        "production_changed": false,
+        "assertions": {
+          "network_off": true,
+          "persisted_owned_events": 10,
+          "durable_sqlite": true
+        }
+      }
+    },
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "1f7dfd9fa41d4d30b2ea63a6625a0d13",
+        "phase": "reconnect",
+        "pid": 14864,
+        "package": "com.tutortds_cartilhas.dev",
+        "api": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+        "production_changed": false,
+        "assertions": {
+          "cold_start_queue_preserved": true,
+          "delivered_once": 10,
+          "same_pseudonym": true,
+          "screen_time_never_learning_credit": true,
+          "original_dev_session_and_preferences_restored": true
+        }
+      }
+    }
+  ],
+  "failure": null
+}

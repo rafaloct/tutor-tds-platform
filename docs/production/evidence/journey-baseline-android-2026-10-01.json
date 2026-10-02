@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "run_id": "3c7db3b2bcb5430cb64d3fa0f05b304b",
+  "device": "ZT6HPRHQHATSEQPR",
+  "apk_sha256": "7725d3d47e8ade656c2b71282bc6922ab54c06bbd4f8545a97483e12b78ed026",
+  "original_dev_apk_sha256": "8ceccdf33d42dbb60979eca761aa680f92598cf5999508e2012ca9706563b349",
+  "phase": "baseline",
+  "production_unchanged": true,
+  "network_restored": true,
+  "dev_binary_restored": true,
+  "reports": [
+    {
+      "status": "passed",
+      "report": {
+        "run_id": "3c7db3b2bcb5430cb64d3fa0f05b304b",
+        "phase": "baseline",
+        "pid": 16894,
+        "package": "com.tutortds_cartilhas.dev",
+        "api": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+        "production_changed": false,
+        "assertions": {
+          "scoped_feature_ui_real_https": true,
+          "pending_identity_before_baseline": true,
+          "reviewed_bi_only_reference": true,
+          "same_id_before_and_after": true,
+          "audit_history": true,
+          "no_phone_account_or_queue_mutation": true,
+          "learning_hours": 0,
+          "attendance": null,
+          "certificate": null
+        }
+      }
+    }
+  ],
+  "failure": null
+}

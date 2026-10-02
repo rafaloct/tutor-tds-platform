@@ -1,0 +1,13 @@
+{
+  "status": "failed",
+  "run_id": "7ce3b59a891940cda4387766627e3e14",
+  "device": "ZT6HPRHQHATSEQPR",
+  "apk_sha256": "97d0032537054acb64670cab4804713c4cfb481c51a0587ecbdd370e8ddffeb7",
+  "original_dev_apk_sha256": "8ceccdf33d42dbb60979eca761aa680f92598cf5999508e2012ca9706563b349",
+  "phase": "baseline",
+  "production_unchanged": true,
+  "network_restored": true,
+  "dev_binary_restored": true,
+  "reports": [],
+  "failure": "Android phase failed: baseline; retain logs/checkpoint"
+}

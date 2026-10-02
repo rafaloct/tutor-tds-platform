@@ -1,0 +1,35 @@
+{
+  "status": "local_review_package_verified",
+  "pilot": {
+    "start": "2026-10-11",
+    "end": "2026-10-30",
+    "hours": 40,
+    "reviewer": "Rafael",
+    "existing_course_id": "ia-cartilha",
+    "provisioned": false
+  },
+  "BI": {
+    "path": "outputs\\TDS_Journey_Pilot_2026-10-11\\TDS_Rastreio.pbip",
+    "parsed_json_count": 565,
+    "pages": 18,
+    "original_pages_and_baseline_jornada_byte_identical": true,
+    "M_TMDL_refresh_render": "pending"
+  },
+  "HTTPS_export": {
+    "path": "outputs\\TDS_Journey_Final_QA_Export_2026-10-01",
+    "counts": {
+      "TDS_ATIVIDADE_APP.csv": 0,
+      "TDS_JORNADA_APP.csv": 1,
+      "TDS_PARTICIPANTES_APP.csv": 1
+    },
+    "sha256": {
+      "TDS_ATIVIDADE_APP.csv": "b6812e6a9da0993fee2bd9caaf70ae87b80adafab9e9c2cac630c02cb0791b9d",
+      "TDS_JORNADA_APP.csv": "2418565f178c33f62ef9dac62eb12236a258533580f58afd00f11ec08e8e5e2c",
+      "TDS_PARTICIPANTES_APP.csv": "cf8279b950f5a6dfe26c553288ade3c8c58b8c193bc932c99ed132c516d6bd3f"
+    },
+    "data": "synthetic",
+    "external_writes": false
+  },
+  "source_sha256": "09b1045fc39be11afa5d19a9c4a07e9b21ad5f86e5d344b0a835a0a0d698f06c",
+  "production_release_changed": false
+}

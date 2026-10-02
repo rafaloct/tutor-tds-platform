@@ -1,0 +1,21 @@
+{
+  "status": "release_correctly_blocked",
+  "physical_course_gate": "passed",
+  "remaining_physical_gates": [
+    "certificate_human_approval_e2e",
+    "classroom_cold_offline_xiaomi",
+    "evidence_offline_xiaomi"
+  ],
+  "release_build_allowed": false,
+  "artifact_upload_allowed": false,
+  "audit_command": "dart run tool/verify_release_readiness.dart --intent=build",
+  "audit_exit_code": 1,
+  "audit_issues": [
+    "physical_evidence_pending",
+    "release_build_frozen"
+  ],
+  "signing_or_configuration_issues_reported": false,
+  "acceptance_hash_verified": true,
+  "referenced_evidence_hashes_verified": 9,
+  "production_changed": false
+}

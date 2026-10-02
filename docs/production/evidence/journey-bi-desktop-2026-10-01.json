@@ -1,0 +1,151 @@
+{
+  "status": "synthetic_pending_journey_passed_legacy_quality_pending",
+  "generator_reproduces_four_new_tables": true,
+  "original_pages_preserved": 17,
+  "original_baseline_and_jornada_preserved": false,
+  "desktop_model_opened": true,
+  "desktop_page_rendered_without_data": true,
+  "desktop_data_refresh": "completed_with_legacy_data_errors",
+  "filters_with_data": "passed_for_two_synthetic_pending_participants",
+  "google_copy_only_owner": true,
+  "google_sheet_id": "1a7KS1twBIlSO5kTXCmUVvmEIxkbt7IwttHKW4Xqzrzs",
+  "qa_people": 2,
+  "qa_activity_rows": 3,
+  "qa_journey_rows": 0,
+  "live_baseline_writes": false,
+  "fabric_publish": false,
+  "external_changes_dialog": "cleared",
+  "human_intervention": {
+    "reason": "Power BI GoogleSheets connector requests browser login; Computer Use forbids automated authentication dialogs",
+    "exact_human_action": "Complete Google login in browser with the authorized TDS account, return to Power BI and notify the agent",
+    "what_remains_unblocked": "Google login completed; refresh, pending-participant filters, numeric correction and save verified",
+    "status": "resolved_by_user"
+  },
+  "expected_qa_checks": {
+    "unfiltered_people": 2,
+    "unfiltered_pending_people": 2,
+    "unfiltered_screen_minutes": 3,
+    "unfiltered_help_requests": 1,
+    "confirmed_baseline_rows": 0,
+    "selected_QA_PALMAS": {
+      "people": 1,
+      "screen_minutes": 2,
+      "help_requests": 1
+    },
+    "selected_QA_ITAGUATINS": {
+      "people": 1,
+      "screen_minutes": 1,
+      "help_requests": 0
+    }
+  },
+  "original_sources_unchanged": true,
+  "original_jornada_byte_preserved": true,
+  "desktop_saved": true,
+  "desktop_save_time_observed": "2026-10-01 13:50 America/Sao_Paulo",
+  "legacy_numeric_types_fixed": true,
+  "observed_qa_checks": {
+    "unfiltered": {
+      "people": 2,
+      "pending_people": 2,
+      "screen_minutes": 3,
+      "help_requests": 1,
+      "linked_inscriptions_display": "BLANK",
+      "certificates_display": "BLANK"
+    },
+    "QA_PALMAS": {
+      "people": 1,
+      "pending_people": 1,
+      "screen_minutes": 2,
+      "help_requests": 1
+    },
+    "QA_ITAGUATINS": {
+      "people": 1,
+      "pending_people": 1,
+      "screen_minutes": 1,
+      "help_requests_display": "BLANK",
+      "help_event_rows": 0
+    },
+    "selection_cleared": {
+      "people": 2,
+      "pending_people": 2,
+      "screen_minutes": 3,
+      "help_requests": 1
+    }
+  },
+  "legacy_validation": {
+    "summary_inscriptions": 510,
+    "digital_forms": 421,
+    "scanned_records": 89,
+    "numeric_cards_after_fix": {
+      "cadunico": {
+        "yes": 418,
+        "valid_answers": 505
+      },
+      "rural_work": {
+        "yes": 396,
+        "valid_answers": 503
+      },
+      "productive_activity": {
+        "yes": 199,
+        "valid_answers": 499
+      },
+      "internet": {
+        "yes": 401,
+        "valid_answers": 502
+      },
+      "productive_policy": {
+        "yes": 69,
+        "valid_answers": 483
+      }
+    },
+    "loaded_rows": {
+      "Baseline": 510,
+      "Jornada": 510,
+      "ComplementoBaseline": 510
+    },
+    "rows_with_errors": {
+      "Baseline": 68,
+      "Jornada": 65
+    },
+    "inspected_error": {
+      "column": "data_inicio",
+      "error": "DataFormat.Error: cannot convert to Date",
+      "value": -684259
+    },
+    "errors_not_added_as_unique_people": true,
+    "source_corrections_made": false
+  },
+  "saved_model_verification": {
+    "Baseline": {
+      "original_sha256": "a07a8fa56e264d9859993acb1297780b66ddd63b756201cfaa34c8e2e7bf4469",
+      "saved_sha256": "c0f7fe9dc2f7d63447c04f81f742d7fb1fb84faa882b818a39a10f104cb45559",
+      "declared_types_preserved": true,
+      "numeric_fix_present": true,
+      "byte_identical": false
+    },
+    "ComplementoBaseline": {
+      "original_sha256": "959eb0ff40bbbb0afcca0800b497c4f23e0ab7842d9185ed143bc251f36ca099",
+      "saved_sha256": "3a9766f29cd10719db6e1d59625b0aaf01e063db77cd5c89ba8c920df7a1b97d",
+      "declared_types_preserved": true,
+      "numeric_fix_present": true,
+      "byte_identical": false
+    },
+    "Jornada": {
+      "original_sha256": "895f89cadde4b10b398f89fcedfe5ae5364e525c56eeb2cc61014e475b1b54b2",
+      "saved_sha256": "895f89cadde4b10b398f89fcedfe5ae5364e525c56eeb2cc61014e475b1b54b2",
+      "declared_types_preserved": true,
+      "numeric_fix_present": false,
+      "byte_identical": true
+    },
+    "pages": {
+      "original_json_files": 529,
+      "changed_original_files": []
+    },
+    "error_queries_persisted": []
+  },
+  "limits": [
+    "JornadaApp empty: confirmed baseline and certificate scenario not validated in Desktop",
+    "Legacy data errors require source review; counts may overlap",
+    "No Fabric publication, Play publication, production deployment or real participants provisioned"
+  ]
+}

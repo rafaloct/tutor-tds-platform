@@ -1,0 +1,1 @@
+{"status": "passed", "deployment_performed": false, "environments": {"production": {"valid": true, "journey_default": false, "context_default": false, "pseudonym_mapping_present": true, "sync_requires_profile": true}, "staging": {"valid": true, "journey_default": false, "context_default": false, "pseudonym_mapping_present": true, "sync_requires_profile": true}}}

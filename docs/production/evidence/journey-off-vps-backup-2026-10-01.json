@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "source_run": "cec516308697",
+  "encrypted_path": "C:\\Users\\Usuario\\.codex\\private\\tutor-tds-backups\\production-before-cec516308697.dpapi",
+  "plaintext_sha256": "1caac105de94226187cf1ff4f9e07a3006a945e6642ac471ad913140ace39d4c",
+  "off_vps_copy": true,
+  "encryption": "Windows DPAPI CurrentUser",
+  "recovery_limitation": "Requires this Windows user profile and its DPAPI keys",
+  "roundtrip_verified": true,
+  "plaintext_removed": true
+}
