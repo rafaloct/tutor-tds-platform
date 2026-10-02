@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../config/app_config.dart';
 import '../features/learning_context/learning_home_card.dart';
+import '../features/courses/presentation/course_pdf_button.dart';
 import '../features/learning_context/learning_home_controller.dart';
 import '../features/courses/data/course_repository.dart';
 import '../features/course_editor/data/course_editor_repository.dart';
@@ -143,7 +143,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Cartilha>> _loadCartilhas() =>
       widget.courseLoader?.call() ??
-      CourseRepository(apiUrl: AppConfig.tutorApiUrl).fetchAll();
+      CourseRepository.forCatalog(
+        // Pass an empty URL when the remote catalog flag is off so that
+        // CourseRepository skips the network entirely and loads only the
+        // 9 bundled local courses. When enabled the existing fallback chain
+        // applies: remote -> local cache (SharedPreferences) -> bundled assets.
+        apiUrl: AppConfig.tutorApiUrl,
+      ).fetchAll();
 
   Future<void> _openBottomDestination(int index) async {
     if (index == 0 || _navigationIndex != 0) return;
@@ -938,26 +944,9 @@ class _CartilhaCard extends StatelessWidget {
                 children: [
                   if (cartilha.downloadUrl != null &&
                       cartilha.downloadUrl!.isNotEmpty)
-                    FilledButton.icon(
-                      icon: const Icon(Icons.picture_as_pdf, size: 14),
-                      label: const Text('PDF', style: TextStyle(fontSize: 12)),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF093AF4),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () => launchUrl(
-                        Uri.parse(cartilha.downloadUrl!),
-                        mode: LaunchMode.externalApplication,
-                      ),
+                    CoursePdfButton(
+                      key: ValueKey('course-pdf-${cartilha.id}'),
+                      course: cartilha,
                     ),
                   const SizedBox(height: 6),
                   const Icon(

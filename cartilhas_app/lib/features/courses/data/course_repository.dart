@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../config/app_config.dart';
 import '../../../models/cartilha.dart';
 
 typedef CourseHttpGet = Future<http.Response> Function(Uri uri);
@@ -14,8 +15,21 @@ class CourseRepository {
     required this.apiUrl,
     CourseHttpGet? httpGet,
     LocalCourseLoader? localLoader,
+    this.fallbackOnEmpty = false,
   }) : _httpGet = httpGet ?? http.get,
        _localLoader = localLoader ?? _loadBundledCourses;
+
+  factory CourseRepository.forCatalog({
+    required String apiUrl,
+    bool remoteCatalogEnabled = AppConfig.remoteCatalogEnabled,
+    CourseHttpGet? httpGet,
+    LocalCourseLoader? localLoader,
+  }) => CourseRepository(
+    apiUrl: remoteCatalogEnabled ? apiUrl : '',
+    httpGet: httpGet,
+    localLoader: localLoader,
+    fallbackOnEmpty: remoteCatalogEnabled,
+  );
 
   static const _assetPaths = [
     'assets/data/lessons/agricultura-sustentavel.json',
@@ -30,6 +44,7 @@ class CourseRepository {
   ];
 
   final String apiUrl;
+  final bool fallbackOnEmpty;
   final CourseHttpGet _httpGet;
   final LocalCourseLoader _localLoader;
 
@@ -42,10 +57,18 @@ class CourseRepository {
       try {
         final remote = await _fetchRemote();
         await _saveCache(remote);
-        return _sorted(remote);
+        if (remote.isNotEmpty || !fallbackOnEmpty) return _sorted(remote);
       } on Object {
         final cached = await _loadCache();
-        if (cached != null) return _sorted(cached);
+        if (cached != null && (cached.isNotEmpty || !fallbackOnEmpty)) {
+          if (!fallbackOnEmpty) return _sorted(cached);
+          final bundled = await _localLoader();
+          final ids = cached.map((course) => course.id).toSet();
+          return _sorted([
+            ...cached,
+            ...bundled.where((course) => !ids.contains(course.id)),
+          ]);
+        }
       }
     }
     return _sorted(await _localLoader());

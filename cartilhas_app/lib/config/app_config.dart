@@ -16,9 +16,25 @@ class AppConfig {
   static const durableLearningOutboxEnabled = bool.fromEnvironment(
     'DURABLE_LEARNING_OUTBOX_ENABLED',
   );
+  static const journeyTraceabilityEnabled = bool.fromEnvironment(
+    'JOURNEY_TRACEABILITY_ENABLED',
+  );
   // Enable only after the inbox signature and account-switch QA are configured.
   static const signedSupportIdentity = bool.fromEnvironment(
     'SIGNED_SUPPORT_IDENTITY',
+  );
+
+  /// Enables the remote course catalog via [tutorApiUrl].
+  /// Defaults to [false] (safe). Does NOT activate login, classrooms,
+  /// journey traceability, or the durable outbox.
+  ///
+  /// When [false], the app only shows the 9 bundled local courses.
+  /// When [true] and [tutorApiUrl] is set, the app fetches the published
+  /// catalog from the API; on failure it falls back to local cache and
+  /// then to bundled assets — the screen is never left empty.
+  static const remoteCatalogEnabled = bool.fromEnvironment(
+    'REMOTE_CATALOG_ENABLED',
+    defaultValue: false,
   );
 
   static const privacyPolicyUrl = String.fromEnvironment(

@@ -1,0 +1,130 @@
+{
+  "status": "PASS_STAGING_ONLY",
+  "scope": "dynamic_editorial_catalog_only_no_production_promotion",
+  "head_before": "f3ee6f49ad35103ae2a89038d1f9887269568bd3",
+  "api": "https://tutor-tds-staging.fastapicloud.dev",
+  "preflight": {
+    "live_http": 200,
+    "health_http": 200,
+    "public_courses_before": 3,
+    "target_absent_before": true,
+    "course_editor_paths_in_openapi": true,
+    "editor_context_without_session_http": 401,
+    "target_absent_from_bundled_lessons": true
+  },
+  "first_publication": {
+    "course_id": "validacao-dinamica-tds",
+    "program_id": "qa-dynamic-program",
+    "title": "Curso Dinâmico de Validação TDS",
+    "author": "Equipe TDS",
+    "version_id": "0dc594fc-d588-4092-b017-dff85138c82d",
+    "version_number": 1,
+    "revision": 4,
+    "status": "published",
+    "workflow": ["draft", "in_review", "published"],
+    "public_catalog_count": 4,
+    "sections": 2,
+    "question_types": ["question", "quiz"]
+  },
+  "build": {
+    "kind": "debug_apk_staging_not_for_distribution",
+    "flutter_build_invocations": 1,
+    "sha256": "8bca7aea80fedd982f115fba3dab68ff96e6e0fdcac6db01293683fce6cf6444",
+    "bytes": 177636205,
+    "source": "cartilhas_app/build/app/outputs/flutter-apk/app-debug.apk",
+    "qa_credentials_in_apk": false,
+    "defines": {
+      "TUTOR_ENVIRONMENT": "staging",
+      "TUTOR_API_URL": "https://tutor-tds-staging.fastapicloud.dev",
+      "TUTOR_STAGING_API_URL": "https://tutor-tds-staging.fastapicloud.dev",
+      "REMOTE_CATALOG_ENABLED": true,
+      "LEARNING_CONTEXT_ENABLED": false,
+      "DURABLE_LEARNING_OUTBOX_ENABLED": false,
+      "JOURNEY_TRACEABILITY_ENABLED": false,
+      "SIGNED_SUPPORT_IDENTITY": false
+    }
+  },
+  "installation": {
+    "avd": "tutor_tds_remote_catalog_qa",
+    "serial_first": "emulator-5558",
+    "serial_after_cold_boot": "emulator-5556",
+    "package": "com.tutortds_cartilhas.dev",
+    "install_count": 1,
+    "first_install_time": "2026-10-02 16:12:58",
+    "last_update_time": "2026-10-02 16:12:58",
+    "installed_sha256_before_v2": "8bca7aea80fedd982f115fba3dab68ff96e6e0fdcac6db01293683fce6cf6444",
+    "installed_sha256_after_v2_and_offline": "8bca7aea80fedd982f115fba3dab68ff96e6e0fdcac6db01293683fce6cf6444"
+  },
+  "first_app_observation": {
+    "public_course_visible_in_home": true,
+    "reader_opened": true,
+    "module_1_intro_visible": true,
+    "module_1_question_answered_correctly": true,
+    "module_2_visible": true,
+    "module_2_three_quizzes_answered": true,
+    "screenshots_sha256": {
+      "remote-catalog-v1-home-2026-10-02.png": "802dd0fa696751337e2927e06a48be8c2dddd8855800de426ff97af5cc2a82e6",
+      "remote-catalog-v1-question-2026-10-02.png": "8de83128d37ffe80fe3e4beb3fe5b57efbec1fa8b9bb83deb51331620c202efa",
+      "remote-catalog-v1-quiz1-2026-10-02.png": "3704ee6c407534fc1fe47d946d8f6cdba8b7fe0351a6619e4ef7d6f4a20e7e5e"
+    }
+  },
+  "second_publication": {
+    "source_version_id": "0dc594fc-d588-4092-b017-dff85138c82d",
+    "version_id": "78862b10-aae4-4ff2-8413-d7e70970f816",
+    "version_number": 2,
+    "revision": 4,
+    "status": "published",
+    "workflow": ["draft", "in_review", "published"],
+    "title": "Curso Dinâmico de Validação TDS — Atualizado",
+    "new_question": "Esta alteração apareceu após recompilar o aplicativo?",
+    "correct_answer": "Não, veio da atualização do catálogo.",
+    "public_catalog_count": 4
+  },
+  "same_app_observation": {
+    "catalog_refreshed_without_restart_or_reinstall": true,
+    "updated_title_visible": true,
+    "new_question_and_correct_answer_visible_and_answered": true,
+    "flutter_build_between_publications": false,
+    "adb_install_between_publications": false,
+    "screenshots_sha256": {
+      "remote-catalog-v2-home-2026-10-02.png": "8e47dfba570715dc95e1e455712c9acb9252331f7d7cf83ead89c9bdf22d332b",
+      "remote-catalog-v2-question-2026-10-02.png": "007e68482721c87ec01da5df06a866bb9049d71dfabc3cab7a9be5fb14d604f3"
+    }
+  },
+  "offline": {
+    "method": "QA AVD airplane mode on, Wi-Fi off; active default network none; process cold restart",
+    "catalog_titles_seen_by_android_ui": 13,
+    "remote_cached_titles": 4,
+    "bundled_local_titles": 9,
+    "updated_course_and_new_question_opened_from_cache": true,
+    "network_restored": true,
+    "airplane_mode_after": 0,
+    "wifi_after": 1,
+    "mobile_data_after": 1,
+    "active_default_network_after": 101,
+    "screenshots_sha256": {
+      "remote-catalog-offline-2026-10-02.png": "a068144d9a7a76fd376b27ade274db8e55042b3d228311a7ee9a7ca14047c172",
+      "remote-catalog-offline-reader-2026-10-02.png": "bc6356387eadeca488023cd877cddf7d8463f1290ec34ac092a8f5711b0d8285"
+    }
+  },
+  "tests": {
+    "flutter_course_repository_and_home_refresh": "21 passed",
+    "flutter_analyze_no_pub": "No issues found",
+    "api_course_editor_sqlite": "27 passed",
+    "git_diff_check_affected": "passed"
+  },
+  "diagnostic": {
+    "Observed": "Fresh QA AVD initially returned null uiautomator root and screencap usage before rendering; the screenshot showed only Android splash.",
+    "Expected": "Reader UI hierarchy and PNG screenshot from the single installed debug APK.",
+    "Responsible Boundary": "QA Android emulator graphics/boot and host ADB argument handling, not the editorial API.",
+    "Evidence": "The fresh Flutter-generated AVD had hw.gpu.enabled=no; after enabling GPU and cold booting without reinstalling, PNG capture worked and the UI hierarchy appeared after splash completion.",
+    "Likely Root Cause": "Disabled GPU and capturing during first-launch splash; initial MSYS path conversion was considered but was not sufficient alone.",
+    "Affected Files": "C:/Users/Usuario/.android/avd/tutor_tds_remote_catalog_qa.avd/config.ini (QA AVD only, outside repository)",
+    "Structural Fix": "Enable GPU only in the newly created QA AVD, cold boot, wait for app rendering, use MSYS_NO_PATHCONV=1 for Android device paths; never rebuild or reinstall the APK."
+  },
+  "limits": [
+    "Only staging editorial catalog proved; does not approve Wave 2 in full, a production release, or Play upload.",
+    "With REMOTE_CATALOG_ENABLED true, offline bundled assets supplement the remote cache; this deliberately differs from the original empty-publication removal behavior and must be reviewed before non-QA activation.",
+    "Inline quiz option selection is not an authorized contextual ActivityAttempt or certificate evidence."
+  ]
+}

@@ -14,6 +14,92 @@ void main() {
   Cartilha course(String id, String title) =>
       Cartilha(id: id, title: title, author: 'TDS', sections: const []);
 
+  test('flag false ignora API e cache remoto', () async {
+    var calls = 0;
+    final repository = CourseRepository.forCatalog(
+      apiUrl: 'https://api.example',
+      remoteCatalogEnabled: false,
+      httpGet: (_) async {
+        calls++;
+        return http.Response('unexpected', 200);
+      },
+      localLoader: () async => [course('local', 'Curso local')],
+    );
+    expect((await repository.fetchAll()).single.id, 'local');
+    expect(calls, 0);
+  });
+
+  test('flag true consulta API sem autenticação', () async {
+    final repository = CourseRepository.forCatalog(
+      apiUrl: 'https://api.example',
+      remoteCatalogEnabled: true,
+      httpGet: (uri) async {
+        expect(uri.toString(), 'https://api.example/courses');
+        return http.Response(
+          jsonEncode({
+            'courses': [course('remote', 'Remoto').toJson()],
+          }),
+          200,
+        );
+      },
+      localLoader: () async => [course('local', 'Local')],
+    );
+    expect((await repository.fetchAll()).single.id, 'remote');
+  });
+
+  test('flag true usa cache quando API falha', () async {
+    await CourseRepository.forCatalog(
+      apiUrl: 'https://api.example',
+      remoteCatalogEnabled: true,
+      httpGet: (_) async =>
+          http.Response(jsonEncode([course('cached', 'Cache').toJson()]), 200),
+    ).fetchAll();
+    final repository = CourseRepository.forCatalog(
+      apiUrl: 'https://api.example',
+      remoteCatalogEnabled: true,
+      httpGet: (_) async => http.Response('offline', 503),
+      localLoader: () async => [course('local', 'Local')],
+    );
+    expect((await repository.fetchAll()).map((item) => item.id), [
+      'cached',
+      'local',
+    ]);
+  });
+
+  test('flag true sem cache recorre aos assets locais', () async {
+    final repository = CourseRepository.forCatalog(
+      apiUrl: 'https://api.example',
+      remoteCatalogEnabled: true,
+      httpGet: (_) async => http.Response('offline', 503),
+      localLoader: () async => [course('local', 'Local')],
+    );
+    expect((await repository.fetchAll()).single.id, 'local');
+  });
+
+  test('catálogo remoto independe de LearningContext desligado', () async {
+    const learningContextEnabled = bool.fromEnvironment(
+      'LEARNING_CONTEXT_ENABLED',
+    );
+    expect(learningContextEnabled, isFalse);
+    final repository = CourseRepository.forCatalog(
+      apiUrl: 'https://api.example',
+      remoteCatalogEnabled: true,
+      httpGet: (_) async =>
+          http.Response(jsonEncode([course('remote', 'Remoto').toJson()]), 200),
+    );
+    expect((await repository.fetchAll()).single.id, 'remote');
+  });
+
+  test('flag true nunca mostra catálogo vazio se assets existem', () async {
+    final repository = CourseRepository.forCatalog(
+      apiUrl: 'https://api.example',
+      remoteCatalogEnabled: true,
+      httpGet: (_) async => http.Response('{"courses":[]}', 200),
+      localLoader: () async => [course('local', 'Local')],
+    );
+    expect((await repository.fetchAll()).single.id, 'local');
+  });
+
   test('usa catálogo remoto e mantém ordenação', () async {
     final repository = CourseRepository(
       apiUrl: 'https://api.example/',
