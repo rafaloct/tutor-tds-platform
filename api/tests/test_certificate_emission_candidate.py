@@ -169,14 +169,14 @@ def test_staging_requires_real_https_staging_transport(candidate):
     settings = replace(
         client.app.state.settings,
         environment="staging",
-        certificate_candidate_url="https://certificate-candidate-staging.example",
+        certificate_candidate_url="https://tutor-tds-cert-staging.tdsipex.workers.dev",
     )
     request = SimpleNamespace(
         app=SimpleNamespace(state=SimpleNamespace(settings=settings)),
     )
     transport = _transport(request)
     assert isinstance(transport, CandidateTransport)
-    assert transport.base_url == "https://certificate-candidate-staging.example"
+    assert transport.base_url == "https://tutor-tds-cert-staging.tdsipex.workers.dev"
 
     # The API client still owns an injected synthetic exchange. Staging must
     # reject it instead of turning a fake into TESTED-STAGING evidence.
@@ -185,8 +185,9 @@ def test_staging_requires_real_https_staging_transport(candidate):
     assert not exchange.calls
 
     for invalid_url in (
-        "http://certificate-candidate-staging.example",
-        "https://certificate-candidate.example",
+        "http://tutor-tds-cert-staging.tdsipex.workers.dev",
+        "https://certificate-candidate-staging.example",
+        "https://tutor-tds-gateway.tdsipex.workers.dev",
         "https://localhost",
     ):
         invalid = replace(settings, certificate_candidate_url=invalid_url)
