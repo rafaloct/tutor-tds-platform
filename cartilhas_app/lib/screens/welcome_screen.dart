@@ -1,20 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/auth/data/auth_repository.dart';
+import '../features/auth/data/external_identity_service.dart';
 import '../features/auth/models/auth_session.dart';
+import '../features/auth/models/external_auth_result.dart';
 import '../features/auth/presentation/account_login_dialog.dart';
-import '../features/certificates/data/certificate_service.dart';
+import '../features/auth/presentation/external_profile_completion_screen.dart';
 import '../features/profile/data/profile_data_store.dart';
-import '../services/privacy_preferences.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_brand_stripe.dart';
 import 'home_screen.dart';
-import 'onboarding_screen.dart';
-import 'privacy_screen.dart';
-import '../features/analytics/telemetry_route.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
@@ -31,21 +30,34 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _cpfController = TextEditingController();
-  bool _privacyConsent = false;
-  late final ProfileDataStore _profileDataStore;
-
-  final phoneMask = MaskTextInputFormatter(mask: '(##) #####-####');
-  final cpfMask = MaskTextInputFormatter(mask: '###.###.###-##');
+  StreamSubscription<void>? _externalSubscription;
+  bool _externalListenerReady = false;
+  bool _externalBusy = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _profileDataStore = widget.profileDataStore ?? SecureProfileDataStore();
     _checkExistingUser();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_externalListenerReady) return;
+    _externalListenerReady = true;
+    final external = context.read<ExternalIdentityService>();
+    if (!external.isConfigured) return;
+    _externalSubscription = external.sessionChanges.listen((_) {
+      _exchangeExternalSession();
+    });
+    scheduleMicrotask(_exchangeExternalSession);
+  }
+
+  @override
+  void dispose() {
+    _externalSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _checkExistingUser() async {
@@ -53,258 +65,165 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name') ?? '';
     if (name.isNotEmpty && mounted) {
-      final hasSeenPrivacyNotice = await PrivacyPreferences.hasSeenNotice();
-      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        trackedRoute(
-          pageId: hasSeenPrivacyNotice ? 'home' : 'privacy_consent',
-          featureId: hasSeenPrivacyNotice ? null : 'privacy_consent',
-          builder: (_) => hasSeenPrivacyNotice
-              ? const HomeScreen()
-              : const PrivacyConsentScreen(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
       );
     }
   }
 
-  Future<void> _saveData() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    await _profileDataStore.write(
-      ProfileData(
-        name: _nameController.text,
-        phone: _phoneController.text,
-        cpf: _cpfController.text,
-      ),
-    );
-    await PrivacyPreferences.saveDecision(consent: _privacyConsent);
-
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      trackedRoute(
-        pageId: 'onboarding',
-        featureId: 'onboarding',
-        builder: (context) => const OnboardingScreen(),
-      ),
-    );
-  }
-
-  Future<void> _createOnlineAccount() async {
-    if (!_formKey.currentState!.validate()) return;
-    final session = await _showAccountDialog(register: true);
-    if (session == null || !mounted) return;
-    await _saveData();
-  }
-
-  Future<void> _loginOnline() async {
-    final session = await showAccountLoginDialog(context);
-    if (session == null || !mounted) return;
+  Future<void> _finishSession(AuthSession session) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_name', session.user.name);
     if (!mounted) return;
+    if (widget.skipExistingUserRedirect && Navigator.canPop(context)) {
+      Navigator.of(context).pop(session);
+      return;
+    }
     Navigator.pushReplacement(
       context,
-      trackedRoute(
-        pageId: 'privacy_consent',
-        featureId: 'privacy_consent',
-        builder: (_) => const PrivacyConsentScreen(),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
     );
   }
 
-  Future<AuthSession?> _showAccountDialog({required bool register}) async {
-    final auth = context.read<AuthRepository>();
-    final dialogFormKey = GlobalKey<FormState>();
-    var cpfValue = register ? _cpfController.text : '';
-    var passwordValue = '';
-    var obscurePassword = true;
-    var busy = false;
-    String? errorMessage;
+  Future<void> _explore() async {
+    if (widget.skipExistingUserRedirect && Navigator.canPop(context)) {
+      Navigator.of(context).pop();
+      return;
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+    );
+  }
 
-    final result = await showDialog<AuthSession>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          Future<void> submit() async {
-            if (!dialogFormKey.currentState!.validate() || busy) return;
-            setDialogState(() {
-              busy = true;
-              errorMessage = null;
-            });
-            try {
-              final session = register
-                  ? await auth.register(
-                      name: _nameController.text.trim(),
-                      cpf: _cpfController.text,
-                      phone: _phoneController.text,
-                      password: passwordValue,
-                    )
-                  : await auth.login(cpf: cpfValue, password: passwordValue);
-              if (dialogContext.mounted) {
-                Navigator.of(dialogContext).pop(session);
-              }
-            } on AuthException catch (error) {
-              if (!dialogContext.mounted) return;
-              setDialogState(() {
-                busy = false;
-                errorMessage = error.message;
-              });
-            }
-          }
-
-          return AlertDialog(
-            title: Text(register ? 'Criar conta Tutor TDS' : 'Entrar na conta'),
-            content: Form(
-              key: dialogFormKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      register
-                          ? 'Sua conta ajuda a sincronizar o progresso quando houver internet.'
-                          : 'Use seu CPF e sua senha. O CPF não fica salvo neste acesso.',
-                    ),
-                    if (!register) ...[
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        key: const ValueKey('account-login-cpf'),
-                        initialValue: cpfValue,
-                        decoration: const InputDecoration(
-                          labelText: 'CPF da conta',
-                          prefixIcon: Icon(Icons.badge_outlined),
-                        ),
-                        inputFormatters: [
-                          MaskTextInputFormatter(mask: '###.###.###-##'),
-                        ],
-                        keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.next,
-                        onChanged: (value) => cpfValue = value,
-                        validator: (value) =>
-                            CertificateService.isValidCpf(value ?? '')
-                            ? null
-                            : 'Informe um CPF válido',
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      key: const ValueKey('account-password'),
-                      obscureText: obscurePassword,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      autofillHints: register
-                          ? const [AutofillHints.newPassword]
-                          : const [AutofillHints.password],
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          tooltip: obscurePassword
-                              ? 'Mostrar senha'
-                              : 'Ocultar senha',
-                          onPressed: busy
-                              ? null
-                              : () => setDialogState(
-                                  () => obscurePassword = !obscurePassword,
-                                ),
-                          icon: Icon(
-                            obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                        ),
-                      ),
-                      validator: (value) => (value?.length ?? 0) < 12
-                          ? 'Use pelo menos 12 caracteres'
-                          : null,
-                      onChanged: (value) => passwordValue = value,
-                      textInputAction: register
-                          ? TextInputAction.next
-                          : TextInputAction.done,
-                      onFieldSubmitted: register ? null : (_) => submit(),
-                    ),
-                    if (register) ...[
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        key: const ValueKey('account-password-confirmation'),
-                        obscureText: obscurePassword,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        autofillHints: const [AutofillHints.newPassword],
-                        decoration: const InputDecoration(
-                          labelText: 'Confirme a senha',
-                          prefixIcon: Icon(Icons.lock_outline),
-                        ),
-                        validator: (value) => value != passwordValue
-                            ? 'As senhas precisam ser iguais'
-                            : null,
-                        textInputAction: TextInputAction.done,
-                        onFieldSubmitted: (_) => submit(),
-                      ),
-                    ],
-                    if (errorMessage != null) ...[
-                      const SizedBox(height: 12),
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          errorMessage!,
-                          key: const ValueKey('account-error'),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ),
-                      ),
-                    ],
-                    if (busy) ...[
-                      const SizedBox(height: 16),
-                      const LinearProgressIndicator(),
-                      const SizedBox(height: 8),
-                      Text(
-                        register ? 'Criando conta...' : 'Entrando...',
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+  Future<void> _exchangeExternalSession() async {
+    if (_externalBusy || !mounted) return;
+    final external = context.read<ExternalIdentityService>();
+    if (!external.isConfigured) return;
+    setState(() {
+      _externalBusy = true;
+      _error = null;
+    });
+    try {
+      final result = await external.exchangeCurrentSession();
+      if (!mounted || result == null) return;
+      if (result.isAuthenticated) {
+        await _finishSession(result.session!);
+        return;
+      }
+      if (result.status ==
+          ExternalAuthStatus.profileCompletionRequired) {
+        final session = await Navigator.of(context).push<AuthSession>(
+          MaterialPageRoute<AuthSession>(
+            builder: (_) => ExternalProfileCompletionScreen(
+              onboardingToken: result.onboardingToken!,
+              verifiedEmail: result.verifiedEmail,
+              profileDataStore: widget.profileDataStore,
             ),
-            actions: [
-              TextButton(
-                onPressed: busy
-                    ? null
-                    : () => Navigator.of(dialogContext).pop(),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: busy ? null : submit,
-                child: Text(
-                  register ? 'Criar conta segura' : 'Entrar na conta',
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-    return result;
+          ),
+        );
+        if (session != null && mounted) {
+          await _finishSession(session);
+        }
+      }
+    } on AuthException catch (error) {
+      if (mounted) setState(() => _error = error.message);
+    } finally {
+      if (mounted) setState(() => _externalBusy = false);
+    }
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _cpfController.dispose();
-    super.dispose();
+  Future<void> _google() async {
+    setState(() => _error = null);
+    try {
+      final opened =
+          await context.read<ExternalIdentityService>().signInWithGoogle();
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login Google cancelado.')),
+        );
+      }
+    } on AuthException catch (error) {
+      if (mounted) setState(() => _error = error.message);
+    }
+  }
+
+  Future<void> _magicLink() async {
+    var email = '';
+    final formKey = GlobalKey<FormState>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Receber link por e-mail'),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            autofocus: true,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            decoration: const InputDecoration(labelText: 'E-mail'),
+            onChanged: (value) => email = value,
+            validator: (value) {
+              final normalized = (value ?? '').trim();
+              return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                      .hasMatch(normalized)
+                  ? null
+                  : 'Informe um e-mail válido';
+            },
+            onFieldSubmitted: (_) {
+              if (formKey.currentState!.validate()) {
+                Navigator.of(dialogContext).pop(true);
+              }
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.of(dialogContext).pop(true);
+              }
+            },
+            child: const Text('Enviar link'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _error = null);
+    try {
+      await context
+          .read<ExternalIdentityService>()
+          .requestMagicLink(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Link solicitado. Abra o e-mail neste aparelho para continuar.',
+            ),
+          ),
+        );
+      }
+    } on AuthException catch (error) {
+      if (mounted) setState(() => _error = error.message);
+    }
+  }
+
+  Future<void> _cpfLogin() async {
+    final session = await showAccountLoginDialog(context);
+    if (session != null && mounted) await _finishSession(session);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final accountAvailable = context.read<AuthRepository>().isConfigured;
+    final externalConfigured =
+        context.read<ExternalIdentityService>().isConfigured;
     return Scaffold(
       backgroundColor: colors.primary,
       body: SafeArea(
@@ -323,13 +242,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ColoredBox(
                         color: colors.primary,
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 28, 24, 30),
+                          padding: const EdgeInsets.fromLTRB(
+                            24,
+                            28,
+                            24,
+                            30,
+                          ),
                           child: Column(
                             children: [
                               Container(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 300,
-                                ),
+                                constraints:
+                                    const BoxConstraints(maxWidth: 300),
                                 padding: const EdgeInsets.all(18),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
@@ -342,9 +265,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ),
                               const SizedBox(height: 22),
                               Text(
-                                'Aprenda, pratique e avance',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.titleLarge
+                                'Tutor TDS',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
                                     ?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -352,7 +276,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                'Conteúdo TDS e ferramentas de estudo em um só lugar.',
+                                'Explore cursos públicos. Entre somente '
+                                'quando precisar de recursos da sua conta.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.9),
@@ -365,176 +290,77 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       const TdsBrandStripe(),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 26, 24, 28),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            FilledButton.icon(
+                              key: const ValueKey('explore-courses'),
+                              onPressed: _externalBusy ? null : _explore,
+                              icon: const Icon(Icons.explore_outlined),
+                              label: const Text('Explorar cursos'),
+                            ),
+                            const SizedBox(height: 20),
+                            const Divider(),
+                            const SizedBox(height: 12),
+                            FilledButton.tonalIcon(
+                              key: const ValueKey('google-login'),
+                              onPressed: externalConfigured && !_externalBusy
+                                  ? _google
+                                  : null,
+                              icon: const Icon(Icons.account_circle_outlined),
+                              label: const Text('Continuar com Google'),
+                            ),
+                            const SizedBox(height: 10),
+                            FilledButton.tonalIcon(
+                              key: const ValueKey('magic-link'),
+                              onPressed: externalConfigured && !_externalBusy
+                                  ? _magicLink
+                                  : null,
+                              icon: const Icon(Icons.mail_outline),
+                              label: const Text('Receber link por e-mail'),
+                            ),
+                            const SizedBox(height: 18),
+                            Text(
+                              'Já possui cadastro?',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                            TextButton(
+                              key: const ValueKey('cpf-login'),
+                              onPressed: _externalBusy ? null : _cpfLogin,
+                              child: const Text('Entrar com CPF'),
+                            ),
+                            if (!externalConfigured) ...[
+                              const SizedBox(height: 8),
                               Text(
-                                'Bem-vindo ao TDS',
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Preencha seus dados para começar',
-                                style: TextStyle(
-                                  color: colors.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              TextFormField(
-                                controller: _nameController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Nome completo',
-                                  prefixIcon: Icon(Icons.person_outline),
-                                ),
-                                validator: (value) =>
-                                    value!.isEmpty ? 'Obrigatório' : null,
-                                textInputAction: TextInputAction.next,
-                              ),
-                              const SizedBox(height: 14),
-                              TextFormField(
-                                controller: _phoneController,
-                                decoration: const InputDecoration(
-                                  labelText: 'WhatsApp',
-                                  prefixIcon: Icon(Icons.phone_outlined),
-                                ),
-                                inputFormatters: [phoneMask],
-                                keyboardType: TextInputType.phone,
-                                validator: (value) =>
-                                    value!.length < 15 ? 'Inválido' : null,
-                                textInputAction: TextInputAction.next,
-                              ),
-                              const SizedBox(height: 14),
-                              TextFormField(
-                                controller: _cpfController,
-                                decoration: const InputDecoration(
-                                  labelText: 'CPF',
-                                  prefixIcon: Icon(Icons.badge_outlined),
-                                ),
-                                inputFormatters: [cpfMask],
-                                keyboardType: TextInputType.number,
-                                validator: (value) =>
-                                    CertificateService.isValidCpf(value ?? '')
-                                    ? null
-                                    : 'Informe um CPF válido',
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _saveData(),
-                              ),
-                              if (accountAvailable) ...[
-                                const SizedBox(height: 18),
-                                DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: colors.primaryContainer.withValues(
-                                      alpha: 0.45,
-                                    ),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: colors.outlineVariant,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        Text(
-                                          'Conta online opcional',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Entre para preparar a sincronização do seu progresso ou continue usando somente este dispositivo.',
-                                          style: TextStyle(
-                                            color: colors.onSurfaceVariant,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Ao criar a conta, nome, CPF e WhatsApp são enviados à API TDS. A senha não é armazenada no aplicativo.',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: colors.onSurfaceVariant,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        FilledButton.tonalIcon(
-                                          onPressed: _createOnlineAccount,
-                                          icon: const Icon(
-                                            Icons.person_add_alt_1_outlined,
-                                          ),
-                                          label: const Text('Criar conta'),
-                                        ),
-                                        TextButton(
-                                          onPressed: _loginOnline,
-                                          child: const Text('Já tenho conta'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 10),
-                              Text(
-                                'O cadastro fica no dispositivo. Ao emitir um certificado, você verá uma confirmação separada de privacidade.',
+                                'Google e link por e-mail serão habilitados '
+                                'quando o provedor de identidade deste '
+                                'ambiente estiver configurado.',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: colors.onSurfaceVariant,
-                                  height: 1.4,
-                                ),
-                              ),
-                              CheckboxListTile(
-                                contentPadding: EdgeInsets.zero,
-                                value: _privacyConsent,
-                                onChanged: (value) => setState(() {
-                                  _privacyConsent = value ?? false;
-                                }),
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                                title: const Text(
-                                  'Autorizo o envio dos meus dados e do progresso à equipe TDS.',
-                                  style: TextStyle(fontSize: 13),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: TextButton(
-                                  onPressed: () => Navigator.push(
-                                    context,
-                                    trackedRoute(
-                                      pageId: 'privacy_policy',
-                                      resourceId: 'privacy_policy',
-                                      builder: (_) =>
-                                          const PrivacyPolicyScreen(),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Entenda como seus dados são usados',
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: _saveData,
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size(double.infinity, 54),
-                                ),
-                                child: Text(
-                                  accountAvailable
-                                      ? 'Continuar neste dispositivo'
-                                      : 'Entrar',
-                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ),
                             ],
-                          ),
+                            if (_error != null) ...[
+                              const SizedBox(height: 12),
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  _error!,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: colors.error),
+                                ),
+                              ),
+                            ],
+                            if (_externalBusy) ...[
+                              const SizedBox(height: 12),
+                              const LinearProgressIndicator(),
+                            ],
+                          ],
                         ),
                       ),
                     ],
