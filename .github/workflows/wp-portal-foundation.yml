@@ -1,0 +1,22 @@
+name: WordPress portal foundation
+
+on:
+  pull_request:
+    paths: ['wordpress/tds-portal-core/**', 'wordpress/staging/**', '.github/workflows/wp-portal-foundation.yml']
+  push:
+    paths: ['wordpress/tds-portal-core/**', 'wordpress/staging/**', '.github/workflows/wp-portal-foundation.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  php-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP version and lint
+        run: |
+          php -v
+          find wordpress/tds-portal-core wordpress/staging/tests -name '*.php' -print0 | xargs -0 -n1 php -n -l
+      - name: Behavioral contract (WordPress doubles, no service)
+        run: php -n wordpress/staging/tests/test-wp2-foundation.php
