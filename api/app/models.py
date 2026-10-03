@@ -844,6 +844,37 @@ class SessionPresence(Base):
     decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class OfficialAttendanceDecision(Base):
+    """Append-only correction of an original meeting; makeup never adds a meeting."""
+    __tablename__ = "official_attendance_decisions"
+    __table_args__ = (
+        UniqueConstraint("original_session_id", "user_id", "revision", name="uq_official_attendance_revision"),
+        ForeignKeyConstraint(["original_session_id", "class_id"], ["class_sessions.id", "class_sessions.class_id"]),
+        ForeignKeyConstraint(["makeup_session_id", "class_id"], ["class_sessions.id", "class_sessions.class_id"]),
+        ForeignKeyConstraint(["class_id", "program_id", "course_id"], ["classes.id", "classes.program_id", "classes.course_id"]),
+        ForeignKeyConstraint(["enrollment_id", "user_id", "program_id", "course_id"], ["enrollments.id", "enrollments.user_id", "enrollments.program_id", "enrollments.course_id"], ondelete="CASCADE"),
+        CheckConstraint("status IN ('VALID', 'ABSENT', 'JUSTIFIED_ABSENCE', 'PENDING_MAKEUP')"),
+        CheckConstraint("revision >= 1"),
+        CheckConstraint("length(trim(reason)) BETWEEN 3 AND 500"),
+        CheckConstraint("makeup_session_id IS NULL OR makeup_session_id != original_session_id"),
+        CheckConstraint("status != 'PENDING_MAKEUP' OR makeup_session_id IS NOT NULL"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    original_session_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    makeup_session_id: Mapped[str | None] = mapped_column(String(36))
+    class_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    enrollment_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    program_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    course_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False)
+    actor_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    idempotency_key: Mapped[str] = mapped_column(String(180), unique=True, nullable=False)
+
+
 class SessionPresenceDecision(Base):
     __tablename__ = "session_presence_decisions"
     __table_args__ = (

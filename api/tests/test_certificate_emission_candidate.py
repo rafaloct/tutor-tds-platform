@@ -364,7 +364,11 @@ def test_migration_upgrade_preserves_legacy_rows_and_guards_then_empty_rollback(
         upgraded = tuple(connection.execute(text("SELECT * FROM certificates")).one())
         assert upgraded[:len(original)] == original
         assert connection.execute(text("SELECT request_id,is_candidate FROM certificates")).one() == (None, 0)
-        assert connection.execute(text("SELECT name,sql FROM sqlite_master WHERE type='trigger' ORDER BY name")).all() == guards
+        upgraded_guards = dict(connection.execute(text("SELECT name,sql FROM sqlite_master WHERE type='trigger' ORDER BY name")).all())
+        assert set(upgraded_guards) == {name for name, _ in guards} | {
+            "official_attendance_immutable", "official_attendance_no_delete",
+        }
+        assert {name: upgraded_guards[name] for name, _ in guards} == dict(guards)
         assert connection.execute(text("PRAGMA foreign_key_check")).all() == []
     command.downgrade(config, "20261001_0020")
     with engine.connect() as connection:
