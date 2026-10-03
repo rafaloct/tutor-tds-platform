@@ -19,4 +19,6 @@ jobs:
           php -v
           find wordpress/tds-portal-core wordpress/staging/tests -name '*.php' -print0 | xargs -0 -n1 php -n -l
       - name: Behavioral contract (WordPress doubles, no service)
-        run: php -n wordpress/staging/tests/test-wp2-foundation.php
+        run: |
+          php -n wordpress/staging/tests/test-wp2-foundation.php
+          php -n wordpress/staging/tests/test-wp4-editorial.php
