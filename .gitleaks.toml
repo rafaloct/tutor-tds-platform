@@ -1,0 +1,17 @@
+# gitleaks config for the PR secret scan (.github/workflows/secret-scan.yml).
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "SHA-256 digests in evidence JSON (file -> hash maps), not credentials"
+condition = "AND"
+paths = ['''^docs/production/evidence/[^/]+\.json$''']
+regexes = ['''^[0-9a-f]{64}$''']
+
+# Extends the default generic-api-key rule (merged by id); specific rules
+# (github-pat, aws, private-key...) still apply to test fixtures.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Fixture passwords/keys in tests"
+paths = ['''^api/tests/''', '''^cartilhas_app/(test|integration_test)/''']
