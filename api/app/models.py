@@ -157,6 +157,29 @@ class ProgramMembership(Base):
     program: Mapped[Program] = relationship(back_populates="memberships")
 
 
+class ExternalIdentity(Base):
+    __tablename__ = "external_identities"
+    __table_args__ = (
+        UniqueConstraint(
+            "provider",
+            "provider_subject",
+            name="uq_external_identity_provider_subject",
+        ),
+        Index("ix_external_identity_user", "user_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    provider_subject: Mapped[str] = mapped_column(String(255), nullable=False)
+    verified_email: Mapped[str | None] = mapped_column(String(320))
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
 class SessionToken(Base):
     __tablename__ = "sessions"
 
