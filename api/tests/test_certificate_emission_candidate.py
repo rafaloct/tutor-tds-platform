@@ -9,12 +9,14 @@ from pathlib import Path
 import shutil
 import subprocess
 from threading import Lock
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.certificate_emission import _transport
 from app.certificate_transport import CandidateTransport, TransportError, _NoRedirect, canonical
 from app.models import Base, BaselineSourceRecord, CertificateEmissionAttempt, CertificateReference, ClassEnrollment, CohortMembership, ProgramMembership, StudentBaseline
 from test_certificate_requests import requests_api, create, evidence, header, review, ORIGINAL
@@ -154,20 +156,59 @@ def test_crash_after_reservation_before_send_recovers_read_only(candidate):
         assert session.get(CertificateEmissionAttempt, request_id).state == "indeterminate"
 
 
-@pytest.mark.parametrize("environment", ["staging", "production"])
-def test_environment_cannot_enable_candidate_or_injected_transport(candidate, environment):
+def test_production_cannot_enable_candidate_or_injected_transport(candidate):
     client, _, exchange, _ = candidate
-    client.app.state.settings = replace(client.app.state.settings, environment=environment)
+    client.app.state.settings = replace(client.app.state.settings, environment="production")
     assert emit(candidate).status_code == 503
     assert not exchange.calls
 
 
-@pytest.mark.parametrize("overrides", [{"TUTOR_ENVIRONMENT": "production"}, {"TUTOR_ENVIRONMENT": "staging"}, {"CERTIFICATE_CANDIDATE_ENABLED": "false"}])
+def test_staging_requires_real_https_staging_transport(candidate):
+    client, _, exchange, _ = candidate
+    settings = replace(
+        client.app.state.settings,
+        environment="staging",
+        certificate_candidate_url="https://certificate-candidate-staging.example",
+    )
+    request = SimpleNamespace(
+        app=SimpleNamespace(state=SimpleNamespace(settings=settings)),
+    )
+    transport = _transport(request)
+    assert isinstance(transport, CandidateTransport)
+    assert transport.base_url == "https://certificate-candidate-staging.example"
+
+    # The API client still owns an injected synthetic exchange. Staging must
+    # reject it instead of turning a fake into TESTED-STAGING evidence.
+    client.app.state.settings = settings
+    assert emit(candidate).status_code == 503
+    assert not exchange.calls
+
+    for invalid_url in (
+        "http://certificate-candidate-staging.example",
+        "https://certificate-candidate.example",
+        "https://localhost",
+    ):
+        invalid = replace(settings, certificate_candidate_url=invalid_url)
+        invalid_request = SimpleNamespace(
+            app=SimpleNamespace(state=SimpleNamespace(settings=invalid)),
+        )
+        with pytest.raises(Exception):
+            _transport(invalid_request)
+
+
+@pytest.mark.parametrize("overrides", [{"TUTOR_ENVIRONMENT": "production"}, {"CERTIFICATE_CANDIDATE_ENABLED": "false"}])
 def test_worker_activation_cannot_bypass_environment_boundary(candidate, overrides):
     _, _, exchange, _ = candidate
     exchange.env = overrides
     assert emit(candidate).status_code == 503
     assert exchange.writes == 0 and exchange.storage == {}
+
+
+def test_worker_candidate_accepts_staging_environment(candidate):
+    _, _, exchange, _ = candidate
+    exchange.env = {"TUTOR_ENVIRONMENT": "staging"}
+    assert emit(candidate).status_code == 200
+    assert exchange.writes == 1
 
 
 def test_api_candidate_disabled_by_default_and_pending_is_not_emission(candidate):
