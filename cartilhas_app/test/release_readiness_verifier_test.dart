@@ -196,6 +196,39 @@ void main() {
       contains('invalid_physical_evidence'),
     );
   });
+
+  for (final mutation in <String, void Function(List<dynamic>)>{
+    'lista vazia': (gates) => gates.clear(),
+    'gate obrigatório removido': (gates) => gates.removeLast(),
+    'gate obrigatório rebaixado': (gates) =>
+        gates.last['required_for_release_build'] = false,
+    'entrada malformada': (gates) => gates[0] = 'passed',
+    'id duplicado': (gates) => gates[1]['id'] = gates[0]['id'],
+  }.entries) {
+    test('falha fechado com ${mutation.key}', () {
+      _writeStatus(
+        root,
+        buildAllowed: true,
+        physicalStatus: 'passed',
+        artifactStatus: 'superseded',
+        uploadAllowed: false,
+      );
+      final file = File('${root.path}/release/release_status.json');
+      final status =
+          jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+      mutation.value(status['required_physical_evidence'] as List<dynamic>);
+      file.writeAsStringSync(jsonEncode(status));
+
+      final result = ReleaseReadinessVerifier(
+        root: root,
+        verifySigningIdentity: false,
+      ).verify(ReleaseIntent.build);
+      expect(
+        result.issues.map((issue) => issue.code),
+        contains('invalid_physical_evidence'),
+      );
+    });
+  }
 }
 
 void _writeFixture(Directory root) {
@@ -280,11 +313,17 @@ void _writeStatus(
         'matches_current_source': artifactStatus == 'candidate',
       },
       'required_physical_evidence': [
-        {
-          'id': 'evidence_offline_xiaomi',
-          'status': physicalStatus,
-          'required_for_release_build': true,
-        },
+        for (final id in [
+          'certificate_human_approval_e2e',
+          'classroom_cold_offline_xiaomi',
+          'course_versioning_xiaomi',
+          'evidence_offline_xiaomi',
+        ])
+          {
+            'id': id,
+            'status': physicalStatus,
+            'required_for_release_build': true,
+          },
       ],
     }),
   );
