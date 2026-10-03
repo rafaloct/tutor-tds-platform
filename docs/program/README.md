@@ -80,6 +80,7 @@ Agentes devem **migrar o existente**, não recriar o produto.
 - `ROADMAP.md`: epics, dependências e gates.
 - `SERVICE_SETUP_GUIDES.md`: configuração serviço a serviço, smoke tests e recuperação.
 - `FLOWS_AND_HIERARCHIES.md`: fluxos ponta a ponta, hierarquia de domínio e pontos de decisão.
+- `OPERATING_MODEL_SECRETARIAT.md`: processo real observado na secretaria, limites de automação, Chatwoot humano-no-loop e perguntas humanas pendentes.
 
 ## 7. Regra para lacunas
 
