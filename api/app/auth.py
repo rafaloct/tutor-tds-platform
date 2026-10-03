@@ -39,6 +39,7 @@ from .models import (
     CourseVersion,
     CourseVersionTransition,
     Enrollment,
+    ExternalIdentity,
     EvidenceItem,
     LearningEventRecord,
     MediaEventRecord,
@@ -297,6 +298,7 @@ def delete_me(
         session.execute(
             delete(ProgramMembership).where(ProgramMembership.user_id == user_id)
         )
+        session.execute(delete(ExternalIdentity).where(ExternalIdentity.user_id == user_id))
         session.execute(delete(SessionToken).where(SessionToken.user_id == user_id))
         # Keep immutable institutional history but anonymize departed creators.
         # Explicit updates also cover SQLite installations without FK enforcement.
