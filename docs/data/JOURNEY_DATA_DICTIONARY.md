@@ -59,9 +59,12 @@ edição. Nenhum desses IDs pode ser derivado de nome, CPF, telefone ou linha.
 `source+record_id` preserva a proveniência e reserva da ponte. No export atual,
 `registro_id` vem desse `record_id`, não de uma nova ficha gerada pelo app.
 
-Baseline pendente não bloqueia estudo nem exclui o participante, mas precisa
-estar regularizado antes do certificado; pode ser preenchido durante ou depois do
-curso (Issue #6, comentário 5965300113). Alvo (Issue #5, comentário
+Baseline pendente não bloqueia estudo nem exclui o participante e pode ser
+preenchido durante ou depois do curso (Issue #6, comentário 5965300113). Baseline
+registrado é requisito de `CAPACITADO` e, por consequência, de
+`CERTIFICADO_VALIDO`; não é pré-requisito de `GENERATED`, que pode ocorrer
+automaticamente no último checkpoint antes de baseline, frequência ou
+assinaturas (contrato v2 do PR #39). Alvo (Issue #5, comentário
 5965837795): baseline como evidência vinculada ao participante, com
 tipo/origem/status; Forms, Jotform, app ou ficha digitalizada são aceitos, sem
 exclusividade de Jotform. Este overlay não exporta tipo/origem/status nem
@@ -110,8 +113,8 @@ são fictícios; não são valores de produção.
 Limite atual de certificado: o seletor da API consultado filtra pessoa, programa,
 curso, turma e `issued_at >= enrolled_at`; não filtra `course_version_id`.
 Assim, a presença de v1/v2 na linha de jornada não comprova emissão naquela
-edição. A flag também não comprova que o gate "baseline regularizado antes do
-certificado" foi aplicado. Integridade/autenticação da emissão continua na
+edição. A referência legada também não basta para derivar `GENERATED`,
+`CAPACITADO` ou `CERTIFICADO_VALIDO`. Integridade/autenticação da emissão continua na
 Issue #5 / PR #39.
 
 Estados alvo do certificado da trilha (Issue #5, comentário 5965837795; candidato
