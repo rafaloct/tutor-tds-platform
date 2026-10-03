@@ -128,6 +128,44 @@ tds_assert( false !== strpos( $tools_html, 'data-tds-tool-state="restricted"' ),
 tds_assert( false === strpos( $tools_html, 'Oculta QA' ), 'ferramentas: hidden não renderiza' );
 tds_assert( false !== strpos( $tools_html, 'data-tds-event="tool_card_click"' ), 'ferramentas: evento declarativo sem transporte' );
 
+$stale_filter = static function () {
+	return array(
+		'state' => 'stale',
+		'items' => array(
+			array( 'title' => 'Conteúdo em cache QA', 'text' => 'Última versão válida.', 'slug' => 'cache-qa' ),
+		),
+	);
+};
+add_filter( 'tds_portal_home_materials', $stale_filter );
+ob_start();
+tds_theme_home_collection( 'tds_portal_home_materials', 'material_click' );
+$stale_html = ob_get_clean();
+remove_filter( 'tds_portal_home_materials', $stale_filter );
+tds_assert( false !== strpos( $stale_html, 'data-tds-state="stale"' ), 'coleção remota: stale explícito' );
+tds_assert( false !== strpos( $stale_html, 'Conteúdo em cache QA' ), 'coleção remota: stale preserva itens válidos' );
+
+$loading_filter = static function () {
+	return array( 'state' => 'loading', 'items' => array() );
+};
+add_filter( 'tds_portal_home_events', $loading_filter );
+ob_start();
+tds_theme_home_collection( 'tds_portal_home_events', 'event_click' );
+$loading_html = ob_get_clean();
+remove_filter( 'tds_portal_home_events', $loading_filter );
+tds_assert( false !== strpos( $loading_html, 'data-tds-state="loading"' ), 'coleção remota: loading explícito' );
+tds_assert( false !== strpos( $loading_html, 'aria-busy="true"' ), 'coleção remota: loading acessível' );
+
+$empty_filter = static function () {
+	return array( 'state' => 'success', 'items' => array() );
+};
+add_filter( 'tds_portal_home_partners', $empty_filter );
+ob_start();
+tds_theme_home_collection( 'tds_portal_home_partners' );
+$empty_html = ob_get_clean();
+remove_filter( 'tds_portal_home_partners', $empty_filter );
+tds_assert( false !== strpos( $empty_html, 'data-tds-state="success"' ), 'coleção remota: sucesso vazio preserva estado do provider' );
+tds_assert( false !== strpos( $empty_html, 'tds-state--empty' ), 'coleção remota: sucesso sem itens renderiza empty' );
+
 // Conteúdo sintético (idempotente por título).
 function tds_page( $title, $template = '', $content = '', $excerpt = '', $password = '' ) {
 	$existing = get_page_by_path( sanitize_title( $title ), OBJECT, 'page' );

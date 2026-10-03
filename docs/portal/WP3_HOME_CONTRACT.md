@@ -47,6 +47,16 @@ composição sem acoplamento antecipado, o tema expõe filtros fail-closed:
 
 Sem provider, nenhum conteúdo fictício é criado.
 
+Os providers de coleção podem devolver a forma explícita:
+
+```text
+{ state: loading|success|empty|stale|unavailable, items: [...] }
+```
+
+Para compatibilidade durante o WP-3, uma lista simples ainda é aceita e equivale
+a `success`; lista vazia sem envelope equivale a `unavailable`. O estado
+`stale` pode renderizar a última lista válida junto ao aviso de desatualização.
+
 ## Estados
 
 Estados remotos de apresentação suportados:
