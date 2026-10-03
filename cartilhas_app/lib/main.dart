@@ -17,8 +17,14 @@ import 'features/learning_events/learning_event_sync_service.dart';
 import 'features/learning_events/learning_event_sync_lifecycle.dart';
 import 'features/analytics/app_telemetry_service.dart';
 import 'features/analytics/telemetry_route.dart';
+import 'features/push/push_notification_provider.dart';
+import 'features/push/push_notification_service.dart';
+import 'screens/chatwoot_screen.dart';
+import 'features/push/push_notification_lifecycle.dart';
 
-void main() {
+final _navigatorKey = GlobalKey<NavigatorState>();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
@@ -28,11 +34,29 @@ void main() {
       systemNavigationBarDividerColor: Colors.transparent,
     ),
   );
-  runApp(const CartilhasApp());
+  final pushService = await createConfiguredPushNotificationService(
+    _navigateFromPush,
+  );
+  runApp(CartilhasApp(pushService: pushService));
+}
+
+void _navigateFromPush(PushNavigationAction action) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final navigator = _navigatorKey.currentState;
+    if (navigator == null || action != PushNavigationAction.support) return;
+    navigator.push(
+      MaterialPageRoute<void>(builder: (_) => const ChatwootScreen()),
+    );
+  });
 }
 
 class CartilhasApp extends StatefulWidget {
-  const CartilhasApp({super.key});
+  const CartilhasApp({
+    super.key,
+    this.pushService = const NoopPushNotificationService(),
+  });
+
+  final PushNotificationService pushService;
 
   @override
   State<CartilhasApp> createState() => _CartilhasAppState();
@@ -49,6 +73,7 @@ class _CartilhasAppState extends State<CartilhasApp> {
 
   @override
   void dispose() {
+    widget.pushService.dispose();
     _themeController.dispose();
     super.dispose();
   }
@@ -96,8 +121,11 @@ class _CartilhasAppState extends State<CartilhasApp> {
             syncService: context.read<LearningEventSyncService>(),
           ),
         ),
+        Provider<PushNotificationService>.value(value: widget.pushService),
       ],
-      child: LearningEventSyncLifecycle(child: const _AppView()),
+      child: PushNotificationLifecycle(
+        child: LearningEventSyncLifecycle(child: const _AppView()),
+      ),
     );
   }
 }
@@ -154,6 +182,7 @@ class _AppViewState extends State<_AppView> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Consumer<ThemeController>(
       builder: (context, themeController, _) => MaterialApp(
+        navigatorKey: _navigatorKey,
         title: 'Tutor TDS',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),

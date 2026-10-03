@@ -24,6 +24,20 @@ class AppConfig {
     'SIGNED_SUPPORT_IDENTITY',
   );
 
+  /// Disabled unless a staging build explicitly opts in. Firebase options are
+  /// non-secret client identifiers supplied only through dart-defines.
+  static const pushNotificationsEnabled = bool.fromEnvironment(
+    'PUSH_NOTIFICATIONS_ENABLED',
+    defaultValue: false,
+  );
+
+  static const firebasePushConfig = FirebasePushConfig(
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY'),
+    appId: String.fromEnvironment('FIREBASE_APP_ID'),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID'),
+  );
+
   /// Enables the remote course catalog via [tutorApiUrl].
   /// Defaults to [false] (safe). Does NOT activate login, classrooms,
   /// journey traceability, or the durable outbox.
@@ -50,4 +64,24 @@ class AppConfig {
 
   static const playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.tutortds_cartilhas';
+}
+
+class FirebasePushConfig {
+  const FirebasePushConfig({
+    required this.apiKey,
+    required this.appId,
+    required this.messagingSenderId,
+    required this.projectId,
+  });
+
+  final String apiKey;
+  final String appId;
+  final String messagingSenderId;
+  final String projectId;
+
+  bool get isComplete =>
+      apiKey.trim().isNotEmpty &&
+      appId.trim().isNotEmpty &&
+      messagingSenderId.trim().isNotEmpty &&
+      projectId.trim().isNotEmpty;
 }
