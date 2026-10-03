@@ -25,12 +25,27 @@ add_action(
 	'admin_init',
 	static function () {
 		register_setting(
-			'tds_portal',
+			'general',
 			TDS_Public_Config::APP_URL_OPTION,
 			array(
+				'type' => 'string',
+				'show_in_rest' => false,
 				'sanitize_callback' => array( 'TDS_Public_Config', 'validated_url' ),
 				'default' => '',
 			)
+		);
+		add_settings_field(
+			TDS_Public_Config::APP_URL_OPTION,
+			'Acesso ao app TDS (HTTPS)',
+			static function () {
+				if ( ! current_user_can( 'manage_options' ) ) { return; }
+				$config = TDS_Public_Config::get();
+				echo '<input type="url" class="regular-text" id="tds_app_access_url" name="tds_app_access_url" value="' . esc_attr( $config['app_access_url'] ) . '" aria-describedby="tds-app-help">';
+				echo '<p class="description" id="tds-app-help">URL pública oficial. Vazio ou inválido mantém o acesso indisponível.</p>';
+			},
+			'general',
+			'default',
+			array( 'label_for' => TDS_Public_Config::APP_URL_OPTION )
 		);
 	}
 );

@@ -18,8 +18,8 @@ final class TDS_Public_Courses_Controller {
 				'callback' => array( $this, 'get_courses' ),
 				'permission_callback' => '__return_true',
 				'args' => array(
-					'page' => array( 'default' => 1, 'sanitize_callback' => 'absint' ),
-					'per_page' => array( 'default' => 12, 'sanitize_callback' => 'absint' ),
+					'page' => array( 'default' => 1, 'type' => 'integer', 'minimum' => 1 ),
+					'per_page' => array( 'default' => 12, 'type' => 'integer', 'minimum' => 1, 'maximum' => 50 ),
 				),
 			)
 		);

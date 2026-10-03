@@ -7,10 +7,11 @@ final class TDS_Public_Config {
 	const APP_URL_OPTION = 'tds_app_access_url';
 
 	public static function get() {
-		$url = get_option( self::APP_URL_OPTION, '' );
+		$url = self::validated_url( get_option( self::APP_URL_OPTION, '' ) );
 		return array(
-			'app_access_url'  => self::validated_url( $url ),
+			'app_access_url'  => $url,
 			'integration_state' => array(
+				'app' => '' === $url ? 'unavailable' : 'ready',
 				'courses'  => 'unavailable',
 				'analytics' => 'disabled',
 				'support'  => 'disabled',
@@ -20,12 +21,12 @@ final class TDS_Public_Config {
 
 	public static function validated_url( $value ) {
 		$value = is_string( $value ) ? trim( $value ) : '';
-		if ( '' === $value || ! wp_http_validate_url( $value ) ) {
+		if ( '' === $value || preg_match( '/[\x00-\x20\x7f\\\\]/', $value ) || ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
 			return '';
 		}
 
 		$parts = wp_parse_url( $value );
-		if ( empty( $parts['scheme'] ) || ! in_array( strtolower( $parts['scheme'] ), array( 'https' ), true ) ) {
+		if ( empty( $parts['host'] ) || empty( $parts['scheme'] ) || 'https' !== strtolower( $parts['scheme'] ) || isset( $parts['user'] ) || isset( $parts['pass'] ) || ( isset( $parts['port'] ) && 443 !== $parts['port'] ) || false === strpos( $parts['host'], '.' ) || preg_match( '/\.(?:localhost|local|internal)$/i', $parts['host'] ) || ( filter_var( trim( $parts['host'], '[]' ), FILTER_VALIDATE_IP ) && ! filter_var( trim( $parts['host'], '[]' ), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) ) {
 			return '';
 		}
 

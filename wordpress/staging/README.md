@@ -1,10 +1,15 @@
 # WP-2 local staging boundary
 
-This directory records the local contract checks for the portal foundation.
-No WordPress staging environment, domain, database, credentials, analytics,
-support inbox, or upstream API has been configured in this slice. Staging
-status is therefore **UNKNOWN**, and production status is unchanged.
+This directory contains PHP behavioral tests with explicit WordPress doubles,
+not a running WordPress installation. Run:
+php -n wordpress/staging/tests/test-wp2-foundation.php
 
-The future staging environment must be isolated, use synthetic/editorial
-content only, and keep the public course adapter pointed at an approved
-staging API before any `ready` state is enabled.
+Windows wrapper tests/test-wp2-foundation.ps1 -Php <php.exe> also lints.
+It replaces the earlier regex-only check, which was not runtime proof.
+
+No WordPress staging environment, domain, database, credentials, analytics,
+support inbox or upstream API is configured. Staging is UNKNOWN.
+Future staging must isolate DB/uploads, use synthetic/editorial content,
+SMTP sink and noindex, preserve the legacy quarantine and prove reversibility.
+Theme validation and actual WordPress REST/settings integration are separate
+gates; no deploy or external provisioning occurs in this slice.
