@@ -1,19 +1,19 @@
 # CURRENT STATE
 
-## 2026-10-03 Issue #5 local candidate checkpoint
+## 2026-10-03 Issue #5 — candidato institucional v2
 
-Authenticated synthetic API→Worker candidate implemented in an exclusive clone;
-final issuance remains blocked. Uses existing request/approval, canonical v2
-enrollment, baseline and references. Additive0021 reserves transport durably;
-timeout/replay recover by signed lookup only. Candidate references are excluded
-from official wallet/export and ledger data is removed on account erasure.
-Development opt-in/loopback only; Worker legacy KV and real services untouched.
-PR #24 still draft is no institutional contract substitute. Approved formation80h
-decision requires validated combined evidence/exceptions; those representations,
-Jotform and final issuer/signature remain gates. Focal actual producer/consumer
-tests substitute only HTTP/KV; SQLite migration tests do not homologate PostgreSQL
-or installed/physical issuance. Exact-SHA results/review/CI belong on candidate PR.
-See `production/ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md` and matrices.
+Contrato direto do usuário implementado em development opt-in: 80h formais por
+curso, encontros configurados/min70%, checkpoints obrigatórios determinísticos,
+baseline multiorigem e fichas contextualizadas. Último checkpoint gera candidato
+sintético automaticamente, antes de assinaturas; CAPACITADO e validade são
+projeções separadas. Lifecycle GENERATED→PENDING_INSTRUCTOR_VALIDATION→
+PENDING_COORDINATOR_SIGNATURE→VALID exige papéis e evidências; ativação institucional
+real permanece bloqueada. Dispatch auditado pending_dispatch para fluxo
+tdsdados@gmail.com (endereço canônico na documentação/registro), sem SMTP.
+Migrações0021/0022 aditivas, reserva durável/reconciliação lookup e segregação
+oficial preservadas. Legado/VPS/serviços reais não foram alterados ou acionados.
+Plano citado não anexado; decisão do usuário autoriza o recorte, não homologação.
+Ver production/ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md e matrizes.
 
 - CURRENT RELEASE: código `1.4.0+13`; produção histórica `1.2.0+11`, não revalidada na Play. Release bloqueada por seus gates.
 - CURRENT WAVE: 2 — Dynamic Learning; fatia 2A aprovada funcionalmente em staging. Wave 1 aprovada em `0081ab0`.

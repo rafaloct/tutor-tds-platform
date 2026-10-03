@@ -38,3 +38,60 @@ Offline: snapshot não cria autorização nova. Revogação conhecida invalida c
 fila preserva dono, ambiente, contexto, chave idempotente e timestamp. Retry
 idêntico não duplica; retry divergente gera conflito. Não atribuir registros
 legados ambíguos a uma turma por conveniência.
+
+
+## 2026-10-03 — contrato institucional autorizado, candidato v2
+
+Decisões diretas do usuário registradas na Issue #5, comentário 5965837795,
+substituem o bloqueio por indefinição de negócio nesta fatia. O Plano de Trabalho
+citado não foi anexado nem lido. Cada curso possui 80h formais; cronômetro não é
+prova desse requisito. Duas unidades de 80h totalizam 160h, mas Classroom atual
+vincula um curso/edição: este candidato projeta por curso/matrícula contextual,
+sem inventar agregação de dois cursos ou atribuir créditos históricos ambíguos.
+
+Política aditiva e congelada por oferta configura encontros (zero bloqueia),
+checkpoints obrigatórios e responsável operacional autorizado. Apenas presença
+confirmed_present conta: 10 × presentes >= 7 × encontros configurados.
+Ausência justificada e exceção accepted não criam presença; exceções mantêm
+pending_human_validation, justificativa e responsável até decisão humana.
+
+EvidenceItem/ReviewDecision servem como EvidenceRecord contextual de tipo,
+origem, status, participante, edição e hash da política. Baseline aceita origens
+Google Forms, Jotform, app ou ficha digitalizada sem integração fictícia;
+StudentBaseline contextual existente também é aceito. Fichas assinadas pelo
+instrutor precisam cobrir todos os encontros configurados do participante.
+Referências documentais privadas/hash são atestação humana auditável, não leitura
+externa nem assinatura criptográfica de PDF.
+
+Todos os checkpoints configurados são avaliados no backend. O adaptador inicial
+suporta assessment editorial imutável, com todas as respostas determinísticas;
+não impõe nota mínima nova. Tipos ainda sem representação determinística falham
+explicitamente. Quiz não é requisito universal: o discriminador admite novos
+adaptadores futuros sem alterar retroativamente a política. IDs configurados
+são requisitos distintos; reutilizar uma fonte exige conclusão explícita de
+cada ID, sem aproveitar evento agregado lesson_completed ou tentativa antiga.
+
+O último checkpoint gera automaticamente pelo API→adaptador→Worker candidato,
+antes de baseline, frequência ou assinaturas. O comando v2 fixa carga formal,
+hash da política e prova dos checkpoints, sem depender da baseline posterior.
+Preservados reserva durável, autenticação, idempotência e reconciliação somente
+por lookup após timeout. Crash após reserva antes do primeiro envio conserva
+estado indeterminado; ausência no KV não autoriza reenviar nem reset automático.
+
+CAPACITADO = baseline registrada AND frequência >=70% AND trilha obrigatória
+concluída AND certificado de trilha gerado. CERTIFICADO_VALIDO = CAPACITADO AND
+fichas regularizadas/assinadas pelo instrutor AND assinatura da coordenação.
+Estados: GENERATED → PENDING_INSTRUCTOR_VALIDATION →
+PENDING_COORDINATOR_SIGNATURE → VALID. VALID aqui é projeção sintética do contrato;
+institutional_release permanece blocked. Geração registra responsável operacional
+configurado (rótulo da responsável Eliza separado do papel técnico, sem mapear identidade real) e evidência de fluxo para
+tdsdados@gmail.com em pending_dispatch, sent=false, recibo=null. Nenhum SMTP/VPS
+foi chamado e nenhum envio foi inventado. Comportamento legado é preservado.
+
+Ativação exige development e opt-in; transporte HTTP isolado em loopback sem
+proxy/redirecionamento, Worker com namespace/binding candidato separados. O novo
+/emit permanece bloqueado por gate deliberado de homologação/ativação real, não
+por falta de decisão sobre horas/Jotform. Rotas oficiais legadas seguem contrato
+anterior; candidato nunca aparece em carteira/export oficial. Migração0022 apenas
+adiciona política JSON/lifecycle nullable; recusa downgrade com dados novos.
+SQLite descartável não homologa PostgreSQL, deploy, provedor instalado ou PDF.

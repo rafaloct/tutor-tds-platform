@@ -2,9 +2,9 @@
 
 | Issue #5 candidate (2026-10-03) | Authorization / behavior | Evidence / limit |
 | --- | --- | --- |
-| POST `/certificate-requests/{id}/emission-candidate` | Owner + approved request + current canonical enrollment/edition/baseline; development opt-in only; authenticated local transport | Actual API/transport/Worker tests with simulated HTTP/KV; no installed E2E |
+| POST `/certificate-requests/{id}/emission-candidate` | Owner/current canonical enrollment; v1 approved request + baseline, v2 full configured trail (pending permitted, rejected blocked); development opt-in, authenticated local transport | Actual API/transport/Worker tests with simulated HTTP/KV; no installed E2E |
 | POST `/certificate-requests/{id}/reconcile-candidate` | Owner/context; authenticated lookup only, no resend after timeout/absent lookup | Durable SQL reservation, one logical reference, synthetic data only |
-| POST `/certificate-requests/{id}/emit` | Final issuance always blocked; institutional combined evidence unrepresented | 80h formation/exceptions, Jotform/wallet evidence and final issuer gates remain |
+| POST `/certificate-requests/{id}/emit` | Final issuance blocked by deliberate institutional activation/homologation gate | Business formulas implemented in synthetic v2; installed issuer/signature/release not homologated |
 
 Protocol/persistence/activation limits: `ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md`.
 
@@ -124,3 +124,11 @@ após revogação conhecida e nova perda de rede. A sincronização confirmou do
 eventos offline uma vez; pedido de PDF também recebido uma vez com zero crédito.
 Histórico prévio preservado (332 eventos/77 registros). Sem endpoint novo ou
 deploy; ver evidence/classroom-access-physical-acceptance-2026-10-01.json.
+
+| Institutional v2 candidate | Authorization / behavior | Limit |
+| --- | --- | --- |
+| PUT `/classes/{id}/certificate-policy-candidate` | Coordinator/admin; immutable course80h, meetings, mandatory checkpoints, operator | Development opt-in; assessment adapter only, unsupported types fail |
+| POST `/certificate-requests/{id}/candidate-checkpoints/{checkpoint}` | Owner exact context; all answers deterministic; final checkpoint generates automatically | Signed real consumer with simulated external HTTP/KV |
+| POST `/certificate-requests/{id}/candidate-evidence` | Authorized staff; baseline any origin, instructor sheets explicit meeting coverage, exception pending human | Private document/hash attestation, no external reads |
+| GET `/certificate-requests/{id}/candidate-status` | Owner/authorized staff | CAPACITADO separate from certificate validity; institutional release blocked |
+| POST `/certificate-requests/{id}/candidate-lifecycle` | Ordered four states; instructor validates; active program coordinator signs | Synthetic VALID projection; no PDF signature/deploy |

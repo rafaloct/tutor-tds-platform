@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-03",
+  "branch": "agent/issue-5-authenticated-emission-20261003",
+  "base_commit": "e92dc8b617cede9243b0100996e7af95f9722ad9",
+  "business_decision": "https://github.com/rafaloct/tutor-tds-platform/issues/5#issuecomment-5965837795",
+  "institutional_document_read": false,
+  "scope": "development opt-in synthetic actual API/adapter/Worker; HTTP/KV only substituted",
+  "tests": {
+    "command": "candidate-env/Scripts/python.exe -m pytest tests/test_certificate_policy_candidate.py tests/test_certificate_emission_candidate.py tests/test_certificate_requests.py tests/test_certificate_reference_context.py tests/test_certificate_approval_gate.py tests/test_auth.py tests/test_journey_export_tools.py tests/test_presence.py tests/test_evidence.py -q -o addopts='' --tb=short",
+    "working_directory": "api",
+    "exit_code": 0,
+    "passed": 115,
+    "duration_seconds": 75.59,
+    "skipped": 0,
+    "warnings": 2,
+    "policy_cases": 22,
+    "worker_cases": 14,
+    "worker_command": "node --test",
+    "worker_exit_code": 0,
+    "compile_exit_code": 0,
+    "diff_check_exit_code": 0
+  },
+  "schema": {
+    "migration": "20261003_0022",
+    "engine": "disposable SQLite",
+    "populated_upgrade": "0020 to head preserved legacy certificate/guards; includes0021 and0022",
+    "empty_rollback": "head to0020 preserved legacy certificate/guards",
+    "nonempty_downgrade": "refused when policy/lifecycle present",
+    "postgresql_homologated": false
+  },
+  "contract": {
+    "course_formal_hours": 80,
+    "attendance": "10 * confirmed_present >= 7 * configured_meetings; zero configuration refused",
+    "checkpoint_adapter": "assessment only; mandatory configured IDs all deterministically completed; unsupported kinds explicitly refused",
+    "automatic_generation": "last required checkpoint triggers signed candidate transport before baseline/attendance/signatures",
+    "capacitado": "baseline AND attendance>=70% AND required trail complete AND trail certificate generated",
+    "certificate_valid": "capacitado AND full attendance sheet coverage signed by instructor AND coordinator certificate signature",
+    "states": [
+      "GENERATED",
+      "PENDING_INSTRUCTOR_VALIDATION",
+      "PENDING_COORDINATOR_SIGNATURE",
+      "VALID"
+    ],
+    "dispatch": {
+      "target_email": "tdsdados@gmail.com",
+      "state": "pending_dispatch",
+      "sent": false,
+      "receipt": null
+    }
+  },
+  "remaining_gates": [
+    "institutional activation deliberately blocked",
+    "installed issuer and real PDF signature not homologated",
+    "two-course160h aggregation has no canonical mapping in single-course Classroom; per-course context implemented",
+    "adapters for checkpoint kinds other than assessment not installed",
+    "PostgreSQL concurrency/upgrade not homologated",
+    "no SMTP/VPS/deploy/merge/services real"
+  ]
+}

@@ -148,3 +148,14 @@
     PRODUCTION_RELEASE_READY=false até GitHub/proveniência, offsite+restore,
     schema/upgrade e decisão editorial de fallback offline. Measurement v1
     mantém baseline papel→planilha; etapas não validadas ficam null.
+
+26. 2026-10-03: decisões diretas do usuário na Issue #5 comentário5965837795
+    autorizam curso80h formal, presença70% de encontros configurados, baseline
+    multiorigem e checkpoints integrais. CAPACITADO e CERTIFICADO_VALIDO são
+    fórmulas separadas. Geração antecede validação humana; lifecycle de quatro
+    estados, instrutor assina fichas com cobertura da oferta, coordenação assina
+    certificado. Recorte sintético v2 reutiliza EvidenceItem/StudentBaseline;
+    último checkpoint gera automaticamente e registra pending_dispatch para
+    tdsdados@gmail.com, sem SMTP/VPS real. Plano citado não anexado. Gate real
+    permanece deliberadamente fechado; legenda antiga por horas/approval só se
+    aplica a ofertas sem política nova. Não mudar checkpoints retroativamente.

@@ -321,6 +321,7 @@ class Classroom(Base):
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    certificate_policy: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     course_version_id: Mapped[str | None] = mapped_column(String(36))
     program_id: Mapped[str] = mapped_column(
         ForeignKey("programs.id"), nullable=False
@@ -429,6 +430,7 @@ class CertificateReference(Base):
     id: Mapped[str] = mapped_column(String(120), primary_key=True)
     request_id: Mapped[str | None] = mapped_column(ForeignKey("certificate_requests.id", ondelete="SET NULL"), unique=True)
     is_candidate: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    lifecycle_state: Mapped[str | None] = mapped_column(String(48))
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     course_id: Mapped[str] = mapped_column(ForeignKey("courses.id"), nullable=False)
     program_id: Mapped[str | None] = mapped_column(ForeignKey("programs.id"))

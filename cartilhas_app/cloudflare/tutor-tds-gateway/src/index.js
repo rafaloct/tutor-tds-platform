@@ -365,12 +365,17 @@ async function handleCertificateCandidate(request, env) {
   let command;
   if (request.method === 'POST') {
     try { command = JSON.parse(raw); } catch { return reply({ error: 'candidate_invalid_json' }, 422); }
-    if (!command || Array.isArray(command) || Object.keys(command).sort().join('|') !== CANDIDATE_FIELDS.join('|') ||
-        command.protocol !== 'certificate-candidate-v1' || command.synthetic !== true || command.id !== id ||
+    const policyMode = command?.protocol === 'certificate-candidate-v2';
+    const fields = policyMode ? [...CANDIDATE_FIELDS, 'formal_hours', 'policy_hash', 'checkpoint_evidence_digest', 'operational_owner_id'].sort() : CANDIDATE_FIELDS;
+    if (!command || Array.isArray(command) || Object.keys(command).sort().join('|') !== fields.join('|') ||
+        !['certificate-candidate-v1', 'certificate-candidate-v2'].includes(command.protocol) || command.synthetic !== true || command.id !== id ||
         !Number.isSafeInteger(command.revision) || command.revision < 1 ||
-        !Number.isSafeInteger(command.baseline_revision) || command.baseline_revision < 1 ||
+        !Number.isSafeInteger(command.baseline_revision) || (policyMode ? command.baseline_revision !== 0 || command.baseline_id !== null : command.baseline_revision < 1) ||
         !Number.isSafeInteger(command.required_seconds) || command.required_seconds < 0 ||
-        CANDIDATE_FIELDS.filter((key) => !['synthetic', 'revision', 'baseline_revision', 'required_seconds', 'class_id'].includes(key)).some((key) => typeof command[key] !== 'string' || command[key].length < 1 || command[key].length > 240) ||
+        (policyMode && (command.formal_hours !== 80 || command.required_seconds !== 80 * 3600 ||
+          !/^[0-9a-f]{64}$/.test(command.policy_hash) || !/^[0-9a-f]{64}$/.test(command.checkpoint_evidence_digest) ||
+          typeof command.operational_owner_id !== 'string' || !command.operational_owner_id.length || command.operational_owner_id.length > 36)) ||
+        CANDIDATE_FIELDS.filter((key) => !['synthetic', 'revision', 'baseline_revision', 'required_seconds', 'class_id', ...(policyMode ? ['baseline_id'] : [])].includes(key)).some((key) => typeof command[key] !== 'string' || command[key].length < 1 || command[key].length > 240) ||
         (typeof command.class_id !== 'string' || !command.class_id.length || command.class_id.length > 36)) {
       return reply({ error: 'candidate_context_invalid' }, 422);
     }
