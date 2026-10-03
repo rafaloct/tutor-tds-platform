@@ -583,7 +583,35 @@ Deve projetar estados e resultados, sem transformar pendência em resultado nega
 
 Certificado, mentoria e follow-up devem gerar/consumir encaminhamentos sem duplicar pessoa/turma.
 
-## 18. Perguntas humanas ainda não respondidas pelas fontes
+## 18. Integração com Drive: whitelist, não varredura
+
+A raiz compartilhada contém materiais de naturezas diferentes e pelo menos um diretório claramente associado a outro projeto. Portanto **não fazer crawling/indexação automática da raiz inteira**.
+
+Se o Tutor TDS integrar o Drive, usar um mapa explícito configurável de pastas autorizadas, por exemplo:
+
+```text
+templates_mds_folder_id
+templates_uft_folder_id
+evidence_planning_folder_id
+evidence_mobilization_folder_id
+evidence_courses_folder_id
+course_enrollment_folder_id opcional
+brand_assets_folder_id
+```
+
+Regras:
+- IDs ficam em configuração por ambiente, não hardcoded em widgets;
+- app não recebe credencial de Drive administrativa;
+- backend lista somente pastas whitelisted;
+- novos arquivos não viram automaticamente evidência validada;
+- mover/renomear arquivo no Drive não deve quebrar identidade se `file_id` for preservado;
+- permissões do Drive continuam valendo;
+- metadados sensíveis não são copiados para BI por conveniência;
+- arquivo de outro projeto nunca entra em RAG, mídia ou evidência TDS por busca ampla.
+
+Isso reduz risco de vazamento e evita que a organização informal do Drive vire schema do produto.
+
+## 19. Perguntas humanas ainda não respondidas pelas fontes
 
 As fontes documentais não permitem afirmar com segurança:
 
@@ -610,7 +638,7 @@ As fontes documentais não permitem afirmar com segurança:
 
 Essas respostas devem virar **decisões de domínio/configuração**, não novas features por padrão.
 
-## 19. Princípio de produto
+## 20. Princípio de produto
 
 O Tutor TDS deve funcionar como:
 
