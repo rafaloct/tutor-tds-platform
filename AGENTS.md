@@ -1,9 +1,20 @@
 # Tutor TDS — contrato operacional
 
 Ler primeiro `docs/CURRENT_STATE.md`, `docs/DOMAIN_CONTRACT.md`,
-`docs/ARCHITECTURE.md` e `docs/DECISIONS.md`. Depois carregar apenas a feature,
-seus testes e digest Stitch. Código descreve implementação; documentos descrevem
-intenção; Stitch descreve referência visual, somente após inspeção dos artefatos.
+`docs/ARCHITECTURE.md` e `docs/DECISIONS.md`. Para qualquer trabalho que
+toque mais de um componente, operação permanente, portal, interoperabilidade,
+infraestrutura, governança ou continuidade, ler também
+`docs/program/README.md` e `docs/program/AGENT_EXECUTION_PLAYBOOK.md` antes
+de editar. Depois carregar apenas a feature, seus testes e digest Stitch. Código
+descreve implementação; documentos descrevem intenção; Stitch descreve
+referência visual, somente após inspeção dos artefatos.
+
+Ao planejar uma mudança, separar explicitamente:
+- **OBSERVED**: comprovado no código, teste, serviço ou evidência;
+- **TARGET**: arquitetura/comportamento desejado;
+- **DECISION**: escolha humana já registrada;
+- **UNKNOWN/BLOCKED**: ainda não comprovado ou depende de ação humana.
+Nunca promover TARGET para OBSERVED apenas porque foi documentado.
 
 - Manutenção incremental do MVP; não recriar o app. Wave 1 aprovada em staging
   (docs/production/WAVE1_ACCEPTANCE.md). Escopo ativo: Wave 2, Dynamic Learning.
@@ -33,3 +44,7 @@ intenção; Stitch descreve referência visual, somente após inspeção dos art
   Tutor contextual, Media/Vídeo, Creator, Evidence/Reporting,
   Commercial/Entitlements, Production hardening. Não executar em paralelo
   migrações do contrato central.
+- Para visão do programa permanente, usar `docs/program/ROADMAP.md`. Issues do
+  GitHub devem manter objetivo único, critérios de aceite, testes, dependências,
+  human gate, risco e fora de escopo. Nenhum agente deve usar WordPress, Sheets,
+  Chatwoot, R2/Drive ou IA como fonte alternativa de autorização acadêmica.
