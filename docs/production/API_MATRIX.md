@@ -1,5 +1,13 @@
 # API matrix — Wave 1 aceita e Wave 2 ativa
 
+| Issue #5 candidate (2026-10-03) | Authorization / behavior | Evidence / limit |
+| --- | --- | --- |
+| POST `/certificate-requests/{id}/emission-candidate` | Owner + approved request + current canonical enrollment/edition/baseline; development opt-in only; authenticated local transport | Actual API/transport/Worker tests with simulated HTTP/KV; no installed E2E |
+| POST `/certificate-requests/{id}/reconcile-candidate` | Owner/context; authenticated lookup only, no resend after timeout/absent lookup | Durable SQL reservation, one logical reference, synthetic data only |
+| POST `/certificate-requests/{id}/emit` | Final issuance always blocked; institutional combined evidence unrepresented | 80h formation/exceptions, Jotform/wallet evidence and final issuer gates remain |
+
+Protocol/persistence/activation limits: `ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md`.
+
 Contratos reais em FastAPI/Pydantic; OpenAPI gerado em `/openapi.json`.
 Esta matriz cobre as jornadas auditadas; expandir a cada wave, sem inventar
 endpoints de Pergunta ao Vivo. LearningContext real está descrito abaixo.

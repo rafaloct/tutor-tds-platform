@@ -17,6 +17,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    false,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -426,6 +427,8 @@ class CertificateReference(Base):
     __tablename__ = "certificates"
 
     id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    request_id: Mapped[str | None] = mapped_column(ForeignKey("certificate_requests.id", ondelete="SET NULL"), unique=True)
+    is_candidate: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     course_id: Mapped[str] = mapped_column(ForeignKey("courses.id"), nullable=False)
     program_id: Mapped[str | None] = mapped_column(ForeignKey("programs.id"))
@@ -439,6 +442,17 @@ class CertificateReference(Base):
     issued_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
+
+
+class CertificateEmissionAttempt(Base):
+    """Transport reservation, not a second certificate or academic decision."""
+    __tablename__ = "certificate_emission_attempts"
+    __table_args__ = (CheckConstraint("state IN ('reserved', 'indeterminate', 'confirmed')", name="ck_certificate_emission_state"),)
+    request_id: Mapped[str] = mapped_column(ForeignKey("certificate_requests.id", ondelete="CASCADE"), primary_key=True)
+    certificate_id: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    command: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    state: Mapped[str] = mapped_column(String(24), nullable=False)
+    receipt: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 
 
 class CertificateRequest(Base):

@@ -128,3 +128,12 @@ abriu no Drive após escolha de conta, confirmado por Rafael e screenshot; um
 pedido de abertura sem crédito, sem medição de páginas/tempo externo.
 Aceite evidence/classroom-access-physical-acceptance-2026-10-01.json fecha somente
 classroom_cold_offline_xiaomi. Certificado/Evidence offline e freeze continuam.
+# Issue #5 local candidate — 2026-10-03
+
+| Delivery | Writer / branch | Paths | Expected evidence / gate |
+| --- | --- | --- | --- |
+| Authenticated synthetic emission and read-only recovery | Sole Issue #5 implementer / `agent/issue-5-authenticated-emission-20261003` | API emission/transport, existing Worker, additive migration0021, focal tests | Actual producer/consumer signatures/context, timeout/concurrency, disposable DB preservation; independent review + exact-SHA CI required |
+| Candidate isolation and owner privacy | Same writer | certificate references/list, journey export, auth erasure | Synthetic references never official; ledger erased with account; legacy refs preserved |
+| Final institutional issuance | Blocked | No real service or release writes | Formation80h scoped rules/exceptions, combined evidence/Jotform, issuer/signature and physical gate remain |
+
+Details: `ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md`; no gate promoted.

@@ -1,5 +1,20 @@
 # CURRENT STATE
 
+## 2026-10-03 Issue #5 local candidate checkpoint
+
+Authenticated synthetic API→Worker candidate implemented in an exclusive clone;
+final issuance remains blocked. Uses existing request/approval, canonical v2
+enrollment, baseline and references. Additive0021 reserves transport durably;
+timeout/replay recover by signed lookup only. Candidate references are excluded
+from official wallet/export and ledger data is removed on account erasure.
+Development opt-in/loopback only; Worker legacy KV and real services untouched.
+PR #24 still draft is no institutional contract substitute. Approved formation80h
+decision requires validated combined evidence/exceptions; those representations,
+Jotform and final issuer/signature remain gates. Focal actual producer/consumer
+tests substitute only HTTP/KV; SQLite migration tests do not homologate PostgreSQL
+or installed/physical issuance. Exact-SHA results/review/CI belong on candidate PR.
+See `production/ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md` and matrices.
+
 - CURRENT RELEASE: código `1.4.0+13`; produção histórica `1.2.0+11`, não revalidada na Play. Release bloqueada por seus gates.
 - CURRENT WAVE: 2 — Dynamic Learning; fatia 2A aprovada funcionalmente em staging. Wave 1 aprovada em `0081ab0`.
 - CURRENT ACCEPTANCE GATE: POCO aprovou 2A e Classroom offline/revogação em 01/10; `course_versioning_xiaomi` e `classroom_cold_offline_xiaomi` fechados. Certificado e Evidence offline pendentes; Wave 2 completa e produção ainda não aprovadas.

@@ -76,6 +76,7 @@ def export_journey(class_id: str, request: Request, limit: int = Query(100, ge=1
                 expected_percent=0, now=now)
             certificate = session.scalar(select(CertificateReference).where(
                 CertificateReference.user_id == member.user_id,
+                CertificateReference.is_candidate.is_(False),
                 CertificateReference.program_id == classroom.program_id,
                 CertificateReference.course_id == classroom.course_id,
                 CertificateReference.class_id == class_id,
