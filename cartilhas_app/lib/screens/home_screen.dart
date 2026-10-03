@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../features/operations/operations_entry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../features/learning_context/learning_home_card.dart';
@@ -448,6 +449,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   return;
                 }
                 final screen = switch (value) {
+                  'operations' => OperationsEntry(
+                    auth: context.read<AuthRepository>(),
+                    apiUrl: AppConfig.tutorApiUrl,
+                  ),
                   'learner_classes' => const LearnerClassroomsScreen(),
                   'editor' => CourseEditorCatalogScreen(
                     gateway: _newEditorGateway(),
@@ -474,6 +479,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _ => const AboutScreen(),
                 };
                 final pageId = switch (value) {
+                  'operations' => 'operator_operations',
                   'learner_classes' => 'learner_classrooms',
                   'editor' => 'course_editor_catalog',
                   'guide' => 'user_guide',
@@ -507,6 +513,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               itemBuilder: (_) => [
+                if (_hasSession && operatorOperationsEnabled)
+                  const PopupMenuItem(
+                    value: 'operations',
+                    child: ListTile(
+                      leading: Icon(Icons.manage_accounts_outlined),
+                      title: Text('Operação de participantes'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                 PopupMenuItem(
                   value: 'refresh_catalog',
                   enabled: !_catalogLoading,

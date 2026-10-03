@@ -17,6 +17,10 @@ void main() {
     );
   });
   tearDown(() => controller.dispose());
+  Finder verticalScroll() => find.byWidgetPredicate(
+    (widget) =>
+        widget is Scrollable && widget.axisDirection == AxisDirection.down,
+  );
   Future<void> open(WidgetTester tester, {double scale = 1}) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -28,7 +32,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     final scopePicker = find.byKey(const ValueKey('operation-scope'));
-    await tester.scrollUntilVisible(scopePicker, 180);
+    await tester.scrollUntilVisible(
+      scopePicker,
+      180,
+      scrollable: verticalScroll(),
+    );
     await tester.tap(scopePicker);
     await tester.pumpAndSettle();
     await tester.tap(find.text(scopeA.label).last);
@@ -38,10 +46,15 @@ void main() {
   Future<void> tap(WidgetTester tester, String text) async {
     final finder = find.text(text);
     if (finder.evaluate().isEmpty) {
-      await tester.scrollUntilVisible(finder, 180);
+      await tester.scrollUntilVisible(
+        finder,
+        180,
+        scrollable: verticalScroll(),
+      );
     } else {
-      await tester.ensureVisible(finder);
+      await Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
     }
+    await tester.pumpAndSettle();
     await tester.tap(finder);
     await tester.pumpAndSettle();
   }
@@ -74,8 +87,14 @@ void main() {
       expect(gateway.mutations, 3);
       expect(controller.snapshot!.assigned, false);
       expect(controller.snapshot!.history.length, 3);
-      final confirmation = find.textContaining('Nenhuma conta ou matrícula real');
-      await tester.scrollUntilVisible(confirmation, -180);
+      final confirmation = find.textContaining(
+        'Nenhuma conta ou matrícula real',
+      );
+      await tester.scrollUntilVisible(
+        confirmation,
+        -180,
+        scrollable: verticalScroll(),
+      );
       expect(confirmation, findsOneWidget);
       expect(tester.takeException(), isNull);
     },
@@ -107,7 +126,11 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       await open(tester, scale: 2);
       await tap(tester, 'Cadastrar nova pessoa');
-      await tester.scrollUntilVisible(find.text('Solicitar cadastro'), 180);
+      await tester.scrollUntilVisible(
+        find.text('Solicitar cadastro'),
+        180,
+        scrollable: verticalScroll(),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byType(ListView), findsOneWidget);

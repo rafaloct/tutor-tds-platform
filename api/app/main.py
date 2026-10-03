@@ -38,6 +38,7 @@ from .media import router as media_router
 from .models import Course
 from .observability import install_observability
 from .organizations import router as organizations_router
+from .operator_operations import router as operator_operations_router
 from .sync_api import router as sync_router
 from .support import router as support_router
 
@@ -77,6 +78,7 @@ def create_app(
     application.include_router(public_router)
     application.include_router(student_followup_router)
     application.include_router(organizations_router)
+    application.include_router(operator_operations_router)
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
     application.include_router(learning_context_router)

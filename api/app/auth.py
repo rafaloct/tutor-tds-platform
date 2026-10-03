@@ -34,6 +34,7 @@ from .models import (
     ClassMonitor,
     Classroom,
     CohortMembership,
+    OperatorCommandReceipt,
     CourseVersion,
     CourseVersionTransition,
     Enrollment,
@@ -237,6 +238,10 @@ def delete_me(
         session.execute(
             delete(CertificateReference).where(CertificateReference.user_id == user_id)
         )
+        # Operator receipts contain subject snapshots, never duplicated actor IDs.
+        # Explicit cleanup also covers SQLite installations without FK enforcement.
+        session.execute(delete(OperatorCommandReceipt).where(OperatorCommandReceipt.subject_id == user_id))
+        session.execute(update(OperatorCommandReceipt).where(OperatorCommandReceipt.actor_id == user_id).values(actor_id=None))
         # Private certificate requests contain the learner's name. Delete their
         # entire history before removing enrollment/user lineage (also on SQLite
         # without FK enforcement). Reviewers of other requests are anonymized.

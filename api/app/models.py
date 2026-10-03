@@ -533,6 +533,25 @@ class LearningEventRecord(Base):
     sync_claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
+class OperatorCommandReceipt(Base):
+    """Server-only audit and replay receipt; never an authorization source."""
+    __tablename__ = "operator_command_receipts"
+    __table_args__ = (
+        UniqueConstraint("program_id", "subject_id", "revision", name="uq_operator_subject_revision"),
+    )
+    id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    actor_id: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    subject_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    program_id: Mapped[str] = mapped_column(ForeignKey("programs.id"), nullable=False)
+    class_id: Mapped[str] = mapped_column(ForeignKey("classes.id"), nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    action: Mapped[str] = mapped_column(String(24), nullable=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False)
+    request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    result: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class SyncLog(Base):
     __tablename__ = "sync_log"
 

@@ -1,3 +1,79 @@
+# Operação de participantes — candidato integrado (#30)
+
+Base: merge normal de `873962afb613f183a7f1d81e97d5d77979278fd6`.
+Ownership ampliado pelo packet #37 / 5970142905, config / 5970229954.
+
+## Estado atual
+
+OBSERVED: backend `/operations`, adapter HTTP autenticado, controller e entrada
+Flutter implementados; candidato local ainda sujeito a revisão e staging.
+Não equivale a produção aprovada nem ao encerramento integral de #30.
+A seção histórica abaixo descreve somente o checkpoint inicial, substituído
+por este contrato atual quanto a escopo e implementação.
+
+Fluxo: selecionar programa/curso/turma/edição; localizar pessoa; cadastrar se
+inexistente; matricular; vincular à turma; consultar baseline/histórico; corrigir
+mediante revogação motivada e associação a outra turma. Correção tem dois comandos
+visíveis; não é transferência atômica. Nenhuma duplicação de User/Enrollment,
+importação Sheets ou autoridade acadêmica criada por telemetria.
+
+## Contrato HTTP e autoridade
+
+- GET `/operations/scopes`: contextos com edição fixada e vínculo de programa ativo.
+- POST `/operations/{class_id}/search`: nome restrito ao programa ou CPF exato;
+  retorna somente id/nome e prova assinada temporária de identidade.
+- POST `/operations/{class_id}/inspect`: pessoa/contexto/revisão/vínculos/baseline/histórico.
+- POST `/operations/{class_id}/commands`: register, enroll, assign ou revoke,
+  com chave única, contexto completo, revisão esperada, motivo e identidade.
+
+Toda operação exige usuário existente e ProgramMembership ativo com papel
+program_operator, coordinator ou admin. Admin global sem vínculo não passa.
+Professor/monitor não recebe poder novo. Provisionamento de equipe usa os meios
+administrativos existentes; não há concessão de papel no cliente. Criar pessoa
+reutiliza AuthService e concede apenas vínculo student. Vincular turma reutiliza
+bind_student e preserva edição/Enrollment existentes. Não altera emissão,
+presença, follow-up ou exportações.
+
+Lookup externo exige CPF exato: prova assinada vincula ator/programa/pessoa por
+10 minutos. O adapter transporta a prova em bodies, nunca na URL. Essa prova não
+substitui autorização. Busca por nome não faz casamento automático nem consulta
+pessoas fora do programa. Baseline ausente não impede matrícula ou estudo.
+
+## Consistência e privacidade
+
+Migration aditiva 20261003_0023 após 0022 cria OperatorCommandReceipt. Comando e
+recibo confirmam na mesma transação. Lock de Program serializa comandos entre
+turmas; revisão é por pessoa/programa. Chave idêntica devolve o resultado confirmado,
+inclusive depois do fechamento da turma; comando novo em turma fechada falha.
+Ator/corpo/contexto divergente falha. Revogação de permissão bloqueia inclusive replay.
+
+Hash HMAC usa o secret JWT existente e não persiste CPF/senha. Troca desse secret
+pode invalidar replay antigo; nesses casos exige reconciliação por leitura, nunca
+reenvio de cadastro com chave nova presumindo falha. Histórico guarda referências,
+sem duplicar actor_id no snapshot. Exclusão de titular remove seus recibos;
+exclusão permitida de antigo ator anonimiza referência, inclusive no SQLite sem
+cascata. Motivos não devem conter dados sensíveis. Nenhum dado sintético é real.
+
+Flutter usa AuthRepository e chave local conta/ambiente/geração. Valida sessão antes
+e depois da requisição; watcher limpa tela ociosa quando a geração muda. Sem fila
+offline: resultado desconhecido mantém somente o comando em memória para retry.
+Erros brutos não aparecem na UI. Sair não desfaz comando já confirmado no servidor.
+
+## Flags e limites de release
+
+Backend `OPERATOR_OPERATIONS_ENABLED=false` e Dart define de mesmo nome false por
+padrão. Habilitar ambos somente em ambiente de aceite autorizado. Não exige secret
+novo nem altera preflight produtivo. Navegação fica oculta com flag desligada.
+Rollback: desligar flags; não apagar ledger. Downgrade com recibos é recusado;
+forward recovery preserva histórico.
+
+TARGET staging: fluxo completo com duas instituições, permissão revogada,
+identidade nova/existente, replay/timeouts/conflitos, edição preservada, baseline
+ausente, logout A→B e Android/TalkBack. Nenhum deploy/AAB/produção nesta execução.
+Gestão integral de equipe/ofertas/instituições e aceite visual permanecem fora
+deste incremento. #30 continua aberta até seus critérios integrais.
+
+## Histórico — checkpoint inicial anterior ao backend
 # Operação de participantes — contrato e candidato Flutter (#30)
 
 Base auditada: `aa6fb88050aa864726e197187487819de303ac65`.
@@ -130,3 +206,22 @@ Extensão autorizada #37 comentário 5970142905: após merge da base 873962a (#3
 este mesmo escritor assume backend, migration aditiva após0022, gateway real e
 entrada Flutter. Não há outro escritor no contrato central. O plano e gates
 acima continuam válidos; frontend inicial é checkpoint incompleto, não entrega final.
+## Evidência final do candidato local — 03/10/2026
+
+| Gate | Resultado |
+|---|---|
+| Flutter analyze focal + Home | PASS, zero issues |
+| Controller | 10/10 PASS |
+| Widget | 3/3 PASS; falhas iniciais de harness corrigidas com scroll vertical/alinhamento explícitos, sem alterar viewport/asserts |
+| Adapter HTTP | 1/1 PASS; proof em bodies, retry idêntico e invalidação da sessão |
+| API SQLite | 10/10 PASS; fluxo, autorização, replay, privacidade, ausência de cascata e migration |
+| PostgreSQL 17.11 isolado | 4/4 PASS; replay após fechamento, anonimização, upgrade/downgrade protegido e duas requisições concorrentes/um recibo |
+| Android/visual/TalkBack/staging | PENDING; não executados |
+
+PostgreSQL usa runtime já validado por #39, cluster exclusivo loopback15430,
+role qa_operator e databases descartáveis com UUID; nenhum banco real utilizado.
+Não há secret novo. Baseline é somente presença de vínculo; não é qualidade ou
+conclusão acadêmica. Papel program_operator é reconhecido pelo servidor, mas o
+provisionamento legado aceita coordinator/admin escopados; adicionar a concessão
+específica e gestão de equipe requer a próxima fatia de #30.
+`api/tests/test_certificate_postgres_integration.py`: ownership ampliado pelo integrador; quatro asserts de head atualizados para0023 explícito; focal PostgreSQL5/5 PASS. Checkpoint #37 comentário5970357270. Clusters locais encerrados após validação.

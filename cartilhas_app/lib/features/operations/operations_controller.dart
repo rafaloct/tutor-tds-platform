@@ -7,8 +7,8 @@ class OperationsController extends ChangeNotifier {
     this.gateway, {
     required String sessionKey,
     required String Function() nextCommandId,
-  // Keep public injection names while state remains private.
-  // ignore: prefer_initializing_formals
+    // Keep public injection names while state remains private.
+    // ignore: prefer_initializing_formals
   }) : _sessionKey = sessionKey,
        // ignore: prefer_initializing_formals
        _nextCommandId = nextCommandId;
