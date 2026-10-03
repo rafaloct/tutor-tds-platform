@@ -26,6 +26,7 @@ from .models import (
     BaselineRevision,
     BaselineSourceRecord,
     CertificateReference,
+    CertificateEmissionAttempt,
     CertificateRequest,
     CertificateRequestTransition,
     ClassEnrollment,
@@ -240,6 +241,8 @@ def delete_me(
         # entire history before removing enrollment/user lineage (also on SQLite
         # without FK enforcement). Reviewers of other requests are anonymized.
         request_ids = list(session.scalars(select(CertificateRequest.id).where(CertificateRequest.user_id == user_id)))
+        if request_ids:
+            session.execute(delete(CertificateEmissionAttempt).where(CertificateEmissionAttempt.request_id.in_(request_ids)))
         session.execute(delete(CertificateRequest).where(CertificateRequest.user_id == user_id))
         if request_ids:
             session.execute(delete(CertificateRequestTransition).where(CertificateRequestTransition.request_id.in_(request_ids)))
