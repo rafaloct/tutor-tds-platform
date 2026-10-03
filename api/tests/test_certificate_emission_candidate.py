@@ -12,6 +12,7 @@ from threading import Lock
 from types import SimpleNamespace
 
 import pytest
+from fastapi import HTTPException
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -192,8 +193,9 @@ def test_staging_requires_real_https_staging_transport(candidate):
         invalid_request = SimpleNamespace(
             app=SimpleNamespace(state=SimpleNamespace(settings=invalid)),
         )
-        with pytest.raises(Exception):
+        with pytest.raises(HTTPException) as error:
             _transport(invalid_request)
+        assert error.value.status_code == 503
 
 
 @pytest.mark.parametrize("overrides", [{"TUTOR_ENVIRONMENT": "production"}, {"CERTIFICATE_CANDIDATE_ENABLED": "false"}])
