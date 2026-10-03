@@ -21,6 +21,7 @@ jobs:
       TUTOR_ENVIRONMENT: staging
       DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
       EXPECTED_STAGING_DATABASE_HOST: db.lgtphbbpgqnzduhtyate.supabase.co
+      EXPECTED_STAGING_PROJECT_REF: lgtphbbpgqnzduhtyate
       EXPECTED_ALEMBIC_HEAD: 20261003_0024
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -53,14 +54,46 @@ jobs:
           test -n "$DATABASE_URL"
           python - <<'PY'
           import os
-          from urllib.parse import urlsplit
+          import re
+          from urllib.parse import parse_qsl, urlsplit
 
-          parsed = urlsplit(os.environ["DATABASE_URL"])
+          if os.environ.get("TUTOR_ENVIRONMENT") != "staging":
+              raise SystemExit("Refusing migration: environment must be staging.")
+          database_url = os.environ.get("DATABASE_URL", "")
+          if not database_url:
+              raise SystemExit("DATABASE_URL is required.")
+
+          parsed = urlsplit(database_url)
           expected_host = os.environ["EXPECTED_STAGING_DATABASE_HOST"]
+          project_ref = os.environ["EXPECTED_STAGING_PROJECT_REF"]
+          pooler_host = re.fullmatch(
+              r"aws-\d+-(?:[a-z0-9]+-)*[a-z0-9]+\.pooler\.supabase\.com",
+              parsed.hostname or "",
+          )
           if parsed.scheme not in {"postgres", "postgresql", "postgresql+psycopg"}:
               raise SystemExit("DATABASE_URL must use PostgreSQL.")
+          if parsed.fragment:
+              raise SystemExit("Refusing migration: DATABASE_URL fragments are not allowed.")
+          query_options = parse_qsl(parsed.query, keep_blank_values=True)
+          if query_options and (
+              len(query_options) != 1
+              or query_options[0][0] != "sslmode"
+              or query_options[0][1] not in {"require", "verify-ca", "verify-full"}
+          ):
+              raise SystemExit("Refusing migration: only a secure sslmode URL option is allowed.")
           if parsed.hostname != expected_host:
-              raise SystemExit("Refusing migration: database host is not the approved staging host.")
+              if not pooler_host:
+                  raise SystemExit("Refusing migration: database host is not an approved staging endpoint.")
+              try:
+                  pooler_port = parsed.port
+              except ValueError:
+                  raise SystemExit("Refusing migration: session pooler port is invalid.")
+              if (
+                  parsed.username != f"postgres.{project_ref}"
+                  or pooler_port != 5432
+                  or parsed.path != "/postgres"
+              ):
+                  raise SystemExit("Refusing migration: session pooler must match the staging project on port 5432/database postgres.")
           if not parsed.username or not parsed.password or not parsed.path.strip("/"):
               raise SystemExit("DATABASE_URL is incomplete.")
           PY
