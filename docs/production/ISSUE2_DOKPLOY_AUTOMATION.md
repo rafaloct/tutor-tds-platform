@@ -115,12 +115,26 @@ Apos upgrade do Dokploy, revalidar Node, rclone, age e notificacao.
   de envio; por isso `native_dispatch_unverified` nao significa entrega.
   Revalidar essa integracao apos upgrade do Dokploy. Executar no maximo um
   novo teste de falha controlada depois de instalar o codigo e a referencia.
-- Para queda total da VPS, um check HTTP externo no GitHub Actions existente
-  e candidato minimo. Sua agenda so roda quando o workflow estiver na branch
-  default; execucoes podem atrasar ou ser descartadas. Notificacao por email
-  depende da preferencia da conta e, em execucao agendada, do ator do workflow.
-  Portanto, nao declarar alerta externo entregue sem execucao e recebimento
-  verificados. Nenhum watchdog externo foi ativado por este documento.
+- Codigo `3683ef5` instalado no runtime privado com SHA-256
+  `73c1fad9f1101f165e1ee3d49926ac845126a4df0b6135c5bf984abec0fb71bb`.
+  `runtime.json` passou a conter somente os IDs do notificador/organizacao
+  na secao `mail`, sem inserir senha SMTP. Uma unica execucao direta de
+  `probe-failure` em 03/10/2026 06:55:13Z nao consultou banco TDS ou R2,
+  nem alterou agendas, backup ou restore. Recibo:
+  `BACKUP_ACTION_REQUIRED`, etapa
+  `controlled_failure_no_database_or_storage_access`, alerta
+  `native_dispatch_unverified`, `delivered=false`. O helper do Dokploy nao
+  propaga o resultado de SMTP; recebimento deste alerta precisa ser conferido
+  pelo destinatario, inclusive na pasta de spam. Nao repetir o probe.
+- Para queda total da VPS, `.github/workflows/tds-vps-watchdog.yml` e um
+  candidato minimo: consulta a API publica e o banco a cada 30 minutos a
+  partir dos runners GitHub, com timeout e falha explicita. A URL retornou
+  `{"status":"ok","database":"available"}` em 03/10. O workflow agendado
+  so roda na branch default apos integracao do PR; execucoes podem atrasar ou
+  ser descartadas. Notificacao por email depende da preferencia da conta e,
+  em execucao agendada, do ator do workflow. Nao declarar alerta externo
+  entregue sem uma execucao real e recebimento verificados. O PR draft nao
+  ativa esse watchdog.
 - Revisar o escopo efetivo da credencial R2 e a possibilidade de uma pessoa
   acessar simultaneamente ZIP do Dokploy, configuracao e identidade age.
   O armazenamento privado nao prova separacao de acesso. Registrar aceite

@@ -1,0 +1,42 @@
+name: Tutor TDS VPS watchdog
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check public production API and database
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(mktemp)"
+          trap 'rm -f "$response"' EXIT
+          status="$(curl --silent --show-error --connect-timeout 5 --max-time 15 \
+            --output "$response" --write-out '%{http_code}' \
+            'https://ead.ipexdesenvolvimento.cloud/tutor-api/health')"
+          if [[ "$status" != 200 ]]; then
+            echo "Production health HTTP status: $status" >&2
+            exit 1
+          fi
+          python3 - "$response" <<'PY'
+          import json
+          import sys
+
+          try:
+              with open(sys.argv[1], encoding='utf-8') as response:
+                  health = json.load(response)
+              assert health.get('status') == 'ok'
+              assert health.get('database') == 'available'
+          except (OSError, ValueError, AssertionError):
+              print('Production API or database health check failed', file=sys.stderr)
+              sys.exit(1)
+          print('Production API and database health check passed')
+          PY
