@@ -9,6 +9,7 @@ $appRoot = Join-Path $workspace 'cartilhas_app'
 $apiRoot = Join-Path $workspace 'api'
 $expectedApi = 'https://ead.ipexdesenvolvimento.cloud/tutor-api'
 . (Join-Path $PSScriptRoot 'Test-ProductionBackendIdentity.ps1')
+. (Join-Path $PSScriptRoot 'Test-ProductionRecoveryEvidence.ps1')
 
 function Require([bool]$Condition, [string]$Reason) {
     if (-not $Condition) { throw "PRODUCTION_RELEASE_READY=false: $Reason" }
@@ -53,9 +54,8 @@ try {
     $restorePath = Join-Path $workspace 'docs/production/evidence/production-restore-acceptance.json'
     Require (Test-Path -LiteralPath $restorePath) 'backup/restauração de produção não comprovados.'
     $proof = Get-Content -LiteralPath $restorePath -Raw | ConvertFrom-Json
-    Require ($proof.status -eq 'passed' -and $proof.offsite_backup -eq $true -and
-        $proof.postgres_restore -eq $true -and $proof.critical_volumes_restore -eq $true -and
-        $proof.upgrade_compatibility -eq $true -and $proof.backend_schema_compatibility -eq $true) 'prova de recuperação/compatibilidade incompleta.'
+    try { Assert-ProductionRecoveryEvidence $proof | Out-Null }
+    catch { throw 'PRODUCTION_RELEASE_READY=false: prova de recuperação/compatibilidade incompleta.' }
     $health = Invoke-RestMethod -Uri "$expectedApi/health" -TimeoutSec 15
     Require ($health.status -eq 'ok' -and $health.database -eq 'available') 'health de produção sem banco disponível.'
     $version = Invoke-RestMethod -Uri "$expectedApi/version" -TimeoutSec 15
