@@ -55,5 +55,19 @@
     "adapters for checkpoint kinds other than assessment not installed",
     "PostgreSQL concurrency/upgrade not homologated",
     "no SMTP/VPS/deploy/merge/services real"
-  ]
+  ],
+  "ci_fixture_recovery": {
+    "observed": "Full API CI Journey populated migration failed: current ORM executed after nontransactional multi-revision downgrade removed0022/0021 before0020 BI guard refused",
+    "expected": "Confirmed BI data/history/guards retained; restore current schema before API detach/replay",
+    "boundary": "test_journey_migration fixture only; no runtime or migration change",
+    "structural_fix": "Assert FK BI, joined recordDIG-0001, exact baseline snapshots and immutable history at stopped schema; forward-recover before current API; retain final detach/replay/counts scenario",
+    "individual_pass": 1,
+    "focal_command": "candidate-env/Scripts/python.exe -m pytest tests/test_journey_migration.py tests/test_journey_traceability.py tests/test_student_followup.py tests/test_certificate_emission_candidate.py tests/test_certificate_policy_candidate.py -q -o addopts='' --tb=short",
+    "focal_passed": 76,
+    "focal_exit_code": 0,
+    "duration_seconds": 87.76,
+    "compile_exit_code": 0,
+    "diff_check_exit_code": 0,
+    "postgresql_not_homologated": true
+  }
 }

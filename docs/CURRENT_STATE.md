@@ -14,6 +14,10 @@ Migrações0021/0022 aditivas, reserva durável/reconciliação lookup e segrega
 oficial preservadas. Legado/VPS/serviços reais não foram alterados ou acionados.
 Plano citado não anexado; decisão do usuário autoriza o recorte, não homologação.
 Ver production/ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md e matrizes.
+CI detectou fixture de downgrade Journey usando ORM atual após remoção parcial
+de colunas0022/0021 antes recusa BI0020. Teste agora verifica BI/histórico/guarda
+no schema parado e faz recuperação forward antes do detach pela API; cenário e
+proteções mantidos, sem mudança de runtime/migration.
 
 - CURRENT RELEASE: código `1.4.0+13`; produção histórica `1.2.0+11`, não revalidada na Play. Release bloqueada por seus gates.
 - CURRENT WAVE: 2 — Dynamic Learning; fatia 2A aprovada funcionalmente em staging. Wave 1 aprovada em `0081ab0`.
