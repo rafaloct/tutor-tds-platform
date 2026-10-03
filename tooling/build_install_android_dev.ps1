@@ -37,6 +37,21 @@ function Assert-StagingConfig {
         throw 'TUTOR_ENVIRONMENT deve ser staging.'
     }
 
+    $approvedRcFlags = @{
+        OPERATOR_OPERATIONS_ENABLED = $true
+        REMOTE_CATALOG_ENABLED = $true
+        LEARNING_CONTEXT_ENABLED = $false
+        DURABLE_LEARNING_OUTBOX_ENABLED = $false
+        JOURNEY_TRACEABILITY_ENABLED = $false
+        SIGNED_SUPPORT_IDENTITY = $false
+    }
+    foreach ($entry in $approvedRcFlags.GetEnumerator()) {
+        $property = $Config.PSObject.Properties[$entry.Key]
+        if ($null -eq $property -or [bool]$property.Value -ne [bool]$entry.Value) {
+            throw "$($entry.Key) diverge do perfil aprovado do RC de homologacao."
+        }
+    }
+
     $apiUri = Get-HttpsUri -Name 'TUTOR_API_URL' -Value ([string]$Config.TUTOR_API_URL)
     $allowedApiUri = Get-HttpsUri `
         -Name 'TUTOR_STAGING_API_URL' `
