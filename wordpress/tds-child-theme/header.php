@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 <header class="tds-header" data-tds-nav="basic">
 	<div class="tds-container tds-header__inner">
 		<?php tds_theme_brand(); ?>
-		<button class="tds-nav-toggle" type="button" aria-expanded="false" aria-controls="tds-primary-nav" hidden>
+		<button class="tds-nav-toggle" type="button" aria-label="<?php esc_attr_e( 'Abrir navegação', 'tds-portal' ); ?>" aria-expanded="false" aria-controls="tds-primary-nav" hidden>
 			<span class="tds-nav-toggle__bars" aria-hidden="true"><span></span></span>
 			<span class="tds-nav-toggle__label"><?php esc_html_e( 'Menu', 'tds-portal' ); ?></span>
 		</button>

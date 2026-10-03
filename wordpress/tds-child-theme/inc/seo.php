@@ -14,6 +14,10 @@ function tds_theme_seo_enabled() {
 function tds_theme_seo_description() {
 	if ( is_singular() ) {
 		$post = get_queried_object();
+		// Conteúdo protegido não pode alimentar metadata pública.
+		if ( ! $post || post_password_required( $post ) ) {
+			return '';
+		}
 		$text = has_excerpt( $post ) ? get_the_excerpt( $post ) : wp_strip_all_tags( strip_shortcodes( $post->post_content ) );
 		return wp_trim_words( $text, 30, '…' );
 	}
@@ -39,7 +43,9 @@ add_action(
 		echo '<meta property="og:type" content="' . ( is_singular( 'post' ) ? 'article' : 'website' ) . '">' . "\n";
 		echo '<meta property="og:site_name" content="' . esc_attr( get_bloginfo( 'name', 'display' ) ) . '">' . "\n";
 		echo '<meta property="og:title" content="' . esc_attr( $title ) . '">' . "\n";
-		echo '<meta property="og:description" content="' . esc_attr( $description ) . '">' . "\n";
+		if ( '' !== $description ) {
+			echo '<meta property="og:description" content="' . esc_attr( $description ) . '">' . "\n";
+		}
 		echo '<meta property="og:url" content="' . esc_url( $url ) . '">' . "\n";
 		echo '<meta property="og:image" content="' . esc_url( $image ) . '">' . "\n";
 		echo '<meta property="og:locale" content="pt_BR">' . "\n";
