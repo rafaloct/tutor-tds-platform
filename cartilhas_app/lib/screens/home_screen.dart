@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../features/operations/operations_entry.dart';
+import '../features/operations/operations_repository.dart';
+import '../features/management/presentation/management_workspace_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../features/learning_context/learning_home_card.dart';
@@ -56,13 +58,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _hasEditorAccess = false;
   bool _hasSession = false;
+  int _editorProgramCount = 0;
+  int _operationScopeCount = 0;
   int _navigationIndex = 0;
+  TeamCapabilitySnapshot? _teamSnapshot;
   Future<TeamCapabilitySnapshot?>? _teamCapability;
   late Future<List<Cartilha>> _cartilhas;
   bool _catalogLoading = false;
   bool _catalogReloadQueued = false;
+
+  bool get _hasManagementAccess =>
+      _operationScopeCount > 0 ||
+      _editorProgramCount > 0 ||
+      (_teamSnapshot?.hasAccess ?? false);
 
   @override
   void initState() {
@@ -124,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _refreshTeamCapability() {
     _refreshSessionState();
     _refreshEditorCapability();
+    _refreshOperationsCapability();
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     final Future<TeamCapabilitySnapshot?> next;
     if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
@@ -135,11 +145,23 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       next = _resolveTeamCapability(repository);
     }
-    if (mounted) {
-      setState(() {
-        _teamCapability = next;
-      });
+    _setTeamCapability(next);
+  }
+
+  void _setTeamCapability(Future<TeamCapabilitySnapshot?> next) {
+    if (!mounted) {
+      _teamCapability = next;
+      _teamSnapshot = null;
+      return;
     }
+    setState(() {
+      _teamCapability = next;
+      _teamSnapshot = null;
+    });
+    next.then((snapshot) {
+      if (!mounted || !identical(_teamCapability, next)) return;
+      setState(() => _teamSnapshot = snapshot);
+    });
   }
 
   Future<List<Cartilha>> _loadCartilhas() =>
@@ -151,6 +173,100 @@ class _HomeScreenState extends State<HomeScreen> {
         // applies: remote -> local cache (SharedPreferences) -> bundled assets.
         apiUrl: AppConfig.tutorApiUrl,
       ).fetchAll();
+
+  Future<void> _openProfile() => Navigator.push(
+    context,
+    trackedRoute(
+      pageId: 'profile',
+      featureId: 'profile_navigation',
+      builder: (_) => const CadUnicoScreen(),
+    ),
+  );
+
+  Future<void> _openManagementTool(String value) async {
+    final team = _teamSnapshot;
+    final screen = switch (value) {
+      'operations' => OperationsEntry(
+        auth: context.read<AuthRepository>(),
+        apiUrl: AppConfig.tutorApiUrl,
+      ),
+      'editor' => CourseEditorCatalogScreen(gateway: _newEditorGateway()),
+      'team' => ClassroomDashboardScreen(
+        gateway: ClassroomRepository(
+          apiUrl: AppConfig.tutorApiUrl,
+          authRepository: context.read<AuthRepository>(),
+        ),
+        evidenceGateway: EvidenceRepository(
+          apiUrl: AppConfig.tutorApiUrl,
+          authRepository: context.read<AuthRepository>(),
+        ),
+      ),
+      'checkin' => EvidenceCheckinScreen(
+        gateway: EvidenceRepository(
+          apiUrl: AppConfig.tutorApiUrl,
+          authRepository: context.read<AuthRepository>(),
+        ),
+      ),
+      _ => throw ArgumentError.value(value),
+    };
+    final pageId = switch (value) {
+      'operations' => 'operator_operations',
+      'editor' => 'course_editor_catalog',
+      'team' =>
+        team?.hasTeacherCockpit ?? false
+            ? 'team_dashboard'
+            : 'monitor_exceptions',
+      'checkin' => 'evidence_checkin',
+      _ => 'management',
+    };
+    await Navigator.push(
+      context,
+      trackedRoute(
+        pageId: pageId,
+        featureId: switch (value) {
+          'editor' => 'course_editor',
+          'team' =>
+            team?.hasTeacherCockpit ?? false
+                ? 'classroom_dashboard'
+                : 'monitor_exceptions',
+          'checkin' => 'evidence_checkin',
+          'operations' => 'operator_operations',
+          _ => null,
+        },
+        builder: (_) => screen,
+      ),
+    );
+    if (mounted && value == 'editor') _refreshCatalog(afterCurrent: true);
+  }
+
+  Future<void> _openManagementWorkspace() async {
+    final team = _teamSnapshot;
+    await Navigator.push(
+      context,
+      trackedRoute(
+        pageId: 'management_workspace',
+        featureId: 'management_workspace',
+        builder: (_) => ManagementWorkspaceScreen(
+          operationScopeCount: _operationScopeCount,
+          editorProgramCount: _editorProgramCount,
+          teamCapability: team,
+          onParticipantsTap: _operationScopeCount > 0
+              ? () => _openManagementTool('operations')
+              : null,
+          onContentTap: _editorProgramCount > 0
+              ? () => _openManagementTool('editor')
+              : null,
+          onTeamTap: team?.hasAccess ?? false
+              ? () => _openManagementTool('team')
+              : null,
+          onAttendanceTap: team?.hasAccess ?? false
+              ? () => _openManagementTool('checkin')
+              : null,
+        ),
+      ),
+    );
+    if (mounted) _refreshTeamCapability();
+  }
 
   Future<void> _openBottomDestination(int index) async {
     if (index == 0 || _navigationIndex != 0) return;
@@ -197,14 +313,14 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         case 3:
           if (!mounted) return;
-          await Navigator.push(
-            context,
-            trackedRoute(
-              pageId: 'profile',
-              featureId: 'profile_navigation',
-              builder: (_) => const CadUnicoScreen(),
-            ),
-          );
+          if (_hasManagementAccess) {
+            await _openManagementWorkspace();
+          } else {
+            await _openProfile();
+          }
+        case 4:
+          if (!mounted || !_hasManagementAccess) return;
+          await _openProfile();
       }
     } finally {
       if (mounted) setState(() => _navigationIndex = 0);
@@ -214,19 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_teamCapability != null) return;
-    _refreshSessionState();
-    _refreshEditorCapability();
-    final auth = Provider.of<AuthRepository?>(context, listen: false);
-    if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
-      _teamCapability = Future.value(null);
-      return;
-    }
-    final repository = ClassroomRepository(
-      apiUrl: AppConfig.tutorApiUrl,
-      authRepository: auth,
-    );
-    _teamCapability = _resolveTeamCapability(repository);
+    if (_teamCapability == null) _refreshTeamCapability();
   }
 
   Future<TeamCapabilitySnapshot?> _resolveTeamCapability(
@@ -245,19 +349,59 @@ class _HomeScreenState extends State<HomeScreen> {
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     if (widget.editorGatewayFactory == null &&
         (auth == null || AppConfig.tutorApiUrl.trim().isEmpty)) {
+      if (mounted) setState(() => _editorProgramCount = 0);
       return;
     }
     final repository = _newEditorGateway();
-    var hasAccess = false;
+    var programCount = 0;
     try {
-      hasAccess = (await repository.programs()).isNotEmpty;
+      programCount = (await repository.programs()).length;
     } catch (_) {
       // Access is granted only by a successful scoped capability response.
     } finally {
       if (repository is CourseEditorRepository) repository.dispose();
     }
     if (mounted) {
-      setState(() => _hasEditorAccess = hasAccess);
+      setState(() => _editorProgramCount = programCount);
+    }
+  }
+
+  Future<void> _refreshOperationsCapability() async {
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    if (!operatorOperationsEnabled ||
+        auth == null ||
+        AppConfig.tutorApiUrl.trim().isEmpty) {
+      if (mounted) setState(() => _operationScopeCount = 0);
+      return;
+    }
+
+    final generation = auth.sessionGeneration;
+    final owner = await auth.localUserId();
+    if (owner == null || generation != auth.sessionGeneration) {
+      if (mounted) setState(() => _operationScopeCount = 0);
+      return;
+    }
+
+    final repository = OperationsRepository(
+      apiUrl: AppConfig.tutorApiUrl,
+      auth: auth,
+      owner: owner,
+      generation: generation,
+    );
+    var scopeCount = 0;
+    try {
+      scopeCount = (await repository.scopes(repository.sessionKey)).length;
+    } catch (_) {
+      // The server is the authority. Failure or denial grants no UI access.
+    } finally {
+      repository.close();
+    }
+    if (mounted) {
+      setState(
+        () => _operationScopeCount = generation == auth.sessionGeneration
+            ? scopeCount
+            : 0,
+      );
     }
   }
 
@@ -441,9 +585,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           FutureBuilder<TeamCapabilitySnapshot?>(
             future: _teamCapability,
-            builder: (context, capability) => PopupMenuButton<String>(
+            builder: (context, _) => PopupMenuButton<String>(
               tooltip: 'Mais opções',
               onSelected: (value) async {
+                if (value == 'management') {
+                  await _openManagementWorkspace();
+                  return;
+                }
                 if (value == 'refresh_catalog') {
                   _refreshCatalog();
                   return;
@@ -513,12 +661,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               itemBuilder: (_) => [
-                if (_hasSession && operatorOperationsEnabled)
+                if (_hasManagementAccess)
                   const PopupMenuItem(
-                    value: 'operations',
+                    value: 'management',
                     child: ListTile(
-                      leading: Icon(Icons.manage_accounts_outlined),
-                      title: Text('Operação de participantes'),
+                      leading: Icon(Icons.admin_panel_settings_outlined),
+                      title: Text('Gestão'),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -537,15 +685,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListTile(
                       leading: Icon(Icons.school_outlined),
                       title: Text('Minhas turmas'),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                if (_hasEditorAccess)
-                  const PopupMenuItem(
-                    value: 'editor',
-                    child: ListTile(
-                      leading: Icon(Icons.edit_note),
-                      title: Text('Meus conteúdos'),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -573,30 +712,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
-                if (capability.data?.hasAccess ?? false)
-                  PopupMenuItem(
-                    value: capability.data!.hasTeacherCockpit
-                        ? 'team'
-                        : 'monitor',
-                    child: ListTile(
-                      leading: const Icon(Icons.groups_outlined),
-                      title: Text(
-                        capability.data!.hasTeacherCockpit
-                            ? 'Área da equipe'
-                            : 'Monitor por exceção',
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                if (_hasSession)
-                  const PopupMenuItem(
-                    value: 'checkin',
-                    child: ListTile(
-                      leading: Icon(Icons.qr_code_scanner_outlined),
-                      title: Text('Registrar presença'),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
                 const PopupMenuItem(
                   value: 'about',
                   child: ListTile(
@@ -621,23 +736,29 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _navigationIndex,
         onDestinationSelected: _openBottomDestination,
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'Início',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.menu_book_outlined),
             selectedIcon: Icon(Icons.menu_book),
             label: 'Aprender',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.article_outlined),
             selectedIcon: Icon(Icons.article),
             label: 'Conteúdos',
           ),
-          NavigationDestination(
+          if (_hasManagementAccess)
+            const NavigationDestination(
+              icon: Icon(Icons.admin_panel_settings_outlined),
+              selectedIcon: Icon(Icons.admin_panel_settings),
+              label: 'Gestão',
+            ),
+          const NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Perfil',
