@@ -44,6 +44,8 @@ foreach ( $iterator as $file ) {
 	// distribuível; os testes já são cobertos por sintaxe acima.
 	if ( in_array( $ext, array( 'php', 'css', 'js', 'md' ), true ) && 0 !== strpos( $rel, 'tests/' ) ) {
 		$text = file_get_contents( $path );
+		// API nativa do WordPress para conteúdo protegido; não é uma credencial.
+		$scan_text = str_replace( 'post_password_required', '', $text );
 		$forbidden = array(
 			'/gtag|googletagmanager/i' => 'analytics',
 			'/\bG-[A-Z0-9]{6,20}\b/' => 'GA4 measurement id',
@@ -53,7 +55,7 @@ foreach ( $iterator as $file ) {
 			'/\.apk\b/i' => 'APK',
 		);
 		foreach ( $forbidden as $pattern => $label ) {
-			if ( preg_match( $pattern, $text ) ) {
+			if ( preg_match( $pattern, $scan_text ) ) {
 				$failures++;
 				echo "FAIL padrão proibido ($label) em $rel\n";
 			}

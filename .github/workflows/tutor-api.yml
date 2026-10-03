@@ -47,6 +47,11 @@ jobs:
           "$python" -m compileall -q app tests ops
           bash -n ops/*.sh
           "$python" -m pytest tests -q
+      - name: Test existing Worker with the candidate protocol consumer
+        working-directory: cartilhas_app/cloudflare/tutor-tds-gateway
+        run: |
+          node --version
+          node --test
       - name: Validate compose manifests
         run: |
           docker compose -f api/docker-compose.yml config --quiet --no-interpolate

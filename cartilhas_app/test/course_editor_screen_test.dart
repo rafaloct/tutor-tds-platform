@@ -88,17 +88,76 @@ Future<void> openEditor(
 }
 
 Future<void> tapVisible(WidgetTester tester, String text) async {
+  await revealEditorAction(tester, text);
+  await tester.tap(find.text(text));
   await tester.pumpAndSettle();
+}
+
+Future<void> revealEditorAction(WidgetTester tester, String text) async {
+  await tester.pumpAndSettle();
+  tester
+      .state<ScrollableState>(find.byType(Scrollable).first)
+      .position
+      .jumpTo(0);
+  await tester.pumpAndSettle();
+  await tester.scrollUntilVisible(
+    find.text(text),
+    200,
+    scrollable: find.byType(Scrollable).first,
+  );
   await Scrollable.ensureVisible(
     tester.element(find.text(text)),
     alignment: 0.5,
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.text(text));
-  await tester.pumpAndSettle();
 }
 
 void main() {
+  testWidgets('editor adds, saves, edits and removes a module material', (
+    tester,
+  ) async {
+    final gateway = _Gateway();
+    await openEditor(tester, gateway);
+    await tapVisible(tester, 'Adicionar material');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Título do material'),
+      'PDF remoto',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'URL pública HTTPS'),
+      'https://example.org/a.pdf',
+    );
+    await tester.tap(find.text('Aplicar material'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, 'Salvar rascunho');
+    final material =
+        ((gateway.data['sections'] as List).first['materials'] as List).single;
+    expect(material['kind'], 'pdf');
+    expect(material['url'], 'https://example.org/a.pdf');
+    final id = material['id'];
+    await tapVisible(tester, 'PDF remoto');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Título do material'),
+      'PDF revisado',
+    );
+    await tester.tap(find.text('Aplicar material'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, 'Salvar rascunho');
+    expect(
+      ((gateway.data['sections'] as List).first['materials'] as List)
+          .single['id'],
+      id,
+    );
+    await Scrollable.ensureVisible(
+      tester.element(find.byTooltip('Remover material')),
+    );
+    await tester.tap(find.byTooltip('Remover material'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmar'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, 'Salvar rascunho');
+    expect((gateway.data['sections'] as List).first['materials'], isEmpty);
+  });
   testWidgets('back navigation asks before discarding unsaved draft', (
     tester,
   ) async {
@@ -201,6 +260,7 @@ void main() {
     await openEditor(tester, gateway);
     await tester.enterText(find.byType(TextField).first, 'Novo título');
     await tester.pumpAndSettle();
+    await revealEditorAction(tester, 'Enviar para revisão');
     expect(
       tester
           .widget<FilledButton>(

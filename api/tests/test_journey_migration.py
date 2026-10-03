@@ -56,8 +56,26 @@ def test_populated_journey_upgrade_preserves_baseline_and_guards(presence_api, t
         assert response.status_code == 200, response.text
         assert client.get('/classes/c1/journey-export', headers=header('teacher')).json()['items'][0]['registro_id'] == 'DIG-0001'
         assert baseline(client, user='other', record='another-source', key='gate-conflict-key', bi_record_id='DIG-0001').status_code == 409
+        with target.connect() as connection:
+            guards_before_refusal = connection.execute(text("SELECT id,revision,snapshot FROM baseline_revisions ORDER BY id")).all()
+            bi_before_refusal = connection.execute(text("SELECT bi_source_record_id FROM student_baselines")).scalar_one()
+            assert connection.execute(text("SELECT record_id FROM baseline_source_records WHERE id=:id"), {"id": bi_before_refusal}).scalar_one() == 'DIG-0001'
         with pytest.raises(RuntimeError, match='Confirmed BI references'):
             command.downgrade(migration, '20260923_0019')
+        # A multi-revision downgrade may already remove later additive columns
+        # before 0020 refuses confirmed BI lineage (SQLite DDL is nontransactional).
+        # Verify protected data at the stopped schema, then restore forward before
+        # using the current API/ORM. Never relax the BI downgrade guard.
+        with target.connect() as connection:
+            assert connection.execute(text("SELECT bi_source_record_id FROM student_baselines")).scalar_one() == bi_before_refusal
+            assert connection.execute(text("SELECT id,revision,snapshot FROM baseline_revisions ORDER BY id")).all() == guards_before_refusal
+            with pytest.raises(DBAPIError, match='immutable followup history'):
+                connection.execute(text("UPDATE baseline_revisions SET reason='rewritten-after-refusal'"))
+            connection.rollback()
+        command.upgrade(migration, 'head')
+        with target.connect() as connection:
+            assert connection.execute(text("SELECT bi_source_record_id FROM student_baselines")).scalar_one() == bi_before_refusal
+            assert connection.execute(text("SELECT id,revision,snapshot FROM baseline_revisions ORDER BY id")).all() == guards_before_refusal
         # Human detach is audited; the old reference still cannot change owners.
         detached = baseline(client, revision=2, key='gate-detach-key', bi_record_id=None)
         assert detached.status_code == 200 and detached.json()['bi_record_id'] is None

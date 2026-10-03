@@ -129,12 +129,12 @@ tds_assert( false === strpos( $tools_html, 'Oculta QA' ), 'ferramentas: hidden n
 tds_assert( false !== strpos( $tools_html, 'data-tds-event="tool_card_click"' ), 'ferramentas: evento declarativo sem transporte' );
 
 // Conteúdo sintético (idempotente por título).
-function tds_page( $title, $template = '', $content = '', $excerpt = '' ) {
+function tds_page( $title, $template = '', $content = '', $excerpt = '', $password = '' ) {
 	$existing = get_page_by_path( sanitize_title( $title ), OBJECT, 'page' );
 	if ( $existing ) {
 		return $existing->ID;
 	}
-	$id = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_content' => $content, 'post_excerpt' => $excerpt, 'page_template' => $template ) );
+	$id = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_content' => $content, 'post_excerpt' => $excerpt, 'post_password' => $password, 'page_template' => $template ) );
 	return $id;
 }
 $home_id = tds_page( 'Início QA', '', '<!-- wp:paragraph --><p>Conteúdo editorial sintético da home.</p><!-- /wp:paragraph -->', 'Resumo sintético do programa para QA.' );
@@ -149,6 +149,8 @@ $pages = array(
 	'templates/contato.php'        => tds_page( 'Contato QA', 'templates/contato.php', '<!-- wp:paragraph --><p>Contato institucional sintético.</p><!-- /wp:paragraph -->' ),
 );
 $states_id = tds_page( 'Estados QA', '', '[tds_estado estado="loading"][tds_estado estado="success"][tds_estado estado="empty"][tds_estado estado="stale"][tds_estado estado="unavailable"][tds_estado estado="error"][tds_catalogo quantidade="3"][tds_acesso_app]' );
+$protected_id = tds_page( 'Protegida QA', '', '<!-- wp:paragraph --><p>SEGREDO-SEO-NAO-PUBLICAR</p><!-- /wp:paragraph -->', '', 'senha-sintetica' );
+wp_update_post( array( 'ID' => $protected_id, 'post_content' => '<!-- wp:paragraph --><p>SEGREDO-SEO-NAO-PUBLICAR</p><!-- /wp:paragraph -->', 'post_password' => 'senha-sintetica' ) );
 if ( ! get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'title' => 'Notícia sintética QA' ) ) ) {
 	wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Notícia sintética QA', 'post_content' => '<!-- wp:paragraph --><p>Corpo da notícia sintética.</p><!-- /wp:paragraph -->' ) );
 }
@@ -175,7 +177,8 @@ try {
 		tds_assert( false !== strpos( $html, '<main id="tds-main" class="tds-main" tabindex="-1"' ), "$label: main focável" );
 		tds_assert( false !== strpos( $html, '<header class="tds-header"' ) && false !== strpos( $html, '<nav id="tds-primary-nav" class="tds-nav" aria-label=' ), "$label: header/nav" );
 		tds_assert( false !== strpos( $html, '<footer class="tds-footer">' ), "$label: footer" );
-		tds_assert( false !== strpos( $html, 'aria-expanded="false" aria-controls="tds-primary-nav"' ), "$label: toggle acessível" );
+		tds_assert( false !== strpos( $html, 'aria-label="Abrir navegação" aria-expanded="false" aria-controls="tds-primary-nav"' ), "$label: toggle com nome acessível" );
+		tds_assert( false !== strpos( $html, 'class="tds-nav-toggle__bars" aria-hidden="true"' ), "$label: ícone do toggle decorativo" );
 		tds_assert( preg_match( '/<body[^>]*class="[^"]*\btds-portal\b/', $html ) === 1, "$label: body.tds-portal" );
 		tds_assert( substr_count( $html, '<h1' ) === 1, "$label: exatamente um h1" );
 		tds_assert( false !== strpos( $html, 'name="viewport" content="width=device-width, initial-scale=1' ), "$label: viewport" );
@@ -232,6 +235,13 @@ try {
 	tds_assert( 200 === $status, 'single 200' );
 	$common( 'single', $html );
 
+	// Conteúdo com senha nunca pode alimentar description/OG pública.
+	list( $status, $html ) = tds_fetch( get_permalink( $protected_id ) );
+	$results['pages']['protected'] = $status;
+	tds_assert( 200 === $status, 'protegida 200' );
+	tds_assert( false === strpos( $html, 'SEGREDO-SEO-NAO-PUBLICAR' ), 'protegida: conteúdo ausente' );
+	tds_assert( false === strpos( $html, '<meta name="description"' ) && false === strpos( $html, '<meta property="og:description"' ), 'protegida: sem description pública' );
+
 	list( $status, $html ) = tds_fetch( $base . '/?s=sint%C3%A9tica' );
 	$results['pages']['search'] = $status;
 	tds_assert( 200 === $status && false !== strpos( $html, 'tds-search-form' ), 'busca 200 com formulário' );
@@ -257,6 +267,13 @@ try {
 	tds_assert( 200 === $status && false !== strpos( $html, 'data-tds-component="catalog" data-tds-state="unavailable"' ), 'plugin inativo: catálogo unavailable' );
 	activate_plugin( 'tds-portal-core/tds-portal-core.php' );
 	tds_assert( is_plugin_active( 'tds-portal-core/tds-portal-core.php' ), 'plugin reativado' );
+
+	// Em 360px a label visual é ocultada; o nome do botão deve permanecer no ARIA.
+	$header_source = (string) file_get_contents( $theme_src . '/header.php' );
+	$style_source = (string) file_get_contents( $theme_src . '/style.css' );
+	tds_assert( false !== strpos( $header_source, 'aria-label="<?php esc_attr_e( \'Abrir navegação\', \'tds-portal\' ); ?>"' ), 'mobile: toggle tem aria-label permanente' );
+	tds_assert( false !== strpos( $header_source, 'class="tds-nav-toggle__bars" aria-hidden="true"' ), 'mobile: ícone permanece decorativo' );
+	tds_assert( false !== strpos( $style_source, '@media (max-width: 379px)' ) && false !== strpos( $style_source, '.tds-nav-toggle__label { display: none; }' ), 'mobile: regressão de label visual <380px coberta' );
 
 	$log = is_file( $debug_log ) ? (string) file_get_contents( $debug_log, false, null, $debug_offset ) : '';
 	tds_assert( ! preg_match( '#themes[/\\]tds-child-theme#', $log ), 'debug.log sem avisos novos do tema' );

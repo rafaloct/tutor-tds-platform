@@ -21,5 +21,8 @@ No external staging environment, domain, analytics, support inbox or upstream
 API is configured. Staging is UNKNOWN.
 Future staging must isolate DB/uploads, use synthetic/editorial content,
 SMTP sink and noindex, preserve the legacy quarantine and prove reversibility.
-Theme validation and MySQL/external staging remain separate gates; no deploy or
-external provisioning occurs in this slice.
+MySQL local recovery is separately reproducible through tests/setup-wp2-mysql.ps1.
+See [MYSQL_LOCAL_REHEARSAL.md](MYSQL_LOCAL_REHEARSAL.md) for verified archives,
+a fresh database, dump/restore, uploads integrity and deactivate/reactivate
+evidence. Theme validation and external staging remain separate gates; no
+deploy or external provisioning occurs in this slice.

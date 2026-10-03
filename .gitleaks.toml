@@ -1,0 +1,24 @@
+# gitleaks config for the PR secret scan (.github/workflows/secret-scan.yml).
+[extend]
+useDefault = true
+
+# Extend only the default generic-api-key rule. Digest and fixture exceptions
+# are contextual; specific rules (PAT, private key, AWS, etc.) remain active.
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "SHA-256 digest values in explicit evidence hash fields"
+condition = "AND"
+paths = ['''^docs/production/evidence/[^/]+\.json$''']
+# Gitleaks 8.28.0 Match includes the closing value quote, not the opening key quote.
+# Keep the match anchored to one field; never allow a whole line with neighboring secrets.
+regexTarget = "match"
+regexes = ['''(?i)^[a-z0-9_]+_sha256"\s*:\s*"[0-9a-f]{64}"$''']
+
+[[rules.allowlists]]
+description = "Explicit TDS synthetic API-key fixtures in API/Flutter tests"
+condition = "AND"
+paths = ['''^api/tests/''', '''^cartilhas_app/(test|integration_test)/''']
+regexTarget = "line"
+regexes = ['''(?i)^\s*(?:const\s+)?(?:synthetic_fixture_api_key|syntheticFixtureApiKey)\s*=\s*["']tds_gitleaks_fixture_[A-Za-z0-9]{24}["']\s*;?\s*(?:#|//)\s*gitleaks:synthetic-fixture\s*$''']
