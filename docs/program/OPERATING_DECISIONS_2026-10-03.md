@@ -2,6 +2,11 @@
 
 Status: **DECISION / HUMAN-CONFIRMED**.
 
+Precedência: a decisão posterior da [Issue #5, comentário 5965837795](https://github.com/rafaloct/tutor-tds-platform/issues/5#issuecomment-5965837795)
+substitui os critérios anteriores de frequência e fechamento digital. A matriz
+em `JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md` distingue decisão, candidato e
+limites. O Plano de Trabalho mencionado pelo responsável não foi examinado.
+
 Este documento registra respostas operacionais confirmadas pelo responsável do projeto para orientar desenvolvimento. Ele complementa `OPERATING_MODEL_SECRETARIAT.md` e reduz ambiguidades sem criar novas features por padrão.
 
 ## 1. Mobilização, comparecimento e matrícula
@@ -32,10 +37,13 @@ Não existe uma única pessoa responsável pela confirmação. A rotina pode ser
 
 O baseline pode ser preenchido no início, meio, fim ou depois da realização do curso, conforme logística e decisão da equipe.
 
-Limite confirmado no [complemento final da Issue #6](https://github.com/rafaloct/tutor-tds-platform/issues/6#issuecomment-5965300113):
-o baseline precisa estar **regularizado antes do certificado**. Isso não bloqueia
-o estudo nem permite criar ficha fictícia. É requisito institucional; a referência
-de certificado hoje exportada pela API não comprova que esse gate foi executado.
+A regra anterior de baseline pré-certificado da Issue #6 foi refinada pela
+decisão posterior de #5: baseline registrado é requisito de **CAPACITADO** e,
+portanto, de **CERTIFICADO_VALIDO**; geração da trilha não equivale a validade
+institucional e pode ocorrer antes da regularização. Registrar tipo, origem e
+status da evidência vinculada ao participante. Forms, Jotform, app e ficha
+digitalizada são origens possíveis, sem integração presumida ou ficha fictícia.
+Isso não bloqueia estudo. Referência legada exportada não comprova esses gates.
 
 ```text
 curso iniciado + baseline ausente
@@ -51,11 +59,15 @@ TARGET: detectar participantes ativos/interagindo com baseline não localizado e
 
 ## 3. Frequência
 
-A referência documental de **75% de frequência mínima** é efetivamente usada, porém sua aplicação é **flexível ao contexto operacional**.
+A referência documental anterior de 75% é histórica. A decisão posterior de
+#5 estabelece **frequência mínima de 70% dos encontros configurados por oferta**.
 
 O mesmo curso pode possuir quantidades diferentes de encontros em locais/turmas diferentes por razões logísticas. Consequência: **não calcular frequência por número fixo de encontros**.
 
-A base preferida deve ser carga/tempo planejado e presença validada nas sessões realizadas.
+A base é a configuração dos encontros da oferta e presença comprovada por
+listas/fichas institucionais. Tempo de tela e carga formal não são presença.
+Exceções ficam `pending_human_validation`, com justificativa e responsável;
+não criam presença automática.
 
 A presença usa assinatura na frequência e evidência do aplicativo como componente pretendido. A evidência do aplicativo ainda não é confiável em produção devido às falhas de monitoramento/backend.
 
@@ -92,41 +104,38 @@ A atividade não se autoaprova. Instrutor/equipe valida. Não criar um LMS paral
 
 As nove cartilhas/cursos presentes no app em produção correspondem a cursos reais.
 
-Existe uma etapa presencial de **40h já realizada** e uma etapa digital que também precisa ser formalizada/fechada em torno de **40h**, utilizando o app.
+O arranjo anterior de 40h presenciais e 40h digitais permanece histórico;
+não constitui condição atual de geração ou validade do certificado.
 
 O problema atual não é a existência pedagógica da etapa digital, mas a falta de regra de fechamento, evidência confiável, fluxo de oficialização e monitoramento/backend consistente.
 
 ### Decisão confirmada de carga total e fechamento digital
 
-A formação deve representar **80h totais**.
-
-O arranjo de referência é **40h presencial + 40h digital**, mas essa proporção não é rígida. A distribuição pode variar por razões humanas e logísticas, desde que a composição total e a exceção sejam registradas e validadas.
-
-Portanto:
-
-```text
-target padrão: 40h presencial + 40h digital = 80h
-exceção: percentuais/cargas diferentes permitidos
-condição: justificativa logística/humana + validação
-resultado: total formativo = 80h
-```
+A decisão posterior define **80h formais por curso TDS**, sem exigir cronômetro
+de 80h nem 40h digitais para emissão. Não inferir composição de dois cursos/160h
+na matrícula de um único curso. A configuração de checkpoints obrigatórios da
+trilha deve ser preservada por edição e validada deterministicamente no backend.
 
 Esse alvo de formação não reescreve a carga configurada de ofertas históricas:
 as 40h do piloto registradas em `../DECISIONS.md`, itens 19/21, permanecem com
 seu escopo e evidência. Não substituir `ProgramCourse.planned_seconds` por 80h
 na exportação, nem creditar tempo de tela como carga digital validada.
 
-A evidência digital deve ser uma **combinação de critérios**, incluindo:
+Todos os checkpoints obrigatórios configurados devem ser concluídos. Não tornar
+Jotform, print, tempo de uso ou quiz universal requisitos novos por inferência.
+Jotform pode coletar evidência, nunca autorizar matrícula ou resultado.
 
-- uso de pelo menos uma funcionalidade relevante de cada eixo/funcionalidade obrigatória definida no app;
-- evidência de conclusão na carteira de certificados do aplicativo;
-- print/registro do certificado disponível nessa carteira;
-- avaliação complementar via Jotform, ainda a ser desenvolvida;
-- demais eventos digitais confiáveis que forem formalizados no backend.
+```text
+CAPACITADO = baseline registrado AND frequência >=70%
+             AND trilha obrigatória concluída AND certificado da trilha gerado
+CERTIFICADO_VALIDO = CAPACITADO AND fichas regularizadas assinadas pelo instrutor
+                    AND certificado assinado pela coordenação
+```
 
-O Jotform será instrumento de avaliação/coleta, não fonte mestre de matrícula ou autorização.
-
-O agente pode implementar o contrato técnico e os pontos de integração, mas não deve inventar novos critérios pedagógicos fora dessa combinação sem nova decisão humana.
+Estados distintos: `GENERATED`, `PENDING_INSTRUCTOR_VALIDATION`,
+`PENDING_COORDINATOR_SIGNATURE`, `VALID`. Geração não é validade institucional.
+O PR #39 representa um candidato local isolado; não comprova emissão real,
+assinatura institucional, PostgreSQL homologado ou ativação em produção.
 
 ## 6. Lançamento e conferência de frequência
 
@@ -201,7 +210,8 @@ Portanto:
 - o sistema calcula e sinaliza;
 - o instrutor decide a suficiência da reposição/complementação;
 - a decisão deve ser registrada com ator, data e justificativa curta;
-- não transformar a regra de 75% em bloqueio rígido sem considerar o mecanismo de regularização.
+- manter o limiar atual de 70% e a exceção em revisão humana; complementação
+  não cria presença nem capacitação automaticamente.
 
 ## 11. Mentoria
 
@@ -217,7 +227,9 @@ O domínio deve registrar a origem do encaminhamento. Nenhum desses caminhos sig
 
 A data-âncora confirmada é a **data do certificado**.
 
-As janelas 30/60/90 contam a partir do certificado emitido/validado conforme autoridade definida no domínio.
+As janelas 30/60/90 se ancoram no certificado. Após distinguir geração e validade,
+o evento/data exatos ainda precisam de definição antes da automação; não escolher
+`GENERATED` ou `VALID` por inferência.
 
 Esta decisão, também registrada na [Issue #8](https://github.com/rafaloct/tutor-tds-platform/issues/8#issuecomment-5965176322),
 supera a redação anterior que ancorava a janela na aplicação validada. O tratamento
@@ -332,8 +344,8 @@ Isso permite tratar novas situações do projeto sem abrir novo workflow e nova 
 As cinco lacunas operacionais anteriormente abertas foram respondidas em 03/10/2026:
 
 1. suporte humano: 08–12, 14–18 e 19–21;
-2. carga total: 80h, preferencialmente 40h presencial + 40h digital, com adaptação logística/humana permitida;
-3. fechamento digital: combinação de uso funcional do app + carteira/certificado + avaliação Jotform + eventos confiáveis;
+2. carga: decisão posterior de #5 fixa 80h formais por curso, sem cronômetro obrigatório;
+3. fechamento digital: checkpoints obrigatórios por edição, conforme decisão posterior de #5;
 4. fotos/relatório: padrão de boa prática; ausência gera flag para complementação/revisita, não evidência fictícia;
 5. conflito de presença: lista física assinada prevalece até correção humana formal.
 

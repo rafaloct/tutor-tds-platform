@@ -276,9 +276,10 @@ Na observação inicial, 75% era regra documental e foram levantadas perguntas s
 - quem pode corrigir presença;
 - como tratar lista sem assinatura.
 
-As decisões posteriores, seções 3–6 e 10, confirmaram 75% flexível, carga/sessões,
-reposição validada pelo instrutor e conferência pela secretaria. Exceções específicas
-sem regra continuam revisão humana; isso não bloqueia o núcleo já decidido.
+A decisão posterior da Issue #5 substitui o limiar anterior por 70% dos encontros
+configurados por oferta. A ficha observada acima permanece evidência histórica,
+não regra vigente de implementação. Reposição/exceções exigem revisão humana,
+sem criar presença automática; ver `JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md`.
 
 ## 8. Evidências
 
@@ -575,8 +576,10 @@ Deve implementar a visão operacional da secretaria: pessoa, inscrição/autoriz
 
 ### Issue #6 — frequência
 
-Usar sessão/data/carga como base e 75% como referência flexível. Aplicar as decisões
-posteriores de reposição/conferência; apenas exceções ainda não definidas exigem gate.
+Usar encontros configurados por oferta e 70% como mínimo conforme decisão
+posterior de #5; evidência institucional e exceções com responsável/justificativa,
+sem crédito automático. Preservar sessão/data/carga como dados, não substituir
+o denominador definido. Conferência permanece humana.
 
 ### Issue #34 / CW — Chatwoot
 
@@ -623,7 +626,8 @@ Isso reduz risco de vazamento e evita que a organização informal do Drive vire
 Esta lista preserva a origem da investigação. As respostas posteriores estão em
 `OPERATING_DECISIONS_2026-10-03.md` e `CASE_ROUTING_AND_NOTIFICATIONS.md`;
 não tratar a lista inteira como pendência atual. O baseline deve estar regularizado
-antes do certificado, sem bloquear estudo. Perguntas originalmente levantadas:
+antes da capacitação/validade institucional, sem bloquear estudo ou geração de
+trilha; ver a decisão posterior de #5. Perguntas originalmente levantadas:
 
 1. Quem confere e autoriza matrícula na prática em cada turma?
 2. A regra de 75% é aplicada exatamente hoje a todos os cursos?
