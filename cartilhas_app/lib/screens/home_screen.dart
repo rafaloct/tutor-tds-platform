@@ -17,6 +17,7 @@ import 'guide_screen.dart';
 import 'chatwoot_screen.dart';
 import 'genui_assistant_screen.dart';
 import 'settings_screen.dart';
+import 'welcome_screen.dart';
 import '../features/study_ai/presentation/study_hub_screen.dart';
 import '../features/study_ai/data/assessment_attempt_repository.dart';
 import '../features/study_ai/models/study_models.dart';
@@ -448,6 +449,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   _refreshCatalog();
                   return;
                 }
+                if (value == 'account_access') {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const WelcomeScreen(
+                        skipExistingUserRedirect: true,
+                      ),
+                    ),
+                  );
+                  if (mounted) _refreshTeamCapability();
+                  return;
+                }
                 final screen = switch (value) {
                   'operations' => OperationsEntry(
                     auth: context.read<AuthRepository>(),
@@ -513,6 +526,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               itemBuilder: (_) => [
+                if (!_hasSession)
+                  const PopupMenuItem(
+                    value: 'account_access',
+                    child: ListTile(
+                      leading: Icon(Icons.login),
+                      title: Text('Entrar / participar'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                 if (_hasSession && operatorOperationsEnabled)
                   const PopupMenuItem(
                     value: 'operations',
