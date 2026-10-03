@@ -14,23 +14,23 @@
   "files": [
     {
       "path": "wordpress/legacy-runtime/docker-compose.yml",
-      "sha256": "27e3493d43e7c7b84ff3f6fd2bc5d87bd084f3f621ea58497380b0f2225714a8",
-      "bytes": 1971
+      "sha256": "00abf3fcf212959116a69f2dd0411d8477405880c48aa4dafbca6d4ab4ef0786",
+      "bytes": 1909
     },
     {
       "path": "wordpress/legacy-runtime/scripts/setup-dns.sh",
-      "sha256": "73952fde87d77cc70bd89542353a0fb8de50e2ddda8ea0dc5e556077d5fda856",
-      "bytes": 6676
+      "sha256": "3ee51c4fa2b456c7531ac56fd0ef9a7e2b572280fe423604fe8edfeda292e502",
+      "bytes": 6486
     },
     {
       "path": "wordpress/legacy-runtime/scripts/setup-dokploy.sh",
-      "sha256": "7e53da1daf0e4ca984ae65938d2e843d971245f5aa2ea55f920f0ed04f6fc553",
-      "bytes": 8299
+      "sha256": "426fee204abab9040a2242b719064ebddf3a26c09a696126a3a9c6585a2ac09c",
+      "bytes": 8078
     },
     {
       "path": "wordpress/legacy-runtime/scripts/smoke-test.sh",
-      "sha256": "42d11e6b58275d8382ace9f80979908529bef985d94c148f6869466557a25dda",
-      "bytes": 2164
+      "sha256": "75957691819ee2bce136a4778d8cbff30b5aeb55c0ab32c3b0383e4b9eab4f79",
+      "bytes": 2106
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/assets/logos/logo-cdr.png",
@@ -84,93 +84,93 @@
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/functions.php",
-      "sha256": "030c2d01a1061eb6a89cdd8946acbc0426b86e0cfc4513bf4e3b1fef0ed14348",
-      "bytes": 15745
+      "sha256": "337b2fffaf6cb460627fe4053cb9e52e42c860a40ab0b2134b99af76e3ff6d90",
+      "bytes": 15364
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/includes/admin-cadastro-aluno.php",
-      "sha256": "3d1fea105690fb9f27ecce6f3c7e1a0b0d9571cc34a8b480b49d5f1f660fd7a5",
-      "bytes": 20465
+      "sha256": "f34757104fb3f8b4d2d7491e8b3d144a43ba705c01d0ed42a58e4b16cce20e07",
+      "bytes": 20041
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/learnpress/content-learning.php",
-      "sha256": "6cbd57d4c646863f0876cf4f60e70f9242bacc48bf44f851dd8e1529de8a8a78",
-      "bytes": 453
+      "sha256": "73697a485b85a282dd0b6e7b256cd656f7411746ff9c102451714440ee002ed8",
+      "bytes": 439
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/learnpress/profile/lp-profile.php",
-      "sha256": "c1db0296496c7c52b44c567cb9fcb0a3e1a1afb45c4c27150a62106abea418fb",
-      "bytes": 145
+      "sha256": "f2f0fec7d48831e36e56c993ab46dbf04f3c57eee496e58d0450381ceb9eef57",
+      "bytes": 140
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/catalogo.php",
-      "sha256": "ca412c8afc9f80567dfafe32be5cacdce94ec7cf3c0cf12c8ea5e4348b6af75d",
-      "bytes": 2674
+      "sha256": "771592f202468a5bb54da98e7b0027fc4e6486a0175213f651c0a13e99f67984",
+      "bytes": 2627
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/certificados.php",
-      "sha256": "1fc3c095ba72c1bbc94800f3f51604b154b91d18e5e4844a3c74b8be0b11d52d",
-      "bytes": 1650
+      "sha256": "3066501ad0d9866932923ec54900965601fe0c1936365f49bbdfaa9452ffa68b",
+      "bytes": 1610
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/contato.php",
-      "sha256": "5d44f6d36171897dbe0729686ef5bf7a9c8c75402c4bb679cabfafd3fc8f1394",
-      "bytes": 11076
+      "sha256": "4a6a020b230b49eb217cc708924263a3876b3d277e05369b07a6c61ebfa804cc",
+      "bytes": 10875
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/guia-chatwoot.php",
-      "sha256": "a8186423268959034cbc273c9256ec60d0ff5dfcb36ee130629ab7731752c324",
-      "bytes": 27307
+      "sha256": "0323031d3461ec4be805c8be4b4fe7e16eaa0528e518434c29f5f5328042c499",
+      "bytes": 26821
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/guia-editor.php",
-      "sha256": "b6170ace747d7492c8380d3e6e3c369914b4de9686ddcfc5d8ec0db12326ac72",
-      "bytes": 26333
+      "sha256": "3668c8e5b5cd2541385e2f5797f372e0713a4ed96bf7599740ba70e6e5fc9abc",
+      "bytes": 25872
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/home.php",
-      "sha256": "8a2086e7ed8880d4ed2b53a78e7674372b9087488d99d670dd57b6fceced2b59",
-      "bytes": 10536
+      "sha256": "afe77785b63964e57dd395848bec1d12bcf21bc5c407d7ccd061439bb0874cda",
+      "bytes": 10330
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/metodologia.php",
-      "sha256": "523f89dfca453e6a6a2a0c7ca99f3daa68badcce55e4f86c67cd9a85bae5d484",
-      "bytes": 10290
+      "sha256": "65b66026f891de7d17ad3ae0549ebc8ad3012882d7aab3c88c94982a1e64b8d3",
+      "bytes": 10094
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/minha-area.php",
-      "sha256": "3d15619284cc4cac2824be859ea314c61ade8ce7378542b16b480c25ea95385a",
-      "bytes": 106
+      "sha256": "e43b7a02a65c70055b2e5af3d07e7417e36bac9042612f9c750407f3c0f62eb8",
+      "bytes": 101
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/noticias.php",
-      "sha256": "19b270db035f6d79ffe22b0b04305f8f342fe785b539b200dbae62afba5da155",
-      "bytes": 4756
+      "sha256": "7901f5a5fef262807296b55f1fa3c80dd7546620aeb0dadc75d7e367e8d4cf2c",
+      "bytes": 4629
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/sobre.php",
-      "sha256": "1767f036d769b9c0386bbf9b9f3366f880447888f68d32815aaa6ad335f0c131",
-      "bytes": 9868
+      "sha256": "710796fff45228f49fe510c6e19367e5b758815538f2e116ed0e9ae87dd0f99d",
+      "bytes": 9706
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/pages/tutorial.php",
-      "sha256": "7901b67da9e235d3cb8a0bfbdae6dad61a165f624be7a58b797b2fecb3b81d5f",
-      "bytes": 18269
+      "sha256": "db3d4576d685d9a9518a472cdad261233a7a7c0c0f6b9bb5b67fe31dbb27ad6c",
+      "bytes": 17949
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/single.php",
-      "sha256": "6e6f77161cbe0d7ab4bb8e70f9b8355a37369355e9699dfaf41a387283f376a6",
-      "bytes": 4820
+      "sha256": "ca37d06a71b2f80c86f1d3efd85fc18a335deb83a94412f212d1b7599c66e8b8",
+      "bytes": 4720
     },
     {
       "path": "wordpress/legacy-runtime/tds-child-theme/style.css",
-      "sha256": "8b2f5b5014cff8d1ce88f5c840e5114c3744917f9501072e44c4de6840f67444",
-      "bytes": 58537
+      "sha256": "c2a905b2c5f5bee0aec31f93bd4bb319a99b84e3416ba72837d31bb4c1515a84",
+      "bytes": 56534
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/composer.json",
-      "sha256": "f46f36e38144f1b81785ebc10d31898049d8d2a02f8ab57e9d951aae6823b9fc",
-      "bytes": 331
+      "sha256": "4eba010b357c24c0e2c4457eb4052c77d34f8676a788ebb6fcae0faddd278a2d",
+      "bytes": 314
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/composer.lock",
@@ -179,118 +179,124 @@
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/API/RestController.php",
-      "sha256": "39951cb08fce740453196e4f3af581068b33c7db8fb6eb010a170256528e495d",
-      "bytes": 9615
+      "sha256": "80e45363f73aea0450bed66ec27c22090b6656f92b7c10116b346c06b47bd883",
+      "bytes": 9402
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Certificates/Generator.php",
-      "sha256": "351c52d061d39e76de43ce1d5a3e3c13565d39a5a98b148562b844da5bee250c",
-      "bytes": 4819
+      "sha256": "e123065df88eb580c0c0598c369d2b9ded85047dc8ac3c52d958932296e139c5",
+      "bytes": 4698
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Certificates/Verifier.php",
-      "sha256": "be2eee8376f8f00763e56637c862a30e9741e69875d5c886dc2dbbe56dbf49f2",
-      "bytes": 940
+      "sha256": "882a57a54a99de0b75ecccbc4b0f8fe67a003dea4c56879b76f58a8c70962a8d",
+      "bytes": 912
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Certificates/views/verification.php",
-      "sha256": "d6bf60369734c52bad6ff361934702c8489207c7f1ccce16dcf448d8e16c323b",
-      "bytes": 1794
+      "sha256": "32aff59a31fc74b9581f4029a596e08723085cf69ff174c24cf0da546a215395",
+      "bytes": 1756
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Chatbot/WidgetInjector.php",
-      "sha256": "e0dd9e8cdf572ec0b0020911dc4bfedad77d311a176363ba6742ff6fba8c8783",
-      "bytes": 1517
+      "sha256": "4236afa69f6548832699dfbf471c0f9babaa530fcae445c21fd339eb5b7e7dcf",
+      "bytes": 1473
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Dashboard/StudentArea.php",
-      "sha256": "a782108fc744120e7f0c78b0a1625b8628d28fd855c5860ece7872ed02a55555",
-      "bytes": 1633
+      "sha256": "e56a9b202930de170442b8fc5b203442d56eb883229201956d7e19cb20da5414",
+      "bytes": 1590
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Dashboard/views/student-area.php",
-      "sha256": "3b7f2bf2aa174a709535584fa04ac21af89c9b055a3d61fff55e33faead47bd9",
-      "bytes": 1339
+      "sha256": "bcc81c59480cd8e2c25f91465dd1b652b9d8220a988f39b8e6867d8980557802",
+      "bytes": 1310
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Drip/Scheduler.php",
-      "sha256": "22d6323a735ad0ac7e733ce121c66541d47cabc2bbee82393548aad03ece1475",
-      "bytes": 1026
+      "sha256": "36faf3b0b0fe5693163aae7be809b78d614430fd82817c30eb87d6ed4f4387d9",
+      "bytes": 1000
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/MultiInstructor/InstructorRoles.php",
-      "sha256": "3d9a3e2a4dcac42b0bd3386d53f11725fd496577156e741d0b9a6072a6b108ab",
-      "bytes": 2450
+      "sha256": "165228cf7155d726724288e04e55f11a6912b3cc989814bd036b98fff5cee474",
+      "bytes": 2400
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Payments/EnrollmentGate.php",
-      "sha256": "c6c9b69e91b444d4e64d4784deb73ecb6f2ddca496ac54631f9bdd29904ef73c",
-      "bytes": 1880
+      "sha256": "e2d29b8c2bcdd64dde408a60fbe4eb2a0193a7dd0f810da43193f55bd8d9781e",
+      "bytes": 1832
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Quiz/AdvancedQuiz.php",
-      "sha256": "9a32bc16ae76185c145385d53d2e77fe053f42ebeb6f4f7fa4c1cceec576b265",
-      "bytes": 2608
+      "sha256": "8033c47d71beed9586405bcb2c6a3c806d14417074d4ba6e366d71f8bb05f275",
+      "bytes": 2558
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Reports/AdminPanel.php",
-      "sha256": "41ffb07d1c930e2ba9d3b20ecd84d64a20d0b7b006c70e273397614acd5f6d52",
-      "bytes": 2950
+      "sha256": "f189d1e8ab71bd77a5a95221f5807741fa2e23df024468e696946e63fbdde72c",
+      "bytes": 2888
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Subscriptions/PlanManager.php",
-      "sha256": "40027fc07bb469b352e9b378d1a5cb17d8ad13bae50da84540fadaaf2070e35f",
-      "bytes": 3756
+      "sha256": "f4edac017fe6c485b3d556da5bdffe301a0f88962240e0457ff7c97f7cf3e974",
+      "bytes": 3667
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Webhooks/N8nDispatcher.php",
-      "sha256": "27faf721aaaf6b124f6fcc6e1fb84f4765547c8a26e6f6cfe5d05d5d089787a9",
-      "bytes": 3396
+      "sha256": "fbd7f8c989539564281b0fa5445955933f1a8c8fc97784b0cc22af7c9b66b114",
+      "bytes": 3322
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/phpunit.xml",
-      "sha256": "9673b6dcdf589845893967d18c9270be5399a563e3936394c4e0df2d53975de4",
-      "bytes": 392
+      "sha256": "cefe521969bbd653b4b8240dbe538b0eea33b10494dd5c6e4b57b1d3c11f4b9b",
+      "bytes": 381
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/tds-lms-core.php",
-      "sha256": "28d6d23d09a560d38704a8589462f3f18a4bd657b11eb169813ce9d486d336bb",
-      "bytes": 1261
+      "sha256": "00e03a4a15792a46a800259ccb9a70eac3f8139e1f5104d5b38e53fdd08be6bd",
+      "bytes": 1225
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/tests/API/RestControllerTest.php",
-      "sha256": "2e9d04636796538a3eef6fda092e1d720e70d00888d1aaef1b300b28dc4a4634",
-      "bytes": 1244
+      "sha256": "cc278263a34e924f360f4a92a6ca79641085a73ae583b16efcba0f73849cb148",
+      "bytes": 1212
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/tests/BaseTestCase.php",
-      "sha256": "313edd309905fd7f371d6298a98763835b5531db461ccdd57efbd299aba5e662",
-      "bytes": 343
+      "sha256": "84303b3721d96c4b112a0a3c8102e2729276d2fcb7f05019c445806590e60d66",
+      "bytes": 326
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/tests/bootstrap.php",
-      "sha256": "ec8e29a9ccdc9fbbe242f1a5877a8454c5f12bfc841db1112c34eaf88ea346ee",
-      "bytes": 617
+      "sha256": "2b5777961355a115d9a5af099053d6fde4856459d4dfd3aad92f9874c85a8744",
+      "bytes": 607
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/tests/Certificates/GeneratorTest.php",
-      "sha256": "405a957faa0c5659ff22fbe1edefbf0140ef367652739ff48a646a9341d41077",
-      "bytes": 1238
+      "sha256": "394a2cb797e39db4846d06f22ee41ecba51d9c17a275ee1e3f9149d8241064d2",
+      "bytes": 1204
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/tests/Stubs/WP.php",
-      "sha256": "5e0bd6d10f4faf4fb4d0ac7705a1242f80ba54b5030b2f5f9d23c08ab3613c27",
-      "bytes": 905
+      "sha256": "27c81d1b8795cf21855cd13dea48005be0cc2d3a6982d881b5180b23e1e3eef0",
+      "bytes": 873
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/tests/Webhooks/N8nDispatcherTest.php",
-      "sha256": "8b0bd33b0f703d400471b35f846a5f2bb31ae32cb35c35f4aa391502723fbd4f",
-      "bytes": 1038
+      "sha256": "ac834162890449f84ac721411dacade542f0a417ebca6a61d1bfe6d6e3df838b",
+      "bytes": 1012
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core-loader.php",
-      "sha256": "0334429aa9fa329bbebcd8ca32e317875a6eca057722f8bc9f1f107a7a637ce6",
-      "bytes": 299
+      "sha256": "087bec87201753942a74978932e274d65d119b951412da0687739cc646fa2c40",
+      "bytes": 290
     }
-  ]
+  ],
+  "hash_contract": {
+    "algorithm": "sha256",
+    "bytes": "git_blob",
+    "verification": "git show HEAD:<path> | sha256",
+    "reason": "stable across checkout line-ending conversion"
+  }
 }
