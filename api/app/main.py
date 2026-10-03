@@ -18,6 +18,8 @@ from .classrooms import admin_router as classroom_admin_router
 from .classrooms import router as classroom_router
 from .certificates import router as certificates_router
 from .certificate_requests import router as certificate_requests_router
+from .certificate_emission import router as certificate_emission_router
+from .certificate_policy import router as certificate_policy_router
 from .commercial import router as commercial_router
 from .config import Settings
 from .course_editor import router as course_editor_router, latest_published_version, legacy_version_id
@@ -36,6 +38,7 @@ from .media import router as media_router
 from .models import Course
 from .observability import install_observability
 from .organizations import router as organizations_router
+from .operator_operations import router as operator_operations_router
 from .sync_api import router as sync_router
 from .support import router as support_router
 
@@ -75,12 +78,15 @@ def create_app(
     application.include_router(public_router)
     application.include_router(student_followup_router)
     application.include_router(organizations_router)
+    application.include_router(operator_operations_router)
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
     application.include_router(learning_context_router)
     application.include_router(journey_export_router)
     application.include_router(certificates_router)
     application.include_router(certificate_requests_router)
+    application.include_router(certificate_emission_router)
+    application.include_router(certificate_policy_router)
     application.include_router(commercial_router)
     application.include_router(hours_router)
     application.include_router(media_admin_router)

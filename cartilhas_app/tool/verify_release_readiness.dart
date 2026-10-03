@@ -52,27 +52,57 @@ class ReleaseReadinessVerifier {
     _verifyProductionConfig(issues);
     _verifySigning(release, issues);
 
+    const requiredPhysicalIds = {
+      'certificate_human_approval_e2e',
+      'classroom_cold_offline_xiaomi',
+      'course_versioning_xiaomi',
+      'evidence_offline_xiaomi',
+    };
     final physicalEvidence = status['required_physical_evidence'];
-    if (physicalEvidence is! List) {
+    final gates = <String, Map<String, dynamic>>{};
+    var invalidPhysical = physicalEvidence is! List || physicalEvidence.isEmpty;
+    if (physicalEvidence is List) {
+      for (final item in physicalEvidence) {
+        if (item is! Map<String, dynamic>) {
+          invalidPhysical = true;
+          continue;
+        }
+        final id = item['id'];
+        if (id is! String ||
+            id.isEmpty ||
+            gates.containsKey(id) ||
+            item['required_for_release_build'] is! bool ||
+            item['status'] is! String ||
+            (item['status'] as String).isEmpty) {
+          invalidPhysical = true;
+          continue;
+        }
+        gates[id] = item;
+      }
+    }
+    if (requiredPhysicalIds.any(
+      (id) => gates[id]?['required_for_release_build'] != true,
+    )) {
+      invalidPhysical = true;
+    }
+    if (invalidPhysical) {
       issues.add(
         const ReleaseVerificationIssue(
           'invalid_physical_evidence',
-          'Lista required_physical_evidence ausente ou inválida.',
+          'Lista required_physical_evidence incompleta ou inválida.',
         ),
       );
     }
-    final pendingPhysical = physicalEvidence is List
-        ? physicalEvidence.whereType<Map>().where((item) {
-            final gate = Map<String, dynamic>.from(item);
-            return gate['required_for_release_build'] == true &&
-                gate['status'] != 'passed';
-          }).toList()
-        : const <Map>[];
-
+    final pendingPhysical = gates.entries
+        .where(
+          (entry) =>
+              entry.value['required_for_release_build'] == true &&
+              entry.value['status'] != 'passed',
+        )
+        .map((entry) => entry.key)
+        .toList();
     if (pendingPhysical.isNotEmpty) {
-      final ids = pendingPhysical
-          .map((item) => item['id']?.toString() ?? 'gate_sem_id')
-          .join(', ');
+      final ids = pendingPhysical.join(', ');
       issues.add(
         ReleaseVerificationIssue(
           'physical_evidence_pending',

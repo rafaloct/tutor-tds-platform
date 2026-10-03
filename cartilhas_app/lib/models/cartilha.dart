@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../features/remote_materials/course_material.dart';
 
 part 'cartilha.g.dart';
 
@@ -44,8 +45,14 @@ class Section {
   final String id;
   final String title;
   final List<Message> messages;
+  final List<CourseMaterial> materials;
 
-  Section({required this.id, required this.title, required this.messages});
+  Section({
+    required this.id,
+    required this.title,
+    required this.messages,
+    this.materials = const [],
+  });
 
   factory Section.fromJson(Map<String, dynamic> json) =>
       _$SectionFromJson(json);

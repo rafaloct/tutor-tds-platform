@@ -51,3 +51,24 @@ No real production preflight, application build, deployment or secret is used.
 The agent reran the existing focused script once: 31/31 passed locally.
 Remote CI outcome is recorded in PR #12 after completion, not inferred here.
 Earlier evidence and the conservative minimum-build contract above are preserved.
+
+## Meta 02: verificacao de 03/10/2026
+
+- Na branch canonica `ab409f1`, os 31 casos offline de identidade e os 55 casos
+  de prova tipada de recuperacao passaram localmente. O workflow de identidade
+  no GitHub para esse commit terminou com sucesso (`37092517110`).
+- A API produtiva respondeu `/health` com `status=ok` e
+  `database=available`, mas `/version` respondeu HTTP 404. Nao ha identidade
+  produtiva, revision Alembic e compatibilidade comprovadas nesse endpoint.
+- `release_build_allowed` continua false. Dois gates fisicos obrigatorios
+  seguem pending. Nao ha tag no HEAD nem arquivo
+  `docs/production/evidence/production-restore-acceptance.json`. Nao inventar
+  o arquivo, alterar flags ou criar tag apenas para passar no script.
+- O verificador Flutter foi endurecido para rejeitar lista vazia, entrada
+  malformada, ID duplicado, gate obrigatorio removido ou rebaixado. Antes,
+  `whereType<Map>()` podia ignorar itens invalidos e aceitar build quando
+  `release_build_allowed=true`. O teste focal cobre essas regressões.
+- O script `build_production.ps1 -PreflightOnly` nao foi executado: requisitos
+  necessarios continuam ausentes. Nenhum APK/AAB, deploy, migration ou
+  manifesto de build foi criado. O versionCode 13 precisa ser confrontado
+  com o codigo publicado verificado pelo titular na janela de release.

@@ -5,21 +5,80 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
-from typing import Any
+import re
+from typing import Any, Literal
+from urllib.parse import urlsplit
 from uuid import NAMESPACE_URL, uuid4, uuid5
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .auth import access_claims
-from .models import Course, CourseVersion, CourseVersionTransition, Program, ProgramCourse, ProgramMembership
+from .models import Course, CourseVersion, CourseVersionTransition, MediaAsset, Program, ProgramCourse, ProgramMembership
 
 router = APIRouter(tags=["course-editor"])
 EDITOR_ROLES = {"teacher", "creator", "coordinator", "admin"}
 REVIEWER_ROLES = {"coordinator", "admin"}
+
+
+class CourseMaterial(BaseModel):
+    """Public edition manifest; provider credentials and playback URLs never belong here."""
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, strict=True)
+    id: str = Field(min_length=1, max_length=120, pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
+    kind: Literal["pdf", "video", "link"]
+    title: str = Field(min_length=1, max_length=240)
+    url: str | None = Field(default=None, max_length=2000)
+    media_id: str | None = Field(default=None, min_length=1, max_length=36, pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
+
+    @model_validator(mode="after")
+    def destination(self) -> "CourseMaterial":
+        if self.kind == "video":
+            if self.media_id is None or self.url is not None:
+                raise ValueError("Vídeo requer somente media_id.")
+        else:
+            if self.url is None or self.media_id is not None:
+                raise ValueError("PDF/link requer somente URL pública HTTPS.")
+            parsed = urlsplit(self.url)
+            host = parsed.hostname or ""
+            public_host = re.fullmatch(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}", host)
+            if (parsed.scheme != "https" or not parsed.hostname or parsed.username is not None
+                    or parsed.password is not None or "?" in self.url or "#" in self.url
+                    or not public_host or host.split(".")[-1] in {"localhost", "local", "internal", "invalid", "test", "example", "home", "lan", "localdomain", "onion"}
+                    or parsed.port not in {None, 443}
+                    or any(char.isspace() or ord(char) < 32 for char in self.url)
+                    or "\\" in self.url):
+                raise ValueError("Use URL pública HTTPS sem credenciais, query ou fragmento.")
+        return self
+
+
+def _materials(section: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = section.get("materials", [])
+    if not isinstance(raw, list) or len(raw) > 50:
+        raise HTTPException(422, "Inclua até 50 materiais por módulo.")
+    try:
+        parsed = [CourseMaterial.model_validate(item).model_dump(exclude_none=True) for item in raw]
+    except (ValidationError, ValueError) as error:
+        raise HTTPException(422, "Material inválido: use id, kind, title e URL pública HTTPS ou media_id.") from error
+    if len({item["id"] for item in parsed}) != len(parsed):
+        raise HTTPException(422, "IDs de materiais devem ser únicos no módulo.")
+    return parsed
+
+
+def _validate_material_lineage(session: Session, record: CourseVersion) -> None:
+    program = session.get(Program, record.program_id) if record.program_id else None
+    for section in record.content.get("sections", []):
+        for material in _materials(section):
+            if material["kind"] != "video":
+                continue
+            media = session.scalar(select(MediaAsset).where(MediaAsset.id == material["media_id"]).with_for_update())
+            if (program is None or media is None or media.status != "published"
+                    or media.institution_id != program.institution_id
+                    or media.program_id != record.program_id or media.course_id != record.course_id
+                    or media.module_id != section["id"]):
+                raise HTTPException(422, "Vídeo deve estar publicado e pertencer ao programa, curso e módulo desta edição.")
 
 
 class CourseCreate(BaseModel):
@@ -76,6 +135,8 @@ def snapshot_content(course_id: str, title: str, author: str, content: dict[str,
         if not isinstance(section_id, str) or not section_id.strip() or len(section_id) > 120 or section_id in section_ids:
             raise HTTPException(422, "IDs de módulos devem ser únicos e não vazios.")
         section_ids.add(section_id)
+        if "materials" in section:
+            section["materials"] = _materials(section)
         if not isinstance(section.get("title"), str) or not section["title"].strip():
             raise HTTPException(422, "Título do módulo obrigatório.")
         messages = section.get("messages")
@@ -329,6 +390,7 @@ def _transition(course_id: str, payload: VersionAction, request: Request, claims
             raise HTTPException(403, "Transição editorial não autorizada.")
         if action in {"submit", "publish"}:
             validate_publishable_content(record.content)
+            _validate_material_lineage(session, record)
         role = _role(session, claims, _program_for(session, record, claims)) or "admin"
         previous = record.status
         target = {"submit": "in_review", "publish": "published", "archive": "archived"}[action]
