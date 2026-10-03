@@ -5,5 +5,11 @@
   "TUTOR_STAGING_GATEWAY_URL": "",
   "TUTOR_GATEWAY_URL": "",
   "PRIVACY_POLICY_URL": "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
-  "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html"
+  "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html",
+  "OPERATOR_OPERATIONS_ENABLED": true,
+  "REMOTE_CATALOG_ENABLED": true,
+  "LEARNING_CONTEXT_ENABLED": false,
+  "DURABLE_LEARNING_OUTBOX_ENABLED": false,
+  "JOURNEY_TRACEABILITY_ENABLED": false,
+  "SIGNED_SUPPORT_IDENTITY": false
 }
