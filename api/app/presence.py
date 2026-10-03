@@ -17,11 +17,129 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .auth import access_claims
-from .evidence import _active_student, _class, _class_session, _locked_class_session, _staff
-from .models import ClassCheckin, ClassEnrollment, Enrollment, EvidenceItem, ProgramMembership, SessionPresence, SessionPresenceDecision, User
+from .evidence import _active_student, _class, _class_session, _is_staff, _locked_class_session, _staff
+from .models import ClassCheckin, ClassEnrollment, ClassSession, Enrollment, EvidenceItem, OfficialAttendanceDecision, ProgramMembership, SessionPresence, SessionPresenceDecision, User
 
 router = APIRouter(tags=["presence"])
 STATUSES = ("pending", "suggested_present", "confirmed_present", "justified_absence", "absent")
+
+
+class OfficialAttendanceCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    status: Literal["VALID", "ABSENT", "JUSTIFIED_ABSENCE", "PENDING_MAKEUP"]
+    makeup_session_id: str | None = Field(default=None, min_length=1, max_length=36)
+    expected_revision: int = Field(ge=0)
+    reason: str = Field(min_length=3, max_length=500)
+    idempotency_key: str = Field(min_length=8, max_length=180, pattern=r"^[A-Za-z0-9_.:-]+$")
+
+
+def official_attendance_projection(session, *, class_id, user_id, enrollment_id, program_id, course_id, session_ids):
+    """Only configured original meetings count; no telemetry or inferred makeup."""
+    if (not isinstance(session_ids, list) or not session_ids
+            or any(not isinstance(identity, str) for identity in session_ids)
+            or len(set(session_ids)) != len(session_ids)):
+        raise HTTPException(409, "Encontros oficiais não configurados de forma única.")
+    meetings = set(session.scalars(select(ClassSession.id).where(
+        ClassSession.id.in_(session_ids), ClassSession.class_id == class_id)))
+    if meetings != set(session_ids):
+        raise HTTPException(409, "Encontros oficiais divergentes da turma.")
+    states = {identity: "PENDING" for identity in session_ids}
+    for row in session.scalars(select(SessionPresence).where(
+            SessionPresence.session_id.in_(session_ids), SessionPresence.class_id == class_id,
+            SessionPresence.user_id == user_id, SessionPresence.enrollment_id == enrollment_id,
+            SessionPresence.program_id == program_id, SessionPresence.course_id == course_id)):
+        states[row.session_id] = {"confirmed_present": "VALID", "absent": "ABSENT",
+                                  "justified_absence": "JUSTIFIED_ABSENCE"}[row.status]
+    decisions = session.scalars(select(OfficialAttendanceDecision).where(
+        OfficialAttendanceDecision.original_session_id.in_(session_ids),
+        OfficialAttendanceDecision.class_id == class_id, OfficialAttendanceDecision.user_id == user_id,
+        OfficialAttendanceDecision.enrollment_id == enrollment_id,
+        OfficialAttendanceDecision.program_id == program_id, OfficialAttendanceDecision.course_id == course_id
+    ).order_by(OfficialAttendanceDecision.revision))
+    for decision in decisions:
+        states[decision.original_session_id] = decision.status
+    valid = sum(status == "VALID" for status in states.values())
+    return {"configured_meetings": len(session_ids), "valid_meetings": valid,
+            "frequency_percent": 100 * valid / len(session_ids),
+            "attendance_70_percent": 10 * valid >= 7 * len(session_ids),
+            "states": states, "source": "official_attendance_with_confirmed_legacy_fallback"}
+
+
+def _official_view(record):
+    return {key: getattr(record, key) for key in (
+        "id", "original_session_id", "makeup_session_id", "class_id", "user_id",
+        "enrollment_id", "revision", "status", "reason", "actor_user_id", "decided_at")}
+
+
+def _official_instructor(session, classroom, actor):
+    # Deliberately omit the legacy global-admin override: program/cohort scope
+    # must remain active even when the designated instructor is a global admin.
+    return classroom.teacher_id == actor and _is_staff(session, classroom, actor, "student")
+
+
+@router.get("/classes/{class_id}/sessions/{session_id}/attendance/{user_id}")
+def official_history(class_id: str, session_id: str, user_id: str, request: Request,
+                     limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0), claims=Depends(access_claims)):
+    with Session(request.app.state.database.engine) as session:
+        classroom = _class(session, class_id)
+        _staff(session, classroom, claims, monitor=True)
+        _class_session(session, class_id, session_id)
+        if not _active_student(session, classroom, user_id):
+            raise HTTPException(403, "Vínculo ativo obrigatório.")
+        query = select(OfficialAttendanceDecision).where(OfficialAttendanceDecision.class_id == class_id,
+            OfficialAttendanceDecision.original_session_id == session_id, OfficialAttendanceDecision.user_id == user_id)
+        return {"items": [_official_view(row) for row in session.scalars(query.order_by(
+            OfficialAttendanceDecision.revision.desc()).offset(offset).limit(limit))],
+            "total": session.scalar(select(func.count()).select_from(query.subquery())), "limit": limit, "offset": offset,
+            "can_decide": _official_instructor(session, classroom, claims["sub"]) and claims["sub"] != user_id}
+
+
+@router.post("/classes/{class_id}/sessions/{session_id}/attendance/{user_id}")
+def decide_official_attendance(class_id: str, session_id: str, user_id: str,
+                              payload: OfficialAttendanceCreate, request: Request, claims=Depends(access_claims)):
+    with Session(request.app.state.database.engine) as session:
+        classroom = _class(session, class_id)
+        _staff(session, classroom, claims, monitor=False)
+        if not _official_instructor(session, classroom, claims["sub"]) or claims["sub"] == user_id:
+            raise HTTPException(403, "Decisão oficial exige instrutor da turma e outra pessoa como alvo.")
+        _locked_class_session(session, class_id, session_id)
+        if not _active_student(session, classroom, user_id):
+            raise HTTPException(403, "Matrícula/vínculo ativo e consistente obrigatório.")
+        if payload.makeup_session_id:
+            _class_session(session, class_id, payload.makeup_session_id)
+            if payload.makeup_session_id == session_id:
+                raise HTTPException(422, "Reposição deve referenciar outro encontro da mesma turma.")
+        if payload.status == "PENDING_MAKEUP" and not payload.makeup_session_id:
+            raise HTTPException(422, "Reposição pendente exige encontro de reposição.")
+        link = session.get(ClassEnrollment, (class_id, user_id))
+        latest = session.scalar(select(OfficialAttendanceDecision).where(
+            OfficialAttendanceDecision.original_session_id == session_id,
+            OfficialAttendanceDecision.user_id == user_id).order_by(OfficialAttendanceDecision.revision.desc()).limit(1))
+        if latest is not None and latest.enrollment_id != link.enrollment_id:
+            raise HTTPException(409, "Linhagem de matrícula mudou; histórico preservado.")
+        replay = session.scalar(select(OfficialAttendanceDecision).where(
+            OfficialAttendanceDecision.idempotency_key == payload.idempotency_key))
+        if replay is not None:
+            if (replay.class_id != class_id or replay.original_session_id != session_id or replay.user_id != user_id
+                    or replay.actor_user_id != claims["sub"] or replay.enrollment_id != link.enrollment_id
+                    or replay.revision != payload.expected_revision + 1 or replay.status != payload.status
+                    or replay.makeup_session_id != payload.makeup_session_id or replay.reason != payload.reason):
+                raise HTTPException(409, "Idempotência divergente.")
+            return _official_view(replay)
+        if (latest.revision if latest else 0) != payload.expected_revision:
+            raise HTTPException(409, "Decisão oficial alterada; recarregue a revisão.")
+        record = OfficialAttendanceDecision(id=str(uuid4()), original_session_id=session_id,
+            makeup_session_id=payload.makeup_session_id, class_id=class_id, user_id=user_id,
+            enrollment_id=link.enrollment_id, program_id=classroom.program_id, course_id=classroom.course_id,
+            revision=payload.expected_revision + 1, status=payload.status, reason=payload.reason,
+            actor_user_id=claims["sub"], decided_at=datetime.now(timezone.utc), idempotency_key=payload.idempotency_key)
+        session.add(record)
+        try:
+            session.commit()
+        except IntegrityError as error:
+            session.rollback()
+            raise HTTPException(409, "Decisão concorrente/inconsistente; recarregue.") from error
+        return _official_view(record)
 
 
 class PresenceCreate(BaseModel):

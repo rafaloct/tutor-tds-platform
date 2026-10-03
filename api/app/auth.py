@@ -35,6 +35,7 @@ from .models import (
     Classroom,
     CohortMembership,
     OperatorCommandReceipt,
+    OfficialAttendanceDecision,
     CourseVersion,
     CourseVersionTransition,
     Enrollment,
@@ -291,6 +292,8 @@ def delete_me(
         session.execute(delete(ClassMonitor).where(ClassMonitor.user_id == user_id))
         session.execute(delete(CohortMembership).where(CohortMembership.user_id == user_id))
         session.execute(delete(Enrollment).where(Enrollment.user_id == user_id))
+        session.execute(delete(OfficialAttendanceDecision).where(OfficialAttendanceDecision.user_id == user_id))
+        session.execute(update(OfficialAttendanceDecision).where(OfficialAttendanceDecision.actor_user_id == user_id).values(actor_user_id=None))
         session.execute(
             delete(ProgramMembership).where(ProgramMembership.user_id == user_id)
         )

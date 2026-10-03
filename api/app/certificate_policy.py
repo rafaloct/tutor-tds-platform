@@ -17,6 +17,7 @@ from .auth import access_claims
 from .certificate_requests import _context
 from .certificate_transport import canonical
 from .learning_context import resolve_student_context
+from .presence import official_attendance_projection
 from .models import (AssessmentAttemptRecord, AssessmentContentRecord, CertificateEmissionAttempt,
     CertificateReference, CertificateRequest, Classroom, ClassSession, CourseVersion, EvidenceItem,
     ProgramMembership, ReviewDecision, SessionPresence, StudentBaseline, User)
@@ -162,11 +163,9 @@ def evaluate(session, record, context, reference=None):
         meeting = session.get(ClassSession, identity)
         if meeting is None or meeting.class_id != record.class_id:
             raise HTTPException(409, "Encontro configurado divergente ou ausente.")
-    present = set(session.scalars(select(SessionPresence.session_id).where(
-        SessionPresence.session_id.in_(session_ids), SessionPresence.class_id == record.class_id,
-        SessionPresence.user_id == record.user_id, SessionPresence.enrollment_id == record.enrollment_id,
-        SessionPresence.program_id == record.program_id, SessionPresence.course_id == record.course_id,
-        SessionPresence.status == "confirmed_present")))
+    attendance = official_attendance_projection(session, class_id=record.class_id,
+        user_id=record.user_id, enrollment_id=record.enrollment_id, program_id=record.program_id,
+        course_id=record.course_id, session_ids=session_ids)
     proofs = matching_evidence(session, record, context, policy, "trail_checkpoint")
     completed, proof_hashes = set(), []
     for checkpoint in policy["checkpoints"]:
@@ -194,7 +193,7 @@ def evaluate(session, record, context, reference=None):
                 proof_hashes.append(proof.item_digest)
     baseline = baseline_for(session, record, context, policy)
     trail_complete = len(completed) == len(policy["checkpoints"])
-    attendance_ok = 10 * len(present) >= 7 * len(session_ids)
+    attendance_ok = attendance["attendance_70_percent"]
     generated = reference is not None and reference.is_candidate and reference.request_id == record.id and reference.lifecycle_state in STATES
     sheets = matching_evidence(session, record, context, policy, "attendance_sheet")
     covered = set()
@@ -207,7 +206,7 @@ def evaluate(session, record, context, reference=None):
     capacitado = baseline is not None and attendance_ok and trail_complete and generated
     valid = capacitado and instructor_signed and coordinator_signed and reference.lifecycle_state == "VALID"
     pending_exceptions = [item.id for item in matching_evidence(session, record, context, policy, "attendance_exception") if item.review_status == "pending"]
-    return {"formal_hours": 80, "configured_meetings": len(session_ids), "confirmed_presence": len(present),
+    return {"formal_hours": 80, "configured_meetings": len(session_ids), "confirmed_presence": attendance["valid_meetings"],
         "attendance_70_percent": attendance_ok, "baseline_registered": baseline is not None,
         "required_checkpoints": len(policy["checkpoints"]), "completed_checkpoints": len(completed),
         "trail_complete": trail_complete, "trail_certificate_generated": generated,
