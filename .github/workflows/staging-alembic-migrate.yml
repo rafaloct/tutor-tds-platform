@@ -75,11 +75,13 @@ jobs:
 
       - name: Record Alembic revision before migration
         working-directory: api
-        run: "$UV_PROJECT_ENVIRONMENT/bin/python" -m alembic current
+        run: |
+          "$UV_PROJECT_ENVIRONMENT/bin/python" -m alembic current
 
       - name: Upgrade Alembic once
         working-directory: api
-        run: "$UV_PROJECT_ENVIRONMENT/bin/python" -m alembic upgrade head
+        run: |
+          "$UV_PROJECT_ENVIRONMENT/bin/python" -m alembic upgrade head
 
       - name: Confirm expected Alembic head
         working-directory: api
