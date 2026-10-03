@@ -2,6 +2,14 @@
 
 Este contrato é alvo de migração, não declaração de implementação concluída.
 
+Jornada/certificados: aplicar a decisão posterior de #5 registrada no item 27 de
+`DECISIONS.md` e na matriz `program/JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md`.
+80h formais por curso não são tempo medido. Frequência mínima é 70% dos encontros
+configurados por oferta. CAPACITADO exige baseline, frequência, trilha obrigatória
+e certificado gerado; validade acrescenta fichas assinadas pelo instrutor e
+assinatura da coordenação. Geração e validade são estados distintos. Referência
+legada e telemetria não comprovam esses requisitos; desconhecidos permanecem null.
+
 | Conceito único | Implementação encontrada | Tratamento na Wave 1 |
 | --- | --- | --- |
 | User | users / User, contém role global | identidade preservada; migrar autorização pedagógica ao vínculo; não remover role antes de migrar consumidores |

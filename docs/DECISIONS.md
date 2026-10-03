@@ -148,3 +148,35 @@
     PRODUCTION_RELEASE_READY=false até GitHub/proveniência, offsite+restore,
     schema/upgrade e decisão editorial de fallback offline. Measurement v1
     mantém baseline papel→planilha; etapas não validadas ficam null.
+
+26. 2026-10-03: conciliação documental META 04, sem nova decisão institucional.
+    As decisões posteriores registradas nas Issues #6 (comentário 5965300113),
+    #8 (5965176322) e #33 (5965176812) confirmam 75% como referência flexível,
+    reposição validada pelo instrutor, lista física assinada prevalente até
+    correção formal, formação alvo 80h com composição adaptável, baseline
+    regularizado antes do certificado sem bloquear estudo e follow-up 30/60/90
+    ancorado no certificado. Elas superam perguntas históricas e a antiga âncora
+    de aplicação validada em Measurement v1. Não alteram cargas históricas do
+    piloto dos itens 19/21, nem comprovam enforcement ou emissão por edição.
+    Proveniência e detalhes: program/OPERATING_DECISIONS_2026-10-03.md e matriz
+    https://github.com/rafaloct/tutor-tds-platform/pull/24#issuecomment-5968944747.
+    Campos de resultado sem fonte integrada continuam null; reemissão exige
+    regra específica antes de automatizar seu marco. Merge/produção permanecem
+    gates próprios, sem AAB ou autorização nova nesta conciliação.
+
+27. 2026-10-03: correção de precedência do item 26. A decisão posterior da Issue
+    #5, comentário 5965837795, substitui 75% por 70% dos encontros configurados
+    por oferta e define 80h formais por curso, sem cronômetro obrigatório ou 40h
+    digitais como condição. Trilha obrigatória por edição tem validação backend.
+    Baseline registrado, frequência >=70%, trilha concluída e certificado gerado
+    compõem CAPACITADO. CERTIFICADO_VALIDO acrescenta fichas regularizadas assinadas
+    pelo instrutor e certificado assinado pela coordenação. Geração não é validade
+    e pode preceder regularização; estados GENERATED, PENDING_INSTRUCTOR_VALIDATION,
+    PENDING_COORDINATOR_SIGNATURE e VALID ficam separados. Exceções de frequência
+    permanecem pending_human_validation, sem presença automática. Baseline admite
+    diferentes origens documentadas, sem exclusividade Jotform. Não sobrescrever
+    carga/evidência histórica nem inferir fontes ausentes no BI. A âncora de #8
+    continua no certificado, mas geração versus validade e reemissão ainda exigem
+    definição antes de automação. #39 permanece candidato preservado; #51 requer
+    reconciliação pelo seu escritor. Plano de Trabalho não examinado, provider
+    real e ativação não comprovados. Matriz: program/JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md.
