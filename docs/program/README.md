@@ -78,6 +78,8 @@ Agentes devem **migrar o existente**, não recriar o produto.
 - `AGENT_EXECUTION_PLAYBOOK.md`: protocolo para agentes.
 - `PROJECT_BOARD_SCHEMA.md`: estrutura do GitHub Project.
 - `ROADMAP.md`: epics, dependências e gates.
+- `SERVICE_SETUP_GUIDES.md`: configuração serviço a serviço, smoke tests e recuperação.
+- `FLOWS_AND_HIERARCHIES.md`: fluxos ponta a ponta, hierarquia de domínio e pontos de decisão.
 
 ## 7. Regra para lacunas
 
