@@ -25,6 +25,7 @@ from .config import Settings
 from .course_editor import router as course_editor_router, latest_published_version, legacy_version_id
 from .database import Database
 from .events import router as events_router
+from .external_auth import router as external_auth_router
 from .evidence import router as evidence_router
 from .presence import router as presence_router
 from .public_api import router as public_router
@@ -69,6 +70,7 @@ def create_app(
     application.state.settings = resolved
     install_observability(application)
     application.include_router(auth_router)
+    application.include_router(external_auth_router)
     application.include_router(support_router)
     application.include_router(assessment_content_router)
     application.include_router(assessment_sync_router)
