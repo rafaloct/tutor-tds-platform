@@ -1,0 +1,29 @@
+name: Tutor TDS backup automation contracts
+on:
+  pull_request:
+    paths:
+      - 'tooling/backup_automation/**'
+      - '.github/workflows/backup-automation.yml'
+  push:
+    branches: ['codex/onda-0-consolidacao']
+    paths:
+      - 'tooling/backup_automation/**'
+      - '.github/workflows/backup-automation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: backup-contracts-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contract-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Offline contracts, no production or S3 access
+        run: |
+          node --version
+          node --check tooling/backup_automation/backup.mjs
+          node --test tooling/backup_automation/backup.test.mjs
