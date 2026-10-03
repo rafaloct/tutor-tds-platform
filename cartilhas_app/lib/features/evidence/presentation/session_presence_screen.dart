@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../analytics/app_telemetry_service.dart';
 import '../data/evidence_repository.dart';
 import '../models/evidence_models.dart';
+import 'official_attendance_screen.dart';
 
 class SessionPresenceScreen extends StatefulWidget {
   const SessionPresenceScreen({
@@ -25,14 +26,33 @@ class _SessionPresenceScreenState extends State<SessionPresenceScreen> {
   bool _busy = false;
   bool _open = false;
   String? _error;
+  int _epoch = 0;
   @override
   void initState() {
     super.initState();
     _load();
   }
 
+  @override
+  void didUpdateWidget(covariant SessionPresenceScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.gateway != widget.gateway ||
+        oldWidget.classId != widget.classId ||
+        oldWidget.sessionId != widget.sessionId) {
+      _epoch++;
+      _items = const [];
+      _total = 0;
+      _open = false;
+      _busy = false;
+      _load();
+    }
+  }
+
+  bool _current(int epoch) => mounted && epoch == _epoch;
+
   Future<void> _load({bool more = false}) async {
     if (_busy) return;
+    final epoch = _epoch;
     setState(() {
       _busy = true;
       _error = null;
@@ -48,16 +68,16 @@ class _SessionPresenceScreenState extends State<SessionPresenceScreen> {
         widget.sessionId,
         offset: more ? _items.length : 0,
       );
-      if (!mounted) return;
+      if (!_current(epoch)) return;
       setState(() {
         _items = [..._items, ...page.items];
         _total = page.total;
         _open = page.sessionStatus == 'open';
       });
     } on Object catch (error) {
-      if (mounted) _showError(error);
+      if (_current(epoch)) _showError(error);
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (_current(epoch)) setState(() => _busy = false);
     }
   }
 
@@ -74,11 +94,12 @@ class _SessionPresenceScreenState extends State<SessionPresenceScreen> {
   });
 
   Future<void> _decide(SessionPresence row) async {
+    final epoch = _epoch;
     final decision = await showDialog<_Decision>(
       context: context,
       builder: (_) => _PresenceDialog(name: row.userName),
     );
-    if (decision == null || !mounted) return;
+    if (decision == null || !_current(epoch)) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -108,7 +129,7 @@ class _SessionPresenceScreenState extends State<SessionPresenceScreen> {
         reason: decision.reason,
         idempotencyKey: 'presence:$key',
       );
-      if (!mounted) return;
+      if (!mounted || !_current(epoch)) return;
       try {
         await Provider.of<AppTelemetryService?>(
           context,
@@ -117,13 +138,13 @@ class _SessionPresenceScreenState extends State<SessionPresenceScreen> {
       } on Object {
         /* Optional analytics never changes the domain decision. */
       }
-      if (!mounted) return;
+      if (!_current(epoch)) return;
       setState(() => _busy = false);
       await _load();
     } on Object catch (error) {
-      if (mounted) _showError(error);
+      if (_current(epoch)) _showError(error);
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (_current(epoch)) setState(() => _busy = false);
     }
   }
 
@@ -165,6 +186,23 @@ class _SessionPresenceScreenState extends State<SessionPresenceScreen> {
                     'Entradas: ${row.checkinCount} • Saídas: ${row.checkoutCount} • Atividades: ${row.activityCount}',
                   ),
                   if (row.reason != null) Text('Justificativa: ${row.reason}'),
+                  if (widget.gateway is OfficialAttendanceGateway)
+                    OutlinedButton(
+                      onPressed: _busy
+                          ? null
+                          : () => Navigator.push(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (_) => OfficialAttendanceScreen(
+                                  gateway: widget.gateway,
+                                  classId: widget.classId,
+                                  sessionId: widget.sessionId,
+                                  userId: row.userId,
+                                ),
+                              ),
+                            ),
+                      child: const Text('Frequência oficial e reposição'),
+                    ),
                   if (_open)
                     OutlinedButton(
                       onPressed: _busy ? null : () => _decide(row),

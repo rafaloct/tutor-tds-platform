@@ -1,0 +1,24 @@
+{
+  "task": "Issue #5 authenticated local certificate emission candidate",
+  "date": "2026-10-03",
+  "responsibility": "sole implementation agent; coordinator owns publication and independent review",
+  "branch": "agent/issue-5-authenticated-emission-20261003",
+  "base_sha": "ab409f168175e764ba4995a9f06c596084b940c2",
+  "state": "implemented_and_focally_tested_final_issuance_blocked",
+  "data": "synthetic only",
+  "runtime": {"python": "3.13.9", "node": "24.13.1", "uv": "0.12.18", "dependencies": "uv sync --locked --extra test --no-install-project --no-python-downloads in isolated local venv"},
+  "verification": [
+    {"working_directory": "api", "command": "python -m pytest tests/test_certificate_emission_candidate.py tests/test_certificate_requests.py tests/test_certificate_reference_context.py tests/test_certificates.py tests/test_certificate_approval_gate.py tests/test_auth.py tests/test_journey_traceability.py -q -o addopts=''", "passed": 78, "candidate_cases": 31, "failed": 0, "skipped": 0, "exit_code": 0, "elapsed_seconds": 78.75, "warnings": "two known dependency deprecations"},
+    {"working_directory": "cartilhas_app/cloudflare/tutor-tds-gateway", "command": "node --test", "passed": 14, "failed": 0, "skipped": 0, "exit_code": 0},
+    {"working_directory": "api", "command": "python -m compileall -q app tests", "exit_code": 0},
+    {"command": "git diff --cached --check", "exit_code": 0}
+  ],
+  "real_logic": ["FastAPI emission command", "canonical contextual resolver", "SQL reservation and reference persistence", "authenticated transport producer and receipt verification", "existing Worker handleRequest consumer"],
+  "substituted_boundaries": ["HTTP exchange simulator invoking Node Worker", "external KV simulated in memory; explicit eventual invisibility/failure", "disposable SQLite DB"],
+  "migration": {"revision": "20261003_0021", "tested": ["zero-to-head disposable SQLite", "populated0020 upgrade preserves legacy rows and triggers", "nullable unique request lineage", "empty-history rollback", "nonempty-history downgrade fails without deleting ledger", "owner erasure with and without SQLite FK enforcement"], "postgresql": "not homologated; no real database migration"},
+  "claims_excluded": ["installed end-to-end", "public verification", "institutional issuer/signature", "exactly-once KV delivery", "PostgreSQL concurrency acceptance", "physical wallet/offline acceptance", "production readiness", "full Issue #5 completion"],
+  "next_gate": "independent exact-SHA review and draft PR CI; validated institutional evidence representations and final issuer/protocol remain essential blockers",
+  "services_changed": [],
+  "deployments": [],
+  "publication": "coordinator checkpoint records final commit SHA, draft PR and CI separately"
+}

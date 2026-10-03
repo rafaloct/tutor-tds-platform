@@ -40,12 +40,18 @@ Section _$SectionFromJson(Map<String, dynamic> json) => Section(
   messages: (json['messages'] as List<dynamic>)
       .map((e) => Message.fromJson(e as Map<String, dynamic>))
       .toList(),
+  materials:
+      (json['materials'] as List<dynamic>?)
+          ?.map((e) => CourseMaterial.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$SectionToJson(Section instance) => <String, dynamic>{
   'id': instance.id,
   'title': instance.title,
   'messages': instance.messages,
+  'materials': instance.materials,
 };
 
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(

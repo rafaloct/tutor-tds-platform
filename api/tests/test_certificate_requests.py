@@ -21,8 +21,8 @@ ORIGINAL = legacy_version_id("course")
 
 
 @pytest.fixture
-def requests_api(tmp_path):
-    url = f"sqlite+pysqlite:///{(tmp_path / 'requests.db').as_posix()}"
+def requests_api(requests_database_url):
+    url = requests_database_url
     config = Config("alembic.ini")
     config.set_main_option("sqlalchemy.url", url)
     command.upgrade(config, "head")
@@ -32,7 +32,8 @@ def requests_api(tmp_path):
 
     @event.listens_for(engine, "connect")
     def foreign_keys(connection, _):
-        connection.execute("PRAGMA foreign_keys=ON")
+        if engine.dialect.name == "sqlite":
+            connection.execute("PRAGMA foreign_keys=ON")
 
     def claims(x_user: str = Header(default="learner")):
         return {"sub": x_user, "role": "admin" if x_user == "admin" else "student"}

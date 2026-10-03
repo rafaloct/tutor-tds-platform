@@ -17,7 +17,99 @@ from sqlalchemy.orm import Session
 from app.auth import access_claims
 from app.course_editor import ensure_legacy_course_version, legacy_version_id, router
 from app.database import Database
-from app.models import Classroom, Course, CourseVersion, CourseVersionTransition, Institution, Program, ProgramCourse, ProgramMembership, User
+from app.models import Classroom, Course, CourseVersion, CourseVersionTransition, Institution, MediaAsset, Program, ProgramCourse, ProgramMembership, User
+
+
+def material_save(client, view, materials):
+    return client.patch('/courses/course', json={
+        **{key: view[key] for key in ('title', 'author', 'version_id')},
+        'expected_revision': view['revision'],
+        'sections': [{'id': 'module', 'title': 'Módulo', 'messages': [
+            {'id': 'intro', 'type': 'bot', 'content': 'Introdução'}], 'materials': materials}],
+    })
+
+
+def seed_material_video(engine, **changes):
+    values = dict(id='video', institution_id='institution', program_id='p1',
+                  course_id='course', module_id='module', creator_user_id='creator',
+                  title='Vídeo', competency_id='skill', provider='youtube',
+                  provider_asset_id='abcdefghijk', duration_seconds=60,
+                  followup_activity_id='followup', status='published', rights_confirmed=True)
+    values.update(changes)
+    with Session(engine) as session:
+        session.add(MediaAsset(**values))
+        session.commit()
+
+
+@pytest.mark.parametrize('material', [
+    {'id': 'x', 'kind': 'pdf', 'title': 'PDF', 'url': 'http://example.org/a.pdf'},
+    {'id': 'x', 'kind': 'link', 'title': 'Link', 'url': 'https://user:pass@example.org/a'},
+    {'id': 'x', 'kind': 'link', 'title': 'Link', 'url': 'https://example.org/a?token=synthetic'},
+    {'id': 'x', 'kind': 'link', 'title': ' ', 'url': 'https://example.org/a'},
+    {'id': 'x', 'kind': 'video', 'title': 'Vídeo', 'url': 'https://example.org/video'},
+    {'id': 'x', 'kind': 'video', 'title': 'Vídeo', 'media_id': 'video', 'secret': 'synthetic'},
+    {'id': 'x', 'kind': 'unknown', 'title': 'Outro'},
+    *[{'id': 'x', 'kind': 'link', 'title': 'Local', 'url': url} for url in (
+        'https://127.0.0.1/a', 'https://10.0.0.1/a', 'https://[::1]/a',
+        'https://localhost/a', 'https://files.internal/a', 'https://192.168.1.1/a',
+        'https://example.org:65536/a', 'https://example.org:abc/a', 'https://example.org:8443/a')],
+])
+def test_material_manifest_rejects_unsafe_or_ambiguous_fields(editor, material):
+    client, _ = editor
+    draft = create(client)
+    assert material_save(client, draft, [material]).status_code == 422
+
+
+@pytest.mark.parametrize('changes', [{'status': 'draft'}, {'status': 'blocked'},
+                                    {'module_id': 'other'}, {'program_id': 'p2'}])
+def test_material_video_must_be_published_in_same_lineage(editor, changes):
+    client, engine = editor
+    draft = create(client)
+    seed_material_video(engine, **changes)
+    saved = material_save(client, draft, [{'id': 'v', 'kind': 'video', 'title': 'Vídeo', 'media_id': 'video'}]).json()
+    assert action(client, saved, 'submit').status_code == 422
+
+
+def test_three_material_formats_publish_and_fork_preserves_pinned_edition(editor):
+    client, engine = editor
+    draft = create(client)
+    seed_material_video(engine)
+    materials = [{'id': 'p', 'kind': 'pdf', 'title': 'PDF', 'url': 'https://example.org/a.pdf'},
+                 {'id': 'l', 'kind': 'link', 'title': 'Site', 'url': 'https://example.org/a'},
+                 {'id': 'v', 'kind': 'video', 'title': 'Vídeo', 'media_id': 'video'}]
+    assert material_save(client, draft, materials * 2).status_code == 422
+    saved = material_save(client, draft, materials).json()
+    assert client.get('/editor/courses/course', headers=headers('student')).status_code == 404
+    assert action(client, saved, 'publish', 'student').status_code == 404
+    review = action(client, saved, 'submit').json()
+    published = action(client, review, 'publish', 'coordinator').json()
+    with Session(engine) as session:
+        session.add(Classroom(id='material-class', program_id='p1', course_id='course',
+                             course_version_id=published['version_id'], teacher_id='teacher',
+                             name='Sintética', start_date=date(2026, 1, 1), end_date=date(2026, 12, 1)))
+        session.commit()
+    fork = client.post('/courses/course/versions', json={'source_version_id': published['version_id']}).json()
+    changed = deepcopy(materials)
+    changed[0]['url'] = 'https://example.org/b.pdf'
+    saved2 = material_save(client, fork, changed).json()
+    review2 = action(client, saved2, 'submit').json()
+    assert action(client, review2, 'publish', 'coordinator').status_code == 200
+    with Session(engine) as session:
+        old = session.get(CourseVersion, session.get(Classroom, 'material-class').course_version_id)
+        assert old.content['sections'][0]['materials'] == materials
+        assert session.get(Course, 'course').content['sections'][0]['materials'] == changed
+
+
+def test_material_video_is_rechecked_at_publish_after_review(editor):
+    client, engine = editor
+    draft = create(client)
+    seed_material_video(engine)
+    saved = material_save(client, draft, [{'id': 'v', 'kind': 'video', 'title': 'Vídeo', 'media_id': 'video'}]).json()
+    review = action(client, saved, 'submit').json()
+    with Session(engine) as session:
+        session.get(MediaAsset, 'video').status = 'blocked'
+        session.commit()
+    assert action(client, review, 'publish', 'coordinator').status_code == 422
 
 
 @pytest.fixture
@@ -180,14 +272,14 @@ def test_coordinator_can_publish_own_draft_but_not_other_program_projection(edit
 def test_seed_versioning_is_idempotent_and_keeps_public_payload(editor):
     _, engine = editor
     with Session(engine) as session:
-        course = Course(id="legacy", title="Legado", author="TDS", active=True, content={"sections": [{"id": "module", "title": "Módulo", "messages": [{"type": "bot", "content": "Preservar"}]}], "downloadUrl": "https://example.test/a.pdf"})
+        course = Course(id="legacy", title="Legado", author="TDS", active=True, content={"sections": [{"id": "module", "title": "Módulo", "messages": [{"type": "bot", "content": "Preservar"}]}], "downloadUrl": "https://example.org/a.pdf"})
         session.add(course)
         version = ensure_legacy_course_version(session, course)
         assert version.id == legacy_version_id("legacy")
         assert ensure_legacy_course_version(session, course).id == version.id
         assert "id" not in course.content["sections"][0]["messages"][0]
         assert version.content["sections"][0]["messages"][0]["id"]
-        assert version.content["downloadUrl"] == "https://example.test/a.pdf"
+        assert version.content["downloadUrl"] == "https://example.org/a.pdf"
         session.commit()
 
 

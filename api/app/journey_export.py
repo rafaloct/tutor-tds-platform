@@ -1,6 +1,7 @@
 """Read-only projection for the inspected TDS BI; never grants learning outcomes."""
 from datetime import datetime, timezone
 import re
+from types import SimpleNamespace
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
@@ -9,6 +10,8 @@ from sqlalchemy.orm import Session
 from .auth import access_claims
 from .classrooms import _student_progress
 from .evidence import _active_student
+from .presence import official_attendance_projection
+from .certificate_policy import policy_for
 from .models import (BaselineSourceRecord, CertificateReference, ClassEnrollment,
                      Course, CourseVersion, LearningEventRecord, ProgramCourse, StudentBaseline, User)
 from .student_followup import BI_SOURCE, _scope
@@ -76,6 +79,7 @@ def export_journey(class_id: str, request: Request, limit: int = Query(100, ge=1
                 expected_percent=0, now=now)
             certificate = session.scalar(select(CertificateReference).where(
                 CertificateReference.user_id == member.user_id,
+                CertificateReference.is_candidate.is_(False),
                 CertificateReference.program_id == classroom.program_id,
                 CertificateReference.course_id == classroom.course_id,
                 CertificateReference.class_id == class_id,
@@ -90,6 +94,13 @@ def export_journey(class_id: str, request: Request, limit: int = Query(100, ge=1
                 LearningEventRecord.payload["course_version_id"].as_string() == classroom.course_version_id,
             )).all()
             last = max((event.occurred_at for event in events), default=None)
+            attendance = None
+            if classroom.certificate_policy is not None:
+                policy = policy_for(session, SimpleNamespace(class_id=class_id, course_id=classroom.course_id,
+                    course_version_id=classroom.course_version_id))
+                attendance = official_attendance_projection(session, class_id=class_id, user_id=member.user_id,
+                    enrollment_id=member.enrollment_id, program_id=classroom.program_id,
+                    course_id=classroom.course_id, session_ids=policy["session_ids"])
             items.append({
                 "registro_id": source.record_id, "pessoa_id": person,
                 "turma_id": class_id, "programa_id": classroom.program_id,
@@ -102,7 +113,8 @@ def export_journey(class_id: str, request: Request, limit: int = Query(100, ge=1
                 "carga_horaria_prevista": planned / 3600,
                 "horas_estudo_validadas": progress.validated_hours,
                 "progresso_estudo_percentual": progress.progress_percent,
-                "frequencia_percentual": None, "concluiu_frequencia_flag": None,
+                "frequencia_percentual": attendance["frequency_percent"] if attendance else None,
+                "concluiu_frequencia_flag": int(attendance["attendance_70_percent"]) if attendance else None,
                 "certificado_flag": 1 if certificate else None,
                 "certificado_emitido_em": _iso(certificate.issued_at) if certificate else None,
                 "certificado_cobertura": "api_class_references_only",

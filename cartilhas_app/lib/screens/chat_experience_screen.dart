@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import '../models/cartilha.dart';
+import '../features/remote_materials/module_materials_screen.dart';
+import '../features/media/data/media_repository.dart';
+import '../features/auth/data/auth_repository.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
@@ -541,6 +544,35 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           actions: [
+            if (!_isInitializing &&
+                widget.cartilha.sections.isNotEmpty &&
+                widget
+                    .cartilha
+                    .sections[_currentSectionIndex]
+                    .materials
+                    .isNotEmpty)
+              IconButton(
+                tooltip: 'Materiais do módulo',
+                icon: const Icon(Icons.folder_open),
+                onPressed: () {
+                  final section =
+                      widget.cartilha.sections[_currentSectionIndex];
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => ModuleMaterialsScreen(
+                        courseId: widget.cartilha.id,
+                        moduleId: section.id,
+                        materials: section.materials,
+                        repository: MediaRepository(
+                          apiUrl: AppConfig.tutorApiUrl,
+                          authRepository: context.read<AuthRepository>(),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             IconButton(
               tooltip: 'Perguntar ao Tutor de IA',
               icon: const Icon(Icons.psychology),

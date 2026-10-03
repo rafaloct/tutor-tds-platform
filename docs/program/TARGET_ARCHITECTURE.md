@@ -10,8 +10,10 @@ staging; catálogo tem evidência física histórica e política posterior #4 va
 localmente, sem novo aceite físico/staging inferido. CW-1 é demonstração local com fake, sem atendimento
 real (`../production/CHATWOOT_CW1_IMPLEMENTATION.md`). Identidade assinada Chatwoot,
 webhooks/casos proativos, mídia e administração web permanecem alvos nos recortes
-não comprovados. WP-1/#49, API pública/#50 e overlay/#51 são candidatos separados,
-sem promoção por este documento. Emissão autenticada permanece fronteira #5/#39.
+não comprovados. Desde aquele checkpoint, WP-1/#49 e API pública/#50 foram
+integrados na base `1a577a6`, sem novo aceite de staging inferido. Overlay/#51
+permanece candidato separado e requer reconciliação com a decisão posterior de
+#5. Emissão autenticada permanece fronteira #5/#39.
 
 ```mermaid
 flowchart LR
