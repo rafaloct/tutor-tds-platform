@@ -13,8 +13,8 @@ em evidência de homologação.
 - `development` continua aceitando somente transporte HTTP loopback e pode usar
   o exchange sintético injetado dos testes.
 - `staging` exige `CERTIFICATE_CANDIDATE_ENABLED=true`, secret server-side com
-  comprimento mínimo já exigido, endpoint HTTPS cujo hostname identifica
-  explicitamente staging e **não aceita exchange injetado**.
+  comprimento mínimo já exigido e endpoint HTTPS `*.workers.dev` cujo nome do
+  Worker identifica explicitamente staging; **não aceita exchange injetado**.
 - `production` continua bloqueado independentemente da flag.
 - O Worker aceita o handler candidato somente em development/staging e mantém
   produção bloqueada.
