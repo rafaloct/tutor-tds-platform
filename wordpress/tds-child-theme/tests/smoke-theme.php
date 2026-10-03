@@ -92,6 +92,42 @@ foreach ( array( 'hero-institucional', 'cta-acesso-app', 'catalogo-publico', 'ca
 	tds_assert( $pattern_registry->is_registered( 'tds-portal/' . $slug ), "pattern tds-portal/$slug" );
 }
 
+// WP-3: contrato fail-closed para métricas, eventos e cards futuros.
+tds_assert( '' === tds_theme_event_attributes( 'contact_submitted' ), 'analytics: evento fora da allowlist rejeitado' );
+$event_attrs = tds_theme_event_attributes( 'tool_card_click', 'Área Sintética QA' );
+tds_assert( false !== strpos( $event_attrs, 'tool_card_click' ) && false !== strpos( $event_attrs, 'area-sintetica-qa' ), 'analytics: somente evento e slug público' );
+
+$stats_filter = static function () {
+	return array(
+		array( 'label' => 'Indicador sintético', 'value' => '12', 'source_label' => 'Fonte QA', 'source_url' => 'https://example.org/public-report' ),
+		array( 'label' => 'Sem fonte', 'value' => '99' ),
+		array( 'label' => 'Fonte insegura', 'value' => '3', 'source_label' => 'HTTP QA', 'source_url' => 'http://example.org/report' ),
+	);
+};
+add_filter( 'tds_portal_public_stats', $stats_filter );
+$stats = TDS_Theme_Portal_Stats_Provider::get();
+tds_assert( 1 === count( $stats ) && '12' === $stats[0]['value'], 'stats: somente métrica com proveniência válida' );
+remove_filter( 'tds_portal_public_stats', $stats_filter );
+
+$tools_filter = static function () {
+	return array(
+		array( 'title' => str_repeat( 'Ferramenta extensa ', 10 ), 'text' => 'Texto sintético.', 'url' => 'https://example.org/tool', 'slug' => 'ferramenta-qa', 'state' => 'available' ),
+		array( 'title' => 'Em preparação QA', 'state' => 'coming_soon' ),
+		array( 'title' => 'Restrita QA', 'state' => 'restricted' ),
+		array( 'title' => 'Oculta QA', 'state' => 'hidden' ),
+	);
+};
+add_filter( 'tds_portal_home_tools', $tools_filter );
+ob_start();
+tds_theme_home_collection( 'tds_portal_home_tools', 'tool_card_click', true );
+$tools_html = ob_get_clean();
+remove_filter( 'tds_portal_home_tools', $tools_filter );
+tds_assert( false !== strpos( $tools_html, 'data-tds-tool-state="available"' ), 'ferramentas: available' );
+tds_assert( false !== strpos( $tools_html, 'data-tds-tool-state="coming_soon"' ), 'ferramentas: coming_soon' );
+tds_assert( false !== strpos( $tools_html, 'data-tds-tool-state="restricted"' ), 'ferramentas: restricted' );
+tds_assert( false === strpos( $tools_html, 'Oculta QA' ), 'ferramentas: hidden não renderiza' );
+tds_assert( false !== strpos( $tools_html, 'data-tds-event="tool_card_click"' ), 'ferramentas: evento declarativo sem transporte' );
+
 // Conteúdo sintético (idempotente por título).
 function tds_page( $title, $template = '', $content = '', $excerpt = '' ) {
 	$existing = get_page_by_path( sanitize_title( $title ), OBJECT, 'page' );
@@ -112,7 +148,7 @@ $pages = array(
 	'templates/acessibilidade.php' => tds_page( 'Acessibilidade QA', 'templates/acessibilidade.php', '<!-- wp:paragraph --><p>Declaração sintética.</p><!-- /wp:paragraph -->' ),
 	'templates/contato.php'        => tds_page( 'Contato QA', 'templates/contato.php', '<!-- wp:paragraph --><p>Contato institucional sintético.</p><!-- /wp:paragraph -->' ),
 );
-$states_id = tds_page( 'Estados QA', '', '[tds_estado estado="loading"][tds_estado estado="empty"][tds_estado estado="unavailable"][tds_estado estado="error"][tds_catalogo quantidade="3"][tds_acesso_app]' );
+$states_id = tds_page( 'Estados QA', '', '[tds_estado estado="loading"][tds_estado estado="success"][tds_estado estado="empty"][tds_estado estado="stale"][tds_estado estado="unavailable"][tds_estado estado="error"][tds_catalogo quantidade="3"][tds_acesso_app]' );
 if ( ! get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'title' => 'Notícia sintética QA' ) ) ) {
 	wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Notícia sintética QA', 'post_content' => '<!-- wp:paragraph --><p>Corpo da notícia sintética.</p><!-- /wp:paragraph -->' ) );
 }
@@ -136,7 +172,7 @@ try {
 
 	$common = static function ( $label, $html ) {
 		tds_assert( false !== strpos( $html, 'class="tds-skip-link" href="#tds-main"' ), "$label: skip link" );
-		tds_assert( false !== strpos( $html, '<main id="tds-main" class="tds-main" tabindex="-1">' ), "$label: main focável" );
+		tds_assert( false !== strpos( $html, '<main id="tds-main" class="tds-main" tabindex="-1"' ), "$label: main focável" );
 		tds_assert( false !== strpos( $html, '<header class="tds-header"' ) && false !== strpos( $html, '<nav id="tds-primary-nav" class="tds-nav" aria-label=' ), "$label: header/nav" );
 		tds_assert( false !== strpos( $html, '<footer class="tds-footer">' ), "$label: footer" );
 		tds_assert( false !== strpos( $html, 'aria-expanded="false" aria-controls="tds-primary-nav"' ), "$label: toggle acessível" );
@@ -160,7 +196,17 @@ try {
 	tds_assert( false !== strpos( $html, '<meta property="og:title"' ) && false !== strpos( $html, '<link rel="canonical" href="' . $base . '/">' ), 'home: og/canonical' );
 	tds_assert( false !== strpos( $html, 'Portal público sintético para QA do tema' ), 'home: descrição do site' );
 	tds_assert( false !== strpos( $html, 'Notícia sintética QA' ), 'home: notícias recentes' );
+	tds_assert( false !== strpos( $html, 'data-tds-event="news_click"' ), 'home: notícia com evento declarativo' );
 	tds_assert( false !== strpos( $html, 'tds-child-theme/assets/img/logo-tds.png' ), 'home: logo oficial' );
+	tds_assert( false !== strpos( $html, 'data-tds-event="portal_home_view"' ), 'home: evento de visualização declarativo' );
+	$home_blocks = array( 'hero', 'journey', 'areas', 'courses', 'tools', 'stories', 'news', 'agenda', 'library', 'partners', 'app-access', 'certificate', 'support' );
+	foreach ( $home_blocks as $block ) {
+		tds_assert( false !== strpos( $html, 'data-tds-home-block="' . $block . '"' ), "home: bloco $block" );
+	}
+	tds_assert( 13 === substr_count( $html, 'data-tds-home-block=' ), 'home: 13 blocos visíveis sem stats não comprovados' );
+	tds_assert( false === strpos( $html, 'data-tds-home-block="stats"' ), 'home: stats ocultos sem fonte' );
+	tds_assert( false !== strpos( $html, 'data-tds-component="certificate-verify"' ) && false !== strpos( $html, 'Verificação oficial ainda não conectada' ), 'home: certificado fail-closed' );
+	tds_assert( false !== strpos( $html, 'data-tds-component="support" data-tds-state="disabled"' ), 'home: suporte fail-closed' );
 
 	foreach ( $pages as $tpl => $id ) {
 		list( $status, $html ) = tds_fetch( get_permalink( $id ) );
@@ -176,7 +222,7 @@ try {
 
 	list( $status, $html ) = tds_fetch( get_permalink( $states_id ) );
 	$results['pages']['estados'] = $status;
-	foreach ( array( 'loading', 'empty', 'unavailable', 'error' ) as $state ) {
+	foreach ( array( 'loading', 'success', 'empty', 'stale', 'unavailable', 'error' ) as $state ) {
 		tds_assert( false !== strpos( $html, 'data-tds-state="' . $state . '"' ), "estados: $state" );
 	}
 	tds_assert( false !== strpos( $html, 'role="alert"' ) && false !== strpos( $html, 'aria-busy="true"' ), 'estados: roles' );
@@ -199,7 +245,7 @@ try {
 	// URL de acesso configurada pelo plugin → botão aparece; inválida → oculto.
 	update_option( TDS_Public_Config::APP_URL_OPTION, 'https://app.qa-tds.example.org/entrar' );
 	list( , $html ) = tds_fetch( $base . '/' );
-	tds_assert( false !== strpos( $html, 'data-tds-component="app-access" data-tds-state="ready"' ) && false !== strpos( $html, 'href="https://app.qa-tds.example.org/entrar"' ), 'app ready: botão exibido' );
+	tds_assert( false !== strpos( $html, 'data-tds-component="app-access" data-tds-state="ready"' ) && false !== strpos( $html, 'href="https://app.qa-tds.example.org/entrar"' ) && false !== strpos( $html, 'data-tds-event="app_access_click"' ), 'app ready: botão exibido com evento declarativo' );
 	update_option( TDS_Public_Config::APP_URL_OPTION, 'http://insecure.example.org/' );
 	list( , $html ) = tds_fetch( $base . '/' );
 	tds_assert( false !== strpos( $html, 'data-tds-state="unavailable"' ) && false === strpos( $html, 'insecure.example.org' ), 'app inválido: botão oculto' );

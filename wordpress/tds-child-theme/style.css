@@ -4,7 +4,7 @@ Theme URI: https://github.com/rafaloct/tutor-tds-platform
 Description: Camada visual pública do portal TDS (WP-2). Child theme do Astra; consome somente TDS_Public_Config::get() e a REST pública do tds-portal-core. Sem autoridade acadêmica.
 Author: Programa TDS
 Template: astra
-Version: 0.1.0
+Version: 0.2.0
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -434,3 +434,87 @@ body.tds-portal {
 .tds-portal .has-tds-ink-color { color: var(--tds-color-ink); }
 .tds-portal .has-tds-surface-background-color { background-color: var(--tds-color-surface); }
 .tds-portal .has-tds-surface-color { color: var(--tds-color-surface); }
+
+
+/* =============================================================
+   15. WP-3 HOME PÚBLICA
+   Slots funcionais e proveniência explícita, sem métricas fictícias.
+   ============================================================= */
+.tds-home-editorial {
+	margin-top: var(--tds-space-8);
+	max-width: 70ch;
+	padding: var(--tds-space-5);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: var(--tds-radius-lg);
+	background: rgba(255, 255, 255, 0.08);
+	color: rgba(255, 255, 255, 0.92);
+}
+.tds-home-editorial a { color: var(--tds-color-accent); }
+
+.tds-journey {
+	list-style: none;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+	gap: var(--tds-space-5);
+	margin: 0;
+	padding: 0;
+	counter-reset: none;
+}
+.tds-journey__item {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: var(--tds-space-3);
+	align-items: start;
+	padding: var(--tds-space-5);
+	background: var(--tds-color-surface);
+	border: 1px solid var(--tds-color-outline);
+	border-radius: var(--tds-radius-lg);
+	box-shadow: var(--tds-shadow-sm);
+}
+.tds-journey__item h3 { font-size: var(--tds-text-lg); margin-bottom: var(--tds-space-2); }
+.tds-journey__item p { margin: 0; color: var(--tds-color-muted); font-size: var(--tds-text-sm); }
+.tds-journey__number {
+	display: grid;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+	background: var(--tds-color-primary);
+	color: #fff;
+	font-weight: 800;
+}
+
+.tds-home-card .tds-card__link {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--tds-tap-target);
+	margin-top: auto;
+	font-weight: 600;
+}
+.tds-home-card[data-tds-tool-state="coming_soon"] .tds-badge { background: var(--tds-color-accent-soft); color: var(--tds-color-on-accent-soft); }
+.tds-home-card[data-tds-tool-state="restricted"] .tds-badge { background: var(--tds-color-secondary-soft); color: var(--tds-color-on-secondary-soft); }
+
+.tds-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+	gap: var(--tds-space-5);
+}
+.tds-stat {
+	padding: var(--tds-space-5);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: var(--tds-radius-lg);
+	background: rgba(255, 255, 255, 0.08);
+}
+.tds-stat__value { margin: 0 0 var(--tds-space-2); font-size: var(--tds-text-3xl); font-weight: 800; color: var(--tds-color-accent); line-height: 1; }
+.tds-stat__label { margin: 0 0 var(--tds-space-2); font-size: var(--tds-text-lg); }
+.tds-stat__source { margin: 0; font-size: var(--tds-text-xs); color: rgba(255, 255, 255, 0.75); }
+.tds-stat__source a { color: #fff; }
+
+.tds-service-cta { max-width: 760px; }
+.tds-state--stale { background: var(--tds-color-primary-soft); border-color: #bdc8ff; }
+.tds-state--stale .tds-state__icon { background: var(--tds-color-primary); color: #fff; }
+
+@media (max-width: 479px) {
+	.tds-home-editorial { padding: var(--tds-space-4); }
+	.tds-journey__item { grid-template-columns: 1fr; }
+}
