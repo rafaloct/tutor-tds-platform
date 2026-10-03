@@ -2,17 +2,7 @@ name: WordPress legacy quarantine
 
 on:
   pull_request:
-    paths:
-      - 'wordpress/legacy-runtime/**'
-      - 'docs/portal/WP1_LEGACY_SOURCE_MANIFEST.json'
-      - 'tooling/verify_wp_legacy_snapshot.py'
-      - '.github/workflows/wp-legacy-quarantine.yml'
   push:
-    paths:
-      - 'wordpress/legacy-runtime/**'
-      - 'docs/portal/WP1_LEGACY_SOURCE_MANIFEST.json'
-      - 'tooling/verify_wp_legacy_snapshot.py'
-      - '.github/workflows/wp-legacy-quarantine.yml'
 
 jobs:
   verify:

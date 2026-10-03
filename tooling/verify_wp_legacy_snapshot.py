@@ -8,6 +8,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "docs" / "portal" / "WP1_LEGACY_SOURCE_MANIFEST.json"
 LEGACY_PREFIX = "wordpress/legacy-runtime/"
+ALLOWED_LEGACY_REFERENCES = {
+    "wordpress/README.md",
+    "tooling/verify_wp_legacy_snapshot.py",
+    ".github/workflows/wp-legacy-quarantine.yml",
+}
 
 
 def git_bytes(path: str) -> bytes:
@@ -15,6 +20,31 @@ def git_bytes(path: str) -> bytes:
         ["git", "-C", str(ROOT), "show", f"HEAD:{path}"],
         stderr=subprocess.DEVNULL,
     )
+
+
+def is_allowed_legacy_reference(path: str) -> bool:
+    return path.startswith("docs/") or path in ALLOWED_LEGACY_REFERENCES
+
+
+def verify_legacy_references() -> None:
+    tracked = subprocess.check_output(
+        ["git", "-C", str(ROOT), "ls-files", "-z"],
+    ).split(b"\0")
+
+    for raw_path in tracked:
+        if not raw_path:
+            continue
+        path = raw_path.decode("utf-8", errors="surrogateescape")
+        if path.startswith(LEGACY_PREFIX) or is_allowed_legacy_reference(path):
+            continue
+        data = subprocess.check_output(
+            ["git", "-C", str(ROOT), "show", f":{path}"],
+            stderr=subprocess.DEVNULL,
+        )
+        if b"wordpress/legacy-runtime" in data:
+            raise SystemExit(
+                f"quarantine violation: tracked file references legacy snapshot: {path}"
+            )
 
 
 def main() -> int:
@@ -44,21 +74,7 @@ def main() -> int:
         if actual != item["sha256"] or len(data) != item["bytes"]:
             raise SystemExit(f"legacy manifest mismatch: {path}")
 
-    candidates = []
-    for pattern in ("**/Dockerfile*", "**/docker-compose*.yml", "**/docker-compose*.yaml"):
-        candidates.extend(ROOT.glob(pattern))
-    for path in candidates:
-        rel = path.relative_to(ROOT).as_posix()
-        if rel.startswith(LEGACY_PREFIX):
-            continue
-        try:
-            content = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
-            continue
-        if "wordpress/legacy-runtime" in content:
-            raise SystemExit(
-                f"quarantine violation: deploy file references legacy snapshot: {rel}"
-            )
+    verify_legacy_references()
 
     print(f"WP legacy manifest OK: {len(tracked)} files")
     return 0
