@@ -82,7 +82,7 @@ function tds_theme_footer_nav() {
 }
 
 /**
- * Aviso de estado. $state: loading | empty | error | unavailable | disabled | success.
+ * Aviso de estado. $state: loading | success | empty | stale | unavailable | error | disabled.
  * Erros usam role="alert"; demais usam role="status" (polite).
  */
 function tds_theme_state_notice( $state, $args = array() ) {
@@ -91,6 +91,7 @@ function tds_theme_state_notice( $state, $args = array() ) {
 		'empty'       => array( '0', __( 'Nada por aqui ainda', 'tds-portal' ), __( 'Quando houver conteúdo publicado, ele aparecerá nesta área.', 'tds-portal' ) ),
 		'error'       => array( '!', __( 'Não foi possível carregar', 'tds-portal' ), __( 'Ocorreu uma falha temporária. Tente novamente mais tarde.', 'tds-portal' ) ),
 		'unavailable' => array( 'i', __( 'Indisponível temporariamente', 'tds-portal' ), __( 'Esta informação ainda não está disponível no portal.', 'tds-portal' ) ),
+		'stale'       => array( '↻', __( 'Última versão disponível', 'tds-portal' ), __( 'A fonte está temporariamente indisponível; este conteúdo pode estar desatualizado.', 'tds-portal' ) ),
 		'disabled'    => array( 'i', __( 'Recurso não habilitado', 'tds-portal' ), __( 'Este recurso ainda não foi ativado para o portal público.', 'tds-portal' ) ),
 		'success'     => array( '✓', __( 'Tudo certo', 'tds-portal' ), '' ),
 	);
@@ -122,7 +123,7 @@ function tds_theme_app_access( $args = array() ) {
 	echo '<div class="tds-app-access" data-tds-component="app-access" data-tds-state="' . esc_attr( $state ) . '">';
 	if ( '' !== $url ) {
 		echo '<div class="tds-cluster">';
-		echo tds_theme_button( isset( $args['label'] ) ? $args['label'] : __( 'Acessar o app TDS', 'tds-portal' ), $url, isset( $args['variant'] ) ? $args['variant'] : 'accent', array( 'rel' => 'noopener', 'data-tds-action' => 'app-access' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in tds_theme_button
+		echo tds_theme_button( isset( $args['label'] ) ? $args['label'] : __( 'Acessar o app TDS', 'tds-portal' ), $url, isset( $args['variant'] ) ? $args['variant'] : 'accent', array( 'rel' => 'noopener', 'data-tds-action' => 'app-access', 'data-tds-event' => 'app_access_click' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in tds_theme_button
 		echo '<span class="tds-footer__note">' . esc_html__( 'Canal oficial configurado pela equipe do programa.', 'tds-portal' ) . '</span>';
 		echo '</div>';
 	} else {
@@ -208,15 +209,17 @@ function tds_theme_page_hero( $args = array() ) {
 	echo '</div></header>';
 }
 
-function tds_theme_post_card( $post_id ) {
-	$has_thumb = has_post_thumbnail( $post_id );
+function tds_theme_post_card( $post_id, $heading_level = 2, $event = '' ) {
+	$has_thumb     = has_post_thumbnail( $post_id );
+	$heading_level = 3 === (int) $heading_level ? 3 : 2;
 	echo '<article class="tds-card tds-card--link">';
 	if ( $has_thumb ) {
 		echo '<div class="tds-card__media">' . get_the_post_thumbnail( $post_id, 'medium_large', array( 'loading' => 'lazy', 'decoding' => 'async' ) ) . '</div>';
 	}
 	echo '<div class="tds-card__body">';
 	echo '<ul class="tds-card__meta"><li><time datetime="' . esc_attr( get_the_date( DATE_W3C, $post_id ) ) . '">' . esc_html( get_the_date( '', $post_id ) ) . '</time></li></ul>';
-	echo '<h2 class="tds-card__title"><a href="' . esc_url( get_permalink( $post_id ) ) . '">' . esc_html( get_the_title( $post_id ) ) . '</a></h2>';
+	$event_attrs = function_exists( 'tds_theme_event_attributes' ) ? tds_theme_event_attributes( $event, get_post_field( 'post_name', $post_id ) ) : '';
+	echo '<h' . esc_attr( (string) $heading_level ) . ' class="tds-card__title"><a href="' . esc_url( get_permalink( $post_id ) ) . '"' . $event_attrs . '>' . esc_html( get_the_title( $post_id ) ) . '</a></h' . esc_attr( (string) $heading_level ) . '>'; // phpcs:ignore WordPress.Security.EscapeOutput -- event helper escapes allowlisted attributes.
 	echo '<p class="tds-card__text">' . esc_html( wp_trim_words( get_the_excerpt( $post_id ), 28 ) ) . '</p>';
 	echo '</div></article>';
 }
