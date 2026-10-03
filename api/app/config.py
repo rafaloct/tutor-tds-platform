@@ -39,6 +39,8 @@ class Settings:
     compatibility_verified: bool = False
     environment: str = "development"
     operator_operations_enabled: bool = False
+    supabase_auth_url: str | None = None
+    supabase_auth_audience: str = "authenticated"
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -55,6 +57,8 @@ class Settings:
         )
         settings = cls(
             operator_operations_enabled=os.getenv("OPERATOR_OPERATIONS_ENABLED", "false").lower() in {"1", "true", "yes"},
+            supabase_auth_url=os.getenv("SUPABASE_AUTH_URL"),
+            supabase_auth_audience=os.getenv("SUPABASE_AUTH_AUDIENCE", "authenticated").strip() or "authenticated",
             database_url=database_url or "sqlite+pysqlite:///./tutor_tds_local.db",
             environment=environment,
             allowed_origins=origins,
@@ -121,6 +125,31 @@ class Settings:
             or (self.environment == "staging" and host == "db")
         ):
             raise RuntimeError("DATABASE_URL exige PostgreSQL persistente do ambiente, fora de SQLite/localhost.")
+
+    def resolved_supabase_auth_url(self) -> str | None:
+        if self.supabase_auth_url is None or not self.supabase_auth_url.strip():
+            return None
+        value = self.supabase_auth_url.strip()
+        parsed = urlsplit(value)
+        try:
+            parsed.port
+        except ValueError as exc:
+            raise RuntimeError("SUPABASE_AUTH_URL possui porta inválida.") from exc
+        if (
+            any(character.isspace() or ord(character) < 32 for character in value)
+            or parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+            or parsed.path not in {"", "/"}
+        ):
+            raise RuntimeError(
+                "SUPABASE_AUTH_URL deve ser uma origem HTTPS canônica, sem "
+                "credenciais, path, query ou fragmento."
+            )
+        return value.rstrip("/")
 
     def require_auth_secrets(self) -> tuple[str, str]:
         if not self.jwt_secret or len(self.jwt_secret) < 32:
