@@ -9,6 +9,21 @@ class AppConfig {
   /// catálogo continua vindo integralmente dos assets do aplicativo.
   static const tutorApiUrl = String.fromEnvironment('TUTOR_API_URL');
 
+  /// Supabase is used only as an external identity provider. Tutor academic
+  /// data always remains behind the FastAPI authority.
+  static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const supabasePublishableKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY',
+  );
+  static const supabaseAuthRedirectUrl = String.fromEnvironment(
+    'SUPABASE_AUTH_REDIRECT_URL',
+    defaultValue: 'tutortds://auth-callback/',
+  );
+  static bool get externalAuthConfigured =>
+      tutorApiUrl.trim().isNotEmpty &&
+      supabaseUrl.trim().isNotEmpty &&
+      supabasePublishableKey.trim().isNotEmpty;
+
   /// Enable with the matching API flag only after the Context Core staging gate.
   static const learningContextEnabled = bool.fromEnvironment(
     'LEARNING_CONTEXT_ENABLED',
