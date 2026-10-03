@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/auth_session.dart';
+import '../models/external_auth_result.dart';
 import 'auth_token_store.dart';
 
 class AuthException implements Exception {
@@ -100,6 +101,47 @@ class AuthRepository {
         path: '/auth/login',
         body: {'cpf': cpf, 'password': password},
         expectedStatus: 200,
+      );
+
+  Future<ExternalAuthResult> exchangeExternal({
+    required String externalAccessToken,
+  }) async {
+    await logout();
+    return _externalRequest(
+      path: '/auth/external/exchange',
+      body: {'access_token': externalAccessToken},
+    );
+  }
+
+  Future<ExternalAuthResult> completeExternalProfile({
+    required String onboardingToken,
+    required String name,
+    required String cpf,
+    required String phone,
+  }) =>
+      _externalRequest(
+        path: '/auth/external/complete',
+        body: {
+          'onboarding_token': onboardingToken,
+          'name': name,
+          'cpf': cpf,
+          'phone': phone,
+        },
+      );
+
+  Future<ExternalAuthResult> linkExistingExternal({
+    required String onboardingToken,
+    required String cpf,
+    required String password,
+  }) =>
+      _externalRequest(
+        path: '/auth/external/link-existing',
+        body: {
+          'onboarding_token': onboardingToken,
+          'cpf': cpf,
+          'password': password,
+        },
+        linkingExisting: true,
       );
 
   Future<AuthUser> currentUser() async {
@@ -232,6 +274,58 @@ class AuthRepository {
       return {'identifier': identifier, 'identifier_hash': signature};
     } on Object {
       throw failure;
+    }
+  }
+
+  Future<ExternalAuthResult> _externalRequest({
+    required String path,
+    required Map<String, String> body,
+    bool linkingExisting = false,
+  }) async {
+    _requireConfigured();
+    final generation = _sessionGeneration;
+    try {
+      final response = await _client
+          .post(
+            _uri(path),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 12));
+      _checkGeneration(generation);
+      if (response.statusCode != 200) {
+        if (response.statusCode == 401 && linkingExisting) {
+          throw const AuthException('CPF ou senha inválidos.');
+        }
+        if (response.statusCode == 401) {
+          throw const AuthException(
+            'A autenticação externa expirou ou é inválida.',
+          );
+        }
+        if (response.statusCode == 409) {
+          throw const AuthException(
+            'Não foi possível vincular esta identidade à conta Tutor.',
+          );
+        }
+        throw const AuthException(
+          'Não foi possível concluir a autenticação externa.',
+        );
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Resposta externa inválida.');
+      }
+      final result = ExternalAuthResult.fromJson(decoded);
+      if (result.session != null) {
+        await _writeSession(result.session!, generation);
+      }
+      return result;
+    } on AuthException {
+      rethrow;
+    } on Object {
+      throw const AuthException(
+        'Não foi possível concluir a autenticação externa agora.',
+      );
     }
   }
 
