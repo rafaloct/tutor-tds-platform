@@ -63,11 +63,9 @@ manual entra nesse algoritmo. O semanal usa registro e prefixo nativos novos:
 As agendas foram persistidas e ativadas, mas o primeiro disparo POR RELOGIO
 nao foi observado nesta entrega; os primeiros testes foram acionados pela API.
 A rotina executa integralmente no servidor depois do acionamento.
-O remetente SMTP ainda nao existe nas notificacoes do Dokploy. Nao ha prova de
-entrega de email. A rotina registra falhas/atrasos e o monitor retorna erro
-explicito por canal ausente. Proxima intervencao: escolher remetente, configurar
-um notificador Email nativo e sincronizar somente esse canal para o runtime;
-validar TLS, envio e recebimento antes de marcar deliveryVerified.
+O estado de notificacao abaixo foi atualizado em 03/10/2026. A rotina registra
+falhas/atrasos, mas o runtime customizado ainda nao tem um canal de entrega.
+Nao marcar `deliveryVerified` apenas porque o notificador nativo passou em teste.
 
 O monitor considera atraso acima de 26h para TDS e 8 dias para Dokploy, com
 verificacao horaria. Sao margens operacionais, nao garantias de RPO.
@@ -87,3 +85,38 @@ sua copia semanal. Para pausar, desabilitar somente os IDs desta rotina.
 Nao apagar o registro manual nem alterar o cron local preexistente.
 Nao divulgar runtime.json, backups ZIP, chaves ou dumps. Recibos sao sanitizados.
 Apos upgrade do Dokploy, revalidar Node, rclone, age e notificacao.
+
+## Atualizacao operacional: 03/10/2026
+
+- O notificador Email nativo `7Oz5wKFr9S0vAy2XRE8Yw` foi cadastrado com
+  destinatario `tdsdados@gmail.com`. Rafael confirmou recebimento do teste
+  nativo na pasta de spam. Isso comprova aquele teste, nao um alerta da rotina
+  customizada nem entrega futura na caixa de entrada.
+- O recibo de monitor consultado ate aqui ainda registrava
+  `email_delivery_not_configured`. Era anterior a integracao do canal, que nao
+  foi comprovada. Nao converter esse recibo em PASS nem repetir o teste SMTP.
+- O primeiro acionamento dos backups TDS e semanal pelo relogio ainda carece
+  de recibos de execucao identificados como disparos automaticos. A copia
+  iniciada pela API nao substitui essa evidencia. O semanal so deve ser
+  conferido depois da primeira agenda de domingo efetivamente vencida.
+- A API publica de notificacoes do Dokploy testa conexao SMTP recebendo a
+  senha no pedido; o identificador do notificador salvo, isoladamente, nao
+  comprova uma rota de alerta customizado. Falhas de Schedule Jobs geram logs,
+  mas nao se deve pressupor que disparem o notificador. Priorizar mecanismo
+  interno suportado que use a configuracao salva sem revelar senha. Se a unica
+  integracao viavel exigir copiar a senha, interromper e solicitar uma unica
+  insercao manual ao titular. Executar no maximo um novo teste de falha
+  controlada depois de provar o caminho de alerta.
+- Para queda total da VPS, um check HTTP externo no GitHub Actions existente
+  e candidato minimo. Sua agenda so roda quando o workflow estiver na branch
+  default; execucoes podem atrasar ou ser descartadas. Notificacao por email
+  depende da preferencia da conta e, em execucao agendada, do ator do workflow.
+  Portanto, nao declarar alerta externo entregue sem execucao e recebimento
+  verificados. Nenhum watchdog externo foi ativado por este documento.
+- Revisar o escopo efetivo da credencial R2 e a possibilidade de uma pessoa
+  acessar simultaneamente ZIP do Dokploy, configuracao e identidade age.
+  O armazenamento privado nao prova separacao de acesso. Registrar aceite
+  formal do risco residual ou reduzir privilegios antes de fechar #2.
+
+Esta atualizacao nao altera agenda, backups, banco, segredo, destino ou
+notificador. O gate operacional permanece aberto.
