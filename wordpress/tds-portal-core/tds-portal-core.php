@@ -13,6 +13,12 @@ require_once __DIR__ . '/includes/interface-tds-courses-adapter.php';
 require_once __DIR__ . '/includes/class-tds-fake-courses-adapter.php';
 require_once __DIR__ . '/includes/class-tds-courses-service.php';
 require_once __DIR__ . '/includes/class-tds-public-courses-controller.php';
+require_once __DIR__ . '/includes/class-tds-editorial-content.php';
+
+add_action(
+	'init',
+	array( 'TDS_Editorial_Content', 'register' ),
+);
 
 add_action(
 	'rest_api_init',
