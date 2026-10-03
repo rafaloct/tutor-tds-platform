@@ -58,6 +58,10 @@ edição. Nenhum desses IDs pode ser derivado de nome, CPF, telefone ou linha.
 `StudentBaseline.bi_source_record_id` aponta a `BaselineSourceRecord` revisada;
 `source+record_id` preserva a proveniência e reserva da ponte. No export atual,
 `registro_id` vem desse `record_id`, não de uma nova ficha gerada pelo app.
+
+Baseline pendente não bloqueia estudo nem exclui o participante, mas precisa
+estar regularizado antes do certificado; pode ser preenchido durante ou depois do
+curso (Issue #6, comentário 5965300113). Este overlay não verifica esse gate.
 Duplicata de `registro_id` impede o pacote atual, mesmo entre turmas. Não
 eliminá-la arbitrariamente nem transferir a mesma ponte para outra inscrição.
 
@@ -102,7 +106,9 @@ são fictícios; não são valores de produção.
 Limite atual de certificado: o seletor da API consultado filtra pessoa, programa,
 curso, turma e `issued_at >= enrolled_at`; não filtra `course_version_id`.
 Assim, a presença de v1/v2 na linha de jornada não comprova emissão naquela
-edição. Integridade/autenticação da emissão continua na Issue #5 / PR #39.
+edição. A flag também não comprova que o gate "baseline regularizado antes do
+certificado" foi aplicado. Integridade/autenticação da emissão continua na
+Issue #5 / PR #39.
 
 ### Campos emitidos pela API, ainda null e fora do CSV de jornada
 
@@ -190,13 +196,20 @@ e cobertura conhecida. `page_view != presença`, `tempo de tela != carga oficial
 `chat resolvido != mentoria`, `interest != eligible`, `submitted != validated`,
 `certificate requested != issued`, `missing != false`.
 
-Decisões confirmadas orientam os próximos contratos: referência de frequência
-75% com regularização humana, carga total 80h com composição adaptável, lista
-assinada prevalece até correção formal, 30/60/90 ancoram na data do certificado.
-Não sobrescrever `ProgramCourse.planned_seconds` nem aplicar 80h a snapshots
-históricos automaticamente. Ainda faltam comandos/fontes integrados, regras de
-reposição auditadas, cobertura de emissão, marco em caso de reemissão e definição
-de contato/resposta para follow-up. Período sem follow-up fica desconhecido.
+Decisões reconciliadas com PR #24 (`OPERATING_DECISIONS_2026-10-03.md`, matriz
+em PR #24 comentário 5968944747): 75% é referência flexível, com presença por
+carga/sessão validada; o instrutor valida a suficiência da complementação. A
+formação alvo é 80h, com 40h presencial + 40h digital adaptável. Isso não altera
+`ProgramCourse.planned_seconds` nem o piloto histórico de 40h. A lista assinada
+prevalece até correção formal. 30/60/90 ancoram no certificado; essa decisão
+supera o Measurement v1 antigo. Pessoa, participação e matrícula formal continuam
+distintas.
+
+`BLOCKED` neste dicionário significa fonte ou comando ainda não integrado à
+projeção, não ausência de decisão geral. Exceção: a regra de reemissão exige
+resolução específica antes de automatizar esse caso. Faltam também regras de
+reposição auditadas, cobertura de emissão e definição de contato/resposta para
+follow-up. Período sem follow-up fica desconhecido.
 
 ## 6. Lineage, privacidade e consumo
 
@@ -226,10 +239,10 @@ de duas turmas. Para medir por edição, usar fatos com vínculo explícito revi
 Rodar a partir de `api/`, no ambiente do lock:
 
 ```sh
-uv run --locked --extra test --no-install-project python -m pytest \
+uv run --locked --extra test python -m pytest \
   tests/test_journey_bi_contract.py tests/test_journey_export_tools.py -q
 ```
 
 Nenhuma edição em manifests WordPress, OpenAPI público, backup, release, fontes
-BI ou contratos centrais. Próximo gate: revisão do dicionário e conciliação com
+BI ou contratos centrais. Próximo gate: aceite semântico da conciliação com
 PR #24; extensão por fontes oficiais próprias. Issue #33 permanece aberta.
