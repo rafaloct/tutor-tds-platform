@@ -67,7 +67,7 @@ portal pagination and provide explicit expiry/invalidation for a real provider.
 
 Base 1a577a6e9417772753beb1525e25757f4e97b7ea; original head
 babd4f68d027394b5ebf44ffffea749298f8609d. Its static/regex claim is superseded by
-46 behavioral assertions on PHP 8.4.26 NTS Windows, real lint on seven PHP files,
+51 behavioral assertions on PHP 8.4.26 NTS Windows, real lint on seven PHP files,
 and git diff --check.
 
 Run: php -n wordpress/staging/tests/test-wp2-foundation.php

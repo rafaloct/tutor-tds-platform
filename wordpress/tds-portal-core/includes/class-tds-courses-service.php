@@ -36,6 +36,7 @@ final class TDS_Courses_Service {
 				foreach ( array( 'slug', 'title', 'status', 'published_version_label', 'updated_at' ) as $field ) {
 					if ( ! isset( $course[ $field ] ) || ! is_string( $course[ $field ] ) || '' === trim( $course[ $field ] ) ) { return $output; }
 					$public[ $field ] = sanitize_text_field( $course[ $field ] );
+					if ( '' === trim( $public[ $field ] ) ) { return $output; }
 				}
 				if ( 'published' !== $public['status'] || ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $public['slug'] ) ) { return $output; }
 				foreach ( array( 'summary', 'public_workload_text', 'public_audience_text' ) as $field ) {

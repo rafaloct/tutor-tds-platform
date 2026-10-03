@@ -81,6 +81,10 @@ $injected['internal'] = 'private'; $injected['courses'][0]['enrollment'] = 'priv
 check( catalog( $injected )['courses'] === array( $course ) && ! isset( catalog( $injected )['internal'] ), 'explicit course and envelope whitelist' );
 $bad = $ready; $bad['courses'][] = array( 'title' => 'invalid' ); $bad['pagination']['total'] = 2;
 check( array() === catalog( $bad )['courses'], 'partial catalog never leaks' );
+foreach ( array( 'slug', 'title', 'status', 'published_version_label', 'updated_at' ) as $field ) {
+    $bad = $ready; $bad['courses'][0][ $field ] = '<b></b>';
+    check( 'error' === catalog( $bad )['state'] && array() === catalog( $bad )['courses'], 'required field empty after sanitization: ' . $field );
+}
 foreach ( array( 'status' => 'draft', 'title' => array(), 'cover_public_url' => 'https://example.org/a?token=x' ) as $key => $value ) {
     $bad = $ready; $bad['courses'][0][ $key ] = $value;
     check( 'error' === catalog( $bad )['state'], 'reject unsafe course field ' . $key );
