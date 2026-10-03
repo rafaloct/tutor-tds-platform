@@ -1,0 +1,6 @@
+**/.env
+**/vendor/
+**/uploads/
+**/.phpunit.result.cache
+**/.phpunit.cache/
+**/__pycache__/
