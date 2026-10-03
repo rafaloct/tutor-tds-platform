@@ -41,6 +41,45 @@ class MediaRepository {
   bool usedCachedData = false;
   String? lastIssue;
 
+  /// Revalidate a pinned reference online; never authorize from cached metadata.
+  Future<MediaItem> fetchPublishedById(
+    String id, {
+    required String courseId,
+    required String moduleId,
+  }) async {
+    if (!RegExp(r'^[a-zA-Z0-9][a-zA-Z0-9_-]{0,35}$').hasMatch(id)) {
+      throw const FormatException('Referência de vídeo inválida.');
+    }
+    final uri = _apiEndpoint('media/$id');
+    final auth = authRepository;
+    final http.Response response;
+    if (auth != null && auth.isConfigured && await auth.hasSession()) {
+      response = await auth.authorized(
+        (token) => _client
+            .get(uri, headers: {'Authorization': 'Bearer $token'})
+            .timeout(const Duration(seconds: 12)),
+      );
+    } else {
+      response = await _client.get(uri).timeout(const Duration(seconds: 12));
+    }
+    if (response.statusCode != 200) {
+      throw const MediaRepositoryException(
+        MediaRepositoryIssue.unavailable,
+        'Vídeo indisponível. Verifique sua conexão e seu acesso.',
+      );
+    }
+    final media = MediaItem.fromJson(_jsonMap(response.body));
+    if (media.id != id ||
+        media.status != 'published' ||
+        media.courseId != courseId ||
+        media.moduleId != moduleId) {
+      throw const FormatException(
+        'Referência de vídeo incompatível com o módulo.',
+      );
+    }
+    return media;
+  }
+
   Future<List<MediaItem>> fetch({String? courseId, String? moduleId}) async {
     rejectedItems = 0;
     usedCachedData = false;

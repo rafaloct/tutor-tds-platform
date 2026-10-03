@@ -128,3 +128,19 @@ abriu no Drive após escolha de conta, confirmado por Rafael e screenshot; um
 pedido de abertura sem crédito, sem medição de páginas/tempo externo.
 Aceite evidence/classroom-access-physical-acceptance-2026-10-01.json fecha somente
 classroom_cold_offline_xiaomi. Certificado/Evidence offline e freeze continuam.
+# Issue #5 local candidate — 2026-10-03
+
+| Delivery | Writer / branch | Paths | Expected evidence / gate |
+| --- | --- | --- | --- |
+| Authenticated synthetic emission and read-only recovery | Sole Issue #5 implementer / `agent/issue-5-authenticated-emission-20261003` | API emission/transport, existing Worker, additive migration0021, focal tests | Actual producer/consumer signatures/context, timeout/concurrency, disposable DB preservation; independent review + exact-SHA CI required |
+| Candidate isolation and owner privacy | Same writer | certificate references/list, journey export, auth erasure | Synthetic references never official; ledger erased with account; legacy refs preserved |
+| Final institutional issuance | Blocked | No real service or release writes | Business formulas superseded by authorized v2 below; installed issuer/signature/physical activation gates remain |
+
+Details: `ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md`; no gate promoted.
+
+| Issue #5 authorized v2 | Implementation | Evidence / gate |
+| --- | --- | --- |
+| Course80h formal, meetings70%, full configured trail | certificate_policy.py + immutable Classroom policy | New focal real API/Worker tests; no stopwatch or historical aggregate credit |
+| Baseline any origin, instructor sheet coverage, CAP/VALID formulas | Existing EvidenceItem/ReviewDecision/StudentBaseline adapters | Synthetic private document attestations; no claimed institutional document read |
+| Automatic generation + four lifecycle states + audit institutional flow | Last checkpoint→_run, candidate ref lifecycle, pending_dispatch evidence | No real SMTP/VPS; gate blocked, official wallet segregated |
+| Additive policy/lifecycle schema | 20261003_0022 | Populated upgrade/empty rollback + populated downgrade refusal; SQLite only |

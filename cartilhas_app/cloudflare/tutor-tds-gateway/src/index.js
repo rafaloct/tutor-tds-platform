@@ -39,6 +39,9 @@ export default {
 };
 
 export async function handleRequest(request, env, _ctx, upstreamFetch = fetch) {
+  if (new URL(request.url).pathname.startsWith('/internal/certificate-candidates/')) {
+    return handleCertificateCandidate(request, env);
+  }
   const cors = getCorsHeaders(request, env);
 
   if (request.method === 'OPTIONS') {
@@ -318,6 +321,88 @@ function timingSafeEqual(left, right) {
     difference |= left.charCodeAt(index) ^ right.charCodeAt(index);
   }
   return difference === 0;
+}
+
+const CANDIDATE_FIELDS = ['protocol', 'synthetic', 'id', 'request_id', 'revision', 'user_id', 'enrollment_id', 'legacy_enrollment_id', 'membership_id', 'program_id', 'institution_id', 'course_id', 'course_version_id', 'class_id', 'baseline_id', 'baseline_revision', 'holder_name', 'course_title', 'institution_name', 'required_seconds'].sort();
+
+function candidateCanonical(command) {
+  return JSON.stringify(Object.fromEntries(Object.keys(command).sort().map((key) => [key, command[key]])));
+}
+
+// Development-only producer/consumer candidate. No legacy KV write, public
+// certificate, institutional signature, pedagogical rule or deployment binding.
+async function handleCertificateCandidate(request, env) {
+  if (env.TUTOR_ENVIRONMENT !== 'development' || env.CERTIFICATE_CANDIDATE_ENABLED !== 'true' ||
+      typeof env.CERTIFICATE_CANDIDATE_SECRET !== 'string' || env.CERTIFICATE_CANDIDATE_SECRET.length < 32 ||
+      !env.CERTIFICATE_CANDIDATES?.get || !env.CERTIFICATE_CANDIDATES?.put) {
+    return json({ error: 'candidate_disabled' }, 503, {});
+  }
+  const url = new URL(request.url);
+  const path = url.pathname;
+  const id = path.slice('/internal/certificate-candidates/'.length);
+  const timestamp = request.headers.get('X-Candidate-Time') || '';
+  if (!/^[0-9]{10}$/.test(timestamp) || Math.abs(Date.now() / 1000 - Number(timestamp)) > 60 ||
+      !/^[0-9a-f-]{36}$/.test(id) || url.search || !['GET', 'POST'].includes(request.method)) {
+    return json({ error: 'candidate_request_invalid' }, 401, {});
+  }
+  const bytes = new Uint8Array(await request.arrayBuffer());
+  if (bytes.length > MAX_BODY_BYTES || (request.method === 'GET' && bytes.length !== 0)) {
+    return json({ error: 'candidate_body_invalid' }, 413, {});
+  }
+  let raw;
+  try { raw = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+  catch { return json({ error: 'candidate_encoding_invalid' }, 400, {}); }
+  const digest = await sha256Hex(raw);
+  const requestSignature = await hmacSha256Hex(env.CERTIFICATE_CANDIDATE_SECRET, `candidate-request-v1\n${request.method}\n${path}\n${timestamp}\n${digest}`);
+  if (!timingSafeEqual(requestSignature, request.headers.get('X-Candidate-Signature'))) {
+    return json({ error: 'candidate_unauthenticated' }, 401, {});
+  }
+  async function reply(value, status = 200) {
+    const body = JSON.stringify(value);
+    const signature = await hmacSha256Hex(env.CERTIFICATE_CANDIDATE_SECRET, `candidate-response-v1\n${request.method}\n${path}\n${timestamp}\n${status}\n${body}`);
+    return new Response(body, { status, headers: { 'Content-Type': 'application/json', 'X-Candidate-Signature': signature, 'Cache-Control': 'no-store' } });
+  }
+  let command;
+  if (request.method === 'POST') {
+    try { command = JSON.parse(raw); } catch { return reply({ error: 'candidate_invalid_json' }, 422); }
+    const policyMode = command?.protocol === 'certificate-candidate-v2';
+    const fields = policyMode ? [...CANDIDATE_FIELDS, 'formal_hours', 'policy_hash', 'checkpoint_evidence_digest', 'operational_owner_id'].sort() : CANDIDATE_FIELDS;
+    if (!command || Array.isArray(command) || Object.keys(command).sort().join('|') !== fields.join('|') ||
+        !['certificate-candidate-v1', 'certificate-candidate-v2'].includes(command.protocol) || command.synthetic !== true || command.id !== id ||
+        !Number.isSafeInteger(command.revision) || command.revision < 1 ||
+        !Number.isSafeInteger(command.baseline_revision) || (policyMode ? command.baseline_revision !== 0 || command.baseline_id !== null : command.baseline_revision < 1) ||
+        !Number.isSafeInteger(command.required_seconds) || command.required_seconds < 0 ||
+        (policyMode && (command.formal_hours !== 80 || command.required_seconds !== 80 * 3600 ||
+          !/^[0-9a-f]{64}$/.test(command.policy_hash) || !/^[0-9a-f]{64}$/.test(command.checkpoint_evidence_digest) ||
+          typeof command.operational_owner_id !== 'string' || !command.operational_owner_id.length || command.operational_owner_id.length > 36)) ||
+        CANDIDATE_FIELDS.filter((key) => !['synthetic', 'revision', 'baseline_revision', 'required_seconds', 'class_id', ...(policyMode ? ['baseline_id'] : [])].includes(key)).some((key) => typeof command[key] !== 'string' || command[key].length < 1 || command[key].length > 240) ||
+        (typeof command.class_id !== 'string' || !command.class_id.length || command.class_id.length > 36)) {
+      return reply({ error: 'candidate_context_invalid' }, 422);
+    }
+  }
+  try {
+    const stored = await env.CERTIFICATE_CANDIDATES.get(`candidate-v1:${id}`);
+    if (stored !== null) {
+      const envelope = JSON.parse(stored);
+      const receipt = envelope.receipt;
+      const storageSignature = await hmacSha256Hex(env.CERTIFICATE_CANDIDATE_SECRET, 'candidate-storage-v1\n' + JSON.stringify(receipt));
+      if (!timingSafeEqual(storageSignature, envelope.signature) || receipt?.command?.id !== id ||
+          receipt.content_hash !== await sha256Hex(candidateCanonical(receipt.command))) {
+        return reply({ error: 'candidate_storage_invalid' }, 409);
+      }
+      if (command && candidateCanonical(command) !== candidateCanonical(receipt.command)) {
+        return reply({ error: 'candidate_context_conflict' }, 409);
+      }
+      return reply(receipt);
+    }
+    if (request.method === 'GET') return reply({ state: 'absent' }, 404);
+    const receipt = { state: 'candidate_confirmed', command, content_hash: await sha256Hex(candidateCanonical(command)), verification_url: `https://synthetic.invalid/certificate-candidates/${id}` };
+    const signature = await hmacSha256Hex(env.CERTIFICATE_CANDIDATE_SECRET, 'candidate-storage-v1\n' + JSON.stringify(receipt));
+    await env.CERTIFICATE_CANDIDATES.put(`candidate-v1:${id}`, JSON.stringify({ receipt, signature }));
+    return reply(receipt);
+  } catch {
+    return reply({ error: 'candidate_storage_indeterminate' }, 503);
+  }
 }
 
 function buildCertificateHtml(certificate, valid, requestedId) {

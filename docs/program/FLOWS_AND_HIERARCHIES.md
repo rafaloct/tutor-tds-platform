@@ -54,18 +54,31 @@ flowchart LR
   S --> AT[Atividades]
   T --> F[Presença oficial]
   AT --> P[Progresso]
-  F --> EL[Elegibilidade de conclusão]
-  P --> EL
-  EL --> CR[Solicitação/validação certificado]
+  AT --> CK[Checkpoints obrigatórios validados por edição]
+  CK --> CR[Certificado da trilha gerado]
+  CK --> CP[CAPACITADO]
+  CR --> CP
+  B -->|registrado| CP
+  F -->|70% dos encontros configurados| CP
+  CP --> VA[Validade institucional]
+  FI[Fichas assinadas pelo instrutor] --> VA
+  CO[Assinatura da coordenação] --> VA
   T --> ME[Mentoria opcional]
   ME --> E[Evidência revisada]
-  T --> FU[Follow-up 30/60/90]
+  CR -.-> AN[Data do certificado: evento exato ainda indefinido]
+  VA -.-> AN
+  AN -.-> FU[Follow-up 30/60/90 ainda sem automação]
   CR --> BI[Projeção BI]
   E --> BI
   FU --> BI
 ```
 
 Baseline não cria matrícula automaticamente.
+
+Geração pode preceder regularização e assinaturas. As setas pontilhadas não
+escolhem geração ou validade como evento-âncora: a definição exata e a reemissão
+permanecem pendentes antes de automatizar follow-up. Progresso/telemetria não
+substituem os checkpoints. Fonte: decisão posterior de #5 e matriz de reconciliação.
 
 ## 4. Novo curso
 

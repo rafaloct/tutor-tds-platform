@@ -107,6 +107,8 @@ def create_reference(
     with Session(database.engine) as session:
         existing = session.get(CertificateReference, payload.id)
         if existing is not None:
+            if existing.is_candidate:
+                raise HTTPException(status_code=409, detail="Referência sintética não é certificado oficial.")
             if _same_reference(existing, payload, claims["sub"], verification_url):
                 response.status_code = 200
                 return _serialize(existing)
@@ -263,6 +265,7 @@ def own_certificates(
         records = session.scalars(
             select(CertificateReference)
             .where(CertificateReference.user_id == claims["sub"])
+            .where(CertificateReference.is_candidate.is_(False))
             .order_by(
                 CertificateReference.issued_at.desc(),
                 CertificateReference.id,
