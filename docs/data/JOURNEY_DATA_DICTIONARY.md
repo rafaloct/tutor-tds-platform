@@ -132,7 +132,7 @@ não disponível nesta projeção. Não converter em negativo nem inferir do app
 | Campo | Tipo alvo | Autoridade / owner | Unidade / denominador | Uso e exemplo válido futuro / inválido |
 | --- | --- | --- | --- | --- |
 | `frequencia_percentual` | número nullable | listas/fichas institucionais / ENSINO | % / encontros configurados da oferta | BLOCKED; presença comprovada ÷ encontros configurados / eventos do app ou tempo de tela |
-| `concluiu_frequencia_flag` | flag nullable | frequência ≥ 70% ou exceção validada / ENSINO | flag / — | BLOCKED; ≥ 70% comprovado, exceção `pending_human_validation` fica null até validação com responsável/justificativa / presença automática |
+| `concluiu_frequencia_flag` | flag nullable | presença institucional ≥ 70% dos encontros configurados / ENSINO | flag / — | BLOCKED; ≥ 70% comprovado / exceção (`pending_human_validation`, com responsável/justificativa) tratada como frequência cumprida, presença ou CAPACITADO; o efeito acadêmico depende de resolução humana específica |
 | `elegivel_mentoria` | flag nullable | decisão de elegibilidade / ENSINO | flag / — | BLOCKED; decisão com regra / certificado implica elegível |
 | `status_convite_mentoria` | enum nullable | convite/resposta / ENSINO | categoria / — | BLOCKED; aceite explícito / convite enviado = aceito |
 | `mentor_id` | ID nullable | atribuição MentorshipCase / ENSINO | ID / — | BLOCKED; atribuição autorizada / autor do último chat |
@@ -217,8 +217,9 @@ onde divergem:
   digitais; a interpretação 40h presencial + 40h digital deixa de ser condição.
 - Frequência mínima de 70% dos encontros configurados por oferta, comprovada por
   listas/fichas institucionais (substitui a referência de 75%). Exceções ficam
-  `pending_human_validation`, com responsável e justificativa, sem presença
-  automática. A lista assinada prevalece até correção formal.
+  `pending_human_validation`, com responsável e justificativa; exceção aceita
+  não cria presença, frequência cumprida nem `CAPACITADO` automaticamente, e seu
+  efeito depende de resolução humana específica. A lista assinada prevalece até correção formal.
 - Trilha obrigatória por edição: checkpoints obrigatórios concluídos, com
   validação determinística no backend e configuração preservada por edição.
 - `CAPACITADO` = baseline registrado AND frequência ≥ 70% AND trilha obrigatória
