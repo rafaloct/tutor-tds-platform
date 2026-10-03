@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from typing import Any
+from datetime import datetime
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -13,6 +15,25 @@ from .models import Course
 router = APIRouter(prefix="/public", tags=["public"])
 
 _CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300"
+
+
+class PublicCourseProjection(BaseModel):
+    slug: str
+    title: str
+    status: Literal["published"]
+    published_version_label: str
+    updated_at: datetime
+    summary: str | None = None
+    cover_public_url: str | None = None
+    public_workload_text: str | None = None
+    public_audience_text: str | None = None
+
+
+class PublicCourseCatalog(BaseModel):
+    courses: list[PublicCourseProjection]
+    offset: int
+    limit: int
+    total: int
 
 
 def _explicit_text(content: dict[str, Any], key: str) -> str | None:
@@ -60,7 +81,7 @@ def _published_projection(session: Session, record: Course) -> dict[str, object]
     return _serialize_public_course(record, version.version_number)
 
 
-@router.get("/courses")
+@router.get("/courses", response_model=PublicCourseCatalog, response_model_exclude_none=True)
 def public_courses(
     request: Request,
     response: Response,
@@ -87,7 +108,7 @@ def public_courses(
     }
 
 
-@router.get("/courses/{slug}")
+@router.get("/courses/{slug}", response_model=PublicCourseProjection, response_model_exclude_none=True)
 def public_course(slug: str, request: Request, response: Response) -> dict[str, object]:
     db: Database = request.app.state.database
     with Session(db.engine) as session:

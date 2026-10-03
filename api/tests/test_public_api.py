@@ -186,3 +186,27 @@ def test_public_projection_omits_untrusted_or_implicit_metadata() -> None:
         "published_version_label",
         "updated_at",
     }
+
+
+def test_public_openapi_declares_the_safe_projection() -> None:
+    client, _ = make_client()
+
+    with client:
+        schema = client.get("/openapi.json").json()
+
+    catalog = schema["paths"]["/public/courses"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]
+    detail = schema["paths"]["/public/courses/{slug}"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]
+    assert catalog == {"$ref": "#/components/schemas/PublicCourseCatalog"}
+    assert detail == {"$ref": "#/components/schemas/PublicCourseProjection"}
+    projection = schema["components"]["schemas"]["PublicCourseProjection"]
+    assert set(projection["properties"]) == {
+        "slug",
+        "title",
+        "status",
+        "published_version_label",
+        "updated_at",
+        "summary",
+        "cover_public_url",
+        "public_workload_text",
+        "public_audience_text",
+    }
