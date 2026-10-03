@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "status": "TARGET",
+  "environment": "staging",
+  "email": {
+    "inbox_address": "support@{{INSTITUTIONAL_DOMAIN}}",
+    "aliases": [
+      "certificados@{{INSTITUTIONAL_DOMAIN}}",
+      "frequencia@{{INSTITUTIONAL_DOMAIN}}",
+      "mobilizacao@{{INSTITUTIONAL_DOMAIN}}",
+      "privacidade@{{INSTITUTIONAL_DOMAIN}}",
+      "cursos@{{INSTITUTIONAL_DOMAIN}}"
+    ],
+    "routing": "all aliases forward to the single support inbox; provider configuration is a human gate"
+  },
+  "inboxes": [
+    {"key": "tds-support", "name": "Central TDS", "channel": "email", "address": "support@{{INSTITUTIONAL_DOMAIN}}"}
+  ],
+  "teams": [
+    {"key": "triagem", "name": "Triagem TDS", "fallback_manual": "coordinator assigns unowned conversations"},
+    {"key": "pedagogico", "name": "Pedagógico", "fallback_manual": "triagem assigns or leaves an internal note"},
+    {"key": "acompanhamento", "name": "Acompanhamento e certificados", "fallback_manual": "triagem applies label and alerts operator"},
+    {"key": "mobilizacao", "name": "Mobilização", "fallback_manual": "triagem applies label and alerts operator"},
+    {"key": "privacidade", "name": "Dados e privacidade", "fallback_manual": "triagem restricts handling and escalates institutionally"}
+  ],
+  "labels": [
+    "tds-suporte", "tds-pedagogico", "tds-frequencia", "tds-certificado", "tds-atividade",
+    "tds-mobilizacao", "tds-curso-novo", "tds-feedback", "tds-privacidade",
+    "aguardando-participante", "retorno-humano", "contato-proativo-pendente"
+  ],
+  "custom_attributes": [
+    {"key": "tds_context_ref", "scope": "conversation", "type": "text", "purpose": "opaque server-resolved context reference"},
+    {"key": "tds_case_ref", "scope": "conversation", "type": "text", "purpose": "opaque operational-case reference"},
+    {"key": "tds_topic", "scope": "conversation", "type": "list", "values": ["technical", "pedagogical", "attendance_certificate", "mobilization", "data_privacy", "other"]},
+    {"key": "tds_contact_preference", "scope": "contact", "type": "list", "values": ["unknown", "in_app_only", "email_allowed", "call_consent_verified"]}
+  ],
+  "quick_replies": [
+    {"key": "received", "title": "Recebimento", "body": "Recebemos sua mensagem e vamos encaminhar ao time adequado."},
+    {"key": "certificate_available", "title": "Certificado disponível", "body": "Há uma atualização sobre seu certificado. Consulte a área de Certificados no app; se a dificuldade continuar, responda por aqui."},
+    {"key": "certificate_pending", "title": "Certificado em análise", "body": "Seu pedido segue em análise. Esta conversa não altera requisitos ou aprovações do certificado."},
+    {"key": "attendance_followup", "title": "Acompanhamento de frequência", "body": "Identificamos uma pendência de acompanhamento. A equipe poderá orientar os próximos passos; esta mensagem não registra presença nem decisão de capacitação."},
+    {"key": "new_activity", "title": "Nova atividade", "body": "Uma nova atividade foi publicada para o seu contexto. Abra o app para conferir os detalhes."},
+    {"key": "new_course", "title": "Novo curso", "body": "Há uma nova oferta disponível. Consulte o app para saber se ela se aplica ao seu contexto."},
+    {"key": "mobilization", "title": "Mobilização", "body": "Temos um informe de mobilização. A participação e a matrícula são confirmadas somente pelos fluxos oficiais."},
+    {"key": "feedback", "title": "Feedback", "body": "Se desejar, conte como foi sua experiência. Sua resposta é voluntária."},
+    {"key": "privacy", "title": "Dados e privacidade", "body": "Vamos encaminhar sua solicitação ao responsável pelo tratamento de dados. Não envie senha, CPF ou dados de terceiros por este chat."}
+  ],
+  "macros": [
+    {"key": "route_pedagogical", "actions": ["label:tds-pedagogico", "assign_team:pedagogico", "reply:received"]},
+    {"key": "route_certificate", "actions": ["label:tds-certificado", "assign_team:acompanhamento", "reply:certificate_pending"]},
+    {"key": "route_attendance", "actions": ["label:tds-frequencia", "assign_team:acompanhamento", "reply:attendance_followup"]},
+    {"key": "route_mobilization", "actions": ["label:tds-mobilizacao", "assign_team:mobilizacao", "reply:mobilization"]},
+    {"key": "route_privacy", "actions": ["label:tds-privacidade", "assign_team:privacidade", "reply:privacy"]},
+    {"key": "human_callback", "actions": ["label:retorno-humano", "internal_note:verify consent and case reference before any call"]}
+  ],
+  "routing_intents": [
+    {"key": "attendance_certificate", "when": "topic=attendance_certificate", "then": "team=acompanhamento", "fallback_manual": "apply tds-frequencia or tds-certificado and assign team"},
+    {"key": "data_privacy", "when": "topic=data_privacy", "then": "team=privacidade", "fallback_manual": "apply tds-privacidade and restrict escalation"},
+    {"key": "proactive_contact", "when": "label=contato-proativo-pendente", "then": "team=acompanhamento", "fallback_manual": "operator reviews consent and assigns a human"}
+  ]
+}
