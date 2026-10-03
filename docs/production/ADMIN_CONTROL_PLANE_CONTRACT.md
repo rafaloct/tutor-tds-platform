@@ -64,8 +64,10 @@ Erros brutos não aparecem na UI. Sair não desfaz comando já confirmado no ser
 Backend `OPERATOR_OPERATIONS_ENABLED=false` e Dart define de mesmo nome false por
 padrão. Habilitar ambos somente em ambiente de aceite autorizado. Não exige secret
 novo nem altera preflight produtivo. Navegação fica oculta com flag desligada.
-Rollback: desligar flags; não apagar ledger. Downgrade com recibos é recusado;
-forward recovery preserva histórico.
+Rollback atual: desligar as flags e preservar o ledger criado pela migração
+20261003_0023. O downgrade para 0022 é recusado quando existem recibos;
+forward recovery preserva o histórico. Remover arquivos não reverte comandos
+já confirmados nem autoriza apagar seus registros.
 
 TARGET staging: fluxo completo com duas instituições, permissão revogada,
 identidade nova/existente, replay/timeouts/conflitos, edição preservada, baseline
@@ -188,9 +190,11 @@ matrícula, associação, correção com motivo e leitura do histórico pela UI;
 replay/timeouts/conflito; revogação imediata; baseline ausente; edição preservada;
 logout A→B; nenhuma escrita em Sheets. Sem produção/AAB/alteração de certificados.
 
-Rollback desta fatia: retirar apenas os arquivos novos do candidato. Não existe
-estado persistido nem navegação publicada para reverter. Backend, AuthRepository,
-rotas existentes, schema, assinatura, flags e release permanecem fora do writer.
+Rollback do checkpoint inicial, anterior ao backend (histórico): naquela fatia
+bastava retirar os arquivos novos, pois ainda não existia estado persistido ou
+navegação publicada. Backend, AuthRepository, rotas existentes, schema, assinatura,
+flags e release ainda estavam fora do writer. Essa orientação foi substituída
+pelo rollback atual com ledger e migração 0023 descrito acima.
 
 ### Checkpoint inicial 03/10
 
