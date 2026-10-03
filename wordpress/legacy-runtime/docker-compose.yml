@@ -1,0 +1,62 @@
+services:
+  wordpress:
+    image: wordpress:6.7-php8.2-apache
+    restart: unless-stopped
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_HOST', 'redis');
+        define('WP_REDIS_PORT', 6379);
+        define('DISABLE_WP_CRON', true);
+        define('TDS_N8N_URL', '${N8N_WEBHOOK_BASE_URL}');
+        define('TDS_API_KEY', '${TDS_API_KEY}');
+        define('TDS_ANYTHINGLLM_URL', 'https://rag.ipexdesenvolvimento.cloud');
+        define('TDS_ANYTHINGLLM_KEY', '${ANYTHINGLLM_KEY}');
+        define('WP_DEBUG', false);
+    volumes:
+      - wp_uploads:/var/www/html/wp-content/uploads
+      - ./tds-lms-core:/var/www/html/wp-content/mu-plugins/tds-lms-core
+      - ./tds-lms-core-loader.php:/var/www/html/wp-content/mu-plugins/tds-lms-core-loader.php
+      - ./tds-child-theme:/var/www/html/wp-content/themes/tds-child-theme
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/", "--connect-timeout", "5"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+
+volumes:
+  wp_uploads:
+  mysql_data:
+  redis_data:
