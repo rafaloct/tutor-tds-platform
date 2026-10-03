@@ -1,0 +1,92 @@
+name: Staging Alembic migration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tutor-tds-staging-alembic
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply 0021 through 0024 to staging only
+    runs-on: ubuntu-24.04
+    environment: staging
+    timeout-minutes: 10
+    env:
+      # This value is intentionally fixed: the Alembic environment validates it.
+      TUTOR_ENVIRONMENT: staging
+      DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+      EXPECTED_STAGING_DATABASE_HOST: db.lgtphbbpgqnzduhtyate.supabase.co
+      EXPECTED_ALEMBIC_HEAD: 20261003_0024
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # The staging migration is intentionally pinned to the approved META06 base.
+          ref: 89624132a150def54c2bc61091fb69fee0e1de07
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Install the pinned uv binary
+        env:
+          UV_IMAGE: ghcr.io/astral-sh/uv:0.12.18@sha256:3adc3706091ce7c2fe595e669628caedd6d951551b92b258b7e7dbe06d9440bc
+        run: |
+          grep -Fq "COPY --from=${UV_IMAGE} /uv" api/Dockerfile ||
+            { echo "UV_IMAGE must match api/Dockerfile." >&2; exit 1; }
+          install -d "$RUNNER_TEMP/uv-bin"
+          container=$(docker create "$UV_IMAGE" /uv)
+          docker cp "$container:/uv" "$RUNNER_TEMP/uv-bin/uv"
+          docker rm "$container" > /dev/null
+          echo "$RUNNER_TEMP/uv-bin" >> "$GITHUB_PATH"
+
+      - name: Fail closed unless this is the known staging database
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$TUTOR_ENVIRONMENT" = staging
+          test -n "$DATABASE_URL"
+          python - <<'PY'
+          import os
+          from urllib.parse import urlsplit
+
+          parsed = urlsplit(os.environ["DATABASE_URL"])
+          expected_host = os.environ["EXPECTED_STAGING_DATABASE_HOST"]
+          if parsed.scheme not in {"postgres", "postgresql", "postgresql+psycopg"}:
+              raise SystemExit("DATABASE_URL must use PostgreSQL.")
+          if parsed.hostname != expected_host:
+              raise SystemExit("Refusing migration: database host is not the approved staging host.")
+          if not parsed.username or not parsed.password or not parsed.path.strip("/"):
+              raise SystemExit("DATABASE_URL is incomplete.")
+          PY
+
+      - name: Install locked Alembic environment
+        working-directory: api
+        run: |
+          echo "UV_PROJECT_ENVIRONMENT=$RUNNER_TEMP/api-venv" >> "$GITHUB_ENV"
+          export UV_PROJECT_ENVIRONMENT="$RUNNER_TEMP/api-venv"
+          uv lock --check
+          uv sync --locked --no-install-project --python "$(command -v python)" --no-python-downloads
+
+      - name: Record Alembic revision before migration
+        working-directory: api
+        run: |
+          "$UV_PROJECT_ENVIRONMENT/bin/python" -m alembic current
+
+      - name: Upgrade Alembic once
+        working-directory: api
+        run: |
+          "$UV_PROJECT_ENVIRONMENT/bin/python" -m alembic upgrade head
+
+      - name: Confirm expected Alembic head
+        working-directory: api
+        run: |
+          set -euo pipefail
+          current=$("$UV_PROJECT_ENVIRONMENT/bin/python" -m alembic current)
+          printf '%s\n' "$current"
+          printf '%s\n' "$current" | grep -Fq "${EXPECTED_ALEMBIC_HEAD}"
