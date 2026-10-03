@@ -151,7 +151,14 @@ time_to_resolution
 
 Resposta automática de recebimento/triagem pode cumprir `first_ack`, mas não deve ser apresentada como solução humana.
 
-A janela exata de horário comercial permanece configurável e pendente de confirmação.
+Janelas confirmadas de suporte humano:
+- 08:00–12:00;
+- 14:00–18:00;
+- 19:00–21:00.
+
+Fora dessas janelas, o Chatwoot pode oferecer atendimento inicial por IA/agente. Esse atendimento pode orientar, coletar contexto e registrar a demanda, mas decisões humanas ficam pendentes para a próxima janela de suporte humano.
+
+Métricas devem separar resposta automática de resposta humana.
 
 ## 8. Notificações
 
@@ -163,6 +170,17 @@ Notificações são uma capacidade transversal do caso e dos domínios, não nov
 - resposta do suporte;
 - pendência de matrícula/regularização;
 - certificado disponível.
+
+### Relação com o fechamento digital
+
+A conclusão da etapa digital de uma formação de 80h não deve depender de uma única métrica. O contrato confirmado prevê combinação de:
+- evidência de uso das funcionalidades obrigatórias do app;
+- carteira de certificados;
+- print/registro do certificado exibido na carteira;
+- avaliação via Jotform;
+- eventos digitais confiáveis registrados pelo backend.
+
+Notificação pode lembrar o participante de critérios pendentes, mas não concede conclusão.
 
 ### Arquitetura
 
@@ -272,7 +290,28 @@ Resposta humana pode gerar notificação essencial do tipo suporte.
 
 Na tela bloqueada, evitar conteúdo sensível. Preferir mensagem genérica como 'A equipe TDS respondeu sua solicitação'.
 
-## 16. Não criar issue infinita
+## 16. Evidência de turma incompleta
+
+Quando uma turma chegar ao fechamento sem fotos ou relatório esperado, criar caso operacional em vez de inventar evidência.
+
+Reason codes sugeridos:
+```text
+COURSE_PHOTOS_MISSING
+EVENT_REPORT_MISSING
+EVIDENCE_PACKAGE_INCOMPLETE
+```
+
+Destino típico: equipe de mobilização/campo ou secretaria, conforme contexto.
+
+A ação esperada pode ser revisita/coleta complementar de imagens e relatório.
+
+## 17. Autoridade de presença em conflito
+
+Se evidência digital divergir da lista física assinada, a **lista física assinada prevalece** até correção humana formal.
+
+A divergência vira caso operacional para conferência; o sistema não sobrescreve silenciosamente a presença oficial.
+
+## 18. Não criar issue infinita
 
 Este contrato deve ser implementado dentro das frentes já existentes sempre que possível:
 
@@ -285,6 +324,6 @@ Este contrato deve ser implementado dentro das frentes já existentes sempre que
 
 Uma issue exclusiva de infraestrutura de push só deve ser criada quando houver execução concreta que não caiba nessas frentes.
 
-## 17. Critério de sucesso
+## 19. Critério de sucesso
 
 O sistema é bem-sucedido quando identifica que algo precisa de atenção, entrega contexto ao humano certo, registra o desfecho e não perde o caso, sem automatizar decisões que exigem julgamento.
