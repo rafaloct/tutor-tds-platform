@@ -6,6 +6,8 @@ on:
       - "tooling/build_production.ps1"
       - "tooling/Test-ProductionBackendIdentity.ps1"
       - "tooling/test_production_backend_identity.ps1"
+      - "tooling/Test-ProductionRecoveryEvidence.ps1"
+      - "tooling/test_production_recovery_evidence.ps1"
       - ".github/workflows/release-identity.yml"
   push:
     branches: [codex/onda-0-consolidacao]
@@ -13,6 +15,8 @@ on:
       - "tooling/build_production.ps1"
       - "tooling/Test-ProductionBackendIdentity.ps1"
       - "tooling/test_production_backend_identity.ps1"
+      - "tooling/Test-ProductionRecoveryEvidence.ps1"
+      - "tooling/test_production_recovery_evidence.ps1"
       - ".github/workflows/release-identity.yml"
   workflow_dispatch:
 
@@ -37,3 +41,9 @@ jobs:
       - name: Run offline identity test with PowerShell 7
         shell: pwsh
         run: .\tooling\test_production_backend_identity.ps1
+      - name: Run offline recovery evidence test with Windows PowerShell 5.1
+        shell: powershell
+        run: .\tooling\test_production_recovery_evidence.ps1
+      - name: Run offline recovery evidence test with PowerShell 7
+        shell: pwsh
+        run: .\tooling\test_production_recovery_evidence.ps1
