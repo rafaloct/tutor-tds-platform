@@ -32,6 +32,11 @@ Não existe uma única pessoa responsável pela confirmação. A rotina pode ser
 
 O baseline pode ser preenchido no início, meio, fim ou depois da realização do curso, conforme logística e decisão da equipe.
 
+Limite confirmado no [complemento final da Issue #6](https://github.com/rafaloct/tutor-tds-platform/issues/6#issuecomment-5965300113):
+o baseline precisa estar **regularizado antes do certificado**. Isso não bloqueia
+o estudo nem permite criar ficha fictícia. É requisito institucional; a referência
+de certificado hoje exportada pela API não comprova que esse gate foi executado.
+
 ```text
 curso iniciado + baseline ausente
 = pendência operacional
@@ -105,6 +110,11 @@ exceção: percentuais/cargas diferentes permitidos
 condição: justificativa logística/humana + validação
 resultado: total formativo = 80h
 ```
+
+Esse alvo de formação não reescreve a carga configurada de ofertas históricas:
+as 40h do piloto registradas em `../DECISIONS.md`, itens 19/21, permanecem com
+seu escopo e evidência. Não substituir `ProgramCourse.planned_seconds` por 80h
+na exportação, nem creditar tempo de tela como carga digital validada.
 
 A evidência digital deve ser uma **combinação de critérios**, incluindo:
 
@@ -208,6 +218,12 @@ O domínio deve registrar a origem do encaminhamento. Nenhum desses caminhos sig
 A data-âncora confirmada é a **data do certificado**.
 
 As janelas 30/60/90 contam a partir do certificado emitido/validado conforme autoridade definida no domínio.
+
+Esta decisão, também registrada na [Issue #8](https://github.com/rafaloct/tutor-tds-platform/issues/8#issuecomment-5965176322),
+supera a redação anterior que ancorava a janela na aplicação validada. O tratamento
+da âncora em caso de reemissão continua uma exceção a definir antes de automatizá-la;
+não reiniciar prazos por inferência. Os campos de follow-up atuais permanecem null
+até integração de fatos, contato/resposta e revisão autorizada.
 
 ## 13. Encerramento de turma e evidências
 

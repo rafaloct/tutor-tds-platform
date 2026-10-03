@@ -148,3 +148,18 @@
     PRODUCTION_RELEASE_READY=false até GitHub/proveniência, offsite+restore,
     schema/upgrade e decisão editorial de fallback offline. Measurement v1
     mantém baseline papel→planilha; etapas não validadas ficam null.
+
+26. 2026-10-03: conciliação documental META 04, sem nova decisão institucional.
+    As decisões posteriores registradas nas Issues #6 (comentário 5965300113),
+    #8 (5965176322) e #33 (5965176812) confirmam 75% como referência flexível,
+    reposição validada pelo instrutor, lista física assinada prevalente até
+    correção formal, formação alvo 80h com composição adaptável, baseline
+    regularizado antes do certificado sem bloquear estudo e follow-up 30/60/90
+    ancorado no certificado. Elas superam perguntas históricas e a antiga âncora
+    de aplicação validada em Measurement v1. Não alteram cargas históricas do
+    piloto dos itens 19/21, nem comprovam enforcement ou emissão por edição.
+    Proveniência e detalhes: program/OPERATING_DECISIONS_2026-10-03.md e matriz
+    https://github.com/rafaloct/tutor-tds-platform/pull/24#issuecomment-5968944747.
+    Campos de resultado sem fonte integrada continuam null; reemissão exige
+    regra específica antes de automatizar seu marco. Merge/produção permanecem
+    gates próprios, sem AAB ou autorização nova nesta conciliação.

@@ -19,6 +19,14 @@ Nomes de pessoas mudam. O sistema deve registrar **papéis**, substitutos e owne
 
 Uma pessoa pode acumular papéis, mas a documentação deve manter as responsabilidades distintas.
 
+No overlay BI, DADOS corresponde à administração de dados/secretaria (ponte e
+qualidade), ENSINO ao instrutor/coordenação (validação pedagógica), API ao
+responsável técnico pela projeção e EMISSOR ao responsável autorizado pela emissão.
+Esses nomes não concedem permissões. `program_operator` é papel alvo; capacidade
+efetiva depende do RBAC implementado e escopo auditado. Instrutor decide suficiência
+da complementação; secretaria confere frequência; API aplica comandos autorizados;
+emissor comprova emissão. Relatório ou atendimento não substitui essas decisões.
+
 ## 2. RACI macro
 
 Legenda: R executa, A aprova, C consultado, I informado.

@@ -4,6 +4,15 @@
 
 A arquitetura alvo mantém o FastAPI/PostgreSQL como núcleo e organiza os demais componentes em superfícies especializadas.
 
+Os diagramas e fluxos abaixo são TARGET, salvo evidência explicitamente indicada.
+Checkpoint OBSERVED da consolidação `3fddb09`: Context Core possui aceite em
+staging; catálogo tem evidência física histórica e política posterior #4 validada
+localmente, sem novo aceite físico/staging inferido. CW-1 é demonstração local com fake, sem atendimento
+real (`../production/CHATWOOT_CW1_IMPLEMENTATION.md`). Identidade assinada Chatwoot,
+webhooks/casos proativos, mídia e administração web permanecem alvos nos recortes
+não comprovados. WP-1/#49, API pública/#50 e overlay/#51 são candidatos separados,
+sem promoção por este documento. Emissão autenticada permanece fronteira #5/#39.
+
 ```mermaid
 flowchart LR
   U[Participante] --> APP[Flutter Android/PWA]
@@ -44,7 +53,8 @@ flowchart LR
 - Admin web: apenas quando existir necessidade operacional que não caiba no app. Deve consumir a mesma API, não criar backend paralelo.
 
 ### 2.2 Domínio
-FastAPI contém autorização e regras de:
+FastAPI é a fronteira de autorização. O domínio alvo abrange os itens abaixo;
+estar nesta lista não comprova implementação ou integração completa:
 - identidade;
 - organização/instituição/programa;
 - curso e versão;

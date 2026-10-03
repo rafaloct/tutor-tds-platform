@@ -110,6 +110,18 @@ Não unir registros por nome/telefone.
 
 Correção no BI não escreve de volta na origem.
 
+Pseudônimos HMAC e IDs de vínculo continuam **dados pessoais**, não anonimização.
+Reconciliar somente dentro do mesmo domínio/ambiente autorizado, com acesso e
+retenção controlados; não ler/exportar o segredo. O overlay distingue pessoa
+única, participação pessoa+turma e matrícula formal consolidada. Atividade de
+conta exige deduplicação por event_id e não pode ser multiplicada por turmas.
+Resultados desconhecidos permanecem null; zero técnico não é reprovação.
+
+O dicionário do PR #51 é candidato sintético separado, sob owner Devin, não
+fonte institucional nova nem aceite de BI. Regras operacionais vêm das decisões
+humanas; fontes e comandos autorizados continuam necessários para oficializar
+frequência, capacitação, mentoria e follow-up.
+
 ## 8. Chatwoot
 
 Chatwoot recebe apenas contexto mínimo necessário para atendimento. Um status `resolved` significa somente atendimento fechado.

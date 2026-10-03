@@ -61,7 +61,9 @@ Basear na branch indicada na issue. Nunca assumir `main`.
 - sem `clean`;
 - sem stash destrutivo;
 - sem apagar output/evidência não rastreada;
-- preferir worktree própria.
+- cada escritor usa worktree própria; nunca dois escritores na mesma branch/worktree;
+- sem force-push ou rebase destrutivo; integrar consolidação por merge que preserve histórico;
+- PRs #21/#39 e arquivos reservados a outros executores devem ser preservados.
 
 ## 7. Secrets
 
@@ -200,6 +202,23 @@ Evitar paralelo no mesmo contrato:
 - backup automation.
 
 ## 17. Definition of Done
+
+Na META 04, no máximo dois escritores Codex simultâneos. Devin mantém os quatro
+arquivos do PR #51; Windsurf recebe revisão semântica read-only e depois arquivos
+exclusivos de tema/frontend. Não compartilhar contrato central, migration head,
+release config, emissão, identidade/matrícula ou backup entre escritores.
+
+GitHub é o canal de dispatch e retorno. Publicar packet autocontido e reservar
+branch/worktree/arquivos antes da edição; mensagem publicada não comprova início
+do executor. Referenciar resultados por SHA explícito: FETCH_HEAD é transitório
+e pode ser substituído por fetch posterior na mesma worktree; refs remotas são
+compartilhadas entre worktrees.
+
+Em cada ciclo publicar CURRENT_FRONT, EXECUTOR, BASE_SHA, HEAD_SHA, STATUS, TESTS,
+CI, REVIEW, BLOCKERS, HUMAN_GATE e NEXT_FRONT. CI verde não aceita semântica nem
+prova staging. Merge de PR permanece reservado a Rafael. Se houver duas decisões
+humanas vigentes incompatíveis, registrar SEMANTIC_HUMAN_GATE e uma pergunta
+objetiva; continuar frentes independentes. Não gerar AAB nesta meta.
 
 Código compilado + testes focais + docs + CI relevante + revisão + critérios de aceite. Para integração real, staging comprovado. Para produção, gate específico.
 

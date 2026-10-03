@@ -62,17 +62,26 @@ O arquivo raiz `pagina_wordpress.html` é **legado de referência**, não especi
 
 ## 5. Integração WordPress ↔ API
 
-Preferir endpoints públicos explícitos, sem token administrativo:
+Usar projeção pública explícita, sem token administrativo. Candidato do PR #50
+(`2927b2ef84aa86cf74727c1e9139c0750ce03442`), ainda não integrado nem validado
+em staging neste checkpoint:
 
 ```text
-GET /public/program
-GET /courses
+GET /public/courses
 GET /public/courses/{slug}
-GET /public/materials
-GET /version
 ```
 
-Se endpoints não existirem, criar issue própria. Não fazer WordPress ler PostgreSQL diretamente.
+`/courses` mantém contrato Flutter e não é a projeção do portal. `/version` é
+identidade técnica, não conteúdo editorial. `/public/program` e
+`/public/materials` continuam TARGET, sem implementação comprovada neste recorte;
+manter lacunas explícitas, sem inventar respostas. Não fazer WordPress ler
+PostgreSQL diretamente. O candidato pagina a resposta, sem comprovar paginação
+na consulta SQL; adapters que baixem mídia devem validar destino contra SSRF.
+
+WP-1/#49 prepara ambiente e quarentena do legado; não comprova WordPress
+implantado. WP-2/#42 depende do aceite de integração de #49/#50 e da divisão
+de arquivos publicada na issue. `wordpress/legacy-runtime/` é referência não
+implantável: plugin e child theme novos não podem ativar esse runtime.
 
 ### Cache
 WordPress pode cachear resposta pública por curto período. Deve exibir “indisponível temporariamente” se a API falhar, sem mostrar dado obsoleto como matrícula/progresso.

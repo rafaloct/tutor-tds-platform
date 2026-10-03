@@ -2,6 +2,10 @@
 
 Status: **OBSERVED + TARGET derivado**.
 
+Leitura histórica da operação. As perguntas e gates iniciais abaixo devem ser
+confrontados com `OPERATING_DECISIONS_2026-10-03.md`, que registra as respostas
+posteriores. Não reabrir como bloqueio geral uma decisão já confirmada.
+
 Este documento traduz para o desenvolvimento o processo operacional já usado pela equipe do TDS e preservado na pasta de trabalho compartilhada da secretaria. O objetivo não é digitalizar tudo nem substituir pessoas. É identificar o que o sistema precisa apoiar para reduzir retrabalho, localizar pendências e encaminhar casos ao humano certo.
 
 ## 1. Fontes observadas
@@ -260,9 +264,9 @@ mensagem Chatwoot != presença
 assinatura/registro validado de sessão -> pode compor frequência
 ```
 
-### O que ainda exige decisão humana
+### Perguntas levantadas na observação inicial
 
-O documento permite adotar 75% como regra documental observada para certificado, mas ainda precisa confirmação operacional sobre:
+Na observação inicial, 75% era regra documental e foram levantadas perguntas sobre:
 
 - ausência justificada;
 - reposição;
@@ -272,7 +276,9 @@ O documento permite adotar 75% como regra documental observada para certificado,
 - quem pode corrigir presença;
 - como tratar lista sem assinatura.
 
-Até isso ser decidido, o sistema calcula o que for objetivamente observável e marca exceções para revisão humana.
+As decisões posteriores, seções 3–6 e 10, confirmaram 75% flexível, carga/sessões,
+reposição validada pelo instrutor e conferência pela secretaria. Exceções específicas
+sem regra continuam revisão humana; isso não bloqueia o núcleo já decidido.
 
 ## 8. Evidências
 
@@ -569,7 +575,8 @@ Deve implementar a visão operacional da secretaria: pessoa, inscrição/autoriz
 
 ### Issue #6 — frequência
 
-Usar sessão/data/carga como base; 75% é regra documental observada. Exceções permanecem human gate.
+Usar sessão/data/carga como base e 75% como referência flexível. Aplicar as decisões
+posteriores de reposição/conferência; apenas exceções ainda não definidas exigem gate.
 
 ### Issue #34 / CW — Chatwoot
 
@@ -611,9 +618,12 @@ Regras:
 
 Isso reduz risco de vazamento e evita que a organização informal do Drive vire schema do produto.
 
-## 19. Perguntas humanas ainda não respondidas pelas fontes
+## 19. Perguntas históricas da leitura inicial
 
-As fontes documentais não permitem afirmar com segurança:
+Esta lista preserva a origem da investigação. As respostas posteriores estão em
+`OPERATING_DECISIONS_2026-10-03.md` e `CASE_ROUTING_AND_NOTIFICATIONS.md`;
+não tratar a lista inteira como pendência atual. O baseline deve estar regularizado
+antes do certificado, sem bloquear estudo. Perguntas originalmente levantadas:
 
 1. Quem confere e autoriza matrícula na prática em cada turma?
 2. A regra de 75% é aplicada exatamente hoje a todos os cursos?

@@ -2,6 +2,13 @@
 
 Status: **contrato canônico de planejamento**. Este diretório descreve como o ecossistema Tutor TDS deve evoluir sem criar plataformas paralelas, duplicar fontes de verdade ou depender do conhecimento de uma única pessoa.
 
+Checkpoint META 04: contrato documental candidato no PR #24, reconciliado com
+a consolidação `3fddb09`, não aceite de implementação. Matriz e proveniência:
+[reconciliação #24 × #51](https://github.com/rafaloct/tutor-tds-platform/pull/24#issuecomment-5968944747).
+Decisões humanas posteriores estão registradas em `../DECISIONS.md` e
+`OPERATING_DECISIONS_2026-10-03.md`. Perguntas históricas não reabrem gates já
+respondidos; fatos novos de implementação exigem evidência própria.
+
 ## 1. Objetivo
 
 Transformar o Tutor TDS de um aplicativo com integrações pontuais em uma plataforma institucional operável no longo prazo, com:
