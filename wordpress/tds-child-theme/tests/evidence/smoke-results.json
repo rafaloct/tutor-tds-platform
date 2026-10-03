@@ -1,0 +1,20 @@
+{
+    "assertions": 180,
+    "failures": [],
+    "pages": {
+        "home": 200,
+        "templates/programa.php": 200,
+        "templates/acessar.php": 200,
+        "templates/privacidade.php": 200,
+        "templates/direitos.php": 200,
+        "templates/acessibilidade.php": 200,
+        "templates/contato.php": 200,
+        "estados": 200,
+        "single": 200,
+        "search": 200,
+        "404": 404
+    },
+    "php": "8.4.26",
+    "wordpress": "7.1.2",
+    "astra": "4.13.1"
+}

@@ -18,3 +18,10 @@ WP-2 deve criar:
 - `staging/`: infraestrutura de staging reproduzível.
 
 `tds-lms-core` é legado acadêmico congelado. O novo portal não deve expandi-lo.
+
+## Evidência local do tema WP-2
+
+O candidate `tds-child-theme/` foi implementado e testado apenas em uma
+instalação WordPress/SQLite descartável. A evidência, os comandos e os limites
+estão em `../docs/portal/WP2_THEME_EVIDENCE_2026-10-03.md`. Isso não comprova
+staging, configuração institucional ou produção.
