@@ -60,8 +60,8 @@ manual entra nesse algoritmo. O semanal usa registro e prefixo nativos novos:
 
 ## Pendencias e limites: nao fechar o gate ainda
 
-As agendas foram persistidas e ativadas, mas o primeiro disparo POR RELOGIO
-nao foi observado nesta entrega; os primeiros testes foram acionados pela API.
+As agendas foram persistidas e ativadas. O primeiro disparo TDS POR RELOGIO
+foi observado em 03/10; o primeiro semanal por relogio aguarda o domingo.
 A rotina executa integralmente no servidor depois do acionamento.
 O estado de notificacao abaixo foi atualizado em 03/10/2026. A rotina registra
 falhas/atrasos, mas o runtime customizado ainda nao tem um canal de entrega.
@@ -92,21 +92,29 @@ Apos upgrade do Dokploy, revalidar Node, rclone, age e notificacao.
   destinatario `tdsdados@gmail.com`. Rafael confirmou recebimento do teste
   nativo na pasta de spam. Isso comprova aquele teste, nao um alerta da rotina
   customizada nem entrega futura na caixa de entrada.
-- O recibo de monitor consultado ate aqui ainda registrava
-  `email_delivery_not_configured`. Era anterior a integracao do canal, que nao
-  foi comprovada. Nao converter esse recibo em PASS nem repetir o teste SMTP.
-- O primeiro acionamento dos backups TDS e semanal pelo relogio ainda carece
-  de recibos de execucao identificados como disparos automaticos. A copia
-  iniciada pela API nao substitui essa evidencia. O semanal so deve ser
-  conferido depois da primeira agenda de domingo efetivamente vencida.
+- O monitor de 03/10 06:10 UTC ainda registrou
+  `email_delivery_not_configured`; o teste nativo nao ativa automaticamente
+  o canal da rotina customizada.
+- O schedule TDS `EIZHFzoDiUJmhH9Xpc_qM` estava habilitado para `40 3 * * *`
+  UTC. Deployment `sw5e1U47sCAvwVnqE2r0O` foi criado pelo relogio em
+  03/10 03:40:00.713Z e terminou `done` em 03:40:09.708Z. O recibo
+  `20261003T034000Z-1d97b88957c74e7790d78dfb1c0b9ba8` terminou
+  `verified` em 03:40:04.295Z no prefixo exclusivo, 53.229 bytes e SHA-256
+  `1ecdf7cb7c6098bbd167bfd3d9d6e82bcbee61425411ed12acc9e79a29e20953`.
+  O semanal de domingo 04:20 UTC ainda nao venceu; nao foi disparado a mao.
 - A API publica de notificacoes do Dokploy testa conexao SMTP recebendo a
   senha no pedido; o identificador do notificador salvo, isoladamente, nao
   comprova uma rota de alerta customizado. Falhas de Schedule Jobs geram logs,
   mas nao se deve pressupor que disparem o notificador. Priorizar mecanismo
-  interno suportado que use a configuracao salva sem revelar senha. Se a unica
-  integracao viavel exigir copiar a senha, interromper e solicitar uma unica
-  insercao manual ao titular. Executar no maximo um novo teste de falha
-  controlada depois de provar o caminho de alerta.
+  interno suportado que use a configuracao salva sem revelar senha. A funcao
+  interna `sendDatabaseBackupNotifications` do Dokploy v0.29.1 seleciona os
+  notificadores de backup da organizacao e carrega o SMTP dentro do proprio
+  Dokploy. Em 03/10, so havia o notificador Email pretendido com o evento
+  `databaseBackup` ativo. O codigo da rotina confere apenas IDs de metadados
+  antes de chama-la, sem ler o campo de senha. A funcao interna captura erros
+  de envio; por isso `native_dispatch_unverified` nao significa entrega.
+  Revalidar essa integracao apos upgrade do Dokploy. Executar no maximo um
+  novo teste de falha controlada depois de instalar o codigo e a referencia.
 - Para queda total da VPS, um check HTTP externo no GitHub Actions existente
   e candidato minimo. Sua agenda so roda quando o workflow estiver na branch
   default; execucoes podem atrasar ou ser descartadas. Notificacao por email
@@ -118,5 +126,8 @@ Apos upgrade do Dokploy, revalidar Node, rclone, age e notificacao.
   O armazenamento privado nao prova separacao de acesso. Registrar aceite
   formal do risco residual ou reduzir privilegios antes de fechar #2.
 
-Esta atualizacao nao altera agenda, backups, banco, segredo, destino ou
-notificador. O gate operacional permanece aberto.
+O adaptador de alerta altera apenas o caminho de notificacao da rotina TDS.
+Nao muda agenda, banco, destino, segredo nem configuracao do notificador nativo.
+O gate operacional permanece aberto ate a falha controlada e o recebimento
+serem comprovados, o watchdog externo ser decidido e o risco de credenciais
+ter aceite formal ou reducao de privilegios.

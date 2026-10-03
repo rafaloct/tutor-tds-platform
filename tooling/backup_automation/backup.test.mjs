@@ -14,6 +14,14 @@ test('plan is safe and works without config, credentials or runtime path', () =>
   assert.equal(result.status, 'PLAN_ONLY'); assert.equal(result.network, false); assert.equal(result.fileWrites, false);
 });
 test('accepts only approved config', () => assert.equal(validateConfig(config()).keepDaily, 30));
+test('native notifier references metadata only and rejects a different recipient or embedded SMTP secret', () => {
+  const mail = { provider: 'dokploy_database_backup', notificationId: '7Oz5wKFr9S0vAy2XRE8Yw',
+    organizationId: 'umP9kk1j8wuWbdVwcJk7b' };
+  assert.equal(validateConfig({ ...config(), mail }).mail.notificationId, mail.notificationId);
+  for (const changed of [{ notificationId: 'other' }, { organizationId: 'other' }, { pass: 'synthetic' }]) {
+    assert.throws(() => validateConfig({ ...config(), mail: { ...mail, ...changed } }));
+  }
+});
 for (const patch of [{ bucket: 'other' }, { endpoint: 'http://localhost' }, { destinationId: 'other' }, { keepDaily: 1 },
   { accessKey: 'name-not-key' }, { secretAccessKey: 'short' }, { recipient: 'AGE-SECRET-KEY-not-allowed' },
   { identity: 'must-not-be-here' }, { BACKUP_AGE_IDENTITY: 'must-not-be-here' }, { weeklyPrefix: '../manual/' }]) {

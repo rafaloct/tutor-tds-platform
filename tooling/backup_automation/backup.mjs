@@ -14,6 +14,8 @@ const OWNER = 'tutor-tds-issue2-scheduled-v1';
 const ID = /^\d{8}T\d{6}Z-[0-9a-f]{32}$/;
 const SHA = /^[0-9a-f]{64}$/;
 const MAX = 64 * 1024 * 1024;
+const NATIVE_NOTIFICATION = '7Oz5wKFr9S0vAy2XRE8Yw';
+const NATIVE_ORGANIZATION = 'umP9kk1j8wuWbdVwcJk7b';
 class StageError extends Error { constructor(stage) { super(stage); this.stage = stage; } }
 const digest = b => createHash('sha256').update(b).digest('hex');
 export function validateConfig(c) {
@@ -22,7 +24,10 @@ export function validateConfig(c) {
       !/^[0-9a-f]{32}$/i.test(c.accessKey) || !/^[0-9a-f]{64}$/i.test(c.secretAccessKey) ||
       !/^age1[023456789acdefghjklmnpqrstuvwxyz]{58}$/.test(c.recipient) ||
       'identity' in c || 'BACKUP_AGE_IDENTITY' in c ||
-      (c.weeklyPrefix !== null && !/^backup-[a-z0-9-]+\/tds-control-plane-scheduled\/$/.test(c.weeklyPrefix))) {
+      (c.weeklyPrefix !== null && !/^backup-[a-z0-9-]+\/tds-control-plane-scheduled\/$/.test(c.weeklyPrefix)) ||
+      (c.mail?.provider === 'dokploy_database_backup' &&
+        (c.mail.notificationId !== NATIVE_NOTIFICATION || c.mail.organizationId !== NATIVE_ORGANIZATION ||
+          'pass' in c.mail || 'password' in c.mail))) {
     throw new StageError('config_invalid');
   }
   return c;
@@ -73,6 +78,28 @@ function storage(c) {
 }
 const object = key => `tds:${BUCKET}/${key}`;
 async function email(c, text) {
+  if (c.mail?.provider === 'dokploy_database_backup') {
+    try {
+      const [{ db }, { notifications }, { and, eq }] = await Promise.all([
+        import('/app/node_modules/@dokploy/server/dist/db/index.js'),
+        import('/app/node_modules/@dokploy/server/dist/db/schema/index.js'),
+        import('/app/node_modules/drizzle-orm/index.js'),
+      ]);
+      const selected = await db.query.notifications.findMany({
+        where: and(eq(notifications.databaseBackup, true), eq(notifications.organizationId, c.mail.organizationId)),
+        columns: { notificationId: true },
+      });
+      if (selected.length !== 1 || selected[0].notificationId !== c.mail.notificationId) {
+        return { status: 'native_notification_mismatch', delivered: false };
+      }
+      const { sendDatabaseBackupNotifications } = await import('/app/node_modules/@dokploy/server/dist/utils/notifications/database-backup.js');
+      await sendDatabaseBackupNotifications({ projectName: 'Tutor TDS', applicationName: 'Backup agendado TDS',
+        databaseType: 'postgres', databaseName: 'Tutor TDS', type: 'error', errorMessage: text,
+        organizationId: c.mail.organizationId });
+      // Dokploy v0.29.1 catches delivery errors internally. This confirms dispatch only.
+      return { status: 'native_dispatch_unverified', delivered: false };
+    } catch { return { status: 'native_dispatch_failed', delivered: false }; }
+  }
   if (!c.mail?.deliveryVerified) return { status: 'not_configured', delivered: false };
   try {
     const m = c.mail;
@@ -135,7 +162,8 @@ async function backup(c) {
     }
   }
   return { status: 'BACKUP_TRANSPORT_VERIFIED', id, key, bytes: receipt.bytes, sha256: hash, deleted,
-    retentionEnabled: c.retentionEnabled === true, emailConfigured: c.mail?.deliveryVerified === true,
+    retentionEnabled: c.retentionEnabled === true,
+    emailConfigured: c.mail?.deliveryVerified === true || c.mail?.provider === 'dokploy_database_backup',
     noPlaintextFile: true, privateKeyUsed: false, restoreExecuted: false };
 }
 async function monitor(c) {
@@ -147,7 +175,7 @@ async function monitor(c) {
     const dates = files.filter(x => !x.IsDir && x.Size > 0 && /^webserver-backup-.*\.zip$/.test(x.Name)).map(x => x.ModTime).filter(x => Number.isFinite(Date.parse(x))).sort();
     if (!dates.length || overdue(dates.at(-1), now, 8 * 24)) problems.push('dokploy_backup_missing_or_older_than_8d');
   } else problems.push('weekly_prefix_missing');
-  if (!c.mail?.deliveryVerified) problems.push('email_delivery_not_configured');
+  if (!c.mail?.deliveryVerified && c.mail?.provider !== 'dokploy_database_backup') problems.push('email_delivery_not_configured');
   const report = { status: problems.length ? 'MONITOR_ACTION_REQUIRED' : 'MONITOR_OK', checkedAt: new Date().toISOString(), problems };
   if (problems.length) report.alert = await email(c, 'Problemas de backup: ' + problems.join(', ') + '. Consulte os logs do Dokploy. Nenhum dado pessoal incluido.');
   atomic(`${ROOT}/monitor-status.json`, report);
