@@ -156,6 +156,66 @@ def test_public_catalog_pagination_is_bounded_and_sorted() -> None:
     assert too_large.status_code == 422
 
 
+def test_public_catalog_pagination_uses_course_id_to_break_title_ties() -> None:
+    client, app = make_client()
+    with Session(app.state.database.engine) as session:
+        add_course(session, course_id="z", title="Outro")
+        add_course(session, course_id="b", title="Mesmo título")
+        add_course(session, course_id="a", title="Mesmo título")
+        session.commit()
+
+    with client:
+        first = client.get("/public/courses?offset=0&limit=1")
+        second = client.get("/public/courses?offset=1&limit=1")
+
+    assert [item["slug"] for item in first.json()["courses"]] == ["a"]
+    assert [item["slug"] for item in second.json()["courses"]] == ["b"]
+
+
+def test_public_projection_rejects_sensitive_url_components() -> None:
+    client, app = make_client()
+    with Session(app.state.database.engine) as session:
+        add_course(
+            session,
+            course_id="urls",
+            title="URLs públicas",
+            content={
+                "sections": [],
+                "cover_public_url": "https://cdn.example.test/cover.webp",
+                "thumbnailUrl": "https://cdn.example.test/fallback.webp?token=secret",
+            },
+        )
+        add_course(
+            session,
+            course_id="query",
+            title="Query",
+            content={"sections": [], "thumbnailUrl": "https://cdn.example.test/cover.webp?token=secret"},
+        )
+        add_course(
+            session,
+            course_id="fragment",
+            title="Fragmento",
+            content={"sections": [], "thumbnailUrl": "https://cdn.example.test/cover.webp#secret"},
+        )
+        add_course(
+            session,
+            course_id="userinfo",
+            title="Userinfo",
+            content={"sections": [], "thumbnailUrl": "https://token@cdn.example.test/cover.webp"},
+        )
+        session.commit()
+
+    with client:
+        simple = client.get("/public/courses/urls")
+        query = client.get("/public/courses/query")
+        fragment = client.get("/public/courses/fragment")
+        userinfo = client.get("/public/courses/userinfo")
+
+    assert simple.json()["cover_public_url"] == "https://cdn.example.test/cover.webp"
+    for response in (query, fragment, userinfo):
+        assert "cover_public_url" not in response.json()
+
+
 def test_public_projection_omits_untrusted_or_implicit_metadata() -> None:
     client, app = make_client()
     with Session(app.state.database.engine) as session:

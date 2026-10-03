@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Any, Literal
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 from pydantic import BaseModel
@@ -47,9 +48,26 @@ def _explicit_text(content: dict[str, Any], key: str) -> str | None:
 def _public_url(content: dict[str, Any], *keys: str) -> str | None:
     for key in keys:
         value = _explicit_text(content, key)
-        if value is not None and value.startswith("https://"):
+        if value is not None and _is_public_https_url(value):
             return value
     return None
+
+
+def _is_public_https_url(value: str) -> bool:
+    try:
+        parsed = urlsplit(value)
+        return (
+            parsed.scheme == "https"
+            and parsed.hostname is not None
+            and parsed.username is None
+            and parsed.password is None
+            and not parsed.query
+            and not parsed.fragment
+            and "?" not in value
+            and "#" not in value
+        )
+    except ValueError:
+        return False
 
 
 def _serialize_public_course(record: Course, version_number: int) -> dict[str, object]:
@@ -91,7 +109,7 @@ def public_courses(
     db: Database = request.app.state.database
     with Session(db.engine) as session:
         records = session.scalars(
-            select(Course).where(Course.active.is_(True)).order_by(Course.title)
+            select(Course).where(Course.active.is_(True)).order_by(Course.title, Course.id)
         ).all()
         items = [
             projection
