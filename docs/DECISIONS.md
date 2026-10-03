@@ -163,3 +163,20 @@
     Campos de resultado sem fonte integrada continuam null; reemissão exige
     regra específica antes de automatizar seu marco. Merge/produção permanecem
     gates próprios, sem AAB ou autorização nova nesta conciliação.
+
+27. 2026-10-03: correção de precedência do item 26. A decisão posterior da Issue
+    #5, comentário 5965837795, substitui 75% por 70% dos encontros configurados
+    por oferta e define 80h formais por curso, sem cronômetro obrigatório ou 40h
+    digitais como condição. Trilha obrigatória por edição tem validação backend.
+    Baseline registrado, frequência >=70%, trilha concluída e certificado gerado
+    compõem CAPACITADO. CERTIFICADO_VALIDO acrescenta fichas regularizadas assinadas
+    pelo instrutor e certificado assinado pela coordenação. Geração não é validade
+    e pode preceder regularização; estados GENERATED, PENDING_INSTRUCTOR_VALIDATION,
+    PENDING_COORDINATOR_SIGNATURE e VALID ficam separados. Exceções de frequência
+    permanecem pending_human_validation, sem presença automática. Baseline admite
+    diferentes origens documentadas, sem exclusividade Jotform. Não sobrescrever
+    carga/evidência histórica nem inferir fontes ausentes no BI. A âncora de #8
+    continua no certificado, mas geração versus validade e reemissão ainda exigem
+    definição antes de automação. #39 permanece candidato preservado; #51 requer
+    reconciliação pelo seu escritor. Plano de Trabalho não examinado, provider
+    real e ativação não comprovados. Matriz: program/JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md.

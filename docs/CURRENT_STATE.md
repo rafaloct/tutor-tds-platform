@@ -2,12 +2,13 @@
 
 ## Checkpoint documental META 04 — 03/10/2026
 
-PR #24 incorpora a consolidação `3fddb09` por merge preservando histórico e
-reconcilia decisões humanas com Measurement v1/portal/governança. Matriz no
-comentário 5968944747 do PR #24. Isto não implementa novos resultados acadêmicos.
-PR #51 permanece sob Devin; delta do baseline pré-certificado solicitado no
-comentário 5968949581. #49/#50 são candidatos de integração, sem staging
-comprovado nesta rodada; WP-2/#42 depende do aceite reservado a Rafael.
+Base canônica `1a577a6`: #24 integrado em `eab8fb0`, #49 em `39075fc` e #50 em
+`1a577a6`, preservando histórico. A conciliação anterior de #24/#51 omitiu a
+decisão posterior de #5: correção no item 27 de DECISIONS e na matriz
+program/JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md. Não representa enforcement.
+#51 permanece sob Devin com delta corretivo solicitado; #39 preservado como
+candidato local, sem ativação institucional. #53 é candidato parcial do plugin
+WP-2, não conclusão de #42; tema Windsurf e staging ainda sem execução comprovada.
 Issue #3: 86 testes sintéticos de identidade/recuperação passaram; PR #40 e
 freeze/gates físicos/restore/proveniência mantêm release bloqueada. Nenhum AAB,
 produção, assinatura, baseline real ou certificado real foi alterado.
