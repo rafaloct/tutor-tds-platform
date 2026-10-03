@@ -329,10 +329,10 @@ function candidateCanonical(command) {
   return JSON.stringify(Object.fromEntries(Object.keys(command).sort().map((key) => [key, command[key]])));
 }
 
-// Development-only producer/consumer candidate. No legacy KV write, public
-// certificate, institutional signature, pedagogical rule or deployment binding.
+// Development/staging-only producer-consumer candidate. Production remains
+// fail-closed. No legacy KV write, public certificate or institutional signature.
 async function handleCertificateCandidate(request, env) {
-  if (env.TUTOR_ENVIRONMENT !== 'development' || env.CERTIFICATE_CANDIDATE_ENABLED !== 'true' ||
+  if (!['development', 'staging'].includes(env.TUTOR_ENVIRONMENT) || env.CERTIFICATE_CANDIDATE_ENABLED !== 'true' ||
       typeof env.CERTIFICATE_CANDIDATE_SECRET !== 'string' || env.CERTIFICATE_CANDIDATE_SECRET.length < 32 ||
       !env.CERTIFICATE_CANDIDATES?.get || !env.CERTIFICATE_CANDIDATES?.put) {
     return json({ error: 'candidate_disabled' }, 503, {});
