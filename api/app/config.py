@@ -38,6 +38,7 @@ class Settings:
     minimum_supported_app_version: str = "1.2.0+11"
     compatibility_verified: bool = False
     environment: str = "development"
+    operator_operations_enabled: bool = False
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -53,6 +54,7 @@ class Settings:
             if item.strip()
         )
         settings = cls(
+            operator_operations_enabled=os.getenv("OPERATOR_OPERATIONS_ENABLED", "false").lower() in {"1", "true", "yes"},
             database_url=database_url or "sqlite+pysqlite:///./tutor_tds_local.db",
             environment=environment,
             allowed_origins=origins,

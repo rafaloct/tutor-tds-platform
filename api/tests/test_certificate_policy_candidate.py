@@ -204,6 +204,9 @@ def test_policy_and_lifecycle_downgrade_refuses_data_loss_and_account_erasure_cl
     config.set_main_option("sqlalchemy.url", str(engine.url))
     with pytest.raises(RuntimeError, match="Preserve configured policy"):
         command.downgrade(config, "20261003_0021")
+    # Later, empty revisions may have downgraded before the 0022 guard refused
+    # data loss. Account erasure exercises the current application/schema pair.
+    command.upgrade(config, "head")
     assert client.delete("/auth/me", headers=header("learner")).status_code == 204
     with Session(engine) as session:
         assert not session.scalars(select(EvidenceItem).where(EvidenceItem.user_id == "learner")).all()
