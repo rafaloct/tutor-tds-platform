@@ -61,7 +61,11 @@ edição. Nenhum desses IDs pode ser derivado de nome, CPF, telefone ou linha.
 
 Baseline pendente não bloqueia estudo nem exclui o participante, mas precisa
 estar regularizado antes do certificado; pode ser preenchido durante ou depois do
-curso (Issue #6, comentário 5965300113). Este overlay não verifica esse gate.
+curso (Issue #6, comentário 5965300113). Alvo (Issue #5, comentário
+5965837795): baseline como evidência vinculada ao participante, com
+tipo/origem/status; Forms, Jotform, app ou ficha digitalizada são aceitos, sem
+exclusividade de Jotform. Este overlay não exporta tipo/origem/status nem
+verifica esse gate.
 Duplicata de `registro_id` impede o pacote atual, mesmo entre turmas. Não
 eliminá-la arbitrariamente nem transferir a mesma ponte para outra inscrição.
 
@@ -92,10 +96,10 @@ são fictícios; não são valores de produção.
 | `status_baseline` | texto | ponte revisada / DADOS | Export atual: `Vínculo conferido`; não prova qualidade das respostas | categoria / — | S / S | Sem ponte não há linha de jornada | P | Vínculo conferido / baseline preenchido por IA |
 | `vinculo_revisao` | inteiro | StudentBaseline.revision / DADOS | Revisão da conferência, não contagem de alunos | revisão / — | S / S | Não apurado | P | 2 / contagem de eventos |
 | `vinculo_conferido_em` | timestamp TZ nullable | StudentBaseline.reviewed_at / DADOS | Momento da revisão, não criação da ficha | data / — | S / S | Revisão sem timestamp disponível | P | 2026-10-01T12:00:00Z / data de instalação do app |
-| `carga_horaria_prevista` | número | ProgramCourse.planned_seconds ÷ 3600 / ENSINO | Carga configurada da oferta; 0 também pode ser ausência de oferta | horas / — | S / S | Não apurado; zero não resolve configuração ausente | O | 40 configuradas / impor 80 a todo curso |
+| `carga_horaria_prevista` | número | ProgramCourse.planned_seconds ÷ 3600 / ENSINO | Carga configurada da oferta no app; não é a carga formal de 80h do curso; 0 também pode ser ausência de oferta | horas / — | S / S | Não apurado; zero não resolve configuração ausente | O | 40 configuradas no piloto / cronômetro de 80h ou de 40h digitais |
 | `horas_estudo_validadas` | número | _student_progress / API | Projeção de estudo da matrícula; separada de presença | horas / — | S / S | Não apurado | P | 1.5 / segundos_tela ÷ 3600 |
-| `progresso_estudo_percentual` | número | _student_progress / API | Projeção compartilhada, não posição local de leitura | % / regra da projeção de estudo | S / S | Não apurado; carga zero não habilita taxa institucional | P | 5 / frequência 75 por abrir app |
-| `certificado_flag` | 1 ou null | CertificateReference / EMISSOR | Referência API encontrada no escopo consultado; ausência desconhecida | flag / — | S / S | Sem referência coberta, não “não certificado” | P | 1 / 0 por não achar KV |
+| `progresso_estudo_percentual` | número | _student_progress / API | Projeção compartilhada, não posição local de leitura | % / regra da projeção de estudo | S / S | Não apurado; carga zero não habilita taxa institucional | P | 5 / frequência 70 por abrir app |
+| `certificado_flag` | 1 ou null | CertificateReference / EMISSOR | Referência API legada encontrada no escopo consultado; não é GENERATED nem VALID; ausência desconhecida | flag / — | S / S | Sem referência coberta, não “não certificado” | P | 1 / 0 por não achar KV |
 | `certificado_emitido_em` | timestamp TZ nullable | CertificateReference.issued_at / EMISSOR | Última referência API selecionada no escopo da turma após matrícula | data / — | S / S | Emissão não comprovada por esta fonte | P | 2026-09-01T12:00:00Z / data de solicitação |
 | `certificado_cobertura` | texto | journey-export / API | `api_class_references_only`: fonte parcial; não cobre todo legado/KV | categoria / — | S / S | Cobertura desconhecida | O | api_class_references_only / cobertura universal |
 | `data_ultima_interacao` | timestamp TZ nullable | eventos com linhagem explícita / API | Última ocorrência no contexto turma+edição+enrollment legado | data / — | S / S | Nenhum evento contextual localizado; não prova abandono | P | 2026-10-01T12:00:00Z / última atividade de outra turma |
@@ -110,6 +114,12 @@ edição. A flag também não comprova que o gate "baseline regularizado antes d
 certificado" foi aplicado. Integridade/autenticação da emissão continua na
 Issue #5 / PR #39.
 
+Estados alvo do certificado da trilha (Issue #5, comentário 5965837795; candidato
+PR #39): `GENERATED`, `PENDING_INSTRUCTOR_VALIDATION`,
+`PENDING_COORDINATOR_SIGNATURE`, `VALID`. A geração pode preceder as assinaturas
+e não confere validade institucional. Esses estados não podem ser colapsados em
+`certificado_flag`/`CertificateReference`; o overlay não os exporta.
+
 ### Campos emitidos pela API, ainda null e fora do CSV de jornada
 
 Tipo abaixo é **alvo semântico**, não schema implementado. Todos têm janela S,
@@ -118,8 +128,8 @@ não disponível nesta projeção. Não converter em negativo nem inferir do app
 
 | Campo | Tipo alvo | Autoridade / owner | Unidade / denominador | Uso e exemplo válido futuro / inválido |
 | --- | --- | --- | --- | --- |
-| `frequencia_percentual` | número nullable | presença validada / ENSINO | % / carga aplicável validada | BLOCKED; cálculo revisado / count de encontros |
-| `concluiu_frequencia_flag` | flag nullable | decisão de suficiência / ENSINO | flag / — | BLOCKED; decisão registrada / regra rígida automática de 75% |
+| `frequencia_percentual` | número nullable | listas/fichas institucionais / ENSINO | % / encontros configurados da oferta | BLOCKED; presença comprovada ÷ encontros configurados / eventos do app ou tempo de tela |
+| `concluiu_frequencia_flag` | flag nullable | frequência ≥ 70% ou exceção validada / ENSINO | flag / — | BLOCKED; ≥ 70% comprovado, exceção `pending_human_validation` fica null até validação com responsável/justificativa / presença automática |
 | `elegivel_mentoria` | flag nullable | decisão de elegibilidade / ENSINO | flag / — | BLOCKED; decisão com regra / certificado implica elegível |
 | `status_convite_mentoria` | enum nullable | convite/resposta / ENSINO | categoria / — | BLOCKED; aceite explícito / convite enviado = aceito |
 | `mentor_id` | ID nullable | atribuição MentorshipCase / ENSINO | ID / — | BLOCKED; atribuição autorizada / autor do último chat |
@@ -182,13 +192,13 @@ Não é migration nem importador real dos CSVs.
 | `vinculos_bi_pendentes` | pares com bi_link_pending | — | S | DADOS / proposta; outras inconsistências separadas |
 | `vinculos_bi_inconsistentes` | enrollment_lineage_changed ou bi_link_inconsistent | — | S | DADOS / proposta |
 | `cobertura_vinculo_percentual` | pares confirmed × 100 | todos os pares do snapshot, mesmo sem baseline | S | DADOS / proposta |
-| `horas_estudo_snapshot` | soma por matrícula contextual+edição revisada | — | S | API / proposta; nunca carga presencial ou capacitação |
+| `horas_estudo_snapshot` | soma por matrícula contextual+edição revisada | — | S | API / proposta; nunca carga formal de 80h, frequência, trilha concluída ou capacitação |
 | `referencias_certificado_api` | linhas conferidas com flag=1 | — | S | EMISSOR / observação parcial; não total institucional |
 | `certificado_desconhecido` | linhas de jornada com flag null | — | S | EMISSOR / cobertura parcial explícita |
 | `pessoas_com_atividade` | contas distintas com fato na janela e visíveis no snapshot | — | E | API / uso técnico |
 | `eventos_conta_janela` | fatos deduplicados, sem multiplicar por turmas | — | E | API / uso técnico |
 | `segundos_tela_janela` | soma de screen_engagement deduplicado | — | E | API / uso técnico, validated_seconds=0 |
-| `capacitados`, `elegiveis_mentoria`, `followup_30d_concluido` | não calculado | não definido neste overlay | — | ENSINO / BLOCKED na projeção atual |
+| `capacitados`, `certificados_validos`, `elegiveis_mentoria`, `followup_30d_concluido` | não calculado | fontes não integradas neste overlay | — | ENSINO / BLOCKED na projeção atual |
 
 Sem publicar conversão por divisão de totais independentes. Qualquer funil futuro
 precisa de interseção das mesmas matrículas/edições, sequência de fatos validados
@@ -196,20 +206,33 @@ e cobertura conhecida. `page_view != presença`, `tempo de tela != carga oficial
 `chat resolvido != mentoria`, `interest != eligible`, `submitted != validated`,
 `certificate requested != issued`, `missing != false`.
 
-Decisões reconciliadas com PR #24 (`OPERATING_DECISIONS_2026-10-03.md`, matriz
-em PR #24 comentário 5968944747): 75% é referência flexível, com presença por
-carga/sessão validada; o instrutor valida a suficiência da complementação. A
-formação alvo é 80h, com 40h presencial + 40h digital adaptável. Isso não altera
-`ProgramCourse.planned_seconds` nem o piloto histórico de 40h. A lista assinada
-prevalece até correção formal. 30/60/90 ancoram no certificado; essa decisão
-supera o Measurement v1 antigo. Pessoa, participação e matrícula formal continuam
-distintas.
+Decisões vigentes. A decisão da Issue #5 (comentário 5965837795, candidato
+PR #39) é posterior a PR #24 (`OPERATING_DECISIONS_2026-10-03.md`) e prevalece
+onde divergem:
+
+- Cada curso tem 80h formais. Não há cronômetro de 80h nem exigência de 40h
+  digitais; a interpretação 40h presencial + 40h digital deixa de ser condição.
+- Frequência mínima de 70% dos encontros configurados por oferta, comprovada por
+  listas/fichas institucionais (substitui a referência de 75%). Exceções ficam
+  `pending_human_validation`, com responsável e justificativa, sem presença
+  automática. A lista assinada prevalece até correção formal.
+- Trilha obrigatória por edição: checkpoints obrigatórios concluídos, com
+  validação determinística no backend e configuração preservada por edição.
+- `CAPACITADO` = baseline registrado AND frequência ≥ 70% AND trilha obrigatória
+  concluída AND certificado da trilha gerado.
+- `CERTIFICADO_VALIDO` = `CAPACITADO` AND fichas regularizadas assinadas pelo
+  instrutor AND certificado assinado pela coordenação.
+- Não alterar retroativamente `ProgramCourse.planned_seconds` nem o piloto
+  histórico de 40h; não gerar valores sintéticos para resultados reais.
+- 30/60/90 ancoram no certificado (supera o Measurement v1 antigo). O evento
+  exato (geração ou validade) e a reemissão exigem definição antes de automatizar.
+- Pessoa, participação e matrícula formal continuam distintas.
 
 `BLOCKED` neste dicionário significa fonte ou comando ainda não integrado à
-projeção, não ausência de decisão geral. Exceção: a regra de reemissão exige
-resolução específica antes de automatizar esse caso. Faltam também regras de
-reposição auditadas, cobertura de emissão e definição de contato/resposta para
-follow-up. Período sem follow-up fica desconhecido.
+projeção, não ausência de decisão geral. Exceção: o evento-âncora do follow-up
+(geração ou validade) e a reemissão exigem resolução específica antes de
+automatizar. Faltam também fontes integradas de frequência, trilha, estados do
+certificado e baseline tipado, e definição de contato/resposta para follow-up. Período sem follow-up fica desconhecido.
 
 ## 6. Lineage, privacidade e consumo
 
