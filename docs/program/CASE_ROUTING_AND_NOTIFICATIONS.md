@@ -173,12 +173,12 @@ Notificações são uma capacidade transversal do caso e dos domínios, não nov
 
 ### Relação com o fechamento digital
 
-A conclusão da etapa digital de uma formação de 80h não deve depender de uma única métrica. O contrato confirmado prevê combinação de:
-- evidência de uso das funcionalidades obrigatórias do app;
-- carteira de certificados;
-- print/registro do certificado exibido na carteira;
-- avaliação via Jotform;
-- eventos digitais confiáveis registrados pelo backend.
+A decisão posterior de #5 exige conclusão dos checkpoints obrigatórios
+configurados por edição, com validação determinística no backend. Cada curso tem
+80h formais, sem cronômetro obrigatório ou 40h digitais como condição. Jotform,
+print/carteira e telemetria não são requisitos universais. Geração da trilha,
+CAPACITADO e validade institucional são distintos; aplicar a matriz
+`JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md`.
 
 Notificação pode lembrar o participante de critérios pendentes, mas não concede conclusão.
 

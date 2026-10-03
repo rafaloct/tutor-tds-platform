@@ -79,7 +79,30 @@ class EvidenceApiException implements Exception {
   String toString() => message;
 }
 
-class EvidenceRepository implements EvidenceGateway {
+abstract interface class OfficialAttendanceGateway {
+  Future<EvidenceSessionPage> attendanceSessions(
+    String classId, {
+    int offset = 0,
+  });
+  Future<OfficialAttendancePage> attendanceHistory(
+    String classId,
+    String sessionId,
+    String userId, {
+    int offset = 0,
+  });
+  Future<void> decideAttendance({
+    required String classId,
+    required String sessionId,
+    required String userId,
+    required String status,
+    required int expectedRevision,
+    required String reason,
+    required String idempotencyKey,
+    String? makeupSessionId,
+  });
+}
+
+class EvidenceRepository implements EvidenceGateway, OfficialAttendanceGateway {
   EvidenceRepository({
     required this.apiUrl,
     required this.authRepository,
@@ -90,6 +113,54 @@ class EvidenceRepository implements EvidenceGateway {
   final AuthRepository authRepository;
   final http.Client _client;
   String? _presenceOwner;
+
+  @override
+  Future<EvidenceSessionPage> attendanceSessions(
+    String classId, {
+    int offset = 0,
+  }) async => EvidenceSessionPage.fromJson(
+    await _presenceRequest(
+      'GET',
+      '/classes/${_segment(classId)}/sessions?limit=100&offset=${offset.clamp(0, 1 << 31)}',
+    ),
+  );
+
+  @override
+  Future<OfficialAttendancePage> attendanceHistory(
+    String classId,
+    String sessionId,
+    String userId, {
+    int offset = 0,
+  }) async => OfficialAttendancePage.fromJson(
+    await _presenceRequest(
+      'GET',
+      '/classes/${_segment(classId)}/sessions/${_segment(sessionId)}/attendance/${_segment(userId)}?limit=50&offset=${offset.clamp(0, 1 << 31)}',
+    ),
+  );
+
+  @override
+  Future<void> decideAttendance({
+    required String classId,
+    required String sessionId,
+    required String userId,
+    required String status,
+    required int expectedRevision,
+    required String reason,
+    required String idempotencyKey,
+    String? makeupSessionId,
+  }) async {
+    await _presenceRequest(
+      'POST',
+      '/classes/${_segment(classId)}/sessions/${_segment(sessionId)}/attendance/${_segment(userId)}',
+      body: {
+        'status': status,
+        'expected_revision': expectedRevision,
+        'reason': reason.trim(),
+        'idempotency_key': idempotencyKey,
+        'makeup_session_id': makeupSessionId,
+      },
+    );
+  }
 
   Future<Map<String, dynamic>> _presenceRequest(
     String method,

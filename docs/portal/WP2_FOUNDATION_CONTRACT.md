@@ -1,7 +1,8 @@
 # WP-2 — Foundation contract
 
 Status: **IMPLEMENTED / TESTED-LOCAL** for PHP contract tests and a disposable
-WordPress 7.1.2 / SQLite integration. External staging remains **UNKNOWN**. Issue #42
+WordPress 7.1.2 / SQLite integration and separate MySQL 8.4.11 recovery rehearsal.
+External staging remains **UNKNOWN**. Issue #42
 also requires theme, pages, accessibility and staging; this slice does not
 complete that issue.
 
@@ -138,3 +139,13 @@ provider integration or deployment is proven by this local SQLite experiment.
 Initial CLI harness failure: admin_init called without core template.php,
 causing undefined add_settings_field. The harness now loads real admin template
 functions first. This was a harness setup defect, not a plugin production fix.
+
+## Separate MySQL/recovery evidence
+
+The subsequent [local MySQL rehearsal](../../wordpress/staging/MYSQL_LOCAL_REHEARSAL.md)
+uses the unchanged public plugin contract in MySQL 8.4.11. A fresh disposable
+recipe passed 43 assertions, mysqldump restore to another database, uploads
+hash verification and deactivate/reactivate across fresh PHP processes.
+Only the new MySQL slice was run locally; the earlier SQLite/HTTP evidence
+retains its original bounded scope. No external staging or theme acceptance
+is inferred. The MySQL process stopped normally and its loopback port closed.

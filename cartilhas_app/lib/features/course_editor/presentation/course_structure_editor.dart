@@ -5,6 +5,7 @@ import '../data/course_editor_repository.dart';
 import '../models/course_editor_models.dart';
 import 'course_editor_screen.dart';
 import 'message_editor_dialog.dart';
+import 'material_editor_dialog.dart';
 
 class CourseStructureEditor extends StatefulWidget {
   const CourseStructureEditor({
@@ -238,6 +239,28 @@ class _CourseStructureEditorState extends State<CourseStructureEditor> {
     }
   }
 
+  Future<void> _material(Map<String, dynamic> section, [int? index]) async {
+    final materials = section['materials'] as List? ?? <dynamic>[];
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (_) => MaterialEditorDialog(
+        material: index == null
+            ? null
+            : materials[index] as Map<String, dynamic>,
+      ),
+    );
+    if (result != null && mounted) {
+      _change(() {
+        if (index == null) {
+          materials.add(result);
+        } else {
+          materials[index] = result;
+        }
+        section['materials'] = materials;
+      });
+    }
+  }
+
   void _move(List<dynamic> items, int index, int direction) => _change(() {
     final item = items.removeAt(index);
     items.insert(index + direction, item);
@@ -403,6 +426,7 @@ class _CourseStructureEditorState extends State<CourseStructureEditor> {
 
   Widget _section(Map<String, dynamic> section, int index) {
     final messages = section['messages'] as List<dynamic>;
+    final materials = section['materials'] as List? ?? <dynamic>[];
     return Card(
       key: ValueKey(section['id']),
       child: Padding(
@@ -486,6 +510,27 @@ class _CourseStructureEditorState extends State<CourseStructureEditor> {
                         ],
                       )
                     : null,
+              ),
+            for (var m = 0; m < materials.length; m++)
+              ListTile(
+                title: Text('${materials[m]['title']}'),
+                subtitle: Text('Material • ${materials[m]['kind']}'),
+                onTap: _editable ? () => _material(section, m) : null,
+                trailing: _editable
+                    ? IconButton(
+                        tooltip: 'Remover material',
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _remove(materials, m, 'material'),
+                      )
+                    : null,
+              ),
+            if (_course!.canEdit)
+              TextButton.icon(
+                onPressed: _editable && materials.length < 50
+                    ? () => _material(section)
+                    : null,
+                icon: const Icon(Icons.attach_file),
+                label: const Text('Adicionar material'),
               ),
             if (_course!.canEdit)
               TextButton.icon(
@@ -582,6 +627,13 @@ class _CoursePreview extends StatelessWidget {
             '${section['title']}',
             style: Theme.of(context).textTheme.titleLarge,
           ),
+          for (final material in section['materials'] as List? ?? [])
+            ListTile(
+              title: Text('${material['title']}'),
+              subtitle: Text(
+                '${material['kind']} • ${material['url'] ?? material['media_id']}',
+              ),
+            ),
           for (final message in section['messages'] as List)
             Card(
               child: Padding(

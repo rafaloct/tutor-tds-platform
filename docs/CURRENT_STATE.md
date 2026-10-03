@@ -1,16 +1,44 @@
 # CURRENT STATE
 
+## Integração META 05 — 03/10/2026
+
+Base integrada neste candidato: `aa6fb88050aa864726e197187487819de303ac65`,
+após merges sequenciais #54/#51/#55. PR #39 mantém migrations 0021/0022 e gate
+institucional fechado. Os checkpoints abaixo preservam a evidência histórica;
+validação PostgreSQL e CI desta integração serão registrados no PR por SHA.
+
+## 2026-10-03 Issue #5 — candidato institucional v2
+
+Contrato direto do usuário implementado em development opt-in: 80h formais por
+curso, encontros configurados/min70%, checkpoints obrigatórios determinísticos,
+baseline multiorigem e fichas contextualizadas. Último checkpoint gera candidato
+sintético automaticamente, antes de assinaturas; CAPACITADO e validade são
+projeções separadas. Lifecycle GENERATED→PENDING_INSTRUCTOR_VALIDATION→
+PENDING_COORDINATOR_SIGNATURE→VALID exige papéis e evidências; ativação institucional
+real permanece bloqueada. Dispatch auditado pending_dispatch para fluxo
+tdsdados@gmail.com (endereço canônico na documentação/registro), sem SMTP.
+Migrações0021/0022 aditivas, reserva durável/reconciliação lookup e segregação
+oficial preservadas. Legado/VPS/serviços reais não foram alterados ou acionados.
+Plano citado não anexado; decisão do usuário autoriza o recorte, não homologação.
+Ver production/ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md e matrizes.
+CI detectou fixture de downgrade Journey usando ORM atual após remoção parcial
+de colunas0022/0021 antes recusa BI0020. Teste agora verifica BI/histórico/guarda
+no schema parado e faz recuperação forward antes do detach pela API; cenário e
+proteções mantidos, sem mudança de runtime/migration.
+
 ## Checkpoint documental META 04 — 03/10/2026
 
-PR #24 incorpora a consolidação `3fddb09` por merge preservando histórico e
-reconcilia decisões humanas com Measurement v1/portal/governança. Matriz no
-comentário 5968944747 do PR #24. Isto não implementa novos resultados acadêmicos.
-PR #51 permanece sob Devin; delta do baseline pré-certificado solicitado no
-comentário 5968949581. #49/#50 são candidatos de integração, sem staging
-comprovado nesta rodada; WP-2/#42 depende do aceite reservado a Rafael.
+Base canônica `1a577a6`: #24 integrado em `eab8fb0`, #49 em `39075fc` e #50 em
+`1a577a6`, preservando histórico. A conciliação anterior de #24/#51 omitiu a
+decisão posterior de #5: correção no item 27 de DECISIONS e na matriz
+program/JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md. Não representa enforcement.
+#51 permanece sob Devin com delta corretivo solicitado; #39 preservado como
+candidato local, sem ativação institucional. #53 é candidato parcial do plugin
+WP-2, não conclusão de #42; tema Windsurf e staging ainda sem execução comprovada.
 Issue #3: 86 testes sintéticos de identidade/recuperação passaram; PR #40 e
 freeze/gates físicos/restore/proveniência mantêm release bloqueada. Nenhum AAB,
 produção, assinatura, baseline real ou certificado real foi alterado.
+
 
 - CURRENT RELEASE: código `1.4.0+13`; produção histórica `1.2.0+11`, não revalidada na Play. Release bloqueada por seus gates.
 - CURRENT WAVE: 2 — Dynamic Learning; fatia 2A aprovada funcionalmente em staging. Wave 1 aprovada em `0081ab0`.
