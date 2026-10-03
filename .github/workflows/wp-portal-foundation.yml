@@ -22,3 +22,4 @@ jobs:
         run: |
           php -n wordpress/staging/tests/test-wp2-foundation.php
           php -n wordpress/staging/tests/test-wp4-editorial.php
+          php -n wordpress/staging/tests/test-wp5-adapter.php
