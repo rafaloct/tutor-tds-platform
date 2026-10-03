@@ -129,12 +129,13 @@ def _transport(request):
         )
 
     hostname = (url.hostname or "").lower()
+    worker_name = hostname.split(".", 1)[0]
     if (
         injected is not None
         or url.scheme != "https"
         or common_invalid
-        or not hostname
-        or "staging" not in hostname
+        or not hostname.endswith(".workers.dev")
+        or "staging" not in worker_name
         or hostname in {"localhost", "127.0.0.1", "::1"}
         or hostname.endswith(".local")
     ):
