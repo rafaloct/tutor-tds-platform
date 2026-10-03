@@ -113,8 +113,8 @@ Apos upgrade do Dokploy, revalidar Node, rclone, age e notificacao.
   `databaseBackup` ativo. O codigo da rotina confere apenas IDs de metadados
   antes de chama-la, sem ler o campo de senha. A funcao interna captura erros
   de envio; por isso `native_dispatch_unverified` nao significa entrega.
-  Revalidar essa integracao apos upgrade do Dokploy. Executar no maximo um
-  novo teste de falha controlada depois de instalar o codigo e a referencia.
+  Revalidar essa integracao apos upgrade do Dokploy. O unico teste de falha
+  controlada desta meta foi executado em 03/10; nao repeti-lo.
 - Codigo `3683ef5` instalado no runtime privado com SHA-256
   `73c1fad9f1101f165e1ee3d49926ac845126a4df0b6135c5bf984abec0fb71bb`.
   `runtime.json` passou a conter somente os IDs do notificador/organizacao
@@ -126,25 +126,57 @@ Apos upgrade do Dokploy, revalidar Node, rclone, age e notificacao.
   `native_dispatch_unverified`, `delivered=false`. O helper do Dokploy nao
   propaga o resultado de SMTP; recebimento deste alerta precisa ser conferido
   pelo destinatario, inclusive na pasta de spam. Nao repetir o probe.
+- Rafael confirmou em 03/10/2026 que o alerta da falha controlada chegou por
+  email. Essa e a evidencia de HUMAN ACCEPTANCE daquela mensagem, associada
+  ao recibo de 06:55:13Z. Nao transforma `delivered=false` do recibo em PASS
+  automatico nem prova entrega futura.
 - Uma consulta manual do monitor em 03/10 06:59:55Z retornou `MONITOR_OK`,
   `problems=[]` depois da integracao. Isso valida o estado atual dos recibos
   e a referencia nativa, nao a entrega de email em uma falha futura.
 - Para queda total da VPS, `.github/workflows/tds-vps-watchdog.yml` e um
   candidato minimo: consulta a API publica e o banco a cada 30 minutos a
-  partir dos runners GitHub, com timeout e falha explicita. A URL retornou
+  partir dos runners GitHub, com timeout e falha explicita. Em caso de falha,
+  tenta email direto para `tdsdados@gmail.com` via SMTP externo com TLS. A
+  URL retornou
   `{"status":"ok","database":"available"}` em 03/10. O workflow agendado
   so roda na branch default apos integracao do PR; execucoes podem atrasar ou
-  ser descartadas. Notificacao por email depende da preferencia da conta e,
-  em execucao agendada, do ator do workflow. Nao declarar alerta externo
-  entregue sem uma execucao real e recebimento verificados. O PR draft nao
-  ativa esse watchdog.
+  ser descartadas. O SMTP externo ainda precisa ser configurado e testado;
+  nao declarar alerta externo entregue sem execucao e recebimento verificados.
+  O PR draft nao ativa esse watchdog.
 - Revisar o escopo efetivo da credencial R2 e a possibilidade de uma pessoa
   acessar simultaneamente ZIP do Dokploy, configuracao e identidade age.
-  O armazenamento privado nao prova separacao de acesso. Registrar aceite
-  formal do risco residual ou reduzir privilegios antes de fechar #2.
+  O armazenamento privado nao prova separacao de acesso. Rafael declarou
+  "aceito o risco" em 03/10/2026, em resposta a essa pendencia agrupada.
+  Trata-se de aceite formal do risco residual de acesso conjunto e escopo
+  R2 nao verificado; nao e prova de privilegios minimos.
+
+## Canal do watchdog externo
+
+Rafael escolheu aviso por email. O workflow GitHub proposto ainda esta em
+PR draft. As notificacoes padrao dos workflows agendados vao para o usuario
+que criou o workflow, nao necessariamente para `tdsdados@gmail.com`. A API
+de emails da conta GitHub conectada nao esta disponivel com o escopo atual;
+nao alterar autorizacao OAuth para deduzir o destino. O workflow usa email
+SMTP direto, com destinatario fixo e credencial propria no GitHub Actions:
+
+| Tipo | Nome | Conteudo esperado |
+| --- | --- | --- |
+| Repository variable | `TDS_WATCHDOG_SMTP_HOST` | Host SMTP externo a VPS |
+| Repository variable | `TDS_WATCHDOG_SMTP_PORT` | `465` ou `587` |
+| Repository variable | `TDS_WATCHDOG_SMTP_USER` | Usuario SMTP |
+| Repository variable | `TDS_WATCHDOG_SMTP_FROM` | Remetente autorizado |
+| Repository secret | `TDS_WATCHDOG_SMTP_PASSWORD` | Credencial inserida manualmente pelo titular |
+
+Nao copiar a senha SMTP do banco Dokploy. Nao colocar valores em commit,
+issue, comentario ou log. Depois de configurar a credencial, integrar o
+workflow na branch default com aprovacao, disparar uma unica execucao
+`workflow_dispatch` com `test_email=true` e conferir o recebimento da
+mensagem rotulada como teste. A opcao nao simula indisponibilidade. O envio
+SMTP bem-sucedido significa aceite do servidor, nao recebimento na caixa.
+Em outage real, o workflow falha e tenta enviar email com URL da execucao;
+quando GitHub atrasar ou omitir a agenda, nao ha garantia de alerta.
 
 O adaptador de alerta altera apenas o caminho de notificacao da rotina TDS.
 Nao muda agenda, banco, destino, segredo nem configuracao do notificador nativo.
-O gate operacional permanece aberto ate a falha controlada e o recebimento
-serem comprovados, o watchdog externo ser decidido e o risco de credenciais
-ter aceite formal ou reducao de privilegios.
+O gate operacional permanece aberto ate o primeiro semanal por relogio e
+o aviso externo por email serem comprovados.

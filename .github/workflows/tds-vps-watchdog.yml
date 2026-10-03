@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '17,47 * * * *'
   workflow_dispatch:
+    inputs:
+      test_email:
+        description: Send a test email without simulating an outage
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -14,6 +19,7 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Check public production API and database
+        id: health
         shell: bash
         run: |
           set -euo pipefail
@@ -39,4 +45,56 @@ jobs:
               print('Production API or database health check failed', file=sys.stderr)
               sys.exit(1)
           print('Production API and database health check passed')
+          PY
+      - name: Email the TDS operations mailbox
+        if: ${{ always() && (steps.health.outcome == 'failure' || (github.event_name == 'workflow_dispatch' && inputs.test_email)) }}
+        shell: bash
+        env:
+          SMTP_HOST: ${{ vars.TDS_WATCHDOG_SMTP_HOST }}
+          SMTP_PORT: ${{ vars.TDS_WATCHDOG_SMTP_PORT }}
+          SMTP_USER: ${{ vars.TDS_WATCHDOG_SMTP_USER }}
+          SMTP_FROM: ${{ vars.TDS_WATCHDOG_SMTP_FROM }}
+          SMTP_PASSWORD: ${{ secrets.TDS_WATCHDOG_SMTP_PASSWORD }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ALERT_KIND: ${{ steps.health.outcome == 'failure' && 'health_failure' || 'test' }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import smtplib
+          import ssl
+          import sys
+          from email.message import EmailMessage
+
+          required = ('SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_FROM', 'SMTP_PASSWORD')
+          if any(not os.environ.get(key) for key in required):
+              sys.exit('Watchdog email configuration incomplete')
+          try:
+              port = int(os.environ['SMTP_PORT'])
+              if port not in (465, 587):
+                  raise ValueError('invalid port')
+              failure = os.environ['ALERT_KIND'] == 'health_failure'
+              message = EmailMessage()
+              message['Subject'] = ('[Tutor TDS] API de produção indisponível'
+                                    if failure else '[Tutor TDS] Teste do watchdog externo')
+              message['From'] = os.environ['SMTP_FROM']
+              message['To'] = 'tdsdados@gmail.com'
+              message.set_content(('O health público da API ou do banco falhou. Confira a execução: '
+                                   if failure else 'Teste solicitado do canal externo. Execução: ')
+                                  + os.environ['RUN_URL'])
+              context = ssl.create_default_context()
+              if port == 465:
+                  with smtplib.SMTP_SSL(os.environ['SMTP_HOST'], port, timeout=15,
+                                        context=context) as smtp:
+                      smtp.login(os.environ['SMTP_USER'], os.environ['SMTP_PASSWORD'])
+                      smtp.send_message(message)
+              else:
+                  with smtplib.SMTP(os.environ['SMTP_HOST'], port, timeout=15) as smtp:
+                      smtp.ehlo()
+                      smtp.starttls(context=context)
+                      smtp.ehlo()
+                      smtp.login(os.environ['SMTP_USER'], os.environ['SMTP_PASSWORD'])
+                      smtp.send_message(message)
+          except Exception:
+              sys.exit('Watchdog email delivery failed; inspect configuration privately')
+          print('Watchdog email accepted by SMTP; confirm receipt in the mailbox')
           PY
