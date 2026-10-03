@@ -5,11 +5,17 @@ defined( 'ABSPATH' ) || exit;
 /** Central, public-only configuration. Integration switches are code defaults. */
 final class TDS_Public_Config {
 	const APP_URL_OPTION = 'tds_app_access_url';
+	const GA4_OPTION = 'tds_ga4_measurement_id';
+	const API_URL_OPTION = 'tds_public_api_base_url';
+	const SUPPORT_URL_OPTION = 'tds_support_base_url';
 
 	public static function get() {
 		$url = self::validated_url( get_option( self::APP_URL_OPTION, '' ) );
 		return array(
 			'app_access_url'  => $url,
+			'ga4_measurement_id' => self::validated_ga4_id( get_option( self::GA4_OPTION, '' ) ),
+			'public_api_base_url' => self::validated_base_url( get_option( self::API_URL_OPTION, '' ) ),
+			'support_base_url' => self::validated_base_url( get_option( self::SUPPORT_URL_OPTION, '' ) ),
 			'integration_state' => array(
 				'app' => '' === $url ? 'unavailable' : 'ready',
 				'courses'  => 'unavailable',
@@ -41,5 +47,14 @@ final class TDS_Public_Config {
 
 		$config = self::get();
 		return isset( $config['integration_state'][ $integration ] ) ? $config['integration_state'][ $integration ] : 'unavailable';
+	}
+
+	public static function validated_base_url( $value ) {
+		$url = self::validated_url( $value );
+		return false !== strpos( $url, '?' ) || false !== strpos( $url, '#' ) ? '' : rtrim( $url, '/' );
+	}
+
+	public static function validated_ga4_id( $value ) {
+		return is_string( $value ) && preg_match( '/^G-[A-Z0-9]{6,20}$/D', $value ) ? $value : '';
 	}
 }

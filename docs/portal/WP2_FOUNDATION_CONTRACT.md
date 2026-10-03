@@ -1,7 +1,7 @@
 # WP-2 — Foundation contract
 
-Status: **IMPLEMENTED / TESTED-LOCAL** for the PHP contract with WordPress
-doubles. Real WordPress integration and staging remain **UNKNOWN**. Issue #42
+Status: **IMPLEMENTED / TESTED-LOCAL** for PHP contract tests and a disposable
+WordPress 7.1.2 / SQLite integration. External staging remains **UNKNOWN**. Issue #42
 also requires theme, pages, accessibility and staging; this slice does not
 complete that issue.
 
@@ -33,6 +33,19 @@ capability/nonce/save handling. The field requires manage_options and the option
 is not exposed through REST settings. Invalid/empty input clears the link.
 Analytics/support remain disabled; courses unavailable. Theme output must escape
 URLs/text for its HTML context.
+
+Additional explicit public options (empty by default): tds_ga4_measurement_id,
+tds_public_api_base_url and tds_support_base_url. get() exposes corresponding
+ga4_measurement_id, public_api_base_url and support_base_url. Configuring them
+never activates integrations, network calls or scripts. Base URLs additionally
+reject query/fragment. No arbitrary options bag, token, inbox or widget secret
+is supported. Real legacy values are not imported. Future adapter configuration
+requires its own reviewed public schema.
+
+The GA4 check accepts G- followed by 6–20 uppercase letters/digits, a local
+conservative input bound, not proof that a stream exists. Google's public
+[measurement-ID description](https://support.google.com/analytics/answer/12270356?hl=en)
+specifies G- plus letters/numbers. Collection remains disabled.
 
 Local URL validation accepts HTTPS public-looking hosts, no credentials,
 control characters, backslashes, private/reserved IP literals, private host
@@ -67,15 +80,16 @@ portal pagination and provide explicit expiry/invalidation for a real provider.
 
 Base 1a577a6e9417772753beb1525e25757f4e97b7ea; original head
 babd4f68d027394b5ebf44ffffea749298f8609d. Its static/regex claim is superseded by
-51 behavioral assertions on PHP 8.4.26 NTS Windows, real lint on seven PHP files,
+65 behavioral assertions on PHP 8.4.26 NTS Windows, real lint on eight PHP files,
 and git diff --check.
 
 Run: php -n wordpress/staging/tests/test-wp2-foundation.php
 PowerShell wrapper additionally lints and accepts -Php <php.exe>.
 Explicit doubles cover hooks, REST responses, settings registration and
-sanitizers. They do **not** prove core WordPress routing/authentication/nonce
-persistence, browser rendering, DNS, upstream availability, real caching,
-theme/accessibility or staging. CI WordPress portal foundation / php-contract
+sanitizers. They do **not** prove real core behavior. Separate local integration
+below proves the bounded core/HTTP cases. Neither suite proves browser rendering,
+DNS, upstream availability, persistent caching, theme/accessibility or staging.
+CI WordPress portal foundation / php-contract
 runs these tests; legacy quarantine / verify checks only the historical snapshot.
 
 Portable PHP provenance: official metadata
@@ -88,3 +102,39 @@ Rollback after a future authorized installation: deactivate the plugin; its
 public link option may remain inert. No migration, secrets, deploy, AAB or
 production change. Independent review and merge remain gates; staging remains
 UNKNOWN until an authorized isolated environment is tested.
+
+## Disposable real WordPress integration
+
+The separate setup-wp2-local.ps1 runner requires PHP with pdo_sqlite, sqlite3,
+openssl and mbstring, plus a **new** destination outside the repository. It
+rejects an existing destination, downloads pinned official packages, verifies
+archives and file manifests, generates its own synthetic configuration and
+creates a QA marker before loading core. Never point it at an existing site.
+test-wp2-wordpress.php rejects a missing marker before wp-load and verifies
+local environment/loopback URL/SQLite after boot.
+
+WordPress 7.1.2: official wordpress.org/wordpress-7.1.2.zip, SHA256
+8fc96c59a78b7219e4a130222b7fadb51b03e503e8b0123beaa7e28961c21ce2.
+3,782 core files matched the official core/checksums/1.0 manifest (MD5).
+SQLite Database Integration 3.0.2: official downloads.wordpress.org plugin ZIP,
+SHA256 1602e75577ad9b3a7e3e4a6a44a81b9541cdee2124d48928faf61c6fd3cd4f74;
+45 files matched the official plugin-checksums manifest (SHA256).
+
+Observed local results: 20 core assertions (real REST dispatch/defaults/invalid
+pagination/methods, sanitizer/options, inactive integrations, capability/nonce
+primitives, HTTP/mail isolation), two assertions of persistence in a new PHP
+process, seven HTTP assertions through real wp-login.php and options.php.
+The HTTP cases prove admin nonce save, invalid nonce 403, subscriber 403,
+unchanged persisted value after denial and real save-path URL sanitization.
+The listener binds only 127.0.0.1:18742 and is stopped in finally.
+
+WP_HTTP_BLOCK_EXTERNAL, pre_http_request, DISABLE_WP_CRON and disabled updates
+prevent WordPress HTTP activity; pre_wp_mail is a discard sink, not an SMTP
+delivery test. This is application-level isolation, not an OS network sandbox.
+No production credentials or content are read. QA archives/core/SQLite files
+stay outside Git. No MySQL, browser visual/accessibility, external staging,
+provider integration or deployment is proven by this local SQLite experiment.
+
+Initial CLI harness failure: admin_init called without core template.php,
+causing undefined add_settings_field. The harness now loads real admin template
+functions first. This was a harness setup defect, not a plugin production fix.

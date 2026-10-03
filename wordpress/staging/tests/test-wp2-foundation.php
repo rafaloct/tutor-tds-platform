@@ -9,7 +9,7 @@ function add_action( $hook, $callback ) { $GLOBALS['actions'][ $hook ] = $callba
 function register_rest_route( $namespace, $route, $args ) { $GLOBALS['routes'][ $namespace . $route ] = $args; }
 function register_setting( $group, $name, $args ) { $GLOBALS['settings'][ $name ] = array( $group, $args ); }
 function add_settings_field( $id, $title, $callback, $page, $section, $args ) { $GLOBALS['fields'][ $id ] = array( $callback, $page, $args ); }
-function get_option( $name, $default ) { return $GLOBALS['option']; }
+function get_option( $name, $default ) { return 'tds_app_access_url' === $name ? $GLOBALS['option'] : ( $GLOBALS['extra_options'][ $name ] ?? $default ); }
 function current_user_can( $cap ) { return $GLOBALS['can_manage'] && 'manage_options' === $cap; }
 function wp_parse_url( $url ) { return parse_url( $url ); }
 function esc_url_raw( $url ) { return $url; }
@@ -53,6 +53,17 @@ $option = 'https://play.google.com/store/apps/details?id=org.example.synthetic';
 check( $option === TDS_Public_Config::get()['app_access_url'], 'store query retained' );
 check( 'ready' === TDS_Public_Config::get()['integration_state']['app'], 'configured app ready' );
 check( 'disabled' === TDS_Public_Config::get()['integration_state']['analytics'] && 'disabled' === TDS_Public_Config::get()['integration_state']['support'], 'integrations off' );
+check( '' === TDS_Public_Config::get()['ga4_measurement_id'] && '' === TDS_Public_Config::get()['public_api_base_url'] && '' === TDS_Public_Config::get()['support_base_url'], 'new config empty by default' );
+foreach ( array( null, array(), 'G-123', 'G-ABCDEFGHIJ\n', 'private-token', 'G-abcdefghij' ) as $bad_id ) {
+    check( '' === TDS_Public_Config::validated_ga4_id( $bad_id ), 'invalid public GA4 ID' );
+}
+check( 'G-ABCDEFGHIJ' === TDS_Public_Config::validated_ga4_id( 'G-ABCDEFGHIJ' ), 'public GA4 format' );
+foreach ( array( 'https://example.org/?token=a', 'https://example.org/#x', 'http://example.org', 'https://user:pass@example.org' ) as $base ) {
+    check( '' === TDS_Public_Config::validated_base_url( $base ), 'invalid integration base URL' );
+}
+$extra_options = array( 'tds_ga4_measurement_id' => 'G-ABCDEFGHIJ', 'tds_public_api_base_url' => 'https://api.example.org/', 'tds_support_base_url' => 'https://support.example.org/' );
+check( 'https://api.example.org' === TDS_Public_Config::get()['public_api_base_url'], 'base URL normalized' );
+check( 'disabled' === TDS_Public_Config::get()['integration_state']['analytics'] && 'disabled' === TDS_Public_Config::get()['integration_state']['support'] && 'unavailable' === TDS_Public_Config::get()['integration_state']['courses'], 'configured integrations still inactive' );
 $actions['admin_init']();
 check( 'general' === $settings['tds_app_access_url'][0] && false === $settings['tds_app_access_url'][1]['show_in_rest'], 'native Settings API group and REST off' );
 ob_start(); $fields['tds_app_access_url'][0](); $html = ob_get_clean();
