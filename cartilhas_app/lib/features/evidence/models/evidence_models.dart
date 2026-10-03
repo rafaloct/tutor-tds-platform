@@ -309,6 +309,34 @@ class SessionPresence {
   }
 }
 
+class OfficialAttendanceDecision {
+  OfficialAttendanceDecision.fromJson(Map<String, dynamic> json)
+    : revision = _int(json, 'revision'),
+      status = _string(json, 'status'),
+      reason = _string(json, 'reason'),
+      makeupSessionId = json['makeup_session_id'] as String?,
+      decidedAt = _string(json, 'decided_at');
+  final int revision;
+  final String status, reason, decidedAt;
+  final String? makeupSessionId;
+}
+
+class OfficialAttendancePage {
+  OfficialAttendancePage.fromJson(Map<String, dynamic> json)
+    : items = (json['items'] as List)
+          .map(
+            (row) => OfficialAttendanceDecision.fromJson(
+              row as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+      total = _int(json, 'total'),
+      canDecide = json['can_decide'] == true;
+  final List<OfficialAttendanceDecision> items;
+  final int total;
+  final bool canDecide;
+}
+
 class SessionPresencePage {
   const SessionPresencePage({
     required this.items,
