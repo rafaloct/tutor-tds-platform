@@ -39,9 +39,12 @@ acadêmica e não expõe histórico ou vínculos de outra pessoa.
 
 Estados injetáveis: carregando, pronto, rascunho, enviando, confirmação simulada,
 erro/retentar e indisponível. Não há timer para fingir resposta. Abrir a tela,
-escolher assunto ou ler a ajuda não envia nada. Durante envio, novo toque é
-bloqueado antes do primeiro await. Retry explícito reutiliza o mesmo comando
-simulado. Offline mantém somente o rascunho da sessão e informa `Não enviado`.
+escolher assunto ou ler a ajuda não envia nada. A prontidão é registrada pela
+geração da sessão corrente e não pelo estado visual: editar rascunho/contexto
+durante preparação ou indisponibilidade não libera envio. Retry de preparação
+reexecuta `prepare()` sem limpar o rascunho nem enviar mensagem; retry de envio
+reutiliza o mesmo `commandId`. Durante envio, novo toque é bloqueado antes do
+primeiro await. Offline mantém somente o rascunho da sessão e informa `Não enviado`.
 
 A confirmação usa texto explícito:
 `DEMONSTRAÇÃO: confirmação simulada. Nenhuma equipe recebeu esta mensagem.`
@@ -72,13 +75,36 @@ testes, `support_entry_test.dart` também passou isoladamente no analyze.
 Testes executados:
 `flutter test test\support_entry_test.dart test\support_controller_test.dart`.
 
-Resultado final: **17/17 PASS** (11 widget + 6 controller). A primeira execução funcional encontrou seis falhas
+Resultado inicial do PR: **17/17 PASS** (11 widget + 6 controller). A primeira execução funcional encontrou seis falhas
 de teste por tentativa de tocar controles fora da viewport rolável de 600 px.
 A correção limitou-se a `ensureVisible` nos testes. A segunda rodada focal passou
 integralmente. Não foram repetidas suítes globais, API ou E2E históricos.
 
 O processo remoto não fornecia `ProgramFiles(x86)`; a variável foi definida somente
 no processo de teste como `C:\Program Files (x86)`, sem mudança persistente no host.
+
+### Revisão focal do PR #23
+
+Após o comentário `5964467939`, foram reproduzidas duas falhas sintéticas do estado
+de preparação: retry após `prepare()` indisponível e edição liberando `canSend`
+antes da prontidão. A correção ficou restrita ao controller, teste focal e este
+registro. A prontidão agora pertence à geração/sessão corrente; conclusão tardia
+de `prepare()` de A não pode liberar B.
+
+Regressões versionadas acrescentadas ao teste de controller:
+
+- retry de preparação preserva assunto, rascunho e contexto e não chama `send()`;
+- edição durante preparação pendente mantém `loading` e `canSend=false`;
+- `prepare()` tardio de A após troca A→B não libera B antes do prepare de B.
+
+Validação após a correção:
+
+- `flutter analyze lib\\features\\support\\support_controller.dart test\\support_controller_test.dart`: **PASS, 0 issues**;
+- `flutter test test\\support_entry_test.dart test\\support_controller_test.dart`: **20/20 PASS** (11 widget + 9 controller).
+
+Os testes existentes de resposta tardia de envio A→B, logout/retorno, toque duplo
+e reutilização do `commandId` no retry de envio continuam dentro dos 20 testes e
+passaram sem alteração de contrato. A pendência de validação visual permanece aberta.
 
 ## Demonstração local
 

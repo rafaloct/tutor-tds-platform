@@ -18,21 +18,29 @@ class SupportController extends ChangeNotifier {
 
   int _generation = 0;
   int _commandSequence = 0;
+  int? _preparedGeneration;
+  int? _preparingGeneration;
   SupportCommand? _retryCommand;
   bool _disposed = false;
 
   bool get isSending => state == SupportViewState.sending;
   bool get hasDraft => topic != null || message.trim().isNotEmpty;
+  bool get _isCurrentSessionPrepared =>
+      session != null && _preparedGeneration == _generation;
 
   bool get canSend {
     final currentTopic = topic;
-    if (session == null || currentTopic == null || isSending) return false;
+    if (session == null ||
+        currentTopic == null ||
+        isSending ||
+        !_isCurrentSessionPrepared) {
+      return false;
+    }
     if (currentTopic.requiresContext && selectedContext == null) return false;
     if (currentTopic != SupportTopic.unsure && message.trim().isEmpty) {
       return false;
     }
-    return state != SupportViewState.loading &&
-        state != SupportViewState.unavailable;
+    return true;
   }
 
   Future<void> startSession(SupportSession next) async {
@@ -42,22 +50,43 @@ class SupportController extends ChangeNotifier {
     message = '';
     statusMessage = null;
     confirmedCommandId = null;
+    _preparedGeneration = null;
     _retryCommand = null;
     selectedContext = _preselectedContext(next);
+    await _prepareSession(next, generation);
+  }
+
+  Future<void> _prepareSession(
+    SupportSession currentSession,
+    int generation,
+  ) async {
+    if (_isStale(generation, currentSession) ||
+        _preparingGeneration == generation) {
+      return;
+    }
+    _preparingGeneration = generation;
     state = SupportViewState.loading;
+    statusMessage = null;
     notifyListeners();
 
     try {
-      await gateway.prepare(next);
-      if (_isStale(generation, next)) return;
-      state = SupportViewState.ready;
+      await gateway.prepare(currentSession);
+      if (_isStale(generation, currentSession)) return;
+      _preparedGeneration = generation;
+      state = hasDraft ? SupportViewState.draft : SupportViewState.ready;
+      statusMessage = null;
       notifyListeners();
     } on SupportUnavailableException {
-      if (_isStale(generation, next)) return;
+      if (_isStale(generation, currentSession)) return;
+      _preparedGeneration = null;
       state = SupportViewState.unavailable;
       statusMessage =
           'Não enviado. A demonstração local está indisponível nesta sessão.';
       notifyListeners();
+    } finally {
+      if (_preparingGeneration == generation) {
+        _preparingGeneration = null;
+      }
     }
   }
 
@@ -75,8 +104,10 @@ class SupportController extends ChangeNotifier {
     topic = next;
     _retryCommand = null;
     confirmedCommandId = null;
-    statusMessage = null;
-    state = SupportViewState.draft;
+    if (_isCurrentSessionPrepared) {
+      statusMessage = null;
+    }
+    _updateEditingState();
     notifyListeners();
   }
 
@@ -94,20 +125,29 @@ class SupportController extends ChangeNotifier {
     selectedContext = next;
     _retryCommand = null;
     confirmedCommandId = null;
-    statusMessage = null;
-    state = hasDraft ? SupportViewState.draft : SupportViewState.ready;
+    if (_isCurrentSessionPrepared) {
+      statusMessage = null;
+    }
+    _updateEditingState();
     notifyListeners();
   }
 
   void clearContext() => chooseContext(null);
+
+  void _updateEditingState() {
+    if (!_isCurrentSessionPrepared) return;
+    state = hasDraft ? SupportViewState.draft : SupportViewState.ready;
+  }
 
   void updateMessage(String value) {
     if (_disposed || isSending || session == null) return;
     message = value;
     _retryCommand = null;
     confirmedCommandId = null;
-    statusMessage = null;
-    state = hasDraft ? SupportViewState.draft : SupportViewState.ready;
+    if (_isCurrentSessionPrepared) {
+      statusMessage = null;
+    }
+    _updateEditingState();
     notifyListeners();
   }
 
@@ -149,11 +189,20 @@ class SupportController extends ChangeNotifier {
   }
 
   Future<void> retry() async {
-    if (_retryCommand == null || isSending || session == null) return;
-    if (state == SupportViewState.unavailable) {
-      state = SupportViewState.draft;
+    if (_disposed || isSending || session == null) return;
+
+    if (_retryCommand != null) {
+      if (!_isCurrentSessionPrepared) return;
+      if (state == SupportViewState.unavailable) {
+        state = SupportViewState.draft;
+      }
+      await send();
+      return;
     }
-    await send();
+
+    if (_isCurrentSessionPrepared) return;
+    final currentSession = session!;
+    await _prepareSession(currentSession, _generation);
   }
 
   SupportCommand _buildCommand(SupportSession currentSession) {
@@ -177,6 +226,8 @@ class SupportController extends ChangeNotifier {
     message = '';
     statusMessage = 'Sessão encerrada. Nenhum rascunho foi preservado.';
     confirmedCommandId = null;
+    _preparedGeneration = null;
+    _preparingGeneration = null;
     _retryCommand = null;
     state = SupportViewState.unavailable;
     notifyListeners();

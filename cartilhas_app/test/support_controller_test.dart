@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cartilhas_app/features/support/support_controller.dart';
 import 'package:cartilhas_app/features/support/support_gateway.dart';
 import 'package:cartilhas_app/features/support/support_models.dart';
@@ -31,6 +33,26 @@ void prepareDraft(SupportController controller) {
   controller.updateMessage('Preciso de ajuda para acessar a atividade.');
 }
 
+class DeferredPrepareGateway implements SupportGateway {
+  final Map<String, Completer<void>> preparations = {};
+  int sends = 0;
+
+  @override
+  Future<void> prepare(SupportSession session) =>
+      preparations.putIfAbsent(session.sessionId, Completer<void>.new).future;
+
+  @override
+  Future<SupportReceipt> send(SupportCommand command) async {
+    sends++;
+    return SupportReceipt(commandId: command.commandId);
+  }
+
+  void complete(String sessionId) {
+    final pending = preparations[sessionId];
+    if (pending != null && !pending.isCompleted) pending.complete();
+  }
+}
+
 void main() {
   test('duas turmas não selecionam a primeira silenciosamente', () async {
     final controller = SupportController(FakeSupportGateway());
@@ -59,6 +81,89 @@ void main() {
       session('A', sessionId: 'session-A-2', preselected: 'desconhecido'),
     );
     expect(controller.selectedContext, isNull);
+  });
+
+  test('retry de preparação preserva rascunho e contexto sem enviar', () async {
+    final gateway = FakeSupportGateway(mode: FakeSupportMode.offline);
+    final controller = SupportController(gateway);
+
+    await controller.startSession(session('A'));
+    expect(controller.state, SupportViewState.unavailable);
+
+    controller.selectTopic(SupportTopic.courseQuestion);
+    controller.chooseContext('cohort-b');
+    controller.updateMessage('Rascunho preservado durante indisponibilidade.');
+
+    expect(controller.state, SupportViewState.unavailable);
+    expect(controller.canSend, isFalse);
+
+    gateway.mode = FakeSupportMode.ready;
+    await controller.retry();
+
+    expect(controller.state, SupportViewState.draft);
+    expect(controller.topic, SupportTopic.courseQuestion);
+    expect(controller.selectedContext?.id, 'cohort-b');
+    expect(
+      controller.message,
+      'Rascunho preservado durante indisponibilidade.',
+    );
+    expect(controller.canSend, isTrue);
+    expect(gateway.commands, isEmpty);
+  });
+
+  test('edição não libera envio enquanto preparação está pendente', () async {
+    final gateway = DeferredPrepareGateway();
+    final controller = SupportController(gateway);
+    final current = session('A');
+
+    final preparation = controller.startSession(current);
+    expect(controller.state, SupportViewState.loading);
+
+    controller.selectTopic(SupportTopic.appHelp);
+    controller.updateMessage('Rascunho criado antes da prontidão.');
+
+    expect(controller.state, SupportViewState.loading);
+    expect(controller.canSend, isFalse);
+    expect(controller.message, 'Rascunho criado antes da prontidão.');
+    expect(gateway.sends, 0);
+
+    gateway.complete(current.sessionId);
+    await preparation;
+
+    expect(controller.state, SupportViewState.draft);
+    expect(controller.canSend, isTrue);
+    expect(gateway.sends, 0);
+  });
+
+  test('prepare tardio de A não libera B antes da preparação de B', () async {
+    final gateway = DeferredPrepareGateway();
+    final controller = SupportController(gateway);
+    final sessionA = session('A');
+    final sessionB = session('B');
+
+    final preparationA = controller.startSession(sessionA);
+    controller.selectTopic(SupportTopic.appHelp);
+    controller.updateMessage('Rascunho de A');
+
+    final preparationB = controller.startSession(sessionB);
+    controller.selectTopic(SupportTopic.appHelp);
+    controller.updateMessage('Rascunho de B');
+
+    gateway.complete(sessionA.sessionId);
+    await preparationA;
+
+    expect(controller.session?.ownerId, 'B');
+    expect(controller.message, 'Rascunho de B');
+    expect(controller.state, SupportViewState.loading);
+    expect(controller.canSend, isFalse);
+
+    gateway.complete(sessionB.sessionId);
+    await preparationB;
+
+    expect(controller.session?.ownerId, 'B');
+    expect(controller.state, SupportViewState.draft);
+    expect(controller.canSend, isTrue);
+    expect(gateway.sends, 0);
   });
 
   test('toque duplo produz um comando enquanto envio está pendente', () async {
