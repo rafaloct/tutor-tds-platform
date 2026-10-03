@@ -54,8 +54,12 @@ A base preferida deve ser carga/tempo planejado e presença validada nas sessõe
 
 A presença usa assinatura na frequência e evidência do aplicativo como componente pretendido. A evidência do aplicativo ainda não é confiável em produção devido às falhas de monitoramento/backend.
 
+Em caso de conflito entre dado digital e frequência física, **a lista física assinada prevalece como evidência operacional oficial**, até que uma correção humana posterior seja formalmente validada.
+
 ```text
+lista física assinada > evidência digital conflitante
 telemetria do app não comprovada != presença comprovada
+divergência -> pendência para revisão humana
 ```
 
 ## 4. Reposição/complementação
@@ -87,13 +91,32 @@ Existe uma etapa presencial de **40h já realizada** e uma etapa digital que tam
 
 O problema atual não é a existência pedagógica da etapa digital, mas a falta de regra de fechamento, evidência confiável, fluxo de oficialização e monitoramento/backend consistente.
 
-### HUMAN-GATE ainda aberto
+### Decisão confirmada de carga total e fechamento digital
 
-1. confirmar se o certificado final representa 80h consolidadas, dois blocos de 40h ou outra forma;
-2. definir quais eventos/evidências digitais são suficientes para reconhecer as 40h digitais;
-3. definir como reposição digital interfere nesse fechamento.
+A formação deve representar **80h totais**.
 
-Nenhum agente deve escolher isso sozinho.
+O arranjo de referência é **40h presencial + 40h digital**, mas essa proporção não é rígida. A distribuição pode variar por razões humanas e logísticas, desde que a composição total e a exceção sejam registradas e validadas.
+
+Portanto:
+
+```text
+target padrão: 40h presencial + 40h digital = 80h
+exceção: percentuais/cargas diferentes permitidos
+condição: justificativa logística/humana + validação
+resultado: total formativo = 80h
+```
+
+A evidência digital deve ser uma **combinação de critérios**, incluindo:
+
+- uso de pelo menos uma funcionalidade relevante de cada eixo/funcionalidade obrigatória definida no app;
+- evidência de conclusão na carteira de certificados do aplicativo;
+- print/registro do certificado disponível nessa carteira;
+- avaliação complementar via Jotform, ainda a ser desenvolvida;
+- demais eventos digitais confiáveis que forem formalizados no backend.
+
+O Jotform será instrumento de avaliação/coleta, não fonte mestre de matrícula ou autorização.
+
+O agente pode implementar o contrato técnico e os pontos de integração, mas não deve inventar novos critérios pedagógicos fora dessa combinação sem nova decisão humana.
 
 ## 6. Lançamento e conferência de frequência
 
@@ -121,7 +144,20 @@ Isso é meta de atendimento inicial, não garantia de resolução em cinco minut
 
 Um agente pode acusar recebimento, classificar, reunir contexto, orientar procedimento simples e encaminhar. Quando houver decisão/contexto humano, o caso deve chegar a estagiário real no Chatwoot.
 
-A janela exata de 'horário comercial' ainda deve ser parametrizada/configurada.
+Janelas confirmadas de suporte humano:
+
+- **08:00–12:00**;
+- **14:00–18:00**;
+- **19:00–21:00**.
+
+Fora dessas janelas, o atendimento inicial pode ser realizado por IA/agente configurado no Chatwoot, com triagem, orientação e registro. Casos que exigirem decisão humana permanecem pendentes para a próxima janela de suporte humano.
+
+O sistema deve distinguir:
+- resposta automática;
+- primeira resposta humana;
+- resolução.
+
+A meta de até 5 minutos vale para a primeira resposta, humana ou automatizada, durante o funcionamento do canal.
 
 ## 9. Contato proativo
 
@@ -149,7 +185,13 @@ frequência abaixo do esperado != reprovação automática
 
 O sistema deve sinalizar exceção e permitir regularização/revisão humana por atividade de complementação/reposição.
 
-Não transformar a regra de 75% em bloqueio rígido sem considerar o mecanismo de regularização.
+A decisão final sobre se a complementação é suficiente para capacitar o participante é do **instrutor**, considerando o contexto.
+
+Portanto:
+- o sistema calcula e sinaliza;
+- o instrutor decide a suficiência da reposição/complementação;
+- a decisão deve ser registrada com ator, data e justificativa curta;
+- não transformar a regra de 75% em bloqueio rígido sem considerar o mecanismo de regularização.
 
 ## 11. Mentoria
 
@@ -176,6 +218,20 @@ Componentes observados incluem ficha(s) de inscrição/matrícula, lista(s) de f
 Hoje cada equipe de campo pode organizar/coletar de forma diferente e depois envia o material para a secretaria organizar no Drive.
 
 TARGET: o sistema deve padronizar **checklist e referências**, não obrigatoriamente substituir o Drive. A secretaria mantém função organizadora.
+
+Fotos e relatório de evento são tratados como **padrão de boas práticas esperado** para as turmas.
+
+Quando o pacote chegar sem essas evidências, o sistema não deve inventá-las nem necessariamente bloquear todo o fechamento. Deve gerar uma pendência/flag para a equipe de mobilização ou campo **revisitar/coletar imagens e complementar o relatório**, quando isso ainda for possível.
+
+Exemplo de reason codes:
+
+```text
+COURSE_PHOTOS_MISSING
+EVENT_REPORT_MISSING
+EVIDENCE_PACKAGE_INCOMPLETE
+```
+
+A ausência deve ficar rastreável para a secretaria.
 
 ## 14. Notificações essenciais
 
@@ -255,14 +311,16 @@ com regras objetivas que podem ser originadas por qualquer domínio e resolvidas
 
 Isso permite tratar novas situações do projeto sem abrir novo workflow e nova tabela a cada caso.
 
-## 19. Perguntas ainda abertas
+## 19. Estado das decisões humanas
 
-Após as decisões acima, restam poucas questões que realmente precisam de confirmação:
+As cinco lacunas operacionais anteriormente abertas foram respondidas em 03/10/2026:
 
-1. Qual é a janela exata de 'horário comercial' usada pelo projeto?
-2. A certificação final das etapas presencial + digital deve ser 80h consolidada, dois registros de 40h ou outra composição?
-3. Quais eventos digitais comprovam oficialmente as 40h digitais?
-4. Fotos e relatório são obrigatórios em toda turma ou podem existir exceções por tipo de ação?
-5. Em caso de conflito entre lista física e dado digital de presença, qual fonte prevalece até revisão?
+1. suporte humano: 08–12, 14–18 e 19–21;
+2. carga total: 80h, preferencialmente 40h presencial + 40h digital, com adaptação logística/humana permitida;
+3. fechamento digital: combinação de uso funcional do app + carteira/certificado + avaliação Jotform + eventos confiáveis;
+4. fotos/relatório: padrão de boa prática; ausência gera flag para complementação/revisita, não evidência fictícia;
+5. conflito de presença: lista física assinada prevalece até correção humana formal.
 
-Essas cinco perguntas podem ser levadas aos instrutores/secretaria. Não há necessidade de ampliar o backlog até respondê-las.
+Assim, o desenvolvimento das frentes #5, #6, #7, #8, #30, #33 e #34 não deve ficar bloqueado por falta de regra operacional geral.
+
+Novas dúvidas devem ser tratadas como configuração ou exceção específica, não como motivo para criar novo módulo por padrão.
