@@ -1,5 +1,17 @@
 # CURRENT STATE
 
+## Checkpoint documental META 04 — 03/10/2026
+
+PR #24 incorpora a consolidação `3fddb09` por merge preservando histórico e
+reconcilia decisões humanas com Measurement v1/portal/governança. Matriz no
+comentário 5968944747 do PR #24. Isto não implementa novos resultados acadêmicos.
+PR #51 permanece sob Devin; delta do baseline pré-certificado solicitado no
+comentário 5968949581. #49/#50 são candidatos de integração, sem staging
+comprovado nesta rodada; WP-2/#42 depende do aceite reservado a Rafael.
+Issue #3: 86 testes sintéticos de identidade/recuperação passaram; PR #40 e
+freeze/gates físicos/restore/proveniência mantêm release bloqueada. Nenhum AAB,
+produção, assinatura, baseline real ou certificado real foi alterado.
+
 - CURRENT RELEASE: código `1.4.0+13`; produção histórica `1.2.0+11`, não revalidada na Play. Release bloqueada por seus gates.
 - CURRENT WAVE: 2 — Dynamic Learning; fatia 2A aprovada funcionalmente em staging. Wave 1 aprovada em `0081ab0`.
 - CURRENT ACCEPTANCE GATE: POCO aprovou 2A e Classroom offline/revogação em 01/10; `course_versioning_xiaomi` e `classroom_cold_offline_xiaomi` fechados. Certificado e Evidence offline pendentes; Wave 2 completa e produção ainda não aprovadas.

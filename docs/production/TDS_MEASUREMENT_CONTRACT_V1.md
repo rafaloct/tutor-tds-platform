@@ -18,6 +18,9 @@ homologada em 01/10. Produção antiga e candidato de manutenção são diferent
   source+record_id humano e `StudentBaseline` apenas vínculo conferido com
   pessoa/matrícula/turma/bi_record_id, revisão e ator. Não importar respostas
   por inferência de CPF/nome/código de tablet nem converter ausência em zero.
+  Baseline pendente não bloqueia estudo, mas deve estar regularizado antes do
+  certificado, conforme decisão posterior da Issue #6, comentário 5965300113,
+  registrada em `../program/OPERATING_DECISIONS_2026-10-03.md`, seção 2.
 - `journey-export` requer equipe autorizada e flag desligada por padrão;
   `pessoa_id` é pseudônimo HMAC, `registro_id` é referência BI conferida,
   `matricula_contextual_id` e `curso_versao_id` não são intercambiáveis.
@@ -28,8 +31,10 @@ homologada em 01/10. Produção antiga e candidato de manutenção são diferent
   pessoa+matrícula+turma+edição quando aplicável, ator, consentimento,
   revisão/estado, motivo e idempotência. Somente um comando autorizado pode
   mudar resultado oficial; exportação e IA são leitores, não escritores de
-  decisão. Revisões preservam histórico. `null` = não apurado; `0` = negativo
-  validado, nunca "não houve" inferido do silêncio do app.
+  decisão. Revisões preservam histórico. Em flags de resultado, `null` = não
+  apurado; `0` = negativo validado, nunca inferido do silêncio do app. Contagens
+  técnicas podem ser zero no snapshot/janela observado, sem provar negativo
+  acadêmico; percentual com denominador zero permanece null.
 
 Legenda de competência: **AUTOMÁTICA** captura técnica; **OPERACIONAL**
 registro por equipe; **DECLARATÓRIA** relato do participante;
@@ -50,11 +55,24 @@ projeção conferida, não concede resultado.
 | 07 Plano | DECLARATÓRIA+OPERACIONAL → VALIDADA: plano versionado, responsável, meta e aprovação | participante+mentor → mentor/coordenação → equipe de campo, BI | objetivo/next_action em `MentorshipCase` E não bastam para afirmar plano aprovado; J `plano_aplicacao_status=null`; P: contrato de plano e aprovação |
 | 08 Aplicação | DECLARATÓRIA+OPERACIONAL → VALIDADA: ação datada por pessoa/turma/plano, verificação em campo | participante → monitor/instrutor → mentor, coordenação, BI | J `aplicacao_iniciada_flag=null`; P: registro e validação; eventos de leitura não comprovam aplicação |
 | 09 Evidência | AUTOMÁTICA ou DECLARATÓRIA → VALIDADA: item/digest/object_reference, revisão humana e vínculo da ação | participante/monitor/sistema → revisor da equipe → mentor, coordenação, BI | `EvidenceItem`/`ReviewDecision` E guardam metadados; J `evidencia_validada_flag=null` até comando e ligação revisados; binários exigem storage privado, não notebook |
-| 10 30 dias | OPERACIONAL+DECLARATÓRIA → VALIDADA: contato datado e resultado conferido, janela a partir de aplicação validada | monitor/participante → equipe de campo → mentor, coordenação, BI | J `acompanhamento_30d=null`; P: instrumento e janela; eventual Jotform não substitui revisão |
+| 10 30 dias | OPERACIONAL+DECLARATÓRIA → VALIDADA: contato datado e resultado conferido, janela a partir do certificado emitido/validado | monitor/participante → equipe de campo → mentor, coordenação, BI | J `acompanhamento_30d=null`; P: instrumento e janela; eventual Jotform não substitui revisão |
 | 11 60 dias | OPERACIONAL+DECLARATÓRIA → VALIDADA: mesma chave/janela de 60 dias, motivo se não localizado | monitor/participante → equipe de campo → mentor, coordenação, BI | J `acompanhamento_60d=null`; P; sem resposta não vira "não aplicou" |
 | 12 90 dias | OPERACIONAL+DECLARATÓRIA → VALIDADA: 90 dias, fechamento/encaminhamento auditado | monitor/participante → coordenação → administração dados, BI | J `acompanhamento_90d`/`encaminhamentos_qtd=null`; P; não preencher por extrapolação |
 
 ## Cobertura BI, métricas e qualidade
+
+Conciliação de 03/10: a âncora do certificado para 30/60/90 foi confirmada na
+[Issue #8](https://github.com/rafaloct/tutor-tds-platform/issues/8#issuecomment-5965176322)
+e substitui a referência anterior à aplicação validada. Reemissão exige regra
+específica antes de automatizar esse caso. Ver decisão operacional seção 12.
+
+Limite OBSERVED em `3fddb09`: o seletor de `CertificateReference` em
+`api/app/journey_export.py` filtra pessoa/programa/curso/turma e data de matrícula,
+mas não `course_version_id`. A chave completa da etapa 03 é requisito alvo;
+a referência exportada não prova emissão naquela edição nem execução dos novos
+requisitos institucionais. Issue #5/PR #39 mantêm a fronteira de emissão.
+Formação alvo de 80h não substitui cargas históricas/configuradas. Capacitação,
+frequência e elegibilidade dependem de decisão autorizada, não da soma de estudo.
 
 `GET /classes/{id}/journey-export` hoje entrega identidade BI conferida,
 turma/programa/curso/versão/matrícula, carga prevista, estudo validado,
