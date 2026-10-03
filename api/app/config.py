@@ -30,6 +30,9 @@ class Settings:
     chatwoot_identity_secret: str | None = None
     chatwoot_identity_namespace: str | None = None
     certificate_approval_required: bool = False
+    certificate_candidate_enabled: bool = False
+    certificate_candidate_url: str | None = None
+    certificate_candidate_secret: str | None = None
     learning_context_enabled: bool = False
     journey_traceability_enabled: bool = False
     minimum_supported_app_version: str = "1.2.0+11"
@@ -87,6 +90,9 @@ class Settings:
             chatwoot_identity_secret=os.getenv("CHATWOOT_IDENTITY_SECRET"),
             chatwoot_identity_namespace=os.getenv("CHATWOOT_IDENTITY_NAMESPACE"),
             certificate_approval_required=os.getenv("CERTIFICATE_APPROVAL_REQUIRED", "false").lower() in {"1", "true", "yes"},
+            certificate_candidate_enabled=os.getenv("CERTIFICATE_CANDIDATE_ENABLED", "false").lower() in {"1", "true", "yes"},
+            certificate_candidate_url=os.getenv("CERTIFICATE_CANDIDATE_URL"),
+            certificate_candidate_secret=os.getenv("CERTIFICATE_CANDIDATE_SECRET"),
             learning_context_enabled=os.getenv("LEARNING_CONTEXT_ENABLED", "false").lower() in {"1", "true", "yes"},
             journey_traceability_enabled=os.getenv("JOURNEY_TRACEABILITY_ENABLED", "false").lower() in {"1", "true", "yes"},
             minimum_supported_app_version=os.getenv("MINIMUM_SUPPORTED_APP_VERSION", "1.2.0+11").strip(),
