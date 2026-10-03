@@ -126,6 +126,9 @@ Apos upgrade do Dokploy, revalidar Node, rclone, age e notificacao.
   `native_dispatch_unverified`, `delivered=false`. O helper do Dokploy nao
   propaga o resultado de SMTP; recebimento deste alerta precisa ser conferido
   pelo destinatario, inclusive na pasta de spam. Nao repetir o probe.
+- Uma consulta manual do monitor em 03/10 06:59:55Z retornou `MONITOR_OK`,
+  `problems=[]` depois da integracao. Isso valida o estado atual dos recibos
+  e a referencia nativa, nao a entrega de email em uma falha futura.
 - Para queda total da VPS, `.github/workflows/tds-vps-watchdog.yml` e um
   candidato minimo: consulta a API publica e o banco a cada 30 minutos a
   partir dos runners GitHub, com timeout e falha explicita. A URL retornou
