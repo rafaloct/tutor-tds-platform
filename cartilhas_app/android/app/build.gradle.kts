@@ -50,6 +50,20 @@ fun validateDebugStagingDefines(defines: Map<String, String>) {
         )
     }
 
+    if (defines["SIGNED_SUPPORT_IDENTITY"] == "true") {
+        val chatwootBase = defines["CHATWOOT_BASE_URL"].orEmpty()
+        val chatwootToken = defines["CHATWOOT_WEBSITE_TOKEN"].orEmpty()
+        if (
+            chatwootBase != "https://chat.ipexdesenvolvimento.cloud" ||
+            chatwootToken.isBlank() ||
+            chatwootToken == "twnJ2K7tWtP2Fqey97p4hcwV"
+        ) {
+            throw GradleException(
+                "QA assinado do Chatwoot exige o inbox isolado de staging e token distinto de produção.",
+            )
+        }
+    }
+
     val apiUri = httpsUri("TUTOR_API_URL", defines["TUTOR_API_URL"].orEmpty())
     val allowedApiUri = httpsUri(
         "TUTOR_STAGING_API_URL",

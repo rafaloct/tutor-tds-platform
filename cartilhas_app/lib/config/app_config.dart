@@ -24,6 +24,15 @@ class AppConfig {
     'SIGNED_SUPPORT_IDENTITY',
   );
 
+  static const chatwootBaseUrl = String.fromEnvironment(
+    'CHATWOOT_BASE_URL',
+    defaultValue: 'https://chat.ipexdesenvolvimento.cloud',
+  );
+  static const chatwootWebsiteToken = String.fromEnvironment(
+    'CHATWOOT_WEBSITE_TOKEN',
+    defaultValue: 'twnJ2K7tWtP2Fqey97p4hcwV',
+  );
+
   /// Enables the remote course catalog via [tutorApiUrl].
   /// Defaults to [false] (safe). Does NOT activate login, classrooms,
   /// journey traceability, or the durable outbox.
