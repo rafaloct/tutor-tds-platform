@@ -1,6 +1,6 @@
 # Homologação de autorização por perfil — staging
 
-Data: 2026-10-04  
+Data: 2026-10-04
 Escopo: API; não cria telas, conteúdo ou dados permanentes.
 
 ## Matriz esperada
