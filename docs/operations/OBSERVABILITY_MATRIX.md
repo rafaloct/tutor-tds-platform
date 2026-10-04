@@ -73,13 +73,33 @@ após gate; recuperação deve fechar a mesma chave, mantendo registro do incide
 
 ## Uso local e contrato sanitizado
 
-Requer Python3 com biblioteca padrão. Não acessa rede nem variáveis de ambiente.
+Requer Python3 com biblioteca padrão. O avaliador `evaluate.py` não acessa rede nem variáveis de ambiente; o runner sintético acessa somente os endpoints HTTPS declarados no manifesto.
 
 ```powershell
 python -m unittest discover -s tools/observability -p 'test_*.py' -v
 python tools/observability/evaluate.py snapshot.json
 python tools/observability/evaluate.py snapshot.json --previous previous.json
+python tools/observability/synthetic_runner.py manifest.json
 ```
+
+O runner Tier 1 local/versionado está em
+[synthetic_runner.py](../../tools/observability/synthetic_runner.py), com exemplo
+de contrato em
+[synthetic_manifest.example.json](../../tools/observability/synthetic_manifest.example.json).
+O manifesto aceita somente HTTPS sem credenciais, query, fragmento ou headers
+customizados; a sonda usa apenas GET, não segue redirect, não usa proxy de ambiente
+e limita o corpo lido a 64 KiB. O exemplo usa `example.invalid` de propósito e não
+é um alvo para smoke real. Copiar o contrato somente para endpoints explicitamente
+autorizados.
+
+Cada serviço gera checks sanitizados de reachability, status HTTP, latência e
+validade TLS. `health_json` e `content_allowlist` são opcionais e só verificam
+chaves/marcadores estáticos não sensíveis; nenhum valor de resposta, URL, exceção,
+token, cookie ou header é serializado. Saída contém apenas `service_id`,
+`check_id`, `PASS/FAIL/UNKNOWN`, `observed_at`, `safe_reason` categórica e
+`latency_ms` quando disponível. Timeout, TLS inválido, HTTP inesperado, JSON
+malformado e conteúdo ausente falham de forma fechada. Os testes unitários injetam
+probes locais/mock e não abrem rede real.
 
 Exemplo parcial: demais checks retornam UNKNOWN por ausência deliberada.
 
@@ -98,7 +118,10 @@ própria. Executar com snapshots confiáveis, sem PII, e guardar estado por ambi
 ## Aceite e gates restantes
 
 - Matriz e avaliador local cobrem falha500, atraso backup/sync, dedup e recuperação.
-- Testes controlados locais são sintéticos; não equivalem a TESTED-STAGING.
+- Runner sintético local cobre reachability HTTPS, status, latência, JSON de health,
+  validade TLS e conteúdo mínimo allowlisted, com saída sanitizada e fail-closed.
+- Testes controlados locais são sintéticos; não equivalem a TESTED-STAGING nem a
+  monitor externo instalado.
 - WAITING-HUMAN/Access: escolher monitor realmente fora da VPS, responsável,
   destinos autorizados e ambiente isolado. Sem esse acesso, Tier1 não é DONE.
 - Próxima prova staging: instalar coletor no ambiente isolado autorizado, induzir
