@@ -49,6 +49,8 @@ from .models import (
     ProgramMembership,
     ReviewDecision,
     SessionToken,
+    CPFActivationToken,
+    AuthRateLimitBucket,
     SessionPresence,
     SessionPresenceDecision,
     StudentBaseline,
@@ -67,6 +69,7 @@ class RegisterRequest(BaseModel):
     cpf: SecretStr
     phone: str = Field(min_length=10, max_length=32)
     password: SecretStr
+    activation_token: SecretStr | None = None
 
 
 class LoginRequest(BaseModel):
@@ -92,6 +95,11 @@ class TokenResponse(BaseModel):
     user: PublicUser
 
 
+class ActivationInviteRequest(BaseModel):
+    cpf: SecretStr
+    expires_in_hours: int = Field(default=24, ge=1, le=168)
+
+
 @router.post("/register", response_model=TokenResponse, status_code=201)
 def register(payload: RegisterRequest, request: Request) -> TokenResponse:
     service, session = _service(request)
@@ -111,10 +119,18 @@ def register(payload: RegisterRequest, request: Request) -> TokenResponse:
 def login(payload: LoginRequest, request: Request) -> TokenResponse:
     service, session = _service(request)
     try:
+        service.consume_rate_limit(
+            "login", request, payload.cpf.get_secret_value(),
+            service.settings.auth_login_attempt_limit,
+        )
         user = service.authenticate(payload)
         response = service.issue_tokens(user)
         session.commit()
         return response
+    except HTTPException:
+        # Failed credentials must consume the shared allowance too.
+        session.commit()
+        raise
     finally:
         session.close()
 
@@ -170,6 +186,35 @@ def require_roles(*allowed_roles: str) -> Callable[..., dict[str, str]]:
         return claims
 
     return authorized_role
+
+
+@router.post("/activation-invites", status_code=201)
+def issue_activation_invite(
+    payload: ActivationInviteRequest,
+    request: Request,
+    claims: dict[str, str] = Depends(require_roles("admin")),
+) -> dict[str, object]:
+    service, session = _service(request)
+    try:
+        cpf_digest = service._cpf_digest(payload.cpf.get_secret_value())
+        raw = secrets.token_urlsafe(32)
+        session.add(
+            CPFActivationToken(
+                id=str(uuid4()),
+                cpf_digest=cpf_digest,
+                token_digest=_token_digest(raw),
+                expires_at=datetime.now(timezone.utc)
+                + timedelta(hours=payload.expires_in_hours),
+                issued_by=claims["sub"],
+            )
+        )
+        session.commit()
+        return {
+            "activation_token": raw,
+            "expires_in_hours": payload.expires_in_hours,
+        }
+    finally:
+        session.close()
 
 
 @router.get("/me", response_model=PublicUser)
@@ -334,6 +379,34 @@ class AuthService:
         cpf_digest = self._cpf_digest(payload.cpf.get_secret_value())
         if self.session.scalar(select(User.id).where(User.cpf_digest == cpf_digest)):
             raise HTTPException(status_code=409, detail="Usuário já cadastrado.")
+        activated_at = None
+        if self.settings.cpf_activation_required:
+            if payload.activation_token is None:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Cadastro exige convite de ativação verificada.",
+                )
+            record = self.session.scalar(
+                select(CPFActivationToken)
+                .where(
+                    CPFActivationToken.token_digest
+                    == _token_digest(payload.activation_token.get_secret_value())
+                )
+                .with_for_update()
+            )
+            now = datetime.now(timezone.utc)
+            if (
+                record is None
+                or record.cpf_digest != cpf_digest
+                or record.used_at is not None
+                or _as_utc(record.expires_at) <= now
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Convite de ativação inválido ou expirado.",
+                )
+            record.used_at = now
+            activated_at = now
 
         phone = re.sub(r"\D", "", payload.phone)
         if not 10 <= len(phone) <= 15:
@@ -348,6 +421,7 @@ class AuthService:
             name=name,
             password_digest=password_hash.hash(password),
             role="student",
+            activated_at=activated_at,
         )
         self.session.add(user)
         self.session.flush()
@@ -368,6 +442,10 @@ class AuthService:
             verified = False
         if user is None or not verified:
             raise _unauthorized("Credenciais inválidas.")
+        if self.settings.cpf_activation_required and user.activated_at is None:
+            raise HTTPException(
+                status_code=403, detail="Conta aguardando ativação verificada."
+            )
         return user
 
     def issue_tokens(self, user: User) -> TokenResponse:
@@ -437,6 +515,61 @@ class AuthService:
         }:
             raise _unauthorized()
         return claims
+
+    def consume_rate_limit(
+        self,
+        scope: str,
+        request: Request,
+        identity: str | None,
+        limit: int,
+    ) -> None:
+        """Atomically consume a distributed, DB-backed fixed-window allowance."""
+        if limit < 1 or self.settings.auth_rate_limit_window_seconds < 1:
+            raise RuntimeError("Configuração de rate limit inválida.")
+        ip = request.client.host if request.client else "unknown"
+        fingerprint = f"{scope}:{ip}:{re.sub(r'\\D', '', identity or '')}"
+        key = hmac.new(
+            self.jwt_secret.encode(), fingerprint.encode(), hashlib.sha256
+        ).hexdigest()
+        now = datetime.now(timezone.utc)
+        window = timedelta(seconds=self.settings.auth_rate_limit_window_seconds)
+        bucket = self.session.get(AuthRateLimitBucket, key, with_for_update=True)
+        if bucket is None:
+            try:
+                with self.session.begin_nested():
+                    self.session.add(
+                        AuthRateLimitBucket(
+                            key=key, window_started_at=now, attempts=0
+                        )
+                    )
+                    self.session.flush()
+            except IntegrityError:
+                pass
+            bucket = self.session.get(
+                AuthRateLimitBucket, key, with_for_update=True
+            )
+        if bucket is None:
+            raise HTTPException(
+                status_code=503, detail="Rate limit temporariamente indisponível."
+            )
+        if _as_utc(bucket.window_started_at) + window <= now:
+            bucket.window_started_at = now
+            bucket.attempts = 0
+        if bucket.attempts >= limit:
+            retry_after = max(
+                1,
+                int(
+                    (
+                        _as_utc(bucket.window_started_at) + window - now
+                    ).total_seconds()
+                ),
+            )
+            raise HTTPException(
+                status_code=429,
+                detail="Muitas tentativas. Tente novamente mais tarde.",
+                headers={"Retry-After": str(retry_after)},
+            )
+        bucket.attempts += 1
 
     def _cpf_digest(self, value: str) -> str:
         normalized = _valid_cpf(value)

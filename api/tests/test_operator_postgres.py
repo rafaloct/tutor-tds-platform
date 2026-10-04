@@ -72,17 +72,17 @@ def test_postgres_migration_and_populated_rollback_guard(operator_api):
     migration.upgrade(config, 'head')
     with engine.connect() as conn:
         assert conn.execute(text('SELECT id, user_id, course_id FROM enrollments ORDER BY id')).all() == before
-        assert conn.scalar(text('SELECT version_num FROM alembic_version')) == '20261003_0024'
+        assert conn.scalar(text('SELECT version_num FROM alembic_version')) == '20261003_0026'
     result, _ = command(client, 'assign')
     assert result.status_code == 200, result.text
     with pytest.raises(RuntimeError, match='Preserve operator history'):
         migration.downgrade(config, '20261003_0022')
     with engine.connect() as conn:
         assert conn.scalar(text('SELECT count(*) FROM operator_command_receipts')) == 1
-        stopped = '20261003_0023' if engine.dialect.name == 'sqlite' else '20261003_0024'
+        stopped = '20261003_0023' if engine.dialect.name == 'sqlite' else '20261003_0026'
         assert conn.scalar(text('SELECT version_num FROM alembic_version')) == stopped
     # SQLite has already dropped empty later revisions before the 0023 guard.
     migration.upgrade(config, 'head')
     with engine.connect() as conn:
-        assert conn.scalar(text('SELECT version_num FROM alembic_version')) == '20261003_0024'
+        assert conn.scalar(text('SELECT version_num FROM alembic_version')) == '20261003_0026'
         assert conn.scalar(text('SELECT count(*) FROM operator_command_receipts')) == 1
