@@ -202,7 +202,7 @@ function tds_theme_home_journey() {
 		),
 		array(
 			'title' => __( 'Transformar demandas em formação', 'tds-portal' ),
-			'text'  => __( 'Cursos e atividades aproximam qualificação e inclusão produtiva das realidades encontradas em cada ação territorial.', 'tds-portal' ),
+			'text'  => __( 'Cursos e atividades conectam qualificação e inclusão produtiva às demandas identificadas em cada ação territorial.', 'tds-portal' ),
 		),
 		array(
 			'title' => __( 'Conectar aprendizado e prática', 'tds-portal' ),
