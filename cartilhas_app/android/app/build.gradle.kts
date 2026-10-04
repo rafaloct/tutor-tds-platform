@@ -106,7 +106,7 @@ fun validateReleaseProductionDefines(defines: Map<String, String>) {
     val inactiveFlags = setOf(
         "REMOTE_CATALOG_ENABLED", "LEARNING_CONTEXT_ENABLED",
         "DURABLE_LEARNING_OUTBOX_ENABLED", "JOURNEY_TRACEABILITY_ENABLED",
-        "SIGNED_SUPPORT_IDENTITY",
+        "SIGNED_SUPPORT_IDENTITY", "PUSH_NOTIFICATIONS_ENABLED",
     )
     if (defines.keys.any { it !in approvedValues.keys && it !in inactiveFlags && it != "TUTOR_ENVIRONMENT" } ||
         inactiveFlags.any { defines[it] != "false" }) {
