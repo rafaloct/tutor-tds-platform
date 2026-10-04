@@ -26,7 +26,7 @@ class LearningExperienceCard extends StatelessWidget {
     final config = _configFor(message.type, Theme.of(context).colorScheme);
     return Semantics(
       container: true,
-      label: config.title + '. ' + message.content,
+      label: '${config.title}. ${message.content}',
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8),
         clipBehavior: Clip.antiAlias,
