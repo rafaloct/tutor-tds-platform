@@ -21,12 +21,15 @@ class AuthRepository {
     required this.apiUrl,
     http.Client? client,
     AuthTokenStore? tokenStore,
+    Future<void> Function()? onSessionEnded,
   }) : _client = client ?? http.Client(),
-       _tokenStore = tokenStore ?? SecureAuthTokenStore();
+       _tokenStore = tokenStore ?? SecureAuthTokenStore(),
+       _onSessionEnded = onSessionEnded;
 
   final String apiUrl;
   final http.Client _client;
   final AuthTokenStore _tokenStore;
+  final Future<void> Function()? _onSessionEnded;
   Future<AuthSession>? _refreshInFlight;
   int _sessionGeneration = 0;
   Future<void> _tokenOperations = Future<void>.value();
@@ -187,13 +190,18 @@ class AuthRepository {
     _checkGeneration(generation);
     response = await request(session.tokens.accessToken);
     _checkGeneration(generation);
+    if (response.statusCode == 401) await logout();
     return response;
   }
 
-  Future<void> logout() {
+  /// Ends the identity before invoking local academic cleanup. A callback is
+  /// injected by the app shell so every revocation path uses the same
+  /// fail-closed cleanup as an explicit logout.
+  Future<void> logout() async {
     _sessionGeneration++;
     _refreshInFlight = null;
-    return _mutateTokens(_tokenStore.clear);
+    await _mutateTokens(_tokenStore.clear);
+    await _onSessionEnded?.call();
   }
 
   /// Fetches a server-signed support identity; never caches or signs locally.
