@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -7,7 +8,7 @@ from ops.rehearse_production_upgrade import assert_upgraded_schema, parse_alembi
 
 
 def test_parser_accepts_current_canonical_head():
-    output = subprocess.check_output(["alembic", "heads"], cwd=Path(__file__).parents[1], text=True)
+    output = subprocess.check_output([sys.executable, "-m", "alembic", "heads"], cwd=Path(__file__).parents[1], text=True)
     assert parse_alembic_head(output) == "20261003_0024"
 
 
