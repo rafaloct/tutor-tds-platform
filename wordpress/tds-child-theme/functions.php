@@ -14,5 +14,4 @@ require_once get_stylesheet_directory() . '/inc/config.php';
 require_once get_stylesheet_directory() . '/inc/setup.php';
 require_once get_stylesheet_directory() . '/inc/template-tags.php';
 require_once get_stylesheet_directory() . '/inc/home-components.php';
-require_once get_stylesheet_directory() . '/inc/story-provider.php';
 require_once get_stylesheet_directory() . '/inc/seo.php';
