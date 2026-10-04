@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TDS_PORTAL_THEME_VERSION', '0.2.0' );
+define( 'TDS_PORTAL_THEME_VERSION', '0.2.1' );
 
 require_once get_stylesheet_directory() . '/inc/config.php';
 require_once get_stylesheet_directory() . '/inc/setup.php';

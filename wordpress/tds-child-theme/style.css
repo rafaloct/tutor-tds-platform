@@ -4,7 +4,7 @@ Theme URI: https://github.com/rafaloct/tutor-tds-platform
 Description: Camada visual pública do portal TDS (WP-2). Child theme do Astra; consome somente TDS_Public_Config::get() e a REST pública do tds-portal-core. Sem autoridade acadêmica.
 Author: Programa TDS
 Template: astra
-Version: 0.2.0
+Version: 0.2.1
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -321,6 +321,88 @@ body.tds-portal {
 .tds-prose .alignwide { max-width: var(--tds-container); margin-inline: auto; }
 .tds-prose .alignfull { width: 100vw; max-width: 100vw; margin-inline: calc(50% - 50vw); }
 .tds-entry-footer { margin-top: var(--tds-space-8); padding-top: var(--tds-space-4); border-top: 1px solid var(--tds-color-outline); font-size: var(--tds-text-sm); color: var(--tds-color-muted); }
+
+
+/* =============================================================
+   8.1 PÁGINAS LEGAIS — CONTEXTO INSTITUCIONAL TDS
+   Escopo visual exclusivo de privacidade e exclusão de conta.
+   ============================================================= */
+.tds-legal-brand {
+	margin-bottom: var(--tds-space-8);
+	border: 1px solid var(--tds-color-outline);
+	border-top: 4px solid var(--tds-color-primary);
+	background: var(--tds-color-surface);
+}
+.tds-legal-brand__identity {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: var(--tds-space-5);
+	align-items: center;
+	padding: var(--tds-space-6);
+}
+.tds-legal-brand__mark {
+	display: block;
+	width: 72px;
+	height: auto;
+}
+.tds-legal-brand__title {
+	margin: 0 0 var(--tds-space-2);
+	font-size: var(--tds-text-xl);
+	font-weight: 700;
+	color: var(--tds-color-ink);
+}
+.tds-legal-brand__text {
+	margin: 0;
+	color: var(--tds-color-muted);
+	font-size: var(--tds-text-sm);
+}
+.tds-legal-brand__attributes {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border-top: 1px solid var(--tds-color-outline);
+}
+.tds-legal-brand__attribute {
+	position: relative;
+	display: grid;
+	gap: var(--tds-space-1);
+	min-width: 0;
+	padding: var(--tds-space-4);
+	border-right: 1px solid var(--tds-color-outline);
+}
+.tds-legal-brand__attribute:last-child { border-right: 0; }
+.tds-legal-brand__attribute::before {
+	content: "";
+	display: block;
+	width: 48px;
+	height: 4px;
+	margin-bottom: var(--tds-space-2);
+	background: var(--tds-color-primary);
+}
+.tds-legal-brand__attribute--territory::before { background: var(--tds-color-primary); }
+.tds-legal-brand__attribute--diversity::before { background: var(--tds-color-success); }
+.tds-legal-brand__attribute--development::before { background: var(--tds-color-secondary); }
+.tds-legal-brand__attribute strong {
+	font-size: var(--tds-text-sm);
+	color: var(--tds-color-ink);
+}
+.tds-legal-brand__attribute span {
+	font-size: var(--tds-text-xs);
+	color: var(--tds-color-muted);
+}
+
+@media (max-width: 639px) {
+	.tds-legal-brand__identity { grid-template-columns: 1fr; }
+	.tds-legal-brand__mark { width: 64px; }
+	.tds-legal-brand__attributes { grid-template-columns: 1fr; }
+	.tds-legal-brand__attribute {
+		border-right: 0;
+		border-bottom: 1px solid var(--tds-color-outline);
+	}
+	.tds-legal-brand__attribute:last-child { border-bottom: 0; }
+}
 
 /* =============================================================
    9. CARDS
