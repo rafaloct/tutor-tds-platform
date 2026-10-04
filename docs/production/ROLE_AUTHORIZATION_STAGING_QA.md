@@ -31,6 +31,8 @@ O container ativo respondeu `200` para login e `GET /auth/me` de admin, professo
 
 Não havia turma retornada para professor ou monitor naquele ambiente; portanto não foi possível afirmar os resultados de escopo de turma, revogação, criação/duplicidade ou analytics com contexto real. Esses itens permanecem **pendentes de dados de teste isolados e do deploy deste PR**. Nenhum dado foi criado ou alterado durante a observação.
 
+Em ambiente de teste da API, `tests/test_operator_operations.py` passou com 10 cenários, incluindo a revogação de um vínculo de aluno por turma e a rejeição de replay por operador revogado. Isto é cobertura automatizada; não substitui a execução física em staging.
+
 ## Limite conhecido
 
 O comando operacional de revogação atualmente inativa o vínculo do aluno na turma. Ele não é prova de desativação global de uma conta de equipe; tal fluxo exige uma política e endpoint próprios antes de ser declarado como revogação total.
