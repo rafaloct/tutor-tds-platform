@@ -50,7 +50,7 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 			<div class="tds-section-header">
 				<p class="tds-eyebrow"><?php esc_html_e( 'Território', 'tds-portal' ); ?></p>
 				<h2 id="tds-journey-title"><?php esc_html_e( 'Uma jornada que começa ouvindo o território', 'tds-portal' ); ?></h2>
-				<p class="tds-lead"><?php esc_html_e( 'O TDS conecta escuta local, formação e acompanhamento para aproximar inclusão produtiva das realidades encontradas em cada ação territorial.', 'tds-portal' ); ?></p>
+				<p class="tds-lead"><?php esc_html_e( 'O TDS conecta escuta local, formação e acompanhamento para aproximar as ações de inclusão produtiva das realidades de cada território.', 'tds-portal' ); ?></p>
 			</div>
 			<?php tds_theme_home_journey(); ?>
 		</div>
@@ -177,7 +177,7 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 
 	<section class="tds-section tds-section--alt" aria-labelledby="tds-support-title"<?php echo tds_theme_home_block_attributes( 14, 'support' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
-			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Acompanhamento', 'tds-portal' ); ?></p><h2 id="tds-support-title"><?php esc_html_e( 'Precisa de orientação?', 'tds-portal' ); ?></h2><p class="tds-lead"><?php esc_html_e( 'O suporte público orienta o próximo passo sem transformar o WordPress em prontuário acadêmico.', 'tds-portal' ); ?></p></div>
+			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Acompanhamento', 'tds-portal' ); ?></p><h2 id="tds-support-title"><?php esc_html_e( 'Precisa de orientação?', 'tds-portal' ); ?></h2><p class="tds-lead"><?php esc_html_e( 'O suporte público orienta o próximo passo sem expor informações acadêmicas no portal.', 'tds-portal' ); ?></p></div>
 			<?php tds_theme_support_cta(); ?>
 		</div>
 	</section>
