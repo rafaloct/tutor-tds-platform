@@ -223,11 +223,19 @@ void main() {
         ),
       );
       await _openMenu(tester);
-      await tester.tap(find.text('Meus conteúdos'));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is PopupMenuItem<String> && widget.value == 'management',
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.tap(find.text('Conteúdos').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
       expect(find.byType(CourseEditorCatalogScreen), findsOneWidget);
-      await tester.tap(find.byType(BackButton));
+      await tester.tap(find.byType(BackButton).last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
       expect(requests, hasLength(1));
@@ -235,6 +243,8 @@ void main() {
       await tester.pump();
       expect(requests, hasLength(2));
       requests.last.complete([_edition(2)]);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(BackButton).last);
       await tester.pumpAndSettle();
       expect(find.text('Curso remoto edição 2'), findsWidgets);
       expect(find.text('Curso remoto edição 1'), findsNothing);
