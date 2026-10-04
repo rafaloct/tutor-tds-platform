@@ -1,5 +1,3 @@
-[Reading 392 lines from start (total: 392 lines, 0 remaining)]
-
 #!/usr/bin/env python3
 """Deterministic path classifier and always-on PR gate helpers."""
 
@@ -392,5 +390,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-[executed on device: avellaria (50b7ca2d-9d90-4e32-ab9d-7f5d2869d5eb)]
