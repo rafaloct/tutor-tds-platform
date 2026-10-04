@@ -21,10 +21,9 @@ class AuthRepository {
     required this.apiUrl,
     http.Client? client,
     AuthTokenStore? tokenStore,
-    Future<void> Function()? onSessionEnded,
+    this._onSessionEnded,
   }) : _client = client ?? http.Client(),
-       _tokenStore = tokenStore ?? SecureAuthTokenStore(),
-       _onSessionEnded = onSessionEnded;
+       _tokenStore = tokenStore ?? SecureAuthTokenStore();
 
   final String apiUrl;
   final http.Client _client;
