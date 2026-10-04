@@ -10,6 +10,7 @@ from app.main import create_app
 from app.models import (
     Base,
     ClassEnrollment,
+    ClassMonitor,
     Classroom,
     Course,
     Enrollment,
@@ -25,6 +26,7 @@ CPFS = {
     "student": "123.456.789-09",
     "teacher": "987.654.321-00",
     "outsider": "529.982.247-25",
+    "monitor": "111.444.777-35",
 }
 
 
@@ -122,6 +124,12 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                         role="teacher",
                         status="active",
                     ),
+                    ProgramMembership(
+                        user_id=ids["monitor"],
+                        program_id="program-1",
+                        role="monitor",
+                        status="active",
+                    ),
                 ]
             )
             session.flush()
@@ -154,6 +162,13 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                     status="active",
                 )
             )
+            session.add(
+                ClassMonitor(
+                    class_id="class-1",
+                    user_id=ids["monitor"],
+                    program_id="program-1",
+                )
+            )
             session.commit()
 
         student_headers = bearer(accounts["student"]["access_token"])
@@ -179,6 +194,10 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
         outsider_summary = client.get(
             "/analytics/usage?class_id=class-1",
             headers=bearer(login(client, "outsider")),
+        )
+        monitor_summary = client.get(
+            "/analytics/usage?class_id=class-1",
+            headers=bearer(login(client, "monitor")),
         )
 
     assert all(response.status_code == 201 for response in created)
@@ -206,3 +225,4 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
     assert forbidden_student.status_code == 403
     assert missing_scope.status_code == 422
     assert outsider_summary.status_code == 403
+    assert monitor_summary.status_code == 403

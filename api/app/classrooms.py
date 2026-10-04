@@ -253,7 +253,7 @@ def eligible_students(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        _require_staff_access(session, classroom, claims)
+        _require_teacher_or_admin(session, classroom, claims)
         _require_open_classroom(classroom)
         existing = select(ClassEnrollment.user_id).where(
             ClassEnrollment.class_id == class_id,
@@ -300,7 +300,7 @@ def include_student(
         )
         if classroom is None:
             raise HTTPException(status_code=404, detail="Turma não encontrada.")
-        _require_staff_access(session, classroom, claims)
+        _require_teacher_or_admin(session, classroom, claims)
         _require_open_classroom(classroom)
         enrollment = session.scalar(
             select(Enrollment).where(
@@ -362,7 +362,7 @@ def class_detail(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        _staff(session, classroom, claims, monitor=True)
+        _require_staff_access(session, classroom, claims)
         student_ids = session.scalars(
             select(ClassEnrollment.user_id)
             .where(
@@ -474,7 +474,7 @@ def class_dashboard(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        _staff(session, classroom, claims, monitor=True)
+        _require_teacher_or_admin(session, classroom, claims)
         offering = session.get(
             ProgramCourse, (classroom.program_id, classroom.course_id)
         )
@@ -566,6 +566,17 @@ def _require_staff_access(
     claims: dict[str, str],
 ) -> None:
     _staff(session, classroom, claims, monitor=True)
+
+
+def _require_teacher_or_admin(
+    session: Session,
+    classroom: Classroom,
+    claims: dict[str, str],
+) -> None:
+    """Actions that expose hours or change the classroom roster are not monitor exceptions."""
+    if claims["role"] == "admin":
+        return
+    _staff(session, classroom, claims, monitor=False)
 
 
 def _student_progress(

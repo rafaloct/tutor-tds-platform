@@ -10,7 +10,13 @@ from sqlalchemy.orm import Session
 
 from .auth import access_claims
 from .database import Database
-from .models import ClassEnrollment, ClassMonitor, Classroom, LearningEventRecord
+from .models import (
+    ClassEnrollment,
+    ClassMonitor,
+    Classroom,
+    LearningEventRecord,
+    ProgramMembership,
+)
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 TelemetryEventType = Literal["page_viewed", "resource_opened", "feature_used"]
@@ -49,6 +55,14 @@ def usage_summary(
     period_start = period_end - timedelta(days=days)
     database: Database = request.app.state.database
     with Session(database.engine) as session:
+        # Monitoring is an exception-handling role, not an analytics role.
+        # Check relational assignments rather than the global JWT role because
+        # a learner may also be assigned as a monitor in a different scope.
+        if _is_monitor(session, claims["sub"]):
+            raise HTTPException(
+                status_code=403,
+                detail="Analytics não autorizado para monitor.",
+            )
         visible_users = _visible_user_ids(
             session,
             claims=claims,
@@ -115,6 +129,23 @@ def usage_summary(
             period_end=period_end,
             items=items,
         )
+
+
+def _is_monitor(session: Session, user_id: str) -> bool:
+    return (
+        session.scalar(
+            select(ClassMonitor.class_id).where(ClassMonitor.user_id == user_id)
+        )
+        is not None
+        or session.scalar(
+            select(ProgramMembership.user_id).where(
+                ProgramMembership.user_id == user_id,
+                ProgramMembership.role == "monitor",
+                ProgramMembership.status == "active",
+            )
+        )
+        is not None
+    )
 
 
 def _visible_user_ids(
