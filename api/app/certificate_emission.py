@@ -1,4 +1,4 @@
-"""Development-only synthetic emission candidate. Final issuance stays blocked."""
+"""Development/staging synthetic emission candidate. Final issuance stays blocked."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -108,11 +108,11 @@ def _transport(request):
         raise HTTPException(503, "Candidato sintético desativado neste ambiente.")
     if not settings.certificate_candidate_secret or len(settings.certificate_candidate_secret) < 32:
         raise HTTPException(503, "Transporte autenticado do candidato não configurado.")
-    url = urlsplit(settings.certificate_candidate_url or "")
     try:
+        url = urlsplit(settings.certificate_candidate_url or "")
         url.port
     except ValueError as error:
-        raise HTTPException(503, "Porta do transporte do candidato inválida.") from error
+        raise HTTPException(503, "URL do transporte do candidato inválida.") from error
 
     injected = getattr(request.app.state, "certificate_candidate_exchange", None)
     common_invalid = (
