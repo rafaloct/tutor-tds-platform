@@ -1,5 +1,3 @@
-[Reading 177 lines from start (total: 177 lines, 0 remaining)]
-
 from __future__ import annotations
 
 import unittest
@@ -177,5 +175,3 @@ class WorkflowStateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-[executed on device: avellaria (50b7ca2d-9d90-4e32-ab9d-7f5d2869d5eb)]
