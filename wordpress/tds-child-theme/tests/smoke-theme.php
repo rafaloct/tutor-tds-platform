@@ -263,6 +263,7 @@ try {
 	tds_assert( false !== strpos( $html, 'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html' ), 'privacidade: link oficial público' );
 	tds_assert( false !== strpos( $html, 'Versão pública oficial' ) && false === strpos( $html, '<form' ), 'privacidade: referência acessível e sem formulário' );
 	tds_assert( false !== strpos( $html, 'TDS — Territórios de Desenvolvimento Social e Inclusão Produtiva' ), 'privacidade: nome institucional completo' );
+	tds_assert( false !== strpos( $html, 'Capacitação que transforma territórios' ) && false !== strpos( $html, 'Inclusão produtiva para quem mais precisa.' ), 'privacidade: bordão original preservado' );
 	tds_assert( false !== strpos( $html, 'assets/img/marca-tds.png' ) && false !== strpos( $html, 'Território' ) && false !== strpos( $html, 'Diversidade' ) && false !== strpos( $html, 'Desenvolvimento' ), 'privacidade: branding book aplicado' );
 
 	list( , $html ) = tds_fetch( get_permalink( $pages['templates/direitos.php'] ) );
@@ -270,6 +271,7 @@ try {
 	tds_assert( false !== strpos( $html, 'https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html' ), 'direitos: link externo oficial' );
 	tds_assert( false !== strpos( $html, 'Configurações' ) && false !== strpos( $html, 'Excluir conta e dados' ), 'direitos: instruções reais no app' );
 	tds_assert( false !== strpos( $html, 'TDS — Territórios de Desenvolvimento Social e Inclusão Produtiva' ), 'direitos: nome institucional completo' );
+	tds_assert( false !== strpos( $html, 'Capacitação que transforma territórios' ) && false !== strpos( $html, 'Inclusão produtiva para quem mais precisa.' ), 'direitos: bordão original preservado' );
 	tds_assert( false !== strpos( $html, 'assets/img/marca-tds.png' ) && false !== strpos( $html, 'Território' ) && false !== strpos( $html, 'Diversidade' ) && false !== strpos( $html, 'Desenvolvimento' ), 'direitos: branding book aplicado' );
 	tds_assert( false === strpos( $html, '<form' ) && false === strpos( $html, 'Canal de solicitação em configuração' ), 'direitos: sem coleta e sem canal fictício' );
 
