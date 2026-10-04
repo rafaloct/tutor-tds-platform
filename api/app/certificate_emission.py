@@ -1,4 +1,4 @@
-"""Development-only synthetic emission candidate. Final issuance stays blocked."""
+"""Development/staging synthetic emission candidate. Final issuance stays blocked."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -18,6 +18,13 @@ from .certificate_policy import evaluate, generation_audit, policy_for, role
 from .models import CertificateEmissionAttempt, CertificateReference, CertificateRequest, ClassEnrollment, Classroom, CohortMembership, Enrollment, ProgramMembership, StudentBaseline
 
 router = APIRouter(prefix="/certificate-requests", tags=["certificate-emission-candidate"])
+
+
+# This is deliberately a deployment identity rather than a fuzzy "staging"
+# match.  A staging candidate must never send its authenticated command to a
+# Worker belonging to a different account merely because its name contains the
+# word "staging".
+STAGING_CANDIDATE_WORKER_HOST = "tutor-tds-cert-staging.tdsipex.workers.dev"
 
 
 def _authorized(session, request_id, user_id):
@@ -94,19 +101,55 @@ def _build_command(session, record, baseline, context):
 
 def _transport(request):
     settings = request.app.state.settings
-    # Verify this boundary before accessing any injected transport or persistence.
-    if settings.environment != "development" or not settings.certificate_candidate_enabled:
+    # Production stays fail-closed. Staging is allowed only through a real,
+    # explicitly named HTTPS staging endpoint; injected transports remain
+    # development-only so a fake cannot masquerade as staging evidence.
+    if settings.environment not in {"development", "staging"} or not settings.certificate_candidate_enabled:
         raise HTTPException(503, "Candidato sintético desativado neste ambiente.")
     if not settings.certificate_candidate_secret or len(settings.certificate_candidate_secret) < 32:
         raise HTTPException(503, "Transporte autenticado do candidato não configurado.")
-    url = urlsplit(settings.certificate_candidate_url or "")
     try:
+        url = urlsplit(settings.certificate_candidate_url or "")
         url.port
     except ValueError as error:
-        raise HTTPException(503, "Porta do transporte local inválida.") from error
-    if url.scheme != "http" or url.hostname not in {"localhost", "127.0.0.1", "::1"} or url.username or url.password or url.path not in {"", "/"} or url.query or url.fragment:
-        raise HTTPException(503, "Candidato exige transporte local isolado.")
-    return CandidateTransport(settings.certificate_candidate_url, settings.certificate_candidate_secret, getattr(request.app.state, "certificate_candidate_exchange", None))
+        raise HTTPException(503, "URL do transporte do candidato inválida.") from error
+
+    injected = getattr(request.app.state, "certificate_candidate_exchange", None)
+    common_invalid = (
+        url.username
+        or url.password
+        or url.path not in {"", "/"}
+        or url.query
+        or url.fragment
+    )
+    if settings.environment == "development":
+        if (
+            url.scheme != "http"
+            or url.hostname not in {"localhost", "127.0.0.1", "::1"}
+            or common_invalid
+        ):
+            raise HTTPException(503, "Candidato em development exige transporte local isolado.")
+        return CandidateTransport(
+            settings.certificate_candidate_url,
+            settings.certificate_candidate_secret,
+            injected,
+        )
+
+    hostname = (url.hostname or "").lower()
+    if (
+        injected is not None
+        or url.scheme != "https"
+        or url.port not in {None, 443}
+        or common_invalid
+        or hostname != STAGING_CANDIDATE_WORKER_HOST
+        or hostname in {"localhost", "127.0.0.1", "::1"}
+        or hostname.endswith(".local")
+    ):
+        raise HTTPException(503, "Candidato em staging exige endpoint HTTPS isolado de staging.")
+    return CandidateTransport(
+        settings.certificate_candidate_url,
+        settings.certificate_candidate_secret,
+    )
 
 
 @router.post("/{request_id}/emit")

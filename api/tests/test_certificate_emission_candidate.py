@@ -9,12 +9,15 @@ from pathlib import Path
 import shutil
 import subprocess
 from threading import Lock
+from types import SimpleNamespace
 
 import pytest
+from fastapi import HTTPException
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.certificate_emission import _transport
 from app.certificate_transport import CandidateTransport, TransportError, _NoRedirect, canonical
 from app.models import Base, BaselineSourceRecord, CertificateEmissionAttempt, CertificateReference, ClassEnrollment, CohortMembership, ProgramMembership, StudentBaseline
 from test_certificate_requests import requests_api, create, evidence, header, review, ORIGINAL
@@ -44,6 +47,7 @@ class WorkerExchange:
             return self._exchange(method, path, body, headers)
 
     def _exchange(self, method, path, body, headers):
+        assert headers.get("User-Agent") == "Tutor-TDS-Certificate-Candidate/1.0"
         self.calls.append(method)
         result = subprocess.run([shutil.which("node") or "node", str(BRIDGE)], input=json.dumps({
             "method": method, "path": path, "body": body.decode(), "headers": headers,
@@ -154,20 +158,87 @@ def test_crash_after_reservation_before_send_recovers_read_only(candidate):
         assert session.get(CertificateEmissionAttempt, request_id).state == "indeterminate"
 
 
-@pytest.mark.parametrize("environment", ["staging", "production"])
-def test_environment_cannot_enable_candidate_or_injected_transport(candidate, environment):
+def test_production_cannot_enable_candidate_or_injected_transport(candidate):
     client, _, exchange, _ = candidate
-    client.app.state.settings = replace(client.app.state.settings, environment=environment)
+    client.app.state.settings = replace(client.app.state.settings, environment="production")
     assert emit(candidate).status_code == 503
     assert not exchange.calls
 
 
-@pytest.mark.parametrize("overrides", [{"TUTOR_ENVIRONMENT": "production"}, {"TUTOR_ENVIRONMENT": "staging"}, {"CERTIFICATE_CANDIDATE_ENABLED": "false"}])
+def test_staging_requires_real_https_staging_transport(candidate):
+    client, _, exchange, _ = candidate
+    settings = replace(
+        client.app.state.settings,
+        environment="staging",
+        certificate_candidate_url="https://tutor-tds-cert-staging.tdsipex.workers.dev",
+    )
+    request = SimpleNamespace(
+        app=SimpleNamespace(state=SimpleNamespace(settings=settings)),
+    )
+    transport = _transport(request)
+    assert isinstance(transport, CandidateTransport)
+    assert transport.base_url == "https://tutor-tds-cert-staging.tdsipex.workers.dev"
+
+    # The API client still owns an injected synthetic exchange. Staging must
+    # reject it instead of turning a fake into TESTED-STAGING evidence.
+    client.app.state.settings = settings
+    assert emit(candidate).status_code == 503
+    assert not exchange.calls
+
+    for invalid_url in (
+        "http://tutor-tds-cert-staging.tdsipex.workers.dev",
+        "https://certificate-candidate-staging.example",
+        "https://tutor-staging.other-account.workers.dev",
+        "https://tutor-tds-gateway.tdsipex.workers.dev",
+        "https://tutor-tds-cert-staging.tdsipex.workers.dev:8443",
+        "https://user:pass@tutor-tds-cert-staging.tdsipex.workers.dev",
+        "https://tutor-tds-cert-staging.tdsipex.workers.dev/internal",
+        "https://tutor-tds-cert-staging.tdsipex.workers.dev?candidate=true",
+        "https://localhost",
+    ):
+        invalid = replace(settings, certificate_candidate_url=invalid_url)
+        invalid_request = SimpleNamespace(
+            app=SimpleNamespace(state=SimpleNamespace(settings=invalid)),
+        )
+        with pytest.raises(HTTPException) as error:
+            _transport(invalid_request)
+        assert error.value.status_code == 503
+
+    for secret in (None, "too-short"):
+        missing_secret = replace(settings, certificate_candidate_secret=secret)
+        missing_secret_request = SimpleNamespace(
+            app=SimpleNamespace(state=SimpleNamespace(settings=missing_secret)),
+        )
+        with pytest.raises(HTTPException) as error:
+            _transport(missing_secret_request)
+        assert error.value.status_code == 503
+
+    malformed = replace(
+        settings,
+        certificate_candidate_url="https://[malformed-staging-host",
+    )
+    malformed_request = SimpleNamespace(
+        app=SimpleNamespace(state=SimpleNamespace(settings=malformed)),
+    )
+    with pytest.raises(HTTPException) as error:
+        _transport(malformed_request)
+    assert error.value.status_code == 503
+    assert error.value.detail == "URL do transporte do candidato inválida."
+
+
+@pytest.mark.parametrize("overrides", [{"TUTOR_ENVIRONMENT": "production"}, {"CERTIFICATE_CANDIDATE_ENABLED": "false"}])
 def test_worker_activation_cannot_bypass_environment_boundary(candidate, overrides):
     _, _, exchange, _ = candidate
     exchange.env = overrides
     assert emit(candidate).status_code == 503
     assert exchange.writes == 0 and exchange.storage == {}
+
+
+def test_worker_candidate_accepts_staging_environment(candidate):
+    _, _, exchange, _ = candidate
+    exchange.env = {"TUTOR_ENVIRONMENT": "staging"}
+    assert emit(candidate).status_code == 200
+    assert exchange.writes == 1
 
 
 def test_api_candidate_disabled_by_default_and_pending_is_not_emission(candidate):
