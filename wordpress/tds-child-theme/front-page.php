@@ -18,7 +18,7 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 	<section class="tds-hero" aria-labelledby="tds-hero-title"<?php echo tds_theme_home_block_attributes( 1, 'hero' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
 			<div class="tds-hero__inner">
-				<p class="tds-eyebrow"><?php esc_html_e( 'Programa TDS', 'tds-portal' ); ?></p>
+				<p class="tds-eyebrow"><?php esc_html_e( 'Territórios de Desenvolvimento Social e Inclusão Produtiva', 'tds-portal' ); ?></p>
 				<h1 id="tds-hero-title" class="tds-hero__title"><?php echo esc_html( $tds_static_home && has_excerpt() ? get_the_title() : get_bloginfo( 'name', 'display' ) ); ?></h1>
 				<p class="tds-hero__lead"><?php echo esc_html( $tds_static_home && has_excerpt() ? get_the_excerpt() : get_bloginfo( 'description', 'display' ) ); ?></p>
 				<div class="tds-hero__actions">
@@ -48,9 +48,9 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 	<section class="tds-section tds-section--alt" aria-labelledby="tds-journey-title"<?php echo tds_theme_home_block_attributes( 2, 'journey' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
 			<div class="tds-section-header">
-				<p class="tds-eyebrow"><?php esc_html_e( 'Jornada', 'tds-portal' ); ?></p>
-				<h2 id="tds-journey-title"><?php esc_html_e( 'Portal público e plataforma, cada um no seu papel', 'tds-portal' ); ?></h2>
-				<p class="tds-lead"><?php esc_html_e( 'O portal informa e orienta. Dados acadêmicos e decisões formais permanecem nos sistemas autorizados do Tutor TDS.', 'tds-portal' ); ?></p>
+				<p class="tds-eyebrow"><?php esc_html_e( 'Território', 'tds-portal' ); ?></p>
+				<h2 id="tds-journey-title"><?php esc_html_e( 'Uma jornada que começa ouvindo o território', 'tds-portal' ); ?></h2>
+				<p class="tds-lead"><?php esc_html_e( 'O TDS conecta escuta local, formação e acompanhamento para aproximar inclusão produtiva das realidades encontradas em cada ação territorial.', 'tds-portal' ); ?></p>
 			</div>
 			<?php tds_theme_home_journey(); ?>
 		</div>
@@ -59,8 +59,9 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 	<section class="tds-section" aria-labelledby="tds-areas-title"<?php echo tds_theme_home_block_attributes( 3, 'areas' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
 			<div class="tds-section-header">
-				<p class="tds-eyebrow"><?php esc_html_e( 'Áreas', 'tds-portal' ); ?></p>
-				<h2 id="tds-areas-title"><?php esc_html_e( 'Áreas de formação', 'tds-portal' ); ?></h2>
+				<p class="tds-eyebrow"><?php esc_html_e( 'Formação', 'tds-portal' ); ?></p>
+				<h2 id="tds-areas-title"><?php esc_html_e( 'Formações conectadas às demandas locais', 'tds-portal' ); ?></h2>
+				<p class="tds-lead"><?php esc_html_e( 'As áreas apresentadas aqui dependem de conteúdo editorial publicado e validado pelo programa.', 'tds-portal' ); ?></p>
 			</div>
 			<?php tds_theme_home_collection( 'tds_portal_home_areas' ); ?>
 		</div>
@@ -70,8 +71,8 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 		<div class="tds-container">
 			<div class="tds-section-header">
 				<p class="tds-eyebrow"><?php esc_html_e( 'Cursos', 'tds-portal' ); ?></p>
-				<h2 id="tds-catalog-title"><?php esc_html_e( 'Catálogo público', 'tds-portal' ); ?></h2>
-				<p class="tds-lead"><?php esc_html_e( 'Somente ofertas publicadas pela plataforma aparecem aqui. Inscrição, frequência e certificado não são controlados pelo WordPress.', 'tds-portal' ); ?></p>
+				<h2 id="tds-catalog-title"><?php esc_html_e( 'Veja as formações publicadas pelo programa', 'tds-portal' ); ?></h2>
+				<p class="tds-lead"><?php esc_html_e( 'O catálogo reúne somente cursos publicados pela fonte oficial. Dados pessoais, matrícula, frequência e certificação permanecem fora deste portal público.', 'tds-portal' ); ?></p>
 			</div>
 			<?php tds_theme_catalog( 6 ); ?>
 		</div>
@@ -80,8 +81,9 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 	<section class="tds-section" aria-labelledby="tds-tools-title"<?php echo tds_theme_home_block_attributes( 5, 'tools' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
 			<div class="tds-section-header">
-				<p class="tds-eyebrow"><?php esc_html_e( 'Ferramentas', 'tds-portal' ); ?></p>
-				<h2 id="tds-tools-title"><?php esc_html_e( 'Recursos do ecossistema TDS', 'tds-portal' ); ?></h2>
+				<p class="tds-eyebrow"><?php esc_html_e( 'Tecnologia', 'tds-portal' ); ?></p>
+				<h2 id="tds-tools-title"><?php esc_html_e( 'Tecnologia como meio, não como fim', 'tds-portal' ); ?></h2>
+				<p class="tds-lead"><?php esc_html_e( 'Aplicativo, materiais e canais digitais apoiam a jornada. O foco permanece nas formações, nas pessoas e nos territórios.', 'tds-portal' ); ?></p>
 			</div>
 			<?php tds_theme_home_collection( 'tds_portal_home_tools', 'tool_card_click', true ); ?>
 		</div>
@@ -91,8 +93,9 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 		<section class="tds-section tds-section--dark" aria-labelledby="tds-stats-title"<?php echo tds_theme_home_block_attributes( 6, 'stats' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 			<div class="tds-container">
 				<div class="tds-section-header">
-					<p class="tds-eyebrow"><?php esc_html_e( 'Transparência', 'tds-portal' ); ?></p>
-					<h2 id="tds-stats-title"><?php esc_html_e( 'Números com fonte identificada', 'tds-portal' ); ?></h2>
+					<p class="tds-eyebrow"><?php esc_html_e( 'Evidências', 'tds-portal' ); ?></p>
+					<h2 id="tds-stats-title"><?php esc_html_e( 'Resultados que podem ser verificados', 'tds-portal' ); ?></h2>
+					<p class="tds-lead"><?php esc_html_e( 'O portal só apresenta números quando a fonte pública e a proveniência estão identificadas.', 'tds-portal' ); ?></p>
 				</div>
 				<?php tds_theme_portal_stats( $tds_stats ); ?>
 			</div>
@@ -102,8 +105,9 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 	<section class="tds-section" aria-labelledby="tds-stories-title"<?php echo tds_theme_home_block_attributes( 7, 'stories' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
 			<div class="tds-section-header">
-				<p class="tds-eyebrow"><?php esc_html_e( 'Histórias', 'tds-portal' ); ?></p>
-				<h2 id="tds-stories-title"><?php esc_html_e( 'Experiências publicadas pela equipe editorial', 'tds-portal' ); ?></h2>
+				<p class="tds-eyebrow"><?php esc_html_e( 'Territórios', 'tds-portal' ); ?></p>
+				<h2 id="tds-stories-title"><?php esc_html_e( 'Ações e experiências que ajudam a contar o programa', 'tds-portal' ); ?></h2>
+				<p class="tds-lead"><?php esc_html_e( 'Histórias entram no portal somente quando houver fonte editorial adequada e autorização para os registros utilizados.', 'tds-portal' ); ?></p>
 			</div>
 			<?php tds_theme_home_collection( 'tds_portal_home_stories' ); ?>
 		</div>
@@ -113,8 +117,8 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 	<section class="tds-section tds-section--alt" aria-labelledby="tds-news-title"<?php echo tds_theme_home_block_attributes( 8, 'news' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
 			<div class="tds-section-header">
-				<p class="tds-eyebrow"><?php esc_html_e( 'Notícias', 'tds-portal' ); ?></p>
-				<h2 id="tds-news-title"><?php esc_html_e( 'Últimas do programa', 'tds-portal' ); ?></h2>
+				<p class="tds-eyebrow"><?php esc_html_e( 'Ações recentes', 'tds-portal' ); ?></p>
+				<h2 id="tds-news-title"><?php esc_html_e( 'O que está acontecendo no TDS', 'tds-portal' ); ?></h2>
 			</div>
 			<?php if ( $tds_news->have_posts() ) : ?>
 				<div class="tds-post-list">
@@ -134,21 +138,21 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 
 	<section class="tds-section" aria-labelledby="tds-agenda-title"<?php echo tds_theme_home_block_attributes( 9, 'agenda' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
-			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Agenda', 'tds-portal' ); ?></p><h2 id="tds-agenda-title"><?php esc_html_e( 'Próximos eventos públicos', 'tds-portal' ); ?></h2></div>
+			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Agenda', 'tds-portal' ); ?></p><h2 id="tds-agenda-title"><?php esc_html_e( 'Próximas ações e encontros públicos', 'tds-portal' ); ?></h2></div>
 			<?php tds_theme_home_collection( 'tds_portal_home_events', 'event_click' ); ?>
 		</div>
 	</section>
 
 	<section class="tds-section tds-section--alt" aria-labelledby="tds-library-title"<?php echo tds_theme_home_block_attributes( 10, 'library' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
-			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Biblioteca', 'tds-portal' ); ?></p><h2 id="tds-library-title"><?php esc_html_e( 'Materiais públicos', 'tds-portal' ); ?></h2></div>
+			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Biblioteca', 'tds-portal' ); ?></p><h2 id="tds-library-title"><?php esc_html_e( 'Materiais para acompanhar e aprofundar', 'tds-portal' ); ?></h2></div>
 			<?php tds_theme_home_collection( 'tds_portal_home_materials', 'material_click' ); ?>
 		</div>
 	</section>
 
 	<section class="tds-section" aria-labelledby="tds-partners-title"<?php echo tds_theme_home_block_attributes( 11, 'partners' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
-			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Parceiros', 'tds-portal' ); ?></p><h2 id="tds-partners-title"><?php esc_html_e( 'Instituições apresentadas somente com publicação aprovada', 'tds-portal' ); ?></h2></div>
+			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Cooperação', 'tds-portal' ); ?></p><h2 id="tds-partners-title"><?php esc_html_e( 'Uma rede construída com instituições e territórios', 'tds-portal' ); ?></h2><p class="tds-lead"><?php esc_html_e( 'Parceiros aparecem somente quando houver publicação institucional aprovada.', 'tds-portal' ); ?></p></div>
 			<?php tds_theme_home_collection( 'tds_portal_home_partners' ); ?>
 		</div>
 	</section>
@@ -156,9 +160,9 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 	<section class="tds-section tds-section--dark" aria-labelledby="tds-access-title"<?php echo tds_theme_home_block_attributes( 12, 'app-access' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
 			<div class="tds-section-header">
-				<p class="tds-eyebrow"><?php esc_html_e( 'Acesso', 'tds-portal' ); ?></p>
-				<h2 id="tds-access-title"><?php esc_html_e( 'Entre no app oficial', 'tds-portal' ); ?></h2>
-				<p class="tds-lead"><?php esc_html_e( 'O acesso de participantes e equipe é feito pelo canal oficial configurado pela coordenação.', 'tds-portal' ); ?></p>
+				<p class="tds-eyebrow"><?php esc_html_e( 'Continuidade', 'tds-portal' ); ?></p>
+				<h2 id="tds-access-title"><?php esc_html_e( 'Continue sua jornada no Tutor TDS', 'tds-portal' ); ?></h2>
+				<p class="tds-lead"><?php esc_html_e( 'O aplicativo complementa as formações e concentra a experiência autenticada de participantes e equipe.', 'tds-portal' ); ?></p>
 			</div>
 			<?php tds_theme_app_access(); ?>
 		</div>
@@ -166,14 +170,14 @@ $tds_stats       = TDS_Theme_Portal_Stats_Provider::get();
 
 	<section class="tds-section" aria-labelledby="tds-certificate-title"<?php echo tds_theme_home_block_attributes( 13, 'certificate' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
-			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Certificados', 'tds-portal' ); ?></p><h2 id="tds-certificate-title"><?php esc_html_e( 'Verificação pelo canal oficial', 'tds-portal' ); ?></h2></div>
+			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Certificados', 'tds-portal' ); ?></p><h2 id="tds-certificate-title"><?php esc_html_e( 'Consulte certificados pelo canal oficial', 'tds-portal' ); ?></h2></div>
 			<?php tds_theme_certificate_cta(); ?>
 		</div>
 	</section>
 
 	<section class="tds-section tds-section--alt" aria-labelledby="tds-support-title"<?php echo tds_theme_home_block_attributes( 14, 'support' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<div class="tds-container">
-			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Suporte', 'tds-portal' ); ?></p><h2 id="tds-support-title"><?php esc_html_e( 'Ajuda sem expor sua jornada acadêmica', 'tds-portal' ); ?></h2></div>
+			<div class="tds-section-header"><p class="tds-eyebrow"><?php esc_html_e( 'Acompanhamento', 'tds-portal' ); ?></p><h2 id="tds-support-title"><?php esc_html_e( 'Precisa de orientação?', 'tds-portal' ); ?></h2><p class="tds-lead"><?php esc_html_e( 'O suporte público orienta o próximo passo sem transformar o WordPress em prontuário acadêmico.', 'tds-portal' ); ?></p></div>
 			<?php tds_theme_support_cta(); ?>
 		</div>
 	</section>
