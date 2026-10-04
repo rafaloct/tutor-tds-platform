@@ -48,7 +48,12 @@ class CandidateTransport:
         digest = hashlib.sha256(body).hexdigest()
         signed = f"candidate-request-v1\n{method}\n{path}\n{timestamp}\n{digest}".encode()
         signature = hmac.new(self.secret, signed, hashlib.sha256).hexdigest()
-        headers = {"Content-Type": "application/json", "X-Candidate-Time": timestamp, "X-Candidate-Signature": signature}
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Tutor-TDS-Certificate-Candidate/1.0",
+            "X-Candidate-Time": timestamp,
+            "X-Candidate-Signature": signature,
+        }
         try:
             status, response_headers, raw = self.exchange(method, path, body, headers)
             if len(raw) > 32768:

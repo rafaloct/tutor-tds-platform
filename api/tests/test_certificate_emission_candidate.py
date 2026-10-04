@@ -47,6 +47,7 @@ class WorkerExchange:
             return self._exchange(method, path, body, headers)
 
     def _exchange(self, method, path, body, headers):
+        assert headers.get("User-Agent") == "Tutor-TDS-Certificate-Candidate/1.0"
         self.calls.append(method)
         result = subprocess.run([shutil.which("node") or "node", str(BRIDGE)], input=json.dumps({
             "method": method, "path": path, "body": body.decode(), "headers": headers,
