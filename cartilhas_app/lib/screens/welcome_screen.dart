@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/models/auth_session.dart';
-import '../features/auth/presentation/account_login_dialog.dart';
+import '../features/auth/presentation/account_login_screen.dart';
 import '../features/certificates/data/certificate_service.dart';
 import '../features/profile/data/profile_data_store.dart';
 import '../services/privacy_preferences.dart';
@@ -99,7 +99,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   Future<void> _loginOnline() async {
-    final session = await showAccountLoginDialog(context);
+    final session = await Navigator.push<AuthSession>(
+      context,
+      trackedRoute<AuthSession>(
+        pageId: 'account_login',
+        featureId: 'account_login',
+        builder: (_) => const AccountLoginScreen(),
+      ),
+    );
     if (session == null || !mounted) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_name', session.user.name);
