@@ -13,8 +13,10 @@ em evidência de homologação.
 - `development` continua aceitando somente transporte HTTP loopback e pode usar
   o exchange sintético injetado dos testes.
 - `staging` exige `CERTIFICATE_CANDIDATE_ENABLED=true`, secret server-side com
-  comprimento mínimo já exigido e endpoint HTTPS `*.workers.dev` cujo nome do
-  Worker identifica explicitamente staging; **não aceita exchange injetado**.
+  comprimento mínimo já exigido e o endpoint HTTPS canônico
+  `tutor-tds-cert-staging.tdsipex.workers.dev` (sem porta, path, query ou
+  credenciais); **não aceita exchange injetado**. Qualquer Worker de outra
+  conta ou hostname apenas rotulado como staging falha fechado.
 - `production` continua bloqueado independentemente da flag.
 - O Worker aceita o handler candidato somente em development/staging e mantém
   produção bloqueada.
@@ -24,7 +26,8 @@ em evidência de homologação.
 
 Antes de declarar TESTED-STAGING:
 
-1. criar Worker de staging separado do Worker produtivo;
+1. criar o Worker de staging separado `tutor-tds-cert-staging` na conta
+   `tdsipex.workers.dev`, sem rota ou binding de produção;
 2. criar namespace KV de staging exclusivo com binding `CERTIFICATE_CANDIDATES`;
 3. configurar `TUTOR_ENVIRONMENT=staging`;
 4. configurar `CERTIFICATE_CANDIDATE_ENABLED=true`;

@@ -187,7 +187,12 @@ def test_staging_requires_real_https_staging_transport(candidate):
     for invalid_url in (
         "http://tutor-tds-cert-staging.tdsipex.workers.dev",
         "https://certificate-candidate-staging.example",
+        "https://tutor-staging.other-account.workers.dev",
         "https://tutor-tds-gateway.tdsipex.workers.dev",
+        "https://tutor-tds-cert-staging.tdsipex.workers.dev:8443",
+        "https://user:pass@tutor-tds-cert-staging.tdsipex.workers.dev",
+        "https://tutor-tds-cert-staging.tdsipex.workers.dev/internal",
+        "https://tutor-tds-cert-staging.tdsipex.workers.dev?candidate=true",
         "https://localhost",
     ):
         invalid = replace(settings, certificate_candidate_url=invalid_url)
@@ -196,6 +201,15 @@ def test_staging_requires_real_https_staging_transport(candidate):
         )
         with pytest.raises(HTTPException) as error:
             _transport(invalid_request)
+        assert error.value.status_code == 503
+
+    for secret in (None, "too-short"):
+        missing_secret = replace(settings, certificate_candidate_secret=secret)
+        missing_secret_request = SimpleNamespace(
+            app=SimpleNamespace(state=SimpleNamespace(settings=missing_secret)),
+        )
+        with pytest.raises(HTTPException) as error:
+            _transport(missing_secret_request)
         assert error.value.status_code == 503
 
 

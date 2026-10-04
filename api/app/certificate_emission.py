@@ -20,6 +20,13 @@ from .models import CertificateEmissionAttempt, CertificateReference, Certificat
 router = APIRouter(prefix="/certificate-requests", tags=["certificate-emission-candidate"])
 
 
+# This is deliberately a deployment identity rather than a fuzzy "staging"
+# match.  A staging candidate must never send its authenticated command to a
+# Worker belonging to a different account merely because its name contains the
+# word "staging".
+STAGING_CANDIDATE_WORKER_HOST = "tutor-tds-cert-staging.tdsipex.workers.dev"
+
+
 def _authorized(session, request_id, user_id):
     record = session.scalar(select(CertificateRequest).where(CertificateRequest.id == request_id).with_for_update())
     if record is None or record.user_id != user_id:
@@ -129,13 +136,12 @@ def _transport(request):
         )
 
     hostname = (url.hostname or "").lower()
-    worker_name = hostname.split(".", 1)[0]
     if (
         injected is not None
         or url.scheme != "https"
+        or url.port not in {None, 443}
         or common_invalid
-        or not hostname.endswith(".workers.dev")
-        or "staging" not in worker_name
+        or hostname != STAGING_CANDIDATE_WORKER_HOST
         or hostname in {"localhost", "127.0.0.1", "::1"}
         or hostname.endswith(".local")
     ):
