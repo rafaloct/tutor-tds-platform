@@ -212,6 +212,18 @@ def test_staging_requires_real_https_staging_transport(candidate):
             _transport(missing_secret_request)
         assert error.value.status_code == 503
 
+    malformed = replace(
+        settings,
+        certificate_candidate_url="https://[malformed-staging-host",
+    )
+    malformed_request = SimpleNamespace(
+        app=SimpleNamespace(state=SimpleNamespace(settings=malformed)),
+    )
+    with pytest.raises(HTTPException) as error:
+        _transport(malformed_request)
+    assert error.value.status_code == 503
+    assert error.value.detail == "URL do transporte do candidato inválida."
+
 
 @pytest.mark.parametrize("overrides", [{"TUTOR_ENVIRONMENT": "production"}, {"CERTIFICATE_CANDIDATE_ENABLED": "false"}])
 def test_worker_activation_cannot_bypass_environment_boundary(candidate, overrides):
