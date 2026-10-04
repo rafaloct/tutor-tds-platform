@@ -51,6 +51,55 @@ permissions allow them):
 - `agent:working`
 - `agent:review`
 - `human-gate`
+- `agent:merge-candidate`
+- `agent:executor:chatgpt-work`
+
+## GitHub control panel
+
+Labels are the visible queue.  The coordinator maintains exactly one lifecycle
+label on each agent Issue:
+
+| Label | Meaning | Who acts next |
+| --- | --- | --- |
+| `agent:ready` | Bounded and safe task, routed to an executor. | ChatGPT Work executor |
+| `agent:working` | A branch/worktree is actively owned by one task. | Current executor only |
+| `agent:review` | Draft PR exists and needs technical review/CI follow-up. | Reviewer/coordinator |
+| `human-gate` | A prohibited boundary or human decision was reached. | Human only |
+| `agent:merge-candidate` | Technical review is complete; merge still needs explicit authorization. | Human only |
+
+`agent:executor:chatgpt-work` identifies work that the Work executor may pick
+up.  It is an assignment label, not permission to merge, deploy, or start a
+different task.  The queue views are therefore GitHub Issue searches for
+`is:open label:agent:ready label:agent:executor:chatgpt-work`,
+`is:open label:agent:working`, `is:open label:agent:review`, and
+`is:open label:human-gate`.
+
+## Executor pass (one routed task at a time)
+
+At the start of every scheduled or manually triggered Work pass, the executor:
+
+1. checks `human-gate` and `agent:merge-candidate` first and reports only the
+   minimum required human action;
+2. lists open PRs and related branches before selecting work, to prevent
+   overlap;
+3. selects at most one Issue with both `agent:ready` and
+   `agent:executor:chatgpt-work`, assigned to the executor when assignment is
+   available;
+4. verifies the Issue has a single goal, bounded paths, acceptance checks and
+   `HUMAN_GATE=NO`; otherwise it moves it to `human-gate` with a checkpoint;
+5. replaces `agent:ready` with `agent:working`, creates one isolated branch,
+   and persists the initial checkpoint on the Issue;
+6. implements only the allowed scope, runs the stated tests, opens or updates
+   one draft PR, then moves the Issue to `agent:review`;
+7. reads the PR diff, CI, conflicts and review threads.  A small technical
+   repair remains on the same Issue/branch/PR.  A distinct repair becomes a
+   newly routed `agent:ready` Issue but is never started in that pass;
+8. records the closing checkpoint in both Issue and PR, then stops.  It never
+   selects another ready task automatically.
+
+The reviewer marks `agent:merge-candidate` only after the technical evidence
+is complete.  `MERGE_ALLOWED=NO` remains in force until an explicit human
+authorization names the expected PR head SHA.
 
 If labels are unavailable, persist the state in Issue/PR comments.
 
@@ -96,6 +145,11 @@ configure them to:
 4. If technically fixable, create the smallest next coding task in GitHub.
 5. If human action is required, state the exact action and stop.
 6. Persist the checkpoint in GitHub; never ask the human to relay agent output.
+
+Issue-created events are not assumed.  Until a repository event trigger for
+Issues is available in the connected workspace, run the same executor pass on
+a bounded schedule or manually.  The pass uses GitHub labels and API state,
+not Gmail or PULL, and remains safe if a run is skipped or combined.
 
 ## Migration from the old worker protocol
 
