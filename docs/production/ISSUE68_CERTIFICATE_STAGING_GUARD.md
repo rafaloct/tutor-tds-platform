@@ -1,6 +1,6 @@
 # Issue #68 — guard de homologação do certificado candidato em staging
 
-Status: **IMPLEMENTED candidate guard; staging externo ainda BLOCKED**.
+Status: **TESTED-STAGING; emissão institucional final continua bloqueada**.
 
 ## Objetivo
 
@@ -20,26 +20,26 @@ em evidência de homologação.
 - `production` continua bloqueado independentemente da flag.
 - O Worker aceita o handler candidato somente em development/staging e mantém
   produção bloqueada.
-- Nenhum binding KV, namespace, secret ou deploy foi criado neste recorte.
+- Este PR não versiona namespace KV, binding, secret nem configuração de deploy.
 
-## Configuração externa ainda necessária
+## Homologação externa concluída
 
-Antes de declarar TESTED-STAGING:
+A evidência sanitizada da homologação real está registrada na Issue #68:
+https://github.com/rafaloct/tutor-tds-platform/issues/68#issuecomment-5976124624
 
-1. criar o Worker de staging separado `tutor-tds-cert-staging` na conta
-   `tdsipex.workers.dev`, sem rota ou binding de produção;
-2. criar namespace KV de staging exclusivo com binding `CERTIFICATE_CANDIDATES`;
-3. configurar `TUTOR_ENVIRONMENT=staging`;
-4. configurar `CERTIFICATE_CANDIDATE_ENABLED=true`;
-5. configurar `CERTIFICATE_CANDIDATE_SECRET` no secret store do Worker e da API
-   de staging, nunca no Git ou no app;
-6. configurar `CERTIFICATE_CANDIDATE_URL` na API apontando para o endpoint HTTPS
-   de staging;
-7. executar emissão/reconciliação com dados sintéticos e registrar evidência
-   sanitizada.
+Foi comprovado em staging isolado:
 
-O `wrangler.jsonc` produtivo existente não deve receber um ID fictício ou o
-binding candidato de staging. A criação do recurso externo permanece HUMAN-GATE.
+1. API → HMAC → Worker → KV exclusivo de staging;
+2. contexto divergente falha fechado com 422;
+3. replay preserva a mesma emissão lógica/idempotente;
+4. receipt autenticado é confirmado e a reconciliação posterior recupera o
+   mesmo candidato;
+5. a referência candidata permanece fora de `GET /certificates`;
+6. a emissão institucional final continua bloqueada;
+7. o runtime de staging voltou ao estado limpo após o teste;
+8. nenhuma alteração foi feita em produção.
+
+O `wrangler.jsonc` produtivo permanece sem binding candidato de staging.
 
 ## Segurança
 
