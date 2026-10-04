@@ -24,7 +24,7 @@ get_template_part(
 					<div>
 						<p class="tds-eyebrow"><?php esc_html_e( 'TDS — Territórios de Desenvolvimento Social e Inclusão Produtiva', 'tds-portal' ); ?></p>
 						<h2 id="tds-legal-brand-title" class="tds-legal-brand__title"><?php esc_html_e( 'Capacitação que transforma territórios', 'tds-portal' ); ?></h2>
-						<p class="tds-legal-brand__text"><?php esc_html_e( 'Programa voltado à promoção do desenvolvimento social e à inclusão produtiva nos territórios do Tocantins.', 'tds-portal' ); ?></p>
+						<p class="tds-legal-brand__text"><?php esc_html_e( 'Inclusão produtiva para quem mais precisa.', 'tds-portal' ); ?></p>
 					</div>
 				</div>
 				<ul class="tds-legal-brand__attributes" aria-label="<?php esc_attr_e( 'Atributos da marca TDS', 'tds-portal' ); ?>">
