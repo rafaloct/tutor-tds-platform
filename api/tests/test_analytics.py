@@ -99,6 +99,11 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                         institution_id="institution-1",
                         name="Programa",
                     ),
+                    Program(
+                        id="program-2",
+                        institution_id="institution-1",
+                        name="Programa 2",
+                    ),
                     Course(
                         id="course-1",
                         title="Curso",
@@ -109,7 +114,12 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                 ]
             )
             session.flush()
-            session.add(ProgramCourse(program_id="program-1", course_id="course-1"))
+            session.add_all(
+                [
+                    ProgramCourse(program_id="program-1", course_id="course-1"),
+                    ProgramCourse(program_id="program-2", course_id="course-1"),
+                ]
+            )
             session.add_all(
                 [
                     ProgramMembership(
@@ -128,6 +138,12 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                         user_id=ids["monitor"],
                         program_id="program-1",
                         role="monitor",
+                        status="active",
+                    ),
+                    ProgramMembership(
+                        user_id=ids["monitor"],
+                        program_id="program-2",
+                        role="teacher",
                         status="active",
                     ),
                 ]
@@ -150,7 +166,17 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                 end_date=date(2026, 12, 1),
                 status="active",
             )
-            session.add_all([enrollment, classroom])
+            teacher_classroom = Classroom(
+                id="class-2",
+                program_id="program-2",
+                course_id="course-1",
+                teacher_id=ids["monitor"],
+                name="Turma B",
+                start_date=date(2026, 9, 1),
+                end_date=date(2026, 12, 1),
+                status="active",
+            )
+            session.add_all([enrollment, classroom, teacher_classroom])
             session.flush()
             session.add(
                 ClassEnrollment(
@@ -195,9 +221,14 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
             "/analytics/usage?class_id=class-1",
             headers=bearer(login(client, "outsider")),
         )
+        monitor_headers = bearer(login(client, "monitor"))
         monitor_summary = client.get(
             "/analytics/usage?class_id=class-1",
-            headers=bearer(login(client, "monitor")),
+            headers=monitor_headers,
+        )
+        multi_role_teacher_summary = client.get(
+            "/analytics/usage?class_id=class-2",
+            headers=monitor_headers,
         )
 
     assert all(response.status_code == 201 for response in created)
@@ -226,3 +257,4 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
     assert missing_scope.status_code == 422
     assert outsider_summary.status_code == 403
     assert monitor_summary.status_code == 403
+    assert multi_role_teacher_summary.status_code == 200
