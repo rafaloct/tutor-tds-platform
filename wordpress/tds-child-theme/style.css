@@ -4,7 +4,7 @@ Theme URI: https://github.com/rafaloct/tutor-tds-platform
 Description: Camada visual pública do portal TDS (WP-2). Child theme do Astra; consome somente TDS_Public_Config::get() e a REST pública do tds-portal-core. Sem autoridade acadêmica.
 Author: Programa TDS
 Template: astra
-Version: 0.2.0
+Version: 0.2.1
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
