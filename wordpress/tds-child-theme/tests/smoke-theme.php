@@ -258,8 +258,16 @@ try {
 	}
 	list( , $html ) = tds_fetch( get_permalink( $pages['templates/contato.php'] ) );
 	tds_assert( false !== strpos( $html, 'data-tds-state="disabled"' ) && false === strpos( $html, '<form' ), 'contato: suporte disabled e sem formulário' );
+
+	list( , $html ) = tds_fetch( get_permalink( $pages['templates/privacidade.php'] ) );
+	tds_assert( false !== strpos( $html, 'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html' ), 'privacidade: link oficial público' );
+	tds_assert( false !== strpos( $html, 'Versão pública oficial' ) && false === strpos( $html, '<form' ), 'privacidade: referência acessível e sem formulário' );
+
 	list( , $html ) = tds_fetch( get_permalink( $pages['templates/direitos.php'] ) );
-	tds_assert( false !== strpos( $html, 'Última atualização' ) && false !== strpos( $html, 'data-tds-state="disabled"' ), 'direitos: data e canal disabled' );
+	tds_assert( false !== strpos( $html, 'Última atualização' ), 'direitos: data de atualização' );
+	tds_assert( false !== strpos( $html, 'https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html' ), 'direitos: link externo oficial' );
+	tds_assert( false !== strpos( $html, 'Configurações' ) && false !== strpos( $html, 'Excluir conta e dados' ), 'direitos: instruções reais no app' );
+	tds_assert( false === strpos( $html, '<form' ) && false === strpos( $html, 'Canal de solicitação em configuração' ), 'direitos: sem coleta e sem canal fictício' );
 
 	list( $status, $html ) = tds_fetch( get_permalink( $states_id ) );
 	$results['pages']['estados'] = $status;
