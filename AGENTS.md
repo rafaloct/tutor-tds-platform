@@ -48,3 +48,47 @@ Nunca promover TARGET para OBSERVED apenas porque foi documentado.
   GitHub devem manter objetivo único, critérios de aceite, testes, dependências,
   human gate, risco e fora de escopo. Nenhum agente deve usar WordPress, Sheets,
   Chatwoot, R2/Drive ou IA como fonte alternativa de autorização acadêmica.
+
+
+## Coordenação GitHub-first
+
+GitHub é a fila e a memória operacional. Chat/Gmail não substituem Issue, PR,
+checks ou comentários persistidos.
+
+Regras padrão para qualquer agente:
+
+- branch canônica de integração: `codex/onda-0-consolidacao`;
+- uma tarefa = uma branch/worktree;
+- `MERGE_ALLOWED=NO` até autorização humana explícita;
+- produção, publicação, migration real e operações destrutivas exigem human gate;
+- force-push é proibido salvo autorização humana explícita e específica;
+- não iniciar a próxima tarefa automaticamente;
+- verificar PRs abertos antes de editar para evitar sobreposição;
+- persistir checkpoint no GitHub ao concluir;
+- CI verde é evidência técnica, não autorização de merge.
+
+Human gate obrigatório para: produção, secrets/credenciais, billing/provider
+pago, permissão/OAuth, operação destrutiva, aprovação legal/editorial/privacidade
+ou regra institucional ambígua.
+
+Resposta de human gate deve conter apenas o mínimo necessário:
+`HUMAN_GATE=SIM`, motivo, ação humana exata e o que continua desbloqueado.
+
+Ao finalizar, usar checkpoint compacto:
+
+```
+TASK_ID=
+BRANCH=
+PR=
+BASE_SHA=
+HEAD_SHA=
+TESTS=
+CI=
+MERGE_RECOMENDADO=SIM/NÃO
+HUMAN_GATE=
+BLOCKER=
+PROXIMO_PASSO=AGUARDAR_COORDENADOR
+```
+
+Perfis especializados reutilizáveis ficam em `.github/agents/*.agent.md`.
+O fluxo completo está em `docs/operations/AGENT_COORDINATION.md`.
