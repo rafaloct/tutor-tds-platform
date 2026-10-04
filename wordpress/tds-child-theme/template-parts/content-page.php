@@ -2,12 +2,12 @@
 /**
  * Página institucional: cabeçalho + conteúdo editorial + bloco opcional.
  *
- * @var array $args { eyebrow, show_modified, after (callable) }
+ * @var array $args { eyebrow, show_modified, before (callable), after (callable) }
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$args = wp_parse_args( $args, array( 'eyebrow' => '', 'show_modified' => false, 'after' => null ) );
+$args = wp_parse_args( $args, array( 'eyebrow' => '', 'show_modified' => false, 'before' => null, 'after' => null ) );
 ?>
 <main id="tds-main" class="tds-main" tabindex="-1">
 	<?php
@@ -17,6 +17,11 @@ $args = wp_parse_args( $args, array( 'eyebrow' => '', 'show_modified' => false, 
 		?>
 		<div class="tds-content">
 			<div class="tds-container tds-container--narrow">
+				<?php
+				if ( is_callable( $args['before'] ) ) {
+					call_user_func( $args['before'] );
+				}
+				?>
 				<div class="tds-prose">
 					<?php the_content(); ?>
 				</div>
