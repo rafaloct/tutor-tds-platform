@@ -19,6 +19,17 @@ class AppConfig {
   static const journeyTraceabilityEnabled = bool.fromEnvironment(
     'JOURNEY_TRACEABILITY_ENABLED',
   );
+  // Chatwoot widget configuration. The website token is a public widget
+  // identifier, but it is environment-specific and should be supplied by build
+  // configuration rather than embedded in the support screen.
+  static const chatwootBaseUrl = String.fromEnvironment(
+    'CHATWOOT_BASE_URL',
+    defaultValue: 'https://chat.ipexdesenvolvimento.cloud',
+  );
+  static const chatwootWebsiteToken = String.fromEnvironment(
+    'CHATWOOT_WEBSITE_TOKEN',
+  );
+
   // Enable only after the inbox signature and account-switch QA are configured.
   static const signedSupportIdentity = bool.fromEnvironment(
     'SIGNED_SUPPORT_IDENTITY',
