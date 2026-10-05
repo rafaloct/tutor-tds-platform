@@ -44,6 +44,7 @@ JWT_RE = re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b")
 PASSWORD_LINE_RE = re.compile(
     r"(?i)(password|senha|authorization|token)(\s*[:=]\s*)(\S+)"
 )
+HOST_SIGNAL_PREFIX = "TDS_E2E_HOST:"
 
 ROLE_ENV = {
     "student": ("STAGING_SEED_STUDENT_CPF", "STAGING_SEED_STUDENT_PASSWORD"),
@@ -242,10 +243,37 @@ def _clear_package(values: dict[str, str]) -> None:
     )
 
 
-def _screenshot(values: dict[str, str], path: Path) -> None:
+def _screenshot(values: dict[str, str], path: Path) -> bool:
+    path.parent.mkdir(parents=True, exist_ok=True)
     result = _adb(values, "exec-out", "screencap", "-p", check=False)
     if result.returncode == 0 and result.stdout.startswith(b"\x89PNG"):
         path.write_bytes(result.stdout)
+        return True
+    return False
+
+
+def _handle_host_signal(
+    values: dict[str, str],
+    scenario: str,
+    raw_line: str,
+    evidence_dir: Path,
+) -> str | None:
+    if HOST_SIGNAL_PREFIX not in raw_line:
+        return None
+    signal = raw_line.split(HOST_SIGNAL_PREFIX, 1)[1].strip()
+    if signal == "NETWORK_OFFLINE":
+        _network(values, False)
+        return signal
+    if signal == "NETWORK_ONLINE":
+        _network(values, True)
+        return signal
+    if signal in {"SCREENSHOT", "SCREENSHOT_OFFLINE"}:
+        suffix = "-offline" if signal == "SCREENSHOT_OFFLINE" else ""
+        path = evidence_dir / f"{scenario}{suffix}.png"
+        if not _screenshot(values, path):
+            raise RuntimeError("in-app screenshot capture failed")
+        return signal
+    raise RuntimeError("unknown E2E host signal")
 
 
 def _run_flutter(
@@ -253,20 +281,42 @@ def _run_flutter(
     scenario: str,
     secret_file: str,
     env: dict[str, str],
-    *,
-    offline_phase: str = "",
-) -> tuple[bool, str]:
-    command = flutter_command(values, scenario, secret_file, offline_phase)
-    result = subprocess.run(
+    evidence_dir: Path,
+) -> tuple[bool, str, list[str]]:
+    command = flutter_command(values, scenario, secret_file)
+    process = subprocess.Popen(
         command,
         cwd=Path(__file__).parents[3] / "cartilhas_app",
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         env=os.environ.copy(),
+        bufsize=1,
     )
-    output = sanitize(result.stdout, env)
-    return result.returncode == 0, output
+    lines: list[str] = []
+    host_events: list[str] = []
+    host_error: str | None = None
+    assert process.stdout is not None
+    for raw_line in process.stdout:
+        lines.append(sanitize(raw_line.rstrip("\n"), env))
+        try:
+            event = _handle_host_signal(
+                values,
+                scenario,
+                raw_line,
+                evidence_dir,
+            )
+            if event is not None:
+                host_events.append(event)
+        except RuntimeError as error:
+            host_error = str(error)
+            process.terminate()
+            break
+    return_code = process.wait()
+    if host_error is not None:
+        lines.append(host_error)
+    output = "\n".join(lines)
+    return return_code == 0 and host_error is None, output, host_events
 
 
 def execute(
@@ -295,47 +345,28 @@ def execute(
                 continue
 
             _clear_package(values)
-            phases = (
-                ("prime", "offline", "reconnect")
-                if scenario == "offline_reconnect"
-                else ("",)
-            )
-            phase_results: list[dict[str, object]] = []
             scenario_ok = True
             try:
-                for phase in phases:
-                    if scenario == "offline_reconnect":
-                        if phase == "offline":
-                            _network(values, False)
-                        elif phase == "reconnect":
-                            _network(values, True)
-                    ok, output = _run_flutter(
-                        values,
-                        scenario,
-                        secret_file.name,
-                        env,
-                        offline_phase=phase,
-                    )
-                    phase_results.append(
-                        {
-                            "phase": phase or "single",
-                            "passed": ok,
-                            "output_tail": output.splitlines()[-30:],
-                        }
-                    )
-                    if not ok:
-                        scenario_ok = False
-                        break
-                _screenshot(
+                ok, output, host_events = _run_flutter(
                     values,
-                    evidence_dir / f"{scenario}.png",
+                    scenario,
+                    secret_file.name,
+                    env,
+                    evidence_dir,
+                )
+                required_screenshots = {"SCREENSHOT"}
+                if scenario == "offline_reconnect":
+                    required_screenshots.add("SCREENSHOT_OFFLINE")
+                scenario_ok = ok and required_screenshots.issubset(
+                    set(host_events)
                 )
             finally:
                 _network(values, True)
             results[scenario] = {
                 "result": "PASS" if scenario_ok else "FAIL",
                 "real_e2e_run": True,
-                "phases": phase_results,
+                "host_events": host_events,
+                "output_tail": output.splitlines()[-30:],
             }
             if not scenario_ok:
                 break
