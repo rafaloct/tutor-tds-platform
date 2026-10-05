@@ -13,6 +13,7 @@ import 'features/study_ai/data/study_ai_service.dart';
 import 'features/study_ai/data/assessment_sync_service.dart';
 import 'features/certificates/data/certificate_service.dart';
 import 'features/auth/data/auth_repository.dart';
+import 'features/auth/data/unscoped_account_data_cleaner.dart';
 import 'features/learning_events/learning_event_sync_service.dart';
 import 'features/learning_events/learning_event_sync_lifecycle.dart';
 import 'features/analytics/app_telemetry_service.dart';
@@ -97,7 +98,10 @@ class _CartilhasAppState extends State<CartilhasApp> {
           dispose: (_, service) => service.dispose(),
         ),
         Provider(
-          create: (_) => AuthRepository(apiUrl: AppConfig.tutorApiUrl),
+          create: (_) => AuthRepository(
+            apiUrl: AppConfig.tutorApiUrl,
+            onSessionEnded: const UnscopedAccountDataCleaner().clear,
+          ),
           dispose: (_, repository) => repository.dispose(),
         ),
         Provider<AssessmentSyncCoordinator>(

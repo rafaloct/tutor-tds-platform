@@ -1,7 +1,10 @@
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
+import 'package:cartilhas_app/features/auth/data/unscoped_account_data_cleaner.dart';
+import 'package:cartilhas_app/features/certificates/data/certificate_repository.dart';
 import 'package:cartilhas_app/features/evidence/data/checkin_draft_store.dart';
+import 'package:cartilhas_app/features/profile/data/profile_data_store.dart';
 import 'package:cartilhas_app/screens/settings_screen.dart';
 import 'package:cartilhas_app/screens/welcome_screen.dart';
 import 'package:cartilhas_app/services/theme_controller.dart';
@@ -26,12 +29,29 @@ class _TokenStore implements AuthTokenStore {
   Future<void> write(AuthTokens tokens) async => value = tokens;
 }
 
+class _NoopProfileStore implements ProfileDataStore {
+  @override
+  Future<void> clear() async {}
+
+  @override
+  Future<ProfileData> read() async =>
+      const ProfileData(name: '', phone: '', cpf: '');
+
+  @override
+  Future<void> write(ProfileData data) async {}
+}
+
+class _NoopCertificates extends CertificateRepository {
+  @override
+  Future<void> deleteAll() async {}
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('logout confirma, preserva dados locais e volta ao login', (
-    tester,
-  ) async {
+  testWidgets(
+    'logout limpa dados acadêmicos não escopados e mantém preferências seguras',
+    (tester) async {
     tester.view.physicalSize = const Size(1200, 1800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -64,6 +84,10 @@ void main() {
         return http.Response('{}', 500);
       }),
       tokenStore: tokenStore,
+      onSessionEnded: UnscopedAccountDataCleaner(
+        profileDataStore: _NoopProfileStore(),
+        certificateRepository: _NoopCertificates(),
+      ).clear,
     );
 
     await tester.pumpWidget(
@@ -78,12 +102,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Conta online conectada'), findsOneWidget);
+    expect(
+      find.text(
+        'Encerra a sessão e remove dados locais que não estão vinculados a uma conta',
+      ),
+      findsOneWidget,
+    );
     await tester.ensureVisible(find.text('Sair da conta'));
     await tester.tap(find.text('Sair da conta'));
     await tester.pumpAndSettle();
     expect(find.text('Sair da conta online?'), findsOneWidget);
     expect(
-      find.textContaining('não são separados por usuário'),
+      find.textContaining(
+        'perfil, certificados e estudos locais não separados por usuário serão removidos',
+      ),
       findsOneWidget,
     );
 
@@ -94,8 +126,9 @@ void main() {
     expect(find.text('Bem-vindo ao TDS'), findsOneWidget);
     expect(find.text('Já tenho conta'), findsOneWidget);
     final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getString('user_name'), 'Pessoa no aparelho');
-    expect(prefs.getString('study_progress:last'), 'progresso-local');
+    expect(prefs.getString('user_name'), isNull);
+    expect(prefs.getString('study_progress:last'), isNull);
+    expect(prefs.getBool('privacy_notice_seen_v1'), isTrue);
     expect(prefs.getString('learning_events:pending:v1'), isNull);
     expect(prefs.getString('study_assessment:sync:v1'), isNull);
     expect(
@@ -103,8 +136,7 @@ void main() {
       isNull,
     );
 
-    // Simula o novo processo do app: o perfil local leva à Home mesmo sem
-    // sessão, e Configurações precisa continuar oferecendo reentrada online.
+    // Novo processo do app: sem user_name o app permanece na tela de boas-vindas.
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpWidget(
       MultiProvider(
@@ -116,18 +148,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Tutor TDS'), findsOneWidget);
+    expect(find.text('Bem-vindo ao TDS'), findsOneWidget);
+    expect(find.text('Já tenho conta'), findsOneWidget);
     expect(tokenStore.value, isNull);
 
-    await tester.tap(find.byTooltip('Mais opções'));
+    await tester.ensureVisible(find.text('Já tenho conta'));
+    await tester.tap(find.text('Já tenho conta'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Configurações'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Sem conta online conectada'), findsOneWidget);
-    expect(find.text('Entrar na conta online'), findsOneWidget);
-    await tester.tap(find.text('Entrar na conta online'));
-    await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(
       find.byKey(const ValueKey('account-login-cpf')),
       '52998224725',
@@ -140,12 +167,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tokenStore.value?.accessToken, 'new-access');
-    expect(find.text('Conta online conectada'), findsOneWidget);
-    expect(find.textContaining('Nova Pessoa • perfil monitor'), findsOneWidget);
-    expect(find.text('Sair da conta'), findsOneWidget);
-    expect(prefs.getString('study_progress:last'), 'progresso-local');
     expect(prefs.getString('user_name'), 'Nova Pessoa');
-  });
+    },
+  );
 
   testWidgets('cancelar mantém sessão ativa', (tester) async {
     SharedPreferences.setMockInitialValues({});
