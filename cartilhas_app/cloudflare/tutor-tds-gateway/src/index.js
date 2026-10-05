@@ -118,6 +118,13 @@ async function handleRequestInternal(request, env, upstreamFetch, requestId) {
       upstreamFetch,
       requestId,
     );
+    if (verifiedSources?.error) {
+      return json(
+        { error: verifiedSources.error },
+        verifiedSources.status,
+        cors.headers,
+      );
+    }
     if (!verifiedSources) {
       return json({ error: 'rag_context_unresolved' }, 503, cors.headers);
     }
@@ -599,18 +606,7 @@ async function callAnythingLlm(upstream, request, upstreamFetch, requestId) {
   }
 
   if (!response.ok) {
-    if (response.status === 429) return { error: 'rate_limited', status: 429 };
-    if (response.status === 408 || response.status === 504) {
-      return { error: 'upstream_timeout', status: 504 };
-    }
-    // Do not reveal whether this was an upstream authentication, routing, or
-    // provider failure. Those categories remain available to Worker logs by
-    // status, while the public contract remains safe to expose.
-    if (response.status === 401 || response.status === 403 || response.status === 404) {
-      return { error: 'service_unavailable', status: 503 };
-    }
-    if (response.status >= 500) return { error: 'service_unavailable', status: 503 };
-    return { error: 'invalid_upstream_response', status: 502 };
+    return upstreamFailure(response.status);
   }
 
   let upstreamData;
@@ -628,6 +624,18 @@ async function callAnythingLlm(upstream, request, upstreamFetch, requestId) {
     text,
     sources: Array.isArray(upstreamData?.sources) ? upstreamData.sources : [],
   };
+}
+
+function upstreamFailure(status) {
+  if (status === 429) return { error: 'rate_limited', status: 429 };
+  if (status === 408 || status === 504) {
+    return { error: 'upstream_timeout', status: 504 };
+  }
+  // Do not expose upstream auth, routing, or provider details.
+  if (status === 401 || status === 403 || status === 404 || status >= 500) {
+    return { error: 'service_unavailable', status: 503 };
+  }
+  return { error: 'invalid_upstream_response', status: 502 };
 }
 
 function validateChatInput(body) {
@@ -748,16 +756,18 @@ async function searchLearningSources(
       body: JSON.stringify({ query, topN: 4 }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
-  } catch {
-    return null;
+  } catch (error) {
+    return error?.name === 'AbortError' || error?.name === 'TimeoutError'
+      ? { error: 'upstream_timeout', status: 504 }
+      : { error: 'service_unavailable', status: 503 };
   }
-  if (!response.ok) return null;
+  if (!response.ok) return upstreamFailure(response.status);
 
   let data;
   try {
     data = await response.json();
   } catch {
-    return null;
+    return { error: 'invalid_upstream_response', status: 502 };
   }
   if (!Array.isArray(data?.results) || data.results.length === 0) return null;
 
@@ -835,21 +845,17 @@ function contextualCitations(citations, verifiedSources) {
   const cited = [];
   for (const citation of citations) {
     const metadata = citation?.metadata;
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+      return null;
+    }
     const title = publicSourceTitle(metadata?.title ?? citation?.title);
     const source = title ? sourcesByTitle.get(title) : null;
     if (!source) return null;
-    if (metadata && (
-      (metadata.course_id !== undefined &&
-        metadata.course_id !== source.course_id) ||
-      (metadata.course_version_id !== undefined &&
-        metadata.course_version_id !== source.course_version_id) ||
-      (metadata.module_id !== undefined &&
-        metadata.module_id !== source.module_id) ||
-      (metadata.experience_id !== undefined &&
-        metadata.experience_id !== source.experience_id) ||
-      (metadata.experience_type !== undefined &&
-        metadata.experience_type !== source.experience_type)
-    )) return null;
+    if (metadata.course_id !== source.course_id ||
+        metadata.course_version_id !== source.course_version_id ||
+        metadata.module_id !== source.module_id ||
+        metadata.experience_id !== source.experience_id ||
+        metadata.experience_type !== source.experience_type) return null;
     cited.push(source);
   }
   return [...new Map(cited.map((source) => [source.title, source])).values()];

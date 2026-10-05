@@ -85,7 +85,14 @@ function vectorSource(context, title, metadata = {}, fields = {}) {
   };
 }
 
-function contextualFetch(results, citations = [{ title: results[0]?.metadata?.title }], capture = {}) {
+function contextualFetch(
+  results,
+  citations = [{
+    title: results[0]?.metadata?.title,
+    metadata: results[0]?.metadata,
+  }],
+  capture = {},
+) {
   return async (url, options) => {
     const requestUrl = String(url);
     const body = JSON.parse(options.body);
@@ -143,7 +150,11 @@ test('contextual chat selects the course-version workspace, queries it, and sani
     {},
     contextualFetch(
       [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
-      [{ title: 'TDS_CTX_A_v1', chunk: 'private chunk text' }],
+      [{
+        title: 'TDS_CTX_A_v1',
+        chunk: 'private chunk text',
+        metadata: vectorSource(learningContextA, 'TDS_CTX_A_v1').metadata,
+      }],
       capture,
     ),
   );
@@ -206,7 +217,10 @@ test('context A and B accept only their own contextual sentinel sources', async 
         assert.equal(JSON.parse(options.body).mode, 'query');
         return Response.json({
           textResponse: 'Sentinel answer',
-          sources: [{ title: scenario.title }],
+          sources: [{
+            title: scenario.title,
+            metadata: vectorSource(scenario.source, scenario.title).metadata,
+          }],
         });
       },
     );
@@ -258,7 +272,10 @@ test('modules in one CourseVersion share a workspace but reject cross-module sou
           chatCalled = true;
           return Response.json({
             textResponse: 'Module answer',
-            sources: [{ title: scenario.title }],
+            sources: [{
+              title: scenario.title,
+              metadata: vectorSource(sourceContext, scenario.title).metadata,
+            }],
           });
         },
       );
@@ -404,6 +421,21 @@ test('contextual response rejects citations not present in verified retrieval', 
   assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
 });
 
+test('contextual response fails closed when citation metadata cannot prove its scope', async () => {
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+    scopedEnv(),
+    {},
+    contextualFetch(
+      [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
+      [{ title: 'TDS_CTX_A_v1', chunk: 'No scope metadata' }],
+    ),
+  );
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+});
+
 test('experience metadata is checked inside its CourseVersion workspace', async () => {
   const context = {
     ...learningContextA,
@@ -418,16 +450,22 @@ test('experience metadata is checked inside its CourseVersion workspace', async 
     async (url) => {
       if (String(url).endsWith('/vector-search')) {
         return Response.json({
-        results: [vectorSource(learningContextA, 'TDS_CTX_A_v1', {
-          experience_id: 'scenario-1',
-          experience_type: 'scenario',
-        })],
-      });
+          results: [vectorSource(learningContextA, 'TDS_CTX_A_v1', {
+            experience_id: 'scenario-1',
+            experience_type: 'scenario',
+          })],
+        });
       }
       chatUrl = String(url);
       return Response.json({
         textResponse: 'Experience answer',
-        sources: [{ title: 'TDS_CTX_A_v1' }],
+        sources: [{
+          title: 'TDS_CTX_A_v1',
+          metadata: vectorSource(learningContextA, 'TDS_CTX_A_v1', {
+            experience_id: 'scenario-1',
+            experience_type: 'scenario',
+          }).metadata,
+        }],
       });
     },
   );
@@ -464,7 +502,10 @@ test('experience sources require exact experience metadata', async () => {
         chatCalled = true;
         return Response.json({
           textResponse: 'Must not return',
-          sources: [{ title: 'TDS_CTX_A_v1' }],
+          sources: [{
+            title: 'TDS_CTX_A_v1',
+            metadata: vectorSource(learningContextA, 'TDS_CTX_A_v1').metadata,
+          }],
         });
       },
     );
@@ -617,6 +658,51 @@ test('preserva rate limit como erro observável sanitizado', async () => {
   );
   assert.equal(response.status, 429);
   assert.deepEqual(await response.json(), { error: 'rate_limited' });
+});
+
+test('contextual vector-search preserves sanitized 429, 504 and upstream failures', async () => {
+  const cases = [
+    { upstream: new Response('private quota detail', { status: 429 }), status: 429, error: 'rate_limited' },
+    { upstream: new Response('private timeout detail', { status: 504 }), status: 504, error: 'upstream_timeout' },
+    { upstream: new Response('private upstream detail', { status: 503 }), status: 503, error: 'service_unavailable' },
+    { upstream: new Response('private client detail', { status: 400 }), status: 502, error: 'invalid_upstream_response' },
+  ];
+
+  for (const scenario of cases) {
+    let chatCalled = false;
+    const response = await handleRequest(
+      post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+      scopedEnv(),
+      {},
+      async (url) => {
+        if (String(url).endsWith('/vector-search')) return scenario.upstream;
+        chatCalled = true;
+        return Response.json({});
+      },
+    );
+
+    assert.equal(response.status, scenario.status);
+    assert.deepEqual(await response.json(), { error: scenario.error });
+    assert.match(response.headers.get('X-Request-Id'), /^[0-9a-f-]{36}$/i);
+    assert.equal(chatCalled, false);
+  }
+
+  let chatCalled = false;
+  const timeout = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+    scopedEnv(),
+    {},
+    async (url) => {
+      if (String(url).endsWith('/vector-search')) {
+        throw new DOMException('deadline interno', 'TimeoutError');
+      }
+      chatCalled = true;
+      return Response.json({});
+    },
+  );
+  assert.equal(timeout.status, 504);
+  assert.deepEqual(await timeout.json(), { error: 'upstream_timeout' });
+  assert.equal(chatCalled, false);
 });
 
 test('normaliza 5xx upstream e JSON inválido sem vazar o corpo', async () => {

@@ -24,6 +24,7 @@ Estado do código auditado: endpoint já usado pelo gateway:
   - versão efetivamente instalada no VPS/Dokploy;
   - metadata e composição dos documentos atualmente indexados;
   - se existe workspace isolado por escopo acadêmico;
+  - se as sources finais do chat instalado carregam metadata de escopo suficiente;
   - execução remota do sentinel contextual A/B.
 
 Fontes oficiais consultadas em 2026-10-05:
@@ -64,7 +65,8 @@ documento/metadata nem os chunks verificados como contexto fechado. A validaçã
 de citations finais detecta fontes incompatíveis que o upstream declara, mas
 não prova que o texto da resposta deixou de usar conteúdo não citado. Os testes
 locais A/B provam a política do gateway para as fixtures, não o isolamento real
-do retriever.
+do retriever. Citation sem metadata que confirme curso/edição/módulo (e
+experiência quando aplicável) também falha com `rag_context_unresolved`.
 
 **RAG_SCOPE_GRANULARITY:** workspace por CourseVersion é a granularidade
 temporária configurada; módulo/experiência continuam bloqueados. A menor
@@ -74,12 +76,15 @@ CourseVersion + módulo em workspace separado. Nenhum workspace por experiência
 nem autorizado nesta execução.
 
 **TUTOR_RAG_SCOPE_MAP_ROLE=TEMPORARY.**
-**FASTAPI_CHANGE_REQUIRED=UNKNOWN.** O vínculo permanente depende do lifecycle
-de publicação/ingestão e não pode ser deduzido do código atual sem duplicar o
-catálogo. Contrato futuro a definir: CourseVersion publicada → material
-aprovado → ingestão/indexação AnythingLLM com metadata estável → registro
-autoritativo de `rag_scope` → gateway resolve versão/módulo. Não foi criado
-endpoint FastAPI.
+**FASTAPI_CHANGE_REQUIRED=SIM para interoperabilidade de conteúdo:** o manifesto
+existente de promoção CourseVersion rejeitava campos de experiência; sua
+allowlist agora valida e preserva o bloco tipado sem conceder autoridade à IA ou
+criar endpoint. **FASTAPI_CHANGE_REQUIRED=UNKNOWN para o registro RAG:** o
+vínculo permanente depende do lifecycle de publicação/ingestão e não pode ser
+deduzido sem duplicar o catálogo. Contrato futuro a definir: CourseVersion
+publicada → material aprovado → ingestão/indexação AnythingLLM com metadata
+estável → registro autoritativo de `rag_scope` → gateway resolve
+versão/módulo. Nenhum endpoint RAG foi criado.
 
 O objeto é somente escopo de conteúdo e não é autorização. O gateway usa somente
 IDs estáveis allowlisted; não recebe identidade, matrícula, frequência,
@@ -107,6 +112,13 @@ continua falhando fechado e não autoriza acesso acadêmico.
   branch do PR #136. A chamada geral passa curso/versão/módulo sem experiência;
   o botão de uma experiência fornece também seu ID/tipo estáveis e prompt
   inicial, sem dados da conta.
+- O manifesto existente de promoção CourseVersion agora aceita somente Experience
+  Blocks tipados e os preserva no snapshot; testes de contrato cobrem campos
+  desconhecidos, IDs/tipos inválidos e configurações de IA malformadas.
+- Validação local: gateway `32/32` e `api/tests/test_course_promotion.py` `10/10`;
+  Flutter test/analyze não executados (`flutter`/`dart` ausentes). GitHub
+  Actions para HEAD `2c223c0` retornou `action_required`, com zero jobs: não é
+  CI PASS. O PR ainda aponta para base não canônica.
 - `REAL_STAGING_E2E=NO`. O PR #132 ainda não teve seu RAG smoke real executado.
 - A base do PR #136 observada no GitHub é `codex/onda-0-consolidacao`, não a
   base canônica `staging` registrada na Issue. O branch inclui a composição

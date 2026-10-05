@@ -5,11 +5,14 @@
 `/v1/chat` aceita contexto estruturado compatível com legado. HEADs autorizados
 de #132/#135 estão compostos localmente no PR #136; request ID, 429/504 e
 chamador real de experiência preservados. Gateway usa mapa temporário por
-CourseVersion, valida source por módulo/experiência e passa 30/30 testes Node.
+CourseVersion e valida source por módulo/experiência.
 AnythingLLM não documenta filtro que prove isolamento do retriever dentro do
-workspace; `RAG_SCOPE_ARCHITECTURE=BLOCKED`, Flutter SDK indisponível neste
-runner, `REAL_STAGING_E2E=NO`. A base do PR #136 ainda precisa ser retargetada
-para staging. Nenhuma configuração, workspace, staging ou produção foi alterada.
+workspace; `RAG_SCOPE_ARCHITECTURE=BLOCKED`, `REAL_STAGING_E2E=NO`. A base do PR
+#136 ainda precisa ser retargetada para staging. Gateway passou 32/32 Node e
+promoção CourseVersion 9/9 testes focais; Flutter test/analyze não executados por
+falta do SDK. Promoção preserva Experience Blocks tipados;
+registro autoritativo de escopo RAG ainda depende da decisão de ingestão. Nenhuma
+configuração, workspace, staging ou produção foi alterada.
 Auditoria: `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
 
 ## Integração META 05 — 03/10/2026

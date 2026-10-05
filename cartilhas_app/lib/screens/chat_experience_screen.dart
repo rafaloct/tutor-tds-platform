@@ -519,6 +519,23 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     );
   }
 
+  String? get _tutorCourseVersionId {
+    final contextVersion = widget
+        .learningContextController
+        ?.snapshot
+        ?.context;
+    final cartilhaVersion = widget.cartilha.courseVersionId;
+    if (contextVersion?.courseId == widget.cartilha.id) {
+      if (cartilhaVersion != null &&
+          cartilhaVersion.trim().isNotEmpty &&
+          cartilhaVersion != contextVersion!.courseVersionId) {
+        return null;
+      }
+      return contextVersion!.courseVersionId;
+    }
+    return cartilhaVersion;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -582,7 +599,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                 final section = widget.cartilha.sections.isEmpty
                     ? null
                     : widget.cartilha.sections[_currentSectionIndex];
-                final courseVersionId = widget.cartilha.courseVersionId;
+                final courseVersionId = _tutorCourseVersionId;
                 final learningContext =
                     courseVersionId != null && courseVersionId.trim().isNotEmpty
                     ? TutorLearningContext(
@@ -769,7 +786,10 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
             if (msg.experience != null)
               LearningExperienceCard(
                 experience: msg.experience!,
-                onAskTutor: msg.experience!.ai == null || messageSection == null
+                onAskTutor: msg.experience!.ai == null ||
+                        messageSection == null ||
+                        _tutorCourseVersionId?.trim().isNotEmpty !=
+                            true
                     ? null
                     : () => _openExperienceTutor(
                         section: messageSection,
@@ -813,25 +833,27 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     required Message message,
   }) {
     final experience = message.experience;
-    if (experience == null || experience.ai == null) return;
+    final courseVersionId = _tutorCourseVersionId;
+    if (experience == null ||
+        experience.ai == null ||
+        courseVersionId == null ||
+        courseVersionId.trim().isEmpty) {
+      return;
+    }
     final ai = experience.ai!;
-    final courseVersionId = widget.cartilha.courseVersionId;
-    final learningContext =
-        courseVersionId != null && courseVersionId.trim().isNotEmpty
-        ? TutorLearningContext(
-            courseId: widget.cartilha.id,
-            courseVersionId: courseVersionId,
-            moduleId: section.id,
-            experienceId: experience.id,
-            experienceType: switch (experience.kind) {
-              ExperienceKind.scenario => TutorExperienceType.scenario,
-              ExperienceKind.reveal => TutorExperienceType.reveal,
-              ExperienceKind.reflection => TutorExperienceType.reflection,
-              ExperienceKind.actionChallenge =>
-                TutorExperienceType.actionChallenge,
-            },
-          )
-        : null;
+    final learningContext = TutorLearningContext(
+      courseId: widget.cartilha.id,
+      courseVersionId: courseVersionId,
+      moduleId: section.id,
+      experienceId: experience.id,
+      experienceType: switch (experience.kind) {
+        ExperienceKind.scenario => TutorExperienceType.scenario,
+        ExperienceKind.reveal => TutorExperienceType.reveal,
+        ExperienceKind.reflection => TutorExperienceType.reflection,
+        ExperienceKind.actionChallenge =>
+          TutorExperienceType.actionChallenge,
+      },
+    );
     // Deliberately build this from content only. No profile, enrollment,
     // progress, attendance, or other participant data crosses this boundary.
     final pedagogicalContext = ExperienceTutorContext.fromContent(

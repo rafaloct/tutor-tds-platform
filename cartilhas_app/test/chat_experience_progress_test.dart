@@ -265,6 +265,85 @@ void main() {
     },
   );
 
+  testWidgets('experience Tutor action is unavailable without a CourseVersion', (
+    tester,
+  ) async {
+    final course = Cartilha(
+      id: 'legacy-course',
+      title: 'Cartilha sem versão canônica',
+      author: 'TDS',
+      sections: [
+        Section(
+          id: 'module-a1',
+          title: 'Módulo A1',
+          messages: [
+            Message(
+              type: 'bot',
+              content: 'Desafio inicial',
+              experience: const ExperienceBlock(
+                id: 'scenario-a1',
+                kind: ExperienceKind.scenario,
+                objective: 'Explore a situação.',
+                ai: ExperienceAiConfig(starterPrompt: 'Ajude a explorar.'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await openReader(tester, course);
+    expect(find.text('Conversar com o Tutor IA'), findsNothing);
+  });
+
+  testWidgets(
+    'experience Tutor can use the authoritative CourseVersion snapshot',
+    (tester) async {
+      final controller = LearningContextController(
+        FakeLearningContextRepository({
+          'class-1': LearningContextSnapshot.fromJson(contextPayload()),
+        }),
+      );
+      addTearDown(controller.dispose);
+      await controller.load('class-1');
+      final course = Cartilha(
+        id: 'course',
+        title: 'Cartilha publicada',
+        author: 'TDS',
+        classId: 'class-1',
+        sections: [
+          Section(
+            id: 'module-a1',
+            title: 'Módulo A1',
+            messages: [
+              Message(
+                type: 'bot',
+                content: 'Desafio inicial',
+                experience: const ExperienceBlock(
+                  id: 'scenario-a1',
+                  kind: ExperienceKind.scenario,
+                  objective: 'Explore a situação.',
+                  ai: ExperienceAiConfig(starterPrompt: 'Ajude a explorar.'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await openReader(tester, course, controller: controller);
+      await tester.tap(find.text('Conversar com o Tutor IA'));
+      await tester.pumpAndSettle();
+      final tutor = tester.widget<GenUIAssistantScreen>(
+        find.byType(GenUIAssistantScreen),
+      );
+      expect(tutor.learningContext?.courseId, 'course');
+      expect(tutor.learningContext?.courseVersionId, 'version-1');
+      expect(tutor.learningContext?.moduleId, 'module-a1');
+      expect(tutor.learningContext?.experienceId, 'scenario-a1');
+    },
+  );
+
   testWidgets(
     'resume in last module weights message counts without implying completion',
     (tester) async {

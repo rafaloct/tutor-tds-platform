@@ -12,7 +12,9 @@ python -m app.course_promotion export --course-id CURSO --version-id VERSAO --ou
 
 O arquivo contém somente `schema_version: 1`, `course_id`, `version_id`,
 `version_number`, `content` e `sha256`. Preserva os IDs e versões dos módulos e
-mensagens. Campos fora do contrato de conteúdo são rejeitados; não exporta usuários,
+mensagens. Mensagens bot podem conter `experience` com ID estável, tipo conhecido,
+objetivo e campos opcionais estritamente validados (`required`, `actionLabel` e
+`ai.starterPrompt`). Campos fora do contrato de conteúdo são rejeitados; não exporta usuários,
 matrículas, turmas, certificados, credenciais, IDs de programa ou IDs do autor no
 banco. `author` continua sendo o crédito editorial do curso. O caminho de saída
 deve ser novo. Revise também o texto e os links do conteúdo antes de transferir.

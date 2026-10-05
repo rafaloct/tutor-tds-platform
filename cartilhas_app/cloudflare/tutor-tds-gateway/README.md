@@ -112,8 +112,10 @@ validadas nas sources. O formato temporário da chave é
 O Worker faz `vector-search` antes do chat, exige metadata exata de
 curso/edição/módulo e, em chamadas de experiência, experiência/tipo; usa
 `mode: "query"` sem session ID. Citações do chat devem corresponder às fontes
-verificadas. O retorno inclui somente título público, IDs acadêmicos verificados
-e score numérico opcional; paths, IDs privados, URLs e chunks são descartados.
+verificadas e trazer metadata que comprove curso/edição/módulo (e experiência
+quando aplicável); citation somente com título/chunk falha fechado. O retorno
+inclui somente título público, IDs acadêmicos verificados e score numérico
+opcional; paths, IDs privados, URLs e chunks são descartados.
 Mapeamento ausente, fonte sem metadata, fonte incompatível ou resposta sem
 citação retorna `rag_context_unresolved`. O mapa é conteúdo de configuração,
 não autorização acadêmica, e não pode conter PII.
@@ -132,9 +134,11 @@ testado remotamente. `WORKSPACE_PER_EXPERIENCE=NO`.
 A arquitetura permanente deve derivar o vínculo do ciclo de publicação:
 CourseVersion publicada → material aprovado → ingestão/indexação → registro de
 `rag_scope` → resolução pelo gateway. `TUTOR_RAG_SCOPE_MAP` permanece
-temporário até esse lifecycle ser definido. `FASTAPI_CHANGE_REQUIRED=UNKNOWN`:
-depende de como ingestão e o registro autoritativo serão integrados; nenhum
-endpoint foi inventado nesta mudança. Nenhum workspace foi criado ou alterado.
+temporário até esse lifecycle ser definido. O contrato existente de promoção
+CourseVersion agora valida e preserva Experience Blocks tipados. A necessidade
+de mudança FastAPI para o futuro registro autoritativo de RAG continua
+`UNKNOWN`; nenhum endpoint RAG foi inventado. Nenhum workspace foi criado ou
+alterado.
 
 ## Certificados
 
