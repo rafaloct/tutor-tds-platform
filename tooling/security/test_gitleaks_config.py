@@ -301,7 +301,7 @@ def main() -> int:
             {
                 "docs/production/evidence/"
                 "class-lifecycle-e2e-14000000000000000000000000000001.json": (
-                    json.dumps({"api_head": git_sha}) + "\n"
+                    json.dumps({"api_head": git_sha}, indent=2) + "\n"
                 )
             },
             gitleaks,
