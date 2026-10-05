@@ -136,31 +136,33 @@ storage ID e metadata privada não são retornados.
 - O manifesto existente de promoção CourseVersion agora aceita somente Experience
   Blocks tipados e os preserva no snapshot; testes de contrato cobrem campos
   desconhecidos, IDs/tipos inválidos e configurações de IA malformadas.
-- Validação local: gateway `32/32` e `api/tests/test_course_promotion.py` `10/10`;
-  Flutter test/analyze não executados (`flutter`/`dart` ausentes). GitHub
-  Actions mais recentes do PR #136 retornaram `action_required`, com zero jobs:
-  não é CI PASS. A revisão automática não pôde carregar o modelo; CodeQL
-  reportou zero alertas Python, mas a análise JavaScript expirou, então a
-  validação de segurança ficou incompleta. O PR ainda aponta para base não
-  canônica.
-- `REAL_STAGING_E2E=NO`. O PR #132 ainda não teve seu RAG smoke real executado.
-- A base do PR #136 observada no GitHub é `codex/onda-0-consolidacao`, não a
-  base canônica `staging` registrada na Issue. O retarget e a atualização do
-  corpo do PR não estão disponíveis pelas ferramentas desta execução; exigem
-  ação do coordenador. O HEAD conserva a composição dos HEADs de #132/#135.
-- Nenhuma chamada estruturada foi testada contra a instalação real. Nenhuma
-  mutação de staging ou produção foi executada.
+- Validação local pós-sync com `staging=8f60b01`: gateway `32/32`,
+  `api/tests/test_course_promotion.py` `10/10`, Flutter focal `18/18`,
+  sentinel tooling `5/5`, `git diff --check` PASS e gitleaks 8.28.0 PASS
+  no intervalo `origin/staging..HEAD`; `flutter analyze --no-pub` também
+  PASS, sem issues.
+- O tooling `verify_rag_sentinel.mjs` agora exige dois `learning_context`
+  distintos, dois marcadores A/B e sources compatíveis; não inclui o marcador
+  esperado na pergunta e não imprime prompt, resposta, endpoint ou metadata
+  privada. Isso prepara a prova remota, mas não a executa.
+- GitHub Actions disparados durante o incidente de disponibilidade do GitHub
+  retornaram `action_required` com zero jobs; esse estado não é CI PASS nem
+  falha de implementação. CI deverá ser observado novamente quando o serviço
+  normalizar.
+- O PR #136 permanece baseado em `staging`; a branch foi sincronizada por
+  merge normal com o HEAD canônico `8f60b01`, preservando a composição dos
+  HEADs #132/#135 e sem trazer WordPress/observabilidade da task quebrada.
+- `REAL_STAGING_E2E=NO`. Nenhuma chamada estruturada foi feita contra a
+  instalação real e nenhuma mutação de staging ou produção foi executada.
 
 ## Human gate
 
-- **Reason:** sentinel contextual e metadata só podem ser comprovados em Worker
-  staging isolado e com documentos QA; nenhum Worker apto nem gate para mutação
-  de staging foram autorizados nesta execução.
-- **Exact human action:** (1) retarget PR #136 para `staging` e atualizar seu
-  corpo com o estado documentado; (2) confirmar o lifecycle automático e o
-  registry autoritativo futuro; (3) liberar/autorizar Actions para a origem do
-  agente, se exigido pela política do GitHub.
-- **What remains unblocked:** testes locais e revisão do contrato de cliente/
-  gateway. Após base correta e CI verde, um gate staging separado ainda será
-  necessário. Isolamento real de módulo/experiência, REAL_STAGING_E2E, merge e
-  produção permanecem bloqueados.
+- **Reason:** o sentinel contextual A/B e a metadata real só podem ser
+  comprovados em Worker staging isolado com dois conteúdos QA vinculados a
+  CourseVersions distintas.
+- **Exact human action:** autorizar um gate separado de staging para preparar os
+  dois conteúdos/workspaces QA, configurar temporariamente o
+  `TUTOR_RAG_SCOPE_MAP` de staging e executar o sentinel contextual A/B.
+- **What remains unblocked:** revisão/CI do código e do contrato local. O
+  registry autoritativo permanente continua TARGET/UNKNOWN; isolamento real de
+  módulo/experiência, REAL_STAGING_E2E, merge e produção permanecem bloqueados.

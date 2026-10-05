@@ -30,11 +30,12 @@ CourseVersion; isolamento de módulo/experiência não está comprovado. Status:
 `CONTEXT_BINDING_READY=NÃO`, `AI_SERVICE_READY=NÃO`.
 `FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO`;
 `RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`. Alvo permanente de ingestão está
-documentado, não implementado. Últimos testes locais registrados: gateway 32/32,
-promoção 10/10; Flutter test/analyze sem execução por SDK ausente. O PR #136
-continua com base não canônica; retarget e edição de descrição exigem ação do
-coordenador. `REAL_STAGING_E2E=NO`. Nenhuma configuração, workspace, staging ou
-produção foi alterada. Auditoria: `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
+documentado, não implementado. Pós-sync com `staging=8f60b01`: gateway 32/32,
+promoção 10/10, Flutter focal 18/18, analyze PASS, sentinel tooling 5/5 e
+gitleaks PASS. O PR #136 permanece baseado em staging e foi sincronizado por
+merge normal; o sentinel A/B real segue não executado. `REAL_STAGING_E2E=NO`.
+Nenhuma configuração, workspace, staging ou produção foi alterada. Auditoria:
+`AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
 
 ## Integração META 05 — 03/10/2026
 

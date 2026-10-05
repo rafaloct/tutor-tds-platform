@@ -1,50 +1,79 @@
-# QA sintético do RAG do Tutor IA
+# QA sintético contextual do RAG do Tutor IA
 
-Este diretório contém somente uma prova **staging-only**, sem credenciais e sem
-persistir perguntas ou respostas. Ele não executa automaticamente e não altera
-Worker, AnythingLLM, workspace, provider ou billing.
+Este diretório contém tooling **staging-only** para provar isolamento contextual
+A/B sem credenciais, PII ou persistência de perguntas/respostas. Ele não executa
+automaticamente e não altera Worker, AnythingLLM, workspace, provider ou billing.
 
 ## Pré-requisito humano
 
-Criar, no workspace de staging autorizado do AnythingLLM, um documento de QA
-sem PII contendo um marcador versionado único, por exemplo:
+Preparar dois conteúdos QA distintos, cada um vinculado a uma CourseVersion
+diferente e ao workspace de staging correspondente. Exemplo:
 
 ```text
-TDS_AI_SENTINEL=2026-10-05-r1
+contexto A -> TDS_CTX_A_v1
+contexto B -> TDS_CTX_B_v3
 ```
 
-Depois confirmar a indexação desse documento no workspace que o Worker de
-staging usa. Não inserir o marcador em cartilha pedagógica ou workspace de
-produção.
+Os marcadores devem existir somente nos documentos QA do respectivo contexto.
+Não inserir os marcadores em cartilhas ou workspaces de produção.
+
+O Worker staging também precisa resolver as duas CourseVersions pelo
+`TUTOR_RAG_SCOPE_MAP` temporário do candidato. Isso é bootstrap de QA, não
+registro acadêmico autoritativo.
 
 ## Execução autorizada
 
-Em uma sessão com a URL de **staging** já autorizada, use variáveis de ambiente
-efêmeras (sem secret):
+Somente depois de autorização explícita de staging, usar variáveis efêmeras:
 
 ```powershell
 $env:TDS_AI_QA_ENV = 'staging'
 $env:TDS_AI_SENTINEL_URL = 'https://SEU-WORKER-STAGING.example'
-$env:TDS_AI_SENTINEL_MARKER = 'TDS_AI_SENTINEL=2026-10-05-r1'
+$env:TDS_AI_SENTINEL_MARKER_A = 'TDS_CTX_A_v1'
+$env:TDS_AI_SENTINEL_MARKER_B = 'TDS_CTX_B_v3'
+$env:TDS_AI_SENTINEL_CONTEXT_A = '{"course_id":"curso-a","course_version_id":"versao-a"}'
+$env:TDS_AI_SENTINEL_CONTEXT_B = '{"course_id":"curso-b","course_version_id":"versao-b"}'
 node tooling/ai_qa/verify_rag_sentinel.mjs
 ```
 
-O script recusa qualquer ambiente que não seja literalmente `staging` e qualquer
-hostname sem o rótulo `staging` (por exemplo, `worker-staging.example`). Isso
-impede que uma variável local mal configurada aponte para produção. Ele
-envia uma pergunta sintética, imprime somente timestamp, status HTTP, latência,
-`X-Request-Id`, categoria de erro e PASS/FAIL do marcador. Não imprime prompt,
-resposta, endpoint nem segredo.
+`module_id` pode ser incluído quando o documento QA provar esse nível. Para
+experiência, `experience_id` e `experience_type` devem aparecer juntos e
+`module_id` é obrigatório.
+
+O script recusa:
+
+- ambiente diferente de `staging`;
+- URL sem HTTPS ou hostname sem rótulo `staging`;
+- marcadores iguais;
+- contextos inválidos ou iguais;
+- resposta sem sources compatíveis com o contexto;
+- marcador A ausente em A ou marcador B aparecendo em A;
+- marcador B ausente em B ou marcador A aparecendo em B.
+
+A pergunta enviada não contém o marcador esperado, para impedir um PASS por
+simples eco do prompt.
+
+## Evidência emitida
+
+A saída contém somente:
+
+- timestamp e ambiente;
+- rótulo A/B;
+- status HTTP e latência;
+- `X-Request-Id`;
+- quantidade de sources;
+- PASS/FAIL da compatibilidade de sources;
+- PASS/FAIL do sentinel;
+- categoria de erro sanitizada.
+
+Não imprime prompt, resposta, marcador, endpoint, título de source, metadata
+privada ou segredo.
 
 ## Interpretação
 
-| Resultado | Conclusão limitada |
-| --- | --- |
-| HTTP 200 + `rag_sentinel=PASS` | Gateway, AnythingLLM, provider e recuperação do documento sentinela responderam nessa chamada. |
-| HTTP 200 + `rag_sentinel=FAIL` | O modelo respondeu, mas não há prova de que recuperou o workspace/documento TDS correto. |
-| 429 | Limite de taxa observável; investigar Cloudflare, AnythingLLM e provider com `request_id`. |
-| 504 / `upstream_timeout` | O Worker alcançou seu limite de upstream; não prova indisponibilidade permanente. |
-| 503 / `service_unavailable` | Falha sanitizada de configuração, rede ou upstream; correlacionar o `request_id` nos logs do Worker. |
+`contextual_rag_sentinel=PASS` exige PASS em A e B. Isso comprova pontualmente
+que o gateway staging recuperou o marcador do contexto correto e que as sources
+declaradas correspondem ao `learning_context`. Ainda não transforma AnythingLLM
+em autoridade acadêmica e não autoriza produção ou merge.
 
-Um PASS é uma evidência pontual de staging — não autoriza produção, merge ou
-mudança de configuração.
+Os testes locais deste diretório validam apenas os guardrails pré-rede. A prova
+real A/B depende de Worker e documentos QA de staging autorizados.
