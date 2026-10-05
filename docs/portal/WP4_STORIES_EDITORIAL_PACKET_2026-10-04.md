@@ -1,7 +1,7 @@
 # WP-4 — pacote editorial das histórias REALIZADO
 
-Data: 2026-10-04  
-Fonte: `WP3B_CURATED_STORIES_2026-10-04.md`  
+Data: 2026-10-04
+Fonte: `WP3B_CURATED_STORIES_2026-10-04.md`
 Status: **STRUCTURED / não publicado em produção**
 
 ## Objetivo
