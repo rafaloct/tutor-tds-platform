@@ -56,7 +56,11 @@
       "agent_reply": "PASS",
       "reply_marker": "CW67 OK",
       "resolved": "PASS",
-      "public_outgoing_count": 1
+      "public_outgoing_count": 1,
+      "agent_reply_text": "CW67 OK",
+      "widget_reply_visible": "PASS",
+      "status_after_reply": "resolved",
+      "auto_resolution_observed": "system resolved due to 0 minutes of inactivity"
     },
     "ab_isolation": {
       "contact_inbox_a": 344,
@@ -70,7 +74,8 @@
   "risks": [
     "staging inbox has no explicit members, so agent reception/reply is not yet proven",
     "working hours exist as 09:00-17:00 Monday-Friday but are disabled",
-    "account-level canned responses include legacy certificate wording that conflicts with the current canonical academic contract; they were not modified because they are shared with production support"
+    "account-level canned responses include legacy certificate wording that conflicts with the current canonical academic contract; they were not modified because they are shared with production support",
+    "staging conversation 157 was auto-resolved by system due to 0 minutes of inactivity immediately after the human reply; investigate Chatwoot inactivity/auto-resolution configuration before operational acceptance"
   ],
   "pending": [
     "A-to-B full conversation isolation smoke",
