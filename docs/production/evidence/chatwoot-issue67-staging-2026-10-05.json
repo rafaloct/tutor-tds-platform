@@ -1,0 +1,103 @@
+{
+  "observed_at": "2026-10-05",
+  "issue": 67,
+  "pull_request": 142,
+  "environment": "staging",
+  "production_mutated": false,
+  "staging": {
+    "api_image_revision": "911c4545076da7cb6e70f57d70dccbe1fbe3b446",
+    "api_container_healthy": true,
+    "identity_namespace": "tds-staging",
+    "identity_secret_present": true,
+    "signed_support_identity_build_flag": false,
+    "support_identity_smoke": {
+      "result": "PASS",
+      "hash_length": 64
+    }
+  },
+  "chatwoot": {
+    "public_version": "4.11.0",
+    "account_name": "TDS Tocantins",
+    "account_admin_count": 2,
+    "account_agent_count": 10,
+    "inbox": {
+      "id": 16,
+      "name": "Tutor TDS — Staging QA",
+      "channel_type": "Channel::WebWidget",
+      "hmac_mandatory": true,
+      "auto_assignment": false,
+      "working_hours_enabled": false,
+      "working_hours_rows": 7,
+      "inbox_members": 2,
+      "member_roles": {
+        "administrator": 2
+      }
+    },
+    "labels_count": 12,
+    "teams_count": 1,
+    "canned_responses_count": 16,
+    "macros_count": 0,
+    "automations_count": 0,
+    "hmac_handshake": {
+      "invalid_signature_status": 401,
+      "invalid_signature_result": "PASS",
+      "api_signature_status": 200,
+      "api_signature_result": "PASS"
+    },
+    "transport": {
+      "tls": "PASS",
+      "websocket_http_status": 101,
+      "websocket": "PASS"
+    },
+    "synthetic_conversation": {
+      "created": true,
+      "conversation_display_id": 157,
+      "incoming_message": "PASS",
+      "agent_reply": "PASS",
+      "reply_marker": "CW67 OK",
+      "resolved": "PASS",
+      "public_outgoing_count": 1,
+      "agent_reply_text": "CW67 OK",
+      "widget_reply_visible": "PASS",
+      "status_after_reply": "resolved",
+      "auto_resolution_observed": "system resolved due to 0 minutes of inactivity"
+    },
+    "ab_isolation": {
+      "contact_inbox_a": 344,
+      "contact_inbox_b": 345,
+      "same_contact": false,
+      "same_contact_inbox": false,
+      "b_conversations_in_staging_inbox": 0,
+      "result": "PASS-STRUCTURAL"
+    }
+  },
+  "risks": [
+    "staging inbox has no explicit members, so agent reception/reply is not yet proven",
+    "working hours exist as 09:00-17:00 Monday-Friday but are disabled",
+    "account-level canned responses include legacy certificate wording that conflicts with the current canonical academic contract; they were not modified because they are shared with production support",
+    "staging conversation 157 was auto-resolved by system due to 0 minutes of inactivity immediately after the human reply; investigate Chatwoot inactivity/auto-resolution configuration before operational acceptance"
+  ],
+  "pending": [
+    "A-to-B full conversation isolation smoke",
+    "network loss and retry on Android",
+    "physical Android evidence required by Issue #67",
+    "prove no academic state changes before/after conversation"
+  ],
+  "academic_boundary": {
+    "action": "resolve Chatwoot staging conversation 157",
+    "checked_tables": [
+      "class_enrollments",
+      "session_presence",
+      "session_presence_decisions",
+      "official_attendance_decisions",
+      "certificate_requests",
+      "certificates",
+      "certificate_request_transitions",
+      "learning_events",
+      "evidence_items",
+      "student_baselines"
+    ],
+    "before_after_hashes_identical": true,
+    "result": "PASS"
+  }
+}
