@@ -40,18 +40,15 @@ O repositório não fixa nem comprova a versão do servidor AnythingLLM. A
 capacidade acima é evidência do contrato oficial consultado, não prova da
 instalação remota.
 
-## Estado da arquitetura e implementação local
+## Estado observado e arquitetura alvo
 
-Sem filtro de documento/metadata, a busca por workspace é a única fronteira de
-recuperação documentada que o gateway consegue selecionar. A seleção temporária
-foi reduzida a `course_id|course_version_id → workspace`; módulo e experiência
-são validações de sources, não seletores de workspace. CourseVersions diferentes
-não podem compartilhar workspace nesse mapa. Não há fallback para
-`ANYTHING_LLM_WORKSPACE`. O Worker executa `vector-search`, exige metadata
-compatível nas sources, só então chama o chat em `mode=query` e confere as
-citações antes de devolver o texto. Mapeamento ausente, fonte sem vínculo,
-metadata incompatível ou resposta sem citação falha com
-`503 rag_context_unresolved`.
+**OBSERVED:** a mudança no gateway resolve o workspace temporariamente por
+`course_id|course_version_id`, faz `vector-search`, exige metadata compatível nas
+sources e chama o chat em `mode=query`. Mapeamento ausente, fonte sem vínculo,
+metadata incompatível ou citação sem metadata suficiente falha com
+`503 rag_context_unresolved`. Não há fallback para `ANYTHING_LLM_WORKSPACE`
+quando `learning_context` está presente. Isso prova o comportamento das fixtures
+locais, não o comportamento da instalação AnythingLLM.
 
 `TUTOR_RAG_SCOPE_MAP` é somente bootstrap temporário/test fixture, não fonte de
 verdade acadêmica permanente. Não foi configurado ou instalado em qualquer
@@ -70,21 +67,37 @@ experiência quando aplicável) também falha com `rag_context_unresolved`.
 
 **RAG_SCOPE_GRANULARITY:** workspace por CourseVersion é a granularidade
 temporária configurada; módulo/experiência continuam bloqueados. A menor
-fronteira de recuperação documentada para isolamento de módulo seria
-CourseVersion + módulo em workspace separado. Nenhum workspace por experiência
-é necessário ou aceitável. O workspace por módulo também não foi provisionado
-nem autorizado nesta execução.
+fronteira de recuperação documentada para isolamento de módulo exigiria uma
+fronteira física distinta por módulo, se não houver capacidade upstream adicional.
+Isso não está implementado, não foi provado e não autoriza provisionamento nesta
+execução. Nenhum workspace por experiência é necessário ou aceitável.
 
 **TUTOR_RAG_SCOPE_MAP_ROLE=TEMPORARY.**
-**FASTAPI_CHANGE_REQUIRED=SIM para interoperabilidade de conteúdo:** o manifesto
-existente de promoção CourseVersion rejeitava campos de experiência; sua
-allowlist agora valida e preserva o bloco tipado sem conceder autoridade à IA ou
-criar endpoint. **FASTAPI_CHANGE_REQUIRED=UNKNOWN para o registro RAG:** o
-vínculo permanente depende do lifecycle de publicação/ingestão e não pode ser
-deduzido sem duplicar o catálogo. Contrato futuro a definir: CourseVersion
-publicada → material aprovado → ingestão/indexação AnythingLLM com metadata
-estável → registro autoritativo de `rag_scope` → gateway resolve
-versão/módulo. Nenhum endpoint RAG foi criado.
+**FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO.** O
+delta limitado em `course_promotion` valida e preserva `Experience Blocks`
+tipados no conteúdo promovido. Não adiciona campo/tabela persistente, migration,
+autorização IA nem endpoint RAG.
+
+**RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN.** Lifecycle permanente documentado como
+**TARGET, não implementação observada**:
+
+```text
+CourseVersion publicada
+        ↓
+materiais aprovados
+        ↓
+ingestão/indexação IA
+        ↓
+metadata vinculada à CourseVersion
+        ↓
+rag_scope registrado
+        ↓
+gateway resolve contexto
+```
+
+O fluxo alvo deve ser automático para novas CourseVersions e não exigir
+configuração por experiência. O registry autoritativo e sua fronteira ainda
+dependem de decisão técnica; nenhum endpoint ou persistência foi criado.
 
 O objeto é somente escopo de conteúdo e não é autorização. O gateway usa somente
 IDs estáveis allowlisted; não recebe identidade, matrícula, frequência,
@@ -94,11 +107,19 @@ código não envia `sessionId`. A resposta expõe somente título público, curs
 edição, módulo e score opcional de fontes verificadas; chunk, caminho, URL,
 storage ID e metadata privada não são retornados.
 
-`FASTAPI_CHANGE_REQUIRED=NO` para o vínculo local por allowlist. Isso não
-comprova que uma futura edição publicada esteja mapeada; contexto não resolvido
-continua falhando fechado e não autoriza acesso acadêmico.
-
 ## Prova local e limites
+
+- `LOCAL_CONTEXT_BINDING_READY=PARCIAL`
+- `CONTEXT_BINDING_READY=NÃO`
+- `AI_SERVICE_READY=NÃO`
+- `RAG_SCOPE_GRANULARITY=CourseVersion`
+- `WORKSPACE_PER_EXPERIENCE=NO`
+- `MODULE_ISOLATION=BLOCKED`
+- `EXPERIENCE_ISOLATION=BLOCKED`
+- `TUTOR_RAG_SCOPE_MAP_ROLE=TEMPORARY`
+- `FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO`
+- `RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`
+- `INGESTION_LIFECYCLE_DOCUMENTED=TARGET`
 
 - Fixtures de `gateway.test.js` usam conteúdo QA distinto
   `TDS_CTX_A_v1`/`TDS_CTX_B_v3`; verificam A→A e B→B, rejeição cruzada,
@@ -124,9 +145,9 @@ continua falhando fechado e não autoriza acesso acadêmico.
   canônica.
 - `REAL_STAGING_E2E=NO`. O PR #132 ainda não teve seu RAG smoke real executado.
 - A base do PR #136 observada no GitHub é `codex/onda-0-consolidacao`, não a
-  base canônica `staging` registrada na Issue. O branch inclui a composição
-  dos HEADs de #132/#135, mas o diff/CI do PR só será válido após retarget da
-  base para `staging`; este agente não alterou outros PRs.
+  base canônica `staging` registrada na Issue. O retarget e a atualização do
+  corpo do PR não estão disponíveis pelas ferramentas desta execução; exigem
+  ação do coordenador. O HEAD conserva a composição dos HEADs de #132/#135.
 - Nenhuma chamada estruturada foi testada contra a instalação real. Nenhuma
   mutação de staging ou produção foi executada.
 
@@ -135,10 +156,11 @@ continua falhando fechado e não autoriza acesso acadêmico.
 - **Reason:** sentinel contextual e metadata só podem ser comprovados em Worker
   staging isolado e com documentos QA; nenhum Worker apto nem gate para mutação
   de staging foram autorizados nesta execução.
-- **Exact human action:** (1) retarget PR #136 para a base `staging`; (2) definir
-  o lifecycle autoritativo de publicação/ingestão e a fronteira por módulo; (3)
-  somente após isso, emitir gate específico para Worker/escopo staging isolado e
-  indexação dos documentos QA `TDS_CTX_A_<versão>` e `TDS_CTX_B_<versão>`.
+- **Exact human action:** (1) retarget PR #136 para `staging` e atualizar seu
+  corpo com o estado documentado; (2) confirmar o lifecycle automático e o
+  registry autoritativo futuro; (3) liberar/autorizar Actions para a origem do
+  agente, se exigido pela política do GitHub.
 - **What remains unblocked:** testes locais e revisão do contrato de cliente/
-  gateway. Isolamento contextual real, REAL_STAGING_E2E, merge e produção
-  permanecem bloqueados.
+  gateway. Após base correta e CI verde, um gate staging separado ainda será
+  necessário. Isolamento real de módulo/experiência, REAL_STAGING_E2E, merge e
+  produção permanecem bloqueados.

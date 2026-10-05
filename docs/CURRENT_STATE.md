@@ -4,15 +4,18 @@
 
 `/v1/chat` aceita contexto estruturado compatível com legado. HEADs autorizados
 de #132/#135 estão compostos localmente no PR #136; request ID, 429/504 e
-chamador real de experiência preservados. Gateway usa mapa temporário por
-CourseVersion e valida source por módulo/experiência.
-AnythingLLM não documenta filtro que prove isolamento do retriever dentro do
-workspace; `RAG_SCOPE_ARCHITECTURE=BLOCKED`, `REAL_STAGING_E2E=NO`. A base do PR
-#136 ainda precisa ser retargetada para staging. Gateway passou 32/32 Node e
-promoção CourseVersion 9/9 testes focais; Flutter test/analyze não executados por
-falta do SDK. Promoção preserva Experience Blocks tipados;
-registro autoritativo de escopo RAG ainda depende da decisão de ingestão. Nenhuma
-configuração, workspace, staging ou produção foi alterada.
+chamador real de experiência preservados. `course_promotion` valida/preserva
+Experience Blocks. `TUTOR_RAG_SCOPE_MAP` é temporário, com granularidade
+CourseVersion; isolamento de módulo/experiência não está comprovado. Status:
+`LOCAL_CONTEXT_BINDING_READY=PARCIAL`,
+`CONTEXT_BINDING_READY=NÃO`, `AI_SERVICE_READY=NÃO`.
+`FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO`;
+`RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`. Alvo permanente de ingestão está
+documentado, não implementado. Últimos testes locais registrados: gateway 32/32,
+promoção 10/10; Flutter test/analyze sem execução por SDK ausente. O PR #136
+continua com base não canônica; retarget e edição de descrição exigem ação do
+coordenador. `REAL_STAGING_E2E=NO`. Nenhuma configuração, workspace, staging ou
+produção foi alterada. Auditoria: `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
 Auditoria: `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
 
 ## Integração META 05 — 03/10/2026
