@@ -16,6 +16,24 @@ import secrets
 import subprocess
 import time
 
+HEAD_LINE = re.compile(r'^([A-Za-z0-9][A-Za-z0-9_-]*) \(head\)$')
+
+
+def parse_alembic_head(output: str) -> str:
+    heads = []
+    for raw in output.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        match = HEAD_LINE.fullmatch(line)
+        if match:
+            heads.append(match.group(1))
+        elif '(head)' in line:
+            raise RuntimeError('Unable to parse candidate Alembic head')
+    if len(heads) != 1:
+        raise RuntimeError('Candidate Alembic must expose exactly one head')
+    return heads[0]
+
 
 def legacy_projection_matches(old, new):
     """Permit additive object fields; preserve every legacy value and list order."""
@@ -28,6 +46,11 @@ def legacy_projection_matches(old, new):
         return (isinstance(new, list) and len(old) == len(new)
                 and all(legacy_projection_matches(a, b) for a, b in zip(old, new)))
     return type(old) is type(new) and old == new
+
+
+def assert_upgraded_schema(expected: str, actual: str) -> None:
+    if actual != expected:
+        raise RuntimeError('Upgraded schema diverges from candidate Alembic head')
 
 
 def main():
@@ -108,6 +131,9 @@ def main():
     production_api = inspect('tutor-tds-api-api-1')
     production_db = inspect('tutor-tds-api-db-1')
     candidate_id = inspect(args.candidate_image)['Id']
+    expected_revision = parse_alembic_head(
+        docker('run', '--rm', args.candidate_image, 'alembic', 'heads').stdout.decode()
+    )
     assert production_api['State']['Running'] and production_db['State']['Running']
     old_image = production_api['Image']
     columns_rows = json.loads(sql('tutor-tds-api-db-1', """SELECT json_agg(x) FROM
@@ -127,6 +153,7 @@ def main():
     report = {'status':'running', 'run_id':run_id, 'state_dir':str(root),
               'candidate_image':args.candidate_image, 'candidate_image_id':candidate_id,
               'production_image_id':old_image, 'production_revision':revision_before,
+              'candidate_expected_revision':expected_revision,
               'backup':{'path':str(backup),'bytes':len(dump),'sha256':hashlib.sha256(dump).hexdigest()},
               'production_before':before, 'production_writes':False}
     (root/'evidence.json').write_text(json.dumps(report, indent=2)+'\n')
@@ -168,7 +195,7 @@ def main():
         after = fingerprint(database,columns)
         assert after==before, 'Migration changed original column data'
         report['clone_revision']=sql(database,'SELECT version_num FROM alembic_version')
-        assert report['clone_revision']=='20261001_0020'
+        assert_upgraded_schema(expected_revision, report['clone_revision'])
         report['original_columns_preserved']=True
         report['ia_course_version']=json.loads(sql(database,"""SELECT row_to_json(x) FROM
             (SELECT id,course_id,version_number,status FROM course_versions
