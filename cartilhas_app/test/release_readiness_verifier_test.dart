@@ -147,6 +147,7 @@ void main() {
     {'EXTRA_ENDPOINT': 'https://tutor-tds.local'},
     {'REMOTE_CATALOG_ENABLED': true},
     {'JOURNEY_TRACEABILITY_ENABLED': true},
+    {'PUSH_NOTIFICATIONS_ENABLED': true},
   ]) {
     test('bloqueia configuração produtiva insegura: ${unsafe.keys.first}', () {
       final file = File('${root.path}/config/production.json');
@@ -171,6 +172,30 @@ void main() {
       );
     });
   }
+
+  test('bloqueia configuração sem a flag push obrigatória', () {
+    final file = File('${root.path}/config/production.json');
+    final config = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    config.remove('PUSH_NOTIFICATIONS_ENABLED');
+    file.writeAsStringSync(jsonEncode(config));
+    _writeStatus(
+      root,
+      buildAllowed: true,
+      physicalStatus: 'passed',
+      artifactStatus: 'superseded',
+      uploadAllowed: false,
+    );
+
+    final result = ReleaseReadinessVerifier(
+      root: root,
+      verifySigningIdentity: false,
+    ).verify(ReleaseIntent.build);
+
+    expect(
+      result.issues.map((issue) => issue.code),
+      contains('production_config_mismatch'),
+    );
+  });
 
   test('falha fechado quando a lista de evidência física está ausente', () {
     _writeStatus(
@@ -270,6 +295,7 @@ validateReleaseFreezeState(rootProject.file(
       'DURABLE_LEARNING_OUTBOX_ENABLED': false,
       'JOURNEY_TRACEABILITY_ENABLED': false,
       'SIGNED_SUPPORT_IDENTITY': false,
+      'PUSH_NOTIFICATIONS_ENABLED': false,
     }),
   );
   write(
