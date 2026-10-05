@@ -211,6 +211,10 @@ def test_classroom_preserves_teacher_monitor_student_hierarchy(monkeypatch: pyte
             f"/classes/{class_id}/dashboard",
             headers=bearer(accounts["student"]["access_token"]),
         )
+        student_monitor_exceptions = client.get(
+            f"/classes/{class_id}/monitor-exceptions",
+            headers=bearer(accounts["student"]["access_token"]),
+        )
 
         invalid_teacher = client.post(
             "/admin/classes",
@@ -278,6 +282,7 @@ def test_classroom_preserves_teacher_monitor_student_hierarchy(monkeypatch: pyte
     ):
         assert forbidden not in serialized_monitor
     assert student_dashboard.status_code == 403
+    assert student_monitor_exceptions.status_code == 403
     assert invalid_teacher.status_code == 422
     assert invalid_dates.status_code == 422
 
