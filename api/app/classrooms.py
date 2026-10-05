@@ -15,6 +15,7 @@ from .database import Database
 from .course_editor import latest_published_version, ensure_legacy_course_version
 from .evidence import _active_student, _is_staff, _staff
 from .context_memberships import active_student_binding, bind_membership, bind_student
+from .classroom_policy import require_available_seat
 from .models import (
     ClassEnrollment,
     ClassMonitor,
@@ -44,6 +45,8 @@ class ClassroomCreate(BaseModel):
     course_id: str = Field(min_length=1, max_length=120)
     teacher_id: str = Field(min_length=1, max_length=36)
     name: str = Field(min_length=2, max_length=240)
+    offer_municipality: str | None = Field(default=None, max_length=240)
+    offer_location: str | None = Field(default=None, max_length=500)
     start_date: date
     end_date: date
     status: ClassStatus = "planned"
@@ -135,12 +138,25 @@ class MonitorExceptionsResponse(BaseModel):
     students: list[MonitorExceptionItem]
 
 
+def _class_lifecycle_enabled(request: Request) -> bool:
+    settings = getattr(request.app.state, "settings", None)
+    return bool(getattr(settings, "class_lifecycle_enabled", False))
+
+
 @admin_router.post("", response_model=ClassroomResponse, status_code=201)
 def create_classroom(
     payload: ClassroomCreate,
     request: Request,
     _: dict[str, str] = Depends(admin_claims),
 ) -> ClassroomResponse:
+    if (
+        _class_lifecycle_enabled(request)
+        and payload.status != "planned"
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Novas turmas devem iniciar em planned e ser ativadas pela coordenação.",
+        )
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         if session.get(ProgramCourse, (payload.program_id, payload.course_id)) is None:
@@ -172,6 +188,16 @@ def create_classroom(
             course_version_id=version.id,
             teacher_id=payload.teacher_id,
             name=payload.name.strip(),
+            offer_municipality=(
+                payload.offer_municipality.strip()
+                if payload.offer_municipality
+                else None
+            ),
+            offer_location=(
+                payload.offer_location.strip()
+                if payload.offer_location
+                else None
+            ),
             start_date=payload.start_date,
             end_date=payload.end_date,
             status=payload.status,
@@ -192,7 +218,12 @@ def add_student(
 ) -> dict[str, str]:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
-        classroom = _classroom(session, class_id)
+        classroom = session.scalar(
+            select(Classroom).where(Classroom.id == class_id).with_for_update()
+        )
+        if classroom is None:
+            raise HTTPException(status_code=404, detail="Turma não encontrada.")
+        _require_open_classroom(classroom)
         enrollment = session.scalar(
             select(Enrollment).where(
                 Enrollment.user_id == user_id,
@@ -208,6 +239,7 @@ def add_student(
             )
         if session.get(ClassEnrollment, (class_id, user_id)) is not None:
             raise HTTPException(status_code=409, detail="Estudante já está na turma.")
+        require_available_seat(session, classroom)
         link = ClassEnrollment(
                 class_id=class_id,
                 user_id=user_id,
@@ -232,6 +264,17 @@ def add_monitor(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
+        if (
+            _class_lifecycle_enabled(request)
+            and classroom.status != "planned"
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "Equipe de turma iniciada deve ser alterada pelo fluxo "
+                    "contextual da coordenação."
+                ),
+            )
         monitor = session.get(
             ProgramMembership, (user_id, classroom.program_id)
         )
@@ -330,6 +373,7 @@ def include_student(
             )
         membership = session.get(ClassEnrollment, (class_id, user_id))
         if membership is None:
+            require_available_seat(session, classroom)
             membership = ClassEnrollment(
                     class_id=class_id,
                     user_id=user_id,
@@ -340,7 +384,10 @@ def include_student(
             )
             session.add(membership)
         elif membership.status != "active":
+            require_available_seat(session, classroom)
             membership.status = "active"
+        else:
+            return {"class_id": class_id, "user_id": user_id, "status": "active"}
         _bind_context(session, classroom, membership, request)
         _commit(session, "Não foi possível incluir o estudante. Tente novamente.")
         return {"class_id": class_id, "user_id": user_id, "status": "active"}
@@ -767,6 +814,8 @@ def _serialize(record: Classroom) -> ClassroomResponse:
         course_version_id=record.course_version_id,
         teacher_id=record.teacher_id,
         name=record.name,
+        offer_municipality=record.offer_municipality,
+        offer_location=record.offer_location,
         start_date=record.start_date,
         end_date=record.end_date,
         status=record.status,
