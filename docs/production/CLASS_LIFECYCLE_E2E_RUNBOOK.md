@@ -4,15 +4,18 @@
 
 **FRONT:** `CLASS_LIFECYCLE_E2E`
 **TARGET_MACHINE:** avellaria
-**BASE:** `staging@911c4545076da7cb6e70f57d70dccbe1fbe3b446`
+**BASE:** `staging@3fc856c8adcd76378322d9de321084ce58c57e1b`
+**API_HEAD:** `1dea14ae741bd0ba141f43b22296c7e297b6e320` (#143)
+**APP_HEAD:** `1dc027ff2ad243c989db8d884453bc51e79f3021` (#144)
 **MERGE_ALLOWED:** NO
 **PRODUCTION_ALLOWED:** NO
 **STAGING_MUTATION:** NO
 
-Este runbook prova a integração. Ele não redefine regra de negócio. A autoridade de
-lifecycle/capabilities vem do backend da #138; a experiência Flutter vem da #139.
-Enquanto os dois HEADs não estiverem compostos, qualquer etapa dependente deles
-permanece **BLOCKED**, nunca PASS por mock.
+Este runbook prova a integração. Ele não redefine regra de negócio. O backend da
+#138/#143 e o Flutter da #139/#144 já estão compostos na `staging` acima. A
+execução final da #140 usa API HTTPS e banco descartáveis no avellaria, dados
+sintéticos e o adapter Flutter real no emulador. Nenhum PASS pode vir de mock,
+staging compartilhado ou produção.
 
 ## 1. Contratos já observados que devem ser preservados
 
@@ -55,45 +58,42 @@ real nem alterar fixtures aprovadas de outro gate.
 
 | Entidade | Valor sintético |
 |---|---|
-| Instituição A | `IPEX QA <run_id>` ou fixture isolada equivalente |
-| Programa A | `Programa QA Turma <run_id>` |
-| Programa B | programa estrangeiro para teste de negação |
-| Curso | curso QA com versão publicada v1 |
+| Instituição A | `qa-i1`, somente no banco descartável |
+| Programa A | `qa-p1`, somente no banco descartável |
+| Programa B | `qa-p2`, programa/instituição estrangeiros para negação |
+| Curso | `qa-course` com versão publicada `qa-v1` |
 | CourseVersion v1 | versão fixada na turma |
-| CourseVersion v2 | publicada **depois** da turma, só para testar imutabilidade |
+| CourseVersion v2 | cenário coberto pelo teste canônico de snapshot, não criado pelo Android |
 | Município da oferta | Palmas |
 | Local físico | `Laboratório QA Avellaria <run_id>` |
-| Município de residência do participante A | Itaguatins |
-| Participante A | aluno da jornada positiva |
-| Participante B | aluno usado para pendência explícita |
-| Participante estrangeiro | programa/instituição diferente |
-| Coordenador | capability completa da turma |
-| Program operator | prepara e opera vínculos, sem fechar |
-| Professor | conduz encontro/presença/evidência |
-| Monitor | projeção de exceções/acompanhamento |
+| Município de residência do participante A | Itaguatins, fixture externa sintética |
+| Participante A | `qa-student` |
+| Participante estrangeiro | `qa-outsider`, ligado ao programa/instituição B |
+| Coordenador | `qa-coordinator` |
+| Program operator | `qa-operator` |
+| Professor | `qa-teacher` |
+| Monitor | `qa-monitor` |
 
-**Prova obrigatória de territorialidade:** município da oferta = Palmas e município
-de residência do Participante A = Itaguatins. Um não pode ser copiado para o outro.
+**Prova obrigatória de territorialidade:** o domínio atual não persiste município
+de residência do participante. Portanto `Itaguatins` é referência sintética
+externa do E2E, enquanto `Palmas` é persistido exclusivamente como município da
+oferta da turma. O manifesto só pode marcar PASS se os valores forem distintos e
+a residência externa não for copiada para o registro da turma.
 
 ## 4. Composição dos HEADs
 
-A worktree da #140 é a única que compõe os dois fronts.
-
-Registrar antes da composição:
+A composição upstream já ocorreu em `staging`:
 
 ```text
-API_HEAD=<40-char SHA da #138>
-APP_HEAD=<40-char SHA da #139>
-BASE_HEAD=911c4545076da7cb6e70f57d70dccbe1fbe3b446
+API_HEAD=1dea14ae741bd0ba141f43b22296c7e297b6e320
+APP_HEAD=1dc027ff2ad243c989db8d884453bc51e79f3021
+BASE_HEAD=3fc856c8adcd76378322d9de321084ce58c57e1b
+COMPOSE_HEAD=<commit da #140 efetivamente executado>
 ```
 
-Regras:
-
-- não rebasear nem force-pushar branches dos outros fronts;
-- não editar arquivos da #138/#139 para “fazer o teste passar”;
-- integrar os HEADs em branch/worktree da #140 preservando histórico;
-- conflito semântico vira BLOCKED;
-- após composição registrar `COMPOSE_HEAD`.
+A branch da #140 recebe a staging por merge normal, preservando histórico. O
+`COMPOSE_HEAD` deve identificar o commit que contém harness + servidor QA +
+integration test executados. Nenhuma branch upstream é reescrita.
 
 ## 5. Jornada E2E principal
 
@@ -143,20 +143,21 @@ Regras:
 
 **Ator:** program_operator ou coordinator.
 
-1. Usar fluxo existente de Participantes.
-2. Localizar Participante A.
-3. Confirmar residência = Itaguatins.
-4. Criar/usar matrícula ativa no programa/curso.
+1. Usar o fluxo/repositório existente de Participantes.
+2. Localizar Participante A já sintético no banco descartável.
+3. Manter a referência externa de residência = Itaguatins fora do registro da turma.
+4. Usar a matrícula ativa sintética no programa/curso.
 5. Vincular à turma.
-6. Repetir a mesma operação.
+6. Repetir exatamente a mesma operação.
 
 **PASS quando:**
 
 - não existe segundo cadastro de participante;
 - vínculo aponta para matrícula canônica;
-- replay é idempotente ou conflito explícito, nunca duplicata;
+- replay é idempotente, nunca duplicata;
 - turma continua com oferta em Palmas;
-- Participante A continua com residência Itaguatins.
+- nenhuma propriedade residencial é criada/inferida no Classroom;
+- o manifesto registra Itaguatins apenas como fixture externa de contraste.
 
 ### E04 — Cross-program e cross-institution
 
@@ -166,18 +167,18 @@ Tentar vincular participante estrangeiro.
 
 ### E05 — Capacidade 30 / exceção 31
 
-1. Preencher turma até 30 com participantes sintéticos.
-2. Tentar 31º como program_operator.
-3. Repetir como coordinator sem motivo.
-4. Repetir como coordinator com motivo.
+Este caso de carga é executado pelo teste backend canônico
+`test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited`.
+O Android consome a capacidade retornada pelo mesmo contrato, mas não cria 31
+contas apenas para repetir uma prova já autoritativa.
 
-**PASS quando:**
+**PASS quando o teste canônico comprovar:**
 
 - program_operator é bloqueado em 30;
 - coordinator sem motivo é bloqueado;
 - coordinator com motivo explícito consegue apenas se capability autorizar;
 - auditoria registra ator/motivo;
-- ocupação/capacidade aparecem corretamente no app.
+- backend continua autoridade da capacidade.
 
 ### E06 — Abrir encontro
 
@@ -214,19 +215,19 @@ Tentar vincular participante estrangeiro.
 
 **Ator:** teacher.
 
-1. Confirmar presença oficial do Participante A.
-2. Deixar Participante B pendente.
-3. Registrar evidência da atividade.
-4. Monitor consulta sua superfície.
+1. Confirmar presença humana do Participante A.
+2. Registrar também decisão oficial `VALID`.
+3. Manter a evidência de QR pendente de revisão.
+4. Monitor consulta sua superfície e tenta uma ação reservada ao professor.
 
 **PASS quando:**
 
-- Participante A = `confirmed_present`;
-- Participante B = `pending`;
+- Participante A = `confirmed_present` após decisão humana;
+- decisão oficial = `VALID`;
+- a evidência do QR permanece explicitamente pendente até o fechamento;
 - decisão tem ator, revisão e chave idempotente;
-- professor vê dashboard operacional;
-- monitor vê projeção reduzida/de exceções, sem dados indevidos;
-- superfícies são diferentes.
+- monitor consegue consultar a projeção permitida, mas não fechar encontro;
+- superfícies/capabilities são distintas.
 
 ### E09 — Fechar encontro com pendência explícita
 
@@ -244,30 +245,29 @@ Tentar vincular participante estrangeiro.
 
 ### E10 — Imutabilidade da CourseVersion
 
-Depois de a turma estar ativa, publicar v2 do mesmo curso.
+O Android prova que a mesma `qa-v1` permanece do preparo ao encerramento. O
+cenário pesado de publicar v2 depois da criação é executado pelo teste canônico
+`test_class_keeps_snapshot_after_new_publication_and_archive`.
 
-**PASS quando:**
+**PASS quando ambas as provas concordarem:**
 
-- turma permanece em v1;
-- participante vê conteúdo/contexto v1;
-- readiness/projeções continuam referenciando v1;
+- turma permanece em v1 no live E2E;
+- nova publicação não troca a versão de turma existente no teste canônico;
 - nenhuma troca silenciosa de versão ocorre.
 
 ### E11 — Offline/reconnect
 
-1. Com participante autenticado, ir offline.
-2. Registrar exatamente uma ação que use a fila autorizada do fluxo.
-3. Reiniciar processo/app conforme cenário.
-4. Restaurar rede.
-5. Aguardar flush.
-6. Repetir reconnect.
+O fluxo de QR não usa fila offline acadêmica. O E2E simula indisponibilidade de
+rede, descarta a sessão HTTP do participante, autentica novamente e reapresenta
+**a mesma** chave idempotente de check-in.
 
 **PASS quando:**
 
-- mesmo dono/ambiente/contexto são preservados;
-- backend recebe a operação uma vez;
-- presença oficial não duplica;
-- replay divergente não é aceito como duplicata válida.
+- a indisponibilidade é observada sem mutação;
+- o reconnect usa o mesmo participante/contexto;
+- replay exato retorna o mesmo check-in;
+- roster continua com `checkin_count=1`;
+- presença humana não duplica.
 
 ### E12 — Readiness de encerramento da turma
 
@@ -339,20 +339,14 @@ Nenhum Worker/KV oficial é acionado neste E2E. “Aprovado” não pode aparece
 
 ## 7. Evidência visual
 
-Capturar no mínimo:
+A apresentação do wizard já foi homologada no PR #144 e está versionada em
+`docs/qa/class-lifecycle-2026-10-05/`. Como a composição da #140 não altera UI,
+essas screenshots são reutilizadas para preparo/readiness/encerramento.
 
-1. preparar turma;
-2. ocupação/capacidade;
-3. QR/check-in;
-4. roster antes da decisão humana;
-5. roster depois da decisão;
-6. projeção professor;
-7. projeção monitor;
-8. readiness de encerramento;
-9. turma fechada;
-10. pedido de certificado aprovado com emissão bloqueada.
-
-Nunca incluir CPF, senha, token, JWT ou secret nas screenshots.
+A #140 acrescenta evidência **estruturada** da integração real para QR, roster,
+reconnect, presença e certificado. Não é permitido criar screenshots que
+exponham token de QR, CPF, senha, JWT ou secret apenas para aumentar volume de
+evidência.
 
 ## 8. Evidência estruturada
 
@@ -367,7 +361,18 @@ python3 tooling/class_lifecycle_e2e/harness.py \
   --api-head <API_HEAD> \
   --app-head <APP_HEAD> \
   --compose-head <COMPOSE_HEAD> \
-  --base-url http://10.0.2.2:<porta> \
+  --base-url https://10.0.2.2:<porta> \
+  --package com.tutortds_cartilhas.dev.dynamicqa.r<32hex> \
+  --device emulator-5556 \
+  --api-python /home/rafael/TutorTDSWorker/.venv-api-a01/bin/python \
+  --evidence-output docs/production/evidence/class-lifecycle-e2e-<run_id>.json \
+  --execute
+
+python3 tooling/class_lifecycle_e2e/harness.py \
+  --api-head <API_HEAD> \
+  --app-head <APP_HEAD> \
+  --compose-head <COMPOSE_HEAD> \
+  --base-url https://10.0.2.2:<porta> \
   --package com.tutortds_cartilhas.dev.dynamicqa.r<32hex> \
   --device emulator-5556 \
   --validate-evidence docs/production/evidence/class-lifecycle-e2e-<run_id>.json \
