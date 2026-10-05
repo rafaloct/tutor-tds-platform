@@ -32,6 +32,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
   List<ClassroomDetails> _classes = const [];
   Map<String, ClassroomStaffCapability> _capabilities = const {};
   ClassroomDashboard? _dashboard;
+  MonitorExceptions? _monitorExceptions;
   UsageSummary? _usage;
   String? _selectedClassId;
   String? _error;
@@ -88,32 +89,43 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
       });
     }
     try {
+      if (_capabilities[classId] == ClassroomStaffCapability.monitor) {
+        final gateway = widget.gateway;
+        if (gateway is! MonitorClassroomGateway) {
+          throw const ClassroomException(
+            'O acompanhamento do monitor está indisponível nesta versão.',
+          );
+        }
+        final exceptions = await gateway.monitorExceptions(classId);
+        if (!mounted) return;
+        setState(() {
+          _monitorExceptions = exceptions;
+          _dashboard = null;
+          _usage = null;
+          _usageWarning = null;
+          _error = null;
+        });
+        return;
+      }
+
       final dashboard = await widget.gateway.dashboard(classId);
       UsageSummary usage;
       String? usageWarning;
-      if (_capabilities[classId] == ClassroomStaffCapability.monitor) {
+      try {
+        usage = await widget.gateway.usage(classId, days: _days);
+      } on Object {
         final now = DateTime.now();
         usage = UsageSummary(
           periodStart: now.subtract(Duration(days: _days)),
           periodEnd: now,
           items: const [],
         );
-      } else {
-        try {
-          usage = await widget.gateway.usage(classId, days: _days);
-        } on Object {
-          final now = DateTime.now();
-          usage = UsageSummary(
-            periodStart: now.subtract(Duration(days: _days)),
-            periodEnd: now,
-            items: const [],
-          );
-          usageWarning =
-              'Analytics de recursos temporariamente indisponível. O progresso pedagógico continua atualizado.';
-        }
+        usageWarning =
+            'Analytics de recursos temporariamente indisponível. O progresso pedagógico continua atualizado.';
       }
       if (!mounted) return;
       setState(() {
+        _monitorExceptions = null;
         _dashboard = dashboard;
         _usage = usage;
         _usageWarning = usageWarning;
@@ -122,6 +134,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
     } on Object catch (error) {
       if (!mounted) return;
       setState(() {
+        _monitorExceptions = null;
         _dashboard = null;
         _usage = null;
         _usageWarning = null;
@@ -138,7 +151,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
       appBar: AppBar(
         title: Text(
           _selectedCapability == ClassroomStaffCapability.monitor
-              ? 'Monitor por exceção'
+              ? 'Acompanhamento da turma'
               : 'Área da equipe',
         ),
       ),
@@ -154,7 +167,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                 children: [
                   Text(
                     _selectedCapability == ClassroomStaffCapability.monitor
-                        ? 'Acompanhamento acionável'
+                        ? 'Quem precisa de atenção'
                         : 'Acompanhamento de turma',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -163,7 +176,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                   const SizedBox(height: 6),
                   Text(
                     _selectedCapability == ClassroomStaffCapability.monitor
-                        ? 'Priorize participantes com sinais reais de atenção, sem expor dados além do seu vínculo.'
+                        ? 'Veja somente os participantes que precisam de acompanhamento e o motivo prático.'
                         : 'Progresso, alertas pedagógicos, carga horária e uso dos recursos em um só lugar.',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -245,7 +258,7 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                               },
                       ),
                     if (widget.gateway is ClassroomRosterGateway &&
-                        _selectedCapability != null &&
+                        _selectedCapability == ClassroomStaffCapability.teacher &&
                         _dashboard != null) ...[
                       const SizedBox(height: 12),
                       FilledButton.tonalIcon(
@@ -314,10 +327,20 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                     const SizedBox(height: 16),
                     _ErrorCard(message: _error!),
                   ],
-                  if (_dashboard != null && _usage != null) ...[
+                  if (_selectedCapability ==
+                          ClassroomStaffCapability.monitor &&
+                      _monitorExceptions != null) ...[
+                    const SizedBox(height: 20),
+                    MonitorExceptionsView(exceptions: _monitorExceptions!),
+                  ],
+                  if (_selectedCapability !=
+                          ClassroomStaffCapability.monitor &&
+                      _dashboard != null &&
+                      _usage != null) ...[
                     const SizedBox(height: 20),
                     if (widget.gateway is ClassroomRepository &&
-                        _selectedCapability != null)
+                        _selectedCapability ==
+                            ClassroomStaffCapability.teacher)
                       OutlinedButton.icon(
                         onPressed:
                             _loading ||
@@ -345,14 +368,11 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
                         icon: const Icon(Icons.support_agent),
                         label: const Text('Baseline e mentoria dos estudantes'),
                       ),
-                    if (_selectedCapability == ClassroomStaffCapability.monitor)
-                      MonitorExceptionsView(dashboard: _dashboard!)
-                    else
-                      _Dashboard(
-                        dashboard: _dashboard!,
-                        usage: _usage!,
-                        usageWarning: _usageWarning,
-                      ),
+                    _Dashboard(
+                      dashboard: _dashboard!,
+                      usage: _usage!,
+                      usageWarning: _usageWarning,
+                    ),
                   ],
                 ],
               ),
