@@ -75,6 +75,15 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
   @override
   void initState() {
     super.initState();
+    final chatwootUri = Uri.tryParse(_chatwootBase);
+    if (chatwootUri == null ||
+        chatwootUri.scheme != 'https' ||
+        chatwootUri.host.isEmpty ||
+        _websiteToken.trim().isEmpty) {
+      _loading = false;
+      _error = true;
+      return;
+    }
     if (kIsWeb) {
       _initWeb();
     } else {
