@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
+import 'package:cartilhas_app/features/auth/data/unscoped_account_data_cleaner.dart';
+import 'package:cartilhas_app/features/certificates/data/certificate_repository.dart';
+import 'package:cartilhas_app/features/profile/data/profile_data_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event_queue.dart';
@@ -25,6 +28,23 @@ class _MemoryTokenStore implements AuthTokenStore {
 
   @override
   Future<void> write(AuthTokens tokens) async => value = tokens;
+}
+
+class _NoopProfileStore implements ProfileDataStore {
+  @override
+  Future<void> clear() async {}
+
+  @override
+  Future<ProfileData> read() async =>
+      const ProfileData(name: '', phone: '', cpf: '');
+
+  @override
+  Future<void> write(ProfileData data) async {}
+}
+
+class _NoopCertificates extends CertificateRepository {
+  @override
+  Future<void> deleteAll() async {}
 }
 
 const _oldTokens = AuthTokens(
@@ -137,7 +157,10 @@ void main() {
         apiUrl: apiUrl,
         tokenStore: store,
         client: MockClient((_) async => http.Response('{}', 500)),
-        onSessionEnded: () => queue.clear(preserveOwned: true),
+        onSessionEnded: UnscopedAccountDataCleaner(
+          profileDataStore: _NoopProfileStore(),
+          certificateRepository: _NoopCertificates(),
+        ).clear,
       );
       addTearDown(authRepository.dispose);
 
