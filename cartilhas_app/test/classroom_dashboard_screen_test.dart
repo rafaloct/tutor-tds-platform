@@ -8,7 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/certificates/presentation/certificate_requests_screen.dart';
 
-class _FakeGateway implements ClassroomGateway, ClassroomRosterGateway {
+class _FakeGateway
+    implements ClassroomGateway, MonitorClassroomGateway, ClassroomRosterGateway {
   _FakeGateway({
     this.role = 'teacher',
     this.userId = 'prof-1',
@@ -22,6 +23,7 @@ class _FakeGateway implements ClassroomGateway, ClassroomRosterGateway {
   final bool monitor;
   final bool hasAlerts;
   int dashboardCalls = 0;
+  int monitorExceptionCalls = 0;
   final included = <String>[];
 
   @override
@@ -103,6 +105,32 @@ class _FakeGateway implements ClassroomGateway, ClassroomRosterGateway {
               : const [],
         ),
       ],
+    );
+  }
+
+  @override
+  Future<MonitorExceptions> monitorExceptions(String classId) async {
+    monitorExceptionCalls++;
+    final alerts = hasAlerts
+        ? const [
+            ClassroomAlert(code: 'inactive_7_days'),
+            ClassroomAlert(code: 'required_activity_pending'),
+            ClassroomAlert(code: 'below_expected_hours'),
+          ]
+        : const <ClassroomAlert>[];
+    return MonitorExceptions(
+      generatedAt: DateTime.utc(2026, 9, 20, 12),
+      totalStudents: 1,
+      attentionStudents: hasAlerts ? 1 : 0,
+      students: hasAlerts
+          ? [
+              MonitorExceptionStudent(
+                userId: 'aluno-1',
+                name: 'Maria da Silva',
+                alerts: alerts,
+              ),
+            ]
+          : const [],
     );
   }
 
@@ -220,7 +248,7 @@ void main() {
           expect(
             find.descendant(
               of: find.byType(AppBar),
-              matching: find.text('Monitor por exceção'),
+              matching: find.text('Acompanhamento da turma'),
             ),
             findsOneWidget,
           );
@@ -238,14 +266,10 @@ void main() {
       },
     );
   }
-  testWidgets('monitor inclui estudante por nome e atualiza painel ao voltar', (
+  testWidgets('professor inclui estudante por nome e atualiza painel ao voltar', (
     tester,
   ) async {
-    final gateway = _FakeGateway(
-      role: 'student',
-      userId: 'monitor-1',
-      monitor: true,
-    );
+    final gateway = _FakeGateway();
     await tester.pumpWidget(
       MaterialApp(home: ClassroomDashboardScreen(gateway: gateway)),
     );
@@ -337,7 +361,7 @@ void main() {
       find.text('Nenhuma turma está vinculada à sua conta.'),
       findsOneWidget,
     );
-    expect(find.text('Monitor por exceção'), findsNothing);
+    expect(find.text('Acompanhamento da turma'), findsNothing);
     expect(gateway.dashboardCalls, 0);
   });
 
@@ -358,17 +382,27 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Monitor por exceção'), findsWidgets);
-    expect(find.text('Precisam de atenção'), findsOneWidget);
+    expect(find.text('Acompanhamento da turma'), findsWidgets);
+    expect(find.text('Quem precisa de atenção'), findsOneWidget);
+    expect(find.text('Precisam de atenção'), findsWidgets);
     expect(find.text('Maria da Silva'), findsOneWidget);
-    expect(find.text('Mensagem'), findsNothing);
-    expect(find.text('Marcar resolvido'), findsNothing);
+    expect(find.text('Incluir estudantes'), findsNothing);
+    expect(find.text('Baseline e mentoria dos estudantes'), findsNothing);
     expect(find.text('Recursos mais usados'), findsNothing);
+    expect(find.textContaining('20%'), findsNothing);
+    expect(find.textContaining('Matrícula interna'), findsNothing);
 
     await tester.tap(find.text('Maria da Silva'));
     await tester.pumpAndSettle();
-    expect(find.text('Detalhes autorizados'), findsOneWidget);
-    expect(find.text('Sem atividade há 7 dias ou mais'), findsOneWidget);
+    expect(find.text('Motivos para acompanhar'), findsOneWidget);
+    expect(find.text('7 dias ou mais sem atividade'), findsOneWidget);
+    expect(find.text('Atividade obrigatória pendente'), findsOneWidget);
+    expect(find.text('Carga horária abaixo do esperado'), findsOneWidget);
+    expect(find.textContaining('validadas de'), findsNothing);
+    expect(find.textContaining('Baseline'), findsNothing);
+    expect(find.textContaining('Mentorias'), findsNothing);
+    expect(gateway.dashboardCalls, 0);
+    expect(gateway.monitorExceptionCalls, 1);
   });
 
   testWidgets('monitor sem alertas recebe estado normal vazio', (tester) async {
@@ -383,9 +417,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Percurso normal'), findsOneWidget);
-    expect(find.text('Nenhum alerta acionável agora'), findsOneWidget);
+    expect(find.text('Tudo certo'), findsOneWidget);
+    expect(find.text('Tudo certo por enquanto'), findsOneWidget);
     expect(find.text('Maria da Silva'), findsNothing);
+    expect(gateway.dashboardCalls, 0);
+    expect(gateway.monitorExceptionCalls, 1);
   });
 
   testWidgets('monitor suporta escala de fonte ampliada sem overflow', (
@@ -414,10 +450,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Monitor por exceção'), findsWidgets);
+    expect(find.text('Acompanhamento da turma'), findsWidgets);
     expect(
-      tester.getSemantics(find.text('Monitor por exceção').first).label,
-      contains('Monitor por exceção'),
+      tester.getSemantics(find.text('Acompanhamento da turma').first).label,
+      contains('Acompanhamento da turma'),
     );
     semantics.dispose();
     expect(tester.takeException(), isNull);
