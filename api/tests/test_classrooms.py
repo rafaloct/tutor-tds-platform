@@ -199,6 +199,14 @@ def test_classroom_preserves_teacher_monitor_student_hierarchy(monkeypatch: pyte
             f"/classes/{class_id}/dashboard",
             headers=bearer(accounts["teacher"]["access_token"]),
         )
+        monitor_dashboard = client.get(
+            f"/classes/{class_id}/dashboard",
+            headers=bearer(accounts["monitor"]["access_token"]),
+        )
+        monitor_exceptions = client.get(
+            f"/classes/{class_id}/monitor-exceptions",
+            headers=bearer(accounts["monitor"]["access_token"]),
+        )
         student_dashboard = client.get(
             f"/classes/{class_id}/dashboard",
             headers=bearer(accounts["student"]["access_token"]),
@@ -243,6 +251,32 @@ def test_classroom_preserves_teacher_monitor_student_hierarchy(monkeypatch: pyte
     assert dashboard.json()["students"][0]["alerts"] == [
         {"code": "required_activity_pending"}
     ]
+    assert monitor_dashboard.status_code == 403
+    assert monitor_exceptions.status_code == 200
+    monitor_payload = monitor_exceptions.json()
+    assert set(monitor_payload) == {
+        "generated_at",
+        "total_students",
+        "attention_students",
+        "students",
+    }
+    assert monitor_payload["total_students"] == 1
+    assert monitor_payload["attention_students"] == 1
+    assert len(monitor_payload["students"]) == 1
+    monitor_student = monitor_payload["students"][0]
+    assert set(monitor_student) == {"user_id", "name", "alerts"}
+    assert monitor_student["user_id"] == ids["student"]
+    assert monitor_student["alerts"] == [{"code": "required_activity_pending"}]
+    serialized_monitor = str(monitor_payload)
+    for forbidden in (
+        "planned_hours",
+        "validated_hours",
+        "progress_percent",
+        "enrollment_id",
+        "baseline",
+        "mentorship",
+    ):
+        assert forbidden not in serialized_monitor
     assert student_dashboard.status_code == 403
     assert invalid_teacher.status_code == 422
     assert invalid_dates.status_code == 422
