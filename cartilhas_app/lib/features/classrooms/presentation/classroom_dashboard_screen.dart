@@ -96,7 +96,8 @@ class _ClassroomDashboardScreenState extends State<ClassroomDashboardScreen> {
             'O acompanhamento do monitor está indisponível nesta versão.',
           );
         }
-        final exceptions = await gateway.monitorExceptions(classId);
+        final monitorGateway = gateway as MonitorClassroomGateway;
+        final exceptions = await monitorGateway.monitorExceptions(classId);
         if (!mounted) return;
         setState(() {
           _monitorExceptions = exceptions;
