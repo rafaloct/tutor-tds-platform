@@ -53,7 +53,18 @@
       "created": true,
       "conversation_display_id": 157,
       "incoming_message": "PASS",
-      "agent_reply": "PENDING_HUMAN"
+      "agent_reply": "PASS",
+      "reply_marker": "CW67 OK",
+      "resolved": "PASS",
+      "public_outgoing_count": 1
+    },
+    "ab_isolation": {
+      "contact_inbox_a": 344,
+      "contact_inbox_b": 345,
+      "same_contact": false,
+      "same_contact_inbox": false,
+      "b_conversations_in_staging_inbox": 0,
+      "result": "PASS-STRUCTURAL"
     }
   },
   "risks": [
@@ -62,10 +73,26 @@
     "account-level canned responses include legacy certificate wording that conflicts with the current canonical academic contract; they were not modified because they are shared with production support"
   ],
   "pending": [
-    "real agent or operational reply in staging conversation 157",
     "A-to-B full conversation isolation smoke",
     "network loss and retry on Android",
     "physical Android evidence required by Issue #67",
     "prove no academic state changes before/after conversation"
-  ]
+  ],
+  "academic_boundary": {
+    "action": "resolve Chatwoot staging conversation 157",
+    "checked_tables": [
+      "class_enrollments",
+      "session_presence",
+      "session_presence_decisions",
+      "official_attendance_decisions",
+      "certificate_requests",
+      "certificates",
+      "certificate_request_transitions",
+      "learning_events",
+      "evidence_items",
+      "student_baselines"
+    ],
+    "before_after_hashes_identical": true,
+    "result": "PASS"
+  }
 }
