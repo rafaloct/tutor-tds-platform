@@ -419,6 +419,29 @@ void main() {
     },
   );
 
+  test('login com 403 não menciona código de ativação', () async {
+    final store = MemoryTokenStore();
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((request) async {
+        expect(request.url.path, '/auth/login');
+        return http.Response('{"detail":"pending"}', 403);
+      }),
+      tokenStore: store,
+    );
+
+    await expectLater(
+      repository.login(cpf: '12345678909', password: 'senha-de-teste'),
+      throwsA(
+        isA<AuthException>()
+            .having((e) => e.message, 'message', contains('liberada'))
+            .having((e) => e.message, 'message', isNot(contains('código'))),
+      ),
+    );
+    expect(store.writes, 0);
+    repository.dispose();
+  });
+
   test(
     '401 renova uma vez e repete a requisição com novo access token',
     () async {

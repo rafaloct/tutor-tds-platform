@@ -262,7 +262,12 @@ class AuthRepository {
           .timeout(const Duration(seconds: 12));
       _checkGeneration(generation);
       if (response.statusCode != expectedStatus) {
-        throw AuthException(_messageFor(response.statusCode));
+        throw AuthException(
+          _messageFor(
+            response.statusCode,
+            registering: path == '/auth/register',
+          ),
+        );
       }
       final session = _decodeSession(response.body);
       await _writeSession(session, generation);
@@ -355,8 +360,11 @@ class AuthRepository {
     }
   }
 
-  String _messageFor(int statusCode) {
+  String _messageFor(int statusCode, {bool registering = false}) {
     if (statusCode == 401) return 'CPF ou senha inválidos.';
+    if (statusCode == 403 && !registering) {
+      return 'Sua conta ainda não foi liberada para acesso. Procure a instituição para concluir a ativação.';
+    }
     if (statusCode == 403) {
       return 'Não foi possível validar o código de ativação. Solicite um novo código à instituição.';
     }
