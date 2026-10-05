@@ -61,6 +61,7 @@ jobs:
           python3 - <<'PY'
           import os
           import smtplib
+          import socket
           import ssl
           import sys
           from email.message import EmailMessage
@@ -94,7 +95,17 @@ jobs:
                       smtp.ehlo()
                       smtp.login(os.environ['SMTP_USER'], os.environ['SMTP_PASSWORD'])
                       smtp.send_message(message)
+          except (socket.timeout, TimeoutError):
+              sys.exit('smtp_connect_timeout')
+          except ssl.SSLError:
+              sys.exit('smtp_tls_error')
+          except smtplib.SMTPAuthenticationError:
+              sys.exit('smtp_auth_failed')
+          except smtplib.SMTPException:
+              sys.exit('smtp_protocol_error')
+          except OSError:
+              sys.exit('smtp_connect_error')
           except Exception:
-              sys.exit('Watchdog email delivery failed; inspect configuration privately')
+              sys.exit('smtp_unclassified_error')
           print('Watchdog email accepted by SMTP; confirm receipt in the mailbox')
           PY
