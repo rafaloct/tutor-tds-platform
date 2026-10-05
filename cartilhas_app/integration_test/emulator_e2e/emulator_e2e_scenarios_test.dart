@@ -18,14 +18,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const _environment = String.fromEnvironment('TUTOR_ENVIRONMENT');
 const _baseUrl = String.fromEnvironment('EMULATOR_E2E_BASE_URL');
 const _package = String.fromEnvironment('EMULATOR_E2E_QA_PACKAGE');
 const _scenario = String.fromEnvironment('EMULATOR_E2E_SCENARIO');
 const _runId = String.fromEnvironment('EMULATOR_E2E_RUN_ID');
-const _offlinePhase = String.fromEnvironment('EMULATOR_E2E_OFFLINE_PHASE');
 const _certificateContext = String.fromEnvironment(
   'EMULATOR_E2E_CERTIFICATE_CONTEXT_ID',
 );
@@ -288,6 +286,8 @@ void main() {
         fail('Unknown scenario $_scenario');
     }
 
+    await _hostSignal(tester, 'SCREENSHOT');
+    evidence['screenshot_in_app'] = true;
     binding.reportData = evidence;
   }, timeout: const Timeout(Duration(minutes: 8)));
 }
@@ -422,58 +422,49 @@ Future<void> _offlineScenario(
   WidgetTester tester,
   Map<String, Object?> evidence,
 ) async {
-  final prefs = await SharedPreferences.getInstance();
-  final key = 'tds.e2e.offline.$_runId';
-  switch (_offlinePhase) {
-    case 'prime':
-      await _startFresh(tester);
-      await _loginFromWelcome(
-        tester,
-        cpf: _studentCpf,
-        password: _studentPassword,
-        expectedUserId: _studentId,
-      );
-      await _openLearnerClass(tester);
-      await prefs.setString(key, 'primed');
-      evidence['online_cache_primed'] = true;
-    case 'offline':
-      expect(prefs.getString(key), 'primed');
-      await tester.pumpWidget(const CartilhasApp());
-      await _home(tester);
-      await _openMoreOption(tester, 'Minhas turmas');
-      await _until(
-        tester,
-        () async => find
-            .textContaining('Sem conexão: exibindo turmas salvas')
-            .evaluate()
-            .isNotEmpty,
-      );
-      expect(find.text(_className), findsOneWidget);
-      await _tap(tester, find.text(_className));
-      await _until(
-        tester,
-        () async => find.byType(ChatExperienceScreen).evaluate().isNotEmpty,
-      );
-      await prefs.setString(key, 'offline');
-      evidence['offline_saved_class_opened'] = true;
-    case 'reconnect':
-      expect(prefs.getString(key), 'offline');
-      await tester.pumpWidget(const CartilhasApp());
-      await _home(tester);
-      await _openMoreOption(tester, 'Minhas turmas');
-      await _until(
-        tester,
-        () async => find.text(_className).evaluate().isNotEmpty,
-      );
-      expect(
-        find.textContaining('Sem conexão: exibindo turmas salvas'),
-        findsNothing,
-      );
-      await prefs.remove(key);
-      evidence['reconnected'] = true;
-    default:
-      fail('offline_reconnect requires prime/offline/reconnect host phase');
-  }
+  await _startFresh(tester);
+  await _loginFromWelcome(
+    tester,
+    cpf: _studentCpf,
+    password: _studentPassword,
+    expectedUserId: _studentId,
+  );
+  await _openLearnerClass(tester);
+  evidence['online_cache_primed'] = true;
+
+  await _hostSignal(tester, 'NETWORK_OFFLINE');
+  await tester.pumpWidget(const CartilhasApp());
+  await _home(tester);
+  await _openMoreOption(tester, 'Minhas turmas');
+  await _until(
+    tester,
+    () async => find
+        .textContaining('Sem conexão: exibindo turmas salvas')
+        .evaluate()
+        .isNotEmpty,
+  );
+  expect(find.text(_className), findsOneWidget);
+  await _tap(tester, find.text(_className));
+  await _until(
+    tester,
+    () async => find.byType(ChatExperienceScreen).evaluate().isNotEmpty,
+  );
+  evidence['offline_saved_class_opened'] = true;
+  await _hostSignal(tester, 'SCREENSHOT_OFFLINE');
+
+  await _hostSignal(tester, 'NETWORK_ONLINE');
+  await tester.pumpWidget(const CartilhasApp());
+  await _home(tester);
+  await _openMoreOption(tester, 'Minhas turmas');
+  await _until(
+    tester,
+    () async => find.text(_className).evaluate().isNotEmpty,
+  );
+  expect(
+    find.textContaining('Sem conexão: exibindo turmas salvas'),
+    findsNothing,
+  );
+  evidence['reconnected'] = true;
 }
 
 Future<http.Response> _authorizedGet(AuthRepository auth, String path) =>
@@ -488,6 +479,11 @@ Future<http.Response> _authorizedGet(AuthRepository auth, String path) =>
 
 Future<void> _home(WidgetTester tester) =>
     _until(tester, () async => find.byType(HomeScreen).evaluate().isNotEmpty);
+
+Future<void> _hostSignal(WidgetTester tester, String signal) async {
+  debugPrint('TDS_E2E_HOST:$signal');
+  await tester.pump(const Duration(seconds: 3));
+}
 
 Future<void> _tap(WidgetTester tester, Finder finder) async {
   await _until(tester, () async => finder.evaluate().isNotEmpty);
