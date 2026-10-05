@@ -52,12 +52,12 @@ def test_postgres_empty_upgrade_downgrade_and_reupgrade(requests_database_url):
     try:
         with engine.connect() as conn:
             assert conn.scalar(text("SELECT version()" )).startswith("PostgreSQL 17.11")
-            assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261003_0024"
+            assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261005_0027"
             assert conn.scalar(text("SELECT count(*) FROM certificate_emission_attempts")) == 0
         command.downgrade(config, "20261001_0020")
         command.upgrade(config, "head")
         with engine.connect() as conn:
-            assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261003_0024"
+            assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261005_0027"
     finally:
         engine.dispose()
 
@@ -86,7 +86,7 @@ def test_postgres_concurrent_candidate_sends_at_most_once(candidate):
     with pytest.raises(RuntimeError, match="emission history"):
         command.downgrade(config, "20261001_0020")
     with engine.connect() as conn:
-        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261003_0024"
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261005_0027"
         assert conn.scalar(text("SELECT count(*) FROM certificate_emission_attempts")) == 1
 
 
@@ -111,4 +111,4 @@ def test_postgres_populated_0020_upgrade_preserves_context_and_policy_guard(cand
     with pytest.raises(RuntimeError, match="policy and lifecycle"):
         command.downgrade(config, "20261003_0021")
     with engine.connect() as conn:
-        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261003_0024"
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "20261005_0027"

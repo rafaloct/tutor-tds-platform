@@ -110,6 +110,44 @@ def test_migration_up_and_down(tmp_path: Path) -> None:
     engine.dispose()
 
 
+def test_cpf_activation_issuer_index_upgrade_and_downgrade(
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "cpf-activation-index.db"
+    database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", database_url)
+    engine = create_engine(database_url)
+
+    command.upgrade(config, "20261003_0026")
+    foreign_keys = inspect(engine).get_foreign_keys("cpf_activation_tokens")
+    issuer_foreign_key = next(
+        item for item in foreign_keys if item["constrained_columns"] == ["issued_by"]
+    )
+    assert issuer_foreign_key["options"]["ondelete"] == "SET NULL"
+    assert "ix_cpf_activation_tokens_issued_by" not in {
+        item["name"] for item in inspect(engine).get_indexes("cpf_activation_tokens")
+    }
+
+    command.upgrade(config, "head")
+    indexes = {
+        item["name"]: item["column_names"]
+        for item in inspect(engine).get_indexes("cpf_activation_tokens")
+    }
+    assert indexes["ix_cpf_activation_tokens_issued_by"] == ["issued_by"]
+
+    command.downgrade(config, "20261003_0026")
+    assert "ix_cpf_activation_tokens_issued_by" not in {
+        item["name"] for item in inspect(engine).get_indexes("cpf_activation_tokens")
+    }
+    foreign_keys = inspect(engine).get_foreign_keys("cpf_activation_tokens")
+    issuer_foreign_key = next(
+        item for item in foreign_keys if item["constrained_columns"] == ["issued_by"]
+    )
+    assert issuer_foreign_key["options"]["ondelete"] == "SET NULL"
+    engine.dispose()
+
+
 def test_existing_enrollment_is_backfilled_into_complete_hierarchy(
     tmp_path: Path,
 ) -> None:
