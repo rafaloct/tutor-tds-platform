@@ -89,9 +89,18 @@ class AuthRepository {
     required String cpf,
     required String phone,
     required String password,
+    required String activationCode,
   }) => _authenticate(
     path: '/auth/register',
-    body: {'name': name, 'cpf': cpf, 'phone': phone, 'password': password},
+    // The activation code is deliberately request-only. AuthSession and the
+    // secure token store contain only server-issued session tokens.
+    body: {
+      'name': name,
+      'cpf': cpf,
+      'phone': phone,
+      'password': password,
+      'activation_token': activationCode,
+    },
     expectedStatus: 201,
   );
 
@@ -348,6 +357,12 @@ class AuthRepository {
 
   String _messageFor(int statusCode) {
     if (statusCode == 401) return 'CPF ou senha inválidos.';
+    if (statusCode == 403) {
+      return 'Não foi possível validar o código de ativação. Solicite um novo código à instituição.';
+    }
+    if (statusCode == 429) {
+      return 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
+    }
     if (statusCode == 409) return 'Já existe uma conta para este CPF.';
     if (statusCode == 422) {
       return 'Confira os dados informados e tente novamente.';

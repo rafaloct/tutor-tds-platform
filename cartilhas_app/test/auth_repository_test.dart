@@ -348,32 +348,76 @@ void main() {
     expect(networkCalled, isFalse);
   });
 
-  test('registro salva somente tokens no armazenamento injetado', () async {
-    final store = MemoryTokenStore();
-    late Map<String, dynamic> sent;
-    final repository = AuthRepository(
-      apiUrl: 'https://api.example/',
-      client: MockClient((request) async {
-        expect(request.url.toString(), 'https://api.example/auth/register');
-        sent = jsonDecode(request.body) as Map<String, dynamic>;
-        return http.Response(sessionJson(), 201);
-      }),
-      tokenStore: store,
-    );
+  test(
+    'registro envia código somente no contrato e salva apenas tokens',
+    () async {
+      final store = MemoryTokenStore();
+      late Map<String, dynamic> sent;
+      final repository = AuthRepository(
+        apiUrl: 'https://api.example/',
+        client: MockClient((request) async {
+          expect(request.url.toString(), 'https://api.example/auth/register');
+          sent = jsonDecode(request.body) as Map<String, dynamic>;
+          return http.Response(sessionJson(), 201);
+        }),
+        tokenStore: store,
+      );
 
-    final session = await repository.register(
-      name: 'Pessoa de Teste',
-      cpf: '123.456.789-09',
-      phone: '61999990000',
-      password: 'senha-enviada-uma-vez',
-    );
+      final session = await repository.register(
+        name: 'Pessoa de Teste',
+        cpf: '123.456.789-09',
+        phone: '61999990000',
+        password: 'senha-enviada-uma-vez',
+        activationCode: 'codigo-ativacao-unico',
+      );
 
-    expect(sent['password'], 'senha-enviada-uma-vez');
-    expect(session.user.name, 'Pessoa de Teste');
-    expect(store.writes, 1);
-    expect(store.value?.accessToken, 'access-new');
-    expect(store.value?.refreshToken, 'refresh-new');
-  });
+      expect(sent['password'], 'senha-enviada-uma-vez');
+      expect(sent['activation_token'], 'codigo-ativacao-unico');
+      expect(session.user.name, 'Pessoa de Teste');
+      expect(store.writes, 1);
+      expect(store.value?.accessToken, 'access-new');
+      expect(store.value?.refreshToken, 'refresh-new');
+      expect(store.value.toString(), isNot(contains('codigo-ativacao-unico')));
+    },
+  );
+
+  test(
+    'registro com código rejeitado não expõe resposta remota nem persiste código',
+    () async {
+      const activationCode = 'codigo-que-nao-pode-vazar';
+      final store = MemoryTokenStore();
+      final repository = AuthRepository(
+        apiUrl: 'https://api.example',
+        client: MockClient((request) async {
+          expect(jsonDecode(request.body)['activation_token'], activationCode);
+          return http.Response('token=$activationCode', 403);
+        }),
+        tokenStore: store,
+      );
+
+      await expectLater(
+        repository.register(
+          name: 'Pessoa de Teste',
+          cpf: '123.456.789-09',
+          phone: '61999990000',
+          password: 'senha-enviada-uma-vez',
+          activationCode: activationCode,
+        ),
+        throwsA(
+          isA<AuthException>()
+              .having((error) => error.message, 'message', contains('ativação'))
+              .having(
+                (error) => error.message,
+                'message',
+                isNot(contains(activationCode)),
+              ),
+        ),
+      );
+      expect(store.value, isNull);
+      expect(store.writes, 0);
+      repository.dispose();
+    },
+  );
 
   test(
     '401 renova uma vez e repete a requisição com novo access token',
