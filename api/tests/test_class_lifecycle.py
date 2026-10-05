@@ -117,6 +117,176 @@ def test_feature_flag_fail_closed_and_options_are_scoped(requests_api):
         ).json() == {"options": []}
 
 
+def test_legacy_admin_routes_remain_compatible_when_lifecycle_flag_is_off(
+    requests_api,
+):
+    client, engine = requests_api
+    legacy_payload = {
+        "program_id": "p1",
+        "course_id": "course",
+        "teacher_id": "teacher",
+        "name": "Legacy active bootstrap",
+        "start_date": "2026-10-11",
+        "end_date": "2026-10-30",
+        "status": "active",
+    }
+    created = client.post(
+        "/admin/classes",
+        headers=header("admin"),
+        json=legacy_payload,
+    )
+    assert created.status_code == 201, created.text
+    class_id = created.json()["id"]
+
+    with Session(engine) as session:
+        session.add(
+            User(
+                id="legacy-monitor",
+                cpf_digest="legacy-monitor",
+                phone="61999990001",
+                name="Legacy Monitor",
+                password_digest="digest",
+                role="student",
+            )
+        )
+        session.flush()
+        session.add(
+            ProgramMembership(
+                user_id="legacy-monitor",
+                program_id="p1",
+                role="monitor",
+                status="active",
+            )
+        )
+        session.commit()
+
+    legacy_monitor = client.post(
+        f"/admin/classes/{class_id}/monitors/legacy-monitor",
+        headers=header("admin"),
+    )
+    assert legacy_monitor.status_code == 201, legacy_monitor.text
+
+    client.app.state.settings = replace(
+        client.app.state.settings,
+        class_lifecycle_enabled=True,
+    )
+    strict_create = client.post(
+        "/admin/classes",
+        headers=header("admin"),
+        json=legacy_payload | {"name": "Strict active bootstrap"},
+    )
+    assert strict_create.status_code == 422
+
+    with Session(engine) as session:
+        session.add(
+            User(
+                id="strict-monitor",
+                cpf_digest="strict-monitor",
+                phone="61999990002",
+                name="Strict Monitor",
+                password_digest="digest",
+                role="student",
+            )
+        )
+        session.flush()
+        session.add(
+            ProgramMembership(
+                user_id="strict-monitor",
+                program_id="p1",
+                role="monitor",
+                status="active",
+            )
+        )
+        session.commit()
+
+    strict_monitor = client.post(
+        f"/admin/classes/{class_id}/monitors/strict-monitor",
+        headers=header("admin"),
+    )
+    assert strict_monitor.status_code == 409
+
+
+def test_team_candidates_and_manageable_classes_are_contextual(lifecycle_api):
+    client, _ = lifecycle_api
+
+    candidates = client.get(
+        "/operations/classes/team-candidates",
+        headers=header("other"),
+        params={"program_id": "p1"},
+    )
+    assert candidates.status_code == 200, candidates.text
+    payload = candidates.json()
+    assert payload["program_id"] == "p1"
+    assert payload["candidates"] == [
+        {
+            "user_id": "monitor",
+            "display_name": "Name monitor",
+            "role": "monitor",
+        },
+        {
+            "user_id": "teacher",
+            "display_name": "Name teacher",
+            "role": "teacher",
+        },
+        {
+            "user_id": "teacher2",
+            "display_name": "Name teacher2",
+            "role": "teacher",
+        },
+    ]
+    assert all(
+        set(candidate) == {"user_id", "display_name", "role"}
+        for candidate in payload["candidates"]
+    )
+    assert client.get(
+        "/operations/classes/team-candidates",
+        headers=header("teacher"),
+        params={"program_id": "p1"},
+    ).status_code == 403
+    assert client.get(
+        "/operations/classes/team-candidates",
+        headers=header("other"),
+        params={"program_id": "p2"},
+    ).status_code == 403
+
+    operator_classes = client.get(
+        "/operations/classes",
+        headers=header("other"),
+    )
+    assert operator_classes.status_code == 200, operator_classes.text
+    assert {
+        item["classroom"]["id"] for item in operator_classes.json()["classes"]
+    } == {"c1", "c2"}
+    assert all(
+        item["classroom"]["program_id"] == "p1"
+        for item in operator_classes.json()["classes"]
+    )
+
+    teacher_classes = client.get(
+        "/operations/classes",
+        headers=header("teacher"),
+    )
+    assert teacher_classes.status_code == 200
+    assert [
+        item["classroom"]["id"] for item in teacher_classes.json()["classes"]
+    ] == ["c1"]
+    assert teacher_classes.json()["classes"][0]["capabilities"]["can_close"] is False
+
+    assert client.get(
+        "/operations/classes",
+        headers=header("monitor"),
+    ).json() == {"classes": []}
+
+    outsider_classes = client.get(
+        "/operations/classes",
+        headers=header("outsider"),
+    )
+    assert outsider_classes.status_code == 200
+    assert [
+        item["classroom"]["id"] for item in outsider_classes.json()["classes"]
+    ] == ["foreign-class"]
+
+
 def test_prepare_pins_published_version_separates_territory_and_replays(lifecycle_api):
     client, engine = lifecycle_api
     response, body = prepare(client, actor="other")
@@ -309,6 +479,10 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     assert readiness.status_code == 200
     assert readiness.json()["readiness"]["closure_warnings"]["open_sessions"] == 1
     assert readiness.json()["readiness"]["closure_warnings_block_close"] is False
+    assert (
+        readiness.json()["readiness"]["close_open_session_policy"]
+        == "HUMAN_GATE_CLOSE_WITH_OPEN_SESSION"
+    )
 
     close = scoped(readiness.json(), target_status="closed")
     closed = client.post(

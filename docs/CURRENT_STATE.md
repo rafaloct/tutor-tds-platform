@@ -6,11 +6,16 @@ IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre
 `911c454`: Classroom recebe município/local da oferta e revisão de lifecycle;
 fluxo contextual `planned -> active -> closed`, equipe, readiness, CAS/replay e
 ledger auditável. Capacidade padrão 30; somente coordinator escopado pode exceder,
-com motivo registrado na operação de inclusão. Rotas legadas de inclusão também
-bloqueiam turma closed e excesso sem override. CourseVersion permanece fixada.
-Feature `CLASS_LIFECYCLE_ENABLED=false` por padrão. Testes locais focais SQLite
-passaram; PostgreSQL descartável não estava disponível no DESKTOP-8T5DRBS e
-permanece UNKNOWN. Sem staging, produção, merge ou deploy.
+com motivo registrado na operação de inclusão. Rotas de inclusão bloqueiam turma
+closed e excesso sem override. CourseVersion permanece fixada. A revisão do PR
+#143 preserva o legado quando `CLASS_LIFECYCLE_ENABLED=false` e aplica criação
+planned/equipe contextual nas rotas administrativas somente com a flag ativa.
+Foram adicionados candidatos de equipe mínimos e listagem contextual de turmas,
+sem PII desnecessária nem dependência de `/operations/scopes`. Sessão aberta no
+fechamento segue `HUMAN_GATE_CLOSE_WITH_OPEN_SESSION`, sem mudança silenciosa.
+Testes focais SQLite passaram; o DESKTOP-8T5DRBS não possui PostgreSQL descartável,
+então qualquer validação PostgreSQL deve ser evidenciada em ambiente isolado
+separado e nunca inferida de SQLite/staging. Sem staging, produção, merge ou deploy.
 
 ## Integração META 05 — 03/10/2026
 

@@ -200,5 +200,13 @@
     de equipe após ativação ficam restritos à coordenação. Professor/monitor não
     ganham poder administrativo novo. Município/local da oferta permanecem
     separados de residência do participante; encerramento não fabrica presença,
-    frequência ou certificado. Feature flag segue false por padrão; sem staging
-    ou produção nesta decisão.
+    frequência ou certificado. Feature flag segue false por padrão: com
+    CLASS_LIFECYCLE_ENABLED=false, /admin/classes preserva criação/status e gestão
+    de monitor legadas; com a flag true, novas turmas administrativas também
+    precisam iniciar planned e equipe pós-ativação usa o fluxo contextual.
+    Capacidade 30 e rejeição de novo vínculo em turma closed não ganham bypass.
+    O backend expõe candidatos de equipe mínimos e listagem contextual de turmas
+    para o Flutter, sem CPF/telefone nem dependência de /operations/scopes.
+    Sessão aberta continua warning e não bloqueia fechamento no candidato atual;
+    essa semântica fica explicitamente HUMAN_GATE_CLOSE_WITH_OPEN_SESSION até
+    decisão da coordenação. Sem staging ou produção nesta decisão.

@@ -138,13 +138,21 @@ class MonitorExceptionsResponse(BaseModel):
     students: list[MonitorExceptionItem]
 
 
+def _class_lifecycle_enabled(request: Request) -> bool:
+    settings = getattr(request.app.state, "settings", None)
+    return bool(getattr(settings, "class_lifecycle_enabled", False))
+
+
 @admin_router.post("", response_model=ClassroomResponse, status_code=201)
 def create_classroom(
     payload: ClassroomCreate,
     request: Request,
     _: dict[str, str] = Depends(admin_claims),
 ) -> ClassroomResponse:
-    if payload.status != "planned":
+    if (
+        _class_lifecycle_enabled(request)
+        and payload.status != "planned"
+    ):
         raise HTTPException(
             status_code=422,
             detail="Novas turmas devem iniciar em planned e ser ativadas pela coordenação.",
@@ -256,7 +264,10 @@ def add_monitor(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        if classroom.status != "planned":
+        if (
+            _class_lifecycle_enabled(request)
+            and classroom.status != "planned"
+        ):
             raise HTTPException(
                 status_code=409,
                 detail=(

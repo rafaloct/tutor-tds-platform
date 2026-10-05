@@ -99,14 +99,34 @@ bloqueiam o 31º vínculo. Exceção só existe pelo comando contextual de coord
 com motivo, registrada como `assign_capacity_override`; admin/teacher não
 possuem bypass. Turma `closed` não aceita novos vínculos.
 
-Endpoints: `GET /operations/classes/options`, `POST /operations/classes`,
-`POST /operations/classes/{id}/plan`, `POST /operations/classes/{id}/team`,
+Endpoints: `GET /operations/classes/options`, `GET /operations/classes`,
+`GET /operations/classes/team-candidates?program_id=...`,
+`POST /operations/classes`, `POST /operations/classes/{id}/plan`,
+`POST /operations/classes/{id}/team`,
 `POST /operations/classes/{id}/transition` e
 `GET /operations/classes/{id}/readiness`.
 
+`team-candidates` exige program_operator/coordinator ativo no programa e retorna
+somente `user_id`, `display_name` e role teacher/monitor. A listagem de turmas
+aceita program_operator/coordinator no programa e professor apenas na própria
+turma; monitor não recebe lifecycle administrativo. Nenhum dos dois contratos
+depende de `OPERATOR_OPERATIONS_ENABLED` ou de `/operations/scopes`.
+
+A flag isola compatibilidade legado/lifecycle: com
+`CLASS_LIFECYCLE_ENABLED=false`, criação administrativa com status legado e
+adição administrativa de monitor continuam compatíveis; com a flag true, nova
+turma administrativa deve iniciar planned e equipe pós-ativação passa pelo fluxo
+contextual. Capacidade 30 e rejeição de novo vínculo em turma closed permanecem
+fail-closed, sem bypass administrativo.
+
+Sessões abertas aparecem em `closure_warnings` e, no comportamento atual, não
+bloqueiam a transição para closed. A resposta marca explicitamente
+`HUMAN_GATE_CLOSE_WITH_OPEN_SESSION`; não ampliar essa semântica até decisão.
+
 Migration 0028 é aditiva e recusa downgrade quando houver território/revisão ou
-recibos novos. Prova local SQLite cobre a fatia; PostgreSQL permanece gate
-explícito ainda não comprovado nesta execução. Sem staging/produção.
+recibos novos. O teste PostgreSQL opt-in da #138 valida upgrade 0027→0028,
+constraints, criação/receipt/capacidade e os dois caminhos de downgrade em banco
+descartável; não usar staging para satisfazer esse gate. Sem staging/produção.
 
 ## Histórico — checkpoint inicial anterior ao backend
 # Operação de participantes — contrato e candidato Flutter (#30)

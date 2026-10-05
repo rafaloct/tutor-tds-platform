@@ -11,7 +11,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -35,6 +35,7 @@ from .models import (
     Program,
     ProgramCourse,
     ProgramMembership,
+    User,
 )
 
 router = APIRouter(prefix="/operations/classes", tags=["operations", "classes"])
@@ -464,6 +465,7 @@ def _snapshot(
             "can_close": classroom.status == "active",
             "closure_warnings": warnings,
             "closure_warnings_block_close": False,
+            "close_open_session_policy": "HUMAN_GATE_CLOSE_WITH_OPEN_SESSION",
         },
         "capabilities": {
             "role": role,
@@ -571,6 +573,83 @@ def options(
                 }
             )
         return {"options": items}
+
+
+@router.get("/team-candidates")
+def team_candidates(
+    program_id: str,
+    request: Request,
+    claims: dict[str, str] = Depends(access_claims),
+) -> dict[str, object]:
+    """Return only display-safe active teacher/monitor candidates."""
+    _enabled(request)
+    with Session(request.app.state.database.engine) as session:
+        _authorize_program(session, program_id, claims["sub"])
+        rows = session.execute(
+            select(User.id, User.name, ProgramMembership.role)
+            .join(
+                ProgramMembership,
+                ProgramMembership.user_id == User.id,
+            )
+            .where(
+                ProgramMembership.program_id == program_id,
+                ProgramMembership.status == "active",
+                ProgramMembership.role.in_(["teacher", "monitor"]),
+            )
+            .order_by(ProgramMembership.role, User.name, User.id)
+            .limit(250)
+        ).all()
+        return {
+            "program_id": program_id,
+            "candidates": [
+                {
+                    "user_id": row.id,
+                    "display_name": row.name,
+                    "role": row.role,
+                }
+                for row in rows
+            ],
+        }
+
+
+@router.get("")
+def manageable_classes(
+    request: Request,
+    claims: dict[str, str] = Depends(access_claims),
+) -> dict[str, list[dict[str, object]]]:
+    """List only classrooms visible through the lifecycle RBAC boundary."""
+    _enabled(request)
+    actor_id = claims["sub"]
+    with Session(request.app.state.database.engine) as session:
+        rows = session.execute(
+            select(Classroom, Program, ProgramMembership)
+            .join(Program, Program.id == Classroom.program_id)
+            .join(
+                ProgramMembership,
+                and_(
+                    ProgramMembership.program_id == Classroom.program_id,
+                    ProgramMembership.user_id == actor_id,
+                ),
+            )
+            .where(
+                ProgramMembership.status == "active",
+                or_(
+                    ProgramMembership.role.in_(["program_operator", "coordinator"]),
+                    and_(
+                        ProgramMembership.role == "teacher",
+                        Classroom.teacher_id == actor_id,
+                    ),
+                ),
+            )
+            .order_by(Classroom.start_date.desc(), Classroom.name, Classroom.id)
+            .limit(250)
+        ).all()
+        items: list[dict[str, object]] = []
+        for classroom, program, membership in rows:
+            item = _snapshot(session, classroom, program, membership)
+            item.pop("history", None)
+            items.append(item)
+        return {"classes": items}
 
 
 @router.post("", status_code=201)
