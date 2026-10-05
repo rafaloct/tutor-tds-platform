@@ -163,7 +163,6 @@ void main() {
               find.byType(ClassroomDashboardScreen).evaluate().isNotEmpty,
         );
         expect(find.text('Área da equipe'), findsWidgets);
-        await _selectClass(tester, _className);
         await _until(
           tester,
           () async => find
@@ -403,21 +402,6 @@ Future<void> _openManagement(WidgetTester tester) async {
     () async => find.byType(ManagementWorkspaceScreen).evaluate().isNotEmpty,
   );
   expect(find.text('Gestão do programa'), findsOneWidget);
-}
-
-Future<void> _selectClass(WidgetTester tester, String className) async {
-  final dropdown = find.byType(DropdownButtonFormField<String>);
-  expect(dropdown, findsOneWidget);
-  await _tap(tester, dropdown);
-  await _until(
-    tester,
-    () async => find.text(className).evaluate().isNotEmpty,
-  );
-  await _tap(tester, find.text(className).last);
-  await _until(
-    tester,
-    () async => find.text(className).evaluate().isNotEmpty,
-  );
 }
 
 Future<void> _openLearnerClass(WidgetTester tester) async {
