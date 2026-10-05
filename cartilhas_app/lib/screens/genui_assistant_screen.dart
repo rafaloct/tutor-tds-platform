@@ -25,10 +25,14 @@ class GenUIAssistantScreen extends StatefulWidget {
   final String initialContext;
   final String? contextLabel;
 
+  /// A content-authored suggestion only; it is never sent automatically.
+  final String? starterPrompt;
+
   const GenUIAssistantScreen({
     super.key,
     this.initialContext = '',
     this.contextLabel,
+    this.starterPrompt,
   });
 
   @override
@@ -56,6 +60,8 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
     _initTts();
     _initSpeech();
     _addInitialMessage();
+    final starter = widget.starterPrompt?.trim();
+    if (starter != null && starter.isNotEmpty) _controller.text = starter;
   }
 
   @override

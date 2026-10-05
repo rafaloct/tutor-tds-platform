@@ -10,7 +10,8 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá, vizinho! Você já viu uma floresta? Nela crescem árvores grandes, médias e pequenas, plantas rasteiras e animais — tudo junto, em harmonia. O SAF — Sistema Agroflorestal — imita exatamente essa organização da natureza, mas PRODUZINDO ALIMENTOS E RENDA para sua família."
+          "content": "Olá, vizinho! Você já viu uma floresta? Nela crescem árvores grandes, médias e pequenas, plantas rasteiras e animais — tudo junto, em harmonia. O SAF — Sistema Agroflorestal — imita exatamente essa organização da natureza, mas PRODUZINDO ALIMENTOS E RENDA para sua família.",
+          "experience": {"kind": "reveal", "objective": "Esboce um objetivo, espécies ou ciclos e uma primeira organização exploratória de SAF.", "actionLabel": "Esboçar meu SAF", "ai": {"starterPrompt": "Ajude-me a esboçar um planejamento inicial de SAF para discussão. Não substitua assistência técnica local."}}
         },
         {
           "type": "bot",
