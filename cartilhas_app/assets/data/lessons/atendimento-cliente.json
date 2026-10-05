@@ -10,7 +10,8 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá! Atender bem não é um dom de poucas pessoas — é uma habilidade que pode ser aprendida, exercitada e aperfeiçoada. Um bom atendimento faz o cliente voltar, indicar para outros e se tornar fiel ao seu negócio. Um atendimento ruim faz o cliente ir embora e ainda falar mal."
+          "content": "Olá! Atender bem não é um dom de poucas pessoas — é uma habilidade que pode ser aprendida, exercitada e aperfeiçoada. Um bom atendimento faz o cliente voltar, indicar para outros e se tornar fiel ao seu negócio. Um atendimento ruim faz o cliente ir embora e ainda falar mal.",
+          "experience": {"kind": "scenario", "objective": "Imagine um primeiro contato ou uma reclamação e escolha uma resposta clara e respeitosa.", "actionLabel": "Ensaiar uma resposta", "ai": {"starterPrompt": "Ajude-me a reformular uma resposta ao cliente de forma clara, respeitosa e objetiva."}}
         },
         {
           "type": "bot",

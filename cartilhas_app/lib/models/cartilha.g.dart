@@ -62,6 +62,9 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       .toList(),
   feedback: json['feedback'] as String?,
   explanation: json['explanation'] as String?,
+  experience: json['experience'] == null
+      ? null
+      : ExperienceBlock.fromJson(json['experience'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -70,7 +73,39 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'options': instance.options,
   'feedback': instance.feedback,
   'explanation': instance.explanation,
+  'experience': instance.experience,
 };
+
+ExperienceBlock _$ExperienceBlockFromJson(Map<String, dynamic> json) =>
+    ExperienceBlock(
+      kind: $enumDecode(_$ExperienceKindEnumMap, json['kind']),
+      objective: json['objective'] as String,
+      actionLabel: json['actionLabel'] as String?,
+      ai: json['ai'] == null
+          ? null
+          : ExperienceAiConfig.fromJson(json['ai'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$ExperienceBlockToJson(ExperienceBlock instance) =>
+    <String, dynamic>{
+      'kind': _$ExperienceKindEnumMap[instance.kind]!,
+      'objective': instance.objective,
+      'actionLabel': instance.actionLabel,
+      'ai': instance.ai,
+    };
+
+const _$ExperienceKindEnumMap = {
+  ExperienceKind.scenario: 'scenario',
+  ExperienceKind.reveal: 'reveal',
+  ExperienceKind.reflection: 'reflection',
+  ExperienceKind.actionChallenge: 'action_challenge',
+};
+
+ExperienceAiConfig _$ExperienceAiConfigFromJson(Map<String, dynamic> json) =>
+    ExperienceAiConfig(starterPrompt: json['starterPrompt'] as String);
+
+Map<String, dynamic> _$ExperienceAiConfigToJson(ExperienceAiConfig instance) =>
+    <String, dynamic>{'starterPrompt': instance.starterPrompt};
 
 Option _$OptionFromJson(Map<String, dynamic> json) => Option(
   label: json['label'] as String,

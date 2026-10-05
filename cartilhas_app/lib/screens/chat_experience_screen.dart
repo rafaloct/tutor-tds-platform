@@ -10,6 +10,7 @@ import '../features/auth/data/auth_repository.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
+import '../widgets/learning_experience_card.dart';
 import 'genui_assistant_screen.dart';
 import '../features/certificates/presentation/certificate_requests_screen.dart';
 import '../features/profile/data/profile_data_store.dart';
@@ -748,6 +749,13 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                 fontWeight: isCompletion ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
+            if (msg.experience != null)
+              LearningExperienceCard(
+                experience: msg.experience!,
+                onAskTutor: msg.experience!.ai == null
+                    ? null
+                    : () => _openExperienceTutor(msg),
+              ),
             if (!isUser)
               Align(
                 alignment: Alignment.centerRight,
@@ -765,6 +773,34 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _openExperienceTutor(Message message) {
+    final experience = message.experience;
+    final section = widget.cartilha.sections[_currentSectionIndex];
+    final ai = experience?.ai;
+    if (ai == null) return;
+    // Deliberately build this from content only. No profile, enrollment,
+    // progress, attendance, or other participant data crosses this boundary.
+    final pedagogicalContext = ExperienceTutorContext.fromContent(
+      cartilha: widget.cartilha,
+      section: section,
+      message: message,
+    );
+    Navigator.push(
+      context,
+      trackedRoute(
+        pageId: 'ai_assistant',
+        courseId: widget.cartilha.id,
+        resourceId: 'ai_chat',
+        featureId: 'ai_tutor_experience',
+        builder: (_) => GenUIAssistantScreen(
+          initialContext: pedagogicalContext,
+          contextLabel: widget.cartilha.title,
+          starterPrompt: ai.starterPrompt,
         ),
       ),
     );
