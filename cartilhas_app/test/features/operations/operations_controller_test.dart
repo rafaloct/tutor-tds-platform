@@ -59,12 +59,29 @@ void main() {
         'Cadastro autorizado',
       );
       expect(controller.snapshot!.person.id, 'synthetic-new-1');
+      expect(controller.message, contains('Cadastro confirmado'));
+      expect(controller.message, isNot(contains('Fluxo completo')));
       await controller.enroll('Matrícula conferida');
+      expect(controller.message, contains('Matrícula confirmada'));
+      expect(controller.message, isNot(contains('Fluxo completo')));
       await controller.assign('Turma conferida');
       expect(controller.snapshot!.scope.versionId, 'v2');
       expect(controller.snapshot!.history.length, 3);
+      expect(controller.message, contains('Fluxo completo confirmado'));
     },
   );
+
+  test('starting a new registration clears the prior confirmation', () async {
+    await select();
+    await controller.enroll('Matrícula conferida');
+    await controller.assign('Turma conferida');
+    expect(controller.message, contains('Fluxo completo confirmado'));
+
+    controller.beginRegistration();
+
+    expect(controller.snapshot, isNull);
+    expect(controller.message, isNull);
+  });
 
   test(
     'response loss retries the exact command without a second mutation',

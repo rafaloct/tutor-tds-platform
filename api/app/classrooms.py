@@ -122,6 +122,19 @@ class ClassroomDashboard(BaseModel):
     students: list[StudentProgress]
 
 
+class MonitorExceptionItem(BaseModel):
+    user_id: str
+    name: str
+    alerts: list[StudentAlert]
+
+
+class MonitorExceptionsResponse(BaseModel):
+    generated_at: datetime
+    total_students: int
+    attention_students: int
+    students: list[MonitorExceptionItem]
+
+
 @admin_router.post("", response_model=ClassroomResponse, status_code=201)
 def create_classroom(
     payload: ClassroomCreate,
@@ -253,7 +266,7 @@ def eligible_students(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        _require_staff_access(session, classroom, claims)
+        _require_teacher_or_admin(session, classroom, claims)
         _require_open_classroom(classroom)
         existing = select(ClassEnrollment.user_id).where(
             ClassEnrollment.class_id == class_id,
@@ -300,7 +313,7 @@ def include_student(
         )
         if classroom is None:
             raise HTTPException(status_code=404, detail="Turma não encontrada.")
-        _require_staff_access(session, classroom, claims)
+        _require_teacher_or_admin(session, classroom, claims)
         _require_open_classroom(classroom)
         enrollment = session.scalar(
             select(Enrollment).where(
@@ -362,7 +375,7 @@ def class_detail(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        _staff(session, classroom, claims, monitor=True)
+        _require_staff_access(session, classroom, claims)
         student_ids = session.scalars(
             select(ClassEnrollment.user_id)
             .where(
@@ -469,12 +482,12 @@ def class_dashboard(
     request: Request,
     claims: dict[str, str] = Depends(access_claims),
 ) -> ClassroomDashboard:
-    """Retorna a visão pedagógica por exceção para professor/monitor/admin."""
+    """Retorna o dashboard pedagógico completo para professor/admin."""
     now = datetime.now(timezone.utc)
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        _staff(session, classroom, claims, monitor=True)
+        _require_teacher_or_admin(session, classroom, claims)
         offering = session.get(
             ProgramCourse, (classroom.program_id, classroom.course_id)
         )
@@ -537,6 +550,89 @@ def class_dashboard(
         )
 
 
+@router.get(
+    "/{class_id}/monitor-exceptions",
+    response_model=MonitorExceptionsResponse,
+)
+def monitor_exceptions(
+    class_id: str,
+    request: Request,
+    claims: dict[str, str] = Depends(access_claims),
+) -> MonitorExceptionsResponse:
+    """Retorna somente sinais acionáveis necessários ao acompanhamento do monitor."""
+    now = datetime.now(timezone.utc)
+    database: Database = request.app.state.database
+    with Session(database.engine) as session:
+        classroom = _classroom(session, class_id)
+        _require_staff_access(session, classroom, claims)
+        offering = session.get(
+            ProgramCourse, (classroom.program_id, classroom.course_id)
+        )
+        if offering is None:
+            raise HTTPException(status_code=409, detail="Oferta da turma inconsistente.")
+
+        expected_percent = _expected_progress(classroom, now.date())
+        roster = (
+            select(ClassEnrollment, User)
+            .join(Classroom, Classroom.id == ClassEnrollment.class_id)
+            .join(User, User.id == ClassEnrollment.user_id)
+            .join(Enrollment, Enrollment.id == ClassEnrollment.enrollment_id)
+            .join(
+                ProgramMembership,
+                (ProgramMembership.user_id == ClassEnrollment.user_id)
+                & (ProgramMembership.program_id == ClassEnrollment.program_id),
+            )
+            .where(
+                ClassEnrollment.class_id == class_id,
+                ClassEnrollment.program_id == classroom.program_id,
+                ClassEnrollment.course_id == classroom.course_id,
+                ClassEnrollment.status == "active",
+                Enrollment.user_id == ClassEnrollment.user_id,
+                Enrollment.program_id == ClassEnrollment.program_id,
+                Enrollment.course_id == ClassEnrollment.course_id,
+                Enrollment.status == "active",
+                ProgramMembership.status == "active",
+                active_student_binding(),
+            )
+        )
+        memberships = session.execute(roster.order_by(User.name, User.id)).all()
+        actionable_codes = {
+            "inactive_7_days",
+            "required_activity_pending",
+            "below_expected_hours",
+        }
+        attention: list[MonitorExceptionItem] = []
+        for membership, user in memberships:
+            progress = _student_progress(
+                session,
+                classroom=classroom,
+                membership=membership,
+                user=user,
+                planned_seconds=offering.planned_seconds,
+                expected_percent=expected_percent,
+                now=now,
+                followup_counts={},
+            )
+            alerts = [
+                alert for alert in progress.alerts if alert.code in actionable_codes
+            ]
+            if alerts:
+                attention.append(
+                    MonitorExceptionItem(
+                        user_id=user.id,
+                        name=user.name,
+                        alerts=alerts,
+                    )
+                )
+
+        return MonitorExceptionsResponse(
+            generated_at=now,
+            total_students=len(memberships),
+            attention_students=len(attention),
+            students=attention,
+        )
+
+
 def _followup_counts(session: Session, classroom: Classroom, eligible) -> dict:
     """Three grouped queries, independent of roster size; no private narratives."""
     result: dict = {}
@@ -566,6 +662,17 @@ def _require_staff_access(
     claims: dict[str, str],
 ) -> None:
     _staff(session, classroom, claims, monitor=True)
+
+
+def _require_teacher_or_admin(
+    session: Session,
+    classroom: Classroom,
+    claims: dict[str, str],
+) -> None:
+    """Actions that expose hours or change the classroom roster are not monitor exceptions."""
+    if claims["role"] == "admin":
+        return
+    _staff(session, classroom, claims, monitor=False)
 
 
 def _student_progress(

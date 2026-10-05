@@ -485,6 +485,100 @@ test('não repassa detalhes de erro do AnythingLLM', async () => {
   assert.deepEqual(await response.json(), { error: 'service_unavailable' });
 });
 
+test('expõe um request id opaco e o propaga ao upstream sem expor segredo', async () => {
+  let upstreamRequestId;
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Teste de correlação' }), env, {},
+    async (_url, options) => {
+      upstreamRequestId = options.headers['X-Request-Id'];
+      return Response.json({ textResponse: 'Ok' });
+    },
+  );
+  const requestId = response.headers.get('X-Request-Id');
+  assert.match(requestId, /^[0-9a-f-]{36}$/i);
+  assert.equal(upstreamRequestId, requestId);
+  assert.equal((await response.text()).includes('test-secret'), false);
+});
+
+test('classifica timeout upstream sem revelar detalhes internos', async () => {
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Teste' }), env, {},
+    async () => { throw new DOMException('deadline interno', 'TimeoutError'); },
+  );
+  assert.equal(response.status, 504);
+  assert.deepEqual(await response.json(), { error: 'upstream_timeout' });
+});
+
+test('preserva rate limit como erro observável sanitizado', async () => {
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Teste' }), env, {},
+    async () => new Response('provider quota internal detail', { status: 429 }),
+  );
+  assert.equal(response.status, 429);
+  assert.deepEqual(await response.json(), { error: 'rate_limited' });
+});
+
+test('normaliza 5xx upstream e JSON inválido sem vazar o corpo', async () => {
+  const upstreamFailure = await handleRequest(
+    post('/v1/chat', { message: 'Teste' }), env, {},
+    async () => new Response('stack trace', { status: 502 }),
+  );
+  assert.equal(upstreamFailure.status, 503);
+  assert.deepEqual(await upstreamFailure.json(), { error: 'service_unavailable' });
+
+  const malformed = await handleRequest(
+    post('/v1/chat', { message: 'Teste' }), env, {},
+    async () => new Response('not json', { status: 200 }),
+  );
+  assert.equal(malformed.status, 502);
+  assert.deepEqual(await malformed.json(), { error: 'invalid_upstream_response' });
+});
+
+test('recusa corpo maior que o limite, contexto inválido e origem não autorizada', async () => {
+  const oversized = await handleRequest(
+    post('/v1/chat', { message: 'x'.repeat(16_385) }), env, {},
+    async () => assert.fail('não deveria chamar upstream'),
+  );
+  assert.equal(oversized.status, 413);
+  assert.deepEqual(await oversized.json(), { error: 'payload_too_large' });
+
+  const invalidContext = await handleRequest(
+    post('/v1/chat', { message: 'Teste', context: 1 }), env, {},
+    async () => assert.fail('não deveria chamar upstream'),
+  );
+  assert.equal(invalidContext.status, 400);
+  assert.deepEqual(await invalidContext.json(), { error: 'invalid_context' });
+
+  const corsRequest = new Request('https://gateway.example/v1/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: 'https://untrusted.example' },
+    body: JSON.stringify({ message: 'Teste' }),
+  });
+  const cors = await handleRequest(corsRequest, { ...env, ALLOWED_ORIGINS: 'https://app.example' }, {});
+  assert.equal(cors.status, 403);
+  assert.deepEqual(await cors.json(), { error: 'origin_not_allowed' });
+});
+
+test('aceita contexto vazio sem o inserir no prompt e rejeita resposta vazia', async () => {
+  let upstreamBody;
+  const contextResponse = await handleRequest(
+    post('/v1/chat', { message: 'Teste', context: '   ' }), env, {},
+    async (_url, options) => {
+      upstreamBody = JSON.parse(options.body);
+      return Response.json({ textResponse: 'Ok' });
+    },
+  );
+  assert.equal(contextResponse.status, 200);
+  assert.doesNotMatch(upstreamBody.system_prompt, /CONTEXTO DA CARTILHA/);
+
+  const emptyResponse = await handleRequest(
+    post('/v1/chat', { message: 'Teste' }), env, {},
+    async () => Response.json({ textResponse: '   ' }),
+  );
+  assert.equal(emptyResponse.status, 502);
+  assert.deepEqual(await emptyResponse.json(), { error: 'empty_upstream_response' });
+});
+
 test('health check não revela configuração', async () => {
   const response = await handleRequest(
     new Request('https://gateway.example/health'), env, {},

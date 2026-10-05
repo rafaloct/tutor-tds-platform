@@ -39,6 +39,9 @@ class Settings:
     compatibility_verified: bool = False
     environment: str = "development"
     operator_operations_enabled: bool = False
+    cpf_activation_required: bool = False
+    auth_rate_limit_window_seconds: int = 900
+    auth_login_attempt_limit: int = 10
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -99,6 +102,9 @@ class Settings:
             journey_traceability_enabled=os.getenv("JOURNEY_TRACEABILITY_ENABLED", "false").lower() in {"1", "true", "yes"},
             minimum_supported_app_version=os.getenv("MINIMUM_SUPPORTED_APP_VERSION", "1.2.0+11").strip(),
             compatibility_verified=os.getenv("COMPATIBILITY_VERIFIED", "false").lower() in {"1", "true", "yes"},
+            cpf_activation_required=os.getenv("CPF_ACTIVATION_REQUIRED", "false").lower() in {"1", "true", "yes"},
+            auth_rate_limit_window_seconds=int(os.getenv("AUTH_RATE_LIMIT_WINDOW_SECONDS", "900")),
+            auth_login_attempt_limit=int(os.getenv("AUTH_LOGIN_ATTEMPT_LIMIT", "10")),
         )
         if not settings.minimum_supported_app_version:
             raise RuntimeError("MINIMUM_SUPPORTED_APP_VERSION não pode ser vazio.")

@@ -1,16 +1,16 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import '../models/tutor_learning_context.dart';
+import 'package:cartilhas_app/models/tutor_learning_context.dart';
 
 /// Cliente do gateway do Tutor. Credenciais e seleção do modelo nunca fazem
 /// parte deste aplicativo; elas permanecem no Cloudflare e no AnythingLLM.
 class AnythingLLMService {
   final String gatewayUrl;
-  final http.Client? _client;
+  final http.Client _client;
 
   AnythingLLMService({required this.gatewayUrl, http.Client? client})
-    : _client = client;
+    : _client = client ?? http.Client();
 
   Future<String> getChatResponse(
     String message, {
@@ -20,12 +20,11 @@ class AnythingLLMService {
   }) async {
     if (gatewayUrl.isEmpty) return _friendlyUnavailableMessage;
 
-    final normalizedGatewayUrl = gatewayUrl.endsWith('/')
-        ? gatewayUrl.substring(0, gatewayUrl.length - 1)
-        : gatewayUrl;
-    final url = Uri.parse('$normalizedGatewayUrl/v1/chat');
-
     try {
+      final normalizedGatewayUrl = gatewayUrl.endsWith('/')
+          ? gatewayUrl.substring(0, gatewayUrl.length - 1)
+          : gatewayUrl;
+      final url = Uri.parse('$normalizedGatewayUrl/v1/chat');
       final body = {
         'message': message,
         'mode': mode,
@@ -36,17 +35,13 @@ class AnythingLLMService {
         if (learningContext != null)
           'learning_context': learningContext.toJson(),
       };
-      final request = _client?.post(
+      final response = await _client
+          .post(
             url,
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(body),
-          ) ??
-          http.post(
-            url,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode(body),
-          );
-      final response = await request.timeout(const Duration(seconds: 30));
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
