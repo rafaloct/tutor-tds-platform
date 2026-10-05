@@ -24,13 +24,25 @@ final class TDS_Fake_Courses_Adapter implements TDS_Courses_Adapter_Interface {
 		}
 
 		$result = array(
-			'state' => $this->state,
-			'courses' => 'ready' === $this->state ? array_slice( $this->courses, ( $page - 1 ) * $per_page, $per_page ) : array(),
+			'state'      => $this->state,
+			'courses'    => 'ready' === $this->state ? array_slice( $this->courses, ( $page - 1 ) * $per_page, $per_page ) : array(),
 			'pagination' => array( 'page' => $page, 'per_page' => $per_page, 'total' => 'ready' === $this->state ? count( $this->courses ) : 0 ),
-			'error' => array( 'code' => 'catalog_unavailable', 'message' => 'Catálogo indisponível temporariamente.' ),
-			'source' => 'offline-fake',
+			'error'      => array( 'code' => 'catalog_unavailable', 'message' => 'Catálogo indisponível temporariamente.' ),
 		);
 		$this->cache[ $key ] = $result;
 		return $result;
+	}
+
+	public function fetch_course( $slug ) {
+		$slug = is_string( $slug ) ? trim( $slug ) : '';
+		if ( 'ready' !== $this->state ) {
+			return array( 'state' => $this->state, 'course' => null );
+		}
+		foreach ( $this->courses as $course ) {
+			if ( is_array( $course ) && isset( $course['slug'] ) && $slug === $course['slug'] ) {
+				return array( 'state' => 'ready', 'course' => $course );
+			}
+		}
+		return array( 'state' => 'not_found', 'course' => null );
 	}
 }

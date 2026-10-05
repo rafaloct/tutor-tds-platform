@@ -41,6 +41,18 @@ function catalog( $result ) {
             if ( $this->result instanceof Throwable ) { throw $this->result; }
             return $this->result;
         }
+        public function fetch_course( $slug ) {
+            if ( $this->result instanceof Throwable ) { throw $this->result; }
+            if ( ! is_array( $this->result ) || 'ready' !== ( $this->result['state'] ?? null ) ) {
+                return array( 'state' => 'error', 'course' => null );
+            }
+            foreach ( $this->result['courses'] ?? array() as $course ) {
+                if ( is_array( $course ) && ( $course['slug'] ?? null ) === $slug ) {
+                    return array( 'state' => 'ready', 'course' => $course );
+                }
+            }
+            return array( 'state' => 'not_found', 'course' => null );
+        }
     } ) )->public_catalog();
 }
 $course = array( 'slug' => 'synthetic-course', 'title' => 'Synthetic course', 'status' => 'published', 'published_version_label' => 'v1', 'updated_at' => '2026-10-03T00:00:00Z' );
@@ -71,10 +83,12 @@ check( false !== strpos( $html, 'name="tds_app_access_url"' ), 'single field ren
 $can_manage = false;
 ob_start(); $fields['tds_app_access_url'][0](); $html = ob_get_clean();
 check( '' === $html, 'non-admin field hidden' );
+$extra_options['tds_public_api_base_url'] = '';
 $actions['rest_api_init']();
 $route = $routes['tds-portal/v1/public/courses'];
 check( 'GET' === $route['methods'] && '__return_true' === $route['permission_callback'], 'public read only route' );
 check( 50 === $route['args']['per_page']['maximum'], 'REST page limit declared' );
+check( isset( $routes['tds-portal/v1/public/courses/(?P<slug>[a-z0-9]+(?:-[a-z0-9]+)*)'] ), 'public detail route declared' );
 $response = $route['callback']( new WP_REST_Request( array( 'page' => 1, 'per_page' => 12 ) ) );
 check( 503 === $response->status && array() === $response->data['courses'], 'bootstrap stays offline without fixture' );
 foreach ( array( 'disabled' => 503, 'unavailable' => 503, 'error' => 502, 'ready' => 200 ) as $state => $status ) {
