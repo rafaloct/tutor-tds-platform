@@ -189,6 +189,29 @@ class HarnessTests(unittest.TestCase):
             manifest["invariants"]["capacity_policy_enforced"]["evidence"],
         )
 
+    def test_execution_marker_rejects_mismatched_heads_and_run_id(self):
+        base_payload = {
+            "front": "CLASS_LIFECYCLE_E2E",
+            "run_id": "a1" * 16,
+            "api_head": SHA_A,
+            "app_head": SHA_B,
+            "compose_head": SHA_C,
+            "production_changed": False,
+            "shared_staging_changed": False,
+            "observed": {},
+        }
+        for key, bad_value in (
+            ("api_head", "d" * 40),
+            ("app_head", "d" * 40),
+            ("compose_head", "d" * 40),
+            ("run_id", "b2" * 16),
+        ):
+            payload = dict(base_payload)
+            payload[key] = bad_value
+            with self.subTest(key=key):
+                with self.assertRaises(ValueError):
+                    harness._manifest_from_execution(args(), payload)
+
     def test_marker_parser_rejects_missing_or_malformed_result(self):
         with self.assertRaises(ValueError):
             harness._parse_flutter_marker("All tests passed")

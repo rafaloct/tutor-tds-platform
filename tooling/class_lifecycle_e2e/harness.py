@@ -404,6 +404,17 @@ def _manifest_from_execution(
     if flutter_payload.get("shared_staging_changed") is not False:
         raise ValueError("Flutter marker does not prove shared staging remained unchanged")
 
+    expected_heads = {
+        "api_head": args.api_head,
+        "app_head": args.app_head,
+        "compose_head": args.compose_head,
+    }
+    for label, expected in expected_heads.items():
+        if flutter_payload.get(label) != expected:
+            raise ValueError(f"Flutter marker {label} does not match executed head")
+    if flutter_payload.get("run_id") != _run_id(args.package):
+        raise ValueError("Flutter marker run_id does not match isolated package")
+
     live_stage_keys = {
         "prepare_class": "prepare_class",
         "participant": "participant",
