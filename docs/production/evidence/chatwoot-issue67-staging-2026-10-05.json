@@ -1,0 +1,62 @@
+{
+  "observed_at": "2026-10-05",
+  "issue": 67,
+  "pull_request": 142,
+  "environment": "staging",
+  "production_mutated": false,
+  "staging": {
+    "api_image_revision": "911c4545076da7cb6e70f57d70dccbe1fbe3b446",
+    "api_container_healthy": true,
+    "identity_namespace": "tds-staging",
+    "identity_secret_present": true,
+    "signed_support_identity_build_flag": false,
+    "support_identity_smoke": {
+      "result": "PASS",
+      "hash_length": 64
+    }
+  },
+  "chatwoot": {
+    "public_version": "4.11.0",
+    "account_name": "TDS Tocantins",
+    "account_admin_count": 2,
+    "account_agent_count": 10,
+    "inbox": {
+      "id": 16,
+      "name": "Tutor TDS — Staging QA",
+      "channel_type": "Channel::WebWidget",
+      "hmac_mandatory": true,
+      "auto_assignment": false,
+      "working_hours_enabled": false,
+      "working_hours_rows": 7,
+      "inbox_members": 0
+    },
+    "labels_count": 12,
+    "teams_count": 1,
+    "canned_responses_count": 16,
+    "macros_count": 0,
+    "automations_count": 0,
+    "hmac_handshake": {
+      "invalid_signature_status": 401,
+      "invalid_signature_result": "PASS",
+      "api_signature_status": 200,
+      "api_signature_result": "PASS"
+    },
+    "transport": {
+      "tls": "PASS",
+      "websocket_http_status": 101,
+      "websocket": "PASS"
+    }
+  },
+  "risks": [
+    "staging inbox has no explicit members, so agent reception/reply is not yet proven",
+    "working hours exist as 09:00-17:00 Monday-Friday but are disabled",
+    "account-level canned responses include legacy certificate wording that conflicts with the current canonical academic contract; they were not modified because they are shared with production support"
+  ],
+  "pending": [
+    "A-to-B full conversation isolation smoke",
+    "real agent or operational reply in staging",
+    "network loss and retry on Android",
+    "physical Android evidence required by Issue #67",
+    "prove no academic state changes before/after conversation"
+  ]
+}
