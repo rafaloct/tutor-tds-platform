@@ -163,7 +163,14 @@ void main() {
               find.byType(ClassroomDashboardScreen).evaluate().isNotEmpty,
         );
         expect(find.text('Área da equipe'), findsWidgets);
-        expect(find.text(_className), findsWidgets);
+        await _selectClass(tester, _className);
+        await _until(
+          tester,
+          () async => find
+              .text('Revisar pedidos de certificado')
+              .evaluate()
+              .isNotEmpty,
+        );
         expect(find.text('Revisar pedidos de certificado'), findsOneWidget);
         evidence['full_teacher_dashboard'] = true;
 
@@ -250,6 +257,10 @@ void main() {
               find.byType(CourseEditorCatalogScreen).evaluate().isNotEmpty,
         );
         expect(find.text('Meus conteúdos'), findsOneWidget);
+        await _until(
+          tester,
+          () async => find.text('Criar curso').evaluate().isNotEmpty,
+        );
         expect(find.text('Criar curso'), findsOneWidget);
         evidence['creator_catalog'] = true;
         evidence['creator_create_entrypoint'] = true;
@@ -394,6 +405,21 @@ Future<void> _openManagement(WidgetTester tester) async {
   expect(find.text('Gestão do programa'), findsOneWidget);
 }
 
+Future<void> _selectClass(WidgetTester tester, String className) async {
+  final dropdown = find.byType(DropdownButtonFormField<String>);
+  expect(dropdown, findsOneWidget);
+  await _tap(tester, dropdown);
+  await _until(
+    tester,
+    () async => find.text(className).evaluate().isNotEmpty,
+  );
+  await _tap(tester, find.text(className).last);
+  await _until(
+    tester,
+    () async => find.text(className).evaluate().isNotEmpty,
+  );
+}
+
 Future<void> _openLearnerClass(WidgetTester tester) async {
   await _openMoreOption(tester, 'Minhas turmas');
   await _until(
@@ -424,11 +450,6 @@ Future<void> _offlineScenario(
         expectedUserId: _studentId,
       );
       await _openLearnerClass(tester);
-      await tester.pageBack();
-      await _until(
-        tester,
-        () async => find.byType(LearnerClassroomsScreen).evaluate().isNotEmpty,
-      );
       await prefs.setString(key, 'primed');
       evidence['online_cache_primed'] = true;
     case 'offline':
