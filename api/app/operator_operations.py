@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from .auth import AuthService, RegisterRequest, access_claims
 from .context_memberships import bind_student, membership_id
+from .classroom_policy import require_available_seat
 from .models import (ClassEnrollment, Classroom, CohortMembership, Enrollment,
                      OperatorCommandReceipt, Program, ProgramCourse,
                      ProgramMembership, StudentBaseline, User)
@@ -63,10 +64,11 @@ def authorized(session, program_id, actor_id):
 
 
 def context(session, class_id, actor_id, *, write=False):
-    classroom = session.get(Classroom, class_id)
+    statement = select(Classroom).where(Classroom.id == class_id)
+    classroom = session.scalar(statement.with_for_update() if write else statement)
     if classroom is None:
         raise HTTPException(404, "Contexto indisponível.")
-    # Serialize all commands in the program, including cross-class corrections.
+    # Serialize participant writes on both the class and its program.
     statement = select(Program).where(Program.id == classroom.program_id)
     program = session.scalar(statement.with_for_update() if write else statement)
     authorized(session, program.id, actor_id)
@@ -203,6 +205,7 @@ def execute(class_id: str, payload: Command, request: Request, claims=Depends(ac
         if classroom.status == "closed":
             raise HTTPException(409, "Turma encerrada.")
         try:
+            receipt_action = payload.action
             if payload.action == "register":
                 if payload.registration is None or payload.person_id is not None:
                     raise HTTPException(422, "Cadastro inválido.")
@@ -215,10 +218,21 @@ def execute(class_id: str, payload: Command, request: Request, claims=Depends(ac
                 person = require_person(session, request, program.id, claims["sub"], payload.person_id, payload.identity_proof)
                 if payload.expected_revision != revision(session, program.id, person.id):
                     raise HTTPException(409, "Outra operação alterou os vínculos; consulte novamente.")
-                mutate(session, classroom, program, person, payload.action)
+                actor_membership = session.get(
+                    ProgramMembership, (claims["sub"], program.id)
+                )
+                receipt_action = mutate(
+                    session,
+                    classroom,
+                    program,
+                    person,
+                    payload.action,
+                    actor_membership=actor_membership,
+                    reason=payload.reason,
+                )
             receipt = OperatorCommandReceipt(id=payload.id, actor_id=claims["sub"], subject_id=person.id,
                 program_id=program.id, class_id=class_id, revision=revision(session, program.id, person.id)+1,
-                action=payload.action, reason=payload.reason, request_hash=digest, result={}, occurred_at=datetime.now(timezone.utc))
+                action=receipt_action, reason=payload.reason, request_hash=digest, result={}, occurred_at=datetime.now(timezone.utc))
             session.add(receipt)
             session.flush()
             result = snapshot(session, classroom, program, person)
@@ -230,7 +244,16 @@ def execute(class_id: str, payload: Command, request: Request, claims=Depends(ac
             raise HTTPException(409, "Conflito de cadastro ou operação. Consulte novamente.") from None
 
 
-def mutate(session, classroom, program, person, action):
+def mutate(
+    session,
+    classroom,
+    program,
+    person,
+    action,
+    *,
+    actor_membership=None,
+    reason=None,
+):
     member = session.get(ProgramMembership, (person.id, program.id))
     if member is not None and member.status != "active":
         raise HTTPException(409, "Vínculo de programa inativo exige revisão específica.")
@@ -248,22 +271,38 @@ def mutate(session, classroom, program, person, action):
         elif enrollment.status != "active":
             raise HTTPException(409, "Matrícula inativa exige revisão específica.")
         session.flush()
-        return
+        return "enroll"
     if member is None or enrollment is None or enrollment.status != "active":
         raise HTTPException(409, "Matrícula ativa necessária.")
     link = session.get(ClassEnrollment, (classroom.id, person.id))
     if action == "assign":
+        if (
+            link is not None
+            and (
+                link.enrollment_id != enrollment.id
+                or link.course_version_id not in {None, classroom.course_version_id}
+            )
+        ):
+            raise HTTPException(409, "Linhagem divergente.")
+        capacity_override = False
+        if link is None or link.status != "active":
+            capacity_override = require_available_seat(
+                session,
+                classroom,
+                actor_membership=actor_membership,
+                reason=reason,
+            )
         if link is None:
             link = ClassEnrollment(class_id=classroom.id, user_id=person.id, enrollment_id=enrollment.id,
                 program_id=program.id, course_id=classroom.course_id, status="active")
             session.add(link)
-        elif link.enrollment_id != enrollment.id or link.course_version_id not in {None, classroom.course_version_id}:
-            raise HTTPException(409, "Linhagem divergente.")
         link.status = "active"
         try:
             bind_student(session, classroom, link)
         except ValueError:
             raise HTTPException(409, "Edição ou vínculo inconsistente.") from None
+        session.flush()
+        return "assign_capacity_override" if capacity_override else "assign"
     else:
         if link is None:
             raise HTTPException(409, "Vínculo não existe.")
@@ -272,3 +311,4 @@ def mutate(session, classroom, program, person, action):
         if bound is not None:
             bound.status = "inactive"
     session.flush()
+    return "revoke"

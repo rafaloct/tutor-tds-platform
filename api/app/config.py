@@ -39,6 +39,7 @@ class Settings:
     compatibility_verified: bool = False
     environment: str = "development"
     operator_operations_enabled: bool = False
+    class_lifecycle_enabled: bool = False
     cpf_activation_required: bool = False
     auth_rate_limit_window_seconds: int = 900
     auth_login_attempt_limit: int = 10
@@ -58,6 +59,7 @@ class Settings:
         )
         settings = cls(
             operator_operations_enabled=os.getenv("OPERATOR_OPERATIONS_ENABLED", "false").lower() in {"1", "true", "yes"},
+            class_lifecycle_enabled=os.getenv("CLASS_LIFECYCLE_ENABLED", "false").lower() in {"1", "true", "yes"},
             database_url=database_url or "sqlite+pysqlite:///./tutor_tds_local.db",
             environment=environment,
             allowed_origins=origins,
