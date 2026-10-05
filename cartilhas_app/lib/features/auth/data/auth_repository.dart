@@ -21,12 +21,14 @@ class AuthRepository {
     required this.apiUrl,
     http.Client? client,
     AuthTokenStore? tokenStore,
+    this._onSessionEnded,
   }) : _client = client ?? http.Client(),
        _tokenStore = tokenStore ?? SecureAuthTokenStore();
 
   final String apiUrl;
   final http.Client _client;
   final AuthTokenStore _tokenStore;
+  final Future<void> Function()? _onSessionEnded;
   Future<AuthSession>? _refreshInFlight;
   int _sessionGeneration = 0;
   Future<void> _tokenOperations = Future<void>.value();
@@ -89,9 +91,18 @@ class AuthRepository {
     required String cpf,
     required String phone,
     required String password,
+    required String activationCode,
   }) => _authenticate(
     path: '/auth/register',
-    body: {'name': name, 'cpf': cpf, 'phone': phone, 'password': password},
+    // The activation code is deliberately request-only. AuthSession and the
+    // secure token store contain only server-issued session tokens.
+    body: {
+      'name': name,
+      'cpf': cpf,
+      'phone': phone,
+      'password': password,
+      'activation_token': activationCode,
+    },
     expectedStatus: 201,
   );
 
@@ -116,9 +127,7 @@ class AuthRepository {
         ),
       );
       if (response.statusCode != 200) {
-        if (response.statusCode == 401) {
-          await logout();
-        }
+        // authorized() already ends the session on a second 401.
         throw const AuthException('Não foi possível validar sua conta.');
       }
       final decoded = jsonDecode(response.body);
@@ -187,13 +196,18 @@ class AuthRepository {
     _checkGeneration(generation);
     response = await request(session.tokens.accessToken);
     _checkGeneration(generation);
+    if (response.statusCode == 401) await logout();
     return response;
   }
 
   Future<void> logout() {
     _sessionGeneration++;
     _refreshInFlight = null;
-    return _mutateTokens(_tokenStore.clear);
+    return _mutateTokens(() async {
+      // Tokens go first: local cleanup must never leave a usable session.
+      await _tokenStore.clear();
+      await _onSessionEnded?.call();
+    });
   }
 
   /// Fetches a server-signed support identity; never caches or signs locally.
@@ -253,7 +267,12 @@ class AuthRepository {
           .timeout(const Duration(seconds: 12));
       _checkGeneration(generation);
       if (response.statusCode != expectedStatus) {
-        throw AuthException(_messageFor(response.statusCode));
+        throw AuthException(
+          _messageFor(
+            response.statusCode,
+            registering: path == '/auth/register',
+          ),
+        );
       }
       final session = _decodeSession(response.body);
       await _writeSession(session, generation);
@@ -346,8 +365,17 @@ class AuthRepository {
     }
   }
 
-  String _messageFor(int statusCode) {
+  String _messageFor(int statusCode, {bool registering = false}) {
     if (statusCode == 401) return 'CPF ou senha inválidos.';
+    if (statusCode == 403 && !registering) {
+      return 'Sua conta ainda não foi liberada para acesso. Procure a instituição para concluir a ativação.';
+    }
+    if (statusCode == 403) {
+      return 'Não foi possível validar o código de ativação. Solicite um novo código à instituição.';
+    }
+    if (statusCode == 429) {
+      return 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.';
+    }
     if (statusCode == 409) return 'Já existe uma conta para este CPF.';
     if (statusCode == 422) {
       return 'Confira os dados informados e tente novamente.';

@@ -149,8 +149,10 @@ def _visible_user_ids(
     if classroom is None:
         raise HTTPException(status_code=404, detail="Turma não encontrada.")
     is_monitor = session.get(ClassMonitor, (class_id, viewer_id)) is not None
-    if classroom.teacher_id == viewer_id or is_monitor:
+    if classroom.teacher_id == viewer_id:
         return _class_student_ids(session, class_id, user_id)
+    if is_monitor:
+        raise HTTPException(status_code=403, detail="Analytics não autorizado para monitor.")
     active_student = session.get(ClassEnrollment, (class_id, viewer_id))
     if active_student is None or active_student.status != "active":
         raise HTTPException(status_code=403, detail="Analytics não autorizado.")

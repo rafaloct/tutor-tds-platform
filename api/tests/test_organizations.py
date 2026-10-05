@@ -236,6 +236,134 @@ def test_admin_creates_role_account_and_program_membership_atomically() -> None:
     assert membership is not None and membership.role == "teacher"
 
 
+def test_admin_provisions_program_operator_through_canonical_control_plane() -> None:
+    client, app, _ = make_client()
+    with client:
+        register(client, cpf=CPF_ADMIN, name="Administradora")
+        operator = register(
+            client,
+            cpf="529.982.247-25",
+            name="Operadora de Programa",
+        )
+        with Session(app.state.database.engine) as session:
+            admin = session.scalar(select(User).where(User.name == "Administradora"))
+            assert admin is not None
+            admin.role = "admin"
+            session.commit()
+
+        login = client.post(
+            "/auth/login",
+            json={"cpf": CPF_ADMIN, "password": PASSWORD},
+        )
+        headers = bearer(login.json()["access_token"])
+        institution = client.post(
+            "/admin/institutions",
+            json={"name": "Instituto Operação"},
+            headers=headers,
+        )
+        program = client.post(
+            "/admin/programs",
+            json={
+                "institution_id": institution.json()["id"],
+                "name": "Programa Operacional",
+            },
+            headers=headers,
+        )
+        program_id = program.json()["id"]
+
+        membership = client.post(
+            f"/admin/programs/{program_id}/memberships",
+            json={
+                "user_id": operator["user"]["id"],
+                "role": "program_operator",
+            },
+            headers=headers,
+        )
+        hierarchy = client.get(
+            "/admin/hierarchy",
+            params={"institution_id": institution.json()["id"]},
+            headers=headers,
+        )
+        openapi = client.get("/openapi.json").json()
+
+        with Session(app.state.database.engine) as session:
+            persisted = session.get(
+                ProgramMembership,
+                (operator["user"]["id"], program_id),
+            )
+
+    assert membership.status_code == 201
+    assert membership.json()["role"] == "program_operator"
+    assert persisted is not None
+    assert persisted.role == "program_operator"
+    assert hierarchy.status_code == 200
+    assert hierarchy.json()[0]["programs"][0]["memberships"] == [
+        {
+            "user_id": operator["user"]["id"],
+            "program_id": program_id,
+            "role": "program_operator",
+            "status": "active",
+        }
+    ]
+    schemas = openapi["components"]["schemas"]
+    assert "program_operator" in schemas["MembershipCreate"]["properties"]["role"]["enum"]
+    assert "program_operator" in schemas["ManagedAccountCreate"]["properties"]["role"]["enum"]
+
+
+def test_admin_managed_account_accepts_program_operator_consistently() -> None:
+    client, app, _ = make_client()
+    with client:
+        register(client, cpf=CPF_ADMIN, name="Administradora")
+        with Session(app.state.database.engine) as session:
+            admin = session.scalar(select(User).where(User.name == "Administradora"))
+            assert admin is not None
+            admin.role = "admin"
+            session.commit()
+
+        login = client.post(
+            "/auth/login",
+            json={"cpf": CPF_ADMIN, "password": PASSWORD},
+        )
+        headers = bearer(login.json()["access_token"])
+        institution = client.post(
+            "/admin/institutions",
+            json={"name": "Instituto Conta"},
+            headers=headers,
+        )
+        program = client.post(
+            "/admin/programs",
+            json={
+                "institution_id": institution.json()["id"],
+                "name": "Programa Conta",
+            },
+            headers=headers,
+        )
+        response = client.post(
+            "/admin/accounts",
+            json={
+                "name": "Operadora Gerenciada",
+                "cpf": "168.995.350-09",
+                "phone": "61999990002",
+                "password": PASSWORD,
+                "role": "program_operator",
+                "program_id": program.json()["id"],
+            },
+            headers=headers,
+        )
+
+        with Session(app.state.database.engine) as session:
+            created = session.get(User, response.json()["id"])
+            membership = session.get(
+                ProgramMembership,
+                (response.json()["id"], program.json()["id"]),
+            )
+
+    assert response.status_code == 201
+    assert response.json()["role"] == "program_operator"
+    assert created is not None and created.role == "program_operator"
+    assert membership is not None and membership.role == "program_operator"
+
+
 def test_bootstrap_admin_is_rerunnable_without_duplicate_user() -> None:
     _, app, settings = make_client()
     with Session(app.state.database.engine) as session:

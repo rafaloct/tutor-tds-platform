@@ -25,7 +25,14 @@ from .models import (
 router = APIRouter(prefix="/admin", tags=["admin"])
 admin_claims = require_roles("admin")
 ProgramRole = Literal[
-    "student", "teacher", "monitor", "creator", "coordinator", "finance", "admin"
+    "student",
+    "teacher",
+    "monitor",
+    "creator",
+    "coordinator",
+    "program_operator",
+    "finance",
+    "admin",
 ]
 
 

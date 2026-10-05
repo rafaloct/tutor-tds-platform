@@ -142,6 +142,51 @@ void main() {
     expect(classes.single.studentIds, isEmpty);
   });
 
+  test('monitor usa endpoint mínimo sem consultar dashboard', () async {
+    final requests = <http.Request>[];
+    final repository = ClassroomRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(),
+      ),
+      client: MockClient((request) async {
+        requests.add(request);
+        return http.Response(
+          jsonEncode({
+            'generated_at': '2026-10-05T12:00:00Z',
+            'total_students': 2,
+            'attention_students': 1,
+            'students': [
+              {
+                'user_id': 'student-1',
+                'name': 'Maria',
+                'alerts': [
+                  {'code': 'inactive_7_days'},
+                  {'code': 'required_activity_pending'},
+                  {'code': 'below_expected_hours'},
+                ],
+              },
+            ],
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    final result = await repository.monitorExceptions('class/id');
+
+    expect(result.attentionStudents, 1);
+    expect(result.students.single.name, 'Maria');
+    expect(requests, hasLength(1));
+    expect(
+      requests.single.url.toString(),
+      'https://api.example/classes/class%2Fid/monitor-exceptions',
+    );
+    expect(requests.single.url.path, isNot(contains('/dashboard')));
+  });
+
   test('propaga detalhe seguro da API em falha de acesso', () async {
     final auth = AuthRepository(
       apiUrl: 'https://api.example',

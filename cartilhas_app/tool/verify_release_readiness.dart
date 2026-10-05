@@ -225,6 +225,7 @@ class ReleaseReadinessVerifier {
       'DURABLE_LEARNING_OUTBOX_ENABLED': false,
       'JOURNEY_TRACEABILITY_ENABLED': false,
       'SIGNED_SUPPORT_IDENTITY': false,
+      'PUSH_NOTIFICATIONS_ENABLED': false,
     };
     if (config.keys.any((key) => !expected.containsKey(key))) {
       issues.add(
