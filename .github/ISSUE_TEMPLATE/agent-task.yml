@@ -1,0 +1,95 @@
+name: Agent task
+description: Create a bounded task for coding/review agents
+title: "[AGENT] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        GitHub is the source of truth. Agents must follow AGENTS.md. Merge and production are forbidden unless explicitly authorized.
+
+  - type: input
+    id: task_id
+    attributes:
+      label: TASK_ID
+      placeholder: A25
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - API
+        - Flutter
+        - WordPress
+        - Infra/CI
+        - Backup/Recovery
+        - Media
+        - Admin/Control Plane
+        - Data/BI
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: One measurable objective.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Allowed scope
+      description: Paths/components the agent may change.
+    validations:
+      required: true
+
+  - type: textarea
+    id: do_not_touch
+    attributes:
+      label: Do not touch
+      description: Explicit excluded paths/domains.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria / tests
+      description: Exact checks that define completion.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: human_gate
+    attributes:
+      label: Human gate at task start?
+      options:
+        - "NO"
+        - "YES — production"
+        - "YES — secret/credential"
+        - "YES — permission/account"
+        - "YES — billing/provider"
+        - "YES — destructive operation"
+        - "YES — legal/editorial/privacy"
+        - "YES — business decision"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: defaults
+    attributes:
+      label: Default execution contract
+      options:
+        - label: MERGE_ALLOWED=NO
+          required: true
+        - label: PRODUCTION_ALLOWED=NO
+          required: true
+        - label: FORCE_PUSH_ALLOWED=NO
+          required: true
+        - label: NEXT_TASK_AUTO=NO
+          required: true
