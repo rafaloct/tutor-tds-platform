@@ -5,7 +5,7 @@ import '../../analytics/app_telemetry_service.dart';
 import '../models/classroom_models.dart';
 
 class MonitorExceptionsView extends StatelessWidget {
-  const MonitorExceptionsView({super.key, required this.dashboard});
+  const MonitorExceptionsView({super.key, required this.exceptions});
 
   static const actionableCodes = {
     'inactive_7_days',
@@ -13,44 +13,33 @@ class MonitorExceptionsView extends StatelessWidget {
     'below_expected_hours',
   };
 
-  final ClassroomDashboard dashboard;
+  final MonitorExceptions exceptions;
 
   @override
   Widget build(BuildContext context) {
-    final students = dashboard.students;
-    final attention = students
-        .where(
-          (student) => student.alerts.any(
-            (alert) => actionableCodes.contains(alert.code),
+    final attention = exceptions.students
+        .map(
+          (student) => MonitorExceptionStudent(
+            userId: student.userId,
+            name: student.name,
+            alerts: student.alerts
+                .where((alert) => actionableCodes.contains(alert.code))
+                .toList(growable: false),
           ),
         )
+        .where((student) => student.alerts.isNotEmpty)
         .toList(growable: false);
-    final normal = students.length - attention.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Monitor por exceção',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Veja somente sinais que precisam de acompanhamento. Eles não são veredictos sobre o participante.',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 16),
         Wrap(
           spacing: 10,
           runSpacing: 10,
           children: [
             _StatusMetric(
-              label: 'Percurso normal',
-              value: normal,
+              label: 'Tudo certo',
+              value: exceptions.normalStudents,
               icon: Icons.check_circle_outline,
               attention: false,
             ),
@@ -62,19 +51,9 @@ class MonitorExceptionsView extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Card.filled(
-          child: const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('Acompanhamento sem ações simuladas'),
-            subtitle: Text(
-              'Mensagem e marcar como resolvido dependem de contratos de comunicação e resolução ainda não disponíveis. Use os detalhes autorizados para orientar o acompanhamento.',
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         Text(
-          'Exceções acionáveis',
+          'Precisam de atenção',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
@@ -82,9 +61,9 @@ class MonitorExceptionsView extends StatelessWidget {
           const Card.outlined(
             child: ListTile(
               leading: Icon(Icons.task_alt),
-              title: Text('Nenhum alerta acionável agora'),
+              title: Text('Tudo certo por enquanto'),
               subtitle: Text(
-                'Todos os participantes seguem sem sinais de inatividade, pendência obrigatória ou carga abaixo do esperado.',
+                'Nenhum participante apresenta sinal de inatividade, atividade obrigatória pendente ou carga abaixo do esperado.',
               ),
             ),
           )
@@ -93,7 +72,7 @@ class MonitorExceptionsView extends StatelessWidget {
             _MonitorStudentCard(student: student),
         const SizedBox(height: 12),
         Text(
-          'Atualizado em ${_dateTime(dashboard.generatedAt)}',
+          'Atualizado em ${_dateTime(exceptions.generatedAt)}',
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -150,7 +129,7 @@ class _StatusMetric extends StatelessWidget {
 class _MonitorStudentCard extends StatelessWidget {
   const _MonitorStudentCard({required this.student});
 
-  final ClassroomStudent student;
+  final MonitorExceptionStudent student;
 
   void _trackDetails(BuildContext context, bool expanded) {
     if (!expanded) return;
@@ -173,7 +152,7 @@ class _MonitorStudentCard extends StatelessWidget {
         leading: CircleAvatar(child: Text(_initials(student.name))),
         title: Text(student.name),
         subtitle: Text(
-          '${alerts.length} sinal(is) acionável(is) • ${student.progressPercent.toStringAsFixed(0)}% do percurso',
+          '${alerts.length} motivo(s) para acompanhar',
         ),
         trailing: Badge(
           label: Text('${alerts.length}'),
@@ -189,37 +168,9 @@ class _MonitorStudentCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Detalhes autorizados',
+                  'Motivos para acompanhar',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 8),
-                Semantics(
-                  label:
-                      'Progresso de ${student.progressPercent.toStringAsFixed(0)} por cento',
-                  child: LinearProgressIndicator(value: student.completion),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${_hours(student.validatedHours)} validadas de ${_hours(student.plannedHours)} planejadas',
-                ),
-                Text(
-                  student.lastActivityAt == null
-                      ? 'Sem atividade registrada'
-                      : 'Última atividade: ${_dateTime(student.lastActivityAt!)}',
-                ),
-                Text('Matrícula interna: ${student.enrollmentId}'),
-                if (student.baselineLinked != null)
-                  Text(
-                    student.baselineLinked!
-                        ? 'Baseline vinculado pela equipe'
-                        : 'Baseline ainda não vinculado',
-                  ),
-                if (student.confirmedSessions != null)
-                  Text(
-                    'Encontros com presença confirmada: ${student.confirmedSessions}',
-                  ),
-                if (student.openMentorshipCases != null)
-                  Text('Mentorias abertas: ${student.openMentorshipCases}'),
                 const SizedBox(height: 10),
                 for (final alert in alerts)
                   Padding(
@@ -254,14 +205,11 @@ IconData _alertIcon(String code) => switch (code) {
 };
 
 String _alertLabel(String code) => switch (code) {
-  'inactive_7_days' => 'Sem atividade há 7 dias ou mais',
+  'inactive_7_days' => '7 dias ou mais sem atividade',
   'required_activity_pending' => 'Atividade obrigatória pendente',
   'below_expected_hours' => 'Carga horária abaixo do esperado',
-  _ => 'Sinal pedagógico',
+  _ => 'Acompanhamento necessário',
 };
-
-String _hours(double value) =>
-    '${value.toStringAsFixed(value % 1 == 0 ? 0 : 1)} h';
 
 String _dateTime(DateTime value) {
   final date = value.toLocal();
