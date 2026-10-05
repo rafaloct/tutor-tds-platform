@@ -288,23 +288,22 @@ def test_staff_can_include_only_active_students_in_the_same_offering() -> None:
         page = client.get(path, params={"limit": 1}, headers=headers["teacher"])
         assert page.status_code == 200
         assert page.json() == {"students": [{"user_id": ids["admin"], "name": "Admin"}], "next_offset": 1}
-        second = client.get(path, params={"limit": 1, "offset": 1}, headers=headers["monitor"])
+        second = client.get(path, params={"limit": 1, "offset": 1}, headers=headers["teacher"])
         assert second.json() == {"students": [{"user_id": ids["student"], "name": "Student"}], "next_offset": None}
         assert client.get(path, params={"q": "tud"}, headers=headers["teacher"]).json()["students"] == second.json()["students"]
         assert client.get(path, params={"q": "%"}, headers=headers["teacher"]).json()["students"] == []
         for params in ({"limit": 51}, {"offset": -1}, {"q": "a" * 101}):
             assert client.get(path, params=params, headers=headers["teacher"]).status_code == 422
-        for actor in ("student", "outsider"):
+        for actor in ("student", "outsider", "monitor"):
             assert client.get(path, headers=headers[actor]).status_code == 403
             assert client.put(f"/classes/a/students/{ids['student']}", headers=headers[actor]).status_code == 403
         assert client.get("/classes/b/eligible-students", headers=headers["teacher"]).status_code == 403
         assert client.put(f"/classes/b/students/{ids['outsider']}", headers=headers["monitor"]).status_code == 403
         for candidate in ("outsider", "monitor"):
             assert client.put(f"/classes/a/students/{ids[candidate]}", headers=headers["teacher"]).status_code == 422
-        for actor in ("teacher", "monitor"):
-            response = client.put(f"/classes/a/students/{ids['student']}", headers=headers[actor])
-            assert response.status_code == 200
-            assert response.json()["status"] == "active"
+        response = client.put(f"/classes/a/students/{ids['student']}", headers=headers["teacher"])
+        assert response.status_code == 200
+        assert response.json()["status"] == "active"
         assert client.get(path, params={"q": "Student"}, headers=headers["teacher"]).json()["students"] == []
         with Session(app.state.database.engine) as session:
             memberships = session.query(ClassEnrollment).all()
@@ -312,10 +311,9 @@ def test_staff_can_include_only_active_students_in_the_same_offering() -> None:
             assert memberships[0].enrollment_id == "student-e"
             assert session.query(Enrollment).count() == 5
             assert session.get(User, ids["teacher"]).role == "student"
-            # A monitor can make a new inclusion, not just repeat a teacher's request.
-        assert client.put(f"/classes/a/students/{ids['admin']}", headers=headers["monitor"]).status_code == 200
+        assert client.put(f"/classes/a/students/{ids['admin']}", headers=headers["monitor"]).status_code == 403
         with Session(app.state.database.engine) as session:
             session.get(Classroom, "a").status = "closed"
             session.commit()
         assert client.get(path, headers=headers["teacher"]).status_code == 409
-        assert client.put(f"/classes/a/students/{ids['student']}", headers=headers["monitor"]).status_code == 409
+        assert client.put(f"/classes/a/students/{ids['student']}", headers=headers["monitor"]).status_code == 403
