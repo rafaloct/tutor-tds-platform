@@ -14,7 +14,7 @@ import sys
 from datetime import datetime, timezone
 
 LEGACY_PACKAGES = frozenset({"com.tutortds_cartilhas", "com.tutortds_cartilhas.dev"})
-QA_PACKAGE_RE = re.compile(r"^com\.tutortds_cartilhas\.dev\.dynamicqa\.r[A-Za-z0-9]{1,32}$")
+QA_PACKAGE_RE = re.compile(r"^com\.tutortds_cartilhas\.dev\.dynamicqa\.r[a-f0-9]{32}$")
 
 # Allowlist de argumentos adb (após o -s <serial>). Tudo fora disso é bloqueado.
 _ALLOWED_SHELL = (
@@ -41,7 +41,7 @@ def validate_package(package: str) -> str:
     if package in LEGACY_PACKAGES:
         raise InvalidPackage("pacote legado/.dev bloqueado")
     if not QA_PACKAGE_RE.match(package or ""):
-        raise InvalidPackage("pacote deve ser QA isolado com.tutortds_cartilhas.dev.dynamicqa.r<id>")
+        raise InvalidPackage("pacote deve ser QA isolado com.tutortds_cartilhas.dev.dynamicqa.r<32 hex>")
     return package
 
 

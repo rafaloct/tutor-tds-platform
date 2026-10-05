@@ -6,7 +6,7 @@ Tooling: `tooling/mobile_qa/xiaomi/harness.py` (Python stdlib, somente leitura).
 
 ## Garantias (fail-closed)
 - Dry-run por padrão; leitura real só com `--execute`.
-- Aceita apenas package QA isolado explícito `com.tutortds_cartilhas.dev.dynamicqa.r<id>`;
+- Aceita apenas package QA isolado explícito `com.tutortds_cartilhas.dev.dynamicqa.r<32 hex>`;
   `com.tutortds_cartilhas` e `.dev` (legado) são rejeitados.
 - Allowlist de comandos adb: `devices`, `getprop`, `dumpsys package`, `pidof`, `pm path`,
   `logcat -d`. Uninstall, install, `pm clear`, push/pull, screencap, input etc. são bloqueados.
@@ -15,7 +15,7 @@ Tooling: `tooling/mobile_qa/xiaomi/harness.py` (Python stdlib, somente leitura).
 
 ## Dry-run (sem device)
 ```
-python tooling/mobile_qa/xiaomi/harness.py --package com.tutortds_cartilhas.dev.dynamicqa.r123
+python tooling/mobile_qa/xiaomi/harness.py --package com.tutortds_cartilhas.dev.dynamicqa.r0123456789abcdef0123456789abcdef
 ```
 Imprime JSON com os comandos planejados, sem executar adb.
 

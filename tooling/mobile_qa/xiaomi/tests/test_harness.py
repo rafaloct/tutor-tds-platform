@@ -5,13 +5,13 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 from mobile_qa.xiaomi import harness as h  # noqa: E402
 
-QA = "com.tutortds_cartilhas.dev.dynamicqa.r123"
+QA = "com.tutortds_cartilhas.dev.dynamicqa.r0123456789abcdef0123456789abcdef"
 
 
 class HarnessTests(unittest.TestCase):
     def test_package_validation(self):
         self.assertEqual(h.validate_package(QA), QA)
-        for bad in ("com.tutortds_cartilhas", "com.tutortds_cartilhas.dev", "", "com.other", QA + ";rm"):
+        for bad in ("com.tutortds_cartilhas", "com.tutortds_cartilhas.dev", "", "com.other", QA + ";rm", "com.tutortds_cartilhas.dev.dynamicqa.r123", "com.tutortds_cartilhas.dev.dynamicqa.r" + "A" * 32):
             with self.assertRaises(h.InvalidPackage):
                 h.validate_package(bad)
 
