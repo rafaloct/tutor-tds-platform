@@ -20,7 +20,7 @@ void main() {
   Finder verticalScroll() => find.byWidgetPredicate(
     (widget) =>
         widget is Scrollable && widget.axisDirection == AxisDirection.down,
-  );
+  ).first;
   Future<void> open(WidgetTester tester, {double scale = 1}) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -63,6 +63,23 @@ void main() {
     (widget) => widget is TextField && widget.decoration?.labelText == label,
   );
 
+  Future<void> revealField(WidgetTester tester, String label) async {
+    final target = field(label);
+    if (target.evaluate().isEmpty) {
+      await tester.scrollUntilVisible(
+        target,
+        180,
+        scrollable: verticalScroll(),
+      );
+    } else {
+      await Scrollable.ensureVisible(
+        tester.element(target),
+        alignment: 0.5,
+      );
+    }
+    await tester.pumpAndSettle();
+  }
+
   testWidgets(
     'existing participant completes enrollment, assignment and confirmed revocation',
     (tester) async {
@@ -72,7 +89,7 @@ void main() {
       await tester.enterText(field('Buscar pessoa'), 'Pessoa');
       await tap(tester, 'Localizar');
       await tap(tester, 'Pessoa teste');
-      await tester.ensureVisible(field('Motivo da operação'));
+      await revealField(tester, 'Motivo da operação');
       await tester.enterText(
         field('Motivo da operação'),
         'Vínculo conferido pela equipe',
@@ -105,9 +122,9 @@ void main() {
   ) async {
     await open(tester);
     await tap(tester, 'Cadastrar nova pessoa');
-    await tester.ensureVisible(field('Nome'));
+    await revealField(tester, 'Nome');
     await tester.enterText(field('Nome'), 'Pessoa sintética privada');
-    await tester.ensureVisible(field('Senha inicial'));
+    await revealField(tester, 'Senha inicial');
     await tester.enterText(field('Senha inicial'), 'synthetic-only');
     controller.replaceSession('actor-b');
     await tester.pumpAndSettle();
@@ -124,7 +141,7 @@ void main() {
       await tester.enterText(field('Buscar pessoa'), 'Pessoa');
       await tap(tester, 'Localizar');
       await tap(tester, 'Pessoa teste');
-      await tester.ensureVisible(field('Motivo da operação'));
+      await revealField(tester, 'Motivo da operação');
       await tester.enterText(field('Motivo da operação'), 'Fluxo sintético');
       await tap(tester, 'Solicitar matrícula');
       await tap(tester, 'Vincular à turma');
@@ -141,13 +158,13 @@ void main() {
 
       await tap(tester, 'Cadastrar nova pessoa');
       expect(finalConfirmation, findsNothing);
-      await tester.ensureVisible(field('Nome'));
+      await revealField(tester, 'Nome');
       await tester.enterText(field('Nome'), 'Nova pessoa sintética');
-      await tester.ensureVisible(field('CPF'));
+      await revealField(tester, 'CPF');
       await tester.enterText(field('CPF'), '00000000000');
-      await tester.ensureVisible(field('Telefone'));
+      await revealField(tester, 'Telefone');
       await tester.enterText(field('Telefone'), '00000000000');
-      await tester.ensureVisible(field('Senha inicial'));
+      await revealField(tester, 'Senha inicial');
       await tester.enterText(field('Senha inicial'), 'synthetic-only');
       await tap(tester, 'Solicitar cadastro');
 
