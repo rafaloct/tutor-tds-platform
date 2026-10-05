@@ -38,6 +38,72 @@ function post(path, body) {
   });
 }
 
+const learningContextA = {
+  course_id: 'course-a',
+  course_version_id: 'version-1',
+  module_id: 'module-a1',
+};
+const learningContextB = {
+  course_id: 'course-b',
+  course_version_id: 'version-3',
+  module_id: 'module-b1',
+};
+
+function scopeKey(context) {
+  return [
+    context.course_id,
+    context.course_version_id,
+    context.module_id || '',
+    context.experience_id || '',
+    context.experience_type || '',
+  ].join('|');
+}
+
+function scopedEnv() {
+  return {
+    ...env,
+    TUTOR_RAG_SCOPE_MAP: JSON.stringify({
+      [scopeKey(learningContextA)]: 'course-a-v1-a1',
+      [scopeKey(learningContextB)]: 'course-b-v3-b1',
+      [scopeKey({
+        ...learningContextA,
+        experience_id: 'scenario-1',
+        experience_type: 'scenario',
+      })]: 'course-a-v1-a1-scenario-1',
+    }),
+  };
+}
+
+function vectorSource(context, title, metadata = {}, fields = {}) {
+  return {
+    id: 'private-storage-id',
+    text: 'private chunk text',
+    metadata: {
+      title,
+      url: 'file:///private/documents/internal.pdf',
+      course_id: context.course_id,
+      course_version_id: context.course_version_id,
+      module_id: context.module_id,
+      ...metadata,
+    },
+    score: 0.94123,
+    ...fields,
+  };
+}
+
+function contextualFetch(results, citations = [{ title: results[0]?.metadata?.title }], capture = {}) {
+  return async (url, options) => {
+    const requestUrl = String(url);
+    const body = JSON.parse(options.body);
+    if (requestUrl.endsWith('/vector-search')) {
+      capture.search = { url: requestUrl, body };
+      return Response.json({ results });
+    }
+    capture.chat = { url: requestUrl, body };
+    return Response.json({ textResponse: 'Contextual answer', sources: citations });
+  };
+}
+
 test('encaminha chat sem expor a chave na resposta', async () => {
   let captured;
   const fakeFetch = async (url, options) => {
@@ -51,6 +117,237 @@ test('encaminha chat sem expor a chave na resposta', async () => {
   assert.deepEqual(await response.json(), { text: 'Resposta segura' });
   assert.equal(captured.url, 'https://anything.example/api/v1/workspace/cartilhas/chat');
   assert.equal(captured.options.headers.Authorization, 'Bearer test-secret');
+});
+
+test('legacy chat still uses the configured workspace and chat mode', async () => {
+  let captured;
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta legada', mode: 'tutor', context: 'Cartilha' }),
+    env,
+    {},
+    async (url, options) => {
+      captured = { url: String(url), body: JSON.parse(options.body) };
+      return Response.json({ textResponse: 'Legacy answer' });
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { text: 'Legacy answer' });
+  assert.equal(captured.url, 'https://anything.example/api/v1/workspace/cartilhas/chat');
+  assert.equal(captured.body.mode, 'chat');
+});
+
+test('contextual chat selects an exact workspace, queries only it, and sanitizes sources', async () => {
+  const capture = {};
+  const response = await handleRequest(
+    post('/v1/chat', {
+      message: 'Pergunta A',
+      context: 'private reflection text',
+      learning_context: learningContextA,
+    }),
+    scopedEnv(),
+    {},
+    contextualFetch(
+      [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
+      [{ title: 'TDS_CTX_A_v1', chunk: 'private chunk text' }],
+      capture,
+    ),
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    text: 'Contextual answer',
+    sources: [{
+      title: 'TDS_CTX_A_v1',
+      course_id: 'course-a',
+      course_version_id: 'version-1',
+      module_id: 'module-a1',
+      score: 0.941,
+    }],
+  });
+  assert.equal(capture.search.url, 'https://anything.example/api/v1/workspace/course-a-v1-a1/vector-search');
+  assert.deepEqual(capture.search.body, { query: 'Pergunta A', topN: 4 });
+  assert.equal(capture.chat.url, 'https://anything.example/api/v1/workspace/course-a-v1-a1/chat');
+  assert.equal(capture.chat.body.mode, 'query');
+  assert.equal('sessionId' in capture.chat.body, false);
+  assert.equal(JSON.stringify(capture).includes('private reflection text'), false);
+  assert.equal(JSON.stringify(capture).includes('course_id'), false);
+});
+
+test('context A and B accept only their own contextual sentinel sources', async () => {
+  const cases = [
+    { context: learningContextA, source: learningContextA, title: 'TDS_CTX_A_v1', status: 200 },
+    { context: learningContextA, source: learningContextB, title: 'TDS_CTX_B_v3', status: 503 },
+    { context: learningContextB, source: learningContextB, title: 'TDS_CTX_B_v3', status: 200 },
+    { context: learningContextB, source: learningContextA, title: 'TDS_CTX_A_v1', status: 503 },
+  ];
+
+  for (const scenario of cases) {
+    let chatCalled = false;
+    const response = await handleRequest(
+      post('/v1/chat', { message: 'Sentinel', learning_context: scenario.context }),
+      scopedEnv(),
+      {},
+      async (url, options) => {
+        if (String(url).endsWith('/vector-search')) {
+          return Response.json({
+            results: [vectorSource(scenario.source, scenario.title)],
+          });
+        }
+        chatCalled = true;
+        assert.match(
+          String(url),
+          scenario.context === learningContextA ? /course-a-v1-a1\/chat$/ : /course-b-v3-b1\/chat$/,
+        );
+        assert.equal(JSON.parse(options.body).mode, 'query');
+        return Response.json({
+          textResponse: 'Sentinel answer',
+          sources: [{ title: scenario.title }],
+        });
+      },
+    );
+    assert.equal(response.status, scenario.status);
+    assert.equal(chatCalled, scenario.status === 200);
+    if (scenario.status !== 200) {
+      assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+    }
+  }
+});
+
+test('ambiguous, missing, or unlinked contextual sources fail closed before chat', async () => {
+  const invalidResultSets = [
+    [],
+    [vectorSource(learningContextA, 'TDS_CTX_A_v1'), vectorSource(learningContextB, 'TDS_CTX_B_v3')],
+    [vectorSource(learningContextA, 'TDS_CTX_A_v1', { course_version_id: 'old-version' })],
+    [vectorSource(learningContextA, '/private/internal.pdf')],
+    [{ text: 'unlinked source', metadata: { title: 'unlinked' } }],
+  ];
+
+  for (const results of invalidResultSets) {
+    let chatCalled = false;
+    const response = await handleRequest(
+      post('/v1/chat', { message: 'Sentinel', learning_context: learningContextA }),
+      scopedEnv(),
+      {},
+      async (url) => {
+        if (String(url).endsWith('/vector-search')) return Response.json({ results });
+        chatCalled = true;
+        return Response.json({ textResponse: 'Must not be returned', sources: [] });
+      },
+    );
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+    assert.equal(chatCalled, false);
+  }
+});
+
+test('unmapped scopes and unknown or malformed learning-context keys fail closed', async () => {
+  let called = false;
+  const unresolved = await handleRequest(
+    post('/v1/chat', { message: 'Unknown course', learning_context: learningContextA }),
+    env,
+    {},
+    async () => {
+      called = true;
+      return Response.json({});
+    },
+  );
+  assert.equal(unresolved.status, 503);
+  assert.deepEqual(await unresolved.json(), { error: 'rag_context_unresolved' });
+
+  const unknownTopLevel = await handleRequest(
+    post('/v1/chat', { message: 'x', unexpected: true, learning_context: learningContextA }),
+    scopedEnv(),
+    {},
+    async () => {
+      called = true;
+      return Response.json({});
+    },
+  );
+  assert.equal(unknownTopLevel.status, 400);
+  assert.deepEqual(await unknownTopLevel.json(), { error: 'unknown_key' });
+
+  for (const body of [
+    { message: 'x', learning_context: { ...learningContextA, unexpected: 'x' } },
+    { message: 'x', learning_context: { course_id: 'course-a', module_id: 'module-a1' } },
+    {
+      message: 'x',
+      learning_context: {
+        course_id: learningContextA.course_id,
+        course_version_id: learningContextA.course_version_id,
+        experience_id: 'scenario-1',
+        experience_type: 'scenario',
+      },
+    },
+    {
+      message: 'x',
+      learning_context: {
+        ...learningContextA,
+        experience_id: 'scenario-1',
+        experience_type: 'unknown',
+      },
+    },
+  ]) {
+    const response = await handleRequest(
+      post('/v1/chat', body),
+      scopedEnv(),
+      {},
+      async () => {
+        called = true;
+        return Response.json({});
+      },
+    );
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), { error: 'invalid_learning_context' });
+  }
+  assert.equal(called, false);
+});
+
+test('contextual response rejects citations not present in verified retrieval', async () => {
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+    scopedEnv(),
+    {},
+    contextualFetch(
+      [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
+      [{ title: 'TDS_CTX_B_v3', chunk: 'must not leave gateway' }],
+    ),
+  );
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+});
+
+test('experience IDs are part of exact workspace selection without sending context text', async () => {
+  const context = {
+    ...learningContextA,
+    experience_id: 'scenario-1',
+    experience_type: 'scenario',
+  };
+  let chatUrl;
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta da experiência', learning_context: context }),
+    scopedEnv(),
+    {},
+    async (url) => {
+      if (String(url).endsWith('/vector-search')) {
+        return Response.json({
+          results: [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
+        });
+      }
+      chatUrl = String(url);
+      return Response.json({
+        textResponse: 'Experience answer',
+        sources: [{ title: 'TDS_CTX_A_v1' }],
+      });
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(
+    chatUrl,
+    'https://anything.example/api/v1/workspace/course-a-v1-a1-scenario-1/chat',
+  );
 });
 
 test('monta o modo adaptativo no servidor', async () => {

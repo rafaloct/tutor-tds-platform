@@ -6,6 +6,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../models/tutor_learning_context.dart';
 import '../services/anything_llm_service.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
@@ -24,11 +25,13 @@ import '../genui/atui_parser.dart';
 class GenUIAssistantScreen extends StatefulWidget {
   final String initialContext;
   final String? contextLabel;
+  final TutorLearningContext? learningContext;
 
   const GenUIAssistantScreen({
     super.key,
     this.initialContext = '',
     this.contextLabel,
+    this.learningContext,
   });
 
   @override
@@ -281,7 +284,8 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
     final response = await service.getChatResponse(
       text,
       mode: _chatMode == 'Minha Realidade' ? 'adaptive' : 'tutor',
-      context: widget.initialContext,
+      context: widget.learningContext == null ? widget.initialContext : null,
+      learningContext: widget.learningContext,
     );
     _processResponse(response);
   }

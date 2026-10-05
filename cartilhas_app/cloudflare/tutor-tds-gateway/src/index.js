@@ -94,6 +94,47 @@ export async function handleRequest(request, env, _ctx, upstreamFetch = fetch) {
   const validationError = validateChatInput(body);
   if (validationError) return json({ error: validationError }, 400, cors.headers);
 
+  if (body.learning_context !== undefined) {
+    const workspace = resolveLearningWorkspace(body.learning_context, env);
+    if (!workspace) {
+      return json({ error: 'rag_context_unresolved' }, 503, cors.headers);
+    }
+
+    const verifiedSources = await searchLearningSources(
+      upstream,
+      workspace,
+      body.message.trim(),
+      body.learning_context,
+      upstreamFetch,
+    );
+    if (!verifiedSources) {
+      return json({ error: 'rag_context_unresolved' }, 503, cors.headers);
+    }
+
+    const upstreamResult = await callAnythingLlm(
+      upstream,
+      {
+        message: body.message.trim(),
+        systemPrompt: buildChatSystemPrompt(
+          { mode: body.mode },
+          env,
+        ),
+        workspace,
+        mode: 'query',
+      },
+      upstreamFetch,
+    );
+    if (upstreamResult.error) {
+      return json({ error: upstreamResult.error }, upstreamResult.status, cors.headers);
+    }
+
+    const sources = contextualCitations(upstreamResult.sources, verifiedSources);
+    if (!sources) {
+      return json({ error: 'rag_context_unresolved' }, 503, cors.headers);
+    }
+    return json({ text: upstreamResult.text, sources }, 200, cors.headers);
+  }
+
   const upstreamResult = await callAnythingLlm(
     upstream,
     {
@@ -516,7 +557,7 @@ async function readJsonBody(request, headers) {
 
 async function callAnythingLlm(upstream, request, upstreamFetch) {
   const upstreamUrl = new URL(
-    `/api/v1/workspace/${encodeURIComponent(upstream.workspace)}/chat`,
+    `/api/v1/workspace/${encodeURIComponent(request.workspace || upstream.workspace)}/chat`,
     `${upstream.baseUrl}/`,
   );
 
@@ -530,7 +571,7 @@ async function callAnythingLlm(upstream, request, upstreamFetch) {
       },
       body: JSON.stringify({
         message: request.message,
-        mode: 'chat',
+        mode: request.mode || 'chat',
         system_prompt: request.systemPrompt,
       }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
@@ -552,11 +593,18 @@ async function callAnythingLlm(upstream, request, upstreamFetch) {
   if (typeof text !== 'string' || !text.trim()) {
     return { error: 'empty_upstream_response', status: 502 };
   }
-  return { text };
+  return {
+    text,
+    sources: Array.isArray(upstreamData?.sources) ? upstreamData.sources : [],
+  };
 }
 
 function validateChatInput(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return 'invalid_body';
+  if (Object.keys(body).some((key) =>
+    !['message', 'mode', 'context', 'learning_context'].includes(key))) {
+    return 'unknown_key';
+  }
   if (typeof body.message !== 'string' || !body.message.trim()) return 'message_required';
   if (body.message.length > MAX_MESSAGE_LENGTH) return 'message_too_long';
   if (body.mode !== undefined && !['tutor', 'adaptive'].includes(body.mode)) {
@@ -564,7 +612,180 @@ function validateChatInput(body) {
   }
   if (body.context !== undefined && typeof body.context !== 'string') return 'invalid_context';
   if (body.context?.length > MAX_CONTEXT_LENGTH) return 'context_too_long';
+  if (body.learning_context !== undefined &&
+      !isValidLearningContext(body.learning_context)) {
+    return 'invalid_learning_context';
+  }
   return null;
+}
+
+const LEARNING_CONTEXT_KEYS = new Set([
+  'course_id',
+  'course_version_id',
+  'module_id',
+  'experience_id',
+  'experience_type',
+]);
+const EXPERIENCE_TYPES = new Set([
+  'scenario',
+  'reveal',
+  'reflection',
+  'action_challenge',
+]);
+
+function isValidLearningContext(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  if (Object.keys(value).some((key) => !LEARNING_CONTEXT_KEYS.has(key))) return false;
+  if (!isStableLearningId(value.course_id) ||
+      !isStableLearningId(value.course_version_id)) return false;
+  if (value.module_id !== undefined && !isStableLearningId(value.module_id)) {
+    return false;
+  }
+  if (value.experience_id !== undefined &&
+      !isStableLearningId(value.experience_id)) return false;
+  if (value.experience_type !== undefined &&
+      !EXPERIENCE_TYPES.has(value.experience_type)) return false;
+  if ((value.experience_id === undefined) !==
+      (value.experience_type === undefined)) return false;
+  if (value.experience_id !== undefined && value.module_id === undefined) {
+    return false;
+  }
+  return true;
+}
+
+function isStableLearningId(value) {
+  return typeof value === 'string' &&
+    value.length <= 128 &&
+    /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value);
+}
+
+function resolveLearningWorkspace(context, env) {
+  let scopeMap = env.TUTOR_RAG_SCOPE_MAP;
+  if (typeof scopeMap === 'string') {
+    try {
+      scopeMap = JSON.parse(scopeMap);
+    } catch {
+      return null;
+    }
+  }
+  if (!scopeMap || typeof scopeMap !== 'object' || Array.isArray(scopeMap)) {
+    return null;
+  }
+  const key = [
+    context.course_id,
+    context.course_version_id,
+    context.module_id || '',
+    context.experience_id || '',
+    context.experience_type || '',
+  ].join('|');
+  const workspace = scopeMap[key];
+  return typeof workspace === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(workspace)
+    ? workspace
+    : null;
+}
+
+async function searchLearningSources(upstream, workspace, query, context, upstreamFetch) {
+  const searchUrl = new URL(
+    `/api/v1/workspace/${encodeURIComponent(workspace)}/vector-search`,
+    `${upstream.baseUrl}/`,
+  );
+  let response;
+  try {
+    response = await upstreamFetch(searchUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `******`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query, topN: 4 }),
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    });
+  } catch {
+    return null;
+  }
+  if (!response.ok) return null;
+
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(data?.results) || data.results.length === 0) return null;
+
+  const sources = [];
+  for (const result of data.results) {
+    const source = sanitizeContextSource(result, context);
+    if (!source) return null;
+    sources.push(source);
+  }
+  return sources;
+}
+
+function sanitizeContextSource(source, context) {
+  if (!source || typeof source !== 'object' || Array.isArray(source)) return null;
+  const metadata = source.metadata;
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  if (metadata.course_id !== context.course_id ||
+      metadata.course_version_id !== context.course_version_id) return null;
+  if (context.module_id !== undefined && metadata.module_id !== context.module_id) {
+    return null;
+  }
+  if (metadata.module_id !== undefined &&
+      !isStableLearningId(metadata.module_id)) return null;
+
+  const title = publicSourceTitle(metadata.title);
+  if (!title) return null;
+  const safeSource = {
+    title,
+    course_id: metadata.course_id,
+    course_version_id: metadata.course_version_id,
+  };
+  if (metadata.module_id !== undefined) safeSource.module_id = metadata.module_id;
+  if (typeof source.score === 'number' &&
+      Number.isFinite(source.score) &&
+      source.score >= 0 &&
+      source.score <= 1) {
+    safeSource.score = Math.round(source.score * 1000) / 1000;
+  }
+  return safeSource;
+}
+
+function publicSourceTitle(value) {
+  if (typeof value !== 'string') return null;
+  const title = value.trim();
+  if (!title || title.length > 160 ||
+      /[\u0000-\u001f\u007f]/.test(title) ||
+      title.includes('/') ||
+      title.includes('\\') ||
+      /^[a-zA-Z]:/.test(title) ||
+      /^[a-z][a-z0-9+.-]*:\/\//i.test(title) ||
+      /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i.test(title)) {
+    return null;
+  }
+  return title;
+}
+
+function contextualCitations(citations, verifiedSources) {
+  if (!Array.isArray(citations) || citations.length === 0) return null;
+  const sourcesByTitle = new Map(verifiedSources.map((source) => [source.title, source]));
+  const cited = [];
+  for (const citation of citations) {
+    const metadata = citation?.metadata;
+    const title = publicSourceTitle(metadata?.title ?? citation?.title);
+    const source = title ? sourcesByTitle.get(title) : null;
+    if (!source) return null;
+    if (metadata && (
+      (metadata.course_id !== undefined &&
+        metadata.course_id !== source.course_id) ||
+      (metadata.course_version_id !== undefined &&
+        metadata.course_version_id !== source.course_version_id) ||
+      (metadata.module_id !== undefined &&
+        metadata.module_id !== source.module_id)
+    )) return null;
+    cited.push(source);
+  }
+  return [...new Map(cited.map((source) => [source.title, source])).values()];
 }
 
 function validateStudyInput(body) {
