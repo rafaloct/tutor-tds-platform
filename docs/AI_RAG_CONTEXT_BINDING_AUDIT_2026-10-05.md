@@ -117,8 +117,11 @@ continua falhando fechado e não autoriza acesso acadêmico.
   desconhecidos, IDs/tipos inválidos e configurações de IA malformadas.
 - Validação local: gateway `32/32` e `api/tests/test_course_promotion.py` `10/10`;
   Flutter test/analyze não executados (`flutter`/`dart` ausentes). GitHub
-  Actions para HEAD `2c223c0` retornou `action_required`, com zero jobs: não é
-  CI PASS. O PR ainda aponta para base não canônica.
+  Actions mais recentes do PR #136 retornaram `action_required`, com zero jobs:
+  não é CI PASS. A revisão automática não pôde carregar o modelo; CodeQL
+  reportou zero alertas Python, mas a análise JavaScript expirou, então a
+  validação de segurança ficou incompleta. O PR ainda aponta para base não
+  canônica.
 - `REAL_STAGING_E2E=NO`. O PR #132 ainda não teve seu RAG smoke real executado.
 - A base do PR #136 observada no GitHub é `codex/onda-0-consolidacao`, não a
   base canônica `staging` registrada na Issue. O branch inclui a composição
