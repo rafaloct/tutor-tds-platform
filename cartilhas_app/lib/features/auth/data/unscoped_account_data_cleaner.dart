@@ -16,16 +16,12 @@ import '../../study_ai/data/assessment_sync_queue.dart';
 /// SharedPreferences.clear(); theme and consents are preserved.
 class UnscopedAccountDataCleaner {
   const UnscopedAccountDataCleaner({
-    LearningEventQueue? learningEventQueue,
-    AssessmentSyncQueue? assessmentSyncQueue,
-    CheckinDraftStore? checkinDraftStore,
-    ProfileDataStore? profileDataStore,
-    CertificateRepository? certificateRepository,
-  }) : _learningEventQueue = learningEventQueue,
-       _assessmentSyncQueue = assessmentSyncQueue,
-       _checkinDraftStore = checkinDraftStore,
-       _profileDataStore = profileDataStore,
-       _certificateRepository = certificateRepository;
+    this._learningEventQueue,
+    this._assessmentSyncQueue,
+    this._checkinDraftStore,
+    this._profileDataStore,
+    this._certificateRepository,
+  });
 
   final LearningEventQueue? _learningEventQueue;
   final AssessmentSyncQueue? _assessmentSyncQueue;
