@@ -32,15 +32,6 @@ if (!/(^|[.-])staging([.-]|$)/i.test(endpoint.hostname)) {
 const allowedContextKeys = new Set([
   'course_id',
   'course_version_id',
-  'module_id',
-  'experience_id',
-  'experience_type',
-]);
-const experienceTypes = new Set([
-  'scenario',
-  'reveal',
-  'reflection',
-  'action_challenge',
 ]);
 
 function stableId(value) {
@@ -59,28 +50,18 @@ function parseContext(raw, label) {
   if (!context || typeof context !== 'object' || Array.isArray(context) ||
       Object.keys(context).some((key) => !allowedContextKeys.has(key)) ||
       !stableId(context.course_id) ||
-      !stableId(context.course_version_id) ||
-      (context.module_id !== undefined && !stableId(context.module_id)) ||
-      (context.experience_id !== undefined && !stableId(context.experience_id)) ||
-      (context.experience_type !== undefined &&
-        !experienceTypes.has(context.experience_type)) ||
-      ((context.experience_id === undefined) !==
-        (context.experience_type === undefined)) ||
-      (context.experience_id !== undefined && context.module_id === undefined)) {
-    throw new Error(`TDS_AI_SENTINEL_CONTEXT_${label} is not a valid learning_context.`);
+      !stableId(context.course_version_id)) {
+    throw new Error(
+      `TDS_AI_SENTINEL_CONTEXT_${label} must contain only a valid CourseVersion scope.`,
+    );
   }
   return context;
 }
 
 const contextA = parseContext(rawContextA, 'A');
 const contextB = parseContext(rawContextB, 'B');
-const scopeKey = (context) => [
-  context.course_id,
-  context.course_version_id,
-  context.module_id ?? '',
-  context.experience_id ?? '',
-  context.experience_type ?? '',
-].join('|');
+const scopeKey = (context) =>
+  [context.course_id, context.course_version_id].join('|');
 if (scopeKey(contextA) === scopeKey(contextB)) {
   throw new Error('Contextual sentinel scopes A and B must be distinct.');
 }
@@ -91,17 +72,8 @@ const question =
 
 function sourceMatchesContext(source, context) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) return false;
-  if (source.course_id !== context.course_id ||
-      source.course_version_id !== context.course_version_id) return false;
-  if (context.module_id !== undefined && source.module_id !== context.module_id) {
-    return false;
-  }
-  if (context.experience_id !== undefined &&
-      (source.experience_id !== context.experience_id ||
-       source.experience_type !== context.experience_type)) {
-    return false;
-  }
-  return true;
+  return source.course_id === context.course_id &&
+    source.course_version_id === context.course_version_id;
 }
 
 async function runCase(label, context, expectedMarker, forbiddenMarker) {

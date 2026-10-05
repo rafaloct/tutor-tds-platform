@@ -70,7 +70,7 @@ test('rejects malformed learning context before any request', () => {
   });
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /not a valid learning_context/);
+  assert.match(result.stderr, /valid CourseVersion scope/);
 });
 
 test('requires distinct A and B scopes before any request', () => {

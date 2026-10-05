@@ -68,29 +68,43 @@ function scopedEnv() {
   };
 }
 
-function vectorSource(context, title, metadata = {}, fields = {}) {
+function vectorSource(title, overrides = {}) {
+  const id = overrides.id ?? `vector-${title}`;
+  const metadata = {
+    title,
+    url: 'file:///private/documents/internal.pdf',
+    author: 'QA',
+    description: 'Synthetic QA source',
+    docSource: `doc:${title}`,
+    chunkSource: `chunk:${title}`,
+    published: '10/5/2026',
+    wordCount: 8,
+    tokenCount: 9,
+    ...(overrides.metadata ?? {}),
+  };
   return {
-    id: 'private-storage-id',
+    id,
     text: `${title} synthetic QA content`,
-    metadata: {
-      title,
-      url: 'file:///private/documents/internal.pdf',
-      course_id: context.course_id,
-      course_version_id: context.course_version_id,
-      module_id: context.module_id,
-      ...metadata,
-    },
+    metadata,
     score: 0.94123,
-    ...fields,
+    ...(overrides.fields ?? {}),
+  };
+}
+
+function chatSource(source, overrides = {}) {
+  return {
+    id: source.id,
+    title: source.metadata.title,
+    docSource: source.metadata.docSource,
+    chunkSource: source.metadata.chunkSource,
+    text: 'private chunk text',
+    ...overrides,
   };
 }
 
 function contextualFetch(
   results,
-  citations = [{
-    title: results[0]?.metadata?.title,
-    metadata: results[0]?.metadata,
-  }],
+  citations = results[0] ? [chatSource(results[0])] : [],
   capture = {},
 ) {
   return async (url, options) => {
@@ -140,6 +154,7 @@ test('legacy chat still uses the configured workspace and chat mode', async () =
 
 test('contextual chat selects the course-version workspace, queries it, and sanitizes sources', async () => {
   const capture = {};
+  const result = vectorSource('TDS_CTX_A_v1');
   const response = await handleRequest(
     post('/v1/chat', {
       message: 'Pergunta A',
@@ -148,25 +163,17 @@ test('contextual chat selects the course-version workspace, queries it, and sani
     }),
     scopedEnv(),
     {},
-    contextualFetch(
-      [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
-      [{
-        title: 'TDS_CTX_A_v1',
-        chunk: 'private chunk text',
-        metadata: vectorSource(learningContextA, 'TDS_CTX_A_v1').metadata,
-      }],
-      capture,
-    ),
+    contextualFetch([result], [chatSource(result)], capture),
   );
 
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), {
+  const payload = await response.json();
+  assert.deepEqual(payload, {
     text: 'Contextual answer',
     sources: [{
       title: 'TDS_CTX_A_v1',
       course_id: 'course-a',
       course_version_id: 'version-1',
-      module_id: 'module-a1',
       score: 0.941,
     }],
   });
@@ -185,122 +192,113 @@ test('contextual chat selects the course-version workspace, queries it, and sani
   assert.equal('sessionId' in capture.chat.body, false);
   assert.equal(JSON.stringify(capture).includes('private reflection text'), false);
   assert.equal(JSON.stringify(capture).includes('course_id'), false);
+  assert.equal(JSON.stringify(payload).includes('docSource'), false);
 });
 
-test('context A and B accept only their own contextual sentinel sources', async () => {
+test('context A and B route to distinct CourseVersion workspaces with real AnythingLLM source shapes', async () => {
   const cases = [
-    { context: learningContextA, source: learningContextA, title: 'TDS_CTX_A_v1', status: 200 },
-    { context: learningContextA, source: learningContextB, title: 'TDS_CTX_B_v3', status: 503 },
-    { context: learningContextB, source: learningContextB, title: 'TDS_CTX_B_v3', status: 200 },
-    { context: learningContextB, source: learningContextA, title: 'TDS_CTX_A_v1', status: 503 },
+    {
+      context: learningContextA,
+      workspace: 'course-a-v1',
+      title: 'TDS_CTX_A_v1',
+      courseId: 'course-a',
+      versionId: 'version-1',
+    },
+    {
+      context: learningContextB,
+      workspace: 'course-b-v3',
+      title: 'TDS_CTX_B_v3',
+      courseId: 'course-b',
+      versionId: 'version-3',
+    },
   ];
 
   for (const scenario of cases) {
-    let chatCalled = false;
+    const result = vectorSource(scenario.title);
+    const calls = [];
     const response = await handleRequest(
       post('/v1/chat', { message: 'Sentinel', learning_context: scenario.context }),
       scopedEnv(),
       {},
       async (url, options) => {
+        calls.push(String(url));
         if (String(url).endsWith('/vector-search')) {
-          return Response.json({
-            results: [vectorSource(scenario.source, scenario.title)],
-          });
+          return Response.json({ results: [result] });
         }
-        chatCalled = true;
-        assert.match(
-          String(url),
-          scenario.context === learningContextA
-            ? /course-a-v1\/chat$/
-            : /course-b-v3\/chat$/,
-        );
         assert.equal(JSON.parse(options.body).mode, 'query');
         return Response.json({
           textResponse: 'Sentinel answer',
-          sources: [{
-            title: scenario.title,
-            metadata: vectorSource(scenario.source, scenario.title).metadata,
-          }],
+          sources: [chatSource(result)],
         });
       },
     );
-    assert.equal(response.status, scenario.status);
-    assert.equal(chatCalled, scenario.status === 200);
-    if (scenario.status !== 200) {
-      assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
-    }
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(calls, [
+      `https://anything.example/api/v1/workspace/${scenario.workspace}/vector-search`,
+      `https://anything.example/api/v1/workspace/${scenario.workspace}/chat`,
+    ]);
+    assert.deepEqual(await response.json(), {
+      text: 'Sentinel answer',
+      sources: [{
+        title: scenario.title,
+        course_id: scenario.courseId,
+        course_version_id: scenario.versionId,
+        score: 0.941,
+      }],
+    });
   }
 });
 
-test('modules in one CourseVersion share a workspace but reject cross-module sources', async () => {
-  const cases = [
+test('module and experience context stay structured without claiming unsupported source isolation', async () => {
+  const contexts = [
+    learningContextA,
+    learningContextA2,
     {
-      context: learningContextA,
-      accepted: learningContextA,
-      rejected: learningContextA2,
-      title: 'TDS_CTX_A_MODULE_1_v1',
-    },
-    {
-      context: learningContextA2,
-      accepted: learningContextA2,
-      rejected: learningContextA,
-      title: 'TDS_CTX_A_MODULE_2_v1',
+      ...learningContextA,
+      experience_id: 'scenario-1',
+      experience_type: 'scenario',
     },
   ];
 
-  for (const scenario of cases) {
-    for (const [sourceContext, status] of [
-      [scenario.accepted, 200],
-      [scenario.rejected, 503],
-    ]) {
-      let chatCalled = false;
-      let searchUrl;
-      const response = await handleRequest(
-        post('/v1/chat', {
-          message: 'Pergunta do módulo',
-          learning_context: scenario.context,
-        }),
-        scopedEnv(),
-        {},
-        async (url) => {
-          if (String(url).endsWith('/vector-search')) {
-            searchUrl = String(url);
-            return Response.json({
-              results: [vectorSource(sourceContext, scenario.title)],
-            });
-          }
-          chatCalled = true;
-          return Response.json({
-            textResponse: 'Module answer',
-            sources: [{
-              title: scenario.title,
-              metadata: vectorSource(sourceContext, scenario.title).metadata,
-            }],
-          });
-        },
-      );
+  for (const context of contexts) {
+    const result = vectorSource('TDS_CTX_A_v1');
+    let searchUrl;
+    const response = await handleRequest(
+      post('/v1/chat', {
+        message: 'Pergunta contextual',
+        learning_context: context,
+      }),
+      scopedEnv(),
+      {},
+      async (url) => {
+        if (String(url).endsWith('/vector-search')) {
+          searchUrl = String(url);
+          return Response.json({ results: [result] });
+        }
+        return Response.json({
+          textResponse: 'CourseVersion-scoped answer',
+          sources: [chatSource(result)],
+        });
+      },
+    );
 
-      assert.equal(searchUrl, 'https://anything.example/api/v1/workspace/course-a-v1/vector-search');
-      assert.equal(response.status, status);
-      assert.equal(chatCalled, status === 200);
-      if (status === 503) {
-        assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
-      }
-    }
+    assert.equal(searchUrl, 'https://anything.example/api/v1/workspace/course-a-v1/vector-search');
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.sources[0].course_id, 'course-a');
+    assert.equal(payload.sources[0].course_version_id, 'version-1');
+    assert.equal('module_id' in payload.sources[0], false);
+    assert.equal('experience_id' in payload.sources[0], false);
+    assert.equal('experience_type' in payload.sources[0], false);
   }
 });
 
-test('ambiguous, missing, or unlinked contextual sources fail closed before chat', async () => {
+test('missing or structurally unsafe vector-search sources fail closed before chat', async () => {
   const invalidResultSets = [
     [],
-    [vectorSource(learningContextA, 'TDS_CTX_A_v1'), vectorSource(learningContextB, 'TDS_CTX_B_v3')],
-    [
-      vectorSource(learningContextA, 'TDS_CTX_A_MODULE_1_v1'),
-      vectorSource(learningContextA2, 'TDS_CTX_A_MODULE_2_v1'),
-    ],
-    [vectorSource(learningContextA, 'TDS_CTX_A_v1', { course_version_id: 'old-version' })],
-    [vectorSource(learningContextA, '/private/internal.pdf')],
-    [{ text: 'unlinked source', metadata: { title: 'unlinked' } }],
+    [vectorSource('/private/internal.pdf')],
+    [{ id: 'unlinked', text: 'unlinked source', metadata: { docSource: 'private' } }],
   ];
 
   for (const results of invalidResultSets) {
@@ -407,13 +405,28 @@ test('different CourseVersions cannot alias to one workspace', async () => {
 });
 
 test('contextual response rejects citations not present in verified retrieval', async () => {
+  const result = vectorSource('TDS_CTX_A_v1');
+  const unrelated = vectorSource('TDS_CTX_B_v3');
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+    scopedEnv(),
+    {},
+    contextualFetch([result], [chatSource(unrelated)]),
+  );
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+});
+
+test('contextual response rejects a conflicting private source id even when title matches', async () => {
+  const result = vectorSource('TDS_CTX_A_v1', { id: 'vector-a' });
   const response = await handleRequest(
     post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
     scopedEnv(),
     {},
     contextualFetch(
-      [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
-      [{ title: 'TDS_CTX_B_v3', chunk: 'must not leave gateway' }],
+      [result],
+      [chatSource(result, { id: 'different-vector-id' })],
     ),
   );
 
@@ -421,98 +434,29 @@ test('contextual response rejects citations not present in verified retrieval', 
   assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
 });
 
-test('contextual response fails closed when citation metadata cannot prove its scope', async () => {
+test('contextual response can correlate the documented title-only chat citation shape', async () => {
+  const result = vectorSource('TDS_CTX_A_v1');
   const response = await handleRequest(
     post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
     scopedEnv(),
     {},
     contextualFetch(
-      [vectorSource(learningContextA, 'TDS_CTX_A_v1')],
-      [{ title: 'TDS_CTX_A_v1', chunk: 'No scope metadata' }],
+      [result],
+      [{ title: 'TDS_CTX_A_v1', chunk: 'private chunk text' }],
     ),
-  );
-
-  assert.equal(response.status, 503);
-  assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
-});
-
-test('experience metadata is checked inside its CourseVersion workspace', async () => {
-  const context = {
-    ...learningContextA,
-    experience_id: 'scenario-1',
-    experience_type: 'scenario',
-  };
-  let chatUrl;
-  const response = await handleRequest(
-    post('/v1/chat', { message: 'Pergunta da experiência', learning_context: context }),
-    scopedEnv(),
-    {},
-    async (url) => {
-      if (String(url).endsWith('/vector-search')) {
-        return Response.json({
-          results: [vectorSource(learningContextA, 'TDS_CTX_A_v1', {
-            experience_id: 'scenario-1',
-            experience_type: 'scenario',
-          })],
-        });
-      }
-      chatUrl = String(url);
-      return Response.json({
-        textResponse: 'Experience answer',
-        sources: [{
-          title: 'TDS_CTX_A_v1',
-          metadata: vectorSource(learningContextA, 'TDS_CTX_A_v1', {
-            experience_id: 'scenario-1',
-            experience_type: 'scenario',
-          }).metadata,
-        }],
-      });
-    },
   );
 
   assert.equal(response.status, 200);
-  assert.equal(
-    chatUrl,
-    'https://anything.example/api/v1/workspace/course-a-v1/chat',
-  );
-});
-
-test('experience sources require exact experience metadata', async () => {
-  const context = {
-    ...learningContextA,
-    experience_id: 'scenario-1',
-    experience_type: 'scenario',
-  };
-  for (const metadata of [
-    {},
-    { experience_id: 'scenario-2', experience_type: 'scenario' },
-    { experience_id: 'scenario-1', experience_type: 'reflection' },
-  ]) {
-    let chatCalled = false;
-    const response = await handleRequest(
-      post('/v1/chat', { message: 'Pergunta da experiência', learning_context: context }),
-      scopedEnv(),
-      {},
-      async (url) => {
-        if (String(url).endsWith('/vector-search')) {
-          return Response.json({
-            results: [vectorSource(learningContextA, 'TDS_CTX_A_v1', metadata)],
-          });
-        }
-        chatCalled = true;
-        return Response.json({
-          textResponse: 'Must not return',
-          sources: [{
-            title: 'TDS_CTX_A_v1',
-            metadata: vectorSource(learningContextA, 'TDS_CTX_A_v1').metadata,
-          }],
-        });
-      },
-    );
-    assert.equal(response.status, 503);
-    assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
-    assert.equal(chatCalled, false);
-  }
+  const payload = await response.json();
+  assert.deepEqual(payload, {
+    text: 'Contextual answer',
+    sources: [{
+      title: 'TDS_CTX_A_v1',
+      course_id: 'course-a',
+      course_version_id: 'version-1',
+      score: 0.941,
+    }],
+  });
 });
 
 test('monta o modo adaptativo no servidor', async () => {

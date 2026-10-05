@@ -43,12 +43,21 @@ instalação remota.
 ## Estado observado e arquitetura alvo
 
 **OBSERVED:** a mudança no gateway resolve o workspace temporariamente por
-`course_id|course_version_id`, faz `vector-search`, exige metadata compatível nas
-sources e chama o chat em `mode=query`. Mapeamento ausente, fonte sem vínculo,
-metadata incompatível ou citação sem metadata suficiente falha com
-`503 rag_context_unresolved`. Não há fallback para `ANYTHING_LLM_WORKSPACE`
-quando `learning_context` está presente. Isso prova o comportamento das fixtures
-locais, não o comportamento da instalação AnythingLLM.
+`course_id|course_version_id` e exige um binding 1:1: duas CourseVersions não
+podem reutilizar o mesmo workspace. O Worker faz `vector-search` nesse workspace
+e chama o mesmo workspace em `mode=query`; não há fallback para
+`ANYTHING_LLM_WORKSPACE` quando `learning_context` está presente.
+
+A auditoria do contrato upstream mostrou que `vector-search` serializa somente
+metadata documental genérica (`url`, `title`, `author`, `description`,
+`docSource`, `chunkSource`, `published`, `wordCount`, `tokenCount`) e
+não preserva IDs acadêmicos arbitrários. O chat, por sua vez, devolve os sources
+brutos do vector DB com campos no topo do objeto. O gateway foi alinhado a esse
+shape: deriva `course_id` e `course_version_id` do binding
+CourseVersion → workspace, correlaciona citations com fontes observadas na
+pré-busca por ID privado quando disponível e por título/document source como
+evidência adicional, e só então publica título + curso + edição + score.
+Identificadores privados, path, URL, chunk e metadata interna não saem do Worker.
 
 `TUTOR_RAG_SCOPE_MAP` é somente bootstrap temporário/test fixture, não fonte de
 verdade acadêmica permanente. Não foi configurado ou instalado em qualquer
@@ -57,13 +66,13 @@ ou alterado. Clientes sem `learning_context` mantêm o comportamento legado.
 
 **RAG_SCOPE_ARCHITECTURE=BLOCKED.** A API consultada não permite provar
 isolamento por módulo dentro de um workspace compartilhado: `vector-search`
-retorna resultados e metadata, mas o contrato de chat não aceita filtro por
-documento/metadata nem os chunks verificados como contexto fechado. A validação
-de citations finais detecta fontes incompatíveis que o upstream declara, mas
-não prova que o texto da resposta deixou de usar conteúdo não citado. Os testes
-locais A/B provam a política do gateway para as fixtures, não o isolamento real
-do retriever. Citation sem metadata que confirme curso/edição/módulo (e
-experiência quando aplicável) também falha com `rag_context_unresolved`.
+não aceita filtro documentado por metadata/documento e o chat não recebe como
+fronteira fechada apenas os chunks verificados na pré-busca. Por isso
+`module_id`, `experience_id` e `experience_type` continuam estruturados no
+request, mas não são fabricados como atributos das sources nem promovidos a
+isolamento comprovado. Os testes locais provam a política CourseVersion do
+gateway e a compatibilidade com o shape público do AnythingLLM, não o isolamento
+real por módulo/experiência.
 
 **RAG_SCOPE_GRANULARITY:** workspace por CourseVersion é a granularidade
 temporária configurada; módulo/experiência continuam bloqueados. A menor
@@ -103,8 +112,9 @@ O objeto é somente escopo de conteúdo e não é autorização. O gateway usa s
 IDs estáveis allowlisted; não recebe identidade, matrícula, frequência,
 baseline ou reflection como contexto. No caminho estruturado, texto `context`
 livre é descartado antes de AnythingLLM. `mode=query` não usa histórico e este
-código não envia `sessionId`. A resposta expõe somente título público, curso,
-edição, módulo e score opcional de fontes verificadas; chunk, caminho, URL,
+código não envia `sessionId`. A resposta expõe somente título público,
+`course_id`, `course_version_id` e score opcional das fontes correlacionadas;
+`module_id`/experiência não são fabricados na source. Chunk, caminho, URL,
 storage ID e metadata privada não são retornados.
 
 ## Prova local e limites
@@ -121,12 +131,13 @@ storage ID e metadata privada não são retornados.
 - `RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`
 - `INGESTION_LIFECYCLE_DOCUMENTED=TARGET`
 
-- Fixtures de `gateway.test.js` usam conteúdo QA distinto
-  `TDS_CTX_A_v1`/`TDS_CTX_B_v3`; verificam A→A e B→B, rejeição cruzada,
-  CourseVersion compartilhada por módulos com rejeição de source cruzada,
-  metadata de experiência exata, fonte ausente, metadata ausente/incompatível,
-  citação cruzada e whitelisting de sources. **TESTED-LOCAL** comprova o filtro
-  de saída do gateway, não o isolamento do retriever.
+- Fixtures de `gateway.test.js` usam o shape público auditado do
+  AnythingLLM: `vector-search` com `id + metadata documental` e chat sources
+  com campos no topo. Os casos provam roteamento A/B para workspaces distintos,
+  rejeição de alias entre CourseVersions, correlação da citation com a
+  pré-busca, descarte de identificadores privados e fail-closed para sources
+  ausentes/estruturalmente inseguras. Módulo/experiência permanecem estruturados
+  no request sem serem fabricados como atributos da source.
 - Os HEADs autorizados de PR #132
   (`0c1d80992d6fe60b4c3143677a923b7c64883429`) e PR #135
   (`039c247873ed6d08bc33d7040cdbdb781ab1c108`) foram integrados localmente ao
@@ -136,15 +147,15 @@ storage ID e metadata privada não são retornados.
 - O manifesto existente de promoção CourseVersion agora aceita somente Experience
   Blocks tipados e os preserva no snapshot; testes de contrato cobrem campos
   desconhecidos, IDs/tipos inválidos e configurações de IA malformadas.
-- Validação local pós-sync com `staging=8f60b01`: gateway `32/32`,
+- Validação local pós-sync com `staging=8f60b01`: gateway `31/31`,
   `api/tests/test_course_promotion.py` `10/10`, Flutter focal `18/18`,
-  sentinel tooling `5/5`, `git diff --check` PASS e gitleaks 8.28.0 PASS
-  no intervalo `origin/staging..HEAD`; `flutter analyze --no-pub` também
-  PASS, sem issues.
-- O tooling `verify_rag_sentinel.mjs` agora exige dois `learning_context`
-  distintos, dois marcadores A/B e sources compatíveis; não inclui o marcador
-  esperado na pergunta e não imprime prompt, resposta, endpoint ou metadata
-  privada. Isso prepara a prova remota, mas não a executa.
+  sentinel tooling `5/5`, `git diff --check` PASS e gitleaks 8.28.0 PASS;
+  `flutter analyze --no-pub` também PASS, sem issues.
+- O tooling `verify_rag_sentinel.mjs` exige dois escopos CourseVersion
+  distintos, dois marcadores A/B e sources compatíveis; rejeita módulo/
+  experiência para não produzir uma prova além da capacidade upstream auditada.
+  Não inclui o marcador esperado na pergunta e não imprime prompt, resposta,
+  endpoint ou metadata privada. Isso prepara a prova remota, mas não a executa.
 - GitHub Actions disparados durante o incidente de disponibilidade do GitHub
   retornaram `action_required` com zero jobs; esse estado não é CI PASS nem
   falha de implementação. CI deverá ser observado novamente quando o serviço

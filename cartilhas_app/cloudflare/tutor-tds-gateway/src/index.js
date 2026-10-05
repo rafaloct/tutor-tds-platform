@@ -784,37 +784,23 @@ function sanitizeContextSource(source, context) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) return null;
   const metadata = source.metadata;
   if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
-  if (metadata.course_id !== context.course_id ||
-      metadata.course_version_id !== context.course_version_id) return null;
-  if (context.module_id !== undefined && metadata.module_id !== context.module_id) {
-    return null;
-  }
-  if (context.experience_id !== undefined) {
-    if (metadata.experience_id !== context.experience_id ||
-        metadata.experience_type !== context.experience_type) return null;
-  } else if ((metadata.experience_id !== undefined ||
-      metadata.experience_type !== undefined) &&
-      (!isStableLearningId(metadata.experience_id) ||
-       !EXPERIENCE_TYPES.has(metadata.experience_type))) {
-    return null;
-  }
-  if (metadata.module_id !== undefined &&
-      !isStableLearningId(metadata.module_id)) return null;
 
+  // AnythingLLM's public vector-search contract does not preserve arbitrary
+  // academic metadata. CourseVersion scope is therefore attested by the unique
+  // CourseVersion -> workspace binding, not by fields that are absent upstream.
   const title = publicSourceTitle(metadata.title);
   if (!title) return null;
+
   const safeSource = {
     title,
-    course_id: metadata.course_id,
-    course_version_id: metadata.course_version_id,
+    course_id: context.course_id,
+    course_version_id: context.course_version_id,
+    _evidence: {
+      id: privateSourceEvidence(source.id),
+      docSource: privateSourceEvidence(metadata.docSource),
+      chunkSource: privateSourceEvidence(metadata.chunkSource),
+    },
   };
-  if (metadata.module_id !== undefined) safeSource.module_id = metadata.module_id;
-  if (metadata.experience_id !== undefined) {
-    safeSource.experience_id = metadata.experience_id;
-  }
-  if (metadata.experience_type !== undefined) {
-    safeSource.experience_type = metadata.experience_type;
-  }
   if (typeof source.score === 'number' &&
       Number.isFinite(source.score) &&
       source.score >= 0 &&
@@ -822,6 +808,15 @@ function sanitizeContextSource(source, context) {
     safeSource.score = Math.round(source.score * 1000) / 1000;
   }
   return safeSource;
+}
+
+function privateSourceEvidence(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim();
+  if (!normalized || normalized.length > 1024 ||
+      /[\u0000-\u001f\u007f]/.test(normalized)) return null;
+  return normalized;
 }
 
 function publicSourceTitle(value) {
@@ -839,24 +834,58 @@ function publicSourceTitle(value) {
   return title;
 }
 
+function citationEvidence(citation) {
+  if (!citation || typeof citation !== 'object' || Array.isArray(citation)) return null;
+  const metadata = citation.metadata;
+  const nested = metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+    ? metadata
+    : {};
+  const title = publicSourceTitle(citation.title ?? nested.title);
+  if (!title) return null;
+  return {
+    title,
+    id: privateSourceEvidence(citation.id ?? nested.id),
+    docSource: privateSourceEvidence(citation.docSource ?? nested.docSource),
+    chunkSource: privateSourceEvidence(citation.chunkSource ?? nested.chunkSource),
+  };
+}
+
+function citationMatchesVerified(citation, source) {
+  const evidence = citationEvidence(citation);
+  if (!evidence || evidence.title !== source.title) return false;
+  const verified = source._evidence ?? {};
+
+  if (verified.id && evidence.id) return verified.id === evidence.id;
+  if (verified.docSource && evidence.docSource &&
+      verified.docSource !== evidence.docSource) return false;
+  if (verified.chunkSource && evidence.chunkSource &&
+      verified.chunkSource !== evidence.chunkSource) return false;
+
+  // The workspace binding already proves CourseVersion scope. Exact title
+  // correspondence proves the citation came from the pre-search result set;
+  // private identifiers are used as stronger evidence whenever upstream emits
+  // them in both response shapes.
+  return true;
+}
+
+function publicContextSource(source) {
+  const safe = {
+    title: source.title,
+    course_id: source.course_id,
+    course_version_id: source.course_version_id,
+  };
+  if (source.score !== undefined) safe.score = source.score;
+  return safe;
+}
+
 function contextualCitations(citations, verifiedSources) {
   if (!Array.isArray(citations) || citations.length === 0) return null;
-  const sourcesByTitle = new Map(verifiedSources.map((source) => [source.title, source]));
   const cited = [];
   for (const citation of citations) {
-    const metadata = citation?.metadata;
-    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
-      return null;
-    }
-    const title = publicSourceTitle(metadata?.title ?? citation?.title);
-    const source = title ? sourcesByTitle.get(title) : null;
+    const source = verifiedSources.find((candidate) =>
+      citationMatchesVerified(citation, candidate));
     if (!source) return null;
-    if (metadata.course_id !== source.course_id ||
-        metadata.course_version_id !== source.course_version_id ||
-        metadata.module_id !== source.module_id ||
-        metadata.experience_id !== source.experience_id ||
-        metadata.experience_type !== source.experience_type) return null;
-    cited.push(source);
+    cited.push(publicContextSource(source));
   }
   return [...new Map(cited.map((source) => [source.title, source])).values()];
 }

@@ -30,9 +30,11 @@ CourseVersion; isolamento de módulo/experiência não está comprovado. Status:
 `CONTEXT_BINDING_READY=NÃO`, `AI_SERVICE_READY=NÃO`.
 `FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO`;
 `RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`. Alvo permanente de ingestão está
-documentado, não implementado. Pós-sync com `staging=8f60b01`: gateway 32/32,
-promoção 10/10, Flutter focal 18/18, analyze PASS, sentinel tooling 5/5 e
-gitleaks PASS. O PR #136 permanece baseado em staging e foi sincronizado por
+documentado, não implementado. O gateway agora usa o shape público real do
+AnythingLLM e deriva o escopo CourseVersion do binding 1:1 com workspace, sem
+fabricar metadata de módulo/experiência. Pós-sync com `staging=8f60b01`: gateway
+31/31, promoção 10/10, Flutter focal 18/18, analyze PASS, sentinel tooling 5/5
+e gitleaks PASS. O PR #136 permanece baseado em staging e foi sincronizado por
 merge normal; o sentinel A/B real segue não executado. `REAL_STAGING_E2E=NO`.
 Nenhuma configuração, workspace, staging ou produção foi alterada. Auditoria:
 `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
