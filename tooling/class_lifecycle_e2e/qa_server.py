@@ -233,6 +233,7 @@ def main() -> int:
         port=args.port,
         ssl_certfile=args.ssl_certfile,
         ssl_keyfile=args.ssl_keyfile,
+        timeout_keep_alive=120,
         log_level="warning",
         access_log=False,
     )

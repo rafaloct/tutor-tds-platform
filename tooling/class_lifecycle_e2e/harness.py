@@ -632,11 +632,16 @@ def _execute(args: argparse.Namespace, root: Path) -> int:
                 sys.stdout.write(flutter.stdout)
                 sys.stderr.write(flutter.stderr)
                 if flutter.returncode != 0:
+                    server_tail = server_log.read_text(
+                        encoding="utf-8",
+                        errors="replace",
+                    )[-4000:]
                     print(
                         json.dumps(
                             {
                                 "result": "FLUTTER_E2E_FAIL",
                                 "returncode": flutter.returncode,
+                                "qa_server_log_tail": server_tail,
                             }
                         ),
                         file=sys.stderr,
