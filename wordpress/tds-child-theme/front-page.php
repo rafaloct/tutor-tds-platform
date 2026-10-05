@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+require_once get_stylesheet_directory() . '/inc/story-provider.php';
+
 get_header();
 $tds_static_home = is_page();
 $tds_programa    = tds_theme_find_page_by_template( 'templates/programa.php' );
