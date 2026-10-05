@@ -29,7 +29,9 @@ $env:TDS_AI_SENTINEL_MARKER = 'TDS_AI_SENTINEL=2026-10-05-r1'
 node tooling/ai_qa/verify_rag_sentinel.mjs
 ```
 
-O script recusa qualquer ambiente que não seja literalmente `staging`. Ele
+O script recusa qualquer ambiente que não seja literalmente `staging` e qualquer
+hostname sem o rótulo `staging` (por exemplo, `worker-staging.example`). Isso
+impede que uma variável local mal configurada aponte para produção. Ele
 envia uma pergunta sintética, imprime somente timestamp, status HTTP, latência,
 `X-Request-Id`, categoria de erro e PASS/FAIL do marcador. Não imprime prompt,
 resposta, endpoint nem segredo.

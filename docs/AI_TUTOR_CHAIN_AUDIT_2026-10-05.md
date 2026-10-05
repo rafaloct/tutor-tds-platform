@@ -86,6 +86,25 @@ qualquer ambiente diferente de `staging`. O procedimento em
 versionado. Ela distingue resposta do modelo sem marcador de recuperação
 comprovada do marcador, sem imprimir a resposta.
 
+## Checklist do gate de staging (não executar nesta PR)
+
+Antes do smoke, um responsável humano deve confirmar e registrar, sem secrets:
+
+- URL HTTPS com rótulo `staging` do Worker autorizada e ambiente `staging`;
+- revisão do Worker em execução;
+- workspace de staging e sua versão/identificador, sem expor chave;
+- documento QA isolado, sem PII, com marcador `TDS_AI_SENTINEL=<versão>`;
+- indexação comprovada desse documento no workspace de staging;
+- alias sanitizado do provider/modelo aprovado;
+- execução da sentinela com `request_id`, status, latência e
+  `rag_sentinel=PASS`, sem salvar prompt ou resposta;
+- consulta autorizada à evidência do Worker/AnythingLLM para confirmar que o
+  request chegou ao upstream, sem registrar conteúdo da conversa.
+
+Se qualquer item exigir leitura de secret, mudança de Worker/workspace/provider,
+deploy, OAuth ou billing, parar em **HUMAN_GATE**. A execução real não faz parte
+deste PR.
+
 ## Observabilidade mínima proposta (sem implementar infraestrutura)
 
 Registrar por evento somente: `request_id`, ambiente, revisão do Worker,

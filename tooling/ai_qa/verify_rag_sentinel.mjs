@@ -17,6 +17,11 @@ const endpoint = new URL('/v1/chat', gatewayUrl);
 if (endpoint.protocol !== 'https:') {
   throw new Error('The sentinel endpoint must use HTTPS.');
 }
+// Environment variables are not evidence that a target is staging. Require an
+// explicit staging label in the hostname as a second, fail-closed guard.
+if (!/(^|[.-])staging([.-]|$)/i.test(endpoint.hostname)) {
+  throw new Error('The sentinel target hostname must carry a staging label.');
+}
 
 const question = `Qual marcador de validação do material TDS está registrado no documento de QA? Responda somente com o marcador completo, incluindo a versão.`;
 const startedAt = Date.now();

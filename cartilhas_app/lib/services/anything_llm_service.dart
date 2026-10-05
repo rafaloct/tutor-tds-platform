@@ -18,12 +18,11 @@ class AnythingLLMService {
   }) async {
     if (gatewayUrl.isEmpty) return _friendlyUnavailableMessage;
 
-    final normalizedGatewayUrl = gatewayUrl.endsWith('/')
-        ? gatewayUrl.substring(0, gatewayUrl.length - 1)
-        : gatewayUrl;
-    final url = Uri.parse('$normalizedGatewayUrl/v1/chat');
-
     try {
+      final normalizedGatewayUrl = gatewayUrl.endsWith('/')
+          ? gatewayUrl.substring(0, gatewayUrl.length - 1)
+          : gatewayUrl;
+      final url = Uri.parse('$normalizedGatewayUrl/v1/chat');
       final response = await _client
           .post(
             url,

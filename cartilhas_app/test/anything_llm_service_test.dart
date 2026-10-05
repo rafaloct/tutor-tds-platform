@@ -72,4 +72,18 @@ void main() {
       );
     },
   );
+
+  test(
+    'uses the availability fallback for an invalid configured gateway URL',
+    () async {
+      final service = AnythingLLMService(
+        gatewayUrl: 'https://[invalid',
+        client: MockClient((_) async => throw StateError('must not send')),
+      );
+
+      final response = await service.getChatResponse('Pergunta');
+
+      expect(response, contains('temporariamente indisponível'));
+    },
+  );
 }
