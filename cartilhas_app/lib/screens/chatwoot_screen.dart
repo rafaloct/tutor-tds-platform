@@ -18,8 +18,8 @@ import '../services/chatwoot_web_impl.dart'
 // webview_flutter compila em todas as plataformas (no-op no web)
 import 'package:webview_flutter/webview_flutter.dart';
 
-const _chatwootBase = 'https://chat.ipexdesenvolvimento.cloud';
-const _websiteToken = 'twnJ2K7tWtP2Fqey97p4hcwV';
+const _chatwootBase = AppConfig.chatwootBaseUrl;
+const _websiteToken = AppConfig.chatwootWebsiteToken;
 const _whatsappSuporte = '5563993010823';
 
 class ChatwootScreen extends StatefulWidget {
