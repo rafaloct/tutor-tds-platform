@@ -1,0 +1,164 @@
+{
+  "front": "CLASS_LIFECYCLE_E2E",
+  "issue": 140,
+  "environment": "local-emulator",
+  "device": "emulator-5556",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r14000000000000000000000000000001",
+  "base_url": "https://10.0.2.2:18040",
+  "api_head": "1dea14ae741bd0ba141f43b22296c7e297b6e320",
+  "app_head": "1dc027ff2ad243c989db8d884453bc51e79f3021",
+  "compose_head": "8ef94437d9790cd5b6bbc567d451714a42c153de",
+  "stages": {
+    "prepare_class": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:prepare_class"
+      ]
+    },
+    "participant": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:participant"
+      ]
+    },
+    "enrollment": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:enrollment"
+      ]
+    },
+    "meeting": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:meeting"
+      ]
+    },
+    "qr_checkin": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:qr_checkin"
+      ]
+    },
+    "attendance_evidence": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:attendance_evidence"
+      ]
+    },
+    "close_meeting": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:close_meeting"
+      ]
+    },
+    "close_class_readiness": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:close_class_readiness"
+      ]
+    },
+    "certificate_boundary": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:approved-request-no-certificate-reference"
+      ]
+    },
+    "offline_reconnect": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:offline_reconnect"
+      ]
+    }
+  },
+  "invariants": {
+    "offer_municipality_differs_from_residence": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:Palmas-offer-vs-external-Itaguatins-residence-fixture"
+      ]
+    },
+    "physical_location_persisted": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:physical_location_persisted"
+      ]
+    },
+    "cross_program_denied": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:foreign-program-and-institution-subject-denied"
+      ]
+    },
+    "cross_institution_denied": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:foreign-program-and-institution-subject-denied"
+      ]
+    },
+    "course_version_stable": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:qa-v1-start-to-close",
+        "backend-contract:test_class_keeps_snapshot_after_new_publication_and_archive"
+      ]
+    },
+    "capacity_policy_enforced": {
+      "status": "PASS",
+      "evidence": [
+        "backend-contract:test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited"
+      ]
+    },
+    "teacher_monitor_surfaces_distinct": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:teacher_monitor_surfaces_distinct"
+      ]
+    },
+    "qr_not_official_presence": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:qr_not_official_presence",
+        "backend-contract:test_evidence_session_token_import_review_and_auditable_close"
+      ]
+    },
+    "close_session_with_explicit_pending": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:close_session_with_explicit_pending",
+        "backend-contract:test_close_requires_explicit_pending_without_qr_and_preserves_report"
+      ]
+    },
+    "closed_class_rejects_new_link": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:closed_class_rejects_new_link",
+        "backend-contract:test_closed_class_rejects_new_participant_across_write_paths"
+      ]
+    },
+    "offline_reconnect_no_duplicate_presence": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:offline_reconnect"
+      ]
+    },
+    "certificate_approval_not_emission": {
+      "status": "PASS",
+      "evidence": [
+        "android-live:approved-request-certificates-empty",
+        "backend-contract:test_requests_do_not_change_existing_certificate_or_allow_issued_status"
+      ]
+    }
+  },
+  "certificate_boundary": {
+    "request_status": "approved",
+    "emitted": false,
+    "institutional_release": "blocked"
+  },
+  "notes": [
+    "Shared staging and production were not mutated.",
+    "Backend contract suite: 6/6 PASS before Android execution.",
+    "Participant residence is an external synthetic QA fixture because the current relational model intentionally does not persist residence; the E2E proves offer municipality remains a separate classroom field and the residence fixture is not copied into the classroom.",
+    "Visual wizard evidence is reused from docs/qa/class-lifecycle-2026-10-05 because PR #144 visual QA already passed and this composition did not change presentation.",
+    "Certificate proof stops at approved request with /certificates still empty; no Worker/KV emission is invoked."
+  ]
+}
