@@ -26,6 +26,10 @@ abstract interface class ClassroomGateway {
   });
 }
 
+abstract interface class MonitorClassroomGateway {
+  Future<MonitorExceptions> monitorExceptions(String classId);
+}
+
 abstract interface class ClassroomRosterGateway {
   Future<EligibleStudentPage> eligibleStudents(
     String classId, {
@@ -52,6 +56,7 @@ class ClassroomException implements Exception {
 class ClassroomRepository
     implements
         ClassroomGateway,
+        MonitorClassroomGateway,
         ClassroomRosterGateway,
         LearnerClassroomGateway {
   ClassroomRepository({
@@ -251,6 +256,16 @@ class ClassroomRepository
       '/classes/${Uri.encodeComponent(id)}/dashboard',
     );
     return ClassroomDashboard.fromJson(_object(response.body));
+  }
+
+  @override
+  Future<MonitorExceptions> monitorExceptions(String classId) async {
+    final id = classId.trim();
+    if (id.isEmpty) throw const ClassroomException('Selecione uma turma.');
+    final response = await _authorizedGet(
+      '/classes/${Uri.encodeComponent(id)}/monitor-exceptions',
+    );
+    return MonitorExceptions.fromJson(_object(response.body));
   }
 
   @override
