@@ -116,6 +116,7 @@ async function handleRequestInternal(request, env, upstreamFetch, requestId) {
       body.message.trim(),
       body.learning_context,
       upstreamFetch,
+      requestId,
     );
     if (!verifiedSources) {
       return json({ error: 'rag_context_unresolved' }, 503, cors.headers);
@@ -133,6 +134,7 @@ async function handleRequestInternal(request, env, upstreamFetch, requestId) {
         mode: 'query',
       },
       upstreamFetch,
+      requestId,
     );
     if (upstreamResult.error) {
       return json({ error: upstreamResult.error }, upstreamResult.status, cors.headers);
@@ -700,28 +702,36 @@ function resolveLearningWorkspace(context, env) {
   if (!scopeMap || typeof scopeMap !== 'object' || Array.isArray(scopeMap)) {
     return null;
   }
-  const workspaces = Object.values(scopeMap);
+  const entries = Object.entries(scopeMap);
+  const workspaces = entries.map(([, workspace]) => workspace);
   if (workspaces.length === 0 ||
+      entries.some(([key]) => {
+        const [courseId, versionId, ...extra] = key.split('|');
+        return extra.length > 0 ||
+          !isStableLearningId(courseId) ||
+          !isStableLearningId(versionId);
+      }) ||
       workspaces.some((workspace) =>
         typeof workspace !== 'string' ||
         !/^[a-zA-Z0-9_-]{1,100}$/.test(workspace)) ||
       new Set(workspaces).size !== workspaces.length) {
     return null;
   }
-  const key = [
-    context.course_id,
-    context.course_version_id,
-    context.module_id || '',
-    context.experience_id || '',
-    context.experience_type || '',
-  ].join('|');
+  const key = [context.course_id, context.course_version_id].join('|');
   const workspace = scopeMap[key];
   return typeof workspace === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(workspace)
     ? workspace
     : null;
 }
 
-async function searchLearningSources(upstream, workspace, query, context, upstreamFetch) {
+async function searchLearningSources(
+  upstream,
+  workspace,
+  query,
+  context,
+  upstreamFetch,
+  requestId,
+) {
   const searchUrl = new URL(
     `/api/v1/workspace/${encodeURIComponent(workspace)}/vector-search`,
     `${upstream.baseUrl}/`,
@@ -733,6 +743,7 @@ async function searchLearningSources(upstream, workspace, query, context, upstre
       headers: {
         Authorization: `******`,
         'Content-Type': 'application/json',
+        'X-Request-Id': requestId,
       },
       body: JSON.stringify({ query, topN: 4 }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
@@ -768,10 +779,15 @@ function sanitizeContextSource(source, context) {
   if (context.module_id !== undefined && metadata.module_id !== context.module_id) {
     return null;
   }
-  if (metadata.experience_id !== undefined &&
-      metadata.experience_id !== context.experience_id) return null;
-  if (metadata.experience_type !== undefined &&
-      metadata.experience_type !== context.experience_type) return null;
+  if (context.experience_id !== undefined) {
+    if (metadata.experience_id !== context.experience_id ||
+        metadata.experience_type !== context.experience_type) return null;
+  } else if ((metadata.experience_id !== undefined ||
+      metadata.experience_type !== undefined) &&
+      (!isStableLearningId(metadata.experience_id) ||
+       !EXPERIENCE_TYPES.has(metadata.experience_type))) {
+    return null;
+  }
   if (metadata.module_id !== undefined &&
       !isStableLearningId(metadata.module_id)) return null;
 

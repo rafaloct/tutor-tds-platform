@@ -7,7 +7,9 @@ import 'package:cartilhas_app/features/learning_context/learning_context_control
 import 'package:cartilhas_app/features/learning_context/learning_context_repository.dart';
 import 'learning_context_test.dart' show contextPayload;
 import 'package:cartilhas_app/models/cartilha.dart';
+import 'package:cartilhas_app/models/tutor_learning_context.dart';
 import 'package:cartilhas_app/screens/chat_experience_screen.dart';
+import 'package:cartilhas_app/screens/genui_assistant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -198,6 +200,68 @@ void main() {
       );
       // Only check eligibility: no certificate is issued by this test.
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'general and experience Tutor callers pass only their available structured scope',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final course = Cartilha(
+        id: 'course-a',
+        title: 'Cartilha A',
+        author: 'TDS',
+        courseVersionId: 'version-a1',
+        sections: [
+          Section(
+            id: 'module-a1',
+            title: 'Módulo A1',
+            messages: [
+              Message(
+                type: 'bot',
+                content: 'Desafio inicial',
+                experience: const ExperienceBlock(
+                  id: 'scenario-a1',
+                  kind: ExperienceKind.scenario,
+                  objective: 'Explore a situação.',
+                  ai: ExperienceAiConfig(starterPrompt: 'Ajude a explorar.'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await openReader(tester, course);
+      await tester.tap(find.byTooltip('Perguntar ao Tutor de IA'));
+      await tester.pumpAndSettle();
+      final generalTutor = tester.widget<GenUIAssistantScreen>(
+        find.byType(GenUIAssistantScreen),
+      );
+      expect(generalTutor.learningContext?.courseId, 'course-a');
+      expect(generalTutor.learningContext?.courseVersionId, 'version-a1');
+      expect(generalTutor.learningContext?.moduleId, 'module-a1');
+      expect(generalTutor.learningContext?.experienceId, isNull);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      final experienceTutorButton = find.text('Conversar com o Tutor IA');
+      expect(experienceTutorButton.hitTestable(), findsOneWidget);
+      await tester.tap(experienceTutorButton);
+      await tester.pumpAndSettle();
+      final experienceTutor = tester.widget<GenUIAssistantScreen>(
+        find.byType(GenUIAssistantScreen),
+      );
+      expect(experienceTutor.learningContext?.courseId, 'course-a');
+      expect(experienceTutor.learningContext?.courseVersionId, 'version-a1');
+      expect(experienceTutor.learningContext?.moduleId, 'module-a1');
+      expect(experienceTutor.learningContext?.experienceId, 'scenario-a1');
+      expect(
+        experienceTutor.learningContext?.experienceType,
+        TutorExperienceType.scenario,
+      );
+      expect(experienceTutor.starterPrompt, 'Ajude a explorar.');
     },
   );
 

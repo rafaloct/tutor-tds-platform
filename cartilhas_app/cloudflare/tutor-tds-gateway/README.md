@@ -91,37 +91,50 @@ pelos limites de tamanho do Worker.
 `POST /v1/chat` aceita opcionalmente `learning_context` com IDs acadêmicos
 estáveis de curso e edição, módulo e experiência. O cliente legado sem esse
 objeto continua usando o workspace configurado em `ANYTHING_LLM_WORKSPACE`.
-Para chamadas estruturadas, o Worker exige uma entrada exata em
-`TUTOR_RAG_SCOPE_MAP`; não usa o workspace legado como fallback.
+Para chamadas estruturadas, o Worker exige uma entrada exata para
+`course_id|course_version_id` em `TUTOR_RAG_SCOPE_MAP`; não usa o workspace
+legado como fallback. O mapa é somente bootstrap temporário e não é catálogo
+acadêmico nem fonte de verdade permanente.
 
 `TUTOR_RAG_SCOPE_MAP` é uma variável JSON do Worker administrada após um gate
-próprio. Cada combinação precisa apontar para um workspace exclusivo, já
-provisionado e com conteúdo somente daquele escopo. O formato da chave é
-`course_id|course_version_id|module_id|experience_id|experience_type`; valores
-opcionais são strings vazias. Exemplo exclusivamente sintético:
+próprio. Cada CourseVersion precisa apontar para um workspace distinto, já
+provisionado. Módulo e experiência não criam workspaces; suas referências são
+validadas nas sources. O formato temporário da chave é
+`course_id|course_version_id`. Exemplo exclusivamente sintético:
 
 ```json
 {
-  "course-a|version-1|module-a1||": "course-a-v1-a1",
-  "course-a|version-1|module-a1|scenario-1|scenario": "course-a-v1-a1-scenario-1"
+  "course-a|version-1": "course-a-v1",
+  "course-b|version-3": "course-b-v3"
 }
 ```
 
-O Worker faz `vector-search` antes do chat, exige metadata de fonte compatível
-com curso/edição/módulo e usa `mode: "query"` sem session ID. Citações do chat
-devem corresponder às fontes verificadas. O retorno inclui somente título
-público, IDs acadêmicos verificados e score numérico opcional; paths, IDs
-privados, URLs e chunks são descartados. Mapeamento ausente, fonte sem metadata,
-fonte incompatível ou resposta sem citação retorna `rag_context_unresolved`.
-O mapa é conteúdo de configuração, não autorização acadêmica, e não pode conter
-PII.
+O Worker faz `vector-search` antes do chat, exige metadata exata de
+curso/edição/módulo e, em chamadas de experiência, experiência/tipo; usa
+`mode: "query"` sem session ID. Citações do chat devem corresponder às fontes
+verificadas. O retorno inclui somente título público, IDs acadêmicos verificados
+e score numérico opcional; paths, IDs privados, URLs e chunks são descartados.
+Mapeamento ausente, fonte sem metadata, fonte incompatível ou resposta sem
+citação retorna `rag_context_unresolved`. O mapa é conteúdo de configuração,
+não autorização acadêmica, e não pode conter PII.
 
 O código oficial auditado do AnythingLLM expõe seleção por workspace, `query`
 e `vector-search`, mas não documenta filtro de metadata/documento nesses
-endpoints. A versão instalada e o metadata dos documentos existentes não foram
-comprovados; portanto, o mapa não está configurado e chamadas estruturadas
-falham fechadas até validação isolada. Nenhum workspace foi criado ou alterado
-por esta implementação.
+endpoints nem uma forma de fornecer ao chat somente os chunks verificados pela
+busca vetorial. A instalação efetiva e a metadata dos documentos continuam
+desconhecidas. Assim, validar as sources recebidas não prova que o texto gerado
+não usou conteúdo de outro módulo. `RAG_SCOPE_ARCHITECTURE=BLOCKED` para
+isolamento de módulo/experiência: workspace CourseVersion compartilhado é
+somente uma aproximação local; workspace por versão e módulo é a menor fronteira
+de recuperação documentada para isolar módulos, mas não foi configurado nem
+testado remotamente. `WORKSPACE_PER_EXPERIENCE=NO`.
+
+A arquitetura permanente deve derivar o vínculo do ciclo de publicação:
+CourseVersion publicada → material aprovado → ingestão/indexação → registro de
+`rag_scope` → resolução pelo gateway. `TUTOR_RAG_SCOPE_MAP` permanece
+temporário até esse lifecycle ser definido. `FASTAPI_CHANGE_REQUIRED=UNKNOWN`:
+depende de como ingestão e o registro autoritativo serão integrados; nenhum
+endpoint foi inventado nesta mudança. Nenhum workspace foi criado ou alterado.
 
 ## Certificados
 
