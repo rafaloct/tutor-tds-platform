@@ -109,6 +109,73 @@ void main() {
     },
   );
 
+  test(
+    'logout preserva evento owned de A, remove legado e B nunca envia o de A',
+    () async {
+      String token(String owner) =>
+          'header.${base64UrlEncode(utf8.encode(jsonEncode({'sub': owner})))}.signature';
+      const apiUrl = 'https://api.example';
+      LearningEvent owned(String session, String owner) =>
+          LearningEvent.forSession(
+            type: LearningEventType.lessonCompleted,
+            courseId: 'course',
+            sessionId: session,
+          ).forLocalOwner(userId: owner, apiUrl: apiUrl);
+      final eventA = owned('sessao-a', 'user-a');
+      await queue.enqueue(eventA);
+      await queue.enqueue(
+        LearningEvent.forSession(
+          type: LearningEventType.lessonStarted,
+          courseId: 'course',
+          sessionId: 'sessao-legada',
+        ),
+      );
+      final store = _MemoryTokenStore(
+        AuthTokens(accessToken: token('user-a'), refreshToken: 'refresh-a'),
+      );
+      final authRepository = AuthRepository(
+        apiUrl: apiUrl,
+        tokenStore: store,
+        client: MockClient((_) async => http.Response('{}', 500)),
+        onSessionEnded: () => queue.clear(preserveOwned: true),
+      );
+      addTearDown(authRepository.dispose);
+
+      await authRepository.logout();
+
+      expect(store.value, isNull);
+      final remaining = await queue.pending();
+      expect(remaining.map((e) => e.eventId), [eventA.eventId]);
+      expect(remaining.single.localOwnerId, 'user-a');
+
+      final posted = <String>[];
+      await store.write(
+        AuthTokens(accessToken: token('user-b'), refreshToken: 'refresh-b'),
+      );
+      final service = LearningEventSyncService(
+        apiUrl: apiUrl,
+        authRepository: authRepository,
+        queue: queue,
+        consentChecker: () async => true,
+        client: MockClient((request) async {
+          posted.add((jsonDecode(request.body) as Map)['event_id'] as String);
+          return http.Response('{}', 200);
+        }),
+      );
+      addTearDown(service.dispose);
+
+      expect(await service.flush(), 0);
+      expect(posted, isEmpty);
+      expect(await queue.pending(), hasLength(1));
+
+      await store.write(
+        AuthTokens(accessToken: token('user-a'), refreshToken: 'refresh-a'),
+      );
+      expect(await service.flush(), 1);
+      expect(posted, [eventA.eventId]);
+    },
+  );
+
   LearningEvent event(String session, LearningEventType type) =>
       LearningEvent.forSession(
         type: type,
