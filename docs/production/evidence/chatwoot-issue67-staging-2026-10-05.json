@@ -28,7 +28,10 @@
       "auto_assignment": false,
       "working_hours_enabled": false,
       "working_hours_rows": 7,
-      "inbox_members": 0
+      "inbox_members": 2,
+      "member_roles": {
+        "administrator": 2
+      }
     },
     "labels_count": 12,
     "teams_count": 1,
@@ -45,6 +48,12 @@
       "tls": "PASS",
       "websocket_http_status": 101,
       "websocket": "PASS"
+    },
+    "synthetic_conversation": {
+      "created": true,
+      "conversation_display_id": 157,
+      "incoming_message": "PASS",
+      "agent_reply": "PENDING_HUMAN"
     }
   },
   "risks": [
@@ -53,8 +62,8 @@
     "account-level canned responses include legacy certificate wording that conflicts with the current canonical academic contract; they were not modified because they are shared with production support"
   ],
   "pending": [
+    "real agent or operational reply in staging conversation 157",
     "A-to-B full conversation isolation smoke",
-    "real agent or operational reply in staging",
     "network loss and retry on Android",
     "physical Android evidence required by Issue #67",
     "prove no academic state changes before/after conversation"
