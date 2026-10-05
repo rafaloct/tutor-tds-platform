@@ -10,7 +10,8 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá! Hoje vamos falar de algo muito próximo da sua vida: a ECONOMIA DO LAR. Não é só sobre dinheiro — é sobre como organizar a casa para gastar menos energia, viver com mais conforto e usar os recursos de forma mais inteligente."
+          "content": "Olá! Hoje vamos falar de algo muito próximo da sua vida: a ECONOMIA DO LAR. Não é só sobre dinheiro — é sobre como organizar a casa para gastar menos energia, viver com mais conforto e usar os recursos de forma mais inteligente.",
+          "experience": {"id": "economia-lar-desperdicio-acao-01", "kind": "action_challenge", "objective": "Identifique um ponto de desperdício e defina uma ação prática de baixo custo.", "required": false, "actionLabel": "Escolher uma ação prática", "ai": {"starterPrompt": "Sugira alternativas simples e de baixo custo para reduzir um desperdício no lar."}}
         },
         {
           "type": "bot",

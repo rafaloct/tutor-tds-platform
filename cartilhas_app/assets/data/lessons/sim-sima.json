@@ -10,7 +10,8 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá! Você produz queijo, mel, carne, ovos, geleias ou outros alimentos de origem animal? Sabia que para vender legalmente esses produtos você precisa de um SELO DE INSPEÇÃO? Sem ele, você pode ser multado e ter a produção apreendida."
+          "content": "Olá! Você produz queijo, mel, carne, ovos, geleias ou outros alimentos de origem animal? Sabia que para vender legalmente esses produtos você precisa de um SELO DE INSPEÇÃO? Sem ele, você pode ser multado e ter a produção apreendida.",
+          "experience": {"id": "sim-sima-proximo-passo-01", "kind": "action_challenge", "objective": "Faça um checklist de regularização, boas práticas e próximo passo para confirmar com o serviço competente.", "required": false, "actionLabel": "Definir próximo passo", "ai": {"starterPrompt": "Explique termos e ajude-me a formular perguntas para o serviço competente. Não afirme aprovação, registro ou certificação legal."}}
         },
         {
           "type": "bot",
