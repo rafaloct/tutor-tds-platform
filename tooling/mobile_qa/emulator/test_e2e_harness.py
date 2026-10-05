@@ -1,9 +1,11 @@
 import io
 import json
 import re
+import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 import e2e_harness as h
 
@@ -133,6 +135,68 @@ class HarnessTest(unittest.TestCase):
         self.assertIn("EMULATOR_E2E_SCENARIO=monitor_projection", joined)
         self.assertIn("/tmp/qa-secrets.json", joined)
 
+    def test_host_signals_toggle_network_and_capture_in_app(self):
+        with tempfile.TemporaryDirectory() as temp:
+            evidence = Path(temp)
+            with patch.object(h, "_network") as network, patch.object(
+                h, "_screenshot", return_value=True
+            ) as screenshot:
+                self.assertEqual(
+                    h._handle_host_signal(
+                        GOOD,
+                        "offline_reconnect",
+                        h.HOST_SIGNAL_PREFIX + "NETWORK_OFFLINE",
+                        evidence,
+                    ),
+                    "NETWORK_OFFLINE",
+                )
+                network.assert_called_once_with(GOOD, False)
+                network.reset_mock()
+                self.assertEqual(
+                    h._handle_host_signal(
+                        GOOD,
+                        "offline_reconnect",
+                        h.HOST_SIGNAL_PREFIX + "NETWORK_ONLINE",
+                        evidence,
+                    ),
+                    "NETWORK_ONLINE",
+                )
+                network.assert_called_once_with(GOOD, True)
+                self.assertEqual(
+                    h._handle_host_signal(
+                        GOOD,
+                        "participant_flow",
+                        h.HOST_SIGNAL_PREFIX + "SCREENSHOT",
+                        evidence,
+                    ),
+                    "SCREENSHOT",
+                )
+                screenshot.assert_called_with(
+                    GOOD, evidence / "participant_flow.png"
+                )
+                self.assertEqual(
+                    h._handle_host_signal(
+                        GOOD,
+                        "offline_reconnect",
+                        h.HOST_SIGNAL_PREFIX + "SCREENSHOT_OFFLINE",
+                        evidence,
+                    ),
+                    "SCREENSHOT_OFFLINE",
+                )
+                screenshot.assert_called_with(
+                    GOOD, evidence / "offline_reconnect-offline.png"
+                )
+
+    def test_unknown_host_signal_fails_closed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaisesRegex(RuntimeError, "unknown E2E host signal"):
+                h._handle_host_signal(
+                    GOOD,
+                    "participant_flow",
+                    h.HOST_SIGNAL_PREFIX + "UNKNOWN",
+                    Path(temp),
+                )
+
     def test_sanitize(self):
         env = {
             "STAGING_SEED_STUDENT_PASSWORD": "hunter2-value",
@@ -160,6 +224,11 @@ class HarnessTest(unittest.TestCase):
         for scenario in h.SCENARIOS:
             self.assertIn(f"'{scenario}'", text)
         self.assertIn("Blocked by Issue #120", text)
+        self.assertIn("TDS_E2E_HOST:", text)
+        self.assertIn("NETWORK_OFFLINE", text)
+        self.assertIn("NETWORK_ONLINE", text)
+        self.assertIn("SCREENSHOT_OFFLINE", text)
+        self.assertNotIn("EMULATOR_E2E_OFFLINE_PHASE", text)
 
 
 if __name__ == "__main__":
