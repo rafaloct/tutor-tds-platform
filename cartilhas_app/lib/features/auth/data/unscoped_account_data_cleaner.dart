@@ -41,11 +41,13 @@ class UnscopedAccountDataCleaner {
     'study_progress:last',
     'study_assessment:last',
     'study_summary:last',
+    'media:catalog_cache:v1',
   };
   static const _prefixes = [
     'study_progress:course:',
     'study_assessment:course:',
     'study_summary:course:',
+    'media:progress:',
   ];
   static const _ownerScopedPrefixes = [
     'study_progress:version:',

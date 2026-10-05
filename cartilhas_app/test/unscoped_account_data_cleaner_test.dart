@@ -39,6 +39,10 @@ void main() {
       'study_assessment:last': '{}',
       'study_assessment:sync:v1': '{}',
       'study_summary:course:c1': '{}',
+      'media:catalog_cache:v1': '[]',
+      'media:progress:m1': '{}',
+      'classroom_private:v1:learner:owner-a': '{}',
+      'learning_home:selection:abc123': '{}',
       SharedPreferencesCheckinDraftStore.storageKey: '{}',
       'theme_preference_v1': 'dark',
       'privacy_consent_v1': true,
@@ -58,6 +62,8 @@ void main() {
     expect(certificates.deleted, isTrue);
     expect(keys, {
       'study_progress:version:["c1","v1","owner-a"]',
+      'classroom_private:v1:learner:owner-a',
+      'learning_home:selection:abc123',
       'theme_preference_v1',
       'privacy_consent_v1',
       'certificate_consent_v1',
