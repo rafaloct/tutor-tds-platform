@@ -27,6 +27,7 @@ void main() {
           home: Scaffold(
             body: LearningExperienceCard(
               experience: ExperienceBlock(
+                id: 'card-${entry.$1.name}',
                 kind: entry.$1,
                 objective: 'Objetivo contextualizado e acessível.',
               ),
@@ -49,6 +50,7 @@ void main() {
         home: Scaffold(
           body: LearningExperienceCard(
             experience: ExperienceBlock(
+              id: 'action-challenge-card',
               kind: ExperienceKind.actionChallenge,
               objective: 'Defina um próximo passo.',
             ),

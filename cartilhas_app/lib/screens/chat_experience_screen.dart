@@ -697,6 +697,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   Widget _buildBubble(Message msg) {
     final isUser = msg.type == 'user';
+    final messageSection = _sectionForMessage(msg);
     // Bolha especial de conclusão
     final isCompletion =
         _isCompleted &&
@@ -752,9 +753,12 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
             if (msg.experience != null)
               LearningExperienceCard(
                 experience: msg.experience!,
-                onAskTutor: msg.experience!.ai == null
+                onAskTutor: msg.experience!.ai == null || messageSection == null
                     ? null
-                    : () => _openExperienceTutor(msg),
+                    : () => _openExperienceTutor(
+                        section: messageSection,
+                        message: msg,
+                      ),
               ),
             if (!isUser)
               Align(
@@ -778,9 +782,21 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     );
   }
 
-  void _openExperienceTutor(Message message) {
+  /// Visible messages can belong to a previously completed module. Resolve the
+  /// authored section from the message itself instead of using the current UI
+  /// cursor, so Tutor IA receives only the matching pedagogical context.
+  Section? _sectionForMessage(Message message) {
+    for (final section in widget.cartilha.sections) {
+      if (section.messages.contains(message)) return section;
+    }
+    return null;
+  }
+
+  void _openExperienceTutor({
+    required Section section,
+    required Message message,
+  }) {
     final experience = message.experience;
-    final section = widget.cartilha.sections[_currentSectionIndex];
     final ai = experience?.ai;
     if (ai == null) return;
     // Deliberately build this from content only. No profile, enrollment,

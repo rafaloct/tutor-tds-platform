@@ -89,14 +89,22 @@ class Message {
 
 @JsonSerializable()
 class ExperienceBlock {
+  /// Stable content identifier. It is authored with the lesson and never
+  /// inferred from text or message position, so a future CourseVersion can
+  /// address the same experience without changing the Flutter contract.
+  final String id;
   final ExperienceKind kind;
   final String objective;
+  @JsonKey(name: 'required', defaultValue: false)
+  final bool isRequired;
   final String? actionLabel;
   final ExperienceAiConfig? ai;
 
   const ExperienceBlock({
+    required this.id,
     required this.kind,
     required this.objective,
+    this.isRequired = false,
     this.actionLabel,
     this.ai,
   });
@@ -104,6 +112,9 @@ class ExperienceBlock {
   factory ExperienceBlock.fromJson(Map<String, dynamic> json) =>
       _$ExperienceBlockFromJson(json);
   Map<String, dynamic> toJson() => _$ExperienceBlockToJson(this);
+
+  static bool isValidStableId(String value) =>
+      RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(value);
 }
 
 @JsonEnum(alwaysCreate: true)

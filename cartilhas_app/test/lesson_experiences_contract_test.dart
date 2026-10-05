@@ -39,6 +39,14 @@ void main() {
             .where((message) => message.experience != null)
             .toList();
         expect(experiences, isNotEmpty, reason: entry.key);
+        final ids = experiences.map((message) => message.experience!.id);
+        expect(ids.every(ExperienceBlock.isValidStableId), isTrue);
+        expect(ids.toSet(), hasLength(ids.length), reason: entry.key);
+        expect(
+          experiences.every((message) => !message.experience!.isRequired),
+          isTrue,
+          reason: 'Experiências desta rodada não são obrigatórias.',
+        );
         kinds.addAll(experiences.map((message) => message.experience!.kind));
         expect(
           experiences.every((message) => message.experience!.ai != null),
@@ -77,6 +85,20 @@ void main() {
     expect(secondContext, contains('Cartilha B'));
     expect(secondContext, isNot(contains('Cartilha A')));
   });
+
+  test(
+    'experience required defaults to false and ids reject unstable text',
+    () {
+      const experience = ExperienceBlock(
+        id: 'conteudo-experiencia-01',
+        kind: ExperienceKind.reflection,
+        objective: 'Objetivo de teste.',
+      );
+      expect(experience.isRequired, isFalse);
+      expect(ExperienceBlock.isValidStableId(experience.id), isTrue);
+      expect(ExperienceBlock.isValidStableId('texto com espaço'), isFalse);
+    },
+  );
 }
 
 Cartilha _lesson(String id, String title, String module, String challenge) =>
@@ -93,6 +115,7 @@ Cartilha _lesson(String id, String title, String module, String challenge) =>
               type: 'bot',
               content: challenge,
               experience: const ExperienceBlock(
+                id: 'curso-a-cenario-01',
                 kind: ExperienceKind.scenario,
                 objective: 'Objetivo pedagógico',
                 ai: ExperienceAiConfig(starterPrompt: 'Ajude-me a refletir.'),

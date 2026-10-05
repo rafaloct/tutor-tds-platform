@@ -78,8 +78,10 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
 
 ExperienceBlock _$ExperienceBlockFromJson(Map<String, dynamic> json) =>
     ExperienceBlock(
+      id: json['id'] as String,
       kind: $enumDecode(_$ExperienceKindEnumMap, json['kind']),
       objective: json['objective'] as String,
+      isRequired: json['required'] as bool? ?? false,
       actionLabel: json['actionLabel'] as String?,
       ai: json['ai'] == null
           ? null
@@ -88,8 +90,10 @@ ExperienceBlock _$ExperienceBlockFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ExperienceBlockToJson(ExperienceBlock instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'kind': _$ExperienceKindEnumMap[instance.kind]!,
       'objective': instance.objective,
+      'required': instance.isRequired,
       'actionLabel': instance.actionLabel,
       'ai': instance.ai,
     };

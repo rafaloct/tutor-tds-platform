@@ -11,7 +11,7 @@
         {
           "type": "bot",
           "content": "Olá! Hoje vamos falar de algo que você provavelmente já usa todo dia sem perceber: o AUDIOVISUAL. Vídeos no celular, fotos de produtos, lives de venda — tudo isso é audiovisual. E você pode usar isso para divulgar seu trabalho, vender mais e comunicar sua mensagem para muito mais pessoas.",
-          "experience": {"kind": "action_challenge", "objective": "Monte um roteiro curto de divulgação com início, mensagem principal e chamada final.", "actionLabel": "Rascunhar meu roteiro", "ai": {"starterPrompt": "Ajude-me a montar um roteiro curto de divulgação com início, mensagem principal e chamada final."}}
+          "experience": {"id": "audiovisual-roteiro-desafio-01", "kind": "action_challenge", "objective": "Monte um roteiro curto de divulgação com início, mensagem principal e chamada final.", "required": false, "actionLabel": "Rascunhar meu roteiro", "ai": {"starterPrompt": "Ajude-me a montar um roteiro curto de divulgação com início, mensagem principal e chamada final."}}
         },
         {
           "type": "bot",

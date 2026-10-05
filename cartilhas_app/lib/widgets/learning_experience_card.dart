@@ -68,7 +68,7 @@ class _LearningExperienceCardState extends State<LearningExperienceCard> {
                     icon: Icon(_done ? Icons.check_circle : Icons.task_alt),
                     label: Text(
                       _done
-                          ? 'Reflexão registrada neste aparelho'
+                          ? 'Marcada nesta sessão'
                           : (widget.experience.actionLabel ?? style.action),
                     ),
                   ),
