@@ -1,5 +1,24 @@
 # CURRENT STATE
 
+## 2026-10-05 Issue #138 — candidato lifecycle territorial
+
+IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre
+`911c454`: Classroom recebe município/local da oferta e revisão de lifecycle;
+fluxo contextual `planned -> active -> closed`, equipe, readiness, CAS/replay e
+ledger auditável. Capacidade padrão 30; somente coordinator escopado pode exceder,
+com motivo registrado na operação de inclusão. Rotas de inclusão bloqueiam turma
+closed e excesso sem override. CourseVersion permanece fixada. A revisão do PR
+#143 preserva o legado quando `CLASS_LIFECYCLE_ENABLED=false` e aplica criação
+planned/equipe contextual nas rotas administrativas somente com a flag ativa.
+Foram adicionados candidatos de equipe mínimos e listagem contextual de turmas,
+sem PII desnecessária nem dependência de `/operations/scopes`. Decisão de
+05/10/2026 fecha o gate de encerramento: sessão aberta bloqueia `active→closed`;
+demais pendências continuam warnings. Readiness e capability refletem esse
+bloqueio e a transição falha sem revision/receipt enquanto existir sessão aberta.
+Testes focais SQLite passaram; o DESKTOP-8T5DRBS não possui PostgreSQL descartável,
+então qualquer validação PostgreSQL deve ser evidenciada em ambiente isolado
+separado e nunca inferida de SQLite/staging. Sem staging, produção, merge ou deploy.
+
 ## 2026-10-05 Issue #134 — candidato local
 
 `/v1/chat` aceita contexto estruturado compatível com legado. HEADs autorizados
@@ -16,7 +35,6 @@ promoção 10/10; Flutter test/analyze sem execução por SDK ausente. O PR #136
 continua com base não canônica; retarget e edição de descrição exigem ação do
 coordenador. `REAL_STAGING_E2E=NO`. Nenhuma configuração, workspace, staging ou
 produção foi alterada. Auditoria: `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
-Auditoria: `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
 
 ## Integração META 05 — 03/10/2026
 

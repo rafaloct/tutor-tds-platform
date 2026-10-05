@@ -33,6 +33,7 @@ from .models import (
     ClassCheckin,
     ClassMonitor,
     Classroom,
+    ClassroomCommandReceipt,
     CohortMembership,
     OperatorCommandReceipt,
     OfficialAttendanceDecision,
@@ -288,6 +289,11 @@ def delete_me(
         # Explicit cleanup also covers SQLite installations without FK enforcement.
         session.execute(delete(OperatorCommandReceipt).where(OperatorCommandReceipt.subject_id == user_id))
         session.execute(update(OperatorCommandReceipt).where(OperatorCommandReceipt.actor_id == user_id).values(actor_id=None))
+        session.execute(
+            update(ClassroomCommandReceipt)
+            .where(ClassroomCommandReceipt.actor_id == user_id)
+            .values(actor_id=None)
+        )
         # Private certificate requests contain the learner's name. Delete their
         # entire history before removing enrollment/user lineage (also on SQLite
         # without FK enforcement). Reviewers of other requests are anonymized.
@@ -511,6 +517,8 @@ class AuthService:
             "student",
             "teacher",
             "monitor",
+            "program_operator",
+            "coordinator",
             "admin",
         }:
             raise _unauthorized()
