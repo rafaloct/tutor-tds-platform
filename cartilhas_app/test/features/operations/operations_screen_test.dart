@@ -168,10 +168,26 @@ void main() {
       await tester.enterText(field('Senha inicial'), 'synthetic-only');
       await tap(tester, 'Solicitar cadastro');
 
-      expect(find.textContaining('Cadastro confirmado'), findsOneWidget);
+      final registrationConfirmation = find.textContaining(
+        'Cadastro confirmado',
+      );
+      await tester.scrollUntilVisible(
+        registrationConfirmation,
+        -180,
+        scrollable: verticalScroll(),
+      );
+      expect(registrationConfirmation, findsOneWidget);
       expect(finalConfirmation, findsNothing);
       await tap(tester, 'Solicitar matrícula');
-      expect(find.textContaining('Matrícula confirmada'), findsOneWidget);
+      final enrollmentConfirmation = find.textContaining(
+        'Matrícula confirmada',
+      );
+      await tester.scrollUntilVisible(
+        enrollmentConfirmation,
+        -180,
+        scrollable: verticalScroll(),
+      );
+      expect(enrollmentConfirmation, findsOneWidget);
       expect(finalConfirmation, findsNothing);
       await tap(tester, 'Vincular à turma');
       await tester.scrollUntilVisible(
