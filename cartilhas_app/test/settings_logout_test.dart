@@ -49,9 +49,9 @@ class _NoopCertificates extends CertificateRepository {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('logout confirma, remove dados locais não escopados e volta ao login', (
-    tester,
-  ) async {
+  testWidgets(
+    'logout limpa dados acadêmicos não escopados e mantém preferências seguras',
+    (tester) async {
     tester.view.physicalSize = const Size(1200, 1800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -130,9 +130,7 @@ void main() {
       isNull,
     );
 
-    // Simula o novo processo do app com um perfil local recriado: leva à Home
-    // mesmo sem sessão, e Configurações precisa oferecer reentrada online.
-    await prefs.setString('user_name', 'Pessoa no aparelho');
+    // Novo processo do app: sem user_name o app permanece na tela de boas-vindas.
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpWidget(
       MultiProvider(
@@ -144,18 +142,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Tutor TDS'), findsOneWidget);
+    expect(find.text('Bem-vindo ao TDS'), findsOneWidget);
+    expect(find.text('Já tenho conta'), findsOneWidget);
     expect(tokenStore.value, isNull);
 
-    await tester.tap(find.byTooltip('Mais opções'));
+    await tester.ensureVisible(find.text('Já tenho conta'));
+    await tester.tap(find.text('Já tenho conta'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Configurações'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Sem conta online conectada'), findsOneWidget);
-    expect(find.text('Entrar na conta online'), findsOneWidget);
-    await tester.tap(find.text('Entrar na conta online'));
-    await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(
       find.byKey(const ValueKey('account-login-cpf')),
       '52998224725',
@@ -168,12 +161,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tokenStore.value?.accessToken, 'new-access');
-    expect(find.text('Conta online conectada'), findsOneWidget);
-    expect(find.textContaining('Nova Pessoa • perfil monitor'), findsOneWidget);
-    expect(find.text('Sair da conta'), findsOneWidget);
-    expect(prefs.getString('study_progress:last'), isNull);
     expect(prefs.getString('user_name'), 'Nova Pessoa');
-  });
+    },
+  );
 
   testWidgets('cancelar mantém sessão ativa', (tester) async {
     SharedPreferences.setMockInitialValues({});
