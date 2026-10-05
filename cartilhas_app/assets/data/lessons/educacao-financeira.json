@@ -9,12 +9,40 @@
       "title": "Por que cuidar do dinheiro?",
       "messages": [
         {
-          "type": "bot",
-          "content": "Olá, meu vizinho! Sou o TUTOR VIZINHO e hoje vamos falar de um assunto sério: o nosso suado dinheirinho. Sabe quando você vende uma saca de milho ou umas galinhas e, antes do mês acabar, o dinheiro já sumiu? Isso acontece com muita gente — e tem solução!"
+          "type": "scenario",
+          "content": "Imagine que hoje entraram R$ 450 da venda de produtos. Ainda faltam quase três semanas para terminar o mês e você sabe que virão gastos com comida, transporte e uma conta de energia. O dinheiro está na mão agora.",
+          "options": [
+            {
+              "label": "Separar primeiro o que já sei que vou precisar",
+              "value": "planejar",
+              "feedback": "Esse caminho cria visibilidade antes de gastar. Educação financeira começa justamente por enxergar o que entra, o que precisa sair e o que realmente está livre."
+            },
+            {
+              "label": "Ir pagando e comprando conforme as coisas aparecem",
+              "value": "improvisar",
+              "feedback": "É um caminho comum, mas fica difícil perceber para onde o dinheiro foi. O orçamento serve para reduzir esse improviso, sem exigir planilhas complicadas."
+            }
+          ]
         },
         {
           "type": "bot",
-          "content": "EDUCAÇÃO FINANCEIRA é o conjunto de conhecimentos, habilidades e atitudes para cuidar melhor do dinheiro. Não importa se você ganha pouco ou muito — quem organiza as finanças vive melhor. O primeiro passo é saber EXATAMENTE quanto entra e quanto sai do seu bolso todo mês."
+          "content": "EDUCAÇÃO FINANCEIRA é o conjunto de conhecimentos, habilidades e atitudes para cuidar melhor do dinheiro. Não importa se você ganha pouco ou muito. O primeiro passo é saber quanto entra e quanto sai do seu bolso ao longo do mês."
+        },
+        {
+          "type": "reflection",
+          "content": "Pensando nos últimos meses, qual situação mais se parece com a sua rotina financeira?",
+          "options": [
+            {
+              "label": "Às vezes não sei exatamente para onde o dinheiro foi",
+              "value": "sem_rastro",
+              "feedback": "Isso é mais comum do que parece. Nas próximas etapas, o foco será criar um jeito simples de acompanhar o dinheiro sem transformar sua rotina numa burocracia."
+            },
+            {
+              "label": "Eu já acompanho boa parte dos gastos",
+              "value": "acompanha",
+              "feedback": "Ótimo ponto de partida. A próxima etapa é usar esse controle para decidir melhor, criar metas e proteger sua renda."
+            }
+          ]
         },
         {
           "type": "question",
@@ -39,16 +67,51 @@
       "title": "Montando seu Orçamento",
       "messages": [
         {
-          "type": "bot",
-          "content": "ORÇAMENTO FAMILIAR é anotar tudo que ENTRA (renda: salário, venda de produtos, benefícios sociais, bicos) e tudo que SAI (despesas: comida, luz, água, aluguel, escola, saúde). Quando o que sai é maior que o que entra, há DÉFICIT — e é aí que as dívidas aparecem."
+          "type": "scenario",
+          "content": "Uma família recebe R$ 2.000 no mês. Antes de fazer qualquer compra, ela lista aluguel, energia, água, alimentação, transporte e remédios. Só depois olha o que pode ser ajustado.",
+          "options": [
+            {
+              "label": "Faz sentido: primeiro enxergar o todo",
+              "value": "todo",
+              "feedback": "Exatamente. Um orçamento não serve para proibir gastos. Ele serve para mostrar o cenário antes da decisão."
+            },
+            {
+              "label": "Eu começaria pelos gastos pequenos",
+              "value": "pequenos",
+              "feedback": "Gastos pequenos também importam, mas começar pelo quadro completo ajuda a descobrir onde estão os maiores compromissos da renda."
+            }
+          ]
         },
         {
           "type": "bot",
-          "content": "DESPESAS FIXAS são os gastos que se repetem todo mês com valor parecido: aluguel, energia elétrica, água, parcela de empréstimo. DESPESAS VARIÁVEIS mudam todo mês: comida, remédio, transporte, roupas. Conhecer os dois tipos ajuda a saber onde você pode economizar."
+          "content": "ORÇAMENTO FAMILIAR é anotar tudo que ENTRA, como salário, venda de produtos, benefícios sociais e bicos, e tudo que SAI, como comida, luz, água, aluguel, escola e saúde. Quando o que sai é maior que o que entra, há DÉFICIT e aumenta o risco de dívidas."
         },
         {
-          "type": "bot",
-          "content": "COMO MONTAR SEU ORÇAMENTO: (1) Anote toda renda do mês. (2) Liste todas as despesas fixas. (3) Estime as despesas variáveis. (4) Subtraia as despesas da renda. Se sobrar, guarde. Se faltar, corte o que não é essencial. Pode ser numa caderneta, numa tabela ou no celular."
+          "type": "reveal",
+          "content": "Uma forma simples de organizar é separar os gastos em dois grupos antes de tentar economizar.",
+          "options": [
+            {
+              "label": "Revelar os dois grupos",
+              "value": "revelar",
+              "feedback": "DESPESAS FIXAS se repetem com valor parecido, como aluguel ou parcela. DESPESAS VARIÁVEIS mudam, como alimentação, remédio, transporte e roupas. Separar os dois grupos ajuda a descobrir onde existe margem para ajuste."
+            }
+          ]
+        },
+        {
+          "type": "action_challenge",
+          "content": "Sem informar nenhum valor ao aplicativo, pense em três gastos que aparecem quase todo mês na sua casa ou no seu negócio.",
+          "options": [
+            {
+              "label": "Já identifiquei meus três gastos",
+              "value": "feito",
+              "feedback": "Boa. Agora tente classificar mentalmente cada um como fixo ou variável. Esse hábito simples já melhora a leitura do orçamento."
+            },
+            {
+              "label": "Quero fazer isso depois",
+              "value": "depois",
+              "feedback": "Sem problema. Você pode continuar e voltar à ideia quando estiver com sua caderneta, extrato ou contas por perto."
+            }
+          ]
         },
         {
           "type": "question",
@@ -73,16 +136,51 @@
       "title": "Crédito e Juros",
       "messages": [
         {
-          "type": "bot",
-          "content": "CRÉDITO é usar dinheiro agora para pagar depois. Pode ser empréstimo bancário, cartão de crédito, fiado no mercado ou compra parcelada. Pode ajudar em emergências, mas o principal risco é usar sem planejamento — quando não há controle, surgem as dívidas."
+          "type": "scenario",
+          "content": "Você precisa de um equipamento de R$ 600. Uma opção é pagar R$ 600 à vista. Outra é parcelar e terminar pagando R$ 720. A parcela parece pequena, mas o total muda.",
+          "options": [
+            {
+              "label": "Comparar o valor total antes de decidir",
+              "value": "comparar",
+              "feedback": "Boa leitura. A parcela precisa caber no orçamento, mas o custo total também precisa ser comparado. Crédito é dinheiro de hoje pago com renda futura."
+            },
+            {
+              "label": "Olhar apenas se a parcela cabe no mês",
+              "value": "parcela",
+              "feedback": "A parcela é importante, mas sozinha pode esconder o custo dos juros. Sempre que possível, compare também quanto será pago no total."
+            }
+          ]
         },
         {
           "type": "bot",
-          "content": "JUROS são o custo extra que você paga ao usar crédito. Quanto mais tempo demorar para pagar, maiores os juros. O cartão de crédito rotativo no Brasil tem uma das taxas mais altas do mundo. Entender os juros é essencial para proteger sua renda. Se vai parcelar, calcule o valor total que vai pagar."
+          "content": "CRÉDITO é usar dinheiro agora para pagar depois. Pode ser empréstimo bancário, cartão de crédito, fiado no mercado ou compra parcelada. Pode ajudar em emergências, mas o principal risco é usar sem planejamento."
         },
         {
-          "type": "bot",
-          "content": "PARA USAR O CRÉDITO COM RESPONSABILIDADE: (1) Avalie se você realmente precisa. (2) Verifique se as parcelas cabem no orçamento. (3) Compare as taxas de juros em diferentes lugares. (4) Evite o cartão rotativo. (5) Lembre-se: crédito não é dinheiro extra — é dinheiro que você vai pagar depois com juros."
+          "type": "reveal",
+          "content": "O detalhe que costuma passar despercebido numa compra parcelada não está apenas no valor da prestação.",
+          "options": [
+            {
+              "label": "Mostrar o detalhe",
+              "value": "juros",
+              "feedback": "JUROS são o custo extra do crédito. Quanto mais caro o crédito e maior o tempo de pagamento, maior pode ser o valor final. Antes de contratar, compare taxas, prazo, parcela e total pago."
+            }
+          ]
+        },
+        {
+          "type": "reflection",
+          "content": "Quando aparece uma compra parcelada, o que você costuma observar primeiro?",
+          "options": [
+            {
+              "label": "O valor da parcela",
+              "value": "parcela",
+              "feedback": "Esse é o comportamento mais comum. A partir de agora, tente acrescentar uma segunda pergunta: quanto vou pagar no total?"
+            },
+            {
+              "label": "O valor total e as condições",
+              "value": "total",
+              "feedback": "Excelente hábito. Ele ajuda a comparar alternativas e evita que uma parcela aparentemente pequena esconda um custo alto."
+            }
+          ]
         },
         {
           "type": "question",
@@ -107,12 +205,51 @@
       "title": "Poupança e Metas",
       "messages": [
         {
-          "type": "bot",
-          "content": "POUPAR não é só para quem ganha muito. É guardar uma parte — mesmo que pequena — do que você ganha todo mês antes de gastar. Uma dica prática: quando receber, separe primeiro o que vai poupar. O que sobrar é o que você gasta. Não o contrário."
+          "type": "scenario",
+          "content": "Depois de pagar os compromissos do mês, sobraram R$ 40. Parece pouco diante de uma meta grande, mas esse valor pode ter uma função definida em vez de simplesmente desaparecer nos próximos gastos.",
+          "options": [
+            {
+              "label": "Separar uma parte para uma meta",
+              "value": "meta",
+              "feedback": "É assim que metas começam a ganhar forma. O valor pode ser pequeno, mas a regularidade e o objetivo tornam a decisão mais consistente."
+            },
+            {
+              "label": "Deixar misturado com o dinheiro do dia a dia",
+              "value": "misturar",
+              "feedback": "Quando fica misturado, é fácil usar sem perceber. Separar mentalmente ou fisicamente o dinheiro de uma meta reduz esse risco."
+            }
+          ]
         },
         {
           "type": "bot",
-          "content": "METAS FINANCEIRAS ajudam a ter foco. Divida em: CURTO PRAZO (até 1 ano) — reserva de emergência para imprevistos como doença ou conserto urgente. MÉDIO PRAZO (1-3 anos) — comprar um equipamento, reformar a casa. LONGO PRAZO (mais de 3 anos) — aposentadoria, terra própria, educação dos filhos."
+          "content": "POUPAR não é só para quem ganha muito. É guardar uma parte, mesmo pequena, do que você ganha. Uma estratégia é separar primeiro o valor destinado à meta e organizar os demais gastos com o restante."
+        },
+        {
+          "type": "reveal",
+          "content": "Metas financeiras ficam mais claras quando têm horizonte de tempo.",
+          "options": [
+            {
+              "label": "Ver os horizontes",
+              "value": "prazos",
+              "feedback": "CURTO PRAZO: até 1 ano, como uma reserva para imprevistos. MÉDIO PRAZO: de 1 a 3 anos, como equipamento ou reforma. LONGO PRAZO: mais de 3 anos, como terra própria, aposentadoria ou educação."
+            }
+          ]
+        },
+        {
+          "type": "action_challenge",
+          "content": "Escolha mentalmente uma meta financeira que faça sentido para você agora. Não precisa informar valores nem dados pessoais.",
+          "options": [
+            {
+              "label": "Já pensei em uma meta",
+              "value": "meta_escolhida",
+              "feedback": "Agora dê a ela um prazo aproximado. Uma meta com objetivo e prazo fica muito mais fácil de acompanhar."
+            },
+            {
+              "label": "Ainda não tenho uma meta",
+              "value": "sem_meta",
+              "feedback": "Tudo bem. Uma boa primeira meta pode ser simplesmente criar uma pequena reserva para um gasto inesperado."
+            }
+          ]
         },
         {
           "type": "question",
@@ -137,12 +274,51 @@
       "title": "Precificação do seu Trabalho",
       "messages": [
         {
-          "type": "bot",
-          "content": "PRECIFICAÇÃO é calcular o preço justo do que você produz ou do serviço que presta. Muita gente cobra barato demais e acaba trabalhando no prejuízo sem perceber. Para calcular o preço certo: some todos os custos de produção (sementes, adubo, embalagem, transporte) + o valor do seu trabalho + uma margem de lucro."
+          "type": "scenario",
+          "content": "Você gastou com matéria-prima, embalagem e transporte para produzir algo que vai vender. No fim, pensa em cobrar olhando apenas o preço do vizinho, sem calcular seu próprio custo.",
+          "options": [
+            {
+              "label": "Calcular meu custo antes de definir o preço",
+              "value": "custo",
+              "feedback": "Esse é o caminho mais seguro. O preço do mercado importa, mas primeiro você precisa saber quanto custa produzir para reconhecer se a venda dá resultado ou prejuízo."
+            },
+            {
+              "label": "Copiar o preço de quem vende parecido",
+              "value": "copiar",
+              "feedback": "O preço do mercado ajuda na comparação, mas os seus custos podem ser diferentes. Copiar sem calcular pode esconder prejuízo."
+            }
+          ]
         },
         {
           "type": "bot",
-          "content": "FÓRMULA BÁSICA: Preço de Venda = Custo Total + Lucro Desejado. Exemplo: se você gastou R$50 para produzir 10 kg de farinha, o custo é R$5/kg. Se quiser 30% de lucro, o preço mínimo é R$6,50/kg. Muitos produtores esquecem de incluir o custo do próprio trabalho — essa é uma grande armadilha."
+          "content": "PRECIFICAÇÃO é calcular o preço justo do que você produz ou do serviço que presta. Para chegar a um preço sustentável, some os custos de produção, considere o valor do seu trabalho e defina uma margem de resultado compatível com sua realidade."
+        },
+        {
+          "type": "reveal",
+          "content": "Existe um custo que muita gente esquece porque ele não aparece como boleto nem nota fiscal.",
+          "options": [
+            {
+              "label": "Descobrir qual",
+              "value": "trabalho",
+              "feedback": "É o valor do próprio trabalho. Se seria necessário pagar outra pessoa para fazer aquela atividade, esse esforço também faz parte do custo econômico da produção."
+            }
+          ]
+        },
+        {
+          "type": "action_challenge",
+          "content": "Pense em um produto ou serviço que você vende ou poderia vender. Tente lembrar de pelo menos quatro custos envolvidos antes da venda acontecer.",
+          "options": [
+            {
+              "label": "Consegui listar quatro custos",
+              "value": "quatro",
+              "feedback": "Ótimo. Se quiser aprofundar, use o Tutor de IA no topo da tela para organizar esses custos em uma conta simples de preço de venda."
+            },
+            {
+              "label": "Ainda faltam custos",
+              "value": "faltam",
+              "feedback": "Comece por matéria-prima, transporte, embalagem, energia e tempo de trabalho. Nem todos se aplicam ao seu caso, mas ajudam a lembrar do que costuma ficar escondido."
+            }
+          ]
         },
         {
           "type": "question",
@@ -164,8 +340,24 @@
     },
     {
       "id": "links",
-      "title": "Grupo e Suporte",
+      "title": "Próximos passos",
       "messages": [
+        {
+          "type": "reflection",
+          "content": "Depois desta cartilha, qual assunto seria mais útil continuar praticando?",
+          "options": [
+            {
+              "label": "Organizar meu orçamento",
+              "value": "orcamento",
+              "feedback": "Boa escolha. Você pode rever a seção de orçamento e usar uma caderneta ou tabela simples para registrar entradas e saídas."
+            },
+            {
+              "label": "Preço e custos do meu negócio",
+              "value": "preco",
+              "feedback": "Você pode voltar à seção de precificação e usar o Tutor de IA para adaptar um exemplo ao seu produto ou serviço, sem informar dados sensíveis."
+            }
+          ]
+        },
         {
           "type": "bot",
           "content": "Quer continuar aprendendo sobre educação financeira e gestão do seu negócio? Entre no nosso GRUPO DE FINANÇAS no WhatsApp: https://chat.whatsapp.com/IYQatWLFGXj8QWGLbHLe1f"

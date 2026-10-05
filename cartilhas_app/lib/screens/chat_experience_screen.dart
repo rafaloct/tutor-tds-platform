@@ -10,6 +10,7 @@ import '../features/auth/data/auth_repository.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
+import '../widgets/learning_experience_card.dart';
 import 'genui_assistant_screen.dart';
 import '../features/certificates/presentation/certificate_requests_screen.dart';
 import '../features/profile/data/profile_data_store.dart';
@@ -695,6 +696,13 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   }
 
   Widget _buildBubble(Message msg) {
+    if (isLearningExperienceType(msg.type)) {
+      return LearningExperienceCard(
+        message: msg,
+        onSpeak: () => _speak(msg.content),
+      );
+    }
+
     final isUser = msg.type == 'user';
     // Bolha especial de conclusão
     final isCompletion =
@@ -776,6 +784,14 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
         .sections[_currentSectionIndex]
         .messages[_currentMessageIndex];
     if (currentMsg.options == null) return const SizedBox.shrink();
+
+    if (isLearningExperienceType(currentMsg.type)) {
+      return LearningExperienceChoices(
+        message: currentMsg,
+        enabled: _canRecordActivities,
+        onSelected: _handleOptionClick,
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
