@@ -71,6 +71,13 @@ class OperationsController extends ChangeNotifier {
     _emit();
   }
 
+  void beginRegistration() {
+    if (!canNavigate) return;
+    snapshot = null;
+    message = null;
+    _emit();
+  }
+
   Future<void> search(String query) async {
     final selected = scope;
     if (!canNavigate || selected == null) return;
@@ -124,6 +131,8 @@ class OperationsController extends ChangeNotifier {
     OperationRegistration registration,
     String reason,
   ) async {
+    if (!canNavigate) return;
+    beginRegistration();
     if (registration.name.trim().isEmpty ||
         registration.cpf.trim().isEmpty ||
         registration.phone.trim().isEmpty ||
@@ -161,6 +170,7 @@ class OperationsController extends ChangeNotifier {
       return;
     }
     if (action != OperationAction.register && snapshot == null) return;
+    if (action == OperationAction.register) snapshot = null;
     _pending = OperationCommand(
       id: _nextCommandId(),
       sessionKey: _sessionKey,
@@ -193,9 +203,24 @@ class OperationsController extends ChangeNotifier {
       if (!_current(generation)) return;
       snapshot = result;
       _pending = null;
+      final confirmation = result.enrolled && result.assigned
+          ? 'Fluxo completo confirmado: matrícula e vínculo à turma estão ativos no contexto selecionado.'
+          : switch (command.action) {
+              OperationAction.register =>
+                'Cadastro confirmado. Continue com a matrícula e o vínculo à turma.',
+              OperationAction.enroll =>
+                result.enrolled
+                    ? 'Matrícula confirmada. Próxima etapa: vincular à turma.'
+                    : 'Matrícula ainda não confirmada pelo serviço.',
+              OperationAction.assign =>
+                result.assigned
+                    ? 'Vínculo à turma confirmado; a matrícula ainda não está confirmada.'
+                    : 'Vínculo à turma ainda não confirmado pelo serviço.',
+              OperationAction.revoke => 'Revogação do vínculo confirmada.',
+            };
       message = isSimulation
-          ? 'Simulação concluída. Nenhuma conta ou matrícula real foi alterada.'
-          : 'Operação confirmada pelo serviço autorizado.';
+          ? 'Simulação concluída. $confirmation Nenhuma conta ou matrícula real foi alterada.'
+          : confirmation;
     } catch (error) {
       if (_current(generation)) _failure(error, command: true);
     } finally {

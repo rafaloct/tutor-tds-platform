@@ -140,9 +140,9 @@ def test_dashboard_excludes_revoked_students_and_their_aggregates(presence_api, 
 
 def test_dashboard_revalidates_staff_membership_and_isolates_scope(presence_api):
     client, engine = presence_api
-    for actor in ("teacher", "monitor", "admin"):
+    for actor in ("teacher", "admin"):
         assert dashboard(client, actor).status_code == 200
-    for actor in ("learner", "outsider", "teacher2", "coordinator"):
+    for actor in ("learner", "outsider", "teacher2", "coordinator", "monitor"):
         assert dashboard(client, actor).status_code == 403
     with Session(engine) as session:
         session.get(ProgramMembership, ("teacher", "p1")).status = "inactive"

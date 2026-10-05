@@ -207,7 +207,10 @@ class _OperationsScreenState extends State<OperationsScreen> {
               ),
             TextButton(
               onPressed: editable
-                  ? () => setState(() => _creating = !_creating)
+                  ? () {
+                      if (!_creating) controller.beginRegistration();
+                      setState(() => _creating = !_creating);
+                    }
                   : null,
               child: Text(
                 _creating ? 'Cancelar novo cadastro' : 'Cadastrar nova pessoa',
@@ -260,7 +263,7 @@ class _OperationsScreenState extends State<OperationsScreen> {
                 child: const Text('Solicitar cadastro'),
               ),
             ],
-            if (selected != null) ...[
+            if (selected != null && !_creating) ...[
               const Divider(),
               Text(
                 selected.person.name,
@@ -272,6 +275,19 @@ class _OperationsScreenState extends State<OperationsScreen> {
               Text(
                 'Vínculo com a turma: ${selected.assigned ? "ativo" : "inativo ou ausente"}',
               ),
+              if (selected.enrolled && selected.assigned)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      controller.isSimulation
+                          ? 'Confirmação final da simulação: matrícula e vínculo à turma ativos neste contexto.'
+                          : 'Confirmação final: matrícula e vínculo à turma confirmados pelo serviço autorizado.',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ),
               Text(switch (selected.baselineLinked) {
                 true => 'Baseline: vínculo informado pelo serviço',
                 false => 'Baseline: pendente; não impede matrícula ou estudo',

@@ -22,7 +22,7 @@ jobs:
       DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
       EXPECTED_STAGING_DATABASE_HOST: db.lgtphbbpgqnzduhtyate.supabase.co
       EXPECTED_STAGING_PROJECT_REF: lgtphbbpgqnzduhtyate
-      EXPECTED_ALEMBIC_HEAD: 20261003_0024
+      EXPECTED_ALEMBIC_HEAD: 20261005_0027
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
