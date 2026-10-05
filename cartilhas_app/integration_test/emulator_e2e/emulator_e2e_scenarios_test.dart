@@ -433,9 +433,12 @@ Future<void> _offlineScenario(
   evidence['online_cache_primed'] = true;
 
   await _hostSignal(tester, 'NETWORK_OFFLINE');
-  await tester.pumpWidget(const CartilhasApp());
-  await _home(tester);
-  await _openMoreOption(tester, 'Minhas turmas');
+  Navigator.of(tester.element(find.byType(ChatExperienceScreen))).pop();
+  await _until(
+    tester,
+    () async => find.byType(LearnerClassroomsScreen).evaluate().isNotEmpty,
+  );
+  await _tap(tester, find.text('Atualizar turmas'));
   await _until(
     tester,
     () async => find
@@ -449,20 +452,31 @@ Future<void> _offlineScenario(
     tester,
     () async => find.byType(ChatExperienceScreen).evaluate().isNotEmpty,
   );
+  expect(
+    tester.widget<ChatExperienceScreen>(find.byType(ChatExperienceScreen))
+        .savedClassroomContent,
+    isTrue,
+  );
   evidence['offline_saved_class_opened'] = true;
   await _hostSignal(tester, 'SCREENSHOT_OFFLINE');
 
   await _hostSignal(tester, 'NETWORK_ONLINE');
-  await tester.pumpWidget(const CartilhasApp());
-  await _home(tester);
-  await _openMoreOption(tester, 'Minhas turmas');
+  Navigator.of(tester.element(find.byType(ChatExperienceScreen))).pop();
+  await _until(
+    tester,
+    () async => find.byType(LearnerClassroomsScreen).evaluate().isNotEmpty,
+  );
+  await _tap(tester, find.text('Atualizar turmas'));
   await _until(
     tester,
     () async => find.text(_className).evaluate().isNotEmpty,
   );
-  expect(
-    find.textContaining('Sem conexão: exibindo turmas salvas'),
-    findsNothing,
+  await _until(
+    tester,
+    () async => find
+        .textContaining('Sem conexão: exibindo turmas salvas')
+        .evaluate()
+        .isEmpty,
   );
   evidence['reconnected'] = true;
 }
