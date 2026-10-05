@@ -1,7 +1,7 @@
 # WP-3B — histórias públicas curadas para o storytelling TDS
 
-Data: 2026-10-04  
-Escopo: curadoria editorial para alimentar a Home pública e o fluxo WP-4.  
+Data: 2026-10-04
+Escopo: curadoria editorial para alimentar a Home pública e o fluxo WP-4.
 Status: **CURATED / sem publicação WordPress, sem reutilização de fotografia, sem produção**.
 
 Este documento complementa `WP3_STORYTELLING_SOURCE_MAP_2026-10-04.md`.
@@ -25,12 +25,12 @@ história abaixo cria ou altera dado acadêmico.
 
 ## História 1 — O TDS chega às lideranças comunitárias pela escuta dos territórios
 
-**Título público sugerido:**  
+**Título público sugerido:**
 `TDS apresenta proposta às lideranças de Palmas e inicia escuta dos territórios`
 
-**Data da ação:** 26/05/2026  
-**Data da publicação-fonte:** 27/05/2026  
-**Território/local:** Centro de Ensino Médio de Taquaralto, Palmas/TO  
+**Data da ação:** 26/05/2026
+**Data da publicação-fonte:** 27/05/2026
+**Território/local:** Centro de Ensino Médio de Taquaralto, Palmas/TO
 **Estado:** `REALIZADO`
 
 ### Ação realizada
@@ -80,12 +80,12 @@ Não importar a fotografia até confirmação de reutilização.
 
 ## História 2 — Da escuta à formação em Associativismo e Cooperativismo
 
-**Título público sugerido:**  
+**Título público sugerido:**
 `Demanda das lideranças de Palmas vira formação em Associativismo e Cooperativismo`
 
-**Data da ação inicial:** 23/06/2026  
-**Datas de continuidade informadas pela fonte:** 25/06/2026 e 29/06/2026  
-**Território/local:** Escola de Tempo Integral Santa Bárbara, Palmas/TO  
+**Data da ação inicial:** 23/06/2026
+**Datas de continuidade informadas pela fonte:** 25/06/2026 e 29/06/2026
+**Território/local:** Escola de Tempo Integral Santa Bárbara, Palmas/TO
 **Estado:** `REALIZADO`
 
 ### Ação realizada
@@ -142,12 +142,12 @@ história destacada na Home, sem foto até autorização.
 
 ## História 3 — Proposta de inclusão produtiva com participantes da Casa da Mulher Brasileira
 
-**Título público sugerido:**  
+**Título público sugerido:**
 `TDS constrói proposta de inclusão produtiva com participantes de oficina da Casa da Mulher Brasileira`
 
-**Data:** 23/06/2026  
+**Data:** 23/06/2026
 **Território/local:** Palmas/TO, com participantes da oficina de costura e
-customização da Casa da Mulher Brasileira  
+customização da Casa da Mulher Brasileira
 **Estado:** `PLANEJADO`
 
 ### Ação realizada
@@ -205,13 +205,13 @@ realizado.
 
 ## História 4 — Articulação para levar novas formações às associações comunitárias
 
-**Título público sugerido:**  
+**Título público sugerido:**
 `UFT e Prefeitura avançam na articulação de novas formações do TDS com associações de Palmas`
 
-**Data da reunião:** 25/08/2026  
-**Data da publicação-fonte:** 26/08/2026  
+**Data da reunião:** 25/08/2026
+**Data da publicação-fonte:** 26/08/2026
 **Território/local:** Palmas/TO; local específico da reunião não informado na
-publicação usada  
+publicação usada
 **Estado:** `EM_ANDAMENTO`
 
 ### Ação realizada

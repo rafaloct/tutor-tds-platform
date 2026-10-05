@@ -32,6 +32,7 @@ void main(List<String> arguments) {
     'DURABLE_LEARNING_OUTBOX_ENABLED': false,
     'JOURNEY_TRACEABILITY_ENABLED': false,
     'SIGNED_SUPPORT_IDENTITY': false,
+    'PUSH_NOTIFICATIONS_ENABLED': false,
   };
   if (config.length != expected.length ||
       expected.entries.any((entry) => config[entry.key] != entry.value)) {
