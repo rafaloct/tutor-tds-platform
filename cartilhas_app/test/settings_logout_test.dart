@@ -102,6 +102,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Conta online conectada'), findsOneWidget);
+    expect(
+      find.text(
+        'Encerra a sessão e remove dados locais que não estão vinculados a uma conta',
+      ),
+      findsOneWidget,
+    );
     await tester.ensureVisible(find.text('Sair da conta'));
     await tester.tap(find.text('Sair da conta'));
     await tester.pumpAndSettle();

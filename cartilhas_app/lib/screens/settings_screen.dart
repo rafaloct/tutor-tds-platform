@@ -345,7 +345,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const Icon(Icons.logout),
                       title: const Text('Sair da conta'),
                       subtitle: const Text(
-                        'Encerra apenas a sessão online; não apaga os dados locais',
+                        'Encerra a sessão e remove dados locais que não estão vinculados a uma conta',
                       ),
                       trailing: _loggingOut
                           ? const SizedBox.square(
