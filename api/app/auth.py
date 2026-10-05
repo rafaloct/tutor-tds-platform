@@ -511,6 +511,7 @@ class AuthService:
             "student",
             "teacher",
             "monitor",
+            "program_operator",
             "admin",
         }:
             raise _unauthorized()
