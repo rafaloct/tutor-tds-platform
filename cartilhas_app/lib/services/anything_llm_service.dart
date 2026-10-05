@@ -6,8 +6,10 @@ import 'package:http/http.dart' as http;
 /// parte deste aplicativo; elas permanecem no Cloudflare e no AnythingLLM.
 class AnythingLLMService {
   final String gatewayUrl;
+  final http.Client _client;
 
-  AnythingLLMService({required this.gatewayUrl});
+  AnythingLLMService({required this.gatewayUrl, http.Client? client})
+    : _client = client ?? http.Client();
 
   Future<String> getChatResponse(
     String message, {
@@ -22,7 +24,7 @@ class AnythingLLMService {
     final url = Uri.parse('$normalizedGatewayUrl/v1/chat');
 
     try {
-      final response = await http
+      final response = await _client
           .post(
             url,
             headers: {'Content-Type': 'application/json'},

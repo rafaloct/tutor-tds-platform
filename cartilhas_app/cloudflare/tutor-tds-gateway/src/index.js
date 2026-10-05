@@ -39,6 +39,16 @@ export default {
 };
 
 export async function handleRequest(request, env, _ctx, upstreamFetch = fetch) {
+  const requestId = crypto.randomUUID();
+  const response = await handleRequestInternal(request, env, upstreamFetch, requestId);
+  const headers = new Headers(response.headers);
+  // This opaque ID is the only per-request value returned to the client.  It
+  // makes an incident traceable without retaining the student's question.
+  headers.set('X-Request-Id', requestId);
+  return new Response(response.body, { status: response.status, headers });
+}
+
+async function handleRequestInternal(request, env, upstreamFetch, requestId) {
   if (new URL(request.url).pathname.startsWith('/internal/certificate-candidates/')) {
     return handleCertificateCandidate(request, env);
   }
@@ -88,7 +98,7 @@ export async function handleRequest(request, env, _ctx, upstreamFetch = fetch) {
   }
 
   if (isStudy) {
-    return handleStudyRequest(body, upstream, cors.headers, upstreamFetch);
+    return handleStudyRequest(body, upstream, cors.headers, upstreamFetch, requestId);
   }
 
   const validationError = validateChatInput(body);
@@ -101,6 +111,7 @@ export async function handleRequest(request, env, _ctx, upstreamFetch = fetch) {
       systemPrompt: buildChatSystemPrompt(body, env),
     },
     upstreamFetch,
+    requestId,
   );
   if (upstreamResult.error) {
     return json({ error: upstreamResult.error }, upstreamResult.status, cors.headers);
@@ -450,7 +461,7 @@ function escapeHtml(value) {
   })[character]);
 }
 
-async function handleStudyRequest(body, upstream, headers, upstreamFetch) {
+async function handleStudyRequest(body, upstream, headers, upstreamFetch, requestId) {
   const validationError = validateStudyInput(body);
   if (validationError) return json({ error: validationError }, 400, headers);
 
@@ -470,6 +481,7 @@ async function handleStudyRequest(body, upstream, headers, upstreamFetch) {
       systemPrompt: prompt,
     },
     upstreamFetch,
+    requestId,
   );
   if (upstreamResult.error) {
     return json({ error: upstreamResult.error }, upstreamResult.status, headers);
@@ -514,7 +526,7 @@ async function readJsonBody(request, headers) {
   }
 }
 
-async function callAnythingLlm(upstream, request, upstreamFetch) {
+async function callAnythingLlm(upstream, request, upstreamFetch, requestId) {
   const upstreamUrl = new URL(
     `/api/v1/workspace/${encodeURIComponent(upstream.workspace)}/chat`,
     `${upstream.baseUrl}/`,
@@ -527,6 +539,7 @@ async function callAnythingLlm(upstream, request, upstreamFetch) {
       headers: {
         Authorization: `Bearer ${upstream.apiKey}`,
         'Content-Type': 'application/json',
+        'X-Request-Id': requestId,
       },
       body: JSON.stringify({
         message: request.message,
@@ -535,11 +548,27 @@ async function callAnythingLlm(upstream, request, upstreamFetch) {
       }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
-  } catch {
+  } catch (error) {
+    if (error?.name === 'AbortError' || error?.name === 'TimeoutError') {
+      return { error: 'upstream_timeout', status: 504 };
+    }
     return { error: 'service_unavailable', status: 503 };
   }
 
-  if (!response.ok) return { error: 'service_unavailable', status: 503 };
+  if (!response.ok) {
+    if (response.status === 429) return { error: 'rate_limited', status: 429 };
+    if (response.status === 408 || response.status === 504) {
+      return { error: 'upstream_timeout', status: 504 };
+    }
+    // Do not reveal whether this was an upstream authentication, routing, or
+    // provider failure. Those categories remain available to Worker logs by
+    // status, while the public contract remains safe to expose.
+    if (response.status === 401 || response.status === 403 || response.status === 404) {
+      return { error: 'service_unavailable', status: 503 };
+    }
+    if (response.status >= 500) return { error: 'service_unavailable', status: 503 };
+    return { error: 'invalid_upstream_response', status: 502 };
+  }
 
   let upstreamData;
   try {
