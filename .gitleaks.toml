@@ -22,3 +22,17 @@ condition = "AND"
 paths = ['''^api/tests/''', '''^cartilhas_app/(test|integration_test)/''']
 regexTarget = "line"
 regexes = ['''(?i)^\s*(?:const\s+)?(?:synthetic_fixture_api_key|syntheticFixtureApiKey)\s*=\s*["']tds_gitleaks_fixture_[A-Za-z0-9]{24}["']\s*;?\s*(?:#|//)\s*gitleaks:synthetic-fixture\s*$''']
+
+[[rules.allowlists]]
+description = "Issue 140 E2E evidence Git commit identities"
+condition = "AND"
+paths = ['''^docs/production/evidence/class-lifecycle-e2e-[0-9a-f]{32}\.json$''']
+regexTarget = "line"
+regexes = ['''(?i)^\s*"(?:api_head|app_head|compose_head)"\s*:\s*"[0-9a-f]{40}",?\s*$''']
+
+[[rules.allowlists]]
+description = "Issue 140 runbook Git commit identities"
+condition = "AND"
+paths = ['''^docs/production/CLASS_LIFECYCLE_E2E_RUNBOOK\.md$''']
+regexTarget = "line"
+regexes = ['''(?i)^\s*(?:API_HEAD|APP_HEAD|COMPOSE_HEAD)=[0-9a-f]{40}\s*$''']

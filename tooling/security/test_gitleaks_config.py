@@ -294,6 +294,40 @@ def main() -> int:
             config,
             default_config,
         )
+        git_sha = "1dea14ae741bd0ba141f43b22296c7e297b6e320"
+        clean_case(
+            tmp_root,
+            "issue_140_evidence_git_sha",
+            {
+                "docs/production/evidence/"
+                "class-lifecycle-e2e-14000000000000000000000000000001.json": (
+                    json.dumps({"api_head": git_sha}, indent=2) + "\n"
+                )
+            },
+            gitleaks,
+            config,
+            default_config,
+        )
+        clean_case(
+            tmp_root,
+            "issue_140_runbook_git_sha",
+            {
+                "docs/production/CLASS_LIFECYCLE_E2E_RUNBOOK.md": (
+                    f"API_HEAD={git_sha}\n"
+                )
+            },
+            gitleaks,
+            config,
+            default_config,
+        )
+        detected_case(
+            tmp_root,
+            "issue_140_git_sha_outside_allowlisted_path",
+            {"docs/production/evidence/other.json": json.dumps({"api_head": git_sha}) + "\n"},
+            "generic-api-key",
+            gitleaks,
+            config,
+        )
         fixture_value = f"tds_gitleaks_fixture_{random_alnum(24)}"
         clean_case(
             tmp_root,
