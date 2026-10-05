@@ -1,5 +1,17 @@
 # CURRENT STATE
 
+## 2026-10-05 Issue #138 — candidato lifecycle territorial
+
+IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre
+`911c454`: Classroom recebe município/local da oferta e revisão de lifecycle;
+fluxo contextual `planned -> active -> closed`, equipe, readiness, CAS/replay e
+ledger auditável. Capacidade padrão 30; somente coordinator escopado pode exceder,
+com motivo registrado na operação de inclusão. Rotas legadas de inclusão também
+bloqueiam turma closed e excesso sem override. CourseVersion permanece fixada.
+Feature `CLASS_LIFECYCLE_ENABLED=false` por padrão. Testes locais focais SQLite
+passaram; PostgreSQL descartável não estava disponível no DESKTOP-8T5DRBS e
+permanece UNKNOWN. Sem staging, produção, merge ou deploy.
+
 ## Integração META 05 — 03/10/2026
 
 Base integrada neste candidato: `aa6fb88050aa864726e197187487819de303ac65`,

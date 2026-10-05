@@ -75,6 +75,39 @@ ausente, logout A→B e Android/TalkBack. Nenhum deploy/AAB/produção nesta exe
 Gestão integral de equipe/ofertas/instituições e aceite visual permanecem fora
 deste incremento. #30 continua aberta até seus critérios integrais.
 
+## Extensão #138 — lifecycle territorial da turma
+
+O backend passa a expor o contrato contextual de turma em
+`/operations/classes`, atrás de `CLASS_LIFECYCLE_ENABLED=false` por padrão.
+A preparação fixa a CourseVersion publicada no servidor e persiste
+`offer_municipality` e `offer_location` sem copiar residência do participante.
+
+RBAC do candidato: program_operator/coordinator podem preparar e alterar
+planejamento/equipe enquanto a turma está `planned`; somente coordinator pode
+ativar, encerrar, alterar equipe após ativação ou autorizar exceção de capacidade.
+Professor/monitor não recebem poder administrativo novo. Readiness do professor
+fica limitado à própria turma.
+
+Lifecycle canônico: `planned -> active -> closed`. Comandos exigem ator,
+motivo, contexto completo, idempotency key e `expected_revision`; replay
+divergente ou CAS stale falha. `classroom_command_receipts` preserva a trilha.
+Encerramento apenas muda o lifecycle e projeta warnings; não cria presença,
+frequência, capacitação ou certificado.
+
+Capacidade padrão é 30 vínculos ativos. Todas as rotas HTTP canônicas de inclusão
+bloqueiam o 31º vínculo. Exceção só existe pelo comando contextual de coordinator,
+com motivo, registrada como `assign_capacity_override`; admin/teacher não
+possuem bypass. Turma `closed` não aceita novos vínculos.
+
+Endpoints: `GET /operations/classes/options`, `POST /operations/classes`,
+`POST /operations/classes/{id}/plan`, `POST /operations/classes/{id}/team`,
+`POST /operations/classes/{id}/transition` e
+`GET /operations/classes/{id}/readiness`.
+
+Migration 0028 é aditiva e recusa downgrade quando houver território/revisão ou
+recibos novos. Prova local SQLite cobre a fatia; PostgreSQL permanece gate
+explícito ainda não comprovado nesta execução. Sem staging/produção.
+
 ## Histórico — checkpoint inicial anterior ao backend
 # Operação de participantes — contrato e candidato Flutter (#30)
 

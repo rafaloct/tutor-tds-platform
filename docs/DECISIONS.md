@@ -191,3 +191,14 @@
     tdsdados@gmail.com, sem SMTP/VPS real. Plano citado não anexado. Gate real
     permanece deliberadamente fechado; legenda antiga por horas/approval só se
     aplica a ofertas sem política nova. Não mudar checkpoints retroativamente.
+
+29. 2026-10-05: Issue #138 estabelece FastAPI/PostgreSQL como autoridade
+    funcional do ciclo de turma territorial. Capacidade padrão é 30 participantes
+    ativos; exceder exige coordinator escopado ao programa e motivo auditável.
+    O candidato mantém RBAC fail-closed: program_operator/coordinator podem
+    preparar e ajustar a turma enquanto planned; ativação/encerramento e mudança
+    de equipe após ativação ficam restritos à coordenação. Professor/monitor não
+    ganham poder administrativo novo. Município/local da oferta permanecem
+    separados de residência do participante; encerramento não fabrica presença,
+    frequência ou certificado. Feature flag segue false por padrão; sem staging
+    ou produção nesta decisão.
