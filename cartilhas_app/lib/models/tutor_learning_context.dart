@@ -44,10 +44,9 @@ class TutorLearningContext {
     return {
       'course_id': courseId,
       'course_version_id': courseVersionId,
-      if (moduleId != null) 'module_id': moduleId!,
-      if (experienceId != null) 'experience_id': experienceId!,
-      if (experienceType != null)
-        'experience_type': experienceType!.wireValue,
+      'module_id': ?moduleId,
+      'experience_id': ?experienceId,
+      'experience_type': ?experienceType?.wireValue,
     };
   }
 
