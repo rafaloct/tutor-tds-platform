@@ -61,7 +61,8 @@ Cenários executáveis por padrão:
   mínima e confirma 403 no dashboard completo;
 - `creator_surface`: Gestão → Conteúdos → Meus conteúdos/Criar curso;
 - `offline_reconnect`: prime online → airplane mode → conteúdo salvo offline →
-  reconexão, preservando o mesmo package isolado entre processos.
+  reconexão dentro da mesma execução de `flutter test`, preservando o mesmo
+  processo/package e o cache local.
 
 `operator_flow` permanece explicitamente bloqueado pela Issue #120. A conta
 admin/creator não deve ser usada como substituição de `program_operator`.
@@ -76,6 +77,21 @@ Credenciais nunca entram no repositório ou no comando em claro. O host fornece:
 
 O harness grava esses valores num JSON temporário para `--dart-define-from-file`,
 redige CPF/token/senha dos logs e apaga o arquivo no `finally`.
+
+## Coordenação host ↔ teste em execução
+
+Para preservar o estado offline e capturar evidência visual válida, o teste
+Flutter emite apenas sinais fixos e não sensíveis com prefixo
+`TDS_E2E_HOST:`. O harness lê stdout em streaming e reage no host:
+
+- `NETWORK_OFFLINE`: ativa airplane mode no emulador;
+- `NETWORK_ONLINE`: desativa airplane mode;
+- `SCREENSHOT_OFFLINE`: captura a tela ainda no estado offline;
+- `SCREENSHOT`: captura a tela validada antes do término do teste.
+
+Sinal desconhecido falha fechado. A ausência das screenshots obrigatórias também
+faz o cenário falhar. O harness restaura a rede no `finally`. Não usar screenshot
+tirado após o encerramento do `flutter test` como evidência de UI.
 
 Para a candidata atual, o run id é derivado do SHA:
 
