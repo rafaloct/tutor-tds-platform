@@ -6,6 +6,15 @@
 e testes unitários locais do Worker. Não houve leitura de secrets, deploy,
 mudança em staging ou chamada para serviços reais.
 
+**OBSERVED (reconciliação):** o candidato foi reaplicado por cherry-pick sobre
+`origin/staging` comprovado em `b074b673867e2bffb784593faf17824742d50b5c`,
+sem conflito e sem absorver outros deltas. O commit anterior do candidato foi
+preservado em sua worktree/branch original. Após a reconciliação, `npm test` do
+Worker passou novamente (20/20). O comando Flutter pinado voltou a parar em
+`loading .../anything_llm_service_test.dart`, depois de resolver dependências e
+antes de executar casos; isto é `FLUTTER_TEST=BLOCKED_ENVIRONMENT`, não uma
+falha funcional observada.
+
 **UNKNOWN/BLOCKED:** o GitHub CLI desta sessão retornou `401`; portanto, os
 estados atuais de Issues/PRs #32, #88, #129/#130 e demais PRs não foram
 confirmados. Nenhum arquivo em `tools/observability/**`, `api/**`, operações,
