@@ -144,6 +144,50 @@ void main() {
     await stale;
     repository.dispose();
   });
+
+  test('logout clears the session before deleting academic data', () async {
+    final store = storedSession();
+    var cleanupCalls = 0;
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      tokenStore: store,
+      onSessionEnded: () async {
+        cleanupCalls++;
+        expect(store.value, isNull);
+      },
+    );
+
+    await repository.logout();
+
+    expect(store.clears, 1);
+    expect(cleanupCalls, 1);
+    repository.dispose();
+  });
+
+  test('second protected-route 401 ends the local academic session', () async {
+    final store = storedSession();
+    var cleanupCalls = 0;
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      tokenStore: store,
+      onSessionEnded: () async => cleanupCalls++,
+      client: MockClient((request) async {
+        if (request.url.path == '/auth/refresh') {
+          return http.Response(sessionJson(), 200);
+        }
+        return http.Response('{}', 401);
+      }),
+    );
+
+    final response = await repository.authorized(
+      (token) async => http.Response('', 401),
+    );
+
+    expect(response.statusCode, 401);
+    expect(store.value, isNull);
+    expect(cleanupCalls, 1);
+    repository.dispose();
+  });
   test(
     'localUserId only decodes subject and performs no network or writes',
     () async {
