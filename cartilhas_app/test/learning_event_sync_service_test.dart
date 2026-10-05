@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
+import 'package:cartilhas_app/features/auth/data/unscoped_account_data_cleaner.dart';
+import 'package:cartilhas_app/features/certificates/data/certificate_repository.dart';
+import 'package:cartilhas_app/features/profile/data/profile_data_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event_queue.dart';
@@ -25,6 +28,23 @@ class _MemoryTokenStore implements AuthTokenStore {
 
   @override
   Future<void> write(AuthTokens tokens) async => value = tokens;
+}
+
+class _NoopProfileStore implements ProfileDataStore {
+  @override
+  Future<void> clear() async {}
+
+  @override
+  Future<ProfileData> read() async =>
+      const ProfileData(name: '', phone: '', cpf: '');
+
+  @override
+  Future<void> write(ProfileData data) async {}
+}
+
+class _NoopCertificates extends CertificateRepository {
+  @override
+  Future<void> deleteAll() async {}
 }
 
 const _oldTokens = AuthTokens(
@@ -106,6 +126,76 @@ void main() {
       expect(await service('https://staging.example').flush(), 0);
       expect(requests, 1);
       expect(await queue.pending(), isEmpty);
+    },
+  );
+
+  test(
+    'logout preserva evento owned de A, remove legado e B nunca envia o de A',
+    () async {
+      String token(String owner) =>
+          'header.${base64UrlEncode(utf8.encode(jsonEncode({'sub': owner})))}.signature';
+      const apiUrl = 'https://api.example';
+      LearningEvent owned(String session, String owner) =>
+          LearningEvent.forSession(
+            type: LearningEventType.lessonCompleted,
+            courseId: 'course',
+            sessionId: session,
+          ).forLocalOwner(userId: owner, apiUrl: apiUrl);
+      final eventA = owned('sessao-a', 'user-a');
+      await queue.enqueue(eventA);
+      await queue.enqueue(
+        LearningEvent.forSession(
+          type: LearningEventType.lessonStarted,
+          courseId: 'course',
+          sessionId: 'sessao-legada',
+        ),
+      );
+      final store = _MemoryTokenStore(
+        AuthTokens(accessToken: token('user-a'), refreshToken: 'refresh-a'),
+      );
+      final authRepository = AuthRepository(
+        apiUrl: apiUrl,
+        tokenStore: store,
+        client: MockClient((_) async => http.Response('{}', 500)),
+        onSessionEnded: UnscopedAccountDataCleaner(
+          profileDataStore: _NoopProfileStore(),
+          certificateRepository: _NoopCertificates(),
+        ).clear,
+      );
+      addTearDown(authRepository.dispose);
+
+      await authRepository.logout();
+
+      expect(store.value, isNull);
+      final remaining = await queue.pending();
+      expect(remaining.map((e) => e.eventId), [eventA.eventId]);
+      expect(remaining.single.localOwnerId, 'user-a');
+
+      final posted = <String>[];
+      await store.write(
+        AuthTokens(accessToken: token('user-b'), refreshToken: 'refresh-b'),
+      );
+      final service = LearningEventSyncService(
+        apiUrl: apiUrl,
+        authRepository: authRepository,
+        queue: queue,
+        consentChecker: () async => true,
+        client: MockClient((request) async {
+          posted.add((jsonDecode(request.body) as Map)['event_id'] as String);
+          return http.Response('{}', 200);
+        }),
+      );
+      addTearDown(service.dispose);
+
+      expect(await service.flush(), 0);
+      expect(posted, isEmpty);
+      expect(await queue.pending(), hasLength(1));
+
+      await store.write(
+        AuthTokens(accessToken: token('user-a'), refreshToken: 'refresh-a'),
+      );
+      expect(await service.flush(), 1);
+      expect(posted, [eventA.eventId]);
     },
   );
 

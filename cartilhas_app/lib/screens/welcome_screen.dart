@@ -126,6 +126,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final dialogFormKey = GlobalKey<FormState>();
     var cpfValue = register ? _cpfController.text : '';
     var passwordValue = '';
+    var activationCode = '';
     var obscurePassword = true;
     var busy = false;
     String? errorMessage;
@@ -148,6 +149,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       cpf: _cpfController.text,
                       phone: _phoneController.text,
                       password: passwordValue,
+                      activationCode: activationCode,
                     )
                   : await auth.login(cpf: cpfValue, password: passwordValue);
               if (dialogContext.mounted) {
@@ -235,6 +237,24 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       onFieldSubmitted: register ? null : (_) => submit(),
                     ),
                     if (register) ...[
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        key: const ValueKey('account-activation-code'),
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        autofillHints: null,
+                        decoration: const InputDecoration(
+                          labelText:
+                              'Código de ativação fornecido pela instituição',
+                          prefixIcon: Icon(Icons.verified_user_outlined),
+                        ),
+                        validator: (value) => (value?.trim().isEmpty ?? true)
+                            ? 'Informe o código de ativação'
+                            : null,
+                        onChanged: (value) => activationCode = value.trim(),
+                        textInputAction: TextInputAction.next,
+                      ),
                       const SizedBox(height: 12),
                       TextFormField(
                         key: const ValueKey('account-password-confirmation'),
