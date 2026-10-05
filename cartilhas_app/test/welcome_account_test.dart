@@ -110,6 +110,10 @@ void main() {
       'senha-segura-2026',
     );
     await tester.enterText(
+      find.byKey(const ValueKey('account-activation-code')),
+      'codigo-ativacao-unico',
+    );
+    await tester.enterText(
       find.byKey(const ValueKey('account-password-confirmation')),
       'senha-segura-2026',
     );
@@ -129,6 +133,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestBody['password'], 'senha-segura-2026');
+    expect(requestBody['activation_token'], 'codigo-ativacao-unico');
     expect(store.value?.accessToken, 'access-token');
     expect(find.text('Aprenda no seu ritmo'), findsOneWidget);
     final prefs = await SharedPreferences.getInstance();
