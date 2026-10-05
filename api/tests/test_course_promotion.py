@@ -195,6 +195,91 @@ def test_manifest_rejects_nonpublishable_extra_data_and_component_identity_rewri
         assert database_snapshot(target) == before
 
 
+def test_manifest_preserves_typed_learning_experience_content(promotion):
+    _, target, manifest, kwargs = promotion
+    experience = {
+        "id": "scenario-intro-01",
+        "kind": "scenario",
+        "objective": "Explore a practical situation.",
+        "required": False,
+        "actionLabel": "Choose a point",
+        "ai": {"starterPrompt": "Help me explore this situation."},
+    }
+    candidate = deepcopy(manifest)
+    candidate["content"]["sections"][0]["messages"][0]["experience"] = experience
+    candidate["content"] = snapshot_content(
+        candidate["course_id"],
+        candidate["content"]["title"],
+        candidate["content"]["author"],
+        candidate["content"],
+    )
+    candidate["sha256"] = manifest_digest(candidate)
+    verified = verify_manifest(candidate, candidate["sha256"])
+    assert verified == candidate
+
+    imported = import_manifest(
+        target,
+        verified,
+        **{**kwargs, "expected_digest": verified["sha256"]},
+        apply=True,
+    )
+    assert not imported["dry_run"]
+    with Session(target) as session:
+        saved = session.get(CourseVersion, verified["version_id"])
+        assert saved.content["sections"][0]["messages"][0]["experience"] == experience
+
+    invalid_experiences = [
+        experience | {"unknown": "rejected"},
+        experience | {"id": "unstable text"},
+        experience | {"kind": "unknown"},
+        experience | {"required": 1},
+        experience | {"ai": {"starterPrompt": "Valid", "private": "rejected"}},
+        experience | {"ai": {"starterPrompt": ""}},
+    ]
+    for invalid_experience in invalid_experiences:
+        invalid = deepcopy(candidate)
+        invalid["content"]["sections"][0]["messages"][0]["experience"] = invalid_experience
+        invalid["content"] = snapshot_content(
+            invalid["course_id"],
+            invalid["content"]["title"],
+            invalid["content"]["author"],
+            invalid["content"],
+        )
+        invalid["sha256"] = manifest_digest(invalid)
+        with pytest.raises(ValueError):
+            verify_manifest(invalid, invalid["sha256"])
+
+
+def test_bundled_experiences_match_the_course_version_promotion_contract():
+    lessons = (
+        Path(__file__).resolve().parents[2]
+        / "cartilhas_app"
+        / "assets"
+        / "data"
+        / "lessons"
+    )
+    lesson_files = sorted(lessons.glob("*.json"))
+    assert lesson_files
+
+    for path in lesson_files:
+        lesson = json.loads(path.read_text(encoding="utf-8"))
+        content_snapshot = snapshot_content(
+            lesson["id"],
+            lesson["title"],
+            lesson["author"],
+            lesson,
+        )
+        manifest = {
+            "schema_version": 1,
+            "course_id": lesson["id"],
+            "version_id": "asset-v1",
+            "version_number": 1,
+            "content": content_snapshot,
+        }
+        manifest["sha256"] = manifest_digest(manifest)
+        assert verify_manifest(manifest, manifest["sha256"]) == manifest, path.name
+
+
 def test_new_course_is_created_once_with_local_program_mapping(promotion):
     source, target, _, kwargs = promotion
     seed_course(source, "new-course", "new-version", 1, "Novo curso", "source-program", "source-reviewer")

@@ -25,9 +25,11 @@ from .models import Course, CourseVersion, CourseVersionTransition, Program, Pro
 MANIFEST_KEYS = {"schema_version", "course_id", "version_id", "version_number", "content", "sha256"}
 CONTENT_KEYS = {"id", "title", "author", "sections", "downloadUrl", "thumbnailUrl"}
 SECTION_KEYS = {"id", "version_id", "title", "messages"}
-MESSAGE_KEYS = {"id", "version_id", "type", "content", "options", "feedback", "explanation"}
+MESSAGE_KEYS = {"id", "version_id", "type", "content", "options", "feedback", "explanation", "experience"}
 OPTION_KEYS = {"label", "value", "isCorrect", "feedback"}
 IDENTIFIER = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_.-]*$")
+EXPERIENCE_IDENTIFIER = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+EXPERIENCE_KINDS = {"scenario", "reveal", "reflection", "action_challenge"}
 DIGEST = re.compile(r"^[a-f0-9]{64}$")
 
 
@@ -79,9 +81,51 @@ def verify_manifest(manifest: Any, expected_digest: str) -> dict[str, Any]:
         _only_keys(section, SECTION_KEYS, "Módulo")
         for message in section["messages"]:
             _only_keys(message, MESSAGE_KEYS, "Mensagem")
+            if "experience" in message:
+                _validate_experience(message)
             for option in message.get("options") or []:
                 _only_keys(option, OPTION_KEYS, "Opção")
     return deepcopy(manifest)
+
+
+def _validate_experience(message: dict[str, Any]) -> None:
+    experience = message["experience"]
+    _only_keys(
+        experience,
+        {"id", "kind", "objective", "required", "actionLabel", "ai"},
+        "Experiência",
+    )
+    identity = experience.get("id")
+    if (
+        message["type"] != "bot"
+        or not isinstance(identity, str)
+        or len(identity) > 128
+        or not EXPERIENCE_IDENTIFIER.fullmatch(identity)
+    ):
+        raise ValueError("Experiência exige ID estável e mensagem bot.")
+    kind = experience.get("kind")
+    if not isinstance(kind, str) or kind not in EXPERIENCE_KINDS:
+        raise ValueError("Tipo de experiência inválido.")
+    objective = experience.get("objective")
+    if not isinstance(objective, str) or not objective.strip() or len(objective) > 2000:
+        raise ValueError("Objetivo da experiência inválido.")
+    if "required" in experience and type(experience["required"]) is not bool:
+        raise ValueError("required da experiência deve ser booleano.")
+    action_label = experience.get("actionLabel")
+    if action_label is not None and (
+        not isinstance(action_label, str) or not action_label.strip() or len(action_label) > 180
+    ):
+        raise ValueError("actionLabel da experiência inválido.")
+    ai = experience.get("ai")
+    if ai is not None:
+        _only_keys(ai, {"starterPrompt"}, "Configuração de IA da experiência")
+        starter_prompt = ai.get("starterPrompt")
+        if (
+            not isinstance(starter_prompt, str)
+            or not starter_prompt.strip()
+            or len(starter_prompt) > 1000
+        ):
+            raise ValueError("starterPrompt da experiência inválido.")
 
 
 def export_manifest(engine: Engine, course_id: str, version_id: str) -> dict[str, Any]:

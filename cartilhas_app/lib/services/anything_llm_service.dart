@@ -1,37 +1,45 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:cartilhas_app/models/tutor_learning_context.dart';
 
 /// Cliente do gateway do Tutor. Credenciais e seleção do modelo nunca fazem
 /// parte deste aplicativo; elas permanecem no Cloudflare e no AnythingLLM.
 class AnythingLLMService {
   final String gatewayUrl;
+  final http.Client _client;
 
-  AnythingLLMService({required this.gatewayUrl});
+  AnythingLLMService({required this.gatewayUrl, http.Client? client})
+    : _client = client ?? http.Client();
 
   Future<String> getChatResponse(
     String message, {
     String mode = 'tutor',
     String? context,
+    TutorLearningContext? learningContext,
   }) async {
     if (gatewayUrl.isEmpty) return _friendlyUnavailableMessage;
 
-    final normalizedGatewayUrl = gatewayUrl.endsWith('/')
-        ? gatewayUrl.substring(0, gatewayUrl.length - 1)
-        : gatewayUrl;
-    final url = Uri.parse('$normalizedGatewayUrl/v1/chat');
-
     try {
-      final response = await http
+      final normalizedGatewayUrl = gatewayUrl.endsWith('/')
+          ? gatewayUrl.substring(0, gatewayUrl.length - 1)
+          : gatewayUrl;
+      final url = Uri.parse('$normalizedGatewayUrl/v1/chat');
+      final body = {
+        'message': message,
+        'mode': mode,
+        if (learningContext == null &&
+            context != null &&
+            context.trim().isNotEmpty)
+          'context': context.trim(),
+        if (learningContext != null)
+          'learning_context': learningContext.toJson(),
+      };
+      final response = await _client
           .post(
             url,
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'message': message,
-              'mode': mode,
-              if (context != null && context.trim().isNotEmpty)
-                'context': context.trim(),
-            }),
+            body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 30));
 
@@ -42,6 +50,8 @@ class AnythingLLMService {
         return 'O Tutor não encontrou uma resposta. Tente reformular a pergunta.';
       }
 
+      return _friendlyUnavailableMessage;
+    } on ArgumentError {
       return _friendlyUnavailableMessage;
     } on Exception {
       return _friendlyUnavailableMessage;

@@ -10,7 +10,8 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá, meu vizinho! Hoje vamos falar de algo muito poderoso: trabalhar junto com outros. Sabe o mutirão para colher a mandioca ou limpar o pasto? Isso já é o começo do COOPERATIVISMO! Quando a gente se une, consegue comprar mais barato e vender por um preço melhor."
+          "content": "Olá, meu vizinho! Hoje vamos falar de algo muito poderoso: trabalhar junto com outros. Sabe o mutirão para colher a mandioca ou limpar o pasto? Isso já é o começo do COOPERATIVISMO! Quando a gente se une, consegue comprar mais barato e vender por um preço melhor.",
+          "experience": {"id": "cooperativismo-pauta-reflexao-01", "kind": "reflection", "objective": "Transforme um objetivo coletivo em uma pauta simples ou checklist para uma reunião.", "required": false, "actionLabel": "Definir objetivo da reunião", "ai": {"starterPrompt": "Ajude-me a transformar um objetivo coletivo em uma pauta ou checklist de reunião. Não tome decisões financeiras por mim."}}
         },
         {
           "type": "bot",

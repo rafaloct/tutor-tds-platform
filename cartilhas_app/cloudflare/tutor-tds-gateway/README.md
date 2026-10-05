@@ -86,6 +86,60 @@ Os prompts, o workspace e os esquemas JSON ficam no servidor. A resposta do
 modelo só é entregue ao app depois de passar pela normalização estrutural e
 pelos limites de tamanho do Worker.
 
+## Vínculo contextual do Tutor
+
+`POST /v1/chat` aceita opcionalmente `learning_context` com IDs acadêmicos
+estáveis de curso e edição, módulo e experiência. O cliente legado sem esse
+objeto continua usando o workspace configurado em `ANYTHING_LLM_WORKSPACE`.
+Para chamadas estruturadas, o Worker exige uma entrada exata para
+`course_id|course_version_id` em `TUTOR_RAG_SCOPE_MAP`; não usa o workspace
+legado como fallback. O mapa é somente bootstrap temporário e não é catálogo
+acadêmico nem fonte de verdade permanente.
+
+`TUTOR_RAG_SCOPE_MAP` é uma variável JSON do Worker administrada após um gate
+próprio. Cada CourseVersion precisa apontar para um workspace distinto, já
+provisionado. Módulo e experiência não criam workspaces; suas referências são
+validadas nas sources. O formato temporário da chave é
+`course_id|course_version_id`. Exemplo exclusivamente sintético:
+
+```json
+{
+  "course-a|version-1": "course-a-v1",
+  "course-b|version-3": "course-b-v3"
+}
+```
+
+O Worker faz `vector-search` antes do chat, exige metadata exata de
+curso/edição/módulo e, em chamadas de experiência, experiência/tipo; usa
+`mode: "query"` sem session ID. Citações do chat devem corresponder às fontes
+verificadas e trazer metadata que comprove curso/edição/módulo (e experiência
+quando aplicável); citation somente com título/chunk falha fechado. O retorno
+inclui somente título público, IDs acadêmicos verificados e score numérico
+opcional; paths, IDs privados, URLs e chunks são descartados.
+Mapeamento ausente, fonte sem metadata, fonte incompatível ou resposta sem
+citação retorna `rag_context_unresolved`. O mapa é conteúdo de configuração,
+não autorização acadêmica, e não pode conter PII.
+
+O código oficial auditado do AnythingLLM expõe seleção por workspace, `query`
+e `vector-search`, mas não documenta filtro de metadata/documento nesses
+endpoints nem uma forma de fornecer ao chat somente os chunks verificados pela
+busca vetorial. A instalação efetiva e a metadata dos documentos continuam
+desconhecidas. Assim, validar as sources recebidas não prova que o texto gerado
+não usou conteúdo de outro módulo. `RAG_SCOPE_ARCHITECTURE=BLOCKED` para
+isolamento de módulo/experiência: workspace CourseVersion compartilhado é
+somente uma aproximação local; workspace por versão e módulo é a menor fronteira
+de recuperação documentada para isolar módulos, mas não foi configurado nem
+testado remotamente. `WORKSPACE_PER_EXPERIENCE=NO`.
+
+A arquitetura permanente deve derivar o vínculo do ciclo de publicação:
+CourseVersion publicada → material aprovado → ingestão/indexação → registro de
+`rag_scope` → resolução pelo gateway. `TUTOR_RAG_SCOPE_MAP` permanece
+temporário até esse lifecycle ser definido. O contrato existente de promoção
+CourseVersion agora valida e preserva Experience Blocks tipados. A necessidade
+de mudança FastAPI para o futuro registro autoritativo de RAG continua
+`UNKNOWN`; nenhum endpoint RAG foi inventado. Nenhum workspace foi criado ou
+alterado.
+
 ## Certificados
 
 `POST /v1/certificates` aceita somente cartilhas presentes na lista fechada do
