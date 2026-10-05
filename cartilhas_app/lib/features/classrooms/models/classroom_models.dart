@@ -83,6 +83,76 @@ class ClassroomAlert {
       ClassroomAlert(code: _requiredString(json, 'code'));
 }
 
+class MonitorExceptionStudent {
+  const MonitorExceptionStudent({
+    required this.userId,
+    required this.name,
+    required this.alerts,
+  });
+
+  final String userId;
+  final String name;
+  final List<ClassroomAlert> alerts;
+
+  factory MonitorExceptionStudent.fromJson(Map<String, dynamic> json) {
+    final rawAlerts = json['alerts'];
+    if (rawAlerts is! List<dynamic> ||
+        rawAlerts.any((item) => item is! Map<String, dynamic>)) {
+      throw const FormatException('Sinais do participante inválidos.');
+    }
+    return MonitorExceptionStudent(
+      userId: _requiredString(json, 'user_id'),
+      name: _requiredString(json, 'name'),
+      alerts: rawAlerts
+          .cast<Map<String, dynamic>>()
+          .map(ClassroomAlert.fromJson)
+          .toList(growable: false),
+    );
+  }
+}
+
+class MonitorExceptions {
+  const MonitorExceptions({
+    required this.generatedAt,
+    required this.totalStudents,
+    required this.attentionStudents,
+    required this.students,
+  });
+
+  final DateTime generatedAt;
+  final int totalStudents;
+  final int attentionStudents;
+  final List<MonitorExceptionStudent> students;
+
+  int get normalStudents => totalStudents - attentionStudents;
+
+  factory MonitorExceptions.fromJson(Map<String, dynamic> json) {
+    final rawStudents = json['students'];
+    if (rawStudents is! List<dynamic> ||
+        rawStudents.any((item) => item is! Map<String, dynamic>)) {
+      throw const FormatException('Acompanhamento do monitor inválido.');
+    }
+    final students = rawStudents
+        .cast<Map<String, dynamic>>()
+        .map(MonitorExceptionStudent.fromJson)
+        .toList(growable: false);
+    final totalStudents = _requiredInt(json, 'total_students');
+    final attentionStudents = _requiredInt(json, 'attention_students');
+    if (totalStudents < 0 ||
+        attentionStudents < 0 ||
+        attentionStudents > totalStudents ||
+        attentionStudents != students.length) {
+      throw const FormatException('Resumo do acompanhamento inválido.');
+    }
+    return MonitorExceptions(
+      generatedAt: _requiredDate(json, 'generated_at'),
+      totalStudents: totalStudents,
+      attentionStudents: attentionStudents,
+      students: students,
+    );
+  }
+}
+
 class ClassroomStudent {
   const ClassroomStudent({
     required this.userId,

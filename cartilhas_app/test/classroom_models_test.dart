@@ -93,4 +93,56 @@ void main() {
     expect(student.confirmedSessions, 2);
     expect(student.openMentorshipCases, 1);
   });
+
+  test('decodifica projeção mínima do monitor com os três sinais', () {
+    final exceptions = MonitorExceptions.fromJson({
+      'generated_at': '2026-10-05T12:00:00Z',
+      'total_students': 3,
+      'attention_students': 1,
+      'students': [
+        {
+          'user_id': 'student-1',
+          'name': 'Maria',
+          'alerts': [
+            {'code': 'inactive_7_days'},
+            {'code': 'required_activity_pending'},
+            {'code': 'below_expected_hours'},
+          ],
+        },
+      ],
+    });
+
+    expect(exceptions.totalStudents, 3);
+    expect(exceptions.attentionStudents, 1);
+    expect(exceptions.normalStudents, 2);
+    expect(
+      exceptions.students.single.alerts.map((item) => item.code),
+      [
+        'inactive_7_days',
+        'required_activity_pending',
+        'below_expected_hours',
+      ],
+    );
+  });
+
+  test('rejeita resumo de monitor inconsistente com a lista', () {
+    expect(
+      () => MonitorExceptions.fromJson({
+        'generated_at': '2026-10-05T12:00:00Z',
+        'total_students': 1,
+        'attention_students': 0,
+        'students': [
+          {
+            'user_id': 'student-1',
+            'name': 'Maria',
+            'alerts': [
+              {'code': 'inactive_7_days'},
+            ],
+          },
+        ],
+      }),
+      throwsFormatException,
+    );
+  });
+
 }
