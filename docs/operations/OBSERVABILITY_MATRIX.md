@@ -211,5 +211,3 @@ ou assumir custo depende de decisão externa. HUMAN_GATE=SIM.
 O monitor ampliado e o alert routing continuam fora desta execução. Dashboard
 também permanece fora até confirmar suporte da infraestrutura. O PR #88 não deve
 alterar o PR #85 nem instalar qualquer monitor.
-
-[executed on device: avellaria (50b7ca2d-9d90-4e32-ab9d-7f5d2869d5eb)]
