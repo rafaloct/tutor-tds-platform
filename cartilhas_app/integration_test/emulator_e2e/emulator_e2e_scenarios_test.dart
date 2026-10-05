@@ -31,7 +31,11 @@ void main() {
       expect(_environment, 'staging');
       expect(_baseUrl, startsWith('https://'));
       expect(_baseUrl, contains('staging'));
-      expect(_package, endsWith('.dev'));
+      expect(
+        RegExp(r'^com\.tutortds_cartilhas\.dev\.dynamicqa\.r[a-f0-9]{32}$')
+            .hasMatch(_package),
+        isTrue,
+      );
       expect(_scenarios, contains(_scenario));
     });
   });

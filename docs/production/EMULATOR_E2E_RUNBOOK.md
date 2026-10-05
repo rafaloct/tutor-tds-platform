@@ -14,7 +14,7 @@ produção.
 | Variável | Regra |
 |---|---|
 | `EMULATOR_E2E_BASE_URL` | https de staging (ou loopback do emulador); host de produção recusado |
-| `EMULATOR_E2E_QA_PACKAGE` | pacote QA isolado `.dev` (nunca `com.tutortds_cartilhas`) |
+| `EMULATOR_E2E_QA_PACKAGE` | pacote QA isolado do Gradle (`DYNAMIC_QA_ISOLATED_PACKAGE=true`, `DYNAMIC_QA_RUN_ID` `^[a-f0-9]{32}$`): `com.tutortds_cartilhas.dev.dynamicqa.r<32-hex>`. O `.dev` legado e produção são recusados |
 | `EMULATOR_E2E_DEVICE` | `emulator-<porta>`; dispositivo físico recusado |
 | `QA_ACCOUNT_A_ID/_SECRET`, `QA_ACCOUNT_B_ID/_SECRET` | credenciais QA, só via env; nunca impressas |
 | `EMULATOR_E2E_CERTIFICATE_CONTEXT_ID` | exigido só para `certificate` (quando backend/contexto existir) |
@@ -29,7 +29,7 @@ Configuração ausente ou inválida encerra com código 2 (`CONFIG_REJECTED`).
 Dry-run / validação estática (sem emulador, sem SDK):
 
     python3 tooling/mobile_qa/emulator/e2e_harness.py --base-url <staging> \
-      --package <pkg>.dev --device emulator-5556
+      --package com.tutortds_cartilhas.dev.dynamicqa.r<32-hex> --device emulator-5556
 
 Testes do harness:
 

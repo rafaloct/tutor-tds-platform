@@ -24,7 +24,7 @@ SCENARIOS = {
 }
 REQUIRED_ENV = ("EMULATOR_E2E_BASE_URL", "EMULATOR_E2E_QA_PACKAGE", "EMULATOR_E2E_DEVICE")
 SECRET_ENV = ("QA_ACCOUNT_A_ID", "QA_ACCOUNT_A_SECRET", "QA_ACCOUNT_B_ID", "QA_ACCOUNT_B_SECRET")
-FORBIDDEN_PACKAGES = {"com.tutortds_cartilhas"}
+ISOLATED_PACKAGE_RE = re.compile(r"^com\.tutortds_cartilhas\.dev\.dynamicqa\.r[a-f0-9]{32}$")
 FORBIDDEN_HOST_PARTS = ("ead.ipexdesenvolvimento.cloud",)
 TARGET = "integration_test/emulator_e2e/emulator_e2e_scenarios_test.dart"
 
@@ -54,8 +54,10 @@ def validate(env, scenarios):
         if any(x in host for x in FORBIDDEN_HOST_PARTS):
             errors.append("production host refused")
     pkg = env.get("EMULATOR_E2E_QA_PACKAGE", "").strip()
-    if pkg and (pkg in FORBIDDEN_PACKAGES or not pkg.endswith(".dev") and ".dev." not in pkg):
-        errors.append("QA package must be an isolated .dev package, never production")
+    if pkg and not ISOLATED_PACKAGE_RE.match(pkg):
+        errors.append(
+            "QA package must match com.tutortds_cartilhas.dev.dynamicqa.r<32-hex> "
+            "(DYNAMIC_QA_ISOLATED_PACKAGE=true); production and legacy .dev are refused")
     dev = env.get("EMULATOR_E2E_DEVICE", "").strip()
     if dev and not dev.startswith("emulator-"):
         errors.append("device must be an emulator (emulator-<port>)")

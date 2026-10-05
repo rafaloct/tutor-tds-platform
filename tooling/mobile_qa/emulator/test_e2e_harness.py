@@ -9,7 +9,7 @@ import e2e_harness as h
 
 GOOD = {
     "EMULATOR_E2E_BASE_URL": "https://tutor-tds-staging.example.dev",
-    "EMULATOR_E2E_QA_PACKAGE": "com.tutortds_cartilhas.dev",
+    "EMULATOR_E2E_QA_PACKAGE": "com.tutortds_cartilhas.dev.dynamicqa.r" + "a1" * 16,
     "EMULATOR_E2E_DEVICE": "emulator-5556",
 }
 ALL = list(h.SCENARIOS)
@@ -37,6 +37,14 @@ class HarnessTest(unittest.TestCase):
         self.assertTrue(h.validate(e, ["login_activation"]))
         e = dict(GOOD, EMULATOR_E2E_BASE_URL="http://tutor-tds-staging.example.dev")
         self.assertTrue(h.validate(e, ["login_activation"]))
+
+    def test_rejects_legacy_dev_and_malformed_isolated_package(self):
+        for pkg in ("com.tutortds_cartilhas.dev",
+                    "com.tutortds_cartilhas.dev.dynamicqa.rXYZ",
+                    "com.tutortds_cartilhas.dev.dynamicqa.r" + "A1" * 16,
+                    "com.tutortds_cartilhas.dev.dynamicqa.r" + "a1" * 15):
+            e = dict(GOOD, EMULATOR_E2E_QA_PACKAGE=pkg)
+            self.assertTrue(h.validate(e, ["login_activation"]), pkg)
 
     def test_rejects_physical_device(self):
         self.assertTrue(h.validate(dict(GOOD, EMULATOR_E2E_DEVICE="ABC123"), ["login_activation"]))
