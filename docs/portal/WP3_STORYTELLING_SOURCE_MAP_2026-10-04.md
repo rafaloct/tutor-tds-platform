@@ -1,7 +1,7 @@
 # WP-3 — mapa narrativo e de fontes da experiência pública
 
-Data: 2026-10-04  
-Escopo: Home pública do Programa TDS.  
+Data: 2026-10-04
+Escopo: Home pública do Programa TDS.
 Status: **IMPLEMENTED no tema / fontes editoriais parcialmente prontas / sem staging ou produção**.
 
 Este documento complementa `WP3_HOME_CONTRACT.md`. Ele não substitui a fonte de
