@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../classrooms/application/team_capability.dart';
+import '../../class_lifecycle/models/class_lifecycle_models.dart';
 
 class ManagementWorkspaceScreen extends StatelessWidget {
   const ManagementWorkspaceScreen({
@@ -8,7 +9,10 @@ class ManagementWorkspaceScreen extends StatelessWidget {
     required this.operationScopeCount,
     required this.editorProgramCount,
     required this.teamCapability,
+    this.lifecycleCapabilities,
     this.onParticipantsTap,
+    this.onPrepareClassTap,
+    this.onCloseClassTap,
     this.onContentTap,
     this.onTeamTap,
     this.onAttendanceTap,
@@ -17,18 +21,26 @@ class ManagementWorkspaceScreen extends StatelessWidget {
   final int operationScopeCount;
   final int editorProgramCount;
   final TeamCapabilitySnapshot? teamCapability;
+  final ClassLifecycleCapabilities? lifecycleCapabilities;
   final VoidCallback? onParticipantsTap;
+  final VoidCallback? onPrepareClassTap;
+  final VoidCallback? onCloseClassTap;
   final VoidCallback? onContentTap;
   final VoidCallback? onTeamTap;
   final VoidCallback? onAttendanceTap;
 
   bool get _hasTeamAccess => teamCapability?.hasAccess ?? false;
+  bool get _hasLifecycleAccess =>
+      lifecycleCapabilities?.hasManagementSurface ?? false;
 
   @override
   Widget build(BuildContext context) {
     final team = teamCapability;
     final hasActions =
-        operationScopeCount > 0 || editorProgramCount > 0 || _hasTeamAccess;
+        operationScopeCount > 0 ||
+        editorProgramCount > 0 ||
+        _hasTeamAccess ||
+        _hasLifecycleAccess;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Gestão')),
@@ -64,6 +76,11 @@ class ManagementWorkspaceScreen extends StatelessWidget {
                     'contextos de participantes',
                   ),
                 ),
+              if (_hasLifecycleAccess)
+                const _CapabilityChip(
+                  icon: Icons.event_note_outlined,
+                  label: 'gestão de ciclo da turma',
+                ),
               if (_hasTeamAccess)
                 _CapabilityChip(
                   icon: Icons.groups_outlined,
@@ -88,6 +105,22 @@ class ManagementWorkspaceScreen extends StatelessWidget {
           if (!hasActions)
             const _EmptyManagementState()
           else ...[
+            if (lifecycleCapabilities?.canPrepare ?? false)
+              _ManagementActionCard(
+                icon: Icons.add_business_outlined,
+                title: 'Preparar turma',
+                subtitle:
+                    'Definir local, formação, período e equipe em um fluxo guiado.',
+                onTap: onPrepareClassTap,
+              ),
+            if (lifecycleCapabilities?.canClose ?? false)
+              _ManagementActionCard(
+                icon: Icons.lock_clock_outlined,
+                title: 'Encerrar turma',
+                subtitle:
+                    'Conferir pendências e readiness antes do encerramento institucional.',
+                onTap: onCloseClassTap,
+              ),
             if (operationScopeCount > 0)
               _ManagementActionCard(
                 icon: Icons.manage_accounts_outlined,

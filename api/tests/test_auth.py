@@ -161,7 +161,7 @@ def test_valid_access_token_returns_only_public_user_fields() -> None:
 
 @pytest.mark.parametrize(
     "role",
-    ["student", "teacher", "monitor", "program_operator", "admin"],
+    ["student", "teacher", "monitor", "program_operator", "coordinator", "admin"],
 )
 def test_decode_access_and_access_claims_accept_only_supported_roles(role: str) -> None:
     client, app = make_client()

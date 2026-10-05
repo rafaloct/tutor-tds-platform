@@ -14,6 +14,7 @@ from .analytics import router as analytics_router
 from .assessment_sync import router as assessment_sync_router
 from .assessment_sync import content_router as assessment_content_router
 from .auth import router as auth_router
+from .class_lifecycle import router as class_lifecycle_router
 from .classrooms import admin_router as classroom_admin_router
 from .classrooms import router as classroom_router
 from .certificates import router as certificates_router
@@ -79,6 +80,7 @@ def create_app(
     application.include_router(student_followup_router)
     application.include_router(organizations_router)
     application.include_router(operator_operations_router)
+    application.include_router(class_lifecycle_router)
     application.include_router(classroom_admin_router)
     application.include_router(classroom_router)
     application.include_router(learning_context_router)
