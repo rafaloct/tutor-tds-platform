@@ -502,6 +502,32 @@ void main() {
     expect(store.value, isNull);
   });
 
+  test('currentUser com segundo 401 encerra a sessão exatamente uma vez', () async {
+    final store = MemoryTokenStore()
+      ..value = const AuthTokens(
+        accessToken: 'access-old',
+        refreshToken: 'refresh-old',
+      );
+    var ended = 0;
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((request) async {
+        if (request.url.path == '/auth/refresh') {
+          return http.Response(sessionJson(), 200);
+        }
+        return http.Response('', 401);
+      }),
+      tokenStore: store,
+      onSessionEnded: () async => ended++,
+    );
+
+    await expectLater(repository.currentUser(), throwsA(isA<AuthException>()));
+
+    expect(store.value, isNull);
+    expect(ended, 1);
+    expect(repository.sessionGeneration, 1);
+  });
+
   test('logout limpa tokens antes do callback de encerramento', () async {
     final store = MemoryTokenStore()
       ..value = const AuthTokens(accessToken: 'a', refreshToken: 'r');

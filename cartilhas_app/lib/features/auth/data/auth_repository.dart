@@ -128,9 +128,7 @@ class AuthRepository {
         ),
       );
       if (response.statusCode != 200) {
-        if (response.statusCode == 401) {
-          await logout();
-        }
+        // authorized() already ends the session on a second 401.
         throw const AuthException('Não foi possível validar sua conta.');
       }
       final decoded = jsonDecode(response.body);
