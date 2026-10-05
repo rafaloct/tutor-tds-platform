@@ -10,6 +10,7 @@ from app.main import create_app
 from app.models import (
     Base,
     ClassEnrollment,
+    ClassMonitor,
     Classroom,
     Course,
     Enrollment,
@@ -25,6 +26,7 @@ CPFS = {
     "student": "123.456.789-09",
     "teacher": "987.654.321-00",
     "outsider": "529.982.247-25",
+    "monitor": "111.444.777-35",
 }
 
 
@@ -97,6 +99,11 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                         institution_id="institution-1",
                         name="Programa",
                     ),
+                    Program(
+                        id="program-2",
+                        institution_id="institution-1",
+                        name="Programa 2",
+                    ),
                     Course(
                         id="course-1",
                         title="Curso",
@@ -107,7 +114,12 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                 ]
             )
             session.flush()
-            session.add(ProgramCourse(program_id="program-1", course_id="course-1"))
+            session.add_all(
+                [
+                    ProgramCourse(program_id="program-1", course_id="course-1"),
+                    ProgramCourse(program_id="program-2", course_id="course-1"),
+                ]
+            )
             session.add_all(
                 [
                     ProgramMembership(
@@ -119,6 +131,18 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                     ProgramMembership(
                         user_id=ids["teacher"],
                         program_id="program-1",
+                        role="teacher",
+                        status="active",
+                    ),
+                    ProgramMembership(
+                        user_id=ids["monitor"],
+                        program_id="program-1",
+                        role="monitor",
+                        status="active",
+                    ),
+                    ProgramMembership(
+                        user_id=ids["monitor"],
+                        program_id="program-2",
                         role="teacher",
                         status="active",
                     ),
@@ -142,7 +166,17 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                 end_date=date(2026, 12, 1),
                 status="active",
             )
-            session.add_all([enrollment, classroom])
+            teacher_classroom = Classroom(
+                id="class-2",
+                program_id="program-2",
+                course_id="course-1",
+                teacher_id=ids["monitor"],
+                name="Turma B",
+                start_date=date(2026, 9, 1),
+                end_date=date(2026, 12, 1),
+                status="active",
+            )
+            session.add_all([enrollment, classroom, teacher_classroom])
             session.flush()
             session.add(
                 ClassEnrollment(
@@ -152,6 +186,13 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
                     program_id="program-1",
                     course_id="course-1",
                     status="active",
+                )
+            )
+            session.add(
+                ClassMonitor(
+                    class_id="class-1",
+                    user_id=ids["monitor"],
+                    program_id="program-1",
                 )
             )
             session.commit()
@@ -180,6 +221,15 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
             "/analytics/usage?class_id=class-1",
             headers=bearer(login(client, "outsider")),
         )
+        monitor_headers = bearer(login(client, "monitor"))
+        monitor_summary = client.get(
+            "/analytics/usage?class_id=class-1",
+            headers=monitor_headers,
+        )
+        multi_role_teacher_summary = client.get(
+            "/analytics/usage?class_id=class-2",
+            headers=monitor_headers,
+        )
 
     assert all(response.status_code == 201 for response in created)
     assert student_summary.status_code == 200
@@ -206,3 +256,5 @@ def test_usage_analytics_respects_student_and_classroom_hierarchy() -> None:
     assert forbidden_student.status_code == 403
     assert missing_scope.status_code == 422
     assert outsider_summary.status_code == 403
+    assert monitor_summary.status_code == 403
+    assert multi_role_teacher_summary.status_code == 200
