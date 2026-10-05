@@ -56,6 +56,8 @@ class AnythingLLMService {
       }
 
       return _friendlyUnavailableMessage;
+    } on ArgumentError {
+      return _friendlyUnavailableMessage;
     } on Exception {
       return _friendlyUnavailableMessage;
     }

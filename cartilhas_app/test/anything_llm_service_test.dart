@@ -34,6 +34,23 @@ void main() {
     });
   });
 
+  test('empty legacy context is omitted', () async {
+    late Map<String, dynamic> requestBody;
+    final client = MockClient((request) async {
+      requestBody = jsonDecode(request.body) as Map<String, dynamic>;
+      return http.Response('{"text":"Resposta"}', 200);
+    });
+    final service = AnythingLLMService(
+      gatewayUrl: 'https://gateway.example',
+      client: client,
+    );
+    addTearDown(client.close);
+
+    await service.getChatResponse('Pergunta', context: '  ');
+
+    expect(requestBody, {'message': 'Pergunta', 'mode': 'tutor'});
+  });
+
   test('context switches send only the new structured academic scope', () async {
     final requests = <Map<String, dynamic>>[];
     final client = MockClient((request) async {
@@ -56,10 +73,19 @@ void main() {
       courseVersionId: 'version-3',
       moduleId: 'module-b1',
     );
+    const nextVersion = TutorLearningContext(
+      courseId: 'course-a',
+      courseVersionId: 'version-2',
+      moduleId: 'module-a1',
+    );
     await service.getChatResponse(
       'Pergunta A',
       context: 'reflection text is not transported',
       learningContext: contextA,
+    );
+    await service.getChatResponse(
+      'Pergunta A na nova edição',
+      learningContext: nextVersion,
     );
     await service.getChatResponse(
       'Pergunta B',
@@ -74,6 +100,15 @@ void main() {
         'learning_context': {
           'course_id': 'course-a',
           'course_version_id': 'version-1',
+          'module_id': 'module-a1',
+        },
+      },
+      {
+        'message': 'Pergunta A na nova edição',
+        'mode': 'tutor',
+        'learning_context': {
+          'course_id': 'course-a',
+          'course_version_id': 'version-2',
           'module_id': 'module-a1',
         },
       },

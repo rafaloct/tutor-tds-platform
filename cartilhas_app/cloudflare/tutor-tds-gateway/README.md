@@ -86,6 +86,43 @@ Os prompts, o workspace e os esquemas JSON ficam no servidor. A resposta do
 modelo só é entregue ao app depois de passar pela normalização estrutural e
 pelos limites de tamanho do Worker.
 
+## Vínculo contextual do Tutor
+
+`POST /v1/chat` aceita opcionalmente `learning_context` com IDs acadêmicos
+estáveis de curso e edição, módulo e experiência. O cliente legado sem esse
+objeto continua usando o workspace configurado em `ANYTHING_LLM_WORKSPACE`.
+Para chamadas estruturadas, o Worker exige uma entrada exata em
+`TUTOR_RAG_SCOPE_MAP`; não usa o workspace legado como fallback.
+
+`TUTOR_RAG_SCOPE_MAP` é uma variável JSON do Worker administrada após um gate
+próprio. Cada combinação precisa apontar para um workspace exclusivo, já
+provisionado e com conteúdo somente daquele escopo. O formato da chave é
+`course_id|course_version_id|module_id|experience_id|experience_type`; valores
+opcionais são strings vazias. Exemplo exclusivamente sintético:
+
+```json
+{
+  "course-a|version-1|module-a1||": "course-a-v1-a1",
+  "course-a|version-1|module-a1|scenario-1|scenario": "course-a-v1-a1-scenario-1"
+}
+```
+
+O Worker faz `vector-search` antes do chat, exige metadata de fonte compatível
+com curso/edição/módulo e usa `mode: "query"` sem session ID. Citações do chat
+devem corresponder às fontes verificadas. O retorno inclui somente título
+público, IDs acadêmicos verificados e score numérico opcional; paths, IDs
+privados, URLs e chunks são descartados. Mapeamento ausente, fonte sem metadata,
+fonte incompatível ou resposta sem citação retorna `rag_context_unresolved`.
+O mapa é conteúdo de configuração, não autorização acadêmica, e não pode conter
+PII.
+
+O código oficial auditado do AnythingLLM expõe seleção por workspace, `query`
+e `vector-search`, mas não documenta filtro de metadata/documento nesses
+endpoints. A versão instalada e o metadata dos documentos existentes não foram
+comprovados; portanto, o mapa não está configurado e chamadas estruturadas
+falham fechadas até validação isolada. Nenhum workspace foi criado ou alterado
+por esta implementação.
+
 ## Certificados
 
 `POST /v1/certificates` aceita somente cartilhas presentes na lista fechada do

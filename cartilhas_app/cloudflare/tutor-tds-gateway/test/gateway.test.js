@@ -77,7 +77,7 @@ function scopedEnv() {
 function vectorSource(context, title, metadata = {}, fields = {}) {
   return {
     id: 'private-storage-id',
-    text: 'private chunk text',
+    text: `${title} synthetic QA content`,
     metadata: {
       title,
       url: 'file:///private/documents/internal.pdf',
@@ -300,6 +300,29 @@ test('unmapped scopes and unknown or malformed learning-context keys fail closed
     assert.equal(response.status, 400);
     assert.deepEqual(await response.json(), { error: 'invalid_learning_context' });
   }
+  assert.equal(called, false);
+});
+
+test('scope mappings cannot alias multiple learning contexts to one workspace', async () => {
+  let called = false;
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+    {
+      ...scopedEnv(),
+      TUTOR_RAG_SCOPE_MAP: {
+        [scopeKey(learningContextA)]: 'shared-workspace',
+        [scopeKey(learningContextB)]: 'shared-workspace',
+      },
+    },
+    {},
+    async () => {
+      called = true;
+      return Response.json({});
+    },
+  );
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
   assert.equal(called, false);
 });
 

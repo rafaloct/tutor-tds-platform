@@ -671,6 +671,14 @@ function resolveLearningWorkspace(context, env) {
   if (!scopeMap || typeof scopeMap !== 'object' || Array.isArray(scopeMap)) {
     return null;
   }
+  const workspaces = Object.values(scopeMap);
+  if (workspaces.length === 0 ||
+      workspaces.some((workspace) =>
+        typeof workspace !== 'string' ||
+        !/^[a-zA-Z0-9_-]{1,100}$/.test(workspace)) ||
+      new Set(workspaces).size !== workspaces.length) {
+    return null;
+  }
   const key = [
     context.course_id,
     context.course_version_id,
@@ -731,6 +739,10 @@ function sanitizeContextSource(source, context) {
   if (context.module_id !== undefined && metadata.module_id !== context.module_id) {
     return null;
   }
+  if (metadata.experience_id !== undefined &&
+      metadata.experience_id !== context.experience_id) return null;
+  if (metadata.experience_type !== undefined &&
+      metadata.experience_type !== context.experience_type) return null;
   if (metadata.module_id !== undefined &&
       !isStableLearningId(metadata.module_id)) return null;
 
@@ -742,6 +754,12 @@ function sanitizeContextSource(source, context) {
     course_version_id: metadata.course_version_id,
   };
   if (metadata.module_id !== undefined) safeSource.module_id = metadata.module_id;
+  if (metadata.experience_id !== undefined) {
+    safeSource.experience_id = metadata.experience_id;
+  }
+  if (metadata.experience_type !== undefined) {
+    safeSource.experience_type = metadata.experience_type;
+  }
   if (typeof source.score === 'number' &&
       Number.isFinite(source.score) &&
       source.score >= 0 &&
@@ -781,7 +799,11 @@ function contextualCitations(citations, verifiedSources) {
       (metadata.course_version_id !== undefined &&
         metadata.course_version_id !== source.course_version_id) ||
       (metadata.module_id !== undefined &&
-        metadata.module_id !== source.module_id)
+        metadata.module_id !== source.module_id) ||
+      (metadata.experience_id !== undefined &&
+        metadata.experience_id !== source.experience_id) ||
+      (metadata.experience_type !== undefined &&
+        metadata.experience_type !== source.experience_type)
     )) return null;
     cited.push(source);
   }

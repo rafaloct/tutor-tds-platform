@@ -1,5 +1,15 @@
 # CURRENT STATE
 
+## 2026-10-05 Issue #134 — candidato local
+
+`/v1/chat` agora aceita contexto acadêmico tipado e resolve workspace somente
+por mapa exato; sem mapa/fontes vinculadas, falha fechado. Contrato upstream
+AnythingLLM: workspace/query/vector-search; versão instalada e metadata real
+desconhecidas. Gateway Node 22/22 passou localmente; Flutter SDK indisponível
+neste runner. PRs #132 e #135 seguem abertos; integração de experiência e
+sentinel staging bloqueados. Nenhuma configuração, workspace, staging ou
+produção foi alterada. Auditoria: `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
+
 ## Integração META 05 — 03/10/2026
 
 Base integrada neste candidato: `aa6fb88050aa864726e197187487819de303ac65`,
