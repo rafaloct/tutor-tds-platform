@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Literal
@@ -18,6 +17,7 @@ from sqlalchemy.orm import Session
 from .auth import access_claims, optional_access_claims
 from .config import Settings
 from .database import Database
+from .media_delivery import DEFAULT_MEDIA_DELIVERY
 from .models import (
     Enrollment,
     MediaAsset,
@@ -642,13 +642,7 @@ def _active_enrollment(
 
 
 def _validate_provider(provider: str, asset_id: str) -> None:
-    if provider in {"youtube", "cloudflare_stream"}:
-        if not re.fullmatch(r"[A-Za-z0-9_-]{6,200}", asset_id):
-            raise ValueError("provider_asset_id inválido")
-        return
-    parsed = urlparse(asset_id)
-    if parsed.scheme != "https" or not parsed.netloc or _is_google_storage_host(parsed.netloc) or not parsed.path.lower().endswith(".m3u8"):
-        raise ValueError("external_hls exige HTTPS .m3u8 e não aceita hosts Google/Drive")
+    DEFAULT_MEDIA_DELIVERY.validate_asset(provider, asset_id)
 
 
 def _validate_https_optional(value: str | None, field: str) -> None:
@@ -664,12 +658,11 @@ def _is_google_storage_host(host: str) -> bool:
 
 
 def _playback_url(media: MediaAsset, settings: Settings) -> str | None:
-    if media.provider == "youtube":
-        return f"https://www.youtube-nocookie.com/embed/{media.provider_asset_id}"
-    if media.provider == "external_hls":
-        return media.provider_asset_id
-    base = settings.cloudflare_stream_delivery_base_url
-    return f"{base.rstrip('/')}/{media.provider_asset_id}/manifest/video.m3u8" if base else None
+    return DEFAULT_MEDIA_DELIVERY.playback_url(
+        provider=media.provider,
+        asset_id=media.provider_asset_id,
+        settings=settings,
+    )
 
 
 def _playback_authorization_url(
