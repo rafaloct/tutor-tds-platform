@@ -197,20 +197,20 @@ function tds_theme_tool_state_label( $state ) {
 function tds_theme_home_journey() {
 	$steps = array(
 		array(
-			'title' => __( 'Conheça as formações publicadas', 'tds-portal' ),
-			'text'  => __( 'O portal apresenta informações públicas; a plataforma acadêmica continua separada.', 'tds-portal' ),
+			'title' => __( 'Escutar o território', 'tds-portal' ),
+			'text'  => __( 'A escuta territorial ajuda a identificar demandas locais e orientar as ações do programa.', 'tds-portal' ),
 		),
 		array(
-			'title' => __( 'Acesse pelo canal oficial', 'tds-portal' ),
-			'text'  => __( 'Participantes entram no Tutor TDS pelo acesso configurado oficialmente pelo programa.', 'tds-portal' ),
+			'title' => __( 'Transformar demandas em formação', 'tds-portal' ),
+			'text'  => __( 'Cursos e atividades conectam qualificação e inclusão produtiva às demandas identificadas em cada ação territorial.', 'tds-portal' ),
 		),
 		array(
-			'title' => __( 'Estude e acompanhe sua jornada', 'tds-portal' ),
-			'text'  => __( 'Atividades, conteúdos e informações pessoais permanecem no aplicativo e na API autorizada.', 'tds-portal' ),
+			'title' => __( 'Conectar aprendizado e prática', 'tds-portal' ),
+			'text'  => __( 'Conteúdos, encontros e materiais relacionam conhecimento a situações concretas de trabalho, produção, organização e comercialização.', 'tds-portal' ),
 		),
 		array(
-			'title' => __( 'Use os registros oficiais', 'tds-portal' ),
-			'text'  => __( 'Matrícula, frequência e certificados não são calculados nem alterados por este portal público.', 'tds-portal' ),
+			'title' => __( 'Dar continuidade à jornada', 'tds-portal' ),
+			'text'  => __( 'O portal reúne ações públicas, agenda e materiais; a jornada acadêmica permanece nos sistemas oficiais do Tutor TDS.', 'tds-portal' ),
 		),
 	);
 
