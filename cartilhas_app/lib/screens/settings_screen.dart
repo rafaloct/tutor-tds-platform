@@ -8,9 +8,6 @@ import '../features/auth/data/account_data_deletion_service.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/models/auth_session.dart';
 import '../features/auth/presentation/account_login_dialog.dart';
-import '../features/evidence/data/checkin_draft_store.dart';
-import '../features/learning_events/learning_event_queue.dart';
-import '../features/study_ai/data/assessment_sync_queue.dart';
 import '../services/privacy_preferences.dart';
 import '../services/theme_controller.dart';
 import '../widgets/responsive_body.dart';
@@ -213,7 +210,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Sair da conta online?'),
         content: const Text(
-          'A sessão online será encerrada. Atividades vinculadas à sua conta aguardam seu próximo login para sincronizar. Envios antigos sem identificação da conta serão removidos. O perfil e os estudos antigos não são separados por usuário e não serão apagados; em um dispositivo compartilhado, essas informações podem continuar visíveis.',
+          'A sessão online será encerrada. Atividades vinculadas à sua conta aguardam seu próximo login para sincronizar. Envios antigos sem identificação da conta serão removidos. O perfil, certificados e estudos locais não separados por usuário serão removidos deste aparelho.',
         ),
         actions: [
           TextButton(
@@ -231,11 +228,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final authRepository = context.read<AuthRepository>();
     setState(() => _loggingOut = true);
     try {
-      await Future.wait([
-        const LearningEventQueue().clear(preserveOwned: true),
-        const AssessmentSyncQueue().clear(),
-        SharedPreferencesCheckinDraftStore().clear(),
-      ]);
       await authRepository.logout();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
@@ -353,7 +345,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const Icon(Icons.logout),
                       title: const Text('Sair da conta'),
                       subtitle: const Text(
-                        'Encerra apenas a sessão online; não apaga os dados locais',
+                        'Encerra a sessão e remove dados locais que não estão vinculados a uma conta',
                       ),
                       trailing: _loggingOut
                           ? const SizedBox.square(
