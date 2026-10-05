@@ -512,6 +512,7 @@ class AuthService:
             "teacher",
             "monitor",
             "admin",
+            "program_operator",
         }:
             raise _unauthorized()
         return claims

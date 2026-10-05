@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
+from jwt import encode
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.auth import AuthService
 from app.config import Settings
 from app.main import create_app
 from app.models import Base, Course, CourseVersion, CourseVersionTransition, LearningEventRecord, SessionToken, User
@@ -135,6 +138,66 @@ def test_valid_access_token_returns_only_public_user_fields() -> None:
     assert response.status_code == 200
     assert set(response.json()) == {"id", "name", "role"}
     assert CPF not in response.text
+
+
+@pytest.mark.parametrize(
+    "role", ["student", "teacher", "monitor", "admin", "program_operator"]
+)
+def test_decode_access_accepts_only_explicit_supported_roles(role: str) -> None:
+    client, app = make_client()
+    with Session(app.state.database.engine) as session:
+        service = AuthService(session, app.state.settings)
+        token = encode(
+            {
+                "sub": "synthetic-user",
+                "role": role,
+                "type": "access",
+                "iat": 0,
+                "exp": 2_000_000_000,
+            },
+            app.state.settings.jwt_secret,
+            algorithm="HS256",
+        )
+        assert service.decode_access(token)["role"] == role
+
+
+def test_decode_access_rejects_unknown_role_and_access_claims_accepts_program_operator(
+) -> None:
+    client, app = make_client()
+    with client:
+        registered = client.post("/auth/register", json=registration_payload()).json()
+        with Session(app.state.database.engine) as session:
+            user = session.get(User, registered["user"]["id"])
+            assert user is not None
+            user.role = "program_operator"
+            session.commit()
+            service = AuthService(session, app.state.settings)
+            invalid_token = encode(
+                {
+                    "sub": user.id,
+                    "role": "unknown_role",
+                    "type": "access",
+                    "iat": 0,
+                    "exp": 2_000_000_000,
+                },
+                app.state.settings.jwt_secret,
+                algorithm="HS256",
+            )
+            with pytest.raises(HTTPException) as rejected:
+                service.decode_access(invalid_token)
+
+        response = client.post(
+            "/auth/login", json={"cpf": CPF, "password": PASSWORD}
+        )
+        me = client.get(
+            "/auth/me",
+            headers={"Authorization": f"Bearer {response.json()['access_token']}"},
+        )
+
+    assert rejected.value.status_code == 401
+    assert response.status_code == 200
+    assert me.status_code == 200
+    assert me.json()["role"] == "program_operator"
 
 
 def test_student_can_delete_account_events_sessions_and_revoke_access() -> None:
