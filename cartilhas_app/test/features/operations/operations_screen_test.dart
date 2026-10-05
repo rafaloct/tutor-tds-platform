@@ -118,6 +118,56 @@ void main() {
   });
 
   testWidgets(
+    'new registration clears the old confirmation and completes each stage',
+    (tester) async {
+      await open(tester);
+      await tester.enterText(field('Buscar pessoa'), 'Pessoa');
+      await tap(tester, 'Localizar');
+      await tap(tester, 'Pessoa teste');
+      await tester.ensureVisible(field('Motivo da operação'));
+      await tester.enterText(field('Motivo da operação'), 'Fluxo sintético');
+      await tap(tester, 'Solicitar matrícula');
+      await tap(tester, 'Vincular à turma');
+
+      final finalConfirmation = find.text(
+        'Confirmação final da simulação: matrícula e vínculo à turma ativos neste contexto.',
+      );
+      await tester.scrollUntilVisible(
+        finalConfirmation,
+        180,
+        scrollable: verticalScroll(),
+      );
+      expect(finalConfirmation, findsOneWidget);
+
+      await tap(tester, 'Cadastrar nova pessoa');
+      expect(finalConfirmation, findsNothing);
+      await tester.ensureVisible(field('Nome'));
+      await tester.enterText(field('Nome'), 'Nova pessoa sintética');
+      await tester.ensureVisible(field('CPF'));
+      await tester.enterText(field('CPF'), '00000000000');
+      await tester.ensureVisible(field('Telefone'));
+      await tester.enterText(field('Telefone'), '00000000000');
+      await tester.ensureVisible(field('Senha inicial'));
+      await tester.enterText(field('Senha inicial'), 'synthetic-only');
+      await tap(tester, 'Solicitar cadastro');
+
+      expect(find.textContaining('Cadastro confirmado'), findsOneWidget);
+      expect(finalConfirmation, findsNothing);
+      await tap(tester, 'Solicitar matrícula');
+      expect(find.textContaining('Matrícula confirmada'), findsOneWidget);
+      expect(finalConfirmation, findsNothing);
+      await tap(tester, 'Vincular à turma');
+      await tester.scrollUntilVisible(
+        finalConfirmation,
+        180,
+        scrollable: verticalScroll(),
+      );
+      expect(finalConfirmation, findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'narrow viewport and enlarged text stay scrollable without overflow',
     (tester) async {
       tester.view.physicalSize = const Size(360, 740);
