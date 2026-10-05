@@ -3,11 +3,11 @@
   "issue": 140,
   "environment": "local-emulator",
   "device": "emulator-5556",
-  "package": "com.tutortds_cartilhas.dev.dynamicqa.r14000000000000000000000000000001",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r14000000000000000000000000000002",
   "base_url": "https://10.0.2.2:18040",
   "api_head": "1dea14ae741bd0ba141f43b22296c7e297b6e320",
   "app_head": "1dc027ff2ad243c989db8d884453bc51e79f3021",
-  "compose_head": "8ef94437d9790cd5b6bbc567d451714a42c153de",
+  "compose_head": "a8aa346b2b82c4b57d1c15cd610af13931d061d3",
   "stages": {
     "prepare_class": {
       "status": "PASS",
