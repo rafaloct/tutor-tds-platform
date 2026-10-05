@@ -432,6 +432,42 @@ void main() {
     expect(response.statusCode, 401);
     expect(requestCalls, 2);
     expect(refreshCalls, 1);
+    expect(store.value, isNull);
+  });
+
+  test('logout limpa tokens antes do callback de encerramento', () async {
+    final store = MemoryTokenStore()
+      ..value = const AuthTokens(accessToken: 'a', refreshToken: 'r');
+    AuthTokens? tokensSeenByCallback = const AuthTokens(
+      accessToken: 'unset',
+      refreshToken: 'unset',
+    );
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((_) async => http.Response('', 500)),
+      tokenStore: store,
+      onSessionEnded: () async => tokensSeenByCallback = store.value,
+    );
+
+    await repository.logout();
+
+    expect(tokensSeenByCallback, isNull);
+  });
+
+  test('segundo 401 aciona o mesmo encerramento seguro', () async {
+    final store = MemoryTokenStore()
+      ..value = const AuthTokens(accessToken: 'a', refreshToken: 'r');
+    var ended = 0;
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((_) async => http.Response(sessionJson(), 200)),
+      tokenStore: store,
+      onSessionEnded: () async => ended++,
+    );
+
+    await repository.authorized((_) async => http.Response('', 401));
+
+    expect(ended, 1);
   });
 
   test('/auth/me usa Bearer e retorna somente usuário público', () async {
