@@ -135,10 +135,32 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(240), nullable=False)
     password_digest: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(32), nullable=False, default="student")
+    activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     program_memberships: Mapped[list["ProgramMembership"]] = relationship(
         back_populates="user"
     )
     enrollments: Mapped[list["Enrollment"]] = relationship(back_populates="user")
+
+
+class CPFActivationToken(Base):
+    __tablename__ = "cpf_activation_tokens"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    cpf_digest: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    token_digest: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    issued_by: Mapped[str | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class AuthRateLimitBucket(Base):
+    """Shared fixed-window counter. `key` is an HMAC, never a raw identity."""
+    __tablename__ = "auth_rate_limit_buckets"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    window_started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
 class ProgramMembership(Base):
