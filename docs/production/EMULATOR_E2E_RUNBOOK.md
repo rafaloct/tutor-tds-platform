@@ -60,9 +60,11 @@ Cenários executáveis por padrão:
 - `monitor_projection`: Gestão → Acompanhamento da turma, valida a projeção
   mínima e confirma 403 no dashboard completo;
 - `creator_surface`: Gestão → Conteúdos → Meus conteúdos/Criar curso;
-- `offline_reconnect`: prime online → airplane mode → conteúdo salvo offline →
-  reconexão dentro da mesma execução de `flutter test`, preservando o mesmo
-  processo/package e o cache local.
+- `offline_reconnect`: prime online → airplane mode → recarga de “Minhas
+  turmas” → conteúdo salvo offline → reconexão, dentro da mesma sessão
+  autenticada e execução de `flutter test`, preservando o cache local.
+  Este gate não comprova cold-start autenticado sem rede; essa capacidade exige
+  contrato de bootstrap offline próprio antes de ser aceita.
 
 `operator_flow` permanece explicitamente bloqueado pela Issue #120. A conta
 admin/creator não deve ser usada como substituição de `program_operator`.
