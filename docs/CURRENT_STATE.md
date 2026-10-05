@@ -11,8 +11,10 @@ closed e excesso sem override. CourseVersion permanece fixada. A revisão do PR
 #143 preserva o legado quando `CLASS_LIFECYCLE_ENABLED=false` e aplica criação
 planned/equipe contextual nas rotas administrativas somente com a flag ativa.
 Foram adicionados candidatos de equipe mínimos e listagem contextual de turmas,
-sem PII desnecessária nem dependência de `/operations/scopes`. Sessão aberta no
-fechamento segue `HUMAN_GATE_CLOSE_WITH_OPEN_SESSION`, sem mudança silenciosa.
+sem PII desnecessária nem dependência de `/operations/scopes`. Decisão de
+05/10/2026 fecha o gate de encerramento: sessão aberta bloqueia `active→closed`;
+demais pendências continuam warnings. Readiness e capability refletem esse
+bloqueio e a transição falha sem revision/receipt enquanto existir sessão aberta.
 Testes focais SQLite passaram; o DESKTOP-8T5DRBS não possui PostgreSQL descartável,
 então qualquer validação PostgreSQL deve ser evidenciada em ambiente isolado
 separado e nunca inferida de SQLite/staging. Sem staging, produção, merge ou deploy.

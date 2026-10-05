@@ -207,6 +207,8 @@
     Capacidade 30 e rejeição de novo vínculo em turma closed não ganham bypass.
     O backend expõe candidatos de equipe mínimos e listagem contextual de turmas
     para o Flutter, sem CPF/telefone nem dependência de /operations/scopes.
-    Sessão aberta continua warning e não bloqueia fechamento no candidato atual;
-    essa semântica fica explicitamente HUMAN_GATE_CLOSE_WITH_OPEN_SESSION até
-    decisão da coordenação. Sem staging ou produção nesta decisão.
+    Decisão da coordenação em 05/10/2026: sessão aberta bloqueia o encerramento
+    da turma. O readiness deve expor open_sessions como blocker e negar active→closed
+    enquanto houver sessão aberta. Demais pendências de evidência, presença,
+    regularização e certificado permanecem warnings e não bloqueiam o fechamento
+    por si só. Sem staging ou produção nesta decisão.

@@ -438,6 +438,7 @@ def _snapshot(
     )
     blockers = _activation_blockers(session, classroom)
     warnings = _closure_warnings(session, classroom)
+    closure_blockers = ["open_sessions"] if warnings["open_sessions"] > 0 else []
     role = actor_membership.role
     coordinator = role == "coordinator"
     operator = role == "program_operator"
@@ -462,10 +463,11 @@ def _snapshot(
         "readiness": {
             "activation_blockers": blockers,
             "can_activate": classroom.status == "planned" and not blockers,
-            "can_close": classroom.status == "active",
+            "can_close": classroom.status == "active" and not closure_blockers,
+            "closure_blockers": closure_blockers,
             "closure_warnings": warnings,
-            "closure_warnings_block_close": False,
-            "close_open_session_policy": "HUMAN_GATE_CLOSE_WITH_OPEN_SESSION",
+            "closure_warnings_block_close": bool(closure_blockers),
+            "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION",
         },
         "capabilities": {
             "role": role,
@@ -478,7 +480,9 @@ def _snapshot(
             "can_activate": coordinator
             and classroom.status == "planned"
             and not blockers,
-            "can_close": coordinator and classroom.status == "active",
+            "can_close": coordinator
+            and classroom.status == "active"
+            and not closure_blockers,
             "can_override_capacity": coordinator,
         },
         "history": _history(session, classroom),
@@ -923,6 +927,16 @@ def transition_class(
                 raise HTTPException(
                     status_code=409,
                     detail="Encerramento exige estado active.",
+                )
+            warnings = _closure_warnings(session, classroom)
+            if warnings["open_sessions"] > 0:
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "message": "Encerre todas as sessões antes de encerrar a turma.",
+                        "blockers": ["open_sessions"],
+                        "open_sessions": warnings["open_sessions"],
+                    },
                 )
 
         classroom.status = payload.target_status

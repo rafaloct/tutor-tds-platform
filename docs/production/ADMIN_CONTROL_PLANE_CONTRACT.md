@@ -119,9 +119,14 @@ turma administrativa deve iniciar planned e equipe pós-ativação passa pelo fl
 contextual. Capacidade 30 e rejeição de novo vínculo em turma closed permanecem
 fail-closed, sem bypass administrativo.
 
-Sessões abertas aparecem em `closure_warnings` e, no comportamento atual, não
-bloqueiam a transição para closed. A resposta marca explicitamente
-`HUMAN_GATE_CLOSE_WITH_OPEN_SESSION`; não ampliar essa semântica até decisão.
+Decisão da coordenação: sessão aberta bloqueia a transição para closed.
+O readiness mantém a contagem em `closure_warnings.open_sessions`, acrescenta
+`closure_blockers=["open_sessions"]`, define `can_close=false` e capability
+de fechamento false enquanto houver sessão aberta. O POST de transição também
+nega com 409, sem incrementar revisão nem criar receipt. Depois que todas as
+sessões estiverem fechadas, pendências como evidência, presença/regularização e
+certificado continuam warnings e não bloqueiam o encerramento por si só.
+`close_open_session_policy=BLOCK_CLOSE_WITH_OPEN_SESSION`.
 
 Migration 0028 é aditiva e recusa downgrade quando houver território/revisão ou
 recibos novos. O teste PostgreSQL opt-in da #138 valida upgrade 0027→0028,

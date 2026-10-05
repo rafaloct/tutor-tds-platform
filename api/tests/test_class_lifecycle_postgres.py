@@ -28,6 +28,7 @@ from test_class_lifecycle import (
     lifecycle_api,
     requests_api,
     test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited as _capacity,
+    test_plan_team_and_strict_lifecycle_authority as _lifecycle_authority,
     test_prepare_pins_published_version_separates_territory_and_replays as _prepare,
 )
 
@@ -69,6 +70,10 @@ def test_postgres_prepare_receipt_and_territory(lifecycle_api):
 
 def test_postgres_capacity_and_coordinator_override(lifecycle_api):
     _capacity(lifecycle_api)
+
+
+def test_postgres_open_session_blocks_close_other_warnings_do_not(lifecycle_api):
+    _lifecycle_authority(lifecycle_api)
 
 
 def test_postgres_0027_to_0028_constraints_and_downgrade_guards(

@@ -19,6 +19,7 @@ from app.models import (
     ClassroomCommandReceipt,
     ClassSession,
     Enrollment,
+    EvidenceItem,
     OperatorCommandReceipt,
     ProgramMembership,
     SessionPresence,
@@ -447,10 +448,11 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     assert result["classroom"]["monitor_ids"] == []
     assert result["classroom"]["revision"] == 5
 
+    open_session_id = str(uuid4())
     with Session(engine) as session:
         session.add(
             ClassSession(
-                id=str(uuid4()),
+                id=open_session_id,
                 class_id=class_id,
                 starts_at=datetime(2026, 10, 20, 12, tzinfo=timezone.utc),
                 ends_at=datetime(2026, 10, 20, 14, tzinfo=timezone.utc),
@@ -460,6 +462,19 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
                 token_expires_at=datetime(
                     2026, 10, 20, 12, 10, tzinfo=timezone.utc
                 ),
+            )
+        )
+        session.add(
+            EvidenceItem(
+                id=str(uuid4()),
+                class_id=class_id,
+                session_id=open_session_id,
+                evidence_type="field_photo",
+                occurred_at=datetime(2026, 10, 20, 13, tzinfo=timezone.utc),
+                confidence_basis_points=10000,
+                review_status="pending",
+                item_digest="e" * 128,
+                metadata_json={},
             )
         )
         session.commit()
@@ -477,14 +492,51 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
         headers=header("coordinator"),
     )
     assert readiness.status_code == 200
+    assert readiness.json()["readiness"]["can_close"] is False
+    assert readiness.json()["capabilities"]["can_close"] is False
+    assert readiness.json()["readiness"]["closure_blockers"] == ["open_sessions"]
     assert readiness.json()["readiness"]["closure_warnings"]["open_sessions"] == 1
-    assert readiness.json()["readiness"]["closure_warnings_block_close"] is False
+    assert readiness.json()["readiness"]["closure_warnings"]["pending_evidence"] == 1
+    assert readiness.json()["readiness"]["closure_warnings_block_close"] is True
     assert (
         readiness.json()["readiness"]["close_open_session_policy"]
-        == "HUMAN_GATE_CLOSE_WITH_OPEN_SESSION"
+        == "BLOCK_CLOSE_WITH_OPEN_SESSION"
     )
 
     close = scoped(readiness.json(), target_status="closed")
+    blocked_close = client.post(
+        f"/operations/classes/{class_id}/transition",
+        headers=header("coordinator"),
+        json=close,
+    )
+    assert blocked_close.status_code == 409
+    assert blocked_close.json()["detail"]["blockers"] == ["open_sessions"]
+    assert blocked_close.json()["detail"]["open_sessions"] == 1
+
+    with Session(engine) as session:
+        classroom = session.get(Classroom, class_id)
+        assert classroom is not None
+        assert classroom.status == "active"
+        assert classroom.lifecycle_revision == 5
+        open_session = session.get(ClassSession, open_session_id)
+        assert open_session is not None
+        open_session.status = "closed"
+        open_session.closed_by = "teacher2"
+        session.commit()
+
+    readiness_after_session_close = client.get(
+        f"/operations/classes/{class_id}/readiness",
+        headers=header("coordinator"),
+    )
+    assert readiness_after_session_close.status_code == 200
+    ready = readiness_after_session_close.json()
+    assert ready["readiness"]["can_close"] is True
+    assert ready["capabilities"]["can_close"] is True
+    assert ready["readiness"]["closure_blockers"] == []
+    assert ready["readiness"]["closure_warnings"]["open_sessions"] == 0
+    assert ready["readiness"]["closure_warnings"]["pending_evidence"] == 1
+    assert ready["readiness"]["closure_warnings_block_close"] is False
+
     closed = client.post(
         f"/operations/classes/{class_id}/transition",
         headers=header("coordinator"),
@@ -495,7 +547,8 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     assert result["classroom"]["status"] == "closed"
     assert result["classroom"]["revision"] == 6
     assert result["classroom"]["course_version_id"] == pinned_version
-    assert result["readiness"]["closure_warnings"]["open_sessions"] == 1
+    assert result["readiness"]["closure_warnings"]["open_sessions"] == 0
+    assert result["readiness"]["closure_warnings"]["pending_evidence"] == 1
 
     reopen = scoped(result, target_status="active")
     assert client.post(
