@@ -1,0 +1,78 @@
+name: Tutor TDS required PR gate
+
+on:
+  pull_request:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: required-pr-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  required-pr-gate:
+    name: required-pr-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Test deterministic path classifier
+        run: python3 -m unittest discover -s tooling/ci -p 'test_*.py' -v
+
+      - name: Classify pull request paths
+        id: classify
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 tooling/ci/pr_gate.py classify \
+            --base "$BASE_SHA" \
+            --head "$HEAD_SHA" \
+            --github-output "$GITHUB_OUTPUT" \
+            --json-output "$RUNNER_TEMP/pr-gate-classification.json"
+
+      - name: Validate WordPress child theme
+        if: steps.classify.outputs.wp_child_theme == 'true'
+        run: php -n wordpress/tds-child-theme/tests/lint.php
+
+      - name: Validate observability tooling
+        if: steps.classify.outputs.observability == 'true'
+        run: |
+          python3 -m unittest discover -s tools/observability -p 'test_*.py' -v
+          python3 -m compileall -q tools/observability
+
+      - name: Validate watchdog workflow statically
+        if: steps.classify.outputs.watchdog_workflow == 'true'
+        run: |
+          python3 tooling/ci/pr_gate.py validate-watchdog
+          if [ -f tooling/security/test_watchdog_smtp_observability.py ]; then
+            python3 tooling/security/test_watchdog_smtp_observability.py
+          fi
+
+      - name: Wait for applicable existing workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REQUIRED_WORKFLOWS: ${{ steps.classify.outputs.required_workflows }}
+        run: |
+          python3 tooling/ci/pr_gate.py wait-workflows \
+            --repo "$GITHUB_REPOSITORY" \
+            --sha "$HEAD_SHA" \
+            --token "$GH_TOKEN" \
+            --required-json "$REQUIRED_WORKFLOWS"
+
+      - name: Emit neutral/applicable domain summary
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/pr-gate-classification.json" ]; then
+            python3 tooling/ci/pr_gate.py summary \
+              --json-input "$RUNNER_TEMP/pr-gate-classification.json"
+          else
+            echo "classification unavailable; prior fail-closed step controls job result"
+          fi
