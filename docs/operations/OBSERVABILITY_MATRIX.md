@@ -117,18 +117,99 @@ própria. Executar com snapshots confiáveis, sem PII, e guardar estado por ambi
 
 ## Aceite e gates restantes
 
-- Matriz e avaliador local cobrem falha500, atraso backup/sync, dedup e recuperação.
-- Runner sintético local cobre reachability HTTPS, status, latência, JSON de health,
-  validade TLS e conteúdo mínimo allowlisted, com saída sanitizada e fail-closed.
-- Testes controlados locais são sintéticos; não equivalem a TESTED-STAGING nem a
-  monitor externo instalado.
-- WAITING-HUMAN/Access: escolher monitor realmente fora da VPS, responsável,
-  destinos autorizados e ambiente isolado. Sem esse acesso, Tier1 não é DONE.
-- Próxima prova staging: instalar coletor no ambiente isolado autorizado, induzir
-  500 somente em endpoint sintético, atrasar recibo fake de backup/sync, comprovar
-  abertura/duplicata/recuperação e sanitização; não repetir restores da #2.
-- Provar detector externo durante indisponibilidade sintética do alvo; não
-  derrubar produção para o teste. Registrar SHA/config, timestamps e recibos
-  sanitizados. Dashboard somente após confirmar suporte da infraestrutura.
-- Rollback local: remover uso do avaliador; nenhum serviço ou regra remota mudou.
-  #32 permanece aberta até monitor externo Tier1 e prova controlada de staging.
+A classificação vigente deste PR está consolidada na seção de 05/10/2026 abaixo.
+A matriz e o runner local permanecem IMPLEMENTED e TESTED-LOCAL. O smoke A19
+adiciona TESTED-STAGING somente para os checks públicos read-only de health e
+version, sem provar monitor recorrente, alert routing ou checks internos.
+O monitor externo ampliado continua HUMAN-GATE e não foi instalado nesta frente.
+
+## Consolidação operacional vigente — 05/10/2026
+
+Esta seção consolida a matriz pedida na Issue #32 com evidência mais recente do
+PR #88. Quando houver divergência com classificações históricas acima, esta seção
+prevalece. Os papéis de owner são TARGET do SERVICE_REGISTRY; owners nominais
+continuam UNKNOWN até registro institucional.
+
+### Evidência OBSERVED e limites
+
+- FastAPI: GET /live prova processo; GET /health executa SELECT 1 no PostgreSQL;
+  GET /version consulta alembic_version e retorna identidade sanitizada.
+- Cloudflare gateway: existe GET /health no Worker versionado. Esse check prova
+  somente Worker/edge e não prova AnythingLLM, workspace, modelo ou provider.
+- Sync Sheets: GET /admin/sync/status exige papel admin e retorna pending,
+  processing, synced, failed, exhausted, last_success_at e last_failure_at.
+  A idade do item mais antigo da fila ainda não é exposta.
+- Backup: tooling/backup_automation/backup.mjs valida recibos offsite e classifica
+  backup diário com mais de 26h como problema. A rotina pertence à Issue #2 e não
+  é alterada pelo PR #88.
+- Monitor fora da VPS: tds-vps-watchdog.yml roda em runner hospedado pelo GitHub,
+  consulta o health público da API e está agendado duas vezes por hora. Alertas
+  por e-mail dependem de configuração SMTP protegida. O PR #85 altera essa frente,
+  portanto o PR #88 não deve editar o workflow.
+- PR #88 A19: smoke read-only real contra staging em /health e /version, HEAD
+  1f59f74812be012ea4e8514c0090f152fba68843. HTTPS, health, version, latência,
+  TLS e sanitização PASS, sem credencial, escrita, deploy, alerta ou mutação.
+  Esse recorte passa a ser classificado como TESTED-STAGING.
+- Não foi encontrado health automatizado canônico versionado do AnythingLLM,
+  health dedicado do WordPress, health dedicado do Chatwoot ou health de provider
+  de mídia. Esses checks permanecem UNKNOWN em vez de receber endpoints inventados.
+
+### Matriz serviço → check → SLI → condição → severidade → owner → runbook → recovery
+
+| Serviço / tier | Check e SLI | Condição / janela TARGET | Severidade | Owner funcional TARGET | Runbook | Recovery |
+|---|---|---|---|---|---|---|
+| FastAPI / 1 | /health: disponibilidade + DB indireto; /version: identidade/schema; latência HTTPS; 5xx agregado quando houver coletor | /health diferente de 200; latência acima de 2000ms; /version inválido; 5xx acima de 5% em 5min somente com pelo menos 100 requests | SEV1 health; SEV2 latência/version/5xx | Técnico + infra | CONFIGURATION_RUNBOOK | Isolar API versus DB; reimplantar somente artefato/config aprovado; restore apenas em gate próprio |
+| PostgreSQL / 1 | /health como conectividade indireta; internamente SELECT 1, revision, storage/conexões | indisponível em 1min interno; revision incompatível no gate de release; storage sem coletor fica UNKNOWN | SEV1 | Infra + dados | BACKUP_RESTORE | Recuperação isolada, integridade/schema e depois smoke da API |
+| Backup / 0 | idade do recibo offsite, integridade e execução; semanal Dokploy quando aplicável | diário acima de 26h; semanal acima de 8 dias | SEV1 | Infra | BACKUP_RESTORE + Issue #2 | Reexecutar fluxo autorizado e confirmar objeto/recibo; restore drill é prova separada |
+| VPS host / 1 | disk/memory internos; queda total inferida externamente pelos endpoints públicos | disk acima de 85% ou memory acima de 90% por 5min; perda do endpoint público conforme política Tier 1 | SEV2 recurso; SEV1 queda total | Infra | OPERATIONS_CONTINUITY | Investigar consumo/processos; nunca apagar volumes ou dados automaticamente |
+| DNS/TLS / 0 | resolução, handshake HTTPS e dias restantes | resolução/handshake falha; validade abaixo de 14 dias | SEV1 indisponibilidade; SEV2 expiração | Infra | SERVICE_SETUP_GUIDES | Conferir DNS/renovação e owner; nenhuma alteração automática de zona |
+| WordPress / 2 | Home pública e /wp-json/ podem ser sintéticos sem login; não existe health dedicado versionado | HTTP diferente de 200 ou TLS inválido após URL canônica aprovada | SEV3 | Editorial + infra | WP1_STAGING_ROLLBACK_PLAN | Verificar runtime/cache/DB; rollback de tema/plugin/conteúdo conforme escopo |
+| Chatwoot / 2 | URL/check público canônico UNKNOWN; workers/WebSocket/SMTP/storage são checks internos | não automatizar condição até mapear endpoint e topologia reais | UNKNOWN até check aprovado; impacto tende a SEV3 | Suporte + infra | CHATWOOT_TDS_CURRENT_STATE + SERVICE_SETUP_GUIDES | Diagnosticar serviço/inbox/workers sem reenviar mensagens; restore específico pertence ao DR |
+| Cloudflare gateway / 2 | GET /health: Worker/edge, latência e TLS | health diferente de 200 ou TLS inválido; upstream precisa de métrica separada | SEV3 | Infra + técnico | SERVICE_SETUP_GUIDES | Verificar Worker/bindings/config; degradação da IA não altera autorização acadêmica |
+| AnythingLLM / 2 | health automatizado canônico não encontrado | UNKNOWN até check técnico autorizado sem prompt real | UNKNOWN | Técnico | SERVICE_SETUP_GUIDES | Verificar container/workspace/provider; reindexar masters aprovados quando aplicável |
+| Sync Sheets / 3 | /admin/sync/status: contagens, exhausted, último sucesso/falha | last_success_at acima de 2h é TARGET quando sync habilitado; exhausted maior que 0 requer triagem; queue oldest acima de 1h ainda sem check direto | SEV3 | Dados + técnico | INTEROPERABILITY | Revisar retry/idempotência/origem; nunca corrigir fonte mestre na planilha |
+| Mídia / 2 | /media prova API/metadados, não provider; não existe provider health dedicado e provider real ainda não é canônico | UNKNOWN até provider/target autorizado existir | UNKNOWN; SEV3 quando provider operacional | Editorial + técnico | MEDIA_PLATFORM | Fail-closed/fallback; trocar provider via adapter sem mudar autoridade da API |
+
+### Fronteira de acesso dos checks
+
+| Serviço | Público sem secret | Interno | Exige secret | Fora da VPS | Check/gap ainda inadequado |
+|---|---|---|---|---|---|
+| FastAPI | SIM: /health, /version, /live | SIM para 5xx/host | NÃO nos públicos | SIM, obrigatório para queda total | agregação 5xx/host não instalada nesta frente |
+| PostgreSQL | somente indireto via /health | SIM: conexão/revision/storage | SIM para check direto | SIM via sinal público indireto | sem coletor interno versionado nesta issue |
+| Backup | NÃO há endpoint público | SIM: recibos/offsite/runtime | SIM para storage/alerta | SIM | monitor offsite ampliado e alert routing não instalados |
+| VPS host | somente efeito nos endpoints públicos | SIM: disk/memory/processos | SIM para acesso host | SIM | coletor host não instalado |
+| DNS/TLS | SIM | NÃO para check básico | NÃO | SIM | owner/inventário nominal UNKNOWN |
+| WordPress | SIM: Home e /wp-json/ | SIM para DB/cache/plugin | SIM para administração | SIM | sem health dedicado; staging WP é frente própria |
+| Chatwoot | UNKNOWN até URL/check canônico | SIM: workers/WebSocket/SMTP/storage | SIM para API/admin | SIM quando check público seguro existir | endpoint e topologia real a homologar |
+| Gateway | SIM: /health após URL autorizada | SIM para métricas/bindings | NÃO no health; SIM para upstream | SIM | health não prova AnythingLLM/upstream |
+| AnythingLLM | NÃO comprovado | SIM | SIM para API/workspace/provider | desejável após check definido | sem health automatizado canônico |
+| Sync Sheets | NÃO: status é admin | SIM via /admin/sync/status ou DB | SIM: auth/admin e integração | opcional; Tier 3 não bloqueia núcleo | queue oldest age não exposta |
+| Mídia | API pública não prova provider | SIM para config/provider/grants | depende do provider | SIM quando provider existir | provider/URL/check real UNKNOWN |
+
+### Decisão técnica do monitor externo
+
+EXTERNAL_MONITOR_MINIMUM=runner fora da VPS executando GET HTTPS sanitizado de Tier 1 e registrando falha sem depender do host monitorado
+
+CANDIDATE_LOCATION=GitHub-hosted Actions runner, reaproveitando o padrão existente do tds-vps-watchdog
+
+CHECK_FREQUENCY=TARGET 5min para Tier 1; watchdog atual observado em aproximadamente 30min; qualquer mudança de agenda exige gate próprio
+
+ALERT_DESTINATION_ROLE=plantão técnico/infra para SEV1-SEV2; owner funcional para SEV3; nomes e canal institucional permanecem UNKNOWN
+
+SECRETS_REQUIRED=NÃO para probes públicos; SIM para entrega SMTP atual e checks internos/autenticados
+
+COST_REQUIRED=UNKNOWN; nenhuma compra de SaaS ou premissa de cota/custo GitHub/SMTP é autorizada
+
+FAILURE_IF_VPS_DOWN=SIM para checks públicos porque o runner GitHub permanece fora da VPS; GitHub, DNS e Internet continuam dependências externas
+
+MONITOR_INSTALLATION_PERFORMED=NO
+
+A solução existente é preferível a criar sistema próprio. Transformar o runner em
+monitor recorrente, mudar frequência, aprovar destino de alerta, cadastrar secrets
+ou assumir custo depende de decisão externa. HUMAN_GATE=SIM.
+
+O monitor ampliado e o alert routing continuam fora desta execução. Dashboard
+também permanece fora até confirmar suporte da infraestrutura. O PR #88 não deve
+alterar o PR #85 nem instalar qualquer monitor.
+
+[executed on device: avellaria (50b7ca2d-9d90-4e32-ab9d-7f5d2869d5eb)]
