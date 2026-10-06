@@ -832,6 +832,7 @@ class ClassSession(Base):
     opened_by: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     closed_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
     checkin_token_digest: Mapped[str] = mapped_column(String(64), nullable=False)
+    checkin_code_digest: Mapped[str | None] = mapped_column(String(64), index=True)
     token_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

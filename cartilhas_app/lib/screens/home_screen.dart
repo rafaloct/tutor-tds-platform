@@ -52,6 +52,7 @@ class HomeScreen extends StatefulWidget {
     this.learningHomeController,
     this.editorGatewayFactory,
     this.classLifecycleGatewayFactory,
+    this.sessionProbe,
   });
 
   final LearningHomeController? learningHomeController;
@@ -59,6 +60,7 @@ class HomeScreen extends StatefulWidget {
   final Future<List<Cartilha>> Function()? courseLoader;
   final CourseEditorGateway Function()? editorGatewayFactory;
   final ClassLifecycleGateway Function()? classLifecycleGatewayFactory;
+  final Future<bool> Function()? sessionProbe;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -474,6 +476,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _refreshSessionState() async {
+    final probe = widget.sessionProbe;
+    if (probe != null) {
+      var probed = false;
+      try {
+        probed = await probe();
+      } catch (_) {
+        probed = false;
+      }
+      if (mounted) setState(() => _hasSession = probed);
+      return;
+    }
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
       if (mounted) setState(() => _hasSession = false);
@@ -753,6 +766,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListTile(
                       leading: Icon(Icons.school_outlined),
                       title: Text('Minhas turmas'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                if (_hasSession)
+                  const PopupMenuItem(
+                    value: 'checkin',
+                    child: ListTile(
+                      leading: Icon(Icons.qr_code_scanner_outlined),
+                      title: Text('Registrar presença'),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),

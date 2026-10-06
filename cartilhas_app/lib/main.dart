@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,6 +23,8 @@ import 'features/push/push_notification_provider.dart';
 import 'features/push/push_notification_service.dart';
 import 'screens/chatwoot_screen.dart';
 import 'features/push/push_notification_lifecycle.dart';
+import 'features/evidence/data/evidence_repository.dart';
+import 'features/evidence/presentation/evidence_checkin_screen.dart';
 
 final _navigatorKey = GlobalKey<NavigatorState>();
 
@@ -51,6 +54,27 @@ void _navigateFromPush(PushNavigationAction action) {
   });
 }
 
+void _navigateFromCheckinLink(Uri uri) {
+  if (uri.scheme != 'tutortds' || uri.host != 'checkin') return;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final navigator = _navigatorKey.currentState;
+    if (navigator == null) return;
+    navigator.push(
+      trackedRoute(
+        pageId: 'evidence_checkin',
+        featureId: 'evidence_checkin',
+        builder: (context) => EvidenceCheckinScreen(
+          initialUri: uri.toString(),
+          gateway: EvidenceRepository(
+            apiUrl: AppConfig.tutorApiUrl,
+            authRepository: context.read<AuthRepository>(),
+          ),
+        ),
+      ),
+    );
+  });
+}
+
 class CartilhasApp extends StatefulWidget {
   const CartilhasApp({
     super.key,
@@ -65,15 +89,24 @@ class CartilhasApp extends StatefulWidget {
 
 class _CartilhasAppState extends State<CartilhasApp> {
   late final ThemeController _themeController;
+  final _appLinks = AppLinks();
+  StreamSubscription<Uri>? _checkinLinkSubscription;
 
   @override
   void initState() {
     super.initState();
     _themeController = ThemeController()..load();
+    _checkinLinkSubscription = _appLinks.uriLinkStream.listen(
+      _navigateFromCheckinLink,
+    );
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) _navigateFromCheckinLink(uri);
+    });
   }
 
   @override
   void dispose() {
+    _checkinLinkSubscription?.cancel();
     widget.pushService.dispose();
     _themeController.dispose();
     super.dispose();
