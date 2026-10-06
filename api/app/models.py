@@ -337,6 +337,14 @@ class Classroom(Base):
             name="fk_classes_teacher_membership",
         ),
         CheckConstraint("end_date >= start_date", name="ck_classes_date_range"),
+        CheckConstraint(
+            "status IN ('planned', 'active', 'closed')",
+            name="ck_classes_status",
+        ),
+        CheckConstraint(
+            "lifecycle_revision >= 0",
+            name="ck_classes_lifecycle_revision",
+        ),
         UniqueConstraint(
             "id", "program_id", name="uq_classes_program_lineage"
         ),
@@ -357,9 +365,14 @@ class Classroom(Base):
     course_id: Mapped[str] = mapped_column(ForeignKey("courses.id"), nullable=False)
     teacher_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(240), nullable=False)
+    offer_municipality: Mapped[str | None] = mapped_column(String(240))
+    offer_location: Mapped[str | None] = mapped_column(String(500))
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String(24), nullable=False, default="planned")
+    lifecycle_revision: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -578,6 +591,47 @@ class OperatorCommandReceipt(Base):
     request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     result: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class ClassroomCommandReceipt(Base):
+    """Class-level lifecycle audit and idempotency receipt."""
+
+    __tablename__ = "classroom_command_receipts"
+    __table_args__ = (
+        UniqueConstraint(
+            "class_id",
+            "revision",
+            name="uq_classroom_command_revision",
+        ),
+        Index(
+            "ix_classroom_command_receipts_class_time",
+            "class_id",
+            "occurred_at",
+        ),
+        CheckConstraint(
+            "revision >= 1",
+            name="ck_classroom_command_revision",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    actor_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    program_id: Mapped[str] = mapped_column(
+        ForeignKey("programs.id"), nullable=False
+    )
+    class_id: Mapped[str] = mapped_column(
+        ForeignKey("classes.id"), nullable=False
+    )
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    action: Mapped[str] = mapped_column(String(32), nullable=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False)
+    request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    result: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
 
 
 class SyncLog(Base):
