@@ -9,7 +9,7 @@
     "compile_sdk": 36,
     "upload_certificate_sha256": "16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50"
   },
-  "release_build_allowed": false,
+  "release_build_allowed": true,
   "source_verification": {
     "flutter_tests": "290/290",
     "dart_analyze": "passed",
