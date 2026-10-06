@@ -82,10 +82,8 @@ Isso não está implementado, não foi provado e não autoriza provisionamento n
 execução. Nenhum workspace por experiência é necessário ou aceitável.
 
 **TUTOR_RAG_SCOPE_MAP_ROLE=TEMPORARY.**
-**FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO.** O
-delta limitado em `course_promotion` valida e preserva `Experience Blocks`
-tipados no conteúdo promovido. Não adiciona campo/tabela persistente, migration,
-autorização IA nem endpoint RAG.
+**FASTAPI_CHANGE_REQUIRED=NÃO.** Este recorte do PR #136 não altera FastAPI nem
+`course_promotion`.
 
 **RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN.** Lifecycle permanente documentado como
 **TARGET, não implementação observada**:
@@ -137,20 +135,18 @@ storage ID e metadata privada não são retornados.
   rejeição de alias entre CourseVersions, correlação da citation com a
   pré-busca, descarte de identificadores privados e fail-closed para sources
   ausentes/estruturalmente inseguras. Módulo/experiência permanecem estruturados
-  no request sem serem fabricados como atributos da source.
-- Os HEADs autorizados de PR #132
-  (`0c1d80992d6fe60b4c3143677a923b7c64883429`) e PR #135
-  (`039c247873ed6d08bc33d7040cdbdb781ab1c108`) foram integrados localmente ao
-  branch do PR #136. A chamada geral passa curso/versão/módulo sem experiência;
-  o botão de uma experiência fornece também seu ID/tipo estáveis e prompt
-  inicial, sem dados da conta.
-- O manifesto existente de promoção CourseVersion agora aceita somente Experience
-  Blocks tipados e os preserva no snapshot; testes de contrato cobrem campos
-  desconhecidos, IDs/tipos inválidos e configurações de IA malformadas.
-- Validação local pós-sync com `staging=8f60b01`: gateway `31/31`,
-  `api/tests/test_course_promotion.py` `10/10`, Flutter focal `18/18`,
-  sentinel tooling `5/5`, `git diff --check` PASS e gitleaks 8.28.0 PASS;
-  `flutter analyze --no-pub` também PASS, sem issues.
+  no request sem serem fabricados como atributos da source. O contrato mantém
+  campos opcionais de experiência; não há chamador de experiência neste PR.
+- A chamada geral do Tutor envia `course_id`, `course_version_id` e `module_id`.
+  Os campos opcionais de experiência permanecem em `TutorLearningContext`
+  porque são aceitos pelo contrato do gateway, mas não têm caller neste PR.
+- Camada Experience Blocks do PR #135 removida do PR #136 por decisão humana em
+  2026-10-06; permanece no PR #135. Chamador geral do Tutor envia
+  course_id/course_version_id/module_id; nenhum chamador de experiência neste PR.
+- Validação local do sync anterior com `staging=9577541`: gateway `31/31` e
+  sentinel tooling `5/5`. A cobertura do caller geral fica em
+  `chat_experience_progress_test.dart`; não há evidência de `course_promotion`
+  ou de caller de experiência neste PR.
 - O tooling `verify_rag_sentinel.mjs` exige dois escopos CourseVersion
   distintos, dois marcadores A/B e sources compatíveis; rejeita módulo/
   experiência para não produzir uma prova além da capacidade upstream auditada.

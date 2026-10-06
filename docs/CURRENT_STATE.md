@@ -21,21 +21,27 @@ separado e nunca inferida de SQLite/staging. Sem staging, produção, merge ou d
 
 ## 2026-10-05 Issue #134 — candidato local
 
-`/v1/chat` aceita contexto estruturado compatível com legado. HEADs autorizados
-de #132/#135 estão compostos localmente no PR #136; request ID, 429/504 e
-chamador real de experiência preservados. `course_promotion` valida/preserva
-Experience Blocks. `TUTOR_RAG_SCOPE_MAP` é temporário, com granularidade
-CourseVersion; isolamento de módulo/experiência não está comprovado. Status:
+`/v1/chat` aceita contexto estruturado compatível com legado. HEAD autorizado
+de #132 permanece composto localmente no PR #136; request ID, 429/504 e o
+chamador geral preservados. Camada Experience Blocks do PR #135 removida do PR
+#136 por decisão humana em 2026-10-06; permanece no PR #135. Chamador geral do
+Tutor envia course_id/course_version_id/module_id; nenhum chamador de experiência
+neste PR. `TutorLearningContext` mantém campos opcionais de experiência aceitos
+pelo contrato do gateway, sem caller neste PR. `TUTOR_RAG_SCOPE_MAP` é
+temporário, com granularidade CourseVersion; isolamento de módulo/experiência
+não está comprovado. Status:
 `LOCAL_CONTEXT_BINDING_READY=PARCIAL`,
 `CONTEXT_BINDING_READY=NÃO`, `AI_SERVICE_READY=NÃO`.
-`FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO`;
+`FASTAPI_CHANGE_REQUIRED=NÃO`;
 `RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`. Alvo permanente de ingestão está
 documentado, não implementado. O gateway agora usa o shape público real do
 AnythingLLM e deriva o escopo CourseVersion do binding 1:1 com workspace, sem
-fabricar metadata de módulo/experiência. Pós-sync com `staging=8f60b01`: gateway
-31/31, promoção 10/10, Flutter focal 18/18, analyze PASS, sentinel tooling 5/5
-e gitleaks PASS. O PR #136 permanece baseado em staging e foi sincronizado por
-merge normal; o sentinel A/B real segue não executado. `REAL_STAGING_E2E=NO`.
+fabricar metadata de módulo/experiência. O chamador geral envia somente
+`course_id`, `course_version_id` e `module_id`; cobertura em
+`chat_experience_progress_test.dart`. No sync anterior com `staging=9577541`,
+gateway 31/31 e sentinel tooling 5/5. O PR #136 permanece baseado em staging e
+foi sincronizado por merge normal; o sentinel A/B real segue não executado.
+`REAL_STAGING_E2E=NO`.
 Nenhuma configuração, workspace, staging ou produção foi alterada. Auditoria:
 `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
 
