@@ -66,9 +66,13 @@
     },
     {
       "id": "pre_aab_xiaomi_smoke",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador."
+      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador.",
+      "verified_at": "2026-10-06T12:44",
+      "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-06.json",
+      "evidence_sha256": "f314de94b2f60ce4c57730410b9532fba3903990b89bffbcdc4d4b68c3752355",
+      "scope": "Xiaomi ZT6HPRHQHATSEQPR (duchamp_global, Android 15/API 35, arm64); Play 1.2.0+11 preservado; DEV 1.4.0-dev+13 do SHA 3e129ea cold-launch+relaunch em novo PID sem crash/ANR; compatibilidade do APK publicado em docs/production/evidence/published-apk-compatibility-2026-10-06.json."
     }
   ]
 }

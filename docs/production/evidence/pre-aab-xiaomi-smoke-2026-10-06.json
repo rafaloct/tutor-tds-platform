@@ -1,0 +1,131 @@
+{
+  "gate": "pre_aab_xiaomi_smoke",
+  "run_id": "20261006-124329",
+  "result": "pass",
+  "execution_host": "avellaria",
+  "execution_host_note": "Contrato original previa DESKTOP-8T5DRBS (Windows). Operador reconectou o USB do Xiaomi neste host Linux e autorizou a execucao aqui; device/atualizacao registrada neste campo.",
+  "source": {
+    "repository": "https://github.com/rafaloct/tutor-tds-platform",
+    "sha": "3e129ea52d686f60b10eb6bc44fa0dfe3a2b4c1d",
+    "ref_verified": "origin/staging apos git fetch origin staging",
+    "checkout": "/tmp/tutor-tds-pre-aab-3e129e (worktree detached, zero alteracoes versionadas)"
+  },
+  "toolchain": {
+    "flutter": "3.44.0 stable (snap) - contrato previa 3.44.9 Windows; pubspec sdk ^3.12.0 satisfeito por Dart 3.12.0",
+    "android_sdk": "36.1.0",
+    "build": "flutter build apk --debug --dart-define-from-file=config/staging.qa.json (preDebugBuild environment gate aprovado)"
+  },
+  "device": {
+    "serial": "ZT6HPRHQHATSEQPR",
+    "model": "2311DRK48G",
+    "product": "duchamp_global",
+    "build_fingerprint": "POCO/duchamp_global/duchamp:15/AP3A.240905.015.A2/OS2.0.209.0.VNLMIXM:user/release-keys",
+    "android_version": "15",
+    "api_level": 35,
+    "abi": "arm64-v8a",
+    "ro_kernel_qemu": "",
+    "physical_device": true
+  },
+  "play_package": {
+    "package": "com.tutortds_cartilhas",
+    "before": {
+      "versionName": "1.2.0",
+      "versionCode": 11,
+      "firstInstallTime": "2026-06-19 14:12:19",
+      "lastUpdateTime": "2026-08-25 08:29:43",
+      "apk_paths": 5,
+      "base_apk_sha256": "cc1ed1778c62a255003876f6b7b08efd4de9e91416440161bb959ede12d14d18"
+    },
+    "after": {
+      "versionName": "1.2.0",
+      "versionCode": 11,
+      "firstInstallTime": "2026-06-19 14:12:19",
+      "lastUpdateTime": "2026-08-25 08:29:43",
+      "apk_paths": 5,
+      "base_apk_sha256": "cc1ed1778c62a255003876f6b7b08efd4de9e91416440161bb959ede12d14d18"
+    },
+    "preserved": true,
+    "cold_launch": {
+      "result": "pass",
+      "pid": 24757,
+      "activity": "com.tutortds_cartilhas/.MainActivity",
+      "resumed": true,
+      "window_focus": true,
+      "fatal_exception": false,
+      "anr": false,
+      "force_stopped_after": true
+    }
+  },
+  "dev_apk": {
+    "package": "com.tutortds_cartilhas.dev",
+    "distinct_from_play": true,
+    "versionName": "1.4.0-dev",
+    "versionCode": 13,
+    "debuggable": true,
+    "label": "Tutor TDS DEV",
+    "sha256": "fc9c015688ed7da78d71baecd46dadc6e628ec6958ad034a525b596e60a1fe79",
+    "signer": "V2 Android Debug (C=US, O=Android, CN=Android Debug)",
+    "signer_sha256": "bc07beccedd86fcaf25fd77e300db34c1ada2f99fcc19784464d00e06797d969",
+    "install": "fresh install via adb apos aprovacao no AdbInstallActivity do MIUI; app Play nao tocado"
+  },
+  "dev_smoke": {
+    "cold_launch": {
+      "result": "pass",
+      "pid": 27074,
+      "activity": "com.tutortds_cartilhas.dev/com.tutortds_cartilhas.MainActivity",
+      "resumed": true,
+      "window_focus": true,
+      "fatal_exception": false,
+      "anr": false
+    },
+    "force_stop": {
+      "pid_after_stop": null,
+      "confirmed_gone": true
+    },
+    "relaunch": {
+      "result": "pass",
+      "new_pid": 28943,
+      "same_apk_reopened": true,
+      "resumed": true,
+      "window_focus": true,
+      "fatal_exception": false,
+      "anr": false,
+      "screen": "welcome/onboarding renderizado (screenshot dev_screen.png)"
+    },
+    "final_force_stop": true
+  },
+  "hardware_rom_sanity": {
+    "physical_xiaomi": true,
+    "not_qemu": true,
+    "android_15_api35": true,
+    "arm64": true,
+    "activity_responsive": true,
+    "no_fatal_exception": true,
+    "no_anr": true
+  },
+  "prohibitions_respected": {
+    "production_touched": false,
+    "worker_rag_touched": false,
+    "anythingllm_touched": false,
+    "play_console_touched": false,
+    "aab_generated": false,
+    "release_build_allowed_modified": false,
+    "git_commit_or_push": false,
+    "play_package_modified": false,
+    "pm_clear_or_uninstall_play": false,
+    "account_or_network_changed": false
+  },
+  "timestamps": {
+    "device_inventory_approx": "2026-10-06T12:25 local",
+    "play_cold_launch_approx": "2026-10-06T12:28 local",
+    "dev_apk_built": "2026-10-06T12:39 local (gradle assembleDebug 157.9s)",
+    "dev_installed": "2026-10-06T12:41:02 (firstInstallTime)",
+    "dev_cold_launch_pid_27074_approx": "2026-10-06T12:42 local",
+    "dev_relaunch_pid_28943_approx": "2026-10-06T12:43 local",
+    "screenshot": "2026-10-06T12:43:29 local",
+    "play_reverified_after": "2026-10-06T12:44 local"
+  },
+  "artifacts": {
+    "screenshot": "dev_screen.png"
+  }
+}
