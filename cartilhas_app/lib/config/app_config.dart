@@ -19,6 +19,13 @@ class AppConfig {
   static const journeyTraceabilityEnabled = bool.fromEnvironment(
     'JOURNEY_TRACEABILITY_ENABLED',
   );
+
+  /// QA-only seam for Issue #139 while the HTTP contract from #138 is not
+  /// available. It is false by default and must never be enabled in production.
+  static const classLifecycleFakeEnabled = bool.fromEnvironment(
+    'CLASS_LIFECYCLE_FAKE_ENABLED',
+    defaultValue: false,
+  );
   // Enable only after the inbox signature and account-switch QA are configured.
   static const signedSupportIdentity = bool.fromEnvironment(
     'SIGNED_SUPPORT_IDENTITY',
