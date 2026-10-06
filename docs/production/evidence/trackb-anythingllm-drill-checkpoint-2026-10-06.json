@@ -3,9 +3,9 @@
   "evidence": "trackb_anythingllm_data_recovery_drill_checkpoint",
   "track": "TRACK_B",
   "classification": "OBSERVED",
-  "written_at": "2026-10-06T03:30:00Z",
+  "written_at": "2026-10-06T03:20:00Z",
   "staging_sha": "f140e638cbe7fef28a59070fc2f43237d2a29e95",
-  "TRACK_B_CURRENT": "BLOCKED",
+  "TRACK_B_CURRENT": "READY_FOR_HUMAN_GATE",
   "accepted_inputs": {
     "POSTGRES_RESTORE": "PASS (/opt/tds-rehearsal-fab1aa6f26e0/evidence.json on production VPS)",
     "UPGRADE_COMPATIBILITY": "PASS",
@@ -19,7 +19,14 @@
     "mount": "/app/server/storage",
     "image": "mintplexlabs/anythingllm@sha256:652666b766e5e2474b8018e8850f166a9869c1a1aed23435c48c99cd94b74f4a",
     "active_vector_db": "lancedb (embedded in volume), embedder native Xenova/all-MiniLM-L6-v2",
-    "baseline": {"WORKSPACE_COUNT": 4, "CARTILHAS_DOCUMENT_COUNT": 10, "VECTOR_COUNT": 660, "tds-qa-ctx-a-v1": 1, "tds-qa-ctx-b-v1": 1, "meu-workspace": 0}
+    "baseline": {
+      "WORKSPACE_COUNT": 4,
+      "CARTILHAS_DOCUMENT_COUNT": 10,
+      "VECTOR_COUNT": 660,
+      "tds-qa-ctx-a-v1": 1,
+      "tds-qa-ctx-b-v1": 1,
+      "meu-workspace": 0
+    }
   },
   "previous_run": {
     "PREVIOUS_RUN_ID": "20261006T030533Z-57c874a5",
@@ -44,10 +51,25 @@
   "next": {
     "authorized": "one single new full drill run (human gate 2026-10-06)",
     "NEXT_EXACT_ACTION": "repeat drill with offline placeholder provider: clone env adds only LLM_PROVIDER=openrouter and OPENROUTER_API_KEY=drill-offline-placeholder (fictitious), network --internal, same pinned image digest, new snapshot :ro, new age encryption, new R2 prefix anythingllm/drill/<run-id>/, capture sanitized clone logs before cleanup",
-    "required_checks": ["SQLITE_INTEGRITY=PASS", "WORKSPACE_COUNT=4", "CARTILHAS_DOCUMENT_COUNT=10", "VECTOR_COUNT=660", "CARTILHAS_SCOPE=PASS", "CTX_A_SCOPE=PASS", "CTX_B_SCOPE=PASS"],
+    "required_checks": [
+      "SQLITE_INTEGRITY=PASS",
+      "WORKSPACE_COUNT=4",
+      "CARTILHAS_DOCUMENT_COUNT=10",
+      "VECTOR_COUNT=660",
+      "CARTILHAS_SCOPE=PASS",
+      "CTX_A_SCOPE=PASS",
+      "CTX_B_SCOPE=PASS"
+    ],
     "if_fail": "no third run; preserve logs + checkpoint; classify cause; hand off",
     "if_pass": "CRITICAL_VOLUMES_RESTORE=PASS; create docs/production/evidence/production-restore-acceptance.json with the 5 booleans true and validate with tooling/test_production_recovery_evidence.ps1; PR to staging, no merge",
-    "forbidden": ["docker pause anythingllm", "touching cartilhas workspace / source volume / AnythingLLM config", "production deploy or migration", "Worker or API changes", "TRACK_C, RC, AAB", "deleting any anythingllm/drill R2 object"],
+    "forbidden": [
+      "docker pause anythingllm",
+      "touching cartilhas workspace / source volume / AnythingLLM config",
+      "production deploy or migration",
+      "Worker or API changes",
+      "TRACK_C, RC, AAB",
+      "deleting any anythingllm/drill R2 object"
+    ],
     "vps_state_dir": "/opt/tds-anythingllm-drill-20261006T030533Z-57c874a5 (mode 700; handoff/ contains handoff.json and the drill scripts phase_a.sh, phase_b.sh, clone_check.js, baseline.py)",
     "scripts_usage": "on VPS as root: bash phase_a.sh <run-id> (ro snapshot to /opt/tds-anythingllm-drill-<run-id>); write AnythingLLM API key to <dir>/k (0600) and copy clone_check.js into <dir>; bash phase_b.sh <run-id> (encrypt, R2 upload/download, decrypt, restore, isolated clone, checks, cleanup). baseline.py runs off-VPS with env K=<AnythingLLM API key> against the public API before/after."
   },
@@ -57,5 +79,12 @@
   ],
   "secrets_persisted": false,
   "production_touched": false,
-  "merge_allowed": false
+  "merge_allowed": false,
+  "outcome": {
+    "TRACK_B_DRILL": "PASS",
+    "run_id": "20261006T031453Z-538dd1cd",
+    "evidence": "docs/production/evidence/trackb-anythingllm-drill-2026-10-06.json",
+    "acceptance": "docs/production/evidence/production-restore-acceptance.json",
+    "NEXT_EXACT_ACTION": "human review of the evidence PR; merge only with explicit authorization; decide later on deleting R2 drill objects"
+  }
 }
