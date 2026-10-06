@@ -1,12 +1,12 @@
 {
   "status": "passed",
   "release_gate": "certificate_human_approval_e2e",
-  "verified_at": "2026-10-06T10:40:39Z",
+  "verified_at": "2026-10-06T10:49:50Z",
   "source_sha": "341e45f1332b4c44a6ddc37d01d44d688a7753e2",
   "executor": "LARGeo + avellaria",
   "android_target": "emulator-5554",
-  "run_id": "8ec21807038d408b9548f2e17e14d29b",
-  "apk_sha256": "C6EEE3D71D5FC481C9E36B82FE1CA4651A9584E512CB29F3E0BDD39A90E57236",
+  "run_id": "fa493fe7dacf4993863f248b77e7fa81",
+  "apk_sha256": "D9C8C0951C17F9E0C2E7D006FC73D5FE2A3D1C381FF6F6B630BBD066B9FC66B2",
   "android_flow": {
     "request_created_pending": true,
     "human_reason_required": true,
