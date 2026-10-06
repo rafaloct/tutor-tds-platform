@@ -1,0 +1,61 @@
+{
+  "status": "passed",
+  "gate": "evidence_offline_android_e2e",
+  "verified_at": "2026-10-06T07:22:32.948481+00:00",
+  "staging_sha": "341e45f1332b4c44a6ddc37d01d44d688a7753e2",
+  "executor": {
+    "kind": "android_emulator",
+    "avd": "Pixel_8_Pro",
+    "android_api": 35,
+    "device_serial_at_run": "emulator-5554",
+    "run_id": "0a71a512333f422aa804673ffd9d3709"
+  },
+  "app": {
+    "package": "com.tutortds_cartilhas.dev.dynamicqa.r0a71a512333f422aa804673ffd9d3709",
+    "source_classes": [
+      "cartilhas_app/lib/features/evidence/presentation/evidence_checkin_screen.dart",
+      "cartilhas_app/lib/features/evidence/data/checkin_draft_store.dart"
+    ]
+  },
+  "emulator_observations": {
+    "phase1": {
+      "draft_persisted": true,
+      "token_absent_from_persisted_draft": true,
+      "idempotency_key_present": true,
+      "result": "PASS"
+    },
+    "process_boundary": {
+      "force_stop_between_phases": true,
+      "apk_reinstalled_between_phases": false,
+      "result": "PASS"
+    },
+    "phase2": {
+      "fresh_code_required_after_reopen": true,
+      "same_idempotency_key_reused": true,
+      "draft_cleared_after_success": true,
+      "result": "PASS"
+    }
+  },
+  "composed_contract_evidence": {
+    "android_live_offline_reconnect_no_duplicate_presence": {
+      "source": "docs/production/evidence/class-lifecycle-e2e-14000000000000000000000000000002.json",
+      "result": "PASS"
+    },
+    "backend_retry_same_key": {
+      "source": "api/tests/test_evidence.py",
+      "contract": "first check-in HTTP 201; retry with same idempotency key HTTP 200",
+      "result": "PASS"
+    },
+    "flutter_network_failure_retry": {
+      "source": "cartilhas_app/test/evidence_screens_test.dart",
+      "contract": "network failure persists a non-sensitive draft and retries with the same mobile idempotency key",
+      "result": "PASS"
+    }
+  },
+  "limitations": [
+    "The emulator run injected the network failure at the EvidenceGateway boundary instead of disabling the emulator radio.",
+    "Backend idempotency and offline/reconnect no-duplicate behavior are therefore supported by the existing API and integrated Android evidence listed above.",
+    "This gate does not replace pre_aab_xiaomi_smoke, which remains the only required physical-device gate."
+  ],
+  "production_touched": false
+}
