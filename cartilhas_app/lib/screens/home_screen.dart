@@ -756,6 +756,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
+                if (_hasSession)
+                  const PopupMenuItem(
+                    value: 'checkin',
+                    child: ListTile(
+                      leading: Icon(Icons.qr_code_scanner_outlined),
+                      title: Text('Registrar presença'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
                 const PopupMenuItem(
                   value: 'guide',
                   child: ListTile(
