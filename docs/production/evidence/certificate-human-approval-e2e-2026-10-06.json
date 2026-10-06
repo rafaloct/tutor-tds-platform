@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "release_gate": "certificate_human_approval_e2e",
+  "verified_at": "2026-10-06T10:49:50Z",
+  "source_sha": "341e45f1332b4c44a6ddc37d01d44d688a7753e2",
+  "executor": "LARGeo + avellaria",
+  "android_target": "emulator-5554",
+  "run_id": "fa493fe7dacf4993863f248b77e7fa81",
+  "apk_sha256": "D9C8C0951C17F9E0C2E7D006FC73D5FE2A3D1C381FF6F6B630BBD066B9FC66B2",
+  "android_flow": {
+    "request_created_pending": true,
+    "human_reason_required": true,
+    "cas_revision_sent": true,
+    "approved_state_visible": true,
+    "approved_not_issued": true,
+    "share_pdf_absent_after_approval": true
+  },
+  "backend_focal": {
+    "result": "pass",
+    "tests": "63/63",
+    "suites": [
+      "test_certificate_requests.py",
+      "test_certificate_emission_candidate.py",
+      "test_certificate_reference_context.py",
+      "test_certificates.py"
+    ]
+  },
+  "production_touched": false,
+  "limits": [
+    "Android presentation flow used an isolated in-process gateway; domain and authenticated emission boundary were validated by the focal backend suites.",
+    "Approval remains distinct from institutional emission."
+  ]
+}
