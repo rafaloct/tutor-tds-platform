@@ -37,6 +37,9 @@ function Invoke-GateCase {
     $dartDefines = ConvertTo-DartDefines -Values $Defines
     Push-Location $androidRoot
     try {
+        # stderr do JVM/Gradle (warnings) nao pode virar NativeCommandError
+        # em Windows PowerShell 5.1; o gate e avaliado somente pelo exit code.
+        $ErrorActionPreference = 'Continue'
         $output = & $gradleWrapper $Task --no-daemon --console=plain -q `
             "-Pdart-defines=$dartDefines" 2>&1
         $exitCode = $LASTEXITCODE
@@ -73,6 +76,7 @@ $production = [ordered]@{
     DURABLE_LEARNING_OUTBOX_ENABLED = 'false'
     JOURNEY_TRACEABILITY_ENABLED = 'false'
     SIGNED_SUPPORT_IDENTITY = 'false'
+    PUSH_NOTIFICATIONS_ENABLED = 'false'
 }
 
 Invoke-GateCase -Name 'debug aceita staging aprovado' `
@@ -138,6 +142,36 @@ foreach ($entry in $production.GetEnumerator()) {
 $wrongGateway.TUTOR_GATEWAY_URL = 'https://staging.example.invalid/gateway'
 Invoke-GateCase -Name 'release rejeita gateway nao aprovado' `
     -Task ':app:preReleaseBuild' -Defines $wrongGateway -ShouldPass $false
+
+$withFlutterMeta = [ordered]@{}
+foreach ($entry in $production.GetEnumerator()) {
+    $withFlutterMeta[$entry.Key] = $entry.Value
+}
+$withFlutterMeta.FLUTTER_VERSION = '3.44.9'
+$withFlutterMeta.FLUTTER_CHANNEL = '[user-branch]'
+$withFlutterMeta.FLUTTER_GIT_URL = 'unknown source'
+$withFlutterMeta.FLUTTER_FRAMEWORK_REVISION = '6b182d2c75'
+$withFlutterMeta.FLUTTER_ENGINE_REVISION = '5a2a6a42cc'
+$withFlutterMeta.FLUTTER_DART_VERSION = '3.12.2'
+Invoke-GateCase -Name 'release aceita metadata do toolchain Flutter' `
+    -Task ':app:preReleaseBuild' -Defines $withFlutterMeta `
+    -ShouldPass ($releaseStatus.release_build_allowed -eq $true)
+
+$unknownDefine = [ordered]@{}
+foreach ($entry in $withFlutterMeta.GetEnumerator()) {
+    $unknownDefine[$entry.Key] = $entry.Value
+}
+$unknownDefine.UNAPPROVED_RELEASE_FLAG = 'true'
+Invoke-GateCase -Name 'release rejeita define desconhecido mesmo com metadata Flutter' `
+    -Task ':app:preReleaseBuild' -Defines $unknownDefine -ShouldPass $false
+
+$enabledInactiveFlag = [ordered]@{}
+foreach ($entry in $withFlutterMeta.GetEnumerator()) {
+    $enabledInactiveFlag[$entry.Key] = $entry.Value
+}
+$enabledInactiveFlag.PUSH_NOTIFICATIONS_ENABLED = 'true'
+Invoke-GateCase -Name 'release rejeita flag inativa habilitada' `
+    -Task ':app:preReleaseBuild' -Defines $enabledInactiveFlag -ShouldPass $false
 
 Write-Output 'Matriz de ambiente Android aprovada; nenhum APK ou AAB foi gerado.'
 # The last case intentionally fails Gradle. Do not leak that expected rejection
