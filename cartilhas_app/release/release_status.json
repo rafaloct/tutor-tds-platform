@@ -52,9 +52,13 @@
     },
     {
       "id": "evidence_offline_android_e2e",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Perda de rede, retry idempotente e reabertura com novo código em Android QA; emulador é o executor padrão."
+      "description": "Perda de rede, retry idempotente e reabertura com novo código em Android QA; emulador é o executor padrão.",
+      "verified_at": "2026-10-06T07:22:32.948481+00:00",
+      "evidence": "docs/production/evidence/evidence-offline-android-emulator-2026-10-06.json",
+      "evidence_sha256": "e2db203e4b71985747148ad138101afc95495d36e726673d1ad846b7c8b7a09e",
+      "scope": "Android emulator gate: persisted non-sensitive draft across force-stop/reopen, required a fresh code, reused the same idempotency key and cleared the draft after success; backend/API evidence covers retry/no-duplicate behavior."
     },
     {
       "id": "pre_aab_xiaomi_smoke",
