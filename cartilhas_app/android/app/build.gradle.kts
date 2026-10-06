@@ -154,7 +154,7 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
     }
     val evidence = status["required_physical_evidence"] as? List<*>
         ?: throw GradleException(
-            "Build release bloqueado: evidencias fisicas ausentes.",
+            "Build release bloqueado: gates Android de release ausentes.",
         )
     val invalidEvidence = evidence.any { item ->
         item !is Map<*, *> ||
@@ -164,7 +164,7 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
     }
     if (invalidEvidence) {
         throw GradleException(
-            "Build release bloqueado: evidencia fisica invalida.",
+            "Build release bloqueado: gate Android de release invalido.",
         )
     }
     val incompleteRequiredGate = evidence
@@ -174,7 +174,7 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
     }
     if (incompleteRequiredGate) {
         throw GradleException(
-            "Build release bloqueado: evidencia fisica obrigatoria pendente.",
+            "Build release bloqueado: gate Android de release pendente.",
         )
     }
 }
