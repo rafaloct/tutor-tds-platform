@@ -62,13 +62,8 @@ try {
     Require ($version.environment -eq 'production' -and $version.schema_version -and
         $version.minimum_supported_app_version -and $version.compatibility_verified -eq $true) 'versão/schema/compatibilidade da API de produção não comprovados.'
     Require ($version.api_version -and $config.TUTOR_API_URL -eq $expectedApi) 'proveniência da API de produção divergente.'
-    Push-Location $apiRoot
-    try {
-        $heads = @(& uv run --locked alembic heads)
-        Require ($LASTEXITCODE -eq 0 -and $heads.Count -eq 1) 'cabeça Alembic local não identificada.'
-        $localSchema = ($heads[0] -split '\s+')[0]
-        Require ($version.schema_version -eq $localSchema) 'revision de produção diverge do HEAD Alembic.'
-    } finally { Pop-Location }
+    $localSchema = Get-CanonicalAlembicHead
+    Require ($version.schema_version -eq $localSchema) 'revision de produção diverge do HEAD Alembic.'
     try {
         Assert-ProductionBackendIdentity -VersionResponse $version -ExpectedSchemaVersion $localSchema `
             -CandidateVersionName $status.release.version_name -CandidateVersionCode $status.release.version_code | Out-Null
