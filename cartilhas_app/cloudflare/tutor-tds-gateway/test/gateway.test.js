@@ -195,6 +195,41 @@ test('contextual chat selects the course-version workspace, queries it, and sani
   assert.equal(JSON.stringify(payload).includes('docSource'), false);
 });
 
+test('contextual vector-search and chat requests both use the configured bearer token', async () => {
+  const upstreamEnv = scopedEnv();
+  const result = vectorSource('TDS_CTX_A_v1');
+  const calls = [];
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+    upstreamEnv,
+    {},
+    async (url, options) => {
+      const requestUrl = String(url);
+      calls.push({ url: requestUrl, authorization: options.headers.Authorization });
+      if (requestUrl.endsWith('/vector-search')) {
+        return Response.json({ results: [result] });
+      }
+      return Response.json({
+        textResponse: 'Contextual answer',
+        sources: [chatSource(result)],
+      });
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(
+    calls.map(({ url }) => new URL(url).pathname),
+    [
+      '/api/v1/workspace/course-a-v1/vector-search',
+      '/api/v1/workspace/course-a-v1/chat',
+    ],
+  );
+  assert.equal(calls.length, 2);
+  for (const call of calls) {
+    assert.equal(call.authorization, `Bearer ${upstreamEnv.ANYTHING_LLM_API_KEY}`);
+  }
+});
+
 test('context A and B route to distinct CourseVersion workspaces with real AnythingLLM source shapes', async () => {
   const cases = [
     {

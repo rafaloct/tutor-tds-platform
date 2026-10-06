@@ -749,7 +749,7 @@ async function searchLearningSources(
     response = await upstreamFetch(searchUrl, {
       method: 'POST',
       headers: {
-        Authorization: `******`,
+        Authorization: `Bearer ${upstream.apiKey}`,
         'Content-Type': 'application/json',
         'X-Request-Id': requestId,
       },
