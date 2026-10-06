@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "gate": "certificate_human_approval_e2e",
+  "status": "passed",
+  "verified_at": "2026-10-06T11:41:17",
+  "source_sha": "341e45f1332b4c44a6ddc37d01d44d688a7753e2",
+  "executor": {
+    "machine": "LARGeo",
+    "device": "emulator-5554",
+    "platform": "Android emulator"
+  },
+  "android_proof": {
+    "request_created_as_pending": true,
+    "human_reason_required": true,
+    "cas_revision_sent": true,
+    "approved_state_visible": true,
+    "approved_not_issued": true,
+    "result": "PASS"
+  },
+  "backend_proof": {
+    "machine": "avellaria",
+    "pytest_exit_code": 0,
+    "files": [
+      "api/tests/test_certificate_requests.py",
+      "api/tests/test_certificate_emission_candidate.py",
+      "api/tests/test_certificate_reference_context.py",
+      "api/tests/test_certificates.py"
+    ],
+    "result": "PASS"
+  },
+  "boundary": {
+    "request_approval_is_not_certificate_emission": true,
+    "authenticated_emission_candidate_contract_covered": true,
+    "wallet_isolation_contract_covered": true
+  },
+  "limits": [
+    "Android interaction uses a synthetic in-process gateway to exercise the real CertificateRequestsScreen.",
+    "Backend focal suites cover authorization, human review/CAS, reference context, candidate emission transport, and wallet isolation.",
+    "No production, Worker production, KV production, AAB, or Play action was performed."
+  ],
+  "production_touched": false
+}
