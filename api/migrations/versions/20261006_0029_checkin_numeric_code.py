@@ -10,16 +10,22 @@ depends_on = None
 
 
 def upgrade() -> None:
-    with op.batch_alter_table("class_sessions") as batch:
-        batch.add_column(
-            sa.Column("checkin_code_digest", sa.String(64), nullable=True)
-        )
-        batch.create_index(
-            "ix_class_sessions_checkin_code", ["checkin_code_digest"]
-        )
+    # Plain ADD COLUMN: rebuilding class_sessions would orphan the SQLite
+    # triggers session_presence_insert/session_presence_snapshot that
+    # reference it.
+    op.add_column(
+        "class_sessions",
+        sa.Column("checkin_code_digest", sa.String(64), nullable=True),
+    )
+    op.create_index(
+        "ix_class_sessions_checkin_code",
+        "class_sessions",
+        ["checkin_code_digest"],
+    )
 
 
 def downgrade() -> None:
-    with op.batch_alter_table("class_sessions") as batch:
-        batch.drop_index("ix_class_sessions_checkin_code")
-        batch.drop_column("checkin_code_digest")
+    op.drop_index(
+        "ix_class_sessions_checkin_code", table_name="class_sessions"
+    )
+    op.drop_column("class_sessions", "checkin_code_digest")
