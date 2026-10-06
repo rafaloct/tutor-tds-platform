@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../data/checkin_draft_store.dart';
 import '../data/evidence_repository.dart';
@@ -9,10 +10,12 @@ class EvidenceCheckinScreen extends StatefulWidget {
     super.key,
     required this.gateway,
     this.draftStore,
+    this.initialUri,
   });
 
   final EvidenceGateway gateway;
   final CheckinDraftStore? draftStore;
+  final String? initialUri;
 
   @override
   State<EvidenceCheckinScreen> createState() => _EvidenceCheckinScreenState();
@@ -21,6 +24,7 @@ class EvidenceCheckinScreen extends StatefulWidget {
 class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
   final _formKey = GlobalKey<FormState>();
   final _code = TextEditingController();
+  final _uri = TextEditingController();
   final _classId = TextEditingController();
   final _sessionId = TextEditingController();
   final _token = TextEditingController();
@@ -36,7 +40,12 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
   void initState() {
     super.initState();
     _draftStore = widget.draftStore ?? SharedPreferencesCheckinDraftStore();
-    _restoreDraft();
+    _restoreDraft().then((_) async {
+      final initial = widget.initialUri;
+      if (!mounted || initial == null) return;
+      _uri.text = initial;
+      await _submit();
+    });
   }
 
   Future<void> _restoreDraft() async {
@@ -44,8 +53,10 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
     if (!mounted || draft == null) return;
     setState(() {
       _pendingDraft = draft;
-      _classId.text = draft.classId;
-      _sessionId.text = draft.sessionId;
+      if (!draft.viaCode) {
+        _classId.text = draft.classId;
+        _sessionId.text = draft.sessionId;
+      }
       _kind = draft.kind;
       _idempotencyKey = draft.idempotencyKey;
     });
@@ -54,6 +65,7 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
   @override
   void dispose() {
     _code.dispose();
+    _uri.dispose();
     _classId.dispose();
     _sessionId.dispose();
     _token.dispose();
@@ -63,7 +75,7 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
   }
 
   Future<bool> _parseCode() async {
-    final raw = _code.text.trim();
+    final raw = _uri.text.trim();
     final uri = Uri.tryParse(raw);
     if (uri == null || uri.scheme != 'tutortds' || uri.host != 'checkin') {
       setState(() => _error = 'Código incompleto. Confira com a equipe.');
@@ -96,37 +108,64 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
   }
 
   Future<void> _submit() async {
-    if (!await _parseCode()) return;
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final digits = _code.text.replaceAll(RegExp(r'\D'), '');
+    final viaCode = digits.isNotEmpty;
+    String? localError;
+    if (!viaCode && _uri.text.trim().isEmpty) {
+      localError = 'Informe o código de 6 dígitos exibido pelo instrutor.';
+    } else if (viaCode && digits.length != 6) {
+      localError = 'O código do encontro tem 6 dígitos.';
+    }
+    if (localError != null) {
+      setState(() => _error = localError);
+      return;
+    }
+    if (!viaCode && !await _parseCode()) return;
+    if (viaCode && _pendingDraft != null) {
+      // The numeric code never reveals which session it belongs to, so a
+      // pending attempt cannot be proven to target the same one. A fresh key
+      // stays safe because the API deduplicates per session/user/kind anyway.
+      _pendingDraft = null;
+      _idempotencyKey = _newIdempotencyKey();
+      await _draftStore.clear();
+    }
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      final result = await widget.gateway.checkin(
-        classId: _classId.text,
-        sessionId: _sessionId.text,
-        kind: _kind,
-        idempotencyKey: _idempotencyKey,
-        token: _token.text,
-      );
+      final result = viaCode
+          ? await widget.gateway.checkinByCode(
+              code: digits,
+              kind: _kind,
+              idempotencyKey: _idempotencyKey,
+            )
+          : await widget.gateway.checkin(
+              classId: _classId.text,
+              sessionId: _sessionId.text,
+              kind: _kind,
+              idempotencyKey: _idempotencyKey,
+              token: _token.text,
+            );
       if (!mounted) return;
       setState(() {
         _result = result;
         _pendingDraft = null;
         _idempotencyKey = _newIdempotencyKey();
         _code.clear();
+        _uri.clear();
         _token.clear();
       });
       await _draftStore.clear();
     } on EvidenceApiException catch (error) {
       if (error.isNetworkFailure) {
         final draft = CheckinDraft(
-          classId: _classId.text,
-          sessionId: _sessionId.text,
+          classId: viaCode ? '' : _classId.text,
+          sessionId: viaCode ? '' : _sessionId.text,
           kind: _kind,
           idempotencyKey: _idempotencyKey,
           createdAt: DateTime.now().toUtc(),
+          viaCode: viaCode,
         );
         await _draftStore.write(draft);
         if (mounted) setState(() => _pendingDraft = draft);
@@ -159,11 +198,13 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
         if (_pendingDraft != null)
           Card.filled(
             key: const ValueKey('pending-checkin'),
-            child: const ListTile(
-              leading: Icon(Icons.pending_actions_outlined),
-              title: Text('Presença pendente neste aparelho'),
+            child: ListTile(
+              leading: const Icon(Icons.pending_actions_outlined),
+              title: const Text('Presença pendente neste aparelho'),
               subtitle: Text(
-                'A confirmação não foi enviada. Cole um código atual da mesma sessão para tentar novamente; o código anterior não foi salvo.',
+                _pendingDraft!.viaCode
+                    ? 'A confirmação não foi enviada. Digite o código atual do mesmo encontro para tentar novamente; o código anterior não foi salvo.'
+                    : 'A confirmação não foi enviada. Cole um código atual da mesma sessão para tentar novamente; o código anterior não foi salvo.',
               ),
             ),
           ),
@@ -184,23 +225,50 @@ class _EvidenceCheckinScreenState extends State<EvidenceCheckinScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
+                key: const ValueKey('session-code'),
                 controller: _code,
-                minLines: 2,
-                maxLines: 4,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(6),
+                ],
                 autocorrect: false,
                 enableSuggestions: false,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  letterSpacing: 12,
+                  fontWeight: FontWeight.bold,
+                ),
                 decoration: const InputDecoration(
-                  labelText: 'Código completo da sessão',
-                  hintText: 'tutortds://checkin?...',
-                  prefixIcon: Icon(Icons.qr_code_2),
+                  labelText: 'Código do encontro',
+                  hintText: '000 000',
+                  helperText: 'Somente os 6 dígitos exibidos pelo instrutor.',
+                  prefixIcon: Icon(Icons.pin_outlined),
                   border: OutlineInputBorder(),
                 ),
-                validator: (_) =>
-                    _classId.text.trim().isEmpty ||
-                        _sessionId.text.trim().isEmpty ||
-                        _token.text.trim().isEmpty
-                    ? 'Informe um código válido.'
-                    : null,
+                validator: (_) => null,
+              ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: const Text('Usar código completo do QR'),
+                subtitle: const Text('Opcional: cole o código escaneado.'),
+                children: [
+                  TextFormField(
+                    key: const ValueKey('qr-uri'),
+                    controller: _uri,
+                    minLines: 2,
+                    maxLines: 4,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    decoration: const InputDecoration(
+                      labelText: 'Código completo da sessão',
+                      hintText: 'tutortds://checkin?...',
+                      prefixIcon: Icon(Icons.qr_code_2),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (_) => null,
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               SegmentedButton<String>(

@@ -8,6 +8,7 @@ class EvidenceSession {
     required this.tokenExpiresAt,
     required this.tokenVersion,
     this.checkinToken,
+    this.checkinCode,
   });
 
   final String id;
@@ -18,6 +19,7 @@ class EvidenceSession {
   final DateTime tokenExpiresAt;
   final int tokenVersion;
   final String? checkinToken;
+  final String? checkinCode;
 
   factory EvidenceSession.fromJson(Map<String, dynamic> json) =>
       EvidenceSession(
@@ -29,6 +31,7 @@ class EvidenceSession {
         tokenExpiresAt: _date(json, 'token_expires_at'),
         tokenVersion: _int(json, 'token_version'),
         checkinToken: _optionalString(json['checkin_token']),
+        checkinCode: _optionalString(json['checkin_code']),
       );
 }
 

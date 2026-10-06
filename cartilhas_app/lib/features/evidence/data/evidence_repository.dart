@@ -41,6 +41,11 @@ abstract interface class EvidenceGateway {
     required String idempotencyKey,
     required String token,
   });
+  Future<EvidenceCheckin> checkinByCode({
+    required String code,
+    required String kind,
+    required String idempotencyKey,
+  });
   Future<EvidenceImportRecord> createImport({
     required String classId,
     required String sourceType,
@@ -316,6 +321,26 @@ class EvidenceRepository implements EvidenceGateway, OfficialAttendanceGateway {
       body: {'kind': kind, 'idempotency_key': idempotencyKey, 'token': token},
     ),
   );
+
+  @override
+  Future<EvidenceCheckin> checkinByCode({
+    required String code,
+    required String kind,
+    required String idempotencyKey,
+  }) {
+    final digits = code.replaceAll(RegExp(r'\D'), '');
+    if (digits.length != 6) {
+      throw const EvidenceApiException(
+        'Informe os 6 dígitos do encontro.',
+        statusCode: 422,
+      );
+    }
+    return _request(
+      'POST',
+      '/checkins/code',
+      body: {'kind': kind, 'idempotency_key': idempotencyKey, 'code': digits},
+    ).then(EvidenceCheckin.fromJson);
+  }
 
   @override
   Future<EvidenceImportRecord> createImport({
