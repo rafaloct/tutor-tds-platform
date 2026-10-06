@@ -26,9 +26,13 @@
   "required_physical_evidence": [
     {
       "id": "certificate_human_approval_e2e",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Pedido, revisão humana e emissão autenticada podem ser validados em staging/emulador; hardware físico não é requisito deste gate."
+      "description": "Pedido, revisão humana e emissão autenticada podem ser validados em staging/emulador; hardware físico não é requisito deste gate.",
+      "verified_at": "2026-10-06T11:41:17",
+      "evidence": "docs/production/evidence/certificate-human-approval-emulator-2026-10-06.json",
+      "evidence_sha256": "a54eac5ff7cb646b0b2eea50b9017f45fae8050e0fec0354510ee420f0d2312d",
+      "scope": "Android emulator E2E for request/review UX + real staging API→HMAC→Worker→KV proof from Issue #68; approved request remains distinct from institutional issuance."
     },
     {
       "id": "classroom_cold_offline_android_e2e",
@@ -52,9 +56,13 @@
     },
     {
       "id": "evidence_offline_android_e2e",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Perda de rede, retry idempotente e reabertura com novo código em Android QA; emulador é o executor padrão."
+      "description": "Perda de rede, retry idempotente e reabertura com novo código em Android QA; emulador é o executor padrão.",
+      "verified_at": "2026-10-06T10:22:01",
+      "evidence": "docs/production/evidence/android-evidence-offline-emulator-2026-10-06.json",
+      "evidence_sha256": "dbd8784ed1bab8678699ded1acf28eb5582ccaadb94b4359ed80774ea9701b59",
+      "scope": "LARGeo emulator-5554; offline draft persisted without token, force-stop/reopen required fresh code, same idempotency key reused, draft cleared after success."
     },
     {
       "id": "pre_aab_xiaomi_smoke",

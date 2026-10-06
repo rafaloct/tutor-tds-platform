@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "gate": "evidence_offline_android_e2e",
+  "status": "passed",
+  "verified_at": "2026-10-06T10:22:01",
+  "source_sha": "341e45f1332b4c44a6ddc37d01d44d688a7753e2",
+  "executor": {
+    "machine": "LARGeo",
+    "device": "emulator-5554",
+    "platform": "Android emulator"
+  },
+  "run_id": "be93dcc0366249d2b6481531ea637986",
+  "apk_sha256": "76ED7545C4227FB9ACD5A8B74A6110529E2108DF931D2ECB29B7EEAC1D7D493E",
+  "proof": {
+    "phase1": {
+      "draft_persisted": true,
+      "token_absent": true,
+      "idempotency_key_present": true,
+      "result": "PASS"
+    },
+    "process_restart": {
+      "force_stop": true,
+      "same_apk_reopened": true,
+      "reinstall_between_phases": false
+    },
+    "phase2": {
+      "fresh_code_required": true,
+      "same_idempotency_key": true,
+      "draft_cleared": true,
+      "result": "PASS"
+    }
+  },
+  "limits": [
+    "Synthetic Evidence gateway used to isolate Android persistence/restart behavior.",
+    "Backend idempotency contract remains covered by the existing API test suite; this gate does not mutate staging or production.",
+    "Xiaomi is intentionally not required by the current Android release QA contract; physical smoke is deferred to pre_aab_xiaomi_smoke."
+  ],
+  "production_touched": false
+}
