@@ -7,7 +7,6 @@ import 'package:cartilhas_app/features/learning_context/learning_context_control
 import 'package:cartilhas_app/features/learning_context/learning_context_repository.dart';
 import 'learning_context_test.dart' show contextPayload;
 import 'package:cartilhas_app/models/cartilha.dart';
-import 'package:cartilhas_app/models/tutor_learning_context.dart';
 import 'package:cartilhas_app/screens/chat_experience_screen.dart';
 import 'package:cartilhas_app/screens/genui_assistant_screen.dart';
 import 'package:flutter/material.dart';
