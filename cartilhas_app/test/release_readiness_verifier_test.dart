@@ -34,7 +34,7 @@ void main() {
     expect(
       result.issues.map((issue) => issue.code),
       containsAll({
-        'physical_evidence_pending',
+        'release_evidence_pending',
         'release_build_frozen',
         'artifact_superseded',
       }),
@@ -218,7 +218,7 @@ void main() {
 
     expect(
       result.issues.map((issue) => issue.code),
-      contains('invalid_physical_evidence'),
+      contains('invalid_release_evidence'),
     );
   });
 
@@ -250,7 +250,7 @@ void main() {
       ).verify(ReleaseIntent.build);
       expect(
         result.issues.map((issue) => issue.code),
-        contains('invalid_physical_evidence'),
+        contains('invalid_release_evidence'),
       );
     });
   }
@@ -341,9 +341,10 @@ void _writeStatus(
       'required_physical_evidence': [
         for (final id in [
           'certificate_human_approval_e2e',
-          'classroom_cold_offline_xiaomi',
-          'course_versioning_xiaomi',
-          'evidence_offline_xiaomi',
+          'classroom_cold_offline_android_e2e',
+          'course_versioning_android_e2e',
+          'evidence_offline_android_e2e',
+          'pre_aab_xiaomi_smoke',
         ])
           {
             'id': id,
