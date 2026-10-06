@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "release_gate": "evidence_offline_android_e2e",
+  "verified_at": "2026-10-06T10:22:01Z",
+  "source_sha": "341e45f1332b4c44a6ddc37d01d44d688a7753e2",
+  "executor": "LARGeo",
+  "android_target": "emulator-5554",
+  "run_id": "be93dcc0366249d2b6481531ea637986",
+  "apk_sha256": "76ED7545C4227FB9ACD5A8B74A6110529E2108DF931D2ECB29B7EEAC1D7D493E",
+  "implementation_under_test": [
+    "EvidenceCheckinScreen",
+    "SharedPreferencesCheckinDraftStore"
+  ],
+  "phase1": {
+    "result": "pass",
+    "draft_persisted": true,
+    "token_persisted": false,
+    "idempotency_key_present": true
+  },
+  "process_restart": {
+    "force_stop": true,
+    "same_apk_reused": true,
+    "reinstall_between_phases": false
+  },
+  "phase2": {
+    "result": "pass",
+    "fresh_code_required": true,
+    "same_idempotency_key": true,
+    "draft_cleared_after_success": true
+  },
+  "production_touched": false,
+  "limits": [
+    "Android behavioral gate used an isolated synthetic gateway; no production or staging records were mutated.",
+    "Backend idempotency and attendance contracts remain covered by the integrated API/E2E suites."
+  ]
+}
