@@ -35,8 +35,20 @@
   },
   "limits": [
     "Android interaction uses a synthetic in-process gateway to exercise the real CertificateRequestsScreen.",
+    "Real staging emission boundary was already homologated under Issue #68: API -> HMAC -> isolated staging Worker -> staging KV, with replay/fail-closed/reconciliation.",
     "Backend focal suites cover authorization, human review/CAS, reference context, candidate emission transport, and wallet isolation.",
-    "No production, Worker production, KV production, AAB, or Play action was performed."
+    "Institutional final issuance remains separate; no production, Worker production, KV production, AAB, or Play action was performed."
   ],
-  "production_touched": false
+  "production_touched": false,
+  "staging_emission_proof": {
+    "contract": "docs/production/ISSUE68_CERTIFICATE_STAGING_GUARD.md",
+    "status": "TESTED-STAGING",
+    "external_evidence": "https://github.com/rafaloct/tutor-tds-platform/issues/68#issuecomment-5976124624",
+    "api_hmac_worker_kv": true,
+    "divergent_context_fail_closed": true,
+    "replay_idempotent": true,
+    "authenticated_receipt_reconciled": true,
+    "official_wallet_unchanged": true,
+    "production_touched": false
+  }
 }
