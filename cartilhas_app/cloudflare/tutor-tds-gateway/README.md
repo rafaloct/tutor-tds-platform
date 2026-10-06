@@ -86,6 +86,67 @@ Os prompts, o workspace e os esquemas JSON ficam no servidor. A resposta do
 modelo só é entregue ao app depois de passar pela normalização estrutural e
 pelos limites de tamanho do Worker.
 
+## Vínculo contextual do Tutor
+
+`POST /v1/chat` aceita opcionalmente `learning_context` com IDs acadêmicos
+estáveis de curso e edição, módulo e experiência. O cliente legado sem esse
+objeto continua usando o workspace configurado em `ANYTHING_LLM_WORKSPACE`.
+Para chamadas estruturadas, o Worker exige uma entrada exata para
+`course_id|course_version_id` em `TUTOR_RAG_SCOPE_MAP`; não usa o workspace
+legado como fallback. O mapa é somente bootstrap temporário e não é catálogo
+acadêmico nem fonte de verdade permanente.
+
+`TUTOR_RAG_SCOPE_MAP` é uma variável JSON do Worker administrada após um gate
+próprio. Cada CourseVersion precisa apontar para um workspace distinto, já
+provisionado; o mapa rejeita dois course/version diferentes apontando para o
+mesmo workspace. O formato temporário da chave é
+`course_id|course_version_id`. Exemplo exclusivamente sintético:
+
+```json
+{
+  "course-a|version-1": "course-a-v1",
+  "course-b|version-3": "course-b-v3"
+}
+```
+
+O Worker faz `vector-search` no workspace exclusivo da CourseVersion antes do
+chat e depois chama o mesmo workspace em `mode: "query"`, sem session ID. O
+contrato público auditado do AnythingLLM devolve no `vector-search` somente
+metadata documental genérica, como `title`, `docSource` e `chunkSource`;
+ele não preserva `course_id`, `course_version_id`, `module_id` ou
+`experience_id`. Por isso, o escopo de curso/edição é derivado do binding
+1:1 CourseVersion → workspace, e nunca de metadata acadêmica inventada.
+
+As citations do chat usam o shape real de source do AnythingLLM, com campos no
+topo do objeto. O gateway exige correspondência com uma fonte já observada no
+`vector-search`, usando ID privado quando presente e título/document source
+como evidência adicional. Esses identificadores servem apenas internamente e
+não são devolvidos ao app. O retorno público contém somente título,
+`course_id`, `course_version_id` e score opcional. Paths, IDs privados,
+URLs, chunks e metadata interna são descartados.
+
+`module_id`, `experience_id` e `experience_type` continuam aceitos e
+validados no `learning_context`, mas NÃO são apresentados como atributos da
+fonte e NÃO são tratados como isolamento comprovado. O AnythingLLM auditado não
+oferece filtro documentado por metadata/documento capaz de fechar essa fronteira
+dentro de um workspace compartilhado. Assim,
+`RAG_SCOPE_GRANULARITY=CourseVersion`, `MODULE_ISOLATION=BLOCKED`,
+`EXPERIENCE_ISOLATION=BLOCKED` e `WORKSPACE_PER_EXPERIENCE=NO`.
+
+Mapeamento ausente, source estruturalmente insegura, citation que não corresponde
+à pré-busca ou erro upstream falha fechado com `rag_context_unresolved` ou o
+erro sanitizado aplicável. O mapa é configuração temporária de conteúdo, não
+autorização acadêmica, e não pode conter PII.
+
+A arquitetura permanente deve derivar o vínculo do ciclo de publicação:
+CourseVersion publicada → material aprovado → ingestão/indexação → registro de
+`rag_scope` → resolução pelo gateway. `TUTOR_RAG_SCOPE_MAP` permanece
+temporário até esse lifecycle ser definido. O contrato existente de promoção
+CourseVersion agora valida e preserva Experience Blocks tipados. A necessidade
+de mudança FastAPI para o futuro registro autoritativo de RAG continua
+`UNKNOWN`; nenhum endpoint RAG foi inventado. Nenhum workspace foi criado ou
+alterado.
+
 ## Certificados
 
 `POST /v1/certificates` aceita somente cartilhas presentes na lista fechada do

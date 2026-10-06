@@ -8,6 +8,7 @@ import 'package:cartilhas_app/features/learning_context/learning_context_reposit
 import 'learning_context_test.dart' show contextPayload;
 import 'package:cartilhas_app/models/cartilha.dart';
 import 'package:cartilhas_app/screens/chat_experience_screen.dart';
+import 'package:cartilhas_app/screens/genui_assistant_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,6 +63,21 @@ Future<void> advanceReader(WidgetTester tester) async {
   await tester.tap(find.text('Continuar'));
   await tester.pumpAndSettle(const Duration(milliseconds: 200));
 }
+
+Cartilha _tutorCourse({String? courseVersionId, String? classId}) => Cartilha(
+  id: 'course',
+  title: 'Cartilha contextual',
+  author: 'TDS',
+  classId: classId,
+  courseVersionId: courseVersionId,
+  sections: [
+    Section(
+      id: 'module-a1',
+      title: 'Módulo A1',
+      messages: [Message(type: 'bot', content: 'Conteúdo do módulo')],
+    ),
+  ],
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -247,6 +263,100 @@ void main() {
         isNotNull,
       );
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'general Tutor sends course, CourseVersion, and current module context',
+    (tester) async {
+      await openReader(
+        tester,
+        _tutorCourse(courseVersionId: 'version-a1'),
+      );
+      await tester.tap(find.byTooltip('Perguntar ao Tutor de IA'));
+      await tester.pumpAndSettle();
+
+      final tutor = tester.widget<GenUIAssistantScreen>(
+        find.byType(GenUIAssistantScreen),
+      );
+      expect(tutor.learningContext?.courseId, 'course');
+      expect(tutor.learningContext?.courseVersionId, 'version-a1');
+      expect(tutor.learningContext?.moduleId, 'module-a1');
+      expect(tutor.learningContext?.experienceId, isNull);
+      expect(tutor.learningContext?.experienceType, isNull);
+    },
+  );
+
+  testWidgets('general Tutor keeps the legacy path without a CourseVersion', (
+    tester,
+  ) async {
+    await openReader(tester, _tutorCourse());
+    await tester.tap(find.byTooltip('Perguntar ao Tutor de IA'));
+    await tester.pumpAndSettle();
+
+    final tutor = tester.widget<GenUIAssistantScreen>(
+      find.byType(GenUIAssistantScreen),
+    );
+    expect(tutor.learningContext, isNull);
+    expect(tutor.initialContext, 'Cartilha contextual');
+  });
+
+  testWidgets(
+    'general Tutor fails closed when the CourseVersion differs from the snapshot',
+    (tester) async {
+      final controller = LearningContextController(
+        FakeLearningContextRepository({
+          'class-1': LearningContextSnapshot.fromJson(
+            contextPayload(version: 'snapshot-version'),
+          ),
+        }),
+      );
+      addTearDown(controller.dispose);
+      await controller.load('class-1');
+      await openReader(
+        tester,
+        _tutorCourse(
+          classId: 'class-1',
+          courseVersionId: 'cartilha-version',
+        ),
+        controller: controller,
+      );
+      await tester.tap(find.byTooltip('Perguntar ao Tutor de IA'));
+      await tester.pumpAndSettle();
+
+      final tutor = tester.widget<GenUIAssistantScreen>(
+        find.byType(GenUIAssistantScreen),
+      );
+      expect(tutor.learningContext, isNull);
+    },
+  );
+
+  testWidgets(
+    'general Tutor uses the matching authoritative snapshot CourseVersion',
+    (tester) async {
+      final controller = LearningContextController(
+        FakeLearningContextRepository({
+          'class-1': LearningContextSnapshot.fromJson(
+            contextPayload(version: 'snapshot-version'),
+          ),
+        }),
+      );
+      addTearDown(controller.dispose);
+      await controller.load('class-1');
+      await openReader(
+        tester,
+        _tutorCourse(classId: 'class-1'),
+        controller: controller,
+      );
+      await tester.tap(find.byTooltip('Perguntar ao Tutor de IA'));
+      await tester.pumpAndSettle();
+
+      final tutor = tester.widget<GenUIAssistantScreen>(
+        find.byType(GenUIAssistantScreen),
+      );
+      expect(tutor.learningContext?.courseId, 'course');
+      expect(tutor.learningContext?.courseVersionId, 'snapshot-version');
+      expect(tutor.learningContext?.moduleId, 'module-a1');
     },
   );
 }

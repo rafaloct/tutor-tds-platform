@@ -13,6 +13,7 @@ import '../widgets/tds_wait_experience.dart';
 import 'genui_assistant_screen.dart';
 import '../features/certificates/presentation/certificate_requests_screen.dart';
 import '../features/profile/data/profile_data_store.dart';
+import '../models/tutor_learning_context.dart';
 import '../features/study_progress/study_progress_repository.dart';
 import '../features/learning_events/learning_event.dart';
 import '../features/learning_events/learning_event_queue.dart';
@@ -517,6 +518,23 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     );
   }
 
+  String? get _tutorCourseVersionId {
+    final contextVersion = widget
+        .learningContextController
+        ?.snapshot
+        ?.context;
+    final cartilhaVersion = widget.cartilha.courseVersionId;
+    if (contextVersion?.courseId == widget.cartilha.id) {
+      if (cartilhaVersion != null &&
+          cartilhaVersion.trim().isNotEmpty &&
+          cartilhaVersion != contextVersion!.courseVersionId) {
+        return null;
+      }
+      return contextVersion!.courseVersionId;
+    }
+    return cartilhaVersion;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -576,19 +594,34 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
             IconButton(
               tooltip: 'Perguntar ao Tutor de IA',
               icon: const Icon(Icons.psychology),
-              onPressed: () => Navigator.push(
-                context,
-                trackedRoute(
-                  pageId: 'ai_assistant',
-                  courseId: widget.cartilha.id,
-                  resourceId: 'ai_chat',
-                  featureId: 'ai_tutor',
-                  builder: (_) => GenUIAssistantScreen(
-                    initialContext: widget.cartilha.title,
-                    contextLabel: widget.cartilha.title,
+              onPressed: () {
+                final section = widget.cartilha.sections.isEmpty
+                    ? null
+                    : widget.cartilha.sections[_currentSectionIndex];
+                final courseVersionId = _tutorCourseVersionId;
+                final learningContext =
+                    courseVersionId != null && courseVersionId.trim().isNotEmpty
+                    ? TutorLearningContext(
+                        courseId: widget.cartilha.id,
+                        courseVersionId: courseVersionId,
+                        moduleId: section?.id,
+                      )
+                    : null;
+                Navigator.push(
+                  context,
+                  trackedRoute(
+                    pageId: 'ai_assistant',
+                    courseId: widget.cartilha.id,
+                    resourceId: 'ai_chat',
+                    featureId: 'ai_tutor',
+                    builder: (_) => GenUIAssistantScreen(
+                      initialContext: widget.cartilha.title,
+                      contextLabel: widget.cartilha.title,
+                      learningContext: learningContext,
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),

@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "evidence": "ai_rag_courseversion_sentinel_staging",
+  "track": "TRACK_D",
+  "status": "passed",
+  "rag_scope_granularity": "CourseVersion",
+  "executed_at": "2026-10-06T02:06:33.643Z",
+  "staging_base_sha": "9577541289037d7a9d4eff1e8555cf3b3e11f611",
+  "pr": "https://github.com/rafaloct/tutor-tds-platform/pull/136",
+  "gateway_source_commit": "999456513d007d1105b77ce65321f59afbb47345",
+  "gateway_source_sha256": "e9a4cb4611451e1562ca3bc98d857f9c53b5eeb2750d58036ce2a63e1bc9597e",
+  "staging_worker": {
+    "name": "tutor-tds-gateway-staging",
+    "host": "tutor-tds-gateway-staging.tdsipex.workers.dev",
+    "version_id": "08fdea1c-b381-47d0-84f5-7ae806344ddf",
+    "TUTOR_ENVIRONMENT": "staging",
+    "kv_bindings": [],
+    "legacy_workspace": "tds-qa-legacy-unbound",
+    "scope_map": {
+      "tds-qa-course-a|tds-qa-version-a1": "tds-qa-ctx-a-v1",
+      "tds-qa-course-b|tds-qa-version-b1": "tds-qa-ctx-b-v1"
+    }
+  },
+  "anythingllm": {
+    "instance": "ia-tutor (production instance, isolated QA workspaces only)",
+    "qa_workspaces": [
+      "tds-qa-ctx-a-v1",
+      "tds-qa-ctx-b-v1"
+    ],
+    "qa_documents": "1 synthetic raw-text document per workspace, distinct marker, no personal data",
+    "cartilhas_workspace_modified": false,
+    "cartilhas_last_updated_at": "2026-06-18T18:41:34.355Z"
+  },
+  "sentinel": {
+    "tool": "tooling/ai_qa/verify_rag_sentinel.mjs",
+    "output": {
+      "timestamp": "2026-10-06T02:06:33.643Z",
+      "environment": "staging",
+      "contextual_rag_sentinel": "PASS",
+      "cases": [
+        {
+          "context": "A",
+          "gateway": "PASS",
+          "http_status": 200,
+          "latency_ms": 1646,
+          "request_id": "209a56b3-9546-4f38-b64c-d1431416104c",
+          "source_count": 1,
+          "scope_sources": "PASS",
+          "rag_sentinel": "PASS",
+          "error_category": null
+        },
+        {
+          "context": "B",
+          "gateway": "PASS",
+          "http_status": 200,
+          "latency_ms": 1298,
+          "request_id": "d9e71554-12f5-461c-a95c-42a8d1265fbb",
+          "source_count": 1,
+          "scope_sources": "PASS",
+          "rag_sentinel": "PASS",
+          "error_category": null
+        }
+      ]
+    }
+  },
+  "additional_cases": {
+    "fail_closed": [
+      {
+        "case": "unknown_courseversion",
+        "status": 503,
+        "error": "rag_context_unresolved",
+        "has_text": false,
+        "marker_A_present": false,
+        "marker_B_present": false,
+        "sources": 0,
+        "request_id": "11e58fdd-f2b7-40fa-a225-b628387aa901",
+        "latency_ms": 61
+      },
+      {
+        "case": "cross_alias_courseA_versionB",
+        "status": 503,
+        "error": "rag_context_unresolved",
+        "has_text": false,
+        "marker_A_present": false,
+        "marker_B_present": false,
+        "sources": 0,
+        "request_id": "a27d642e-b2fa-4086-ae30-80f260bebc64",
+        "latency_ms": 39
+      },
+      {
+        "case": "missing_course_version_id",
+        "status": 400,
+        "error": "invalid_learning_context",
+        "has_text": false,
+        "marker_A_present": false,
+        "marker_B_present": false,
+        "sources": 0,
+        "request_id": "27e255fd-08ca-44fc-ba99-43fb760df335",
+        "latency_ms": 54
+      }
+    ],
+    "pii_rejected": [
+      {
+        "case": "pii_field_in_context",
+        "status": 400,
+        "error": "invalid_learning_context",
+        "has_text": false,
+        "marker_A_present": false,
+        "marker_B_present": false,
+        "sources": 0,
+        "request_id": "6dc5ac83-2bcb-46fc-9289-38543c42e1ac",
+        "latency_ms": 58
+      }
+    ],
+    "legacy_without_context_no_cartilhas_fallback": [
+      {
+        "case": "legacy_no_context_no_cartilhas_fallback",
+        "status": 502,
+        "error": "invalid_upstream_response",
+        "has_text": false,
+        "marker_A_present": false,
+        "marker_B_present": false,
+        "sources": 0,
+        "request_id": "18dfae04-2009-463b-a4d0-695561472c1f",
+        "latency_ms": 266
+      }
+    ],
+    "account_switch": [
+      {
+        "case": "account1_contextA",
+        "status": 200,
+        "error": null,
+        "own_marker": true,
+        "other_marker": false,
+        "sources": 1,
+        "sources_match_context": true,
+        "source_keys": [
+          "course_id",
+          "course_version_id",
+          "score",
+          "title"
+        ],
+        "request_id": "37598da7-4c98-4144-a1a1-5f4c1b2cf4c8",
+        "latency_ms": 1340
+      },
+      {
+        "case": "account2_contextB_after_account1",
+        "status": 200,
+        "error": null,
+        "own_marker": true,
+        "other_marker": false,
+        "sources": 1,
+        "sources_match_context": true,
+        "source_keys": [
+          "course_id",
+          "course_version_id",
+          "score",
+          "title"
+        ],
+        "request_id": "c0db090b-8a26-4577-a3af-8627da7a1c91",
+        "latency_ms": 1512
+      }
+    ]
+  },
+  "prior_failed_runs": [
+    {
+      "executed_at": "2026-10-06T02:03:30.091Z",
+      "gateway_source_commit": "5bf8a1246d6182495d6251fd246d501421240a5b",
+      "result": "FAIL",
+      "error_category": "service_unavailable",
+      "root_cause": "searchLearningSources sent a literal masked Authorization header to vector-search; fixed in 9994565 with regression test"
+    }
+  ],
+  "not_recorded": [
+    "prompt",
+    "full response",
+    "markers",
+    "secrets",
+    "personal data",
+    "private storage IDs/paths"
+  ],
+  "deferred": {
+    "module_isolation": "DEFERRED",
+    "experience_isolation": "DEFERRED",
+    "permanent_rag_registry": "DEFERRED"
+  },
+  "production_touched": false
+}
