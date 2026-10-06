@@ -10,8 +10,7 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá, meu vizinho! Sou o TUTOR VIZINHO e hoje vamos falar de um assunto sério: o nosso suado dinheirinho. Sabe quando você vende uma saca de milho ou umas galinhas e, antes do mês acabar, o dinheiro já sumiu? Isso acontece com muita gente — e tem solução!",
-          "experience": {"id": "financas-orcamento-cenario-01", "kind": "scenario", "objective": "Explore um orçamento, uma meta ou uma precificação contextualizada sem informar valores pessoais.", "required": false, "actionLabel": "Escolher um cenário financeiro", "ai": {"starterPrompt": "Ajude-me a explorar um cenário de orçamento, meta ou precificação e explique consequências. Não tome decisões financeiras por mim."}}
+          "content": "Olá, meu vizinho! Sou o TUTOR VIZINHO e hoje vamos falar de um assunto sério: o nosso suado dinheirinho. Sabe quando você vende uma saca de milho ou umas galinhas e, antes do mês acabar, o dinheiro já sumiu? Isso acontece com muita gente — e tem solução!"
         },
         {
           "type": "bot",

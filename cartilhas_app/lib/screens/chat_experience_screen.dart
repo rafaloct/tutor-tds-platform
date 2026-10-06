@@ -10,7 +10,6 @@ import '../features/auth/data/auth_repository.dart';
 import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
-import '../widgets/learning_experience_card.dart';
 import 'genui_assistant_screen.dart';
 import '../features/certificates/presentation/certificate_requests_screen.dart';
 import '../features/profile/data/profile_data_store.dart';
@@ -730,7 +729,6 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   Widget _buildBubble(Message msg) {
     final isUser = msg.type == 'user';
-    final messageSection = _sectionForMessage(msg);
     // Bolha especial de conclusão
     final isCompletion =
         _isCompleted &&
@@ -783,19 +781,6 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                 fontWeight: isCompletion ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
-            if (msg.experience != null)
-              LearningExperienceCard(
-                experience: msg.experience!,
-                onAskTutor: msg.experience!.ai == null ||
-                        messageSection == null ||
-                        _tutorCourseVersionId?.trim().isNotEmpty !=
-                            true
-                    ? null
-                    : () => _openExperienceTutor(
-                        section: messageSection,
-                        message: msg,
-                      ),
-              ),
             if (!isUser)
               Align(
                 alignment: Alignment.centerRight,
@@ -813,66 +798,6 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                 ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-
-  /// Visible messages can belong to a previously completed module. Resolve the
-  /// authored section from the message itself instead of using the current UI
-  /// cursor, so Tutor IA receives only the matching pedagogical context.
-  Section? _sectionForMessage(Message message) {
-    for (final section in widget.cartilha.sections) {
-      if (section.messages.contains(message)) return section;
-    }
-    return null;
-  }
-
-  void _openExperienceTutor({
-    required Section section,
-    required Message message,
-  }) {
-    final experience = message.experience;
-    final courseVersionId = _tutorCourseVersionId;
-    if (experience == null ||
-        experience.ai == null ||
-        courseVersionId == null ||
-        courseVersionId.trim().isEmpty) {
-      return;
-    }
-    final ai = experience.ai!;
-    final learningContext = TutorLearningContext(
-      courseId: widget.cartilha.id,
-      courseVersionId: courseVersionId,
-      moduleId: section.id,
-      experienceId: experience.id,
-      experienceType: switch (experience.kind) {
-        ExperienceKind.scenario => TutorExperienceType.scenario,
-        ExperienceKind.reveal => TutorExperienceType.reveal,
-        ExperienceKind.reflection => TutorExperienceType.reflection,
-        ExperienceKind.actionChallenge =>
-          TutorExperienceType.actionChallenge,
-      },
-    );
-    // Deliberately build this from content only. No profile, enrollment,
-    // progress, attendance, or other participant data crosses this boundary.
-    final pedagogicalContext = ExperienceTutorContext.fromContent(
-      cartilha: widget.cartilha,
-      section: section,
-      message: message,
-    );
-    Navigator.push(
-      context,
-      trackedRoute(
-        pageId: 'ai_assistant',
-        courseId: widget.cartilha.id,
-        resourceId: 'ai_chat',
-        featureId: 'ai_tutor_experience',
-        builder: (_) => GenUIAssistantScreen(
-          initialContext: pedagogicalContext,
-          contextLabel: widget.cartilha.title,
-          learningContext: learningContext,
-          starterPrompt: ai.starterPrompt,
         ),
       ),
     );

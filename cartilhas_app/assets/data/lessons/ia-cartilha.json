@@ -10,8 +10,7 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá! Você já percebeu que o celular sugere a próxima palavra quando você está digitando? Ou que o aplicativo do banco identifica se uma compra é suspeita? Isso é INTELIGÊNCIA ARTIFICIAL (IA) — e ela já faz parte do seu dia a dia sem você perceber.",
-          "experience": {"id": "ia-pergunta-especifica-revelacao-01", "kind": "reveal", "objective": "Transforme uma pergunta vaga em uma pergunta específica, converse com o Tutor IA e reflita sobre o que precisa ser verificado.", "required": false, "actionLabel": "Melhorar minha pergunta", "ai": {"starterPrompt": "Ajude-me a transformar uma pergunta vaga em uma pergunta específica. Explique também o que devo verificar antes de confiar na resposta."}}
+          "content": "Olá! Você já percebeu que o celular sugere a próxima palavra quando você está digitando? Ou que o aplicativo do banco identifica se uma compra é suspeita? Isso é INTELIGÊNCIA ARTIFICIAL (IA) — e ela já faz parte do seu dia a dia sem você perceber."
         },
         {
           "type": "bot",

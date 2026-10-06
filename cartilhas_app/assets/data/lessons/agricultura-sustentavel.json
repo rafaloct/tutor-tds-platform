@@ -10,8 +10,7 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá, meu vizinho! Sou o TUTOR VIZINHO do programa TDS. Hoje vamos conversar sobre Agricultura Sustentável — como plantar respeitando a natureza e garantir renda para sua família.",
-          "experience": {"id": "agricultura-diagnostico-cenario-01", "kind": "scenario", "objective": "Faça um diagnóstico prático: escolha um ponto de água, solo, diversidade ou comercialização para observar na sua realidade.", "required": false, "actionLabel": "Escolher um ponto para observar", "ai": {"starterPrompt": "Ajude-me a criar perguntas simples para observar água, solo, diversidade ou comercialização na minha produção. Não substitua orientação técnica local."}}
+          "content": "Olá, meu vizinho! Sou o TUTOR VIZINHO do programa TDS. Hoje vamos conversar sobre Agricultura Sustentável — como plantar respeitando a natureza e garantir renda para sua família."
         },
         {
           "type": "bot",

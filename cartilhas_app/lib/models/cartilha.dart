@@ -67,10 +67,6 @@ class Message {
   final String? feedback;
   final String? explanation;
 
-  /// An optional, non-assessed activity shown alongside an existing message.
-  /// Keeping it nested preserves the order and identity of legacy messages.
-  final ExperienceBlock? experience;
-
   bool get isAssessmentQuestion => type == 'question' || type == 'quiz';
 
   Message({
@@ -79,84 +75,11 @@ class Message {
     this.options,
     this.feedback,
     this.explanation,
-    this.experience,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
   Map<String, dynamic> toJson() => _$MessageToJson(this);
-}
-
-@JsonSerializable()
-class ExperienceBlock {
-  /// Stable content identifier. It is authored with the lesson and never
-  /// inferred from text or message position, so a future CourseVersion can
-  /// address the same experience without changing the Flutter contract.
-  final String id;
-  final ExperienceKind kind;
-  final String objective;
-  @JsonKey(name: 'required', defaultValue: false)
-  final bool isRequired;
-  final String? actionLabel;
-  final ExperienceAiConfig? ai;
-
-  const ExperienceBlock({
-    required this.id,
-    required this.kind,
-    required this.objective,
-    this.isRequired = false,
-    this.actionLabel,
-    this.ai,
-  });
-
-  factory ExperienceBlock.fromJson(Map<String, dynamic> json) =>
-      _$ExperienceBlockFromJson(json);
-  Map<String, dynamic> toJson() => _$ExperienceBlockToJson(this);
-
-  static bool isValidStableId(String value) =>
-      RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(value);
-}
-
-@JsonEnum(alwaysCreate: true)
-enum ExperienceKind {
-  @JsonValue('scenario')
-  scenario,
-  @JsonValue('reveal')
-  reveal,
-  @JsonValue('reflection')
-  reflection,
-  @JsonValue('action_challenge')
-  actionChallenge,
-}
-
-@JsonSerializable()
-class ExperienceAiConfig {
-  final String starterPrompt;
-
-  const ExperienceAiConfig({required this.starterPrompt});
-
-  factory ExperienceAiConfig.fromJson(Map<String, dynamic> json) =>
-      _$ExperienceAiConfigFromJson(json);
-  Map<String, dynamic> toJson() => _$ExperienceAiConfigToJson(this);
-}
-
-/// The only context that a content experience is allowed to hand to Tutor IA.
-/// It is intentionally derived exclusively from the published lesson content.
-class ExperienceTutorContext {
-  static String fromContent({
-    required Cartilha cartilha,
-    required Section section,
-    required Message message,
-  }) {
-    final experience = message.experience;
-    if (experience == null) return '';
-    return [
-      'Cartilha: ${cartilha.title}',
-      'Módulo: ${section.title}',
-      'Objetivo: ${experience.objective}',
-      'Desafio atual: ${message.content}',
-    ].join('\n');
-  }
 }
 
 @JsonSerializable()
