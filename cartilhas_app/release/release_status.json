@@ -31,8 +31,8 @@
       "description": "Pedido, revisão humana e emissão autenticada podem ser validados em staging/emulador; hardware físico não é requisito deste gate.",
       "verified_at": "2026-10-06T11:41:17",
       "evidence": "docs/production/evidence/certificate-human-approval-emulator-2026-10-06.json",
-      "evidence_sha256": "188c7e543b14930c9718129df2664ce00977b4f0642cd1043e15c6d70d66e005",
-      "scope": "Android emulator E2E for request/review UX plus focal backend certificate suites; approved request remains distinct from issuance."
+      "evidence_sha256": "a54eac5ff7cb646b0b2eea50b9017f45fae8050e0fec0354510ee420f0d2312d",
+      "scope": "Android emulator E2E for request/review UX + real staging API→HMAC→Worker→KV proof from Issue #68; approved request remains distinct from institutional issuance."
     },
     {
       "id": "classroom_cold_offline_android_e2e",
