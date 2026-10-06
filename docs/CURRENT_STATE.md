@@ -31,7 +31,8 @@ pelo contrato do gateway, sem caller neste PR. `TUTOR_RAG_SCOPE_MAP` é
 temporário, com granularidade CourseVersion; isolamento de módulo/experiência
 não está comprovado. Status:
 `LOCAL_CONTEXT_BINDING_READY=PARCIAL`,
-`CONTEXT_BINDING_READY=NÃO`, `AI_SERVICE_READY=NÃO`.
+`CONTEXT_BINDING_READY=SIM_COURSEVERSION`,
+`AI_SERVICE_READY=SIM (escopo CourseVersion, staging)`.
 `FASTAPI_CHANGE_REQUIRED=NÃO`;
 `RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`. Alvo permanente de ingestão está
 documentado, não implementado. O gateway agora usa o shape público real do
@@ -40,9 +41,16 @@ fabricar metadata de módulo/experiência. O chamador geral envia somente
 `course_id`, `course_version_id` e `module_id`; cobertura em
 `chat_experience_progress_test.dart`. No sync anterior com `staging=9577541`,
 gateway 31/31 e sentinel tooling 5/5. O PR #136 permanece baseado em staging e
-foi sincronizado por merge normal; o sentinel A/B real segue não executado.
-`REAL_STAGING_E2E=NO`.
-Nenhuma configuração, workspace, staging ou produção foi alterada. Auditoria:
+foi sincronizado por merge normal. Sentinel A/B real PASS em staging em
+2026-10-06 (Worker `tutor-tds-gateway-staging`, workspaces QA
+`tds-qa-ctx-a-v1`/`tds-qa-ctx-b-v1`), com fail-closed, rejeição de PII no
+contexto e troca de conta comprovados; evidência
+`docs/production/evidence/ai-rag-courseversion-sentinel-staging-2026-10-06.json`.
+A primeira execução revelou header Authorization mascarado no vector-search,
+corrigido em `9994565` com teste de regressão. `REAL_STAGING_E2E=YES`.
+Isolamento de módulo/experiência e registry RAG permanente: DEFERRED.
+Produção e o workspace `cartilhas` não foram alterados; apenas recursos QA
+isolados de staging foram criados. Auditoria:
 `AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
 
 ## Integração META 05 — 03/10/2026

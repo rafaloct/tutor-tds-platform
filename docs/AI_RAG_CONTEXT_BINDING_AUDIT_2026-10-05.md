@@ -25,7 +25,7 @@ Estado do código auditado: endpoint já usado pelo gateway:
   - metadata e composição dos documentos atualmente indexados;
   - se existe workspace isolado por escopo acadêmico;
   - se as sources finais do chat instalado carregam metadata de escopo suficiente;
-  - execução remota do sentinel contextual A/B.
+  - registry RAG permanente e fronteira acadêmica autoritativa.
 
 Fontes oficiais consultadas em 2026-10-05:
 
@@ -60,11 +60,13 @@ evidência adicional, e só então publica título + curso + edição + score.
 Identificadores privados, path, URL, chunk e metadata interna não saem do Worker.
 
 `TUTOR_RAG_SCOPE_MAP` é somente bootstrap temporário/test fixture, não fonte de
-verdade acadêmica permanente. Não foi configurado ou instalado em qualquer
-ambiente. Nenhum workspace, documento, binding, secret, DNS ou Worker foi criado
-ou alterado. Clientes sem `learning_context` mantêm o comportamento legado.
+verdade acadêmica permanente. Durante o sentinel de 2026-10-06, apontou somente
+para workspaces QA isolados em staging. Nenhum registry acadêmico permanente
+foi criado. Produção e o workspace `cartilhas` não foram alterados; apenas
+recursos QA isolados de staging foram criados. Clientes sem `learning_context`
+mantêm o comportamento legado.
 
-**RAG_SCOPE_ARCHITECTURE=BLOCKED.** A API consultada não permite provar
+**RAG_SCOPE_ARCHITECTURE=DEFERRED.** A API consultada não permite provar
 isolamento por módulo dentro de um workspace compartilhado: `vector-search`
 não aceita filtro documentado por metadata/documento e o chat não recebe como
 fronteira fechada apenas os chunks verificados na pré-busca. Por isso
@@ -75,11 +77,12 @@ gateway e a compatibilidade com o shape público do AnythingLLM, não o isolamen
 real por módulo/experiência.
 
 **RAG_SCOPE_GRANULARITY:** workspace por CourseVersion é a granularidade
-temporária configurada; módulo/experiência continuam bloqueados. A menor
-fronteira de recuperação documentada para isolamento de módulo exigiria uma
-fronteira física distinta por módulo, se não houver capacidade upstream adicional.
-Isso não está implementado, não foi provado e não autoriza provisionamento nesta
-execução. Nenhum workspace por experiência é necessário ou aceitável.
+temporária configurada; isolamento de módulo/experiência permanece DEFERRED. A
+menor fronteira de recuperação documentada para isolamento de módulo exigiria
+uma fronteira física distinta por módulo, se não houver capacidade upstream
+adicional. Isso não está implementado, não foi provado e não autoriza
+provisionamento nesta execução. Nenhum workspace por experiência é necessário
+ou aceitável.
 
 **TUTOR_RAG_SCOPE_MAP_ROLE=TEMPORARY.**
 **FASTAPI_CHANGE_REQUIRED=NÃO.** Este recorte do PR #136 não altera FastAPI nem
@@ -118,15 +121,16 @@ storage ID e metadata privada não são retornados.
 ## Prova local e limites
 
 - `LOCAL_CONTEXT_BINDING_READY=PARCIAL`
-- `CONTEXT_BINDING_READY=NÃO`
-- `AI_SERVICE_READY=NÃO`
+- `CONTEXT_BINDING_READY=SIM_COURSEVERSION`
+- `AI_SERVICE_READY=SIM (escopo CourseVersion, staging)`
 - `RAG_SCOPE_GRANULARITY=CourseVersion`
 - `WORKSPACE_PER_EXPERIENCE=NO`
-- `MODULE_ISOLATION=BLOCKED`
-- `EXPERIENCE_ISOLATION=BLOCKED`
+- `MODULE_ISOLATION=DEFERRED`
+- `EXPERIENCE_ISOLATION=DEFERRED`
 - `TUTOR_RAG_SCOPE_MAP_ROLE=TEMPORARY`
-- `FASTAPI_CHANGE_REQUIRED=SIM_APENAS_PARA_COMPATIBILIDADE_DO_MANIFESTO`
+- `FASTAPI_CHANGE_REQUIRED=NÃO`
 - `RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`
+- `RAG_REGISTRY_PERMANENT=DEFERRED`
 - `INGESTION_LIFECYCLE_DOCUMENTED=TARGET`
 
 - Fixtures de `gateway.test.js` usam o shape público auditado do
@@ -134,9 +138,11 @@ storage ID e metadata privada não são retornados.
   com campos no topo. Os casos provam roteamento A/B para workspaces distintos,
   rejeição de alias entre CourseVersions, correlação da citation com a
   pré-busca, descarte de identificadores privados e fail-closed para sources
-  ausentes/estruturalmente inseguras. Módulo/experiência permanecem estruturados
-  no request sem serem fabricados como atributos da source. O contrato mantém
-  campos opcionais de experiência; não há chamador de experiência neste PR.
+  ausentes/estruturalmente inseguras. O sentinel real em staging também provou
+  o binding CourseVersion; módulo/experiência permanecem estruturados no request
+  sem serem fabricados como atributos da source ou tratados como isolamento
+  comprovado. O contrato mantém campos opcionais de experiência; não há chamador
+  de experiência neste PR.
 - A chamada geral do Tutor envia `course_id`, `course_version_id` e `module_id`.
   Os campos opcionais de experiência permanecem em `TutorLearningContext`
   porque são aceitos pelo contrato do gateway, mas não têm caller neste PR.
@@ -151,25 +157,39 @@ storage ID e metadata privada não são retornados.
   distintos, dois marcadores A/B e sources compatíveis; rejeita módulo/
   experiência para não produzir uma prova além da capacidade upstream auditada.
   Não inclui o marcador esperado na pergunta e não imprime prompt, resposta,
-  endpoint ou metadata privada. Isso prepara a prova remota, mas não a executa.
+  endpoint ou metadata privada. A prova real remota está registrada abaixo.
 - GitHub Actions disparados durante o incidente de disponibilidade do GitHub
   retornaram `action_required` com zero jobs; esse estado não é CI PASS nem
   falha de implementação. CI deverá ser observado novamente quando o serviço
   normalizar.
-- O PR #136 permanece baseado em `staging`; a branch foi sincronizada por
-  merge normal com o HEAD canônico `8f60b01`, preservando a composição dos
-  HEADs #132/#135 e sem trazer WordPress/observabilidade da task quebrada.
-- `REAL_STAGING_E2E=NO`. Nenhuma chamada estruturada foi feita contra a
-  instalação real e nenhuma mutação de staging ou produção foi executada.
+- O sentinel A/B real PASS em staging em 2026-10-06; `REAL_STAGING_E2E=YES`
+  para escopo CourseVersion. A evidência está em
+  `production/evidence/ai-rag-courseversion-sentinel-staging-2026-10-06.json`.
+  Produção e o workspace `cartilhas` não foram alterados.
 
 ## Human gate
 
-- **Reason:** o sentinel contextual A/B e a metadata real só podem ser
-  comprovados em Worker staging isolado com dois conteúdos QA vinculados a
-  CourseVersions distintas.
-- **Exact human action:** autorizar um gate separado de staging para preparar os
-  dois conteúdos/workspaces QA, configurar temporariamente o
-  `TUTOR_RAG_SCOPE_MAP` de staging e executar o sentinel contextual A/B.
-- **What remains unblocked:** revisão/CI do código e do contrato local. O
-  registry autoritativo permanente continua TARGET/UNKNOWN; isolamento real de
-  módulo/experiência, REAL_STAGING_E2E, merge e produção permanecem bloqueados.
+- **Reason:** isolamento de módulo/experiência e lifecycle/registry RAG
+  permanente não foram implementados nem provados pelo sentinel CourseVersion.
+- **Exact human action:** definir separadamente o lifecycle e a fronteira
+  autoritativa para registry RAG permanente antes de qualquer implementação.
+- **What remains unblocked:** o binding CourseVersion tem prova real A/B em
+  staging; módulo/experiência e registry permanente permanecem DEFERRED.
+
+## Prova real em staging — 2026-10-06
+
+- Sentinel A PASS e B PASS no Worker `tutor-tds-gateway-staging`, com uma source
+  cada e correspondência à CourseVersion respectiva nos workspaces QA
+  `tds-qa-ctx-a-v1` e `tds-qa-ctx-b-v1`.
+- Contexto A→B e troca de conta não reutilizaram sources entre escopos.
+- CourseVersion desconhecida e alias curso/versão retornaram 503
+  `rag_context_unresolved`.
+- Versão ausente e campo extra `user_id` retornaram 400
+  `invalid_learning_context`.
+- Chamada legada sem contexto não fez fallback para `cartilhas`.
+- O gateway chamou somente AnythingLLM; nenhum endpoint acadêmico foi chamado.
+- A primeira execução revelou o header Authorization mascarado no
+  `vector-search`; correção em `9994565` com teste de regressão.
+- Evidência: [ai-rag-courseversion-sentinel-staging-2026-10-06.json](production/evidence/ai-rag-courseversion-sentinel-staging-2026-10-06.json).
+- `AI_SERVICE_READY=SIM` somente para CourseVersion; isolamento de
+  módulo/experiência e registry RAG permanente: DEFERRED.
