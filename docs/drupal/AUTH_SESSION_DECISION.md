@@ -31,10 +31,11 @@ browser ── cookie de sessão Drupal (HttpOnly, Secure, SameSite) ──► D
 ### 2.1 Regras fixas
 
 1. **Token nunca no cliente.** Proibido persistir ou expor `access_token`,
-   `refresh_token`, `identity_proof`, CPF ou hash de suporte em JS,
-   `localStorage`, `sessionStorage`, cookie legível por JS, URL, fragmento,
-   analytics, log ou HTML. Respostas do BFF ao browser contêm apenas dados de
-   apresentação.
+   `refresh_token`, `identity_proof` ou CPF em JS, `localStorage`,
+   `sessionStorage`, cookie legível por JS, URL, fragmento, analytics, log ou
+   HTML. Respostas do BFF ao browser contêm apenas dados de apresentação. A
+   única exceção é o `identifier_hash` do Chatwoot, regido pela regra 12 — não
+   é token TDS.
 2. **Cookie de sessão do portal:** `HttpOnly; Secure; SameSite=Lax` (mínimo;
    `Strict` preferível onde não quebrar fluxo), `Path=/`, sem `Domain` amplo, TTL
    alinhado à sessão, rotação de ID no login/logout (proteção de fixação).
@@ -75,6 +76,16 @@ browser ── cookie de sessão Drupal (HttpOnly, Secure, SameSite) ──► D
 11. **Ambientes:** a sessão referencia o `environment` da API de destino; trocar
     de ambiente exige nova sessão — nunca reaproveitar tokens entre staging e
     produção.
+12. **`identifier_hash` do Chatwoot não é token TDS.** É a assinatura HMAC que
+    prova o `identifier` ao Chatwoot e só tem valor para o widget de suporte;
+    não concede sessão, autorização nem chamada à API. Como o widget exige o
+    par `identifier`+`identifier_hash` no cliente, a entrega é permitida
+    somente de forma efêmera ao runtime do widget autenticado: o BFF chama
+    `GET /support/identity` a cada carregamento, responde ao browser com
+    `Cache-Control: no-store` e injeta o par na inicialização do widget em
+    memória. Proibido persisti-lo em `localStorage`/`sessionStorage`, cookie
+    legível por JS, URL/fragmento, log, analytics, HTML estático/SSR ou
+    qualquer store — cada nova exibição do widget refaz a chamada.
 
 ### 2.2 Ciclo de vida
 
@@ -87,6 +98,7 @@ browser ── cookie de sessão Drupal (HttpOnly, Secure, SameSite) ──► D
 | `429` da API | respeitar `Retry-After`; backoff no BFF, sem retry imediato |
 | Logout | destruir sessão + apagar tokens + cookie inválido; G1 documenta que a API ainda não revoga o refresh |
 | Troca de conta | encerrar sessão anterior por completo antes de autenticar outra pessoa; nenhum dado da sessão A pode vazar à sessão B |
+| Exclusão de conta (`DELETE /auth/me` → `204`) | destruir a sessão Drupal imediatamente, apagar access/refresh do store, invalidar o cookie e impedir back/forward/reuso — proibido apenas aguardar a sessão expirar |
 | Expiração de sessão Drupal com tokens válidos | destruir tokens junto com a sessão; não persistir "lembrar-me" com refresh token |
 
 ### 2.3 O que OBSERVED na API sustenta esta decisão
@@ -98,8 +110,8 @@ browser ── cookie de sessão Drupal (HttpOnly, Secure, SameSite) ──► D
 - `GET /auth/me` permite ao BFF revalidar identidade/role sem decodificar JWT no
   portal.
 - `GET /support/identity` entrega a assinatura HMAC do Chatwoot já calculada no
-  servidor da API — o portal apenas a repassa ao widget na página autenticada,
-  `no-store` respeitado.
+  servidor da API — o portal a entrega de forma efêmera ao runtime do widget na
+  página autenticada, `no-store` ponta a ponta e sem persistência (regra 12).
 
 ### 2.4 Consequências
 
@@ -107,9 +119,15 @@ browser ── cookie de sessão Drupal (HttpOnly, Secure, SameSite) ──► D
 - Revogação real de sessão depende da Issue G1; até lá, logout é "esquecer" no
   portal, não revogação na autoridade — declarado ao usuário como encerramento de
   sessão web, não revogação global.
-- Escala: store de sessão deve ser apagável por usuário (direito de exclusão já
-  coberto por `DELETE /auth/me` na identidade; sessões residuais do portal expiram
-  com a sessão Drupal).
+- Escala: store de sessão deve ser apagável por usuário. Exclusão de conta:
+  após o `204` de `DELETE /auth/me`, o BFF destrói imediatamente a sessão
+  Drupal, apaga access/refresh tokens do store, invalida o cookie e impede
+  back/forward/reuso. OBSERVED: a própria API remove `User` e `SessionToken`
+  na mesma transação (`auth.py::delete_me`) — o refresh fica inutilizável na
+  hora e a request seguinte com o Bearer antigo falha com `401` porque
+  `access_claims` confere a existência do usuário. Mesmo assim o portal não
+  delega o encerramento à autoridade: reter sessão residual "até expirar" é
+  proibido.
 
 ## 3. Alternativas rejeitadas
 

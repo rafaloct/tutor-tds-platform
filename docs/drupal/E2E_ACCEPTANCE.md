@@ -37,9 +37,10 @@ invalidados no portal
 | P3 | Abrir contexto/edição da turma | `GET /classes/{id}/learning-context` (flag) + `GET /classes/{id}/course` (`test_learning_context`, `test_classroom_course_versions`) | snapshot da `CourseVersion` fixada; 403 de alheio bloqueia tela |
 | P4 | Ver certificado/referência | `GET /certificates` (`test_certificates`); link abre `verification_url` oficial | referência oficial renderizada; candidatos `is_candidate` nunca exibidos |
 | P5 | Pedir certificado (fluxo opcional) | `GET /certificate-requests/contexts` → `POST /certificate-requests` → `GET /certificate-requests` (`test_certificate_requests`) | pedido criado/reutilizado com `revision`; elegibilidade exibida como veio da API |
-| P6 | Abrir suporte | `GET /support/identity` (`test_support`) + widget Chatwoot | `identifier`+hash repassados ao widget; `503` → fallback de contato; nada de CPF/token no widget |
+| P6 | Abrir suporte | `GET /support/identity` (`test_support`) + widget Chatwoot | `identifier`+`identifier_hash` entregues de forma efêmera ao runtime do widget (`Cache-Control: no-store` ponta a ponta; ausentes de `localStorage`/`sessionStorage`, URL, log, analytics e HTML estático — `AUTH_SESSION_DECISION.md` regra 12); `503` → fallback de contato; nada de CPF/token no widget |
 | P7 | Logout | sessão Drupal destruída + tokens descartados (`AUTH_SESSION_DECISION.md` §2.2) | back/forward não reexibe área autenticada; nova request → login |
 | P8 | Revogação server-side do refresh no logout | — | **BLOCKED (G1)**: sem `/auth/logout`; aceite parcial = sessão portal invalidada; revogação na autoridade aguarda Issue própria |
+| P9 | Excluir conta e tentar reusar a sessão | `DELETE /auth/me` → `204` (`test_auth`); a API remove `User`+`SessionToken` na mesma transação (`auth.py::delete_me`) | imediatamente após o `204`: sessão Drupal destruída, access/refresh apagados do store, cookie invalidado; back/forward não reexibe dados; nova request autenticada → login; Bearer antigo → `401` da API (`access_claims` confere o usuário) |
 
 ## 3. Jornada operador/coordenador
 
@@ -96,7 +97,7 @@ certificado → suporte público/fallback
 
 ## 6. Critérios de aceite do milestone
 
-1. Todos os cenários P1–P7, O1–O8, PU1–PU5 e F1–F12 executados em staging
+1. Todos os cenários P1–P9, O1–O8, PU1–PU5 e F1–F12 executados em staging
    Drupal isolado, com contas sintéticas, e evidência por PR (SHA base/head,
    ambiente, comandos, PASS/FAIL, o que não foi testado).
 2. Nenhum arquivo `cartilhas_app/**` alterado; nenhum acesso direto ao
