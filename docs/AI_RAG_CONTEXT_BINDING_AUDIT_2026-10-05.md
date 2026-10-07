@@ -167,6 +167,31 @@ storage ID e metadata privada não são retornados.
   `production/evidence/ai-rag-courseversion-sentinel-staging-2026-10-06.json`.
   Produção e o workspace `cartilhas` não foram alterados.
 
+## Adendo 2026-10-07 — binding de módulo
+
+Sob a autorização Phase A de 07/10, o `TUTOR_RAG_SCOPE_MAP` passa a aceitar
+chaves de três segmentos `course_id|course_version_id|module_id` além das
+chaves de CourseVersion. Com `module_id` no contexto, o gateway tenta primeiro
+o binding exato de módulo; se o mapa declara granularidade de módulo para aquela
+CourseVersion mas o módulo pedido não está mapeado, falha fechada com
+`rag_context_unresolved` em vez de ampliar silenciosamente para o workspace da
+edição. Sem chaves de módulo para a CourseVersion, a resolução permanece na
+granularidade CourseVersion (compatível com o comportamento já provado em
+staging em 06/10). O invariante 1:1 escopo → workspace continua valendo entre
+todas as chaves. As sources passam a declarar exatamente o escopo resolvido:
+`module_id` aparece somente quando um binding de módulo foi usado;
+`experience_id`/`experience_type` nunca participam da resolução nem viram
+atributo de fonte (`WORKSPACE_PER_EXPERIENCE=NO` mantido). O sentinel
+`verify_rag_sentinel.mjs` aceita `module_id` opcional e exige `module_id` nas
+sources para provar isolamento de módulo.
+
+`MODULE_ISOLATION=SUPPORTED_BY_MODULE_BINDINGS` (TESTED-LOCAL, gateway 38/38,
+sentinel tooling 8/8). `MODULE_ISOLATION_STAGING_PROOF=PENDING_GATE`: prova
+real exige workspaces/bindings de módulo QA e deploy do HEAD revisado, ambos
+fora desta autorização. Nenhum workspace foi criado nem provisionado; nenhuma
+mutação de staging foi executada nesta execução. Chamador de experiência e
+registry RAG permanente permanecem DEFERRED.
+
 ## Human gate
 
 - **Reason:** isolamento de módulo/experiência e lifecycle/registry RAG

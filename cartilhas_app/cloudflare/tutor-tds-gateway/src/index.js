@@ -105,16 +105,15 @@ async function handleRequestInternal(request, env, upstreamFetch, requestId) {
   if (validationError) return json({ error: validationError }, 400, cors.headers);
 
   if (body.learning_context !== undefined) {
-    const workspace = resolveLearningWorkspace(body.learning_context, env);
-    if (!workspace) {
+    const resolved = resolveLearningScope(body.learning_context, env);
+    if (!resolved) {
       return json({ error: 'rag_context_unresolved' }, 503, cors.headers);
     }
 
     const verifiedSources = await searchLearningSources(
       upstream,
-      workspace,
+      resolved,
       body.message.trim(),
-      body.learning_context,
       upstreamFetch,
       requestId,
     );
@@ -137,7 +136,7 @@ async function handleRequestInternal(request, env, upstreamFetch, requestId) {
           { mode: body.mode },
           env,
         ),
-        workspace,
+        workspace: resolved.workspace,
         mode: 'query',
       },
       upstreamFetch,
@@ -698,7 +697,14 @@ function isStableLearningId(value) {
     /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value);
 }
 
-function resolveLearningWorkspace(context, env) {
+// Resolves the retrieval scope declared by the learning context. Keys are
+// `course_id|course_version_id` or `course_id|course_version_id|module_id`.
+// When the map binds any module of the requested CourseVersion, module-scoped
+// requests resolve only through their exact module binding: silently widening
+// to the CourseVersion workspace would break the declared module isolation.
+// When no module key exists for the CourseVersion, the declared granularity is
+// CourseVersion and `module_id` does not narrow the retrieval scope.
+function resolveLearningScope(context, env) {
   let scopeMap = env.TUTOR_RAG_SCOPE_MAP;
   if (typeof scopeMap === 'string') {
     try {
@@ -714,10 +720,9 @@ function resolveLearningWorkspace(context, env) {
   const workspaces = entries.map(([, workspace]) => workspace);
   if (workspaces.length === 0 ||
       entries.some(([key]) => {
-        const [courseId, versionId, ...extra] = key.split('|');
-        return extra.length > 0 ||
-          !isStableLearningId(courseId) ||
-          !isStableLearningId(versionId);
+        const parts = key.split('|');
+        return (parts.length !== 2 && parts.length !== 3) ||
+          parts.some((part) => !isStableLearningId(part));
       }) ||
       workspaces.some((workspace) =>
         typeof workspace !== 'string' ||
@@ -725,23 +730,37 @@ function resolveLearningWorkspace(context, env) {
       new Set(workspaces).size !== workspaces.length) {
     return null;
   }
-  const key = [context.course_id, context.course_version_id].join('|');
+
+  const versionKey = [context.course_id, context.course_version_id].join('|');
+  const scope = {
+    course_id: context.course_id,
+    course_version_id: context.course_version_id,
+  };
+  let key = versionKey;
+  if (context.module_id !== undefined) {
+    const moduleKey = `${versionKey}|${context.module_id}`;
+    if (typeof scopeMap[moduleKey] === 'string') {
+      key = moduleKey;
+      scope.module_id = context.module_id;
+    } else if (entries.some(([mapKey]) => mapKey.startsWith(`${versionKey}|`))) {
+      return null;
+    }
+  }
   const workspace = scopeMap[key];
   return typeof workspace === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(workspace)
-    ? workspace
+    ? { workspace, scope }
     : null;
 }
 
 async function searchLearningSources(
   upstream,
-  workspace,
+  resolved,
   query,
-  context,
   upstreamFetch,
   requestId,
 ) {
   const searchUrl = new URL(
-    `/api/v1/workspace/${encodeURIComponent(workspace)}/vector-search`,
+    `/api/v1/workspace/${encodeURIComponent(resolved.workspace)}/vector-search`,
     `${upstream.baseUrl}/`,
   );
   let response;
@@ -773,34 +792,36 @@ async function searchLearningSources(
 
   const sources = [];
   for (const result of data.results) {
-    const source = sanitizeContextSource(result, context);
+    const source = sanitizeContextSource(result, resolved.scope);
     if (!source) return null;
     sources.push(source);
   }
   return sources;
 }
 
-function sanitizeContextSource(source, context) {
+function sanitizeContextSource(source, scope) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) return null;
   const metadata = source.metadata;
   if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
 
   // AnythingLLM's public vector-search contract does not preserve arbitrary
-  // academic metadata. CourseVersion scope is therefore attested by the unique
-  // CourseVersion -> workspace binding, not by fields that are absent upstream.
+  // academic metadata. Retrieval scope is therefore attested by the unique
+  // scope -> workspace binding, not by fields that are absent upstream, and the
+  // response reports exactly the scope key that was resolved.
   const title = publicSourceTitle(metadata.title);
   if (!title) return null;
 
   const safeSource = {
     title,
-    course_id: context.course_id,
-    course_version_id: context.course_version_id,
+    course_id: scope.course_id,
+    course_version_id: scope.course_version_id,
     _evidence: {
       id: privateSourceEvidence(source.id),
       docSource: privateSourceEvidence(metadata.docSource),
       chunkSource: privateSourceEvidence(metadata.chunkSource),
     },
   };
+  if (scope.module_id !== undefined) safeSource.module_id = scope.module_id;
   if (typeof source.score === 'number' &&
       Number.isFinite(source.score) &&
       source.score >= 0 &&
@@ -874,6 +895,7 @@ function publicContextSource(source) {
     course_id: source.course_id,
     course_version_id: source.course_version_id,
   };
+  if (source.module_id !== undefined) safe.module_id = source.module_id;
   if (source.score !== undefined) safe.score = source.score;
   return safe;
 }

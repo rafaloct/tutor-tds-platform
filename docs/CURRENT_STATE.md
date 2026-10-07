@@ -1,5 +1,34 @@
 # CURRENT STATE
 
+## 2026-10-07 Issue #134 — candidato binding de módulo
+
+Sobre `staging` `fbb4b6a` (que já contém o PR #136 mergeado), a autorização
+Phase A de 07/10 foi usada para fechar a lacuna de participação do módulo na
+resolução de escopo: `TUTOR_RAG_SCOPE_MAP` agora aceita chaves de três
+segmentos `course_id|course_version_id|module_id` além das de dois. Com
+`module_id` no contexto, o Worker tenta o binding exato de módulo; se o mapa
+declara granularidade de módulo para aquela CourseVersion (alguma chave de três
+segmentos com o prefixo `course|version`) mas o módulo pedido não está mapeado,
+a chamada falha fechada com `rag_context_unresolved` em vez de ampliar
+silenciosamente para a edição. Sem chaves de módulo para a CourseVersion, a
+resolução permanece na granularidade CourseVersion (comportamento anterior
+preservado). Sem `module_id`, resolve apenas pela chave de dois segmentos. O
+invariante 1:1 escopo → workspace vale para todas as chaves. As sources agora
+declaram exatamente o escopo resolvido: `module_id` aparece somente quando um
+binding de módulo foi usado; `experience_id`/`experience_type` nunca entram na
+resolução nem na fonte (`WORKSPACE_PER_EXPERIENCE=NO`). O sentinel
+`verify_rag_sentinel.mjs` passa a aceitar `module_id` opcional e exige
+`module_id` nas sources para provar isolamento de módulo. Nenhum workspace foi
+criado nem provisionado; nenhuma mutação de staging foi executada nesta
+execução; FastAPI inalterado; `sessionId` continua fora de escopo (planejamento
+posterior da Issue). Chamador de experiência segue DEFERRED na frente
+dynamic-learning (camada Experience Blocks removida do #136 por decisão humana
+em 06/10). Testes: gateway 38/38, sentinel tooling 8/8. Status:
+`MODULE_SCOPE_BINDING=IMPLEMENTED_TESTED_LOCAL`,
+`MODULE_ISOLATION_STAGING_PROOF=PENDING_GATE` (requer workspaces/binding de
+módulo QA e deploy do HEAD revisado, ambos sob gate). Registry RAG permanente
+segue DEFERRED.
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre

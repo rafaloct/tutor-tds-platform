@@ -97,40 +97,56 @@ legado como fallback. O mapa é somente bootstrap temporário e não é catálog
 acadêmico nem fonte de verdade permanente.
 
 `TUTOR_RAG_SCOPE_MAP` é uma variável JSON do Worker administrada após um gate
-próprio. Cada CourseVersion precisa apontar para um workspace distinto, já
-provisionado; o mapa rejeita dois course/version diferentes apontando para o
-mesmo workspace. O formato temporário da chave é
-`course_id|course_version_id`. Exemplo exclusivamente sintético:
+próprio. Cada escopo precisa apontar para um workspace distinto, já
+provisionado; o mapa rejeita duas chaves diferentes apontando para o mesmo
+workspace. O formato da chave é `course_id|course_version_id` ou, quando a
+implantação declara granularidade de módulo,
+`course_id|course_version_id|module_id`. Exemplo exclusivamente sintético:
 
 ```json
 {
-  "course-a|version-1": "course-a-v1",
+  "course-a|version-1|module-a1": "course-a-v1-m1",
+  "course-a|version-1|module-a2": "course-a-v1-m2",
   "course-b|version-3": "course-b-v3"
 }
 ```
 
-O Worker faz `vector-search` no workspace exclusivo da CourseVersion antes do
+Com `module_id` no contexto, o Worker tenta primeiro a chave de três segmentos.
+Se o mapa contém qualquer binding de módulo para aquela CourseVersion mas não
+para o módulo pedido, a chamada falha fechada com `rag_context_unresolved`:
+ampliar silenciosamente para o workspace da edição quebraria o isolamento de
+módulo declarado. Se nenhuma chave de módulo existe para a CourseVersion, a
+granularidade declarada é CourseVersion e a chave de dois segmentos resolve o
+pedido. Contexto sem `module_id` resolve somente pela chave de dois segmentos.
+
+O Worker faz `vector-search` no workspace do escopo resolvido antes do
 chat e depois chama o mesmo workspace em `mode: "query"`, sem session ID. O
 contrato público auditado do AnythingLLM devolve no `vector-search` somente
 metadata documental genérica, como `title`, `docSource` e `chunkSource`;
 ele não preserva `course_id`, `course_version_id`, `module_id` ou
-`experience_id`. Por isso, o escopo de curso/edição é derivado do binding
-1:1 CourseVersion → workspace, e nunca de metadata acadêmica inventada.
+`experience_id`. Por isso, o escopo é derivado do binding 1:1
+escopo → workspace, e nunca de metadata acadêmica inventada.
 
 As citations do chat usam o shape real de source do AnythingLLM, com campos no
 topo do objeto. O gateway exige correspondência com uma fonte já observada no
 `vector-search`, usando ID privado quando presente e título/document source
 como evidência adicional. Esses identificadores servem apenas internamente e
 não são devolvidos ao app. O retorno público contém somente título,
-`course_id`, `course_version_id` e score opcional. Paths, IDs privados,
-URLs, chunks e metadata interna são descartados.
+`course_id`, `course_version_id`, score opcional e, somente quando a resolução
+usou um binding de módulo, `module_id` — a source declara exatamente o escopo
+efetivamente resolvido. Paths, IDs privados, URLs, chunks e metadata interna
+são descartados.
 
 `module_id`, `experience_id` e `experience_type` continuam aceitos e
-validados no `learning_context`, mas NÃO são apresentados como atributos da
-fonte e NÃO são tratados como isolamento comprovado. O AnythingLLM auditado não
-oferece filtro documentado por metadata/documento capaz de fechar essa fronteira
-dentro de um workspace compartilhado. Assim,
-`RAG_SCOPE_GRANULARITY=CourseVersion`, `MODULE_ISOLATION=BLOCKED`,
+validados no `learning_context`. `module_id` participa da resolução de escopo
+quando existe um binding de módulo para a CourseVersion; sem binding, a
+granularidade efetiva permanece CourseVersion e a fonte não declara
+`module_id`. `experience_id` e `experience_type` nunca participam da resolução
+de escopo nem aparecem como atributos da fonte: não há workspace por
+experiência. O AnythingLLM auditado não oferece filtro documentado por
+metadata/documento capaz de fechar essa fronteira dentro de um workspace
+compartilhado. Assim, `RAG_SCOPE_GRANULARITY=CourseVersion|Module (por
+binding)`, `MODULE_ISOLATION=SUPPORTED_BY_MODULE_BINDINGS`,
 `EXPERIENCE_ISOLATION=BLOCKED` e `WORKSPACE_PER_EXPERIENCE=NO`.
 
 Mapeamento ausente, source estruturalmente insegura, citation que não corresponde
