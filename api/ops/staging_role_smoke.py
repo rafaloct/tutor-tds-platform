@@ -77,23 +77,37 @@ def main() -> None:
         if class_counts[role] < 1:
             raise RuntimeError(f"Synthetic class not visible to {role}")
 
-    for role in ("TEACHER", "MONITOR"):
-        dashboard = request(
-            base_url,
-            "/classes/staging-qa-class/dashboard",
-            token=tokens[role],
-        )
-        if not isinstance(dashboard, dict) or not isinstance(
-            dashboard.get("students"), list
-        ):
-            raise RuntimeError(f"Invalid dashboard for {role}")
+    dashboard = request(
+        base_url,
+        "/classes/staging-qa-class/dashboard",
+        token=tokens["TEACHER"],
+    )
+    if not isinstance(dashboard, dict) or not isinstance(
+        dashboard.get("students"), list
+    ):
+        raise RuntimeError("Invalid dashboard for TEACHER")
+
+    monitor_exceptions = request(
+        base_url,
+        "/classes/staging-qa-class/monitor-exceptions",
+        token=tokens["MONITOR"],
+    )
+    if not isinstance(monitor_exceptions, dict) or not isinstance(
+        monitor_exceptions.get("students"), list
+    ):
+        raise RuntimeError("Invalid exception view for MONITOR")
 
     sessions = request(
         base_url,
         "/classes/staging-qa-class/sessions/open",
         token=tokens["STUDENT"],
     )
-    if not isinstance(sessions, dict) or sessions.get("id") != "staging-qa-class-session":
+    if (
+        not isinstance(sessions, dict)
+        or not isinstance(sessions.get("id"), str)
+        or sessions.get("class_id") != "staging-qa-class"
+        or sessions.get("status") != "open"
+    ):
         raise RuntimeError("Synthetic open session was not recovered")
     if "checkin_token" in sessions and sessions["checkin_token"] is not None:
         raise RuntimeError("Read endpoint exposed a check-in token")

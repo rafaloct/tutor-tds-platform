@@ -1,5 +1,21 @@
 # CURRENT STATE
 
+## 2026-10-07 — smoke autenticado de staging para o RC
+
+Execução autorizada contra `tutor-staging-api`, com credenciais mantidas somente
+em `/opt/tutor-tds-staging/.staging-seed.env`, passou em modo segmentado: login e
+escopo das quatro personas, visão integral do professor, exceções restritas do
+monitor, refresh de sessão descartável, check-in/checkout com replay, rotação de
+token e roundtrip de presença. O primeiro ensaio revelou dois pressupostos
+obsoletos no runner: monitor não pode abrir o dashboard integral e a sessão fixa
+histórica não deve ser exigida como aberta. Correção candidata no PR #174, SHA
+`7a11c2b185566456da1c93aa2aa8322bb9149693`; 17 testes direcionados e YAML
+passaram. Evidência sanitizada em
+`docs/production/evidence/staging-authenticated-smoke-2026-10-07.json`.
+Não houve deploy, produção, keystore ou secret novo; somente a rotação prevista
+do token sintético no host. Este smoke não fecha Evidence offline, APK/AAB,
+assinatura, Play nem `PRODUCTION_RELEASE_READY`.
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre

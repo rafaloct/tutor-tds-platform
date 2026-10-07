@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-07T17:36:47.7729712Z",
+  "environment": "staging",
+  "status": "passed_segmented",
+  "repository": "rafaloct/tutor-tds-platform",
+  "base_merge_sha": "d1327504ae7ace2aa2589b2be2e2597fd4305ca4",
+  "runner_source_sha": "7a11c2b185566456da1c93aa2aa8322bb9149693",
+  "runner_source_ref": "codex/fix-staging-role-smoke-20261007",
+  "execution_mode": "authorized_direct_ssh_fallback",
+  "checks": {
+    "authenticated_roles": {
+      "status": "passed",
+      "visible_class_counts": {
+        "admin": 6,
+        "teacher": 6,
+        "monitor": 1,
+        "student": 3
+      },
+      "teacher_full_dashboard": "passed",
+      "monitor_exception_view": "passed"
+    },
+    "evidence_session_refresh": "passed",
+    "checkin_create_status": 201,
+    "checkin_replay_status": 200,
+    "token_rotation_status": 200,
+    "checkout_create_status": 201,
+    "checkout_replay_status": 200,
+    "closed_report_checkin_count": 2,
+    "presence_roundtrip": "passed",
+    "student_denied": true,
+    "closed_report_stable": true,
+    "credential_leak_guard": "passed"
+  },
+  "sanitized_evidence": {
+    "authenticated_log_sha256": "8e256e1c945dc3f64ff580c10e8f3309950f1c3b35875437d484cbb73f428a25",
+    "presence_log_sha256": "b9d1135d0a4159e1f582db208182b6b3cf35aa02a2ece45815a9b033610d6059",
+    "archive_sha256": "6d98f20e17ffe601b2b7ae8d5dbbe797874c894e8ddf9e25717fd6f1ef3fac19"
+  },
+  "limitations": [
+    "The run was segmented after local PowerShell-to-Bash transport and packaging errors; successful API phases were not repeated.",
+    "GitHub workflow_dispatch was unavailable because the workflow is not present on the repository default branch.",
+    "This online synthetic smoke does not approve Evidence offline, APK/AAB signing, Play promotion, production deployment, or PRODUCTION_RELEASE_READY."
+  ],
+  "secrets": {
+    "created": false,
+    "exported_from_host": false,
+    "changed": false,
+    "synthetic_checkin_token_rotated_as_designed": true
+  }
+}
