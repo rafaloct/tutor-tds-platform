@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "evidence": "trackb_anythingllm_data_recovery_drill",
+  "track": "TRACK_B",
+  "classification": "OBSERVED",
+  "status": "passed",
+  "TRACK_B_DRILL": "PASS",
+  "run_id": "20261006T031453Z-538dd1cd",
+  "executed_at": "2026-10-06T03:15:00Z",
+  "staging_sha": "f140e638cbe7fef28a59070fc2f43237d2a29e95",
+  "source": {
+    "volume": "anythingllm_data",
+    "mount": "read-only (:ro), hot copy, no docker pause",
+    "file_fingerprint_before": "b90938d4c4056a1eed70be0f21486465f16cf97bf6997d0275d8c52ce4186a2a",
+    "file_fingerprint_after": "b90938d4c4056a1eed70be0f21486465f16cf97bf6997d0275d8c52ce4186a2a",
+    "anythingllm_db_sha256_before": "fcd43f36c2ee0a31bf616d12656ec12d1bc8fb5f51682ca898df399d017f4c1f",
+    "anythingllm_db_sha256_after": "fcd43f36c2ee0a31bf616d12656ec12d1bc8fb5f51682ca898df399d017f4c1f",
+    "SOURCE_VOLUME_WRITES": "NO",
+    "HOT_COPY_CONSISTENCY": "PASS"
+  },
+  "snapshot": {"sha256": "6392cfbd3f6954b1f1b1035adf6e3911b1f65ae77b1e706f3077475c1ea80665", "bytes": 34734080, "format": "tar --numeric-owner"},
+  "offsite": {
+    "object": "r2:tds-backups/anythingllm/drill/20261006T031453Z-538dd1cd/anythingllm_data.tar.age",
+    "receipt": "r2:tds-backups/anythingllm/drill/20261006T031453Z-538dd1cd/receipt.json",
+    "sha256": "9a4d216dc14824684e744a609a47b2b1905ea7397a5078825f08a0115223389c",
+    "bytes": 34742854,
+    "uploaded_at": "2026-10-06T03:15:49Z",
+    "OFFSITE_SHA256_MATCH": "YES (upload, remote stat and download size + sha256 identical)",
+    "AGE_ENCRYPTION": "age v1 client-side; recipients = TDS backup public recipient (sha256/16 4309ccb3dcb09ff2) + ephemeral drill identity used for the restore and destroyed; now decryptable only with the production age identity",
+    "retained": true,
+    "retention": "keep until Tutor TDS release closure; previous object anythingllm/drill/20261006T030533Z-57c874a5/ also retained"
+  },
+  "restore": {
+    "decrypted_sha256_equals_snapshot": true,
+    "volume": "new temporary Docker volume (removed after checks)",
+    "image": "mintplexlabs/anythingllm@sha256:652666b766e5e2474b8018e8850f166a9869c1a1aed23435c48c99cd94b74f4a",
+    "network": "docker --internal (no egress; clone log shows remote fetch failing)",
+    "clone_env_additions": {"LLM_PROVIDER": "openrouter", "OPENROUTER_API_KEY": "drill-offline-placeholder (fictitious)"},
+    "llm_inference": false
+  },
+  "checks": {
+    "SQLITE_INTEGRITY": "PASS",
+    "WORKSPACE_COUNT": 4,
+    "CARTILHAS_DOCUMENT_COUNT": 10,
+    "VECTOR_COUNT": 660,
+    "baseline_before_equals_after": true,
+    "CARTILHAS_SCOPE": {"result": "PASS", "http": 200, "results": 4, "sources_in_own_workspace": true, "cross_sources": []},
+    "CTX_A_SCOPE": {"result": "PASS", "http": 200, "results": 1, "sources": ["tds-qa-contexto-a-v1.txt"], "cross_sources": []},
+    "CTX_B_SCOPE": {"result": "PASS", "http": 200, "results": 1, "sources": ["tds-qa-contexto-b-v1.txt"], "cross_sources": []}
+  },
+  "previous_attempt": {
+    "run_id": "20261006T030533Z-57c874a5",
+    "result": "structural PASS, vector-search HTTP 500",
+    "cause": "OBSERVED fix: clone lacked LLM_PROVIDER; with the offline placeholder provider vector-search returned 200 using the native embedder"
+  },
+  "CRITICAL_VOLUMES_RESTORE": "PASS",
+  "vps_state_dir": "/opt/tds-anythingllm-drill-20261006T031453Z-538dd1cd (mode 700: phase-a.json, sql-result.json, clone-result.json, drill-checks.json, offsite-receipt.json, clone-logs.txt sanitized)",
+  "production": {
+    "PRODUCTION_ANYTHINGLLM_WRITES": "NO (container anythingllm started 2026-06-18, restarts=0, never paused)",
+    "PRODUCTION_API_WRITES": "NO",
+    "PRODUCTION_DB_WRITES": "NO",
+    "PRODUCTION_WORKER_TOUCHED": "NO"
+  },
+  "pending_outside_track_b": [
+    "TRACK_A promotion: policy-web drift /opt/tutor-tds-api/public/privacy.html vs cartilhas_app/web/privacy.html",
+    "TRACK_D_PRODUCTION_PROMOTION_PENDING: no production CourseVersion workspaces / TUTOR_RAG_SCOPE_MAP"
+  ],
+  "secrets_persisted": false
+}

@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "offsite_backup": true,
+  "postgres_restore": true,
+  "critical_volumes_restore": true,
+  "upgrade_compatibility": true,
+  "backend_schema_compatibility": true
+}

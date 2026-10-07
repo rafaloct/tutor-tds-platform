@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.main import create_app
-from app.models import (Base, ClassEnrollment, ClassMonitor, Classroom, Course,
-    Enrollment, Institution, Program, ProgramCourse, ProgramMembership)
+from app.models import (Base, ClassEnrollment, ClassMonitor, Classroom, ClassSession,
+    Course, Enrollment, Institution, Program, ProgramCourse, ProgramMembership)
 
 PASSWORD = "uma-senha-forte-2026"
 
@@ -118,6 +118,129 @@ def test_evidence_session_token_import_review_and_auditable_close() -> None:
     assert open_after_close.status_code == 404
     assert closed_sessions.status_code == 200
     assert [item["id"] for item in closed_sessions.json()["sessions"]] == [session_id]
+
+
+def test_checkin_by_numeric_code() -> None:
+    settings = Settings(
+        database_url="sqlite+pysqlite:///:memory:", allowed_origins=(),
+        jwt_secret="j"*32, cpf_pepper="p"*32, checkin_code_attempt_limit=20,
+    )
+    app = create_app(database_url=settings.database_url, settings=settings)
+    Base.metadata.create_all(app.state.database.engine)
+    client = TestClient(app)
+    with client:
+        teacher = register(client, "123.456.789-09", "Professora")
+        student = register(client, "987.654.321-00", "Estudante")
+        outsider = register(client, "529.982.247-25", "Terceiro")
+        other_teacher = register(client, "168.995.350-09", "Professora B")
+        teacher_id, student_id = teacher["user"]["id"], student["user"]["id"]
+        with Session(app.state.database.engine) as session:
+            session.add_all([
+                Institution(id="institution-1", name="Instituto"),
+                Institution(id="institution-2", name="Instituto 2"),
+                Course(id="course-1", title="Curso", author="TDS", content={"sections": []}, active=True),
+                Course(id="course-2", title="Curso 2", author="TDS", content={"sections": []}, active=True),
+            ]); session.flush()
+            session.add_all([
+                Program(id="program-1", institution_id="institution-1", name="Programa"),
+                Program(id="program-2", institution_id="institution-2", name="Programa 2"),
+            ]); session.flush()
+            session.add_all([
+                ProgramCourse(program_id="program-1", course_id="course-1"),
+                ProgramCourse(program_id="program-2", course_id="course-2"),
+                ProgramMembership(user_id=teacher_id, program_id="program-1", role="teacher", status="active"),
+                ProgramMembership(user_id=student_id, program_id="program-1", role="student", status="active"),
+                ProgramMembership(user_id=other_teacher["user"]["id"], program_id="program-2", role="teacher", status="active"),
+            ]); session.flush()
+            session.add(Enrollment(id="enrollment-1", user_id=student_id, program_id="program-1", course_id="course-1", status="active"))
+            session.add_all([
+                Classroom(id="class-1", program_id="program-1", course_id="course-1", teacher_id=teacher_id,
+                    name="Turma A", start_date=date(2026,1,1), end_date=date(2027,12,1), status="active"),
+                Classroom(id="class-2", program_id="program-2", course_id="course-2", teacher_id=other_teacher["user"]["id"],
+                    name="Turma B", start_date=date(2026,1,1), end_date=date(2027,12,1), status="active"),
+            ]); session.flush()
+            session.add(ClassEnrollment(class_id="class-1", user_id=student_id, enrollment_id="enrollment-1", program_id="program-1", course_id="course-1", status="active"))
+            session.commit()
+
+        created = client.post("/admin/classes/class-1/sessions", headers=bearer(teacher),
+            json={"starts_at":"2026-01-01T00:00:00Z","ends_at":"2027-12-01T00:00:00Z"})
+        session_id, code = created.json()["id"], created.json()["checkin_code"]
+        other = client.post("/admin/classes/class-2/sessions", headers=bearer(other_teacher),
+            json={"starts_at":"2026-01-01T00:00:00Z","ends_at":"2027-12-01T00:00:00Z"})
+        other_code = other.json()["checkin_code"]
+
+        # O código nunca vaza pela visão de membro da sessão.
+        recovered_open = client.get("/classes/class-1/sessions/open", headers=bearer(student))
+
+        spaced = f"{code[:3]} {code[3:]}"
+        by_code = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkin","idempotency_key":"code:student:1","code":spaced})
+        replay = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkin","idempotency_key":"code:student:2","code":code})
+        wrong_code = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkin","idempotency_key":"code:student:3","code":"000000"})
+        cross_class = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkin","idempotency_key":"code:student:4","code":other_code})
+        outsider_code = client.post("/checkins/code", headers=bearer(outsider),
+            json={"kind":"checkin","idempotency_key":"code:outsider:1","code":code})
+
+        rotated = client.post(f"/classes/class-1/sessions/{session_id}/token", headers=bearer(teacher))
+        new_code = rotated.json()["checkin_code"]
+        stale_code = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkout","idempotency_key":"code:student:5","code":code})
+        checkout = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkout","idempotency_key":"code:student:6","code":new_code})
+
+        # Código com TTL expirado falha mesmo com a sessão ainda aberta.
+        with Session(app.state.database.engine) as editing:
+            rec = editing.get(ClassSession, session_id)
+            rec.token_expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+            editing.commit()
+        expired_code = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkin","idempotency_key":"code:student:7","code":new_code})
+
+        closed = client.post(f"/classes/class-1/sessions/{session_id}/close?confirm_pending=true",
+            headers=bearer(teacher))
+        closed_code = client.post("/checkins/code", headers=bearer(student),
+            json={"kind":"checkin","idempotency_key":"code:student:8","code":new_code})
+
+    assert created.status_code == 201
+    assert isinstance(code, str) and len(code) == 6 and code.isdigit()
+    # Sessões abertas nunca compartilham o mesmo código numérico.
+    assert isinstance(other_code, str) and other_code != code
+    assert "checkin_code" not in recovered_open.json()
+    assert "checkin_token" not in recovered_open.json()
+    assert by_code.status_code == 201 and by_code.json()["method"] == "code"
+    assert by_code.json()["session_id"] == session_id
+    assert replay.status_code == 200 and replay.json()["id"] == by_code.json()["id"]
+    assert wrong_code.status_code == 401
+    assert cross_class.status_code == 403
+    assert outsider_code.status_code == 403
+    assert rotated.status_code == 200 and new_code and len(new_code) == 6
+    assert stale_code.status_code == 401
+    assert checkout.status_code == 201 and checkout.json()["method"] == "code"
+    assert expired_code.status_code == 401
+    assert closed.status_code == 200
+    assert closed_code.status_code == 401
+
+
+def test_checkin_code_rate_limit() -> None:
+    settings = Settings(
+        database_url="sqlite+pysqlite:///:memory:", allowed_origins=(),
+        jwt_secret="j"*32, cpf_pepper="p"*32, checkin_code_attempt_limit=3,
+    )
+    app = create_app(database_url=settings.database_url, settings=settings)
+    Base.metadata.create_all(app.state.database.engine)
+    client = TestClient(app)
+    with client:
+        student = register(client, "987.654.321-00", "Estudante")
+        responses = [
+            client.post("/checkins/code", headers=bearer(student),
+                json={"kind":"checkin","idempotency_key":f"code:probe:{i}","code":"000000"})
+            for i in range(4)
+        ]
+    assert [item.status_code for item in responses] == [401, 401, 401, 429]
+    assert "Muitas tentativas" in responses[-1].json()["detail"]
 
 
 def test_session_recovery_is_isolated_by_class_and_institution() -> None:

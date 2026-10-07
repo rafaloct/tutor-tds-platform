@@ -32,6 +32,46 @@ def command(client, action, person="other", revision=0, class_id="c1", **overrid
     return client.post(f"/operations/{class_id}/commands", headers=header("coordinator"), json=body), body
 
 
+def test_canonical_program_operator_grant_unlocks_scoped_operations(requests_api):
+    client, engine = requests_api
+    client.app.state.settings = replace(
+        client.app.state.settings,
+        operator_operations_enabled=True,
+    )
+
+    denied = client.post(
+        "/operations/c1/search",
+        headers=header("admin"),
+        json={"query": "Name"},
+    )
+    assert denied.status_code == 403
+
+    granted = client.post(
+        "/admin/programs/p1/memberships",
+        headers=header("admin"),
+        json={"user_id": "admin", "role": "program_operator"},
+    )
+    assert granted.status_code == 201
+    assert granted.json()["role"] == "program_operator"
+
+    scopes = client.get("/operations/scopes", headers=header("admin"))
+    assert scopes.status_code == 200
+    assert {row["class_id"] for row in scopes.json()["scopes"]} == {"c1", "c2"}
+
+    allowed = client.post(
+        "/operations/c1/search",
+        headers=header("admin"),
+        json={"query": "Name"},
+    )
+    assert allowed.status_code == 200
+
+    with Session(engine) as session:
+        membership = session.get(ProgramMembership, ("admin", "p1"))
+        assert membership is not None
+        assert membership.role == "program_operator"
+        assert membership.status == "active"
+
+
 def test_scoped_search_and_global_admin_does_not_bypass(operator_api):
     client, _ = operator_api
     contexts = client.get("/operations/scopes", headers=header("coordinator")).json()["scopes"]

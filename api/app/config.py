@@ -39,9 +39,11 @@ class Settings:
     compatibility_verified: bool = False
     environment: str = "development"
     operator_operations_enabled: bool = False
+    class_lifecycle_enabled: bool = False
     cpf_activation_required: bool = False
     auth_rate_limit_window_seconds: int = 900
     auth_login_attempt_limit: int = 10
+    checkin_code_attempt_limit: int = 8
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -58,6 +60,7 @@ class Settings:
         )
         settings = cls(
             operator_operations_enabled=os.getenv("OPERATOR_OPERATIONS_ENABLED", "false").lower() in {"1", "true", "yes"},
+            class_lifecycle_enabled=os.getenv("CLASS_LIFECYCLE_ENABLED", "false").lower() in {"1", "true", "yes"},
             database_url=database_url or "sqlite+pysqlite:///./tutor_tds_local.db",
             environment=environment,
             allowed_origins=origins,
@@ -105,6 +108,7 @@ class Settings:
             cpf_activation_required=os.getenv("CPF_ACTIVATION_REQUIRED", "false").lower() in {"1", "true", "yes"},
             auth_rate_limit_window_seconds=int(os.getenv("AUTH_RATE_LIMIT_WINDOW_SECONDS", "900")),
             auth_login_attempt_limit=int(os.getenv("AUTH_LOGIN_ATTEMPT_LIMIT", "10")),
+            checkin_code_attempt_limit=int(os.getenv("CHECKIN_CODE_ATTEMPT_LIMIT", "8")),
         )
         if not settings.minimum_supported_app_version:
             raise RuntimeError("MINIMUM_SUPPORTED_APP_VERSION não pode ser vazio.")

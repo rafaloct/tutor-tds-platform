@@ -75,6 +75,64 @@ ausente, logout A→B e Android/TalkBack. Nenhum deploy/AAB/produção nesta exe
 Gestão integral de equipe/ofertas/instituições e aceite visual permanecem fora
 deste incremento. #30 continua aberta até seus critérios integrais.
 
+## Extensão #138 — lifecycle territorial da turma
+
+O backend passa a expor o contrato contextual de turma em
+`/operations/classes`, atrás de `CLASS_LIFECYCLE_ENABLED=false` por padrão.
+A preparação fixa a CourseVersion publicada no servidor e persiste
+`offer_municipality` e `offer_location` sem copiar residência do participante.
+
+RBAC do candidato: program_operator/coordinator podem preparar e alterar
+planejamento/equipe enquanto a turma está `planned`; somente coordinator pode
+ativar, encerrar, alterar equipe após ativação ou autorizar exceção de capacidade.
+Professor/monitor não recebem poder administrativo novo. Readiness do professor
+fica limitado à própria turma.
+
+Lifecycle canônico: `planned -> active -> closed`. Comandos exigem ator,
+motivo, contexto completo, idempotency key e `expected_revision`; replay
+divergente ou CAS stale falha. `classroom_command_receipts` preserva a trilha.
+Encerramento apenas muda o lifecycle e projeta warnings; não cria presença,
+frequência, capacitação ou certificado.
+
+Capacidade padrão é 30 vínculos ativos. Todas as rotas HTTP canônicas de inclusão
+bloqueiam o 31º vínculo. Exceção só existe pelo comando contextual de coordinator,
+com motivo, registrada como `assign_capacity_override`; admin/teacher não
+possuem bypass. Turma `closed` não aceita novos vínculos.
+
+Endpoints: `GET /operations/classes/options`, `GET /operations/classes`,
+`GET /operations/classes/team-candidates?program_id=...`,
+`POST /operations/classes`, `POST /operations/classes/{id}/plan`,
+`POST /operations/classes/{id}/team`,
+`POST /operations/classes/{id}/transition` e
+`GET /operations/classes/{id}/readiness`.
+
+`team-candidates` exige program_operator/coordinator ativo no programa e retorna
+somente `user_id`, `display_name` e role teacher/monitor. A listagem de turmas
+aceita program_operator/coordinator no programa e professor apenas na própria
+turma; monitor não recebe lifecycle administrativo. Nenhum dos dois contratos
+depende de `OPERATOR_OPERATIONS_ENABLED` ou de `/operations/scopes`.
+
+A flag isola compatibilidade legado/lifecycle: com
+`CLASS_LIFECYCLE_ENABLED=false`, criação administrativa com status legado e
+adição administrativa de monitor continuam compatíveis; com a flag true, nova
+turma administrativa deve iniciar planned e equipe pós-ativação passa pelo fluxo
+contextual. Capacidade 30 e rejeição de novo vínculo em turma closed permanecem
+fail-closed, sem bypass administrativo.
+
+Decisão da coordenação: sessão aberta bloqueia a transição para closed.
+O readiness mantém a contagem em `closure_warnings.open_sessions`, acrescenta
+`closure_blockers=["open_sessions"]`, define `can_close=false` e capability
+de fechamento false enquanto houver sessão aberta. O POST de transição também
+nega com 409, sem incrementar revisão nem criar receipt. Depois que todas as
+sessões estiverem fechadas, pendências como evidência, presença/regularização e
+certificado continuam warnings e não bloqueiam o encerramento por si só.
+`close_open_session_policy=BLOCK_CLOSE_WITH_OPEN_SESSION`.
+
+Migration 0028 é aditiva e recusa downgrade quando houver território/revisão ou
+recibos novos. O teste PostgreSQL opt-in da #138 valida upgrade 0027→0028,
+constraints, criação/receipt/capacidade e os dois caminhos de downgrade em banco
+descartável; não usar staging para satisfazer esse gate. Sem staging/produção.
+
 ## Histórico — checkpoint inicial anterior ao backend
 # Operação de participantes — contrato e candidato Flutter (#30)
 

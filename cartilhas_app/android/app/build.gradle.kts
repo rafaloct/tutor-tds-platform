@@ -111,8 +111,19 @@ fun validateReleaseProductionDefines(defines: Map<String, String>) {
         "DURABLE_LEARNING_OUTBOX_ENABLED", "JOURNEY_TRACEABILITY_ENABLED",
         "SIGNED_SUPPORT_IDENTITY", "PUSH_NOTIFICATIONS_ENABLED",
     )
-    if (defines.keys.any { it !in approvedValues.keys && it !in inactiveFlags && it != "TUTOR_ENVIRONMENT" } ||
-        inactiveFlags.any { defines[it] != "false" }) {
+    // Metadados que o Flutter tool sempre injeta em -Pdart-defines; não são
+    // configuração da aplicação e não podem derrubar o gate.
+    val flutterToolMetadata = setOf(
+        "FLUTTER_VERSION", "FLUTTER_CHANNEL", "FLUTTER_GIT_URL",
+        "FLUTTER_FRAMEWORK_REVISION", "FLUTTER_ENGINE_REVISION",
+        "FLUTTER_DART_VERSION",
+    )
+    if (defines.keys.any {
+            it !in approvedValues.keys &&
+                it !in inactiveFlags &&
+                it !in flutterToolMetadata &&
+                it != "TUTOR_ENVIRONMENT"
+        } || inactiveFlags.any { defines[it] != "false" }) {
         throw GradleException("Build release bloqueado: defines ou flags não aprovados para produção.")
     }
     approvedValues.forEach { (variable, approvedValue) ->
@@ -157,7 +168,7 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
     }
     val evidence = status["required_physical_evidence"] as? List<*>
         ?: throw GradleException(
-            "Build release bloqueado: evidencias fisicas ausentes.",
+            "Build release bloqueado: gates Android de release ausentes.",
         )
     val invalidEvidence = evidence.any { item ->
         item !is Map<*, *> ||
@@ -167,7 +178,7 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
     }
     if (invalidEvidence) {
         throw GradleException(
-            "Build release bloqueado: evidencia fisica invalida.",
+            "Build release bloqueado: gate Android de release invalido.",
         )
     }
     val incompleteRequiredGate = evidence
@@ -177,7 +188,7 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
     }
     if (incompleteRequiredGate) {
         throw GradleException(
-            "Build release bloqueado: evidencia fisica obrigatoria pendente.",
+            "Build release bloqueado: gate Android de release pendente.",
         )
     }
 }

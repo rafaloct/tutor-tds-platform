@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Literal
@@ -13,7 +14,7 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .auth import access_claims
+from .auth import AuthService, access_claims
 from .database import Database
 from .context_memberships import active_student_binding, membership_id
 from .models import (ClassCheckin, ClassEnrollment, ClassMonitor, Classroom,
@@ -35,6 +36,7 @@ class SessionCreate(BaseModel):
 class SessionResponse(BaseModel):
     id: str; class_id: str; starts_at: datetime; ends_at: datetime; status: str
     token_expires_at: datetime; token_version: int; checkin_token: str | None = None
+    checkin_code: str | None = None
 
 class SessionView(BaseModel):
     id: str; class_id: str; starts_at: datetime; ends_at: datetime; status: Literal["open", "closed"]
@@ -52,6 +54,12 @@ class CheckinCreate(BaseModel):
     idempotency_key: str = Field(min_length=8, max_length=180, pattern=r"^[A-Za-z0-9_.:-]+$")
     token: str | None = Field(default=None, max_length=200)
     user_id: str | None = Field(default=None, max_length=36)
+
+class CodeCheckinCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    kind: Literal["checkin", "checkout"]
+    idempotency_key: str = Field(min_length=8, max_length=180, pattern=r"^[A-Za-z0-9_.:-]+$")
+    code: str = Field(min_length=1, max_length=16)
 
 class CheckinResponse(BaseModel):
     id: str; session_id: str; user_id: str; kind: str; occurred_at: datetime; method: str; evidence_id: str
@@ -109,11 +117,13 @@ def create_session(class_id: str, payload: SessionCreate, request: Request, clai
     with Session(db.engine) as session:
         classroom = _class(session, class_id); _staff(session, classroom, claims, monitor=False)
         token = secrets.token_urlsafe(24); now = datetime.now(timezone.utc)
+        code = _new_checkin_code(session)
         record = ClassSession(id=str(uuid4()), class_id=class_id, starts_at=payload.starts_at,
             ends_at=payload.ends_at, status="open", opened_by=claims["sub"],
-            checkin_token_digest=_digest(token), token_expires_at=min(payload.ends_at, now + timedelta(minutes=10)), token_version=1)
+            checkin_token_digest=_digest(token), checkin_code_digest=_digest(code),
+            token_expires_at=min(payload.ends_at, now + timedelta(minutes=10)), token_version=1)
         session.add(record); session.commit()
-        return _session_response(record, token)
+        return _session_response(record, token, code)
 
 @router.get("/classes/{class_id}/sessions", response_model=SessionPage)
 def list_sessions(
@@ -182,10 +192,12 @@ def rotate_token(class_id: str, session_id: str, request: Request, claims=Depend
         record = _class_session(session, class_id, session_id)
         if record.status != "open": raise HTTPException(409, "Sessão encerrada.")
         token = secrets.token_urlsafe(24); record.checkin_token_digest = _digest(token)
+        code = _new_checkin_code(session, exclude_session_id=record.id)
+        record.checkin_code_digest = _digest(code)
         record.token_version += 1
         ends_at = record.ends_at.replace(tzinfo=timezone.utc) if record.ends_at.tzinfo is None else record.ends_at
         record.token_expires_at = min(ends_at, datetime.now(timezone.utc) + timedelta(minutes=10))
-        session.commit(); return _session_response(record, token)
+        session.commit(); return _session_response(record, token, code)
 
 @router.post("/classes/{class_id}/sessions/{session_id}/checkins", response_model=CheckinResponse, status_code=201)
 def checkin(class_id: str, session_id: str, payload: CheckinCreate, request: Request, response: Response, claims=Depends(access_claims)):
@@ -215,16 +227,45 @@ def checkin(class_id: str, session_id: str, payload: CheckinCreate, request: Req
         expires = record.token_expires_at.replace(tzinfo=timezone.utc) if record.token_expires_at.tzinfo is None else record.token_expires_at
         if method == "qr" and (not payload.token or not secrets.compare_digest(_digest(payload.token), record.checkin_token_digest) or now > expires):
             raise HTTPException(401, "Token de check-in inválido ou expirado.")
-        evidence_id = str(uuid4()); evidence = EvidenceItem(id=evidence_id, class_id=class_id, session_id=session_id,
-            user_id=user_id, evidence_type="attendance", occurred_at=now, confidence_basis_points=10000,
-            review_status="pending", item_digest=_digest(f"{session_id}:{user_id}:{payload.kind}"), metadata_json={"method": method})
-        result = ClassCheckin(id=str(uuid4()), session_id=session_id, user_id=user_id, kind=payload.kind,
-            occurred_at=now, method=method, evidence_id=evidence_id, idempotency_key=payload.idempotency_key)
-        # No ORM relationship connects these rows, so SQLAlchemy cannot infer
-        # their FK dependency. Persist the evidence first on every dialect.
-        session.add(evidence); _flush(session)
-        session.add(result); _commit(session)
-        return _checkin_response(result)
+        return _persist_checkin(session, record, user_id=user_id, kind=payload.kind,
+            idempotency_key=payload.idempotency_key, method=method, response=response, now=now)
+
+@router.post("/checkins/code", response_model=CheckinResponse, status_code=201)
+def checkin_by_code(payload: CodeCheckinCreate, request: Request, response: Response, claims=Depends(access_claims)):
+    db: Database = request.app.state.database
+    with Session(db.engine) as session:
+        service = AuthService(session, request.app.state.settings)
+        service.consume_rate_limit(
+            "checkin_code", request, claims["sub"],
+            service.settings.checkin_code_attempt_limit,
+        )
+        session.commit()
+        digits = re.sub(r"\D", "", payload.code)
+        if len(digits) != 6:
+            raise HTTPException(422, "Informe os 6 dígitos do encontro.")
+        now = datetime.now(timezone.utc)
+        digest = _digest(digits)
+        candidates = session.scalars(
+            select(ClassSession).where(
+                ClassSession.checkin_code_digest == digest,
+                ClassSession.status == "open",
+            )
+        ).all()
+        live = [
+            record for record in candidates
+            if (record.token_expires_at.replace(tzinfo=timezone.utc)
+                if record.token_expires_at.tzinfo is None else record.token_expires_at) > now
+        ]
+        if not live:
+            raise HTTPException(401, "Código inválido ou expirado. Use o código atual exibido pelo instrutor.")
+        if len(live) > 1:
+            raise HTTPException(409, "Código em rotação. Peça o novo código ao instrutor.")
+        record = live[0]
+        classroom = _class(session, record.class_id)
+        if not _active_student(session, classroom, claims["sub"]):
+            raise HTTPException(403, "Matrícula na turma não autorizada.")
+        return _persist_checkin(session, record, user_id=claims["sub"], kind=payload.kind,
+            idempotency_key=payload.idempotency_key, method="code", response=response, now=now)
 
 @router.post("/classes/{class_id}/evidence-imports", response_model=ImportResponse, status_code=201)
 def import_evidence(class_id: str, payload: ImportCreate, request: Request, response: Response, claims=Depends(access_claims)):
@@ -373,7 +414,61 @@ def _active_student(session, classroom, user_id):
             .where(ClassEnrollment.class_id == classroom.id, ClassEnrollment.user_id == user_id,
                    active_student_binding())) is not None)
 def _digest(value): return hashlib.sha256(value.encode()).hexdigest()
-def _session_response(r, token=None): return SessionResponse(id=r.id, class_id=r.class_id, starts_at=r.starts_at, ends_at=r.ends_at, status=r.status, token_expires_at=r.token_expires_at, token_version=r.token_version, checkin_token=token)
+
+def _new_checkin_code(session, exclude_session_id: str | None = None):
+    for _ in range(16):
+        code = f"{secrets.randbelow(900000) + 100000:06d}"
+        filters = [ClassSession.checkin_code_digest == _digest(code), ClassSession.status == "open"]
+        if exclude_session_id is not None:
+            filters.append(ClassSession.id != exclude_session_id)
+        if session.scalar(select(ClassSession.id).where(*filters)) is None:
+            return code
+    raise HTTPException(503, "Não foi possível gerar o código do encontro.")
+
+def _persist_checkin(session, record, user_id, kind, idempotency_key, method, response, now):
+    previous = session.scalar(
+        select(ClassCheckin).where(
+            ClassCheckin.session_id == record.id,
+            ClassCheckin.user_id == user_id,
+            ClassCheckin.kind == kind,
+        )
+    )
+    if previous is not None:
+        response.status_code = 200
+        return _checkin_response(previous)
+    if record.status != "open": raise HTTPException(409, "Sessão encerrada.")
+    starts = record.starts_at.replace(tzinfo=timezone.utc) if record.starts_at.tzinfo is None else record.starts_at
+    ends = record.ends_at.replace(tzinfo=timezone.utc) if record.ends_at.tzinfo is None else record.ends_at
+    if now < starts - timedelta(minutes=15) or now > ends:
+        raise HTTPException(409, "Check-in fora da janela da sessão.")
+    evidence_id = str(uuid4())
+    evidence = EvidenceItem(id=evidence_id, class_id=record.class_id, session_id=record.id,
+        user_id=user_id, evidence_type="attendance", occurred_at=now, confidence_basis_points=10000,
+        review_status="pending", item_digest=_digest(f"{record.id}:{user_id}:{kind}"), metadata_json={"method": method})
+    result = ClassCheckin(id=str(uuid4()), session_id=record.id, user_id=user_id, kind=kind,
+        occurred_at=now, method=method, evidence_id=evidence_id, idempotency_key=idempotency_key)
+    # No ORM relationship connects these rows, so SQLAlchemy cannot infer
+    # their FK dependency. Persist the evidence first on every dialect.
+    session.add(evidence); _flush(session)
+    session.add(result)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        previous = session.scalar(
+            select(ClassCheckin).where(
+                ClassCheckin.session_id == record.id,
+                ClassCheckin.user_id == user_id,
+                ClassCheckin.kind == kind,
+            )
+        )
+        if previous is None:
+            raise HTTPException(409, "Registro duplicado ou divergente.")
+        response.status_code = 200
+        return _checkin_response(previous)
+    return _checkin_response(result)
+
+def _session_response(r, token=None, code=None): return SessionResponse(id=r.id, class_id=r.class_id, starts_at=r.starts_at, ends_at=r.ends_at, status=r.status, token_expires_at=r.token_expires_at, token_version=r.token_version, checkin_token=token, checkin_code=code)
 def _session_view(r): return SessionView(id=r.id, class_id=r.class_id, starts_at=r.starts_at, ends_at=r.ends_at, status=r.status, token_expires_at=r.token_expires_at, token_version=r.token_version)
 def _checkin_response(r): return CheckinResponse(id=r.id, session_id=r.session_id, user_id=r.user_id, kind=r.kind, occurred_at=r.occurred_at, method=r.method, evidence_id=r.evidence_id)
 def _import_response(session, r): return ImportResponse(id=r.id, class_id=r.class_id, source_type=r.source_type, status=r.status, retention_until=r.retention_until, source_digest=r.source_digest, evidence_ids=list(session.scalars(select(EvidenceItem.id).where(EvidenceItem.import_id == r.id))))

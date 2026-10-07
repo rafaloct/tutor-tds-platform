@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Test-ProductionBackendIdentity.ps1')
-$expectedSchema = '20261001_0020'
+$expectedSchema = Get-CanonicalAlembicHead
 $script:checked = 0
 function New-VersionPayload {
     param([hashtable]$Overrides = @{})
@@ -48,3 +48,21 @@ foreach($field in @('api_version','schema_version','minimum_supported_app_versio
     Check "missing $field" $false $payload
 }
 Write-Output "OFFLINE_BACKEND_IDENTITY=PASS; cases=$script:checked; network=false; production_acceptance=false"
+
+
+$future = Get-CanonicalAlembicHead -MigrationDefinitions @(
+    "revision = 'base_1'`ndown_revision = None",
+    "revision = 'future_9999'`ndown_revision = 'base_1'"
+)
+if ($future -cne 'future_9999') { throw 'future HEAD should resolve without literal edits.' }
+$script:checked++; Write-Output 'PASS future HEAD is dynamic'
+try {
+    Get-CanonicalAlembicHead -MigrationDefinitions @(
+        "revision = 'base_1'`ndown_revision = None",
+        "revision = 'branch_a'`ndown_revision = 'base_1'",
+        "revision = 'branch_b'`ndown_revision = 'base_1'"
+    ) | Out-Null
+    throw 'multiple heads should fail.'
+} catch { if ($_.Exception.Message -eq 'multiple heads should fail.') { throw } }
+$script:checked++; Write-Output 'PASS multiple HEADs fail closed'
+Write-Output "OFFLINE_BACKEND_IDENTITY_DYNAMIC_HEAD=PASS; cases=$script:checked; network=false; production_acceptance=false"

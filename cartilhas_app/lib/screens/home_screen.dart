@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import '../features/operations/operations_entry.dart';
 import '../features/operations/operations_repository.dart';
 import '../features/management/presentation/management_workspace_screen.dart';
+import '../features/class_lifecycle/data/class_lifecycle_gateway.dart';
+import '../features/class_lifecycle/data/class_lifecycle_repository.dart';
+import '../features/class_lifecycle/models/class_lifecycle_models.dart';
+import '../features/class_lifecycle/presentation/prepare_classroom_screen.dart';
+import '../features/class_lifecycle/presentation/close_classroom_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../features/learning_context/learning_home_card.dart';
@@ -46,12 +51,16 @@ class HomeScreen extends StatefulWidget {
     this.courseLoader,
     this.learningHomeController,
     this.editorGatewayFactory,
+    this.classLifecycleGatewayFactory,
+    this.sessionProbe,
   });
 
   final LearningHomeController? learningHomeController;
 
   final Future<List<Cartilha>> Function()? courseLoader;
   final CourseEditorGateway Function()? editorGatewayFactory;
+  final ClassLifecycleGateway Function()? classLifecycleGatewayFactory;
+  final Future<bool> Function()? sessionProbe;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -64,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _navigationIndex = 0;
   TeamCapabilitySnapshot? _teamSnapshot;
   Future<TeamCapabilitySnapshot?>? _teamCapability;
+  ClassLifecycleCapabilities? _classLifecycleCapabilities;
   late Future<List<Cartilha>> _cartilhas;
   bool _catalogLoading = false;
   bool _catalogReloadQueued = false;
@@ -71,7 +81,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool get _hasManagementAccess =>
       _operationScopeCount > 0 ||
       _editorProgramCount > 0 ||
-      (_teamSnapshot?.hasAccess ?? false);
+      (_teamSnapshot?.hasAccess ?? false) ||
+      (_classLifecycleCapabilities?.hasManagementSurface ?? false);
 
   @override
   void initState() {
@@ -130,10 +141,25 @@ class _HomeScreenState extends State<HomeScreen> {
         authRepository: context.read<AuthRepository>(),
       );
 
+  ClassLifecycleGateway? _newClassLifecycleGateway() {
+    final factory = widget.classLifecycleGatewayFactory;
+    if (factory != null) return factory();
+    if (AppConfig.classLifecycleFakeEnabled) {
+      return FakeClassLifecycleGateway.coordinator();
+    }
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) return null;
+    return ClassLifecycleRepository(
+      apiUrl: AppConfig.tutorApiUrl,
+      authRepository: auth,
+    );
+  }
+
   void _refreshTeamCapability() {
     _refreshSessionState();
     _refreshEditorCapability();
     _refreshOperationsCapability();
+    _refreshClassLifecycleCapability();
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     final Future<TeamCapabilitySnapshot?> next;
     if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
@@ -185,12 +211,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _openManagementTool(String value) async {
     final team = _teamSnapshot;
+    final lifecycleGateway = _newClassLifecycleGateway();
     final screen = switch (value) {
       'operations' => OperationsEntry(
         auth: context.read<AuthRepository>(),
         apiUrl: AppConfig.tutorApiUrl,
       ),
       'editor' => CourseEditorCatalogScreen(gateway: _newEditorGateway()),
+      'prepare_class' => PrepareClassroomScreen(
+        gateway:
+            lifecycleGateway ??
+            (throw StateError('Lifecycle de turma indisponível.')),
+        onParticipantsTap: _operationScopeCount > 0
+            ? () => _openManagementTool('operations')
+            : null,
+      ),
+      'close_class' => CloseClassroomScreen(
+        gateway:
+            lifecycleGateway ??
+            (throw StateError('Lifecycle de turma indisponível.')),
+      ),
       'team' => ClassroomDashboardScreen(
         gateway: ClassroomRepository(
           apiUrl: AppConfig.tutorApiUrl,
@@ -212,6 +252,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final pageId = switch (value) {
       'operations' => 'operator_operations',
       'editor' => 'course_editor_catalog',
+      'prepare_class' => 'prepare_classroom',
+      'close_class' => 'close_classroom',
       'team' =>
         team?.hasTeacherCockpit ?? false
             ? 'team_dashboard'
@@ -225,6 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
         pageId: pageId,
         featureId: switch (value) {
           'editor' => 'course_editor',
+          'prepare_class' => 'classroom_lifecycle_prepare',
+          'close_class' => 'classroom_lifecycle_close',
           'team' =>
             team?.hasTeacherCockpit ?? false
                 ? 'classroom_dashboard'
@@ -250,8 +294,15 @@ class _HomeScreenState extends State<HomeScreen> {
           operationScopeCount: _operationScopeCount,
           editorProgramCount: _editorProgramCount,
           teamCapability: team,
+          lifecycleCapabilities: _classLifecycleCapabilities,
           onParticipantsTap: _operationScopeCount > 0
               ? () => _openManagementTool('operations')
+              : null,
+          onPrepareClassTap: _classLifecycleCapabilities?.canPrepare ?? false
+              ? () => _openManagementTool('prepare_class')
+              : null,
+          onCloseClassTap: _classLifecycleCapabilities?.canClose ?? false
+              ? () => _openManagementTool('close_class')
               : null,
           onContentTap: _editorProgramCount > 0
               ? () => _openManagementTool('editor')
@@ -366,6 +417,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _refreshClassLifecycleCapability() async {
+    final gateway = _newClassLifecycleGateway();
+    if (gateway == null) {
+      if (mounted) setState(() => _classLifecycleCapabilities = null);
+      return;
+    }
+
+    ClassLifecycleCapabilities? capabilities;
+    try {
+      capabilities = (await gateway.bootstrap()).capabilities;
+    } on Object {
+      // Fail closed. Lifecycle management is visible only after a successful
+      // capability response from the selected gateway.
+    }
+    if (mounted) {
+      setState(() => _classLifecycleCapabilities = capabilities);
+    }
+  }
+
   Future<void> _refreshOperationsCapability() async {
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     if (!operatorOperationsEnabled ||
@@ -406,6 +476,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _refreshSessionState() async {
+    final probe = widget.sessionProbe;
+    if (probe != null) {
+      var probed = false;
+      try {
+        probed = await probe();
+      } catch (_) {
+        probed = false;
+      }
+      if (mounted) setState(() => _hasSession = probed);
+      return;
+    }
     final auth = Provider.of<AuthRepository?>(context, listen: false);
     if (auth == null || AppConfig.tutorApiUrl.trim().isEmpty) {
       if (mounted) setState(() => _hasSession = false);
@@ -685,6 +766,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ListTile(
                       leading: Icon(Icons.school_outlined),
                       title: Text('Minhas turmas'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                if (_hasSession)
+                  const PopupMenuItem(
+                    value: 'checkin',
+                    child: ListTile(
+                      leading: Icon(Icons.qr_code_scanner_outlined),
+                      title: Text('Registrar presença'),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),

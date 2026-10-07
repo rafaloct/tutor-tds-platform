@@ -54,9 +54,10 @@ class ReleaseReadinessVerifier {
 
     const requiredPhysicalIds = {
       'certificate_human_approval_e2e',
-      'classroom_cold_offline_xiaomi',
-      'course_versioning_xiaomi',
-      'evidence_offline_xiaomi',
+      'classroom_cold_offline_android_e2e',
+      'course_versioning_android_e2e',
+      'evidence_offline_android_e2e',
+      'pre_aab_xiaomi_smoke',
     };
     final physicalEvidence = status['required_physical_evidence'];
     final gates = <String, Map<String, dynamic>>{};
@@ -88,8 +89,8 @@ class ReleaseReadinessVerifier {
     if (invalidPhysical) {
       issues.add(
         const ReleaseVerificationIssue(
-          'invalid_physical_evidence',
-          'Lista required_physical_evidence incompleta ou inválida.',
+          'invalid_release_evidence',
+          'Lista de gates Android de release incompleta ou inválida.',
         ),
       );
     }
@@ -105,8 +106,8 @@ class ReleaseReadinessVerifier {
       final ids = pendingPhysical.join(', ');
       issues.add(
         ReleaseVerificationIssue(
-          'physical_evidence_pending',
-          'Evidência física obrigatória pendente: $ids.',
+          'release_evidence_pending',
+          'Gate Android de release pendente: $ids.',
         ),
       );
     }

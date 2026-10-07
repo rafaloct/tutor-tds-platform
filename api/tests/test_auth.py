@@ -1,19 +1,40 @@
 from __future__ import annotations
 
+from datetime import date
+
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.auth import AuthService
 from app.config import Settings
 from app.main import create_app
-from app.models import Base, Course, CourseVersion, CourseVersionTransition, LearningEventRecord, SessionToken, User
+from app.models import (
+    Base,
+    Classroom,
+    Course,
+    CourseVersion,
+    CourseVersionTransition,
+    Institution,
+    LearningEventRecord,
+    Program,
+    ProgramCourse,
+    ProgramMembership,
+    SessionToken,
+    User,
+)
 
 CPF = "123.456.789-09"
 PASSWORD = "uma-senha-forte-2026"
 
 
-def make_client(*, access_minutes: int = 15) -> tuple[TestClient, object]:
+def make_client(
+    *,
+    access_minutes: int = 15,
+    operator_operations_enabled: bool = False,
+) -> tuple[TestClient, object]:
     settings = Settings(
         database_url="sqlite+pysqlite:///:memory:",
         allowed_origins=(),
@@ -21,6 +42,7 @@ def make_client(*, access_minutes: int = 15) -> tuple[TestClient, object]:
         cpf_pepper="test-cpf-pepper-with-at-least-32-chars",
         access_token_minutes=access_minutes,
         refresh_token_days=30,
+        operator_operations_enabled=operator_operations_enabled,
     )
     app = create_app(database_url=settings.database_url, settings=settings)
     Base.metadata.create_all(app.state.database.engine)
@@ -135,6 +157,226 @@ def test_valid_access_token_returns_only_public_user_fields() -> None:
     assert response.status_code == 200
     assert set(response.json()) == {"id", "name", "role"}
     assert CPF not in response.text
+
+
+@pytest.mark.parametrize(
+    "role",
+    ["student", "teacher", "monitor", "program_operator", "coordinator", "admin"],
+)
+def test_decode_access_and_access_claims_accept_only_supported_roles(role: str) -> None:
+    client, app = make_client()
+    with client:
+        registered = client.post("/auth/register", json=registration_payload()).json()
+        user_id = registered["user"]["id"]
+        with Session(app.state.database.engine) as session:
+            user = session.get(User, user_id)
+            assert user is not None
+            user.role = role
+            session.commit()
+
+        logged_in = client.post(
+            "/auth/login",
+            json={"cpf": CPF, "password": PASSWORD},
+        )
+        assert logged_in.status_code == 200
+        token = logged_in.json()["access_token"]
+
+        with Session(app.state.database.engine) as session:
+            claims = AuthService(session, app.state.settings).decode_access(token)
+        assert claims["sub"] == user_id
+        assert claims["role"] == role
+        assert claims["type"] == "access"
+
+        me = client.get(
+            "/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert me.status_code == 200
+    assert me.json()["role"] == role
+
+
+def test_decode_access_rejects_unknown_role_fail_closed() -> None:
+    client, app = make_client()
+    with client:
+        registered = client.post("/auth/register", json=registration_payload()).json()
+        user_id = registered["user"]["id"]
+        with Session(app.state.database.engine) as session:
+            user = session.get(User, user_id)
+            assert user is not None
+            user.role = "unexpected_role"
+            session.commit()
+
+        logged_in = client.post(
+            "/auth/login",
+            json={"cpf": CPF, "password": PASSWORD},
+        )
+        assert logged_in.status_code == 200
+        token = logged_in.json()["access_token"]
+
+        with Session(app.state.database.engine) as session:
+            service = AuthService(session, app.state.settings)
+            with pytest.raises(HTTPException) as rejected:
+                service.decode_access(token)
+        denied = client.get(
+            "/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert rejected.value.status_code == 401
+    assert denied.status_code == 401
+
+
+def test_program_operator_remains_scoped_and_is_not_global_admin() -> None:
+    client, app = make_client(operator_operations_enabled=True)
+    with client:
+        registered = client.post("/auth/register", json=registration_payload()).json()
+        operator_id = registered["user"]["id"]
+
+        with Session(app.state.database.engine) as session:
+            operator = session.get(User, operator_id)
+            assert operator is not None
+            operator.role = "program_operator"
+            session.add_all(
+                [
+                    Institution(id="i1", name="Instituição 1"),
+                    Institution(id="i2", name="Instituição 2"),
+                    User(
+                        id="teacher-1",
+                        cpf_digest="1" * 64,
+                        phone="61999990001",
+                        name="Teacher 1",
+                        password_digest="not-used",
+                        role="teacher",
+                    ),
+                    User(
+                        id="teacher-2",
+                        cpf_digest="2" * 64,
+                        phone="61999990002",
+                        name="Teacher 2",
+                        password_digest="not-used",
+                        role="teacher",
+                    ),
+                    Course(
+                        id="course",
+                        title="Curso",
+                        author="TDS",
+                        content={"sections": []},
+                        active=True,
+                    ),
+                ]
+            )
+            session.flush()
+            session.add_all(
+                [
+                    Program(id="p1", institution_id="i1", name="Programa 1"),
+                    Program(id="p2", institution_id="i2", name="Programa 2"),
+                ]
+            )
+            session.flush()
+            session.add_all(
+                [
+                    ProgramCourse(program_id="p1", course_id="course"),
+                    ProgramCourse(program_id="p2", course_id="course"),
+                    ProgramMembership(
+                        user_id="teacher-1",
+                        program_id="p1",
+                        role="teacher",
+                        status="active",
+                    ),
+                    ProgramMembership(
+                        user_id="teacher-2",
+                        program_id="p2",
+                        role="teacher",
+                        status="active",
+                    ),
+                    CourseVersion(
+                        id="version-1",
+                        course_id="course",
+                        version_number=1,
+                        revision=1,
+                        status="published",
+                        content={"sections": []},
+                    ),
+                ]
+            )
+            session.flush()
+            session.add_all(
+                [
+                    Classroom(
+                        id="class-p1",
+                        program_id="p1",
+                        course_id="course",
+                        course_version_id="version-1",
+                        teacher_id="teacher-1",
+                        name="Turma P1",
+                        start_date=date(2026, 1, 1),
+                        end_date=date(2026, 12, 31),
+                        status="active",
+                    ),
+                    Classroom(
+                        id="class-p2",
+                        program_id="p2",
+                        course_id="course",
+                        course_version_id="version-1",
+                        teacher_id="teacher-2",
+                        name="Turma P2",
+                        start_date=date(2026, 1, 1),
+                        end_date=date(2026, 12, 31),
+                        status="active",
+                    ),
+                ]
+            )
+            session.commit()
+
+        logged_in = client.post(
+            "/auth/login",
+            json={"cpf": CPF, "password": PASSWORD},
+        )
+        assert logged_in.status_code == 200
+        token = logged_in.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # A JWT role is valid, but it does not grant global admin or program scope.
+        assert client.get("/auth/me", headers=headers).status_code == 200
+        assert client.get("/admin/hierarchy", headers=headers).status_code == 403
+        assert client.get("/operations/scopes", headers=headers).json() == {"scopes": []}
+        assert (
+            client.post(
+                "/operations/class-p1/search",
+                headers=headers,
+                json={"query": "Teacher"},
+            ).status_code
+            == 403
+        )
+
+        with Session(app.state.database.engine) as session:
+            session.add(
+                ProgramMembership(
+                    user_id=operator_id,
+                    program_id="p1",
+                    role="program_operator",
+                    status="active",
+                )
+            )
+            session.commit()
+
+        scopes = client.get("/operations/scopes", headers=headers)
+        in_scope = client.post(
+            "/operations/class-p1/search",
+            headers=headers,
+            json={"query": "Teacher"},
+        )
+        out_of_scope = client.post(
+            "/operations/class-p2/search",
+            headers=headers,
+            json={"query": "Teacher"},
+        )
+
+    assert scopes.status_code == 200
+    assert [item["class_id"] for item in scopes.json()["scopes"]] == ["class-p1"]
+    assert in_scope.status_code == 200
+    assert out_of_scope.status_code == 403
 
 
 def test_student_can_delete_account_events_sessions_and_revoke_access() -> None:

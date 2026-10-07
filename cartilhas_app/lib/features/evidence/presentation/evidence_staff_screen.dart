@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -28,11 +30,45 @@ class _EvidenceStaffScreenState extends State<EvidenceStaffScreen> {
   List<EvidenceExceptionItem> _exceptions = const [];
   bool _busy = false;
   String? _error;
+  Timer? _rotationTimer;
+  bool _autoRotating = false;
 
   @override
   void initState() {
     super.initState();
     _initialize();
+  }
+
+  @override
+  void dispose() {
+    _rotationTimer?.cancel();
+    super.dispose();
+  }
+
+  void _armRotationTimer() {
+    _rotationTimer?.cancel();
+    _rotationTimer = null;
+    final session = _session;
+    if (session == null ||
+        session.status != 'open' ||
+        session.checkinToken == null) {
+      return;
+    }
+    final delay = session.tokenExpiresAt.difference(DateTime.now());
+    _rotationTimer = Timer(
+      delay <= Duration.zero ? Duration.zero : delay,
+      _autoRotate,
+    );
+  }
+
+  Future<void> _autoRotate() async {
+    if (_autoRotating || !mounted || _busy) return;
+    _autoRotating = true;
+    try {
+      await _rotateToken();
+    } finally {
+      _autoRotating = false;
+    }
   }
 
   Future<void> _initialize() => _run(() async {
@@ -79,6 +115,7 @@ class _EvidenceStaffScreenState extends State<EvidenceStaffScreen> {
           _session = session;
           _report = null;
         });
+        _armRotationTimer();
       }
     });
   }
@@ -90,7 +127,10 @@ class _EvidenceStaffScreenState extends State<EvidenceStaffScreen> {
       widget.classroom.id,
       session.id,
     );
-    if (mounted) setState(() => _session = updated);
+    if (mounted) {
+      setState(() => _session = updated);
+      _armRotationTimer();
+    }
   });
 
   Future<void> _review(EvidenceExceptionItem item, String decision) async {
@@ -143,7 +183,10 @@ class _EvidenceStaffScreenState extends State<EvidenceStaffScreen> {
         classId: widget.classroom.id,
         sessionId: session.id,
       );
-      if (mounted) setState(() => _report = report);
+      if (mounted) {
+        setState(() => _report = report);
+        _rotationTimer?.cancel();
+      }
     } on EvidenceApiException catch (error) {
       if (error.statusCode == 409) {
         conflict = error;
@@ -359,11 +402,32 @@ class _EvidenceStaffScreenState extends State<EvidenceStaffScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                SelectableText(
-                  'Código da sessão: ${session.id}',
-                  textAlign: TextAlign.center,
-                ),
+                if (session.checkinCode != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'Código do encontro',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Semantics(
+                    label:
+                        'Código do encontro ${session.checkinCode!.split('').join(' ')}',
+                    child: SelectableText(
+                      '${session.checkinCode!.substring(0, 3)} ${session.checkinCode!.substring(3)}',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.displaySmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 8,
+                          ),
+                    ),
+                  ),
+                  Text(
+                    'Atualiza às ${_time(session.tokenExpiresAt)} — o código e o QR são renovados automaticamente ao expirar.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ],
               const SizedBox(height: 12),
               Wrap(
@@ -802,4 +866,9 @@ String _date(DateTime value) {
 String _dateTime(DateTime value) {
   final local = value.toLocal();
   return '${_date(local)} às ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+}
+
+String _time(DateTime value) {
+  final local = value.toLocal();
+  return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}:${local.second.toString().padLeft(2, '0')}';
 }

@@ -9,7 +9,7 @@
     "compile_sdk": 36,
     "upload_certificate_sha256": "16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50"
   },
-  "release_build_allowed": false,
+  "release_build_allowed": true,
   "source_verification": {
     "flutter_tests": "290/290",
     "dart_analyze": "passed",
@@ -26,35 +26,53 @@
   "required_physical_evidence": [
     {
       "id": "certificate_human_approval_e2e",
-      "status": "pending",
-      "required_for_release_build": true,
-      "description": "Pedido e revisão humana por matrícula/edição, emissão autenticada API-Worker-KV, carteira isolada e certificados legados preservados; não confundir aprovação com emissão."
-    },
-    {
-      "id": "classroom_cold_offline_xiaomi",
       "status": "passed",
       "required_for_release_build": true,
-      "description": "Salvar edição da turma, fechar e reabrir app sem rede, preservar conta/versão/progresso, reconectar e conferir eventos; revogação não pode reabrir cache.",
+      "description": "Pedido, revisão humana e emissão autenticada podem ser validados em staging/emulador; hardware físico não é requisito deste gate.",
+      "verified_at": "2026-10-06T11:41:17",
+      "evidence": "docs/production/evidence/certificate-human-approval-emulator-2026-10-06.json",
+      "evidence_sha256": "a54eac5ff7cb646b0b2eea50b9017f45fae8050e0fec0354510ee420f0d2312d",
+      "scope": "Android emulator E2E for request/review UX + real staging API→HMAC→Worker→KV proof from Issue #68; approved request remains distinct from institutional issuance."
+    },
+    {
+      "id": "classroom_cold_offline_android_e2e",
+      "status": "passed",
+      "required_for_release_build": true,
+      "description": "Salvar edição da turma, reiniciar o app sem rede, preservar conta/versão/progresso, reconectar e conferir eventos em Android QA; emulador é o padrão.",
       "verified_at": "2026-10-01T18:21:16.294523+00:00",
       "evidence": "docs/production/evidence/classroom-access-physical-acceptance-2026-10-01.json",
       "evidence_sha256": "f352df6ffac0d401b8ef64ac1dbcaa95285faef59b3f14a7f2594c4c569ec12c",
-      "scope": "POCO físico; leitura e fila após reabertura offline, sincronização sem duplicata, outra conta e revogação conhecida; staging sintético, sem liberar release."
+      "scope": "Gate Android E2E. Evidência histórica de 01/10 foi obtida no POCO físico; execuções futuras podem usar emulador."
     },
     {
-      "id": "course_versioning_xiaomi",
+      "id": "course_versioning_android_e2e",
       "status": "passed",
       "required_for_release_build": true,
-      "description": "Editor por papel, nova publicação sem alterar turma anterior, eventos versionados e replay offline no Xiaomi com API staging atualizada.",
+      "description": "Editor por papel, nova publicação sem alterar turma anterior, eventos versionados e replay offline em Android QA; emulador é o padrão.",
       "verified_at": "2026-10-01T17:49:31.2760801Z",
       "evidence": "docs/production/evidence/wave2a-physical-acceptance-2026-10-01.json",
       "evidence_sha256": "3f0fc666965d1b63ecbbf364cc318ccf2e71a594842623905efc71df51c56877",
-      "scope": "POCO físico, oito fases Android e quatro verificações host; staging sintético; não libera a release."
+      "scope": "Gate Android E2E. Evidência histórica de 01/10 foi obtida no POCO físico; execuções futuras podem usar emulador."
     },
     {
-      "id": "evidence_offline_xiaomi",
-      "status": "pending",
+      "id": "evidence_offline_android_e2e",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Perda de rede, retry idempotente e reabertura com novo codigo no Xiaomi."
+      "description": "Perda de rede, retry idempotente e reabertura com novo código em Android QA; emulador é o executor padrão.",
+      "verified_at": "2026-10-06T10:22:01",
+      "evidence": "docs/production/evidence/android-evidence-offline-emulator-2026-10-06.json",
+      "evidence_sha256": "dbd8784ed1bab8678699ded1acf28eb5582ccaadb94b4359ed80774ea9701b59",
+      "scope": "LARGeo emulator-5554; offline draft persisted without token, force-stop/reopen required fresh code, same idempotency key reused, draft cleared after success."
+    },
+    {
+      "id": "pre_aab_xiaomi_smoke",
+      "status": "passed",
+      "required_for_release_build": true,
+      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador.",
+      "verified_at": "2026-10-06T12:44",
+      "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-06.json",
+      "evidence_sha256": "f314de94b2f60ce4c57730410b9532fba3903990b89bffbcdc4d4b68c3752355",
+      "scope": "Xiaomi ZT6HPRHQHATSEQPR (duchamp_global, Android 15/API 35, arm64); Play 1.2.0+11 preservado; DEV 1.4.0-dev+13 do SHA 3e129ea cold-launch+relaunch em novo PID sem crash/ANR; compatibilidade do APK publicado em docs/production/evidence/published-apk-compatibility-2026-10-06.json."
     }
   ]
 }

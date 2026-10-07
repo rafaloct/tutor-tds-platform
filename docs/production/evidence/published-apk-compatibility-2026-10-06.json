@@ -1,0 +1,81 @@
+{
+  "gate": "published_apk_compatibility",
+  "date": "2026-10-06",
+  "execution_host": "avellaria",
+  "result": "pass",
+  "source": {
+    "current_sha": "3e129ea52d686f60b10eb6bc44fa0dfe3a2b4c1d",
+    "published_source_commit": "7c22045",
+    "published_pubspec_version": "1.2.0+11"
+  },
+  "play_package": {
+    "package": "com.tutortds_cartilhas",
+    "version": "1.2.0+11",
+    "xiaomi_evidence_path": "/tmp/tds-pre-aab-xiaomi-smoke-20261006-124329/evidence.json",
+    "xiaomi_evidence_sha256": "f314de94b2f60ce4c57730410b9532fba3903990b89bffbcdc4d4b68c3752355",
+    "preserved_after_smoke": true,
+    "cold_launch": "pass",
+    "fatal_exception": false,
+    "anr": false,
+    "baseline": "pass"
+  },
+  "static_dependency_check_at_7c22045": {
+    "TUTOR_API_URL_in_client": false,
+    "auth_login_in_client": false,
+    "courses_endpoint_in_client": false,
+    "TUTOR_ENVIRONMENT_in_client": false,
+    "fastapi_client_dependency": "no",
+    "online_services": {
+      "chat": "POST $gatewayUrl/v1/chat (lib/services/anything_llm_service.dart) -> field 'text'",
+      "study": "POST $gatewayUrl/v1/study (lib/features/study_ai/data/study_ai_service.dart) -> field 'material'",
+      "certificates": "POST/GET $gatewayUrl/v1/certificates (lib/features/certificates/data/certificate_service.dart)",
+      "gateway": "https://tutor-tds-gateway.tdsipex.workers.dev"
+    }
+  },
+  "legacy_worker_checks": {
+    "origin": "https://cartilhas.ipexdesenvolvimento.cloud",
+    "chat": {
+      "method": "POST /v1/chat",
+      "payload": {"message": "Explique de forma simples o que e educacao financeira.", "mode": "tutor"},
+      "learning_context_sent": false,
+      "http_status": 200,
+      "text_field_nonempty": true,
+      "result": "pass"
+    },
+    "study": {
+      "method": "POST /v1/study",
+      "payload": {"kind": "summary", "topic": "educacao financeira", "summaryLength": "quick"},
+      "http_status": 200,
+      "material_field_present": true,
+      "result": "pass"
+    },
+    "certificate_route": {
+      "method": "GET /v1/certificates/compatibility-nonexistent-qa",
+      "http_status": 404,
+      "write_performed": false,
+      "result": "pass"
+    },
+    "backward_compatibility": "pass - Worker contextual aceita formato legado sem learning_context"
+  },
+  "fastapi_prod_readonly": {
+    "health": {"http_status": 200, "body": {"status": "ok", "database": "available"}},
+    "version": {
+      "http_status": 200,
+      "environment": "production",
+      "schema_version": "20261005_0028",
+      "minimum_supported_app_version": "1.2.0+11",
+      "compatibility_verified": false
+    }
+  },
+  "writes_performed": {
+    "production": false,
+    "git": false,
+    "worker": false,
+    "cloudflare": false,
+    "xiaomi_additional": false,
+    "aab_generated": false,
+    "play_console": false,
+    "compatibility_verified_changed": false
+  },
+  "conclusion": "APK Play 1.2.0+11 permanece compativel: cliente nao depende do FastAPI migrado (sem TUTOR_API_URL, /auth/login, /courses); servicos online usam somente o gateway legado /v1/chat|study|certificates; Worker contextual preserva o formato legado (200/200/404); schema prod 20261005_0028; minimum_supported_app_version=1.2.0+11; baseline fisica Xiaomi comprovada e preservada."
+}

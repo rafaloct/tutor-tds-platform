@@ -1,4 +1,40 @@
-
+function Get-CanonicalAlembicHead {
+    [CmdletBinding()]
+    param(
+        [string]$MigrationRoot,
+        [string[]]$MigrationDefinitions
+    )
+    if ($null -eq $MigrationDefinitions) {
+        if ([string]::IsNullOrWhiteSpace($MigrationRoot)) {
+            $workspace = Split-Path $PSScriptRoot -Parent
+            $MigrationRoot = Join-Path $workspace 'api/migrations/versions'
+        }
+        if (-not (Test-Path -LiteralPath $MigrationRoot -PathType Container)) {
+            throw 'diretório de migrations Alembic ausente.'
+        }
+        $MigrationDefinitions = @(Get-ChildItem -LiteralPath $MigrationRoot -Filter '*.py' -File |
+            Sort-Object Name | ForEach-Object { Get-Content -LiteralPath $_.FullName -Raw })
+    }
+    if (@($MigrationDefinitions).Count -eq 0) { throw 'nenhuma migration Alembic encontrada.' }
+    $revisions = @{}
+    $parents = @{}
+    foreach ($definition in @($MigrationDefinitions)) {
+        if ($definition -notmatch '(?m)^revision\s*=\s*["'']([A-Za-z0-9][A-Za-z0-9_-]*)["'']\s*$') {
+            throw 'migration sem revision Alembic simples e válida.'
+        }
+        $revision = $Matches[1]
+        if ($revisions.ContainsKey($revision)) { throw 'revision Alembic duplicada.' }
+        $revisions[$revision] = $true
+        if ($definition -match '(?m)^down_revision\s*=\s*["'']([A-Za-z0-9][A-Za-z0-9_-]*)["'']\s*$') {
+            $parents[$Matches[1]] = $true
+        } elseif ($definition -notmatch '(?m)^down_revision\s*=\s*None\s*$') {
+            throw 'down_revision Alembic não suportada; gate falha fechado.'
+        }
+    }
+    $heads = @($revisions.Keys | Where-Object { -not $parents.ContainsKey($_) })
+    if ($heads.Count -ne 1) { throw 'exatamente um HEAD Alembic local é obrigatório.' }
+    return [string]$heads[0]
+}
 function Get-RequiredVersionProperty {
     param([Parameter(Mandatory = $true)][object]$Response, [Parameter(Mandatory = $true)][string]$Name)
     $property = $Response.PSObject.Properties[$Name]

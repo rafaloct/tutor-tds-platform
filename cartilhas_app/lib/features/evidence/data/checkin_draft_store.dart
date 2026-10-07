@@ -13,6 +13,7 @@ class CheckinDraft {
     required this.kind,
     required this.idempotencyKey,
     required this.createdAt,
+    this.viaCode = false,
   });
 
   final String classId;
@@ -21,12 +22,17 @@ class CheckinDraft {
   final String idempotencyKey;
   final DateTime createdAt;
 
+  /// `true` when the pending attempt used the short numeric session code,
+  /// which never carries class/session identifiers to restore.
+  final bool viaCode;
+
   Map<String, dynamic> toJson() => {
     'class_id': classId,
     'session_id': sessionId,
     'kind': kind,
     'idempotency_key': idempotencyKey,
     'created_at': createdAt.toUtc().toIso8601String(),
+    if (viaCode) 'via_code': true,
   };
 
   static CheckinDraft? fromJson(Object? value) {
@@ -36,10 +42,11 @@ class CheckinDraft {
     final kind = value['kind'];
     final idempotencyKey = value['idempotency_key'];
     final createdAt = DateTime.tryParse(value['created_at'] as String? ?? '');
+    final viaCode = value['via_code'] == true;
     if (classId is! String ||
-        classId.trim().isEmpty ||
+        (!viaCode && classId.trim().isEmpty) ||
         sessionId is! String ||
-        sessionId.trim().isEmpty ||
+        (!viaCode && sessionId.trim().isEmpty) ||
         (kind != 'checkin' && kind != 'checkout') ||
         idempotencyKey is! String ||
         !idempotencyKey.startsWith('mobile:') ||
@@ -52,6 +59,7 @@ class CheckinDraft {
       kind: kind as String,
       idempotencyKey: idempotencyKey,
       createdAt: createdAt.toUtc(),
+      viaCode: viaCode,
     );
   }
 }

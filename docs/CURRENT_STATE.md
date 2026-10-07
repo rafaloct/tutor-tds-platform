@@ -1,5 +1,58 @@
 # CURRENT STATE
 
+## 2026-10-05 Issue #138 — candidato lifecycle territorial
+
+IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre
+`911c454`: Classroom recebe município/local da oferta e revisão de lifecycle;
+fluxo contextual `planned -> active -> closed`, equipe, readiness, CAS/replay e
+ledger auditável. Capacidade padrão 30; somente coordinator escopado pode exceder,
+com motivo registrado na operação de inclusão. Rotas de inclusão bloqueiam turma
+closed e excesso sem override. CourseVersion permanece fixada. A revisão do PR
+#143 preserva o legado quando `CLASS_LIFECYCLE_ENABLED=false` e aplica criação
+planned/equipe contextual nas rotas administrativas somente com a flag ativa.
+Foram adicionados candidatos de equipe mínimos e listagem contextual de turmas,
+sem PII desnecessária nem dependência de `/operations/scopes`. Decisão de
+05/10/2026 fecha o gate de encerramento: sessão aberta bloqueia `active→closed`;
+demais pendências continuam warnings. Readiness e capability refletem esse
+bloqueio e a transição falha sem revision/receipt enquanto existir sessão aberta.
+Testes focais SQLite passaram; o DESKTOP-8T5DRBS não possui PostgreSQL descartável,
+então qualquer validação PostgreSQL deve ser evidenciada em ambiente isolado
+separado e nunca inferida de SQLite/staging. Sem staging, produção, merge ou deploy.
+
+## 2026-10-05 Issue #134 — candidato local
+
+`/v1/chat` aceita contexto estruturado compatível com legado. HEAD autorizado
+de #132 permanece composto localmente no PR #136; request ID, 429/504 e o
+chamador geral preservados. Camada Experience Blocks do PR #135 removida do PR
+#136 por decisão humana em 2026-10-06; permanece no PR #135. Chamador geral do
+Tutor envia course_id/course_version_id/module_id; nenhum chamador de experiência
+neste PR. `TutorLearningContext` mantém campos opcionais de experiência aceitos
+pelo contrato do gateway, sem caller neste PR. `TUTOR_RAG_SCOPE_MAP` é
+temporário, com granularidade CourseVersion; isolamento de módulo/experiência
+não está comprovado. Status:
+`LOCAL_CONTEXT_BINDING_READY=PARCIAL`,
+`CONTEXT_BINDING_READY=SIM_COURSEVERSION`,
+`AI_SERVICE_READY=SIM (escopo CourseVersion, staging)`.
+`FASTAPI_CHANGE_REQUIRED=NÃO`;
+`RAG_REGISTRY_FASTAPI_CHANGE=UNKNOWN`. Alvo permanente de ingestão está
+documentado, não implementado. O gateway agora usa o shape público real do
+AnythingLLM e deriva o escopo CourseVersion do binding 1:1 com workspace, sem
+fabricar metadata de módulo/experiência. O chamador geral envia somente
+`course_id`, `course_version_id` e `module_id`; cobertura em
+`chat_experience_progress_test.dart`. No sync anterior com `staging=9577541`,
+gateway 31/31 e sentinel tooling 5/5. O PR #136 permanece baseado em staging e
+foi sincronizado por merge normal. Sentinel A/B real PASS em staging em
+2026-10-06 (Worker `tutor-tds-gateway-staging`, workspaces QA
+`tds-qa-ctx-a-v1`/`tds-qa-ctx-b-v1`), com fail-closed, rejeição de PII no
+contexto e troca de conta comprovados; evidência
+`docs/production/evidence/ai-rag-courseversion-sentinel-staging-2026-10-06.json`.
+A primeira execução revelou header Authorization mascarado no vector-search,
+corrigido em `9994565` com teste de regressão. `REAL_STAGING_E2E=YES`.
+Isolamento de módulo/experiência e registry RAG permanente: DEFERRED.
+Produção e o workspace `cartilhas` não foram alterados; apenas recursos QA
+isolados de staging foram criados. Auditoria:
+`AI_RAG_CONTEXT_BINDING_AUDIT_2026-10-05.md`.
+
 ## Integração META 05 — 03/10/2026
 
 Base integrada neste candidato: `aa6fb88050aa864726e197187487819de303ac65`,

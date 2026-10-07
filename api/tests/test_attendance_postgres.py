@@ -96,5 +96,5 @@ def test_postgres_attendance_migration_preserves_data_and_refuses_populated_loss
     with pytest.raises(RuntimeError,match='Preserve official attendance history'):
         command.downgrade(config,'20261003_0023')
     with engine.connect() as conn:
-        assert conn.scalar(text('SELECT version_num FROM alembic_version'))=='20261005_0027'
+        assert conn.scalar(text('SELECT version_num FROM alembic_version'))=='20261006_0029'
         assert conn.scalar(text('SELECT count(*) FROM official_attendance_decisions'))==1
