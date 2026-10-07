@@ -72,6 +72,48 @@ Os comandos legados de preparação de programa/matrícula/turma continuam exigi
 admin global; sua migração não foi implicitamente declarada pelo gate editorial.
 Nenhuma operação de IA ou LearningEvent cria esses vínculos.
 
+## Atividades contextuais publicadas — candidato local Wave 2B
+
+Candidato sobre `fbb4b6a`, migration `20261007_0030`. O mesmo domínio de
+`assessment_attempts`/`assessment_contents` recebe origem `published_block` e
+linhagem completa; o legado `practice` continua todo nulo. A API deriva conteúdo,
+gabarito e nota do snapshot imutável de CourseVersion e cria, na mesma transação,
+`assessment_completed` determinístico com crédito zero. A feature exige
+`LEARNING_CONTEXT_ENABLED=true` e `DYNAMIC_ACTIVITY_ENABLED=true`; ambas seguem
+false por padrão. API, Flutter e runner foram verificados localmente, sem deploy
+ou aceite STAGING/PRODUCTION.
+
+Para `published_block`, o cliente e a API calculam o mesmo ID canônico a partir
+da linhagem completa (sem `apiUrl`), e o banco impõe uma tentativa por
+dono/contexto/bloco. `assessment_contents.origin` e o namespace reservado
+impedem que gabarito publicado seja aceito pelo fluxo legado. Projeções do aluno
+e públicas removem campos reveladores; o evento conclusivo omite IDs pessoais.
+
+| Method | Path | Authentication | Permission | Request | Response | Consumer | Repository | Tables | Test | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PUT | /assessment-attempts/{attempt_id} | Bearer access_claims | `published_block`: próprio aluno com LearningContext exato e ativo; `practice` preserva regra student legada | origem, revisão/CAS, resposta/marcação e linhagem completa; sem conteúdo/gabarito do cliente | tentativa criada/replay idêntico; 409 em revisão/ID canônico/snapshot divergente; 422 `future_updated_at` reparável somente no relógio; score calculado no servidor | ChatExperienceScreen / PublishedAssessmentController | AssessmentAttemptRepository; AssessmentSyncService | assessment_attempts; assessment_contents; learning_events | test_dynamic_activity; published_assessment_sync_test; published_assessment_controller_test | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/assessment-attempts | Bearer access_claims | próprio aluno; matrícula, membership, programa, curso e edição revalidados | limit; offset | página de tentativas da linhagem exata | retomada/sync Flutter | AssessmentAttemptRepository | assessment_attempts | test_dynamic_activity; published_assessment_reader_test | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/assessment-attempts/{attempt_id} | Bearer access_claims | próprio aluno no contexto exato ativo | class_id; attempt_id | tentativa contextual ou 404/409 fail-closed | retomada Flutter | AssessmentAttemptRepository | assessment_attempts | test_dynamic_activity; published_assessment_reader_test | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/assessment-attempts/{attempt_id}/content | Bearer access_claims | próprio aluno no contexto exato ativo | class_id; attempt_id | conteúdo público; gabarito somente após conclusão | revisão da atividade | AssessmentAttemptRepository | assessment_attempts; assessment_contents | test_dynamic_activity | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/students/{owner_id}/assessment-attempts | Bearer access_claims | professor/admin autorizado na turma exata; monitor/outsider negados | owner_id; limit; offset | página pedagógica do aluno naquela turma | acompanhamento | API contextual | assessment_attempts | test_dynamic_activity; test_staging_dynamic_activity_smoke | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id} | Bearer access_claims | professor/admin autorizado na turma exata | owner_id; attempt_id | tentativa contextual exata | acompanhamento | API contextual | assessment_attempts | test_dynamic_activity; test_staging_dynamic_activity_smoke | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id}/content | Bearer access_claims | professor/admin autorizado na turma exata | owner_id; attempt_id | conteúdo congelado; gabarito somente após conclusão | acompanhamento | API contextual | assessment_attempts; assessment_contents | test_dynamic_activity | LOCAL_CANDIDATE |
+
+Runner remoto: `staging_dynamic_activity_smoke.py` exige
+`WAVE2B_STAGING_LANE` e combinação exata de lane/URL. `cloud` em
+`https://tutor-tds-staging.fastapicloud.dev` é a aceitação canônica; `vps` em
+`https://ead.ipexdesenvolvimento.cloud/tutor-staging-api` produz somente
+pré-aceitação. Não há default, fallback ou redirect. O runner usa descriptor não
+secreto de fixture pré-provisionada e contas sintéticas
+student/teacher/admin/monitor/outsider. Não provisiona nem revoga dados sem hook
+descartável + guard. A única credencial possivelmente nova ou a confirmar é a
+conta sintética outsider, se ausente; nenhum secret de produção é requerido.
+Após hook de restauração, o runner exige GET autenticado da mesma tentativa com
+ID/revisão/origem exatos; HTTP 200 isolado não aprova nem oculta fixture ainda
+revogada.
+`dynamic_activity_contextual_android_e2e` permanece pendente antes de ativar a
+flag, mas não é gate de build quando ela está false.
+
 ## Identidade e jornada — QA isolado, 01/10/2026
 
 Recorte priorizado pelo usuário; `JOURNEY_TRACEABILITY_ENABLED=false` por padrão

@@ -212,3 +212,30 @@
     enquanto houver sessão aberta. Demais pendências de evidência, presença,
     regularização e certificado permanecem warnings e não bloqueiam o fechamento
     por si só. Sem staging ou produção nesta decisão.
+
+30. 2026-10-07: Dynamic Learning 2B evolui as tabelas existentes de avaliação,
+    sem criar um domínio paralelo. O candidato sobre `fbb4b6a` adiciona a
+    migration `20261007_0030`, com linhagem `published_block` completa ou legado
+    `practice` todo nulo, e preserva IDs/versões do snapshot publicado até o
+    Flutter. Gabarito, nota e evidência determinística pertencem ao servidor;
+    conclusão tem crédito zero e nunca concede autorização, matrícula,
+    frequência, carga horária ou certificado. Persistência local antecede o
+    avanço da interface e a fila é segregada por dono/API/contexto. Professor e
+    admin só leem a turma exata; monitor e pessoa externa não recebem respostas.
+    `DYNAMIC_ACTIVITY_ENABLED=false` por padrão e requer Context Core ativo.
+    API, Flutter e runner foram verificados localmente, sem commit, deploy,
+    staging, produção ou secret alterado. O gate
+    `dynamic_activity_contextual_android_e2e` é obrigatório antes de ativar a
+    flag, mas não bloqueia build produtivo com ela false. Cloud `0024` e VPS
+    `0029` seguem sem compatibilidade confirmada nem SHA implantado exato; `0030`
+    é somente local. O runner usa fixture e identidades sintéticas; apenas a
+    conta outsider pode precisar ser criada ou confirmada se ausente, sem secret
+    novo de produção.
+31. 2026-10-07: tentativa publicada possui identidade canônica independente da
+    URL da API e unicidade parcial no banco por dono/contexto/bloco. Conteúdo de
+    prática não pode ocupar `published-block:` nem carregar proveniência
+    publicada; projeções públicas/do aluno não expõem gabarito, `isCorrect`,
+    `value`, feedback ou explicações. O evento de conclusão omite IDs de pessoa e
+    matrícula. Clock skew futuro é recuperável somente por uma correção de
+    `updated_at`, sem mudar revisão, respostas ou contexto. O runner só considera
+    restauração de revogação efetiva após reler a tentativa canônica.

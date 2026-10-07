@@ -1,5 +1,64 @@
 # CURRENT STATE
 
+## 2026-10-07 — candidato local Dynamic Learning 2B
+
+Sobre a base `fbb4b6a`, a fatia 2B agora possui candidato local executável com a
+migration aditiva `20261007_0030`: blocos publicados `question`/`quiz` preservam
+IDs e versões, reutilizam `assessment_attempts`/`assessment_contents`, resolvem o
+LearningContext completo e obtêm gabarito exclusivamente do snapshot imutável de
+CourseVersion no servidor. A tentativa é persistida localmente antes de a tela
+avançar; fila/cache ficam escopados por dono, API, turma, matrícula, edição,
+seção e bloco. Conclusão cria `assessment_completed` determinístico com
+`active_seconds=0` e `validated_seconds=0`; não concede horas, frequência,
+matrícula ou certificado. Leitura da própria tentativa revalida o contexto e a
+visão pedagógica fica restrita a professor/admin da turma exata; monitor e pessoa
+externa são negados.
+
+A identidade da tentativa publicada é canônica nos dois lados: SHA-256 do array
+JSON compacto `published_block`, dono, organização, programa, turma, membership,
+matrículas contextual/legada, curso, edição, seção/versão e bloco/versão; a URL
+da API não participa da identidade. O servidor exige esse ID e a migration cria
+unicidade parcial por dono/contexto/bloco, fechando corrida entre dispositivos.
+`assessment_contents.origin` separa `practice` de `published_block`, o namespace
+`published-block:` é reservado e a migration recusa colisão legada sem mutar o
+banco. Projeções públicas/do aluno removem gabarito, `isCorrect`, `value`,
+feedback e explicações; payloads de `assessment_completed` não carregam IDs de
+pessoa/matrícula. Relógio futuro recebe erro estruturado e só permite reparar
+`updated_at`, mantendo tentativa, revisão, respostas e contexto idênticos.
+
+`DYNAMIC_ACTIVITY_ENABLED=false` é o padrão na API, Flutter, exemplos e gates de
+produção, e depende também de `LEARNING_CONTEXT_ENABLED`. API, Flutter e o
+runner sintético foram verificados localmente; a suíte API completa coletou 620
+casos: 590 passaram e 30 gates PostgreSQL opt-in foram ignorados sem URL. A
+suíte Flutter passou 567/567 e a análise estática terminou sem problemas. Isso
+valida o candidato e o contrato do runner, não um ensaio contra staging. Somente
+a branch local do candidato é alterada; não houve push, merge, deploy, alteração
+de staging/produção ou mudança de secret nesta fatia.
+
+O estado remoto permanece separado: o Cloud canônico foi observado em `0024` e
+a VPS em `0029`; ambos reportaram `compatibility_verified=false` e não forneceram
+o SHA exato implantado. Portanto a migration `0030` existe somente no candidato
+local. Snapshot direto do Supabase em `2026-10-07T21:46:50Z`: 46/46 tabelas com
+RLS habilitado, zero policies, zero grants diretos para `anon`/`authenticated` e
+grants para `service_role`; default ACLs amplas para objetos futuros continuam
+inseguras e o toggle da Data API não foi verificado. Um alerta inicial do
+connector foi inconsistente com a leitura direta e não é evidência.
+
+Próximo gate: `dynamic_activity_contextual_android_e2e`, pendente e obrigatório
+antes de ligar a flag. Duas abordagens locais de harness foram encerradas pela
+regra de duas tentativas e não contam como evidência: a primeira travou na
+sincronização do binding; a substituição prebuilt compilou/instalou o APK e
+encontrou os controles na árvore, mas o display do emulador estava apagado, a
+captura ficou preta e o toque não chegou ao app. Nenhuma tentativa foi criada.
+A fronteira responsável observada é o preflight de tela acordada/desbloqueada do
+executor ADB, não uma falha demonstrada do domínio. Os harnesses falhos não são
+versionados. O gate não bloqueia um build de produção enquanto a flag continuar
+false. O runner remoto exige fixture sintética pré-provisionada, contas
+sintéticas student/teacher/admin/monitor/outsider e o host HTTPS canônico; a
+única credencial possivelmente nova ou a confirmar é a conta sintética outsider,
+caso ela ainda não exista. Nenhum secret de produção é necessário. Não há aceite
+de STAGING ou PRODUCTION para 2B.
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre

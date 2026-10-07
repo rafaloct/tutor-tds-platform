@@ -12,7 +12,11 @@ from sqlalchemy.orm import Session
 
 from .auth import access_claims, require_roles
 from .database import Database
-from .course_editor import latest_published_version, ensure_legacy_course_version
+from .course_editor import (
+    ensure_legacy_course_version,
+    latest_published_version,
+    learner_course_projection,
+)
 from .evidence import _active_student, _is_staff, _staff
 from .context_memberships import active_student_binding, bind_membership, bind_student
 from .classroom_policy import require_available_seat
@@ -508,13 +512,26 @@ def classroom_course(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        if not _active_student(session, classroom, claims["sub"]):
+        active_student = _active_student(session, classroom, claims["sub"])
+        can_view_answer_key = False
+        if not active_student:
             _staff(session, classroom, claims, monitor=True)
+            if claims["role"] == "admin" or classroom.teacher_id == claims["sub"]:
+                _staff(session, classroom, claims, monitor=False)
+                can_view_answer_key = True
         version = session.get(CourseVersion, classroom.course_version_id) if classroom.course_version_id else None
         if version is None or version.course_id != classroom.course_id or version.status not in {"published", "archived"}:
             raise HTTPException(409, "A versão do curso desta turma precisa ser conferida pela equipe.")
+        settings = request.app.state.settings
+        content = (
+            learner_course_projection(version.content)
+            if not can_view_answer_key
+            and settings.learning_context_enabled
+            and settings.dynamic_activity_enabled
+            else version.content
+        )
         return {
-            **version.content,
+            **content,
             "course_version_id": version.id,
             "version_id": version.id,
             "version_number": version.version_number,

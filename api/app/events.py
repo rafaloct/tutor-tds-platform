@@ -123,7 +123,14 @@ class EventCreate(BaseModel):
         return self
 
 
-class EventResponse(EventCreate):
+class EventResponse(BaseModel):
+    event_id: str
+    event_type: EventType | Literal["assessment_completed"]
+    course_id: str
+    session_id: str
+    occurred_at: datetime
+    active_seconds: int | None
+    payload: dict[str, object]
     sync_status: str
     validated_seconds: int
 

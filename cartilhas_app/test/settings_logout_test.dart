@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
@@ -52,122 +54,134 @@ void main() {
   testWidgets(
     'logout limpa dados acadêmicos não escopados e mantém preferências seguras',
     (tester) async {
-    tester.view.physicalSize = const Size(1200, 1800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    SharedPreferences.setMockInitialValues({
-      'user_name': 'Pessoa no aparelho',
-      'privacy_notice_seen_v1': true,
-      'study_progress:last': 'progresso-local',
-      'learning_events:pending:v1': '[{"event_id":"old-user"}]',
-      'study_assessment:sync:v1': '{"old-attempt":{}}',
-      SharedPreferencesCheckinDraftStore.storageKey:
-          '{"class_id":"class-1","session_id":"session-1","kind":"checkin","idempotency_key":"mobile:1","created_at":"2026-09-20T14:00:00Z"}',
-    });
-    final tokenStore = _TokenStore();
-    final auth = AuthRepository(
-      apiUrl: 'https://api.example',
-      client: MockClient((request) async {
-        if (request.method == 'GET' && request.url.path == '/auth/me') {
-          return http.Response(
-            '{"id":"old-user","name":"Pessoa anterior","role":"student"}',
-            200,
-          );
-        }
-        if (request.method == 'POST' && request.url.path == '/auth/login') {
-          return http.Response(
-            '{"access_token":"new-access","refresh_token":"new-refresh","user":{"id":"monitor-1","name":"Nova Pessoa","role":"monitor"}}',
-            200,
-          );
-        }
-        return http.Response('{}', 500);
-      }),
-      tokenStore: tokenStore,
-      onSessionEnded: UnscopedAccountDataCleaner(
+      tester.view.physicalSize = const Size(1200, 1800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({
+        'user_name': 'Pessoa no aparelho',
+        'privacy_notice_seen_v1': true,
+        'study_progress:last': 'progresso-local',
+        'learning_events:pending:v1': '[{"event_id":"old-user"}]',
+        'study_assessment:sync:v1': '{"old-attempt":{}}',
+        SharedPreferencesCheckinDraftStore.storageKey:
+            '{"class_id":"class-1","session_id":"session-1","kind":"checkin","idempotency_key":"mobile:1","created_at":"2026-09-20T14:00:00Z"}',
+      });
+      final tokenStore = _TokenStore();
+      final cleanupDone = Completer<void>();
+      final cleaner = UnscopedAccountDataCleaner(
         profileDataStore: _NoopProfileStore(),
         certificateRepository: _NoopCertificates(),
-      ).clear,
-    );
+      );
+      final auth = AuthRepository(
+        apiUrl: 'https://api.example',
+        client: MockClient((request) async {
+          if (request.method == 'GET' && request.url.path == '/auth/me') {
+            return http.Response(
+              '{"id":"old-user","name":"Pessoa anterior","role":"student"}',
+              200,
+            );
+          }
+          if (request.method == 'POST' && request.url.path == '/auth/login') {
+            return http.Response(
+              '{"access_token":"new-access","refresh_token":"new-refresh","user":{"id":"monitor-1","name":"Nova Pessoa","role":"monitor"}}',
+              200,
+            );
+          }
+          return http.Response('{}', 500);
+        }),
+        tokenStore: tokenStore,
+        onSessionEnded: () async {
+          try {
+            await cleaner.clear();
+          } finally {
+            if (!cleanupDone.isCompleted) cleanupDone.complete();
+          }
+        },
+      );
 
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          Provider<AuthRepository>.value(value: auth),
-          ChangeNotifierProvider(create: (_) => ThemeController()),
-        ],
-        child: const MaterialApp(home: SettingsScreen()),
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<AuthRepository>.value(value: auth),
+            ChangeNotifierProvider(create: (_) => ThemeController()),
+          ],
+          child: const MaterialApp(home: SettingsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Conta online conectada'), findsOneWidget);
-    expect(
-      find.text(
-        'Encerra a sessão e remove dados locais que não estão vinculados a uma conta',
-      ),
-      findsOneWidget,
-    );
-    await tester.ensureVisible(find.text('Sair da conta'));
-    await tester.tap(find.text('Sair da conta'));
-    await tester.pumpAndSettle();
-    expect(find.text('Sair da conta online?'), findsOneWidget);
-    expect(
-      find.textContaining(
-        'perfil, certificados e estudos locais não separados por usuário serão removidos',
-      ),
-      findsOneWidget,
-    );
+      expect(find.text('Conta online conectada'), findsOneWidget);
+      expect(
+        find.text(
+          'Encerra a sessão e remove dados locais que não estão vinculados a uma conta',
+        ),
+        findsOneWidget,
+      );
+      await tester.ensureVisible(find.text('Sair da conta'));
+      await tester.tap(find.text('Sair da conta'));
+      await tester.pumpAndSettle();
+      expect(find.text('Sair da conta online?'), findsOneWidget);
+      expect(
+        find.textContaining(
+          'perfil, certificados e estudos locais não separados por usuário serão removidos',
+        ),
+        findsOneWidget,
+      );
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Sair da conta'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Sair da conta'));
+      await tester.pump();
+      await tester.runAsync(
+        () => cleanupDone.future.timeout(const Duration(seconds: 5)),
+      );
+      await tester.pumpAndSettle();
 
-    expect(tokenStore.value, isNull);
-    expect(find.text('Bem-vindo ao TDS'), findsOneWidget);
-    expect(find.text('Já tenho conta'), findsOneWidget);
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getString('user_name'), isNull);
-    expect(prefs.getString('study_progress:last'), isNull);
-    expect(prefs.getBool('privacy_notice_seen_v1'), isTrue);
-    expect(prefs.getString('learning_events:pending:v1'), isNull);
-    expect(prefs.getString('study_assessment:sync:v1'), isNull);
-    expect(
-      prefs.getString(SharedPreferencesCheckinDraftStore.storageKey),
-      isNull,
-    );
+      expect(tokenStore.value, isNull);
+      expect(find.text('Bem-vindo ao TDS'), findsOneWidget);
+      expect(find.text('Já tenho conta'), findsOneWidget);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('user_name'), isNull);
+      expect(prefs.getString('study_progress:last'), isNull);
+      expect(prefs.getBool('privacy_notice_seen_v1'), isTrue);
+      expect(prefs.getString('learning_events:pending:v1'), isNull);
+      expect(prefs.getString('study_assessment:sync:v1'), isNull);
+      expect(
+        prefs.getString(SharedPreferencesCheckinDraftStore.storageKey),
+        isNull,
+      );
 
-    // Novo processo do app: sem user_name o app permanece na tela de boas-vindas.
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          Provider<AuthRepository>.value(value: auth),
-          ChangeNotifierProvider(create: (_) => ThemeController()),
-        ],
-        child: const MaterialApp(home: WelcomeScreen()),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Bem-vindo ao TDS'), findsOneWidget);
-    expect(find.text('Já tenho conta'), findsOneWidget);
-    expect(tokenStore.value, isNull);
+      // Novo processo do app: sem user_name o app permanece na tela de boas-vindas.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<AuthRepository>.value(value: auth),
+            ChangeNotifierProvider(create: (_) => ThemeController()),
+          ],
+          child: const MaterialApp(home: WelcomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Bem-vindo ao TDS'), findsOneWidget);
+      expect(find.text('Já tenho conta'), findsOneWidget);
+      expect(tokenStore.value, isNull);
 
-    await tester.ensureVisible(find.text('Já tenho conta'));
-    await tester.tap(find.text('Já tenho conta'));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const ValueKey('account-login-cpf')),
-      '52998224725',
-    );
-    await tester.enterText(
-      find.byKey(const ValueKey('account-password')),
-      'senha-segura-2026',
-    );
-    await tester.tap(find.widgetWithText(FilledButton, 'Entrar na conta'));
-    await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Já tenho conta'));
+      await tester.tap(find.text('Já tenho conta'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('account-login-cpf')),
+        '52998224725',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('account-password')),
+        'senha-segura-2026',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Entrar na conta'));
+      await tester.pumpAndSettle();
 
-    expect(tokenStore.value?.accessToken, 'new-access');
-    expect(prefs.getString('user_name'), 'Nova Pessoa');
+      expect(tokenStore.value?.accessToken, 'new-access');
+      expect(prefs.getString('user_name'), 'Nova Pessoa');
     },
   );
 

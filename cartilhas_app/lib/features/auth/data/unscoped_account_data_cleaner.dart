@@ -16,18 +16,18 @@ import '../../study_ai/data/assessment_sync_queue.dart';
 /// SharedPreferences.clear(); theme and consents are preserved.
 class UnscopedAccountDataCleaner {
   const UnscopedAccountDataCleaner({
-    this._learningEventQueue,
-    this._assessmentSyncQueue,
-    this._checkinDraftStore,
-    this._profileDataStore,
-    this._certificateRepository,
+    this.learningEventQueue,
+    this.assessmentSyncQueue,
+    this.checkinDraftStore,
+    this.profileDataStore,
+    this.certificateRepository,
   });
 
-  final LearningEventQueue? _learningEventQueue;
-  final AssessmentSyncQueue? _assessmentSyncQueue;
-  final CheckinDraftStore? _checkinDraftStore;
-  final ProfileDataStore? _profileDataStore;
-  final CertificateRepository? _certificateRepository;
+  final LearningEventQueue? learningEventQueue;
+  final AssessmentSyncQueue? assessmentSyncQueue;
+  final CheckinDraftStore? checkinDraftStore;
+  final ProfileDataStore? profileDataStore;
+  final CertificateRepository? certificateRepository;
 
   static const _exactKeys = {
     'user_name',
@@ -48,17 +48,20 @@ class UnscopedAccountDataCleaner {
   static const _ownerScopedPrefixes = [
     'study_progress:version:',
     'study_progress:context:',
+    'study_assessment:context:',
   ];
 
   Future<void> clear() async {
-    await (_learningEventQueue ?? const LearningEventQueue()).clear(
+    await (learningEventQueue ?? const LearningEventQueue()).clear(
       preserveOwned: true,
     );
-    await (_assessmentSyncQueue ?? const AssessmentSyncQueue()).clear();
-    await (_checkinDraftStore ?? SharedPreferencesCheckinDraftStore()).clear();
-    await (_profileDataStore ?? SecureProfileDataStore()).clear();
+    await (assessmentSyncQueue ?? const AssessmentSyncQueue()).clear(
+      preserveOwned: true,
+    );
+    await (checkinDraftStore ?? SharedPreferencesCheckinDraftStore()).clear();
+    await (profileDataStore ?? SecureProfileDataStore()).clear();
     await _clearPreferences();
-    await (_certificateRepository ?? CertificateRepository()).deleteAll();
+    await (certificateRepository ?? CertificateRepository()).deleteAll();
   }
 
   Future<void> _clearPreferences() async {
@@ -75,7 +78,9 @@ class UnscopedAccountDataCleaner {
   /// Version/context progress keys end with `ownerId` inside a JSON list.
   bool _isUnowned(String key) {
     try {
-      final payload = jsonDecode(key.substring(key.indexOf(':', 15) + 1));
+      final payloadStart = key.indexOf('[');
+      if (payloadStart < 0) return true;
+      final payload = jsonDecode(key.substring(payloadStart));
       return payload is List && payload.isNotEmpty && payload.last == null;
     } on Object {
       return true;

@@ -11,9 +11,9 @@
   },
   "release_build_allowed": true,
   "source_verification": {
-    "flutter_tests": "290/290",
+    "flutter_tests": "567/567",
     "dart_analyze": "passed",
-    "verified_at": "2026-09-21"
+    "verified_at": "2026-10-07"
   },
   "artifact": {
     "path": "release/Tutor-TDS-1.4.0+13-signed.aab",
@@ -73,6 +73,13 @@
       "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-06.json",
       "evidence_sha256": "f314de94b2f60ce4c57730410b9532fba3903990b89bffbcdc4d4b68c3752355",
       "scope": "Xiaomi ZT6HPRHQHATSEQPR (duchamp_global, Android 15/API 35, arm64); Play 1.2.0+11 preservado; DEV 1.4.0-dev+13 do SHA 3e129ea cold-launch+relaunch em novo PID sem crash/ANR; compatibilidade do APK publicado em docs/production/evidence/published-apk-compatibility-2026-10-06.json."
+    },
+    {
+      "id": "dynamic_activity_contextual_android_e2e",
+      "status": "pending",
+      "required_for_release_build": false,
+      "description": "Validar atividade publicada contextual, marcação, offline/reinício/replay e observação pedagógica em Android antes de habilitar DYNAMIC_ACTIVITY_ENABLED.",
+      "scope": "Obrigatório para ativar a feature; não bloqueia build de produção enquanto DYNAMIC_ACTIVITY_ENABLED=false. Candidato local sobre fbb4b6a/migration 0030; duas abordagens de harness encerradas sem aceite, a última por display do emulador apagado antes do gesto; sem aceite de staging ou produção."
     }
   ]
 }
