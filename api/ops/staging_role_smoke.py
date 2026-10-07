@@ -102,7 +102,12 @@ def main() -> None:
         "/classes/staging-qa-class/sessions/open",
         token=tokens["STUDENT"],
     )
-    if not isinstance(sessions, dict) or sessions.get("id") != "staging-qa-class-session":
+    if (
+        not isinstance(sessions, dict)
+        or not isinstance(sessions.get("id"), str)
+        or sessions.get("class_id") != "staging-qa-class"
+        or sessions.get("status") != "open"
+    ):
         raise RuntimeError("Synthetic open session was not recovered")
     if "checkin_token" in sessions and sessions["checkin_token"] is not None:
         raise RuntimeError("Read endpoint exposed a check-in token")

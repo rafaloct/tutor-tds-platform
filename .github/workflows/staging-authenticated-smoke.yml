@@ -82,8 +82,8 @@ jobs:
           set -a
           . "$seed"
           set +a
-          python3 "$remote_tmp/staging_role_smoke.py" "$base"
           python3 "$remote_tmp/staging_evidence_session_refresh.py" "$base" "$seed"
+          python3 "$remote_tmp/staging_role_smoke.py" "$base"
           python3 "$remote_tmp/staging_evidence_smoke.py" "$base"
           (
             cd "$remote_tmp"

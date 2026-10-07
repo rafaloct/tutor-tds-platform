@@ -34,7 +34,11 @@ def test_role_smoke_uses_role_specific_class_views(monkeypatch, capsys):
             return {"students": []}
         if path == "/classes/staging-qa-class/sessions/open":
             assert token == "STUDENT"
-            return {"id": "staging-qa-class-session"}
+            return {
+                "id": "staging-qa-class-session-refresh",
+                "class_id": "staging-qa-class",
+                "status": "open",
+            }
         if path == "/assessment-attempts":
             assert token == "STUDENT"
             return {"attempts": []}
