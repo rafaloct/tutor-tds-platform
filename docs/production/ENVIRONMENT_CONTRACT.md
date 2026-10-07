@@ -108,6 +108,11 @@ confundir o pacote debug instalado com um candidato Play. STAGING aponta só ao
 host Cloud aprovado. O comando futuro único é `tooling/build_production.ps1`
 com Flutter 3.44.9 explícito e `PublishedVersionCode` comprovado. Não o executar
 sem checklist em `PRODUCTION_READINESS.md`; `-PreflightOnly` nunca cria AAB.
+O passo final de `flutter build appbundle` não usa `--no-pub`: ele precisa
+regenerar o registro de plugins depois dos testes, mantendo `integration_test`
+somente como dependência dev e fora do classpath release. O lockfile continua
+obrigatório; não versionar `GeneratedPluginRegistrant.java` nem promover plugin
+de teste para dependência produtiva.
 
 Contrato proposto de `GET /version` (ainda ausente na produção atual):
 `api_version`, `schema_version` (revision Alembic aplicada ao DB conectado),

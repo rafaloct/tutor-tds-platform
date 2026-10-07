@@ -66,6 +66,13 @@ sintéticas student/teacher/admin/monitor/outsider e o host HTTPS canônico; a
 caso ela ainda não exista. Nenhum secret de produção é necessário. Não há aceite
 de STAGING ou PRODUCTION para 2B.
 
+O build de release deve regenerar o tooling de plataforma depois dos testes.
+Por isso, `tooling/build_production.ps1` conserva `--no-pub` nos gates de análise
+e testes, mas não no `flutter build appbundle`: um registrant ignorado e obsoleto
+pode ainda citar o plugin dev `integration_test`, que corretamente não participa
+do classpath release. Não mover esse plugin para dependências produtivas nem
+versionar arquivos gerados para contornar o problema.
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre

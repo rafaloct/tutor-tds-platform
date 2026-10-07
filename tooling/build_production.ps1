@@ -82,7 +82,10 @@ try {
     try {
         Run $Flutter @('analyze', '--no-pub')
         Run $Flutter @('test', '--no-pub')
-        Run $Flutter @('build', 'appbundle', '--release', '--no-pub', '--dart-define-from-file=config/production.json')
+        # Release must regenerate platform tooling after tests. With --no-pub,
+        # a stale GeneratedPluginRegistrant.java can retain dev-only plugins
+        # that Gradle correctly excludes from the release classpath.
+        Run $Flutter @('build', 'appbundle', '--release', '--dart-define-from-file=config/production.json')
         $artifact = Join-Path $appRoot 'build/app/outputs/bundle/release/app-release.aab'
         Require (Test-Path -LiteralPath $artifact) 'AAB não encontrado após build.'
         $manifest = [ordered]@{
