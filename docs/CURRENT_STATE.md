@@ -71,7 +71,9 @@ Por isso, `tooling/build_production.ps1` conserva `--no-pub` nos gates de análi
 e testes, mas não no `flutter build appbundle`: um registrant ignorado e obsoleto
 pode ainda citar o plugin dev `integration_test`, que corretamente não participa
 do classpath release. Não mover esse plugin para dependências produtivas nem
-versionar arquivos gerados para contornar o problema.
+versionar arquivos gerados para contornar o problema. Antes de empacotar, o
+wrapper executa `pub get --enforce-lockfile`; depois confirma que o hash de
+`pubspec.lock` e a árvore Git continuam idênticos ao SHA candidato.
 
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 

@@ -113,6 +113,8 @@ regenerar o registro de plugins depois dos testes, mantendo `integration_test`
 somente como dependência dev e fora do classpath release. O lockfile continua
 obrigatório; não versionar `GeneratedPluginRegistrant.java` nem promover plugin
 de teste para dependência produtiva.
+O wrapper executa `pub get --enforce-lockfile` e, antes de criar o manifesto,
+rejeita qualquer mudança no hash de `pubspec.lock` ou na árvore Git.
 
 Contrato proposto de `GET /version` (ainda ausente na produção atual):
 `api_version`, `schema_version` (revision Alembic aplicada ao DB conectado),
