@@ -35,10 +35,13 @@ $env:TDS_AI_SENTINEL_CONTEXT_B = '{"course_id":"curso-b","course_version_id":"ve
 node tooling/ai_qa/verify_rag_sentinel.mjs
 ```
 
-O sentinel remoto deste gate aceita deliberadamente **somente** `course_id` e
-`course_version_id`. Módulo e experiência continuam no contrato geral do
-`learning_context`, porém seu isolamento ainda é `BLOCKED`; incluí-los nesta
-prova produziria uma conclusão mais forte do que o AnythingLLM auditado permite.
+O sentinel remoto deste gate aceita `course_id`, `course_version_id` e,
+opcionalmente, `module_id` quando a prova mirar bindings de módulo no
+`TUTOR_RAG_SCOPE_MAP` de staging. Com `module_id`, a prova só passa se as
+sources declararem o binding de módulo correspondente; uma source apenas de
+CourseVersion não evidencia isolamento de módulo. Experiência continua fora
+desta prova: não existe workspace por experiência e incluí-la produziria uma
+conclusão mais forte do que o AnythingLLM auditado permite.
 
 O script recusa:
 
@@ -46,8 +49,8 @@ O script recusa:
 - URL sem HTTPS ou hostname sem rótulo `staging`;
 - marcadores iguais;
 - contextos inválidos ou iguais;
-- contexto que tente ampliar a prova além de CourseVersion;
-- resposta sem sources compatíveis com a CourseVersion;
+- contexto que tente ampliar a prova além do escopo curso/versão/módulo;
+- resposta sem sources compatíveis com o escopo declarado;
 - marcador A ausente em A ou marcador B aparecendo em A;
 - marcador B ausente em B ou marcador A aparecendo em B.
 
@@ -73,10 +76,12 @@ privada ou segredo.
 ## Interpretação
 
 `contextual_rag_sentinel=PASS` exige PASS em A e B. Isso comprova pontualmente
-que o gateway staging recuperou o marcador da CourseVersion correta e que as
-sources declaradas correspondem ao binding CourseVersion → workspace. Não prova
-isolamento de módulo/experiência e ainda não transforma AnythingLLM
-em autoridade acadêmica e não autoriza produção ou merge.
+que o gateway staging recuperou o marcador do escopo correto e que as
+sources declaradas correspondem ao binding escopo → workspace. Com contextos
+de módulo, comprova o binding módulo → workspace; sem `module_id`, comprova o
+binding CourseVersion → workspace. Não prova isolamento de experiência e ainda
+não transforma AnythingLLM em autoridade acadêmica e não autoriza produção ou
+merge.
 
 Os testes locais deste diretório validam apenas os guardrails pré-rede. A prova
 real A/B depende de Worker e documentos QA de staging autorizados.

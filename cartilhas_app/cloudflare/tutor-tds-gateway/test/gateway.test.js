@@ -68,6 +68,17 @@ function scopedEnv() {
   };
 }
 
+function moduleScopedEnv() {
+  return {
+    ...env,
+    TUTOR_RAG_SCOPE_MAP: JSON.stringify({
+      [`${scopeKey(learningContextA)}|${learningContextA.module_id}`]: 'course-a-v1-m1',
+      [`${scopeKey(learningContextA)}|${learningContextA2.module_id}`]: 'course-a-v1-m2',
+      [scopeKey(learningContextB)]: 'course-b-v3',
+    }),
+  };
+}
+
 function vectorSource(title, overrides = {}) {
   const id = overrides.id ?? `vector-${title}`;
   const metadata = {
@@ -327,6 +338,173 @@ test('module and experience context stay structured without claiming unsupported
     assert.equal('experience_id' in payload.sources[0], false);
     assert.equal('experience_type' in payload.sources[0], false);
   }
+});
+
+test('module binding resolves the module workspace and reports the effective scope', async () => {
+  const capture = {};
+  const result = vectorSource('TDS_CTX_A_v1');
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta A1', learning_context: learningContextA }),
+    moduleScopedEnv(),
+    {},
+    contextualFetch([result], [chatSource(result)], capture),
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(
+    capture.search.url,
+    'https://anything.example/api/v1/workspace/course-a-v1-m1/vector-search',
+  );
+  assert.equal(
+    capture.chat.url,
+    'https://anything.example/api/v1/workspace/course-a-v1-m1/chat',
+  );
+  assert.equal(capture.chat.body.mode, 'query');
+  assert.deepEqual(await response.json(), {
+    text: 'Contextual answer',
+    sources: [{
+      title: 'TDS_CTX_A_v1',
+      course_id: 'course-a',
+      course_version_id: 'version-1',
+      module_id: 'module-a1',
+      score: 0.941,
+    }],
+  });
+});
+
+test('distinct module bindings of the same CourseVersion do not cross retrieval', async () => {
+  for (const [context, workspace] of [
+    [learningContextA, 'course-a-v1-m1'],
+    [learningContextA2, 'course-a-v1-m2'],
+  ]) {
+    const result = vectorSource('TDS_CTX_A_v1');
+    const calls = [];
+    const response = await handleRequest(
+      post('/v1/chat', { message: 'Pergunta', learning_context: context }),
+      moduleScopedEnv(),
+      {},
+      async (url) => {
+        calls.push(String(url));
+        if (String(url).endsWith('/vector-search')) {
+          return Response.json({ results: [result] });
+        }
+        return Response.json({
+          textResponse: 'Answer',
+          sources: [chatSource(result)],
+        });
+      },
+    );
+    assert.equal(response.status, 200);
+    assert.equal(calls[0], `https://anything.example/api/v1/workspace/${workspace}/vector-search`);
+    assert.equal(calls[1], `https://anything.example/api/v1/workspace/${workspace}/chat`);
+    assert.equal((await response.json()).sources[0].module_id, context.module_id);
+  }
+});
+
+test('unmapped module fails closed when the map declares module granularity', async () => {
+  let called = false;
+  const response = await handleRequest(
+    post('/v1/chat', {
+      message: 'Pergunta A3',
+      learning_context: { ...learningContextA, module_id: 'module-a3' },
+    }),
+    moduleScopedEnv(),
+    {},
+    async () => {
+      called = true;
+      return Response.json({});
+    },
+  );
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+  assert.equal(called, false);
+});
+
+test('module-scoped map fails closed for requests without module context', async () => {
+  const moduleOnlyEnv = {
+    ...env,
+    TUTOR_RAG_SCOPE_MAP: JSON.stringify({
+      [`${scopeKey(learningContextA)}|${learningContextA.module_id}`]: 'course-a-v1-m1',
+    }),
+  };
+  let called = false;
+  const response = await handleRequest(
+    post('/v1/chat', {
+      message: 'Pergunta sem módulo',
+      learning_context: {
+        course_id: learningContextA.course_id,
+        course_version_id: learningContextA.course_version_id,
+      },
+    }),
+    moduleOnlyEnv,
+    {},
+    async () => {
+      called = true;
+      return Response.json({});
+    },
+  );
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+  assert.equal(called, false);
+});
+
+test('module keys cannot alias an existing scope workspace or use malformed keys', async () => {
+  const invalidMaps = [
+    {
+      [scopeKey(learningContextA)]: 'course-a-v1',
+      [`${scopeKey(learningContextA)}|${learningContextA.module_id}`]: 'course-a-v1',
+    },
+    { [`${scopeKey(learningContextA)}|${learningContextA.module_id}|extra`]: 'ws-1' },
+    { [`${scopeKey(learningContextA)}|`]: 'ws-1' },
+    { 'course-only': 'ws-1' },
+  ];
+  for (const map of invalidMaps) {
+    let called = false;
+    const response = await handleRequest(
+      post('/v1/chat', { message: 'Pergunta A', learning_context: learningContextA }),
+      { ...env, TUTOR_RAG_SCOPE_MAP: JSON.stringify(map) },
+      {},
+      async () => {
+        called = true;
+        return Response.json({});
+      },
+    );
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), { error: 'rag_context_unresolved' });
+    assert.equal(called, false);
+  }
+});
+
+test('experience context under module binding resolves the module workspace without claiming experience scope', async () => {
+  const context = {
+    ...learningContextA,
+    experience_id: 'scenario-1',
+    experience_type: 'scenario',
+  };
+  const result = vectorSource('TDS_CTX_A_v1');
+  let searchUrl;
+  const response = await handleRequest(
+    post('/v1/chat', { message: 'Pergunta', learning_context: context }),
+    moduleScopedEnv(),
+    {},
+    async (url) => {
+      if (String(url).endsWith('/vector-search')) {
+        searchUrl = String(url);
+        return Response.json({ results: [result] });
+      }
+      return Response.json({
+        textResponse: 'Answer',
+        sources: [chatSource(result)],
+      });
+    },
+  );
+
+  assert.equal(searchUrl, 'https://anything.example/api/v1/workspace/course-a-v1-m1/vector-search');
+  assert.equal(response.status, 200);
+  const source = (await response.json()).sources[0];
+  assert.equal(source.module_id, 'module-a1');
+  assert.equal('experience_id' in source, false);
+  assert.equal('experience_type' in source, false);
 });
 
 test('missing or structurally unsafe vector-search sources fail closed before chat', async () => {

@@ -32,6 +32,7 @@ if (!/(^|[.-])staging([.-]|$)/i.test(endpoint.hostname)) {
 const allowedContextKeys = new Set([
   'course_id',
   'course_version_id',
+  'module_id',
 ]);
 
 function stableId(value) {
@@ -50,9 +51,10 @@ function parseContext(raw, label) {
   if (!context || typeof context !== 'object' || Array.isArray(context) ||
       Object.keys(context).some((key) => !allowedContextKeys.has(key)) ||
       !stableId(context.course_id) ||
-      !stableId(context.course_version_id)) {
+      !stableId(context.course_version_id) ||
+      (context.module_id !== undefined && !stableId(context.module_id))) {
     throw new Error(
-      `TDS_AI_SENTINEL_CONTEXT_${label} must contain only a valid CourseVersion scope.`,
+      `TDS_AI_SENTINEL_CONTEXT_${label} must contain only a valid CourseVersion or module scope.`,
     );
   }
   return context;
@@ -61,7 +63,9 @@ function parseContext(raw, label) {
 const contextA = parseContext(rawContextA, 'A');
 const contextB = parseContext(rawContextB, 'B');
 const scopeKey = (context) =>
-  [context.course_id, context.course_version_id].join('|');
+  [context.course_id, context.course_version_id, context.module_id]
+    .filter((part) => part !== undefined)
+    .join('|');
 if (scopeKey(contextA) === scopeKey(contextB)) {
   throw new Error('Contextual sentinel scopes A and B must be distinct.');
 }
@@ -72,8 +76,15 @@ const question =
 
 function sourceMatchesContext(source, context) {
   if (!source || typeof source !== 'object' || Array.isArray(source)) return false;
-  return source.course_id === context.course_id &&
-    source.course_version_id === context.course_version_id;
+  if (source.course_id !== context.course_id ||
+      source.course_version_id !== context.course_version_id) return false;
+  // A module-scoped context only proves module isolation when the gateway
+  // reports the module binding on the sources; a CourseVersion-only source is
+  // not evidence of module scope.
+  if (context.module_id !== undefined && source.module_id !== context.module_id) {
+    return false;
+  }
+  return true;
 }
 
 async function runCase(label, context, expectedMarker, forbiddenMarker) {

@@ -70,7 +70,58 @@ test('rejects malformed learning context before any request', () => {
   });
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /valid CourseVersion scope/);
+  assert.match(result.stderr, /valid CourseVersion or module scope/);
+});
+
+test('rejects a malformed module scope before any request', () => {
+  const result = run({
+    ...baseEnv,
+    TDS_AI_SENTINEL_CONTEXT_A: JSON.stringify({
+      course_id: 'qa-course-a',
+      course_version_id: 'qa-v1',
+      module_id: 'module with spaces',
+    }),
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /valid CourseVersion or module scope/);
+});
+
+test('accepts module-scoped contexts and reaches the request stage', () => {
+  const result = run({
+    ...baseEnv,
+    TDS_AI_SENTINEL_CONTEXT_A: JSON.stringify({
+      course_id: 'qa-course-a',
+      course_version_id: 'qa-v1',
+      module_id: 'qa-module-a1',
+    }),
+    TDS_AI_SENTINEL_CONTEXT_B: JSON.stringify({
+      course_id: 'qa-course-a',
+      course_version_id: 'qa-v1',
+      module_id: 'qa-module-a2',
+    }),
+  });
+
+  // The unreachable host fails the sentinel at request time; validation of the
+  // module-scoped contexts must already have passed for that output to exist.
+  assert.match(result.stdout, /"contextual_rag_sentinel":"FAIL"/);
+  assert.doesNotMatch(result.stderr, /must contain only/);
+});
+
+test('requires distinct module scopes when course and version match', () => {
+  const context = JSON.stringify({
+    course_id: 'qa-course-a',
+    course_version_id: 'qa-v1',
+    module_id: 'qa-module-a1',
+  });
+  const result = run({
+    ...baseEnv,
+    TDS_AI_SENTINEL_CONTEXT_A: context,
+    TDS_AI_SENTINEL_CONTEXT_B: context,
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /scopes A and B must be distinct/);
 });
 
 test('requires distinct A and B scopes before any request', () => {
