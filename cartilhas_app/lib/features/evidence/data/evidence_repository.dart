@@ -319,6 +319,7 @@ class EvidenceRepository implements EvidenceGateway, OfficialAttendanceGateway {
       'POST',
       '/classes/${_segment(classId)}/sessions/${_segment(sessionId)}/checkins',
       body: {'kind': kind, 'idempotency_key': idempotencyKey, 'token': token},
+      checkinChallenge: true,
     ),
   );
 
@@ -339,6 +340,7 @@ class EvidenceRepository implements EvidenceGateway, OfficialAttendanceGateway {
       'POST',
       '/checkins/code',
       body: {'kind': kind, 'idempotency_key': idempotencyKey, 'code': digits},
+      checkinChallenge: true,
     ).then(EvidenceCheckin.fromJson);
   }
 
@@ -427,11 +429,31 @@ class EvidenceRepository implements EvidenceGateway, OfficialAttendanceGateway {
         ),
       );
 
+  /// Exact 401 `detail` values the API returns when a check-in *challenge*
+  /// (QR token or numeric code) is invalid or expired — domain errors, not
+  /// authentication failures. Any other 401 keeps the standard
+  /// refresh-then-logout semantics.
+  static const _checkinChallengeDetails = {
+    'Token de check-in inválido ou expirado.',
+    'Código inválido ou expirado. Use o código atual exibido pelo instrutor.',
+  };
+
+  static bool _isCheckinChallengeRejection(http.Response response) {
+    try {
+      final decoded = jsonDecode(response.body);
+      return decoded is Map<String, dynamic> &&
+          _checkinChallengeDetails.contains(decoded['detail']);
+    } on Object {
+      return false;
+    }
+  }
+
   Future<Map<String, dynamic>> _request(
     String method,
     String path, {
     Map<String, dynamic>? body,
     String? expectedOwner,
+    bool checkinChallenge = false,
   }) async {
     try {
       Future<void> verifyOwner() async {
@@ -444,7 +466,7 @@ class EvidenceRepository implements EvidenceGateway, OfficialAttendanceGateway {
         }
       }
 
-      final response = await authRepository.authorized((token) async {
+      Future<http.Response> send(String token) async {
         await verifyOwner();
         final headers = {
           'Authorization': 'Bearer $token',
@@ -459,7 +481,14 @@ class EvidenceRepository implements EvidenceGateway, OfficialAttendanceGateway {
             body: body == null ? null : jsonEncode(body),
           ),
         }.timeout(const Duration(seconds: 15));
-      });
+      }
+
+      final response = checkinChallenge
+          ? await authRepository.authorizedPreservingDomainRejection(
+              send,
+              isDomainRejection: _isCheckinChallengeRejection,
+            )
+          : await authRepository.authorized(send);
       await verifyOwner();
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw EvidenceApiException(

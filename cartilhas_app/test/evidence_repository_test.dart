@@ -24,6 +24,64 @@ class _TokenStore implements AuthTokenStore {
 }
 
 void main() {
+  for (final sample in <String, String>{
+    'empty': '',
+    'non-json': '{not-json',
+    'missing detail': '{}',
+    'null detail': '{"detail":null}',
+    'list detail': jsonEncode({
+      'detail': ['Token de check-in inválido ou expirado.'],
+    }),
+    'non-exact detail': jsonEncode({
+      'detail': 'Token de check-in inválido ou expirado. extra',
+    }),
+  }.entries) {
+    test('malformed challenge ${sample.key} keeps auth fail-closed', () async {
+      var refreshCalls = 0;
+      var attempts = 0;
+      var sessionEnded = 0;
+      final auth = AuthRepository(
+        apiUrl: 'https://api.example',
+        client: MockClient((request) async {
+          expect(request.url.path, '/auth/refresh');
+          refreshCalls++;
+          return http.Response(_authSessionJson(), 200);
+        }),
+        tokenStore: _TokenStore(),
+        onSessionEnded: () async {
+          sessionEnded++;
+        },
+      );
+      final repository = EvidenceRepository(
+        apiUrl: 'https://api.example',
+        authRepository: auth,
+        client: MockClient((_) async {
+          attempts++;
+          return http.Response(sample.value, 401);
+        }),
+      );
+      addTearDown(repository.dispose);
+      await expectLater(
+        repository.checkinByCode(
+          code: '123456',
+          kind: 'checkin',
+          idempotencyKey: 'qa:malformed',
+        ),
+        throwsA(
+          isA<EvidenceApiException>().having(
+            (e) => e.statusCode,
+            'statusCode',
+            401,
+          ),
+        ),
+      );
+      expect(refreshCalls, 1);
+      expect(attempts, 2);
+      expect(sessionEnded, 1);
+      expect(await auth.hasSession(), isFalse);
+    });
+  }
+
   test('consome sessão, QR, check-in e exceções com autenticação', () async {
     final requests = <http.Request>[];
     final auth = AuthRepository(
@@ -280,6 +338,279 @@ void main() {
       ),
     );
   });
+
+  test(
+    'código de encontro expirado é erro de negócio e não encerra a sessão',
+    () async {
+      final store = _TokenStore();
+      var refreshCalls = 0;
+      final auth = AuthRepository(
+        apiUrl: 'https://api.example',
+        client: MockClient((request) async {
+          refreshCalls++;
+          expect(request.url.path, '/auth/refresh');
+          return http.Response(
+            jsonEncode({
+              'user': {'id': 'me', 'name': 'Ana', 'role': 'student'},
+              'access_token': 'access-new',
+              'refresh_token': 'refresh-new',
+            }),
+            200,
+          );
+        }),
+        tokenStore: store,
+      );
+      var checkinAttempts = 0;
+      final repository = EvidenceRepository(
+        apiUrl: 'https://api.example',
+        authRepository: auth,
+        client: MockClient((_) async {
+          checkinAttempts++;
+          // O 401 de /checkins/code é de negócio (código expirado/inválido),
+          // não uma falha de autenticação do access token.
+          return http.Response(
+            jsonEncode({
+              'detail':
+                  'Código inválido ou expirado. Use o código atual exibido pelo instrutor.',
+            }),
+            401,
+          );
+        }),
+      );
+
+      await expectLater(
+        repository.checkinByCode(
+          code: '123456',
+          kind: 'checkin',
+          idempotencyKey: 'mobile:12345678',
+        ),
+        throwsA(
+          isA<EvidenceApiException>().having(
+            (error) => error.statusCode,
+            'statusCode',
+            401,
+          ),
+        ),
+      );
+
+      // O 401 de desafio é reconhecido na primeira resposta pelo detail
+      // canônico da API, portanto nem sequer se queima um refresh: renovar e
+      // repetir não mudaria a rejeição de negócio. Antes da correção, este
+      // fluxo apagava a sessão válida do estudante (defeito reproduzido em
+      // teste local com Flutter 3.44.9: hasSession() retornava false).
+      expect(refreshCalls, 0);
+      expect(checkinAttempts, 1);
+      expect(
+        await auth.hasSession(),
+        isTrue,
+        reason:
+            'código de encontro expirado não é falha de autenticação; '
+            'a sessão do estudante deve ser preservada',
+      );
+    },
+  );
+
+  test('token de QR expirado também preserva a sessão', () async {
+    var authCalls = 0;
+    final auth = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((_) async {
+        authCalls++;
+        return http.Response('{}', 500);
+      }),
+      tokenStore: _TokenStore(),
+    );
+    final repository = EvidenceRepository(
+      apiUrl: 'https://api.example',
+      authRepository: auth,
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({'detail': 'Token de check-in inválido ou expirado.'}),
+          401,
+        ),
+      ),
+    );
+
+    await expectLater(
+      repository.checkin(
+        classId: 'class-1',
+        sessionId: 'session-1',
+        kind: 'checkin',
+        idempotencyKey: 'mobile:12345678',
+        token: 'stale-token',
+      ),
+      throwsA(
+        isA<EvidenceApiException>().having(
+          (error) => error.statusCode,
+          'statusCode',
+          401,
+        ),
+      ),
+    );
+    expect(authCalls, 0);
+    expect(await auth.hasSession(), isTrue);
+  });
+
+  test('401 não reconhecido ainda renova uma vez e encerra a sessão', () async {
+    var refreshCalls = 0;
+    var attempts = 0;
+    final auth = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((request) async {
+        refreshCalls++;
+        expect(request.url.path, '/auth/refresh');
+        return http.Response(_authSessionJson(), 200);
+      }),
+      tokenStore: _TokenStore(),
+    );
+    final repository = EvidenceRepository(
+      apiUrl: 'https://api.example',
+      authRepository: auth,
+      client: MockClient((_) async {
+        attempts++;
+        // detail de autenticação canônico (auth.py _unauthorized), não o
+        // detail de desafio de check-in.
+        return http.Response(
+          jsonEncode({'detail': 'Token inválido ou expirado.'}),
+          401,
+        );
+      }),
+    );
+
+    await expectLater(
+      repository.checkinByCode(
+        code: '123456',
+        kind: 'checkin',
+        idempotencyKey: 'mobile:12345678',
+      ),
+      throwsA(isA<EvidenceApiException>()),
+    );
+    expect(attempts, 2);
+    expect(refreshCalls, 1);
+    expect(await auth.hasSession(), isFalse);
+  });
+
+  test('refresh rejeitado encerra a sessão também no check-in', () async {
+    final auth = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({'detail': 'Refresh token inválido.'}),
+          401,
+        ),
+      ),
+      tokenStore: _TokenStore(),
+    );
+    final repository = EvidenceRepository(
+      apiUrl: 'https://api.example',
+      authRepository: auth,
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({'detail': 'Token inválido ou expirado.'}),
+          401,
+        ),
+      ),
+    );
+
+    await expectLater(
+      repository.checkinByCode(
+        code: '123456',
+        kind: 'checkin',
+        idempotencyKey: 'mobile:12345678',
+      ),
+      throwsA(isA<EvidenceApiException>()),
+    );
+    expect(await auth.hasSession(), isFalse);
+  });
+
+  test(
+    'access expirado renova, e 401 de desafio na repetição preserva a sessão',
+    () async {
+      var refreshCalls = 0;
+      var attempts = 0;
+      final auth = AuthRepository(
+        apiUrl: 'https://api.example',
+        client: MockClient((request) async {
+          refreshCalls++;
+          expect(request.url.path, '/auth/refresh');
+          return http.Response(_authSessionJson(), 200);
+        }),
+        tokenStore: _TokenStore(),
+      );
+      final repository = EvidenceRepository(
+        apiUrl: 'https://api.example',
+        authRepository: auth,
+        client: MockClient((_) async {
+          attempts++;
+          // 1ª resposta: access token expirado (detail de auth). Após refresh
+          // bem-sucedido, a repetição falha com o detail de desafio: é erro de
+          // negócio, não motivo para logout.
+          return http.Response(
+            jsonEncode({
+              'detail': attempts == 1
+                  ? 'Token inválido ou expirado.'
+                  : 'Código inválido ou expirado. Use o código atual exibido pelo instrutor.',
+            }),
+            401,
+          );
+        }),
+      );
+
+      await expectLater(
+        repository.checkinByCode(
+          code: '123456',
+          kind: 'checkin',
+          idempotencyKey: 'mobile:12345678',
+        ),
+        throwsA(
+          isA<EvidenceApiException>().having(
+            (error) => error.statusCode,
+            'statusCode',
+            401,
+          ),
+        ),
+      );
+      expect(attempts, 2);
+      expect(refreshCalls, 1);
+      expect(await auth.hasSession(), isTrue);
+    },
+  );
+
+  test('rotas não relacionadas mantêm renovação e logout em 401', () async {
+    var refreshCalls = 0;
+    final auth = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((request) async {
+        refreshCalls++;
+        expect(request.url.path, '/auth/refresh');
+        return http.Response(_authSessionJson(), 200);
+      }),
+      tokenStore: _TokenStore(),
+    );
+    final repository = EvidenceRepository(
+      apiUrl: 'https://api.example',
+      authRepository: auth,
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({'detail': 'Token inválido ou expirado.'}),
+          401,
+        ),
+      ),
+    );
+
+    await expectLater(
+      repository.session('class-1', 'session-1'),
+      throwsA(
+        isA<EvidenceApiException>().having(
+          (error) => error.statusCode,
+          'statusCode',
+          401,
+        ),
+      ),
+    );
+    expect(refreshCalls, 1);
+    expect(await auth.hasSession(), isFalse);
+  });
 }
 
 Map<String, dynamic> _sessionJson({required String token}) => {
@@ -292,6 +623,12 @@ Map<String, dynamic> _sessionJson({required String token}) => {
   'token_version': token == 'token-1' ? 1 : 2,
   'checkin_token': token,
 };
+
+String _authSessionJson() => jsonEncode({
+  'user': {'id': 'me', 'name': 'Ana', 'role': 'student'},
+  'access_token': 'access-new',
+  'refresh_token': 'refresh-new',
+});
 
 String _hex(String character) => List.filled(64, character).join();
 
