@@ -12,11 +12,6 @@
   "analyze_command": "flutter analyze --no-pub lib/features/auth/data/auth_repository.dart lib/features/evidence/data/evidence_repository.dart test/evidence_repository_test.dart",
   "analyze_exit_code": 0,
   "analyze_result": "No issues found",
-  "normalized_sha256": {
-    "cartilhas_app/lib/features/auth/data/auth_repository.dart": "203ba204f85026e6d602b029de30ca3c02daaa8598790326b9e139fbf842c2f3",
-    "cartilhas_app/lib/features/evidence/data/evidence_repository.dart": "867b864ab537599f19c5b97cdfb98ac98a8d971e46be1d50ae92277daf1085ec",
-    "cartilhas_app/test/evidence_repository_test.dart": "9e140af53c24dc9fe7e96e8730134313242bf2b53223587ff44d2fa4ac89649c"
-  },
   "hash_normalization": "CRLF to LF only; validated content matches commit input",
   "devin_review": "PASS on the three-file implementation candidate; six malformed/non-exact-body tests added by coordinator afterwards",
   "contract_limit": "Exact-message compatibility for two check-in domain 401 details; other 401 responses retain refresh/logout. No HTTP error becomes success.",
@@ -30,12 +25,37 @@
     "live_backend_validation": false
   },
   "live_authenticated_smoke": "NOT_RUN in this round; previous credential-tool restriction preserved",
-  "staging_read_only": {"health": "ok", "database": "available", "schema": "20261006_0029", "post_checkins_code": true},
-  "production_read_only": {"health": "ok", "database": "available", "schema": "20261005_0028", "post_checkins_code": false},
+  "staging_read_only": {
+    "health": "ok",
+    "database": "available",
+    "schema": "20261006_0029",
+    "post_checkins_code": true
+  },
+  "production_read_only": {
+    "health": "ok",
+    "database": "available",
+    "schema": "20261005_0028",
+    "post_checkins_code": false
+  },
   "runtime_changes": false,
   "migration_changes": false,
   "release_changes": false,
   "aab_built": false,
   "play_changed": false,
-  "merge_allowed": false
+  "merge_allowed": false,
+  "validated_files": [
+    {
+      "path": "cartilhas_app/lib/features/auth/data/auth_repository.dart",
+      "content_sha256": "203ba204f85026e6d602b029de30ca3c02daaa8598790326b9e139fbf842c2f3"
+    },
+    {
+      "path": "cartilhas_app/lib/features/evidence/data/evidence_repository.dart",
+      "content_sha256": "867b864ab537599f19c5b97cdfb98ac98a8d971e46be1d50ae92277daf1085ec"
+    },
+    {
+      "path": "cartilhas_app/test/evidence_repository_test.dart",
+      "content_sha256": "9e140af53c24dc9fe7e96e8730134313242bf2b53223587ff44d2fa4ac89649c"
+    }
+  ],
+  "security_scan_note": "One exact historical fingerprint in .gitleaksignore is the independently recomputed SHA-256 of the committed auth source, not a credential. Current hashes use explicit content_sha256 fields."
 }
