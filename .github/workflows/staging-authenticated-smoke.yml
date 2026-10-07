@@ -1,0 +1,136 @@
+name: Staging authenticated smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type RUN_STAGING_AUTHENTICATED_SMOKE
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tutor-tds-staging-authenticated-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    if: inputs.confirmation == 'RUN_STAGING_AUTHENTICATED_SMOKE'
+    runs-on: ubuntu-24.04
+    environment: staging
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Configure pinned SSH host identity
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      - id: remote
+        name: Create private remote runner directory
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
+        run: |
+          path="$(ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST"             'umask 077; mktemp -d /tmp/tutor-tds-auth-smoke.XXXXXX')"
+          case "$path" in
+            /tmp/tutor-tds-auth-smoke.*) ;;
+            *) echo "Unexpected remote temporary path." >&2; exit 2 ;;
+          esac
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+
+      - name: Copy reviewed smoke runners
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
+          REMOTE_TMP: ${{ steps.remote.outputs.path }}
+        run: |
+          scp -P "$SSH_PORT"             api/ops/staging_evidence_session_refresh.py             api/ops/staging_role_smoke.py             api/ops/staging_evidence_smoke.py             api/ops/smoke_presence_staging.py             api/ops/smoke_course_editor_staging.py             "$SSH_USER@$SSH_HOST:$REMOTE_TMP/"
+
+      - name: Run authenticated staging smoke without exporting credentials
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
+          REMOTE_TMP: ${{ steps.remote.outputs.path }}
+        shell: bash
+        run: |
+          set +e
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST"             "bash -s -- '$REMOTE_TMP'"             > "$RUNNER_TEMP/authenticated-smoke.raw.log" 2>&1 <<'REMOTE'
+          set -euo pipefail
+          remote_tmp="$1"
+          seed="/opt/tutor-tds-staging/.staging-seed.env"
+          base="https://ead.ipexdesenvolvimento.cloud/tutor-staging-api"
+          cleanup() {
+            rm -rf -- "$remote_tmp"
+          }
+          trap cleanup EXIT
+          test -f "$seed"
+          test "$(stat -c '%a' "$seed")" = "600"
+          test "$(stat -c '%u' "$seed")" = "$(id -u)"
+          set -a
+          . "$seed"
+          set +a
+          python3 "$remote_tmp/staging_role_smoke.py" "$base"
+          python3 "$remote_tmp/staging_evidence_session_refresh.py" "$base" "$seed"
+          python3 "$remote_tmp/staging_evidence_smoke.py" "$base"
+          (
+            cd "$remote_tmp"
+            python3 smoke_presence_staging.py --create-synthetic-session
+          )
+          REMOTE
+          status=$?
+          set -e
+
+          raw="$RUNNER_TEMP/authenticated-smoke.raw.log"
+          safe="$RUNNER_TEMP/authenticated-smoke.log"
+          if grep -Eiq 'Bearer |(access|refresh|checkin)_token|STAGING_SEED_[A-Z_]+=' "$raw"; then
+            printf '%s\n' 'Smoke output rejected by the credential leak guard.' > "$safe"
+            rm -f -- "$raw"
+            exit 3
+          fi
+          mv "$raw" "$safe"
+          cat "$safe"
+          exit "$status"
+
+      - name: Record immutable evidence metadata
+        if: always()
+        shell: bash
+        run: |
+          evidence="$RUNNER_TEMP/staging-authenticated-smoke-evidence"
+          install -d -m 700 "$evidence"
+          if test -f "$RUNNER_TEMP/authenticated-smoke.log"; then
+            install -m 600 "$RUNNER_TEMP/authenticated-smoke.log" "$evidence/"
+          fi
+          {
+            echo "repository=$GITHUB_REPOSITORY"
+            echo "source_sha=$GITHUB_SHA"
+            echo "source_ref=$GITHUB_REF"
+            echo "workflow_run_id=$GITHUB_RUN_ID"
+            echo "workflow_run_attempt=$GITHUB_RUN_ATTEMPT"
+            echo "environment=staging"
+          } > "$evidence/metadata.txt"
+          (
+            cd "$evidence"
+            sha256sum ./* > SHA256SUMS.txt
+          )
+
+      - name: Upload sanitized smoke evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: staging-authenticated-smoke-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/staging-authenticated-smoke-evidence
+          if-no-files-found: error
+          retention-days: 14
