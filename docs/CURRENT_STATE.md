@@ -35,6 +35,13 @@ valida o candidato e o contrato do runner, não um ensaio contra staging. Soment
 a branch local do candidato é alterada; não houve push, merge, deploy, alteração
 de staging/produção ou mudança de secret nesta fatia.
 
+O gate PostgreSQL opt-in foi executado separadamente no LARGeo contra uma
+instância descartável PostgreSQL 17.11 em loopback, no commit
+`de9ec577415bb6114d502191713816f78931313d`: 8/8 cenários passaram, incluindo
+upgrade vazio/downgrade/reupgrade, upgrades de 0024 e 0029, preservação do
+legado, proveniência `published_block` e unicidade por dono/contexto/bloco. Essa
+prova valida a migration física; não equivale a deploy ou aceite de staging.
+
 O estado remoto permanece separado: o Cloud canônico foi observado em `0024` e
 a VPS em `0029`; ambos reportaram `compatibility_verified=false` e não forneceram
 o SHA exato implantado. Portanto a migration `0030` existe somente no candidato

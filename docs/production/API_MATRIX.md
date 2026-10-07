@@ -81,7 +81,9 @@ gabarito e nota do snapshot imutável de CourseVersion e cria, na mesma transaç
 `assessment_completed` determinístico com crédito zero. A feature exige
 `LEARNING_CONTEXT_ENABLED=true` e `DYNAMIC_ACTIVITY_ENABLED=true`; ambas seguem
 false por padrão. API, Flutter e runner foram verificados localmente, sem deploy
-ou aceite STAGING/PRODUCTION.
+ou aceite STAGING/PRODUCTION. A migration passou ainda 8/8 cenários físicos em
+PostgreSQL 17.11 descartável no LARGeo, commit `de9ec577415b`; isso não promove
+o status dos endpoints.
 
 Para `published_block`, o cliente e a API calculam o mesmo ID canônico a partir
 da linhagem completa (sem `apiUrl`), e o banco impõe uma tentativa por

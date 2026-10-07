@@ -10,8 +10,9 @@ deploy é autorizado por este documento.
 
 O candidato Dynamic Learning 2B está somente local sobre `fbb4b6a`, com head
 Alembic `20261007_0030` e `DYNAMIC_ACTIVITY_ENABLED=false`. API, Flutter e runner
-foram verificados localmente; não houve commit, deploy, alteração de secret,
-staging ou produção.
+foram verificados localmente. A migration passou 8/8 cenários opt-in em uma
+instância descartável PostgreSQL 17.11 do LARGeo no commit `de9ec577415b`.
+Não houve push, merge, deploy, alteração de secret, staging ou produção.
 
 | Backend observado | Revisão | compatibility_verified | SHA exato implantado | Consequência |
 | --- | --- | --- | --- | --- |
@@ -51,6 +52,7 @@ estados diferentes; nunca inferir deploy a partir do Git local.
 | --- | --- | --- | --- |
 | API development | `Settings.from_environment`, `DATABASE_URL` explícita ou `sqlite+pysqlite:///./tutor_tds_local.db` somente fora de production; testes usam SQLite em tmp/memória | arquivo local descartável | jamais promover como DB principal |
 | Compose dev | `api/docker-compose.yml`: PostgreSQL 16, volume local `tutor_tds_api_db`, `DATABASE_URL` interna | volume Docker no computador de desenvolvimento | não é produção |
+| Gate PostgreSQL Wave 2B | PostgreSQL 17.11 descartável, loopback `127.0.0.1:15439`, role exclusiva de QA | cluster temporário no LARGeo; cada teste cria e remove seu próprio banco | 8/8 no commit `de9ec577415b`; não é staging nem fonte persistente |
 | Flutter em cada aparelho | `getDatabasesPath()/tds_learning_outbox.db`, SharedPreferences e secure storage | sandbox do dispositivo; outbox/retomada/cache | fila não autoriza matrícula; sincronizar quando feature e consentimento permitirem |
 | Staging Cloud | FastAPI Cloud com `DATABASE_URL` do PostgreSQL Supabase isolado; revisão canônica observada `0024`; exposição Data API não verificada no snapshot direto de 07/10 | gerenciada pelo provedor; backup QA verificado em 01/10 | somente dados sintéticos; 0030 não implantada |
 | Produção VPS | compose define `DATABASE_URL=postgresql+psycopg://...@db:5432/tutor_tds`; revisão observada `0029`; PostgreSQL 16 em volume nomeado `tutor_tds_api_db` | volume da VPS; SHA implantado/compatibilidade não comprovados nesta rodada | backup fora da VPS e restore drill bloqueantes; 0030 não implantada |

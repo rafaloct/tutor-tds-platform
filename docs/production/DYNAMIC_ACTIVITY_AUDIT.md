@@ -65,6 +65,11 @@ falha local, logout, escopo da fila, offline/reinício e sync. O runner validado
 localmente cobre o protocolo, sanitização e falha fechada; ainda não é evidência
 de execução remota.
 
+A migration também passou 8/8 cenários opt-in no PostgreSQL 17.11 descartável
+do LARGeo, commit `de9ec577415bb6114d502191713816f78931313d`. O gate inclui
+upgrade a partir de 0024 e 0029, legado preservado, provenance e índice único.
+O alvo foi loopback isolado criado para QA; nenhum banco remoto foi tocado.
+
 ## Gate e precondições remotas
 
 `dynamic_activity_contextual_android_e2e` permanece pendente. O fluxo exigido é:
