@@ -180,7 +180,22 @@ class AuthRepository {
 
   Future<http.Response> authorized(
     Future<http.Response> Function(String accessToken) request,
-  ) async {
+  ) => _authorized(request);
+
+  /// Like [authorized], except a 401 response matching [isDomainRejection] is
+  /// returned unchanged as a domain error: it is not an authentication
+  /// failure, so it neither triggers a refresh on the first challenge nor
+  /// ends the session when it reappears after a successful retry.
+  /// Unrecognized 401s keep the standard refresh-then-logout behavior.
+  Future<http.Response> authorizedPreservingDomainRejection(
+    Future<http.Response> Function(String accessToken) request, {
+    required bool Function(http.Response response) isDomainRejection,
+  }) => _authorized(request, isDomainRejection: isDomainRejection);
+
+  Future<http.Response> _authorized(
+    Future<http.Response> Function(String accessToken) request, {
+    bool Function(http.Response response)? isDomainRejection,
+  }) async {
     _requireConfigured();
     final generation = _sessionGeneration;
     var tokens = await _readTokens();
@@ -191,12 +206,16 @@ class AuthRepository {
     var response = await request(tokens.accessToken);
     _checkGeneration(generation);
     if (response.statusCode != 401) return response;
+    if (isDomainRejection?.call(response) ?? false) return response;
 
     final session = await refresh();
     _checkGeneration(generation);
     response = await request(session.tokens.accessToken);
     _checkGeneration(generation);
-    if (response.statusCode == 401) await logout();
+    if (response.statusCode == 401 &&
+        !(isDomainRejection?.call(response) ?? false)) {
+      await logout();
+    }
     return response;
   }
 
