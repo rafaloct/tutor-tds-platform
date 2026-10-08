@@ -13,6 +13,6 @@ services:
 
   tds_tutor_gateway.session_manager:
     class: Drupal\tds_tutor_gateway\Session\TutorSessionManager
-    arguments: ['@tds_tutor_gateway.client', '@tds_tutor_gateway.token_store', '@datetime.time']
+    arguments: ['@tds_tutor_gateway.client', '@tds_tutor_gateway.token_store', '@datetime.time', '@event_dispatcher']
   Drupal\tds_tutor_gateway\Session\TutorSessionManagerInterface:
     alias: tds_tutor_gateway.session_manager

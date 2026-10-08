@@ -35,4 +35,19 @@ interface TutorApiClientInterface {
    */
   public function me(string $accessToken): array;
 
+  /**
+   * Executa GET autenticado em uma rota de leitura explicitamente permitida.
+   *
+   * @param string $path
+   *   Path absoluto allowlisted, nunca uma URL.
+   * @param array<string, scalar> $query
+   *   Query allowlisted para a rota.
+   * @param string $accessToken
+   *   Token mantido exclusivamente no servidor.
+   *
+   * @return array<string, mixed>
+   *   Objeto JSON validado.
+   */
+  public function get(string $path, array $query, string $accessToken): array;
+
 }

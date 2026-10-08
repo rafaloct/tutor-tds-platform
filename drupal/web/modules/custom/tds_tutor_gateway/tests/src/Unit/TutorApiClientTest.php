@@ -90,6 +90,26 @@ final class TutorApiClientTest extends UnitTestCase {
   }
 
   /**
+   * Leitura participante aceita apenas rota e query fechadas.
+   */
+  public function testAuthorizedReadAllowlist(): void {
+    $history = [];
+    $client = $this->client([
+      new Response(200, [], '{"classes":[]}'),
+    ], $history);
+
+    self::assertSame(
+      ['classes' => []],
+      $client->get('/classes', ['enrolled_only' => 'true'], 'access-value'),
+    );
+    self::assertSame('enrolled_only=true', $history[0]['request']->getUri()->getQuery());
+    self::assertSame('Bearer access-value', $history[0]['request']->getHeaderLine('Authorization'));
+
+    $this->expectException(\LogicException::class);
+    $client->get('/admin/classes', [], 'access-value');
+  }
+
+  /**
    * HTTP fora de loopback local e recusado antes da rede.
    */
   public function testNonLocalRequiresHttps(): void {
