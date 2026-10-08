@@ -1,0 +1,48 @@
+{# Catalogo FastAPI publico. Twig autoescapa todos os campos. #}
+<section class="tds-public-catalog" aria-label="Cursos publicados" data-tds-view="catalog">
+
+  {% if state == 'unavailable' %}
+    <p class="tds-public-status tds-public-status--warning" role="status">
+      Catalogo temporariamente indisponivel. Tente novamente mais tarde.
+    </p>
+  {% elseif state == 'empty' %}
+    <p class="tds-public-status" role="status">Nenhum curso publicado no momento.</p>
+  {% else %}
+    {% if state == 'stale' %}
+      <p class="tds-public-status tds-public-status--stale" role="status">
+        Exibindo a ultima versao disponivel do catalogo.
+      </p>
+    {% endif %}
+    <ul class="tds-card-grid" role="list">
+      {% for course in courses %}
+        <li class="tds-card">
+          {% if course.cover_public_url %}
+            <img class="tds-card__cover" src="{{ course.cover_public_url }}" alt="" loading="lazy" width="640" height="360">
+          {% endif %}
+          {% if embedded %}
+            <h3 class="tds-card__title">
+              <a href="{{ course.portal_url }}"
+                 data-tds-analytics="open_course"
+                 data-tds-view="catalog">{{ course.title }}</a>
+            </h3>
+          {% else %}
+            <h2 class="tds-card__title">
+              <a href="{{ course.portal_url }}"
+                 data-tds-analytics="open_course"
+                 data-tds-view="catalog">{{ course.title }}</a>
+            </h2>
+          {% endif %}
+          {% if course.summary %}<p>{{ course.summary }}</p>{% endif %}
+          <dl class="tds-card__meta">
+            {% if course.public_workload_text %}
+              <div><dt>Carga horaria</dt><dd>{{ course.public_workload_text }}</dd></div>
+            {% endif %}
+            {% if course.public_audience_text %}
+              <div><dt>Publico</dt><dd>{{ course.public_audience_text }}</dd></div>
+            {% endif %}
+          </dl>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>

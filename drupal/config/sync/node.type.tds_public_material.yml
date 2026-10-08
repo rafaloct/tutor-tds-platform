@@ -1,0 +1,11 @@
+uuid: 5f42c538-0325-4774-af5a-bbc8f97c1640
+langcode: pt-br
+status: true
+dependencies: {  }
+name: 'Material publico'
+type: tds_public_material
+description: 'Referencia editorial aprovada para material explicitamente publico.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: false

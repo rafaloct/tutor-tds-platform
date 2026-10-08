@@ -1,0 +1,11 @@
+uuid: 97064488-6ee6-4129-8bdc-b50fdbcae896
+langcode: pt-br
+status: true
+dependencies: {  }
+name: 'Pergunta frequente'
+type: tds_faq
+description: 'Pergunta e resposta editorial publica.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: false

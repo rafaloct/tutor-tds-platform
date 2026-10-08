@@ -1,0 +1,32 @@
+uuid: b7d58c73-822d-4e24-b9d3-28ab2cbf8cf7
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - workflows.workflow.tds_editorial
+  module:
+    - content_moderation
+    - node
+    - system
+    - taxonomy
+id: tds_editor
+label: 'Editor TDS'
+weight: 2
+is_admin: false
+permissions:
+  - 'access content'
+  - 'access content overview'
+  - 'access taxonomy overview'
+  - 'create tds_event content'
+  - 'create tds_faq content'
+  - 'create tds_institutional_page content'
+  - 'create tds_news content'
+  - 'create tds_public_material content'
+  - 'edit own tds_event content'
+  - 'edit own tds_faq content'
+  - 'edit own tds_institutional_page content'
+  - 'edit own tds_news content'
+  - 'edit own tds_public_material content'
+  - 'use tds_editorial transition create_new_draft'
+  - 'use tds_editorial transition submit_for_review'
+  - 'view own unpublished content'

@@ -1,0 +1,112 @@
+tds_public_portal.home:
+  path: '/portal'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::home'
+    _title: 'Tutor TDS'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.program:
+  path: '/programa'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::institutional'
+    _title: 'Programa'
+    page_key: 'program'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.news:
+  path: '/noticias'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::editorialList'
+    _title: 'Noticias'
+    bundle: 'tds_news'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.events:
+  path: '/agenda'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::editorialList'
+    _title: 'Agenda'
+    bundle: 'tds_event'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.materials:
+  path: '/materiais'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::editorialList'
+    _title: 'Materiais publicos'
+    bundle: 'tds_public_material'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.faq:
+  path: '/faq'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::editorialList'
+    _title: 'Perguntas frequentes'
+    bundle: 'tds_faq'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.privacy:
+  path: '/privacidade'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::institutional'
+    _title: 'Privacidade'
+    page_key: 'privacy'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.rights:
+  path: '/direitos-e-exclusao'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::institutional'
+    _title: 'Direitos e exclusao'
+    page_key: 'rights'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.accessibility:
+  path: '/acessibilidade'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::institutional'
+    _title: 'Acessibilidade'
+    page_key: 'accessibility'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.contact:
+  path: '/contato'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::institutional'
+    _title: 'Contato institucional'
+    page_key: 'contact'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.catalog:
+  path: '/cursos'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::catalog'
+    _title: 'Cursos'
+  requirements:
+    _permission: 'access content'
+
+tds_public_portal.course:
+  path: '/cursos/{slug}'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\PublicPortalController::course'
+    _title_callback: '\Drupal\tds_public_portal\Controller\PublicPortalController::courseTitle'
+  requirements:
+    _permission: 'access content'
+    slug: '[a-z0-9]+(?:-[a-z0-9]+)*'
+
+tds_public_portal.sitemap:
+  path: '/sitemap.xml'
+  defaults:
+    _controller: '\Drupal\tds_public_portal\Controller\SitemapController::sitemap'
+  requirements:
+    _access: 'TRUE'

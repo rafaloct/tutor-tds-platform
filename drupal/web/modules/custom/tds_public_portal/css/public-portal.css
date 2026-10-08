@@ -1,0 +1,108 @@
+.tds-public-lead {
+  max-width: 70ch;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+}
+
+.tds-public-actions,
+.tds-card-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tds-public-actions {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.tds-public-actions a,
+.tds-card {
+  display: block;
+  border: 1px solid #b7c7c1;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.tds-public-actions a {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+
+.tds-card {
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.tds-card__cover,
+.tds-public-course__cover {
+  width: 100%;
+  height: auto;
+  border-radius: 0.35rem;
+  object-fit: cover;
+}
+
+.tds-card__title {
+  font-size: 1.25rem;
+}
+
+.tds-card__meta,
+.tds-course-facts {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tds-card__meta div,
+.tds-course-facts div {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.35fr) 1fr;
+  gap: 0.5rem;
+}
+
+.tds-card__meta dt,
+.tds-course-facts dt {
+  font-weight: 700;
+}
+
+.tds-card__meta dd,
+.tds-course-facts dd {
+  margin: 0;
+}
+
+.tds-public-status {
+  padding: 0.75rem 1rem;
+  border-left: 0.25rem solid #0b6e4f;
+  background: #edf7f3;
+}
+
+.tds-public-status--warning {
+  border-color: #8a4f00;
+  background: #fff5df;
+}
+
+.tds-public-status--stale {
+  border-color: #3f5f8f;
+  background: #edf3fb;
+}
+
+@media (min-width: 24.375rem) {
+  .tds-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  }
+}
+
+@media (min-width: 48rem) {
+  .tds-card-grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

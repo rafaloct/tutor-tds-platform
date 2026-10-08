@@ -1,0 +1,20 @@
+uuid: 9a8b3764-2663-4426-8f48-479669a95f4c
+langcode: pt-br
+status: true
+dependencies:
+  module:
+    - node
+    - taxonomy
+id: node.field_tds_public_topics
+field_name: field_tds_public_topics
+entity_type: node
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

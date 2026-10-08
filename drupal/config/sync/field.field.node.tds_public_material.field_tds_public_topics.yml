@@ -1,0 +1,29 @@
+uuid: 7052fe32-0062-4e41-b3a6-1f2553086dfb
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tds_public_topics
+    - node.type.tds_public_material
+    - taxonomy.vocabulary.tds_public_topics
+id: node.tds_public_material.field_tds_public_topics
+field_name: field_tds_public_topics
+entity_type: node
+bundle: tds_public_material
+label: Topicos
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      tds_public_topics: tds_public_topics
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

@@ -1,0 +1,63 @@
+uuid: 17689f63-132b-401b-a74e-795760c953bc
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - node.type.tds_event
+    - node.type.tds_faq
+    - node.type.tds_institutional_page
+    - node.type.tds_news
+    - node.type.tds_public_material
+  module:
+    - content_moderation
+id: tds_editorial
+label: 'Editorial TDS'
+type: content_moderation
+type_settings:
+  states:
+    draft:
+      label: Rascunho
+      weight: 0
+      published: false
+      default_revision: false
+    published:
+      label: Publicado
+      weight: 2
+      published: true
+      default_revision: true
+    review:
+      label: Revisao
+      weight: 1
+      published: false
+      default_revision: true
+  transitions:
+    create_new_draft:
+      label: 'Criar novo rascunho'
+      from:
+        - draft
+        - review
+        - published
+      to: draft
+      weight: 0
+    publish:
+      label: Publicar
+      from:
+        - review
+        - published
+      to: published
+      weight: 2
+    submit_for_review:
+      label: 'Enviar para revisao'
+      from:
+        - draft
+        - review
+      to: review
+      weight: 1
+  entity_types:
+    node:
+      - tds_event
+      - tds_faq
+      - tds_institutional_page
+      - tds_news
+      - tds_public_material
+  default_moderation_state: draft

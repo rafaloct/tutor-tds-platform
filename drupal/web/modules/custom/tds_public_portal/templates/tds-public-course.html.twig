@@ -1,0 +1,27 @@
+{# Detalhe allowlisted do curso publico; nenhum ID interno e renderizado. #}
+<article class="tds-public-course" data-tds-view="course">
+  {% if state == 'unavailable' %}
+    <p class="tds-public-status tds-public-status--warning" role="status">
+      Nao foi possivel consultar o curso agora. Tente novamente mais tarde.
+    </p>
+  {% else %}
+    {% if state == 'stale' %}
+      <p class="tds-public-status tds-public-status--stale" role="status">
+        Exibindo a ultima versao publica disponivel.
+      </p>
+    {% endif %}
+    {% if course.cover_public_url %}
+      <img class="tds-public-course__cover" src="{{ course.cover_public_url }}" alt="" width="960" height="540">
+    {% endif %}
+    {% if course.summary %}<p class="tds-public-lead">{{ course.summary }}</p>{% endif %}
+    <dl class="tds-course-facts">
+      <div><dt>Versao publicada</dt><dd>{{ course.published_version_label }}</dd></div>
+      {% if course.public_workload_text %}
+        <div><dt>Carga horaria</dt><dd>{{ course.public_workload_text }}</dd></div>
+      {% endif %}
+      {% if course.public_audience_text %}
+        <div><dt>Publico</dt><dd>{{ course.public_audience_text }}</dd></div>
+      {% endif %}
+    </dl>
+  {% endif %}
+</article>

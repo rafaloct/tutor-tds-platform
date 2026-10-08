@@ -1,0 +1,21 @@
+uuid: 3b607c7a-51b1-4ff7-ae03-2fbb93856e53
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tds_page_key
+    - node.type.tds_institutional_page
+  module:
+    - options
+id: node.tds_institutional_page.field_tds_page_key
+field_name: field_tds_page_key
+entity_type: node
+bundle: tds_institutional_page
+label: 'Chave da pagina'
+description: 'Cada chave possui uma unica pagina publicada; a mais recente prevalece.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string
