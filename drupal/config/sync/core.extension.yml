@@ -12,6 +12,7 @@ module:
   path_alias: 0
   system: 0
   tds_health: 0
+  tds_tutor_gateway: 0
   text: 0
   update: 0
   user: 0

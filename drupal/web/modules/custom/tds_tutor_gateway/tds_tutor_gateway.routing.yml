@@ -1,0 +1,31 @@
+tds_tutor_gateway.login:
+  path: '/tds/session/login'
+  defaults:
+    _controller: '\Drupal\tds_tutor_gateway\Controller\TutorSessionController::login'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'
+    _csrf_token: 'TRUE'
+  options:
+    no_cache: TRUE
+
+tds_tutor_gateway.context:
+  path: '/tds/session/context'
+  defaults:
+    _controller: '\Drupal\tds_tutor_gateway\Controller\TutorSessionController::context'
+  methods: [GET]
+  requirements:
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
+
+tds_tutor_gateway.logout:
+  path: '/tds/session/logout'
+  defaults:
+    _controller: '\Drupal\tds_tutor_gateway\Controller\TutorSessionController::logout'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'
+    _csrf_token: 'TRUE'
+  options:
+    no_cache: TRUE
