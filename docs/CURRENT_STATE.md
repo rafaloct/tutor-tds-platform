@@ -30,6 +30,15 @@ confirmado). Porta local em `127.0.0.1` via `DRUPAL_HTTP_BIND`; smoke assere
 sinteticos, install+smoke 5/5, lint OK, unit 2/2. Stack preview `tds-drupal`
 inalterada. MERGE_ALLOWED=NO; PR segue DRAFT para reviewer ACP.
 
+Rereview ACP (CHANGES_REQUESTED 2026-10-08, unico blocker restante): a tag
+mutavel `tutor-tds-drupal:staging` foi substituida por
+`DRUPAL_STAGING_IMAGE_REF` obrigatoria (`${VAR:?}`) — referencia imutavel
+`repo@sha256:<64-hex>` fornecida pelo ambiente. Validacao fail-closed em tres
+camadas: `scripts/staging-preflight.sh` (host, rejeita tag-only/malformada e
+roda `compose config`), `install-site.sh` e `settings.php` (rejeitam ref sem
+digest quando `DRUPAL_ENVIRONMENT != local`). Sem push de registry, DNS ou
+segredos; provisionamento staging segue BLOCKED (G6).
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre

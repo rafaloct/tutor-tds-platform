@@ -133,8 +133,12 @@ Mudanças de config: editar no admin/drush, `drush cex`, commitar o diff.
 - **local**: compose acima, credenciais dev do `.env.example`.
 - **staging**: `docker compose -f docker-compose.yml -f docker-compose.staging.yml`
   com `DRUPAL_ENVIRONMENT=staging` e segredos do ambiente. O override remove o
-  `build:` local e os bind mounts de código (imagem `tutor-tds-drupal:staging`
-  pronta) e **exige** `DRUPAL_DB_NAME`, `DRUPAL_DB_USER`, `DRUPAL_DB_PASSWORD`,
+  `build:` local e os bind mounts de código e **exige**
+  `DRUPAL_STAGING_IMAGE_REF` — referência imutável da imagem da aplicação
+  pinnada por digest (`repo@sha256:<64-hex>`), fornecida pelo ambiente;
+  tags mutáveis são rejeitadas por `scripts/staging-preflight.sh` (rodar
+  antes de `up`) e por `settings.php`/`install-site.sh` no container. Também
+  obrigatórios: `DRUPAL_DB_NAME`, `DRUPAL_DB_USER`, `DRUPAL_DB_PASSWORD`,
   `DRUPAL_DB_ROOT_PASSWORD`, `DRUPAL_HASH_SALT`, `DRUPAL_TRUSTED_HOSTS`,
   `DRUPAL_ADMIN_USER` e `DRUPAL_ADMIN_PASSWORD` — `docker compose config`
   falha se algum estiver ausente, e `settings.php`/`install-site.sh` rejeitam

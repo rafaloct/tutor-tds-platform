@@ -35,6 +35,16 @@ if ($tds_environment !== 'local') {
       ));
     }
   }
+  // Rereview ACP PR #177: a imagem da aplicacao declarada pelo ambiente deve
+  // ser ref imutavel pinnada por digest (repo@sha256:<64-hex>); tag mutavel
+  // nao pode subir em staging.
+  $tds_image_ref = getenv('DRUPAL_STAGING_IMAGE_REF');
+  if (!is_string($tds_image_ref) || preg_match('/^[^\s@]+@sha256:[0-9a-f]{64}$/', $tds_image_ref) !== 1) {
+    throw new \RuntimeException(sprintf(
+      'settings.php: DRUPAL_STAGING_IMAGE_REF deve ser referencia imutavel repo@sha256:<64-hex> quando DRUPAL_ENVIRONMENT="%s".',
+      $tds_environment
+    ));
+  }
 }
 
 $databases['default']['default'] = [

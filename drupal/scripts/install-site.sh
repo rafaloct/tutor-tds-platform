@@ -20,6 +20,14 @@ if [ "${DRUPAL_ENVIRONMENT:-local}" != "local" ]; then
       exit 1
     fi
   done
+  # Rereview ACP PR #177: fora de local a imagem da aplicacao deve ser ref
+  # imutavel pinnada por digest (repo@sha256:<64-hex>); tag mutavel e proibida.
+  image_ref="${DRUPAL_STAGING_IMAGE_REF:-}"
+  ref_re='^[^[:space:]@]+@sha256:[0-9a-f]{64}$'
+  if [[ ! "$image_ref" =~ $ref_re ]]; then
+    echo "[install] FAIL: DRUPAL_STAGING_IMAGE_REF deve ser ref imutavel repo@sha256:<64-hex> (atual: '${image_ref:-<vazio>}')" >&2
+    exit 1
+  fi
 fi
 
 DB_HOST="${DRUPAL_DB_HOST:-db}"

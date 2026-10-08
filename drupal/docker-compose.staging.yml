@@ -9,16 +9,23 @@
 # Fail-closed (review ACP PR #177): este override NAO herda bind mounts de
 # codigo nem path de build local do compose base, e todos os valores
 # sensiveis sao OBRIGATORIOS via ${VAR:?} — sem fallback para defaults dev.
+# A imagem da aplicacao NUNCA e uma tag mutavel: DRUPAL_STAGING_IMAGE_REF deve
+# ser uma referencia imutavel pinnada por digest (repo@sha256:<64-hex>),
+# validada por scripts/staging-preflight.sh, settings.php e install-site.sh.
 name: tds-drupal
 
 services:
   web:
-    image: tutor-tds-drupal:staging
+    # Sem tag mutavel: referencia imutavel pinnada por digest, fornecida pelo
+    # ambiente (gerenciador/release aprovado). ${VAR:?} falha o config se
+    # ausente; o formato digest e validado fail-closed no preflight/installer.
+    image: "${DRUPAL_STAGING_IMAGE_REF:?referencia imutavel obrigatoria no formato repo@sha256:<64-hex> (sem tag mutavel)}"
     # Sem build em staging: a imagem vem de um artefato revisado, nunca do
     # checkout local. !reset remove o "build:" herdado do compose base.
     build: !reset null
     environment:
       DRUPAL_ENVIRONMENT: staging
+      DRUPAL_STAGING_IMAGE_REF: "${DRUPAL_STAGING_IMAGE_REF:?referencia imutavel obrigatoria no formato repo@sha256:<64-hex>}"
       DRUPAL_DB_DRIVER: ${DRUPAL_DB_DRIVER:-mysql}
       DRUPAL_DB_HOST: ${DRUPAL_DB_HOST:-db}
       DRUPAL_DB_PORT: ${DRUPAL_DB_PORT:-3306}
