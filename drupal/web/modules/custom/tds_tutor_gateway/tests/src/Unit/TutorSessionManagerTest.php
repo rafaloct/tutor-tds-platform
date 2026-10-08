@@ -144,6 +144,33 @@ final class TutorSessionManagerTest extends UnitTestCase {
   }
 
   /**
+   * POST operacional repete uma unica vez apos 401 com payload identico.
+   */
+  public function testOperationsPostRefreshesOnceWithIdenticalPayload(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 2000));
+    $fresh = new TutorTokenSet('fresh', 'refresh-fresh', 3000);
+    $payload = ['id' => 'fixed-command-0001', 'action' => 'assign'];
+    $calls = 0;
+    $client->expects(self::exactly(2))->method('operationsPost')
+      ->with('/operations/class-1/commands', $payload, self::callback(function (string $token) use (&$calls): bool {
+        self::assertSame($calls === 0 ? 'old' : 'fresh', $token);
+        $calls++;
+        return TRUE;
+      }))
+      ->willReturnCallback(function () use (&$calls): array {
+        if ($calls === 1) {
+          throw new GatewayException('invalid_or_expired_session', 401);
+        }
+        return ['revision' => 2];
+      });
+    $client->expects(self::once())->method('refresh')->with('refresh-old')->willReturn($fresh);
+
+    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    self::assertSame(['revision' => 2], $manager->operationsPost('/operations/class-1/commands', $payload));
+  }
+
+  /**
    * Mock de relogio.
    */
   private function time(int $requestTime): TimeInterface {

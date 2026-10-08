@@ -41,13 +41,7 @@ final class TutorSessionManager implements TutorSessionManagerInterface {
    * {@inheritdoc}
    */
   public function context(): array {
-    $tokens = $this->store->load();
-    if ($tokens === NULL) {
-      throw new GatewayException('session_required', 401);
-    }
-    if ($tokens->expiresAt <= $this->time->getRequestTime() + self::REFRESH_SKEW_SECONDS) {
-      $tokens = $this->rotate($tokens->refreshToken);
-    }
+    $tokens = $this->activeTokens();
     try {
       return $this->client->me($tokens->accessToken);
     }
@@ -63,10 +57,65 @@ final class TutorSessionManager implements TutorSessionManagerInterface {
   /**
    * {@inheritdoc}
    */
+  public function operationsGet(string $path): array {
+    return $this->authenticatedRequest(
+      fn (string $accessToken): array => $this->client->operationsGet($path, $accessToken),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsPost(string $path, array $payload): array {
+    return $this->authenticatedRequest(
+      fn (string $accessToken): array => $this->client->operationsPost($path, $payload, $accessToken),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function logout(): void {
     // A API ainda nao possui /auth/logout; a invalidacao garantida desta
     // fatia e local e imediata. A ausencia upstream permanece documentada.
     $this->store->clear();
+  }
+
+  /**
+   * Carrega e renova preventivamente a sessao atual.
+   */
+  private function activeTokens(): TutorTokenSet {
+    $tokens = $this->store->load();
+    if ($tokens === NULL) {
+      throw new GatewayException('session_required', 401);
+    }
+    if ($tokens->expiresAt <= $this->time->getRequestTime() + self::REFRESH_SKEW_SECONDS) {
+      $tokens = $this->rotate($tokens->refreshToken);
+    }
+    return $tokens;
+  }
+
+  /**
+   * Executa uma chamada autenticada e renova uma unica vez por 401.
+   *
+   * @param callable(string): array<string, mixed> $request
+   *   Chamada que recebe o access token.
+   *
+   * @return array<string, mixed>
+   *   Resposta.
+   */
+  private function authenticatedRequest(callable $request): array {
+    $tokens = $this->activeTokens();
+    try {
+      return $request($tokens->accessToken);
+    }
+    catch (GatewayException $error) {
+      if ($error->httpStatus() !== 401) {
+        throw $error;
+      }
+      $tokens = $this->rotate($tokens->refreshToken);
+      return $request($tokens->accessToken);
+    }
   }
 
   /**

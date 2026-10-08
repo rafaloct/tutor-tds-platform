@@ -1,0 +1,8 @@
+services:
+  tds_operator_portal.state:
+    class: Drupal\tds_operator_portal\State\OperationsState
+    arguments: ['@request_stack']
+
+  tds_operator_portal.control_plane:
+    class: Drupal\tds_operator_portal\Service\OperationsControlPlane
+    arguments: ['@tds_tutor_gateway.session_manager', '@uuid']
