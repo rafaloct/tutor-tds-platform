@@ -30,6 +30,13 @@ abstract interface class AssessmentSyncCoordinator {
   Future<AssessmentSyncRecord> resolveKeepingLocal(AssessmentAttempt local);
 }
 
+abstract interface class PublishedAssessmentSyncCoordinator {
+  Future<RemoteAssessmentAttempt?> findPublishedAttempt(
+    PublishedAssessmentContext context,
+    String attemptId,
+  );
+}
+
 class AssessmentSyncConflictException implements Exception {
   const AssessmentSyncConflictException(this.message);
 
@@ -47,30 +54,36 @@ class AssessmentLegacyContentException extends AssessmentSyncConflictException {
       );
 }
 
-class AssessmentSyncService implements AssessmentSyncCoordinator {
+class AssessmentSyncService
+    implements AssessmentSyncCoordinator, PublishedAssessmentSyncCoordinator {
   AssessmentSyncService({
     required this.apiUrl,
     required this.authRepository,
     this.queue = const AssessmentSyncQueue(),
     http.Client? client,
-  }) : _client = client ?? http.Client();
+    DateTime Function()? clock,
+  }) : _client = client ?? http.Client(),
+       _clock = clock ?? DateTime.now;
 
   final String apiUrl;
   final AuthRepository authRepository;
   final AssessmentSyncQueue queue;
   final http.Client _client;
+  final DateTime Function() _clock;
   final Map<String, AssessmentAttempt> _localAttempts = {};
   final Set<String> _registeredContentIds = {};
   Future<void> _operationTail = Future<void>.value();
 
   @override
-  Future<AssessmentSyncRecord> queueAttempt(AssessmentAttempt attempt) {
+  Future<AssessmentSyncRecord> queueAttempt(AssessmentAttempt attempt) async {
+    await _validateLocalScope(attempt.publishedContext);
     _localAttempts[attempt.id] = attempt;
     return queue.enqueue(attempt);
   }
 
   @override
   Future<AssessmentSyncRecord> queueAndSync(AssessmentAttempt attempt) async {
+    await _validateLocalScope(attempt.publishedContext);
     _localAttempts[attempt.id] = attempt;
     final queued = await queue.enqueue(attempt);
     if (queued.lastError == 'active_enrollment_required') return queued;
@@ -95,7 +108,11 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     final response = await authRepository.authorized(
       (accessToken) => _client
           .get(
-            _uri('/assessment-attempts/${remote.attemptId}/content'),
+            _uri(
+              remote.payload.origin == AssessmentOrigin.publishedBlock
+                  ? '/classes/${Uri.encodeComponent(remote.payload.publishedLineage!.classId)}/assessment-attempts/${Uri.encodeComponent(remote.attemptId)}/content'
+                  : '/assessment-attempts/${Uri.encodeComponent(remote.attemptId)}/content',
+            ),
             headers: {'Authorization': 'Bearer $accessToken'},
           )
           .timeout(const Duration(seconds: 12)),
@@ -149,9 +166,26 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
           : (content.durationSeconds / 60).ceil(),
       items: content.questions,
     );
+    PublishedAssessmentContext? publishedContext;
+    if (payload.origin == AssessmentOrigin.publishedBlock) {
+      final ownerId = await authRepository.localUserId();
+      final lineage = payload.publishedLineage;
+      if (ownerId == null || lineage == null) {
+        throw const AssessmentSyncConflictException(
+          'O contexto local da atividade publicada não pôde ser confirmado.',
+        );
+      }
+      publishedContext = PublishedAssessmentContext(
+        ownerId: ownerId,
+        apiUrl: apiUrl,
+        lineage: lineage,
+      );
+    }
     final attempt = AssessmentAttempt(
       id: remote.attemptId,
       assessmentContentId: content.id,
+      origin: payload.origin,
+      publishedContext: publishedContext,
       courseId: content.courseId,
       topic: content.topic,
       mode: content.mode,
@@ -172,7 +206,11 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
       updatedAt: payload.updatedAt,
     );
     _localAttempts[attempt.id] = attempt;
-    await queue.acceptRemote(attempt.id, remote);
+    await queue.acceptRemote(
+      attempt.id,
+      remote,
+      localContext: publishedContext,
+    );
     return attempt;
   }
 
@@ -224,7 +262,8 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
         if (item is! Map<String, dynamic>) continue;
         try {
           final attempt = RemoteAssessmentAttempt.fromJson(item);
-          if (attempt.payload.courseId == courseId &&
+          if (attempt.payload.origin == AssessmentOrigin.practice &&
+              attempt.payload.courseId == courseId &&
               attempt.payload.mode == mode &&
               !attempt.payload.completed) {
             attempts.add(attempt);
@@ -243,6 +282,30 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
   }
 
   @override
+  Future<RemoteAssessmentAttempt?> findPublishedAttempt(
+    PublishedAssessmentContext context,
+    String attemptId,
+  ) async {
+    if (apiUrl.trim().isEmpty || !authRepository.isConfigured) return null;
+    if (context.apiUrl != _normalizedApiUrl) return null;
+    try {
+      if (!await authRepository.hasSession() ||
+          await authRepository.localUserId() != context.ownerId) {
+        return null;
+      }
+      final remote = await _fetchRemote(attemptId, publishedContext: context);
+      if (remote == null ||
+          remote.payload.origin != AssessmentOrigin.publishedBlock ||
+          !context.lineage.sameAs(remote.payload.publishedLineage)) {
+        return null;
+      }
+      return remote;
+    } on Object {
+      return null;
+    }
+  }
+
+  @override
   Future<AssessmentSyncRecord> registerDiscovered(
     AssessmentAttempt local,
     RemoteAssessmentAttempt remote,
@@ -251,7 +314,12 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     if (remote.attemptId != local.id ||
         payload.courseId != local.courseId ||
         payload.topic != local.topic ||
-        payload.mode != local.mode) {
+        payload.mode != local.mode ||
+        payload.origin != local.origin ||
+        (local.origin == AssessmentOrigin.publishedBlock &&
+            !local.publishedContext!.lineage.sameAs(
+              payload.publishedLineage,
+            ))) {
       throw const AssessmentSyncConflictException(
         'A tentativa online não corresponde a esta atividade local.',
       );
@@ -261,7 +329,11 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
       revision: payload.revision,
     );
     if (payload.hasSameState(localPayload)) {
-      return queue.acceptRemote(local.id, remote);
+      return queue.acceptRemote(
+        local.id,
+        remote,
+        localContext: local.publishedContext,
+      );
     }
     await queue.enqueue(local);
     return queue.markConflict(local.id, remote, 'remote_revision_detected');
@@ -280,7 +352,10 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
         !await authRepository.hasSession()) {
       return current;
     }
-    final remote = await _fetchRemote(attemptId);
+    final remote = await _fetchRemote(
+      attemptId,
+      publishedContext: current.localContext,
+    );
     if (remote == null) return current;
     return queue.markConflict(
       attemptId,
@@ -300,7 +375,12 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     }
     if (remote.payload.courseId != local.courseId ||
         remote.payload.topic != local.topic ||
-        remote.payload.mode != local.mode) {
+        remote.payload.mode != local.mode ||
+        remote.payload.origin != local.origin ||
+        (local.origin == AssessmentOrigin.publishedBlock &&
+            !local.publishedContext!.lineage.sameAs(
+              remote.payload.publishedLineage,
+            ))) {
       throw const AssessmentSyncConflictException(
         'A tentativa remota não corresponde a esta atividade.',
       );
@@ -337,6 +417,16 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
         current.pending.isEmpty) {
       return current;
     }
+    var correctedFutureTimestamp = false;
+    final localContext = current.localContext;
+    if (localContext != null) {
+      if (localContext.apiUrl != _normalizedApiUrl) {
+        return queue.markPending(attemptId, 'api_scope_mismatch');
+      }
+      if (await authRepository.localUserId() != localContext.ownerId) {
+        return queue.markPending(attemptId, 'owner_scope_mismatch');
+      }
+    }
     if (apiUrl.trim().isEmpty || !authRepository.isConfigured) {
       return queue.markPending(attemptId, 'api_unavailable');
     }
@@ -349,7 +439,11 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     }
 
     final local = _localAttempts[attemptId];
-    if (local != null && local.deck.hasAnswerKey) {
+    final origin = local?.origin ?? current.pending.first.payload.origin;
+    if (origin == AssessmentOrigin.publishedBlock) {
+      // The server resolves the immutable block and its answer key. The client
+      // must never register a personal assessment content record for it.
+    } else if (local != null && local.deck.hasAnswerKey) {
       final contentError = await _ensureContent(local);
       if (contentError != null) {
         return queue.markPending(attemptId, contentError);
@@ -359,9 +453,12 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     }
 
     while (current.pending.isNotEmpty) {
-      final pending = current.pending.first;
-      final revision = pending.payload.revision;
+      final revision = current.pending.first.payload.revision;
       current = await queue.markAttempted(attemptId, revision);
+      // enqueue() may have replaced an unattempted revision while this flush
+      // was waiting for the queue lock. Send the exact payload that
+      // markAttempted() made durable, not the stale pre-lock snapshot.
+      final pending = current.pending.first;
       try {
         final response = await authRepository.authorized(
           (accessToken) => _client
@@ -376,7 +473,14 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
               .timeout(const Duration(seconds: 12)),
         );
         if (response.statusCode == 200 || response.statusCode == 201) {
-          final remote = _decodeRemote(response.body);
+          final RemoteAssessmentAttempt remote;
+          try {
+            remote = _decodeRemote(response.body);
+          } on Object {
+            // A 2xx response with an unreadable contract is a permanent
+            // server-side rejection, not an offline/transient condition.
+            return queue.markPending(attemptId, 'invalid_server_response');
+          }
           if (!remote.payload.isAcceptedResponseFor(pending.payload) ||
               remote.attemptId != attemptId) {
             return queue.markPending(attemptId, 'invalid_server_response');
@@ -386,7 +490,10 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
         }
         if (response.statusCode == 409) {
           final conflictCode = _conflictCode(response.body);
-          final remote = await _fetchRemote(attemptId);
+          final remote = await _fetchRemote(
+            attemptId,
+            publishedContext: current.localContext,
+          );
           return queue.markConflict(attemptId, remote, conflictCode);
         }
         if (response.statusCode == 403) {
@@ -394,6 +501,32 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
         }
         if (response.statusCode == 401) {
           return queue.markPending(attemptId, 'session_required');
+        }
+        if (response.statusCode == 422) {
+          final serverTime = origin == AssessmentOrigin.publishedBlock
+              ? _futureUpdatedAtCorrection(
+                  response.body,
+                  rejected: pending.payload,
+                  confirmed: current.confirmedPayload,
+                )
+              : null;
+          if (!correctedFutureTimestamp && serverTime != null) {
+            current = await queue.correctFutureUpdatedAt(
+              attemptId,
+              pending.payload.revision,
+              serverTime,
+            );
+            correctedFutureTimestamp = true;
+            continue;
+          }
+          return queue.markPending(
+            attemptId,
+            serverTime == null ? 'server_422' : 'future_updated_at',
+          );
+        }
+        if (origin == AssessmentOrigin.publishedBlock &&
+            response.statusCode == 404) {
+          return queue.markPending(attemptId, 'dynamic_activity_unavailable');
         }
         return queue.markPending(attemptId, 'server_${response.statusCode}');
       } on Object {
@@ -404,11 +537,15 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
   }
 
   Future<String?> _ensureContent(AssessmentAttempt attempt) async {
-    if (_registeredContentIds.contains(attempt.assessmentContentId)) {
+    final contentId = attempt.assessmentContentId;
+    if (contentId == null || contentId.isEmpty) {
+      return 'assessment_content_required';
+    }
+    if (_registeredContentIds.contains(contentId)) {
       return null;
     }
     final idPattern = RegExp(r'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,179}$');
-    if (!idPattern.hasMatch(attempt.assessmentContentId)) {
+    if (!idPattern.hasMatch(contentId)) {
       return 'invalid_assessment_content_id';
     }
     final durationSeconds = attempt.mode == AssessmentMode.exam
@@ -435,7 +572,7 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
       final response = await authRepository.authorized(
         (accessToken) => _client
             .put(
-              _uri('/assessment-contents/${attempt.assessmentContentId}'),
+              _uri('/assessment-contents/$contentId'),
               headers: {
                 'Authorization': 'Bearer $accessToken',
                 'Content-Type': 'application/json',
@@ -450,7 +587,7 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
           return 'invalid_content_response';
         }
         final content = RemoteAssessmentContent.fromJson(decoded);
-        if (content.id != attempt.assessmentContentId ||
+        if (content.id != contentId ||
             content.courseId != attempt.courseId ||
             content.topic != attempt.topic ||
             content.mode != attempt.mode ||
@@ -460,7 +597,7 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
             !_sameQuestions(content.questions, attempt.deck.items)) {
           return 'invalid_content_response';
         }
-        _registeredContentIds.add(attempt.assessmentContentId);
+        _registeredContentIds.add(contentId);
         return null;
       }
       if (response.statusCode == 403) return 'active_enrollment_required';
@@ -485,14 +622,17 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     return true;
   }
 
-  Future<RemoteAssessmentAttempt?> _fetchRemote(String attemptId) async {
+  Future<RemoteAssessmentAttempt?> _fetchRemote(
+    String attemptId, {
+    PublishedAssessmentContext? publishedContext,
+  }) async {
     try {
+      final path = publishedContext == null
+          ? '/assessment-attempts/${Uri.encodeComponent(attemptId)}'
+          : '/classes/${Uri.encodeComponent(publishedContext.lineage.classId)}/assessment-attempts/${Uri.encodeComponent(attemptId)}';
       final response = await authRepository.authorized(
         (accessToken) => _client
-            .get(
-              _uri('/assessment-attempts/$attemptId'),
-              headers: {'Authorization': 'Bearer $accessToken'},
-            )
+            .get(_uri(path), headers: {'Authorization': 'Bearer $accessToken'})
             .timeout(const Duration(seconds: 12)),
       );
       if (response.statusCode != 200) return null;
@@ -526,6 +666,44 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     return 'revision_conflict';
   }
 
+  DateTime? _futureUpdatedAtCorrection(
+    String source, {
+    required AssessmentSyncPayload rejected,
+    required AssessmentSyncPayload? confirmed,
+  }) {
+    try {
+      final decoded = jsonDecode(source);
+      if (decoded is! Map<String, dynamic>) return null;
+      final detail = decoded['detail'];
+      if (detail is! Map<String, dynamic> ||
+          detail['code'] != 'future_updated_at') {
+        return null;
+      }
+      final rawServerTime = detail['server_time'];
+      final maxFutureSeconds = (detail['max_future_seconds'] as num?)?.toInt();
+      if (rawServerTime is! String ||
+          !rawServerTime.endsWith('Z') ||
+          maxFutureSeconds != 300) {
+        return null;
+      }
+      final serverTime = DateTime.tryParse(rawServerTime)?.toUtc();
+      if (serverTime == null) return null;
+      final localDifference = _clock().toUtc().difference(serverTime).abs();
+      if (localDifference > const Duration(days: 1)) return null;
+      final upperBound = serverTime.add(Duration(seconds: maxFutureSeconds!));
+      if (!rejected.updatedAt.isAfter(upperBound)) return null;
+      final confirmedTime = confirmed?.updatedAt;
+      if (confirmedTime != null && confirmedTime.isAfter(upperBound)) {
+        return null;
+      }
+      return confirmedTime != null && confirmedTime.isAfter(serverTime)
+          ? confirmedTime
+          : serverTime;
+    } on FormatException {
+      return null;
+    }
+  }
+
   Future<AssessmentSyncRecord> _serialize(
     Future<AssessmentSyncRecord> Function() operation,
   ) {
@@ -540,16 +718,33 @@ class AssessmentSyncService implements AssessmentSyncCoordinator {
     return completer.future;
   }
 
+  Future<void> _validateLocalScope(PublishedAssessmentContext? context) async {
+    if (context == null) return;
+    if (context.apiUrl != _normalizedApiUrl) {
+      throw const AssessmentSyncConflictException(
+        'A atividade pertence a outro ambiente da API.',
+      );
+    }
+    if (await authRepository.localUserId() != context.ownerId) {
+      throw const AssessmentSyncConflictException(
+        'A atividade pertence a outra conta neste aparelho.',
+      );
+    }
+  }
+
+  String get _normalizedApiUrl =>
+      apiUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+
   Uri _uri(String path) {
-    final base = apiUrl.endsWith('/')
-        ? apiUrl.substring(0, apiUrl.length - 1)
-        : apiUrl;
-    return Uri.parse('$base$path');
+    return Uri.parse('$_normalizedApiUrl$path');
   }
 
   List<String> _weakTopics(AssessmentDeck deck, Map<int, int> answers) =>
       Iterable<int>.generate(deck.items.length)
-          .where((index) => answers[index] != deck.items[index].correctIndex)
+          .where((index) {
+            final item = deck.items[index];
+            return item.graded && !item.correctIndexes.contains(answers[index]);
+          })
           .map((index) => deck.items[index].topic)
           .toSet()
           .toList();

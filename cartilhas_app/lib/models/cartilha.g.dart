@@ -36,6 +36,7 @@ Map<String, dynamic> _$CartilhaToJson(Cartilha instance) => <String, dynamic>{
 
 Section _$SectionFromJson(Map<String, dynamic> json) => Section(
   id: json['id'] as String,
+  versionId: json['version_id'] as String?,
   title: json['title'] as String,
   messages: (json['messages'] as List<dynamic>)
       .map((e) => Message.fromJson(e as Map<String, dynamic>))
@@ -49,12 +50,15 @@ Section _$SectionFromJson(Map<String, dynamic> json) => Section(
 
 Map<String, dynamic> _$SectionToJson(Section instance) => <String, dynamic>{
   'id': instance.id,
+  'version_id': instance.versionId,
   'title': instance.title,
   'messages': instance.messages,
   'materials': instance.materials,
 };
 
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
+  id: json['id'] as String?,
+  versionId: json['version_id'] as String?,
   type: json['type'] as String,
   content: json['content'] as String,
   options: (json['options'] as List<dynamic>?)
@@ -65,6 +69,8 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
 );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
+  'id': instance.id,
+  'version_id': instance.versionId,
   'type': instance.type,
   'content': instance.content,
   'options': instance.options,

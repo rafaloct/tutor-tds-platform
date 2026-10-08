@@ -24,6 +24,11 @@ import '../features/learning_context/learning_context_controller.dart';
 import '../features/learning_events/learning_delivery_controller.dart';
 import '../features/learning_events/learning_delivery_status.dart';
 import '../features/learning_events/learning_outbox.dart';
+import '../features/study_ai/application/published_assessment_controller.dart';
+import '../features/study_ai/data/assessment_attempt_repository.dart';
+import '../features/study_ai/data/assessment_sync_service.dart';
+import '../features/study_ai/models/assessment_sync_models.dart';
+import '../features/study_ai/models/study_models.dart';
 
 class ChatExperienceScreen extends StatefulWidget {
   final Cartilha cartilha;
@@ -32,6 +37,10 @@ class ChatExperienceScreen extends StatefulWidget {
   final bool savedClassroomContent;
   final LearningContextController? learningContextController;
   final LearningDeliveryController? deliveryController;
+  final bool? dynamicActivityEnabled;
+  final String? assessmentApiUrl;
+  final PublishedAssessmentAttemptStore assessmentAttemptStore;
+  final AssessmentSyncCoordinator? assessmentSyncCoordinator;
   const ChatExperienceScreen({
     super.key,
     required this.cartilha,
@@ -40,6 +49,10 @@ class ChatExperienceScreen extends StatefulWidget {
     this.savedClassroomContent = false,
     this.learningContextController,
     this.deliveryController,
+    this.dynamicActivityEnabled,
+    this.assessmentApiUrl,
+    this.assessmentAttemptStore = const AssessmentAttemptRepository(),
+    this.assessmentSyncCoordinator,
   });
 
   @override
@@ -69,6 +82,8 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   bool _hadSaveFailure = false;
   bool _startingLesson = false;
   bool _startingRequest = false;
+  bool _enteringAssessmentBlock = false;
+  PublishedAssessmentController? _publishedAssessmentController;
   LearningEvent? _startedEvent;
   String? _startedEventId;
   String? _pendingActionEventId;
@@ -77,6 +92,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       !_startingLesson &&
       _pendingReadingAction == null &&
       (_delivery?.canRecord ?? true);
+
+  bool get _dynamicActivityEnabled =>
+      widget.dynamicActivityEnabled ?? AppConfig.dynamicActivityEnabled;
+  String get _assessmentApiUrl =>
+      widget.assessmentApiUrl ?? AppConfig.tutorApiUrl;
 
   int get _totalQuestions => widget.cartilha.sections
       .expand((s) => s.messages)
@@ -320,17 +340,38 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       messageIndex = 0;
     }
     final currentMessage = sections[sectionIndex].messages[messageIndex];
-    final questionsAnswered = _bounded(
+    var questionsAnswered = _bounded(
       saved?.questionsAnswered ?? 0,
       _totalQuestions,
     );
+    final publishedController = await _openPublishedAssessment(
+      sections[sectionIndex],
+      currentMessage,
+    );
+    if (!mounted) return;
+    final publishedBlocked = _publishedAssessmentBlockedFor(
+      sections[sectionIndex],
+      currentMessage,
+    );
+    final restoredOption = publishedController?.selectionReady == true
+        ? publishedController?.selectedOptionIndex
+        : null;
+    if (restoredOption != null &&
+        currentMessage.isAssessmentQuestion &&
+        (saved == null || saved.showOptions)) {
+      questionsAnswered = _bounded(questionsAnswered + 1, _totalQuestions);
+    }
 
     setState(() {
       _currentSectionIndex = sectionIndex;
       _currentMessageIndex = messageIndex;
       _questionsAnswered = questionsAnswered;
       _isCompleted = saved?.isCompleted ?? false;
-      _showOptions = saved?.showOptions ?? currentMessage.type != 'bot';
+      _showOptions = publishedBlocked
+          ? false
+          : restoredOption == null
+          ? (saved?.showOptions ?? currentMessage.type != 'bot')
+          : false;
       if (_isCompleted) {
         _visibleMessages.add(_completionMessage());
       } else {
@@ -343,6 +384,11 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
           );
         }
         _visibleMessages.add(currentMessage);
+        _appendRestoredAssessmentAnswer(
+          currentMessage,
+          restoredOption,
+          notify: false,
+        );
       }
       _isInitializing = false;
     });
@@ -353,6 +399,133 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     if (value < 0) return 0;
     if (value > maximum) return maximum;
     return value;
+  }
+
+  PublishedAssessmentContext? _publishedContextFor(
+    Section section,
+    Message message,
+  ) {
+    if (!_isContextualPublishedAssessment(message) ||
+        !_hasCompletePublishedLineage(section, message)) {
+      return null;
+    }
+    final learning = widget.learningContextController?.snapshot?.context;
+    final legacyEnrollmentId = learning?.legacyEnrollmentId;
+    if (learning == null ||
+        legacyEnrollmentId == null ||
+        !learning.matchesCourse(widget.cartilha) ||
+        !learning.permissions.contains('activity.record') ||
+        _assessmentApiUrl.trim().isEmpty) {
+      return null;
+    }
+    return PublishedAssessmentContext(
+      ownerId: learning.userId,
+      apiUrl: _assessmentApiUrl,
+      lineage: PublishedAssessmentLineage(
+        organizationId: learning.organizationId,
+        programId: learning.programId,
+        classId: learning.cohortId,
+        membershipId: learning.membershipId,
+        enrollmentId: learning.enrollmentId,
+        legacyEnrollmentId: legacyEnrollmentId,
+        courseId: learning.courseId,
+        courseVersionId: learning.courseVersionId,
+        sectionId: section.id,
+        sectionVersionId: section.versionId!,
+        blockId: message.id!,
+        blockVersionId: message.versionId!,
+      ),
+    );
+  }
+
+  bool _isContextualPublishedAssessment(Message message) =>
+      _dynamicActivityEnabled &&
+      message.isAssessmentQuestion &&
+      !widget.cartilha.legacyProgressCompatible &&
+      widget.cartilha.classId?.trim().isNotEmpty == true &&
+      widget.cartilha.courseVersionId?.trim().isNotEmpty == true;
+
+  bool _hasCompletePublishedLineage(Section section, Message message) =>
+      section.id.trim().isNotEmpty &&
+      section.versionId?.trim().isNotEmpty == true &&
+      message.id?.trim().isNotEmpty == true &&
+      message.versionId?.trim().isNotEmpty == true;
+
+  bool _publishedAssessmentBlockedFor(Section section, Message message) =>
+      _isContextualPublishedAssessment(message) &&
+      _publishedContextFor(section, message) == null;
+
+  Future<PublishedAssessmentController?> _openPublishedAssessment(
+    Section section,
+    Message message,
+  ) async {
+    final publishedContext = _publishedContextFor(section, message);
+    if (publishedContext == null) return null;
+    var controller = _publishedAssessmentController;
+    if (controller == null) {
+      final sync =
+          widget.assessmentSyncCoordinator ??
+          context.read<AssessmentSyncCoordinator>();
+      controller = PublishedAssessmentController(
+        widget.assessmentAttemptStore,
+        sync,
+      );
+      controller.addListener(_publishedAssessmentChanged);
+      _publishedAssessmentController = controller;
+    }
+    await controller.open(
+      PublishedAssessmentBlock(
+        courseId: widget.cartilha.id,
+        courseTitle: widget.cartilha.title,
+        section: section,
+        message: message,
+        context: publishedContext,
+      ),
+    );
+    return controller;
+  }
+
+  void _publishedAssessmentChanged() {
+    if (mounted) setState(() {});
+  }
+
+  PublishedAssessmentController? get _activePublishedAssessment {
+    if (_isCompleted || widget.cartilha.sections.isEmpty) return null;
+    final section = widget.cartilha.sections[_currentSectionIndex];
+    final message = section.messages[_currentMessageIndex];
+    final publishedContext = _publishedContextFor(section, message);
+    final controller = _publishedAssessmentController;
+    return publishedContext != null &&
+            controller?.matches(publishedContext) == true
+        ? controller
+        : null;
+  }
+
+  bool get _activePublishedAssessmentBlocked {
+    if (_isCompleted || widget.cartilha.sections.isEmpty) return false;
+    final section = widget.cartilha.sections[_currentSectionIndex];
+    final message = section.messages[_currentMessageIndex];
+    return _publishedAssessmentBlockedFor(section, message);
+  }
+
+  void _appendRestoredAssessmentAnswer(
+    Message message,
+    int? optionIndex, {
+    required bool notify,
+  }) {
+    final options = message.options ?? const <Option>[];
+    if (optionIndex == null ||
+        optionIndex < 0 ||
+        optionIndex >= options.length) {
+      return;
+    }
+    final option = options[optionIndex];
+    _visibleMessages.add(Message(type: 'user', content: option.label));
+    final feedback = option.feedback ?? message.explanation;
+    if (feedback != null && feedback.trim().isNotEmpty) {
+      _visibleMessages.add(Message(type: 'bot', content: feedback));
+    }
+    if (notify) setState(() {});
   }
 
   Message _completionMessage() => Message(
@@ -387,6 +560,8 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     WidgetsBinding.instance.removeObserver(this);
     _delivery?.removeListener(_deliveryChanged);
     if (_ownsDelivery) _delivery?.dispose();
+    _publishedAssessmentController?.removeListener(_publishedAssessmentChanged);
+    _publishedAssessmentController?.dispose();
     _tts.stop();
     super.dispose();
   }
@@ -404,13 +579,25 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     await _tts.speak(text);
   }
 
-  void _displayNextMessage() {
+  Future<void> _displayNextMessage() async {
     final section = widget.cartilha.sections[_currentSectionIndex];
     if (_currentMessageIndex < section.messages.length) {
       final msg = section.messages[_currentMessageIndex];
+      setState(() => _enteringAssessmentBlock = true);
+      final published = await _openPublishedAssessment(section, msg);
+      if (!mounted) return;
+      final publishedBlocked = _publishedAssessmentBlockedFor(section, msg);
+      final restoredOption = published?.selectionReady == true
+          ? published?.selectedOptionIndex
+          : null;
       setState(() {
+        _enteringAssessmentBlock = false;
         _visibleMessages.add(msg);
-        _showOptions = (msg.type != 'bot');
+        _showOptions =
+            !publishedBlocked && restoredOption == null && msg.type != 'bot';
+        if (restoredOption != null) {
+          _appendRestoredAssessmentAnswer(msg, restoredOption, notify: false);
+        }
       });
       _saveProgress();
       _scrollToBottom();
@@ -418,6 +605,22 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   }
 
   void _advance() {
+    if (_activePublishedAssessment != null) {
+      unawaited(_completePublishedAssessment());
+      return;
+    }
+    _act(_advanceContent);
+  }
+
+  Future<void> _completePublishedAssessment() async {
+    final controller = _activePublishedAssessment;
+    if (controller == null || controller.saving) return;
+    final stored = await controller.complete();
+    if (!mounted) return;
+    if (!stored) {
+      _showAssessmentIssue();
+      return;
+    }
     _act(_advanceContent);
   }
 
@@ -425,13 +628,13 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     final section = widget.cartilha.sections[_currentSectionIndex];
     if (_currentMessageIndex < section.messages.length - 1) {
       setState(() => _currentMessageIndex++);
-      _displayNextMessage();
+      unawaited(_displayNextMessage());
     } else if (_currentSectionIndex < widget.cartilha.sections.length - 1) {
       setState(() {
         _currentSectionIndex++;
         _currentMessageIndex = 0;
       });
-      _displayNextMessage();
+      unawaited(_displayNextMessage());
     } else {
       final event = LearningEvent.forSession(
         type: LearningEventType.lessonCompleted,
@@ -459,7 +662,74 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
 
   void _handleOptionClick(Option option) {
     if (!_showOptions || !_canRecordActivities) return;
+    final published = _activePublishedAssessment;
+    if (published != null) {
+      unawaited(_persistPublishedOption(published, option));
+      return;
+    }
     _act(() => _applyOption(option));
+  }
+
+  Future<void> _persistPublishedOption(
+    PublishedAssessmentController controller,
+    Option option,
+  ) async {
+    if (controller.saving) return;
+    final current = widget
+        .cartilha
+        .sections[_currentSectionIndex]
+        .messages[_currentMessageIndex];
+    final optionIndex = current.options?.indexOf(option) ?? -1;
+    final stored = await controller.selectOption(optionIndex);
+    if (!mounted) return;
+    if (stored) {
+      _applyOption(option);
+      final event = _activityTracker.recordInteraction();
+      if (event != null) unawaited(_enqueueAndSync(event));
+    }
+    if (!stored) _showAssessmentIssue();
+  }
+
+  Future<void> _togglePublishedReview() async {
+    final controller = _activePublishedAssessment;
+    if (controller == null || controller.saving) return;
+    final stored = await controller.toggleReview();
+    if (!mounted || stored) return;
+    _showAssessmentIssue();
+  }
+
+  Future<void> _retryPublishedAssessment() async {
+    final controller = _activePublishedAssessment;
+    if (controller == null || controller.saving) return;
+    final stored = await controller.retry();
+    if (!mounted) return;
+    if (!stored) {
+      _showAssessmentIssue();
+      return;
+    }
+    final optionIndex = controller.selectedOptionIndex;
+    final options = widget
+        .cartilha
+        .sections[_currentSectionIndex]
+        .messages[_currentMessageIndex]
+        .options;
+    if (_showOptions &&
+        controller.selectionReady &&
+        optionIndex != null &&
+        options != null &&
+        optionIndex >= 0 &&
+        optionIndex < options.length) {
+      _applyOption(options[optionIndex]);
+    }
+  }
+
+  void _showAssessmentIssue() {
+    final message =
+        _activePublishedAssessment?.error ??
+        'A atividade não foi salva. Tente novamente.';
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _applyOption(Option option) {
@@ -519,10 +789,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
   }
 
   String? get _tutorCourseVersionId {
-    final contextVersion = widget
-        .learningContextController
-        ?.snapshot
-        ?.context;
+    final contextVersion = widget.learningContextController?.snapshot?.context;
     final cartilhaVersion = widget.cartilha.courseVersionId;
     if (contextVersion?.courseId == widget.cartilha.id) {
       if (cartilhaVersion != null &&
@@ -691,24 +958,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                       ),
                     ),
                   ),
-                  if (!_isCompleted && _showOptions)
-                    _buildOptions()
-                  else if (!_isCompleted)
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 860),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                          child: ElevatedButton(
-                            onPressed: _canRecordActivities ? _advance : null,
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(double.infinity, 48),
-                            ),
-                            child: const Text('Continuar'),
-                          ),
-                        ),
-                      ),
-                    ),
+                  if (!_isCompleted) _buildReaderActions(),
                 ],
               ),
         floatingActionButton: _isCompleted
@@ -841,4 +1091,132 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
       ),
     );
   }
+
+  Widget _buildReaderActions() {
+    if (_enteringAssessmentBlock) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final published = _activePublishedAssessment;
+    if (published == null) {
+      if (_activePublishedAssessmentBlocked) {
+        return const Padding(
+          key: Key('published-assessment-blocked'),
+          padding: EdgeInsets.fromLTRB(24, 12, 24, 20),
+          child: Text(
+            'Atividade indisponível. Atualize seu acesso à turma antes de responder.',
+            textAlign: TextAlign.center,
+          ),
+        );
+      }
+      return _showOptions ? _buildOptions() : _buildContinueButton();
+    }
+    return ListenableBuilder(
+      listenable: published,
+      builder: (context, _) {
+        final record = published.syncRecord;
+        final status = record?.status.label ?? 'Salvo neste aparelho';
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 860),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OutlinedButton.icon(
+                    key: const Key('published-assessment-review-toggle'),
+                    onPressed:
+                        published.saving ||
+                            published.isCompleted ||
+                            published.accessDenied ||
+                            published.activityUnavailable
+                        ? null
+                        : _togglePublishedReview,
+                    icon: Icon(
+                      published.markedForReview
+                          ? Icons.bookmark
+                          : Icons.bookmark_border,
+                    ),
+                    label: Text(
+                      published.markedForReview
+                          ? 'Remover marca de revisão'
+                          : 'Marcar para revisar',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (published.accessDenied)
+                    const Padding(
+                      key: Key('published-assessment-access-denied'),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        'Atividade bloqueada porque seu acesso à turma não está ativo.',
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  else if (published.activityUnavailable)
+                    const Padding(
+                      key: Key('published-assessment-unavailable'),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        'Atividade indisponível neste ambiente até a liberação do serviço.',
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  else if (!published.selectionReady)
+                    _buildOptions()
+                  else
+                    _buildContinueButton(
+                      enabled: !published.saving && _canRecordActivities,
+                    ),
+                  const SizedBox(height: 6),
+                  Text(
+                    status,
+                    key: const Key('published-assessment-sync-status'),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  if (published.error case final issue?) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      issue,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: published.saving
+                          ? null
+                          : () => unawaited(_retryPublishedAssessment()),
+                      child: const Text('Tentar envio novamente'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContinueButton({bool? enabled}) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 860),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: ElevatedButton(
+          onPressed: (enabled ?? _canRecordActivities) ? _advance : null,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
+          child: const Text('Continuar'),
+        ),
+      ),
+    ),
+  );
 }

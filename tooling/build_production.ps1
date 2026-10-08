@@ -82,7 +82,18 @@ try {
     try {
         Run $Flutter @('analyze', '--no-pub')
         Run $Flutter @('test', '--no-pub')
-        Run $Flutter @('build', 'appbundle', '--release', '--no-pub', '--dart-define-from-file=config/production.json')
+        $lockPath = Join-Path $appRoot 'pubspec.lock'
+        Require (Test-Path -LiteralPath $lockPath) 'pubspec.lock ausente.'
+        $lockBefore = (Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash
+        Run $Flutter @('pub', 'get', '--enforce-lockfile')
+        Require ((Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash -eq $lockBefore) 'pubspec.lock divergiu no pub get.'
+        # Release must regenerate platform tooling after tests. With --no-pub,
+        # a stale GeneratedPluginRegistrant.java can retain dev-only plugins
+        # that Gradle correctly excludes from the release classpath.
+        Run $Flutter @('build', 'appbundle', '--release', '--dart-define-from-file=config/production.json')
+        Require ((Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash -eq $lockBefore) 'pubspec.lock mudou durante o build.'
+        $postBuildDirty = @(& git status --porcelain=v1 -uall)
+        Require ($LASTEXITCODE -eq 0 -and $postBuildDirty.Count -eq 0) 'working tree mudou durante o build.'
         $artifact = Join-Path $appRoot 'build/app/outputs/bundle/release/app-release.aab'
         Require (Test-Path -LiteralPath $artifact) 'AAB não encontrado após build.'
         $manifest = [ordered]@{

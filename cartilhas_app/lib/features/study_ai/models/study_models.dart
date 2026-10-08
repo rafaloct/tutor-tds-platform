@@ -27,6 +27,20 @@ extension SummaryLengthLabel on SummaryLength {
 
 enum AssessmentMode { quiz, exam }
 
+enum AssessmentOrigin { practice, publishedBlock }
+
+extension AssessmentOriginValue on AssessmentOrigin {
+  String get apiValue => switch (this) {
+    AssessmentOrigin.practice => 'practice',
+    AssessmentOrigin.publishedBlock => 'published_block',
+  };
+
+  static AssessmentOrigin fromApi(Object? value) => switch (value) {
+    'published_block' => AssessmentOrigin.publishedBlock,
+    _ => AssessmentOrigin.practice,
+  };
+}
+
 extension AssessmentModeLabel on AssessmentMode {
   String get label => switch (this) {
     AssessmentMode.quiz => 'Quiz',
@@ -76,30 +90,49 @@ class StudyQuestion {
     required this.question,
     required List<String> options,
     required this.correctIndex,
+    Set<int>? correctIndexes,
+    this.graded = true,
     required this.explanation,
     required this.topic,
-  }) : options = List.unmodifiable(options);
+  }) : options = List.unmodifiable(options),
+       correctIndexes = Set.unmodifiable(
+         correctIndexes ?? (correctIndex >= 0 ? {correctIndex} : const <int>{}),
+       );
 
   final String question;
   final List<String> options;
   final int correctIndex;
+  final Set<int> correctIndexes;
+  final bool graded;
   final String explanation;
   final String topic;
 
-  factory StudyQuestion.fromJson(Map<String, dynamic> json) => StudyQuestion(
-    question: json['question'] as String? ?? '',
-    options: (json['options'] as List<dynamic>? ?? const [])
-        .whereType<String>()
-        .toList(),
-    correctIndex: json['correctIndex'] as int? ?? 0,
-    explanation: json['explanation'] as String? ?? '',
-    topic: json['topic'] as String? ?? 'Conteúdo da cartilha',
-  );
+  factory StudyQuestion.fromJson(Map<String, dynamic> json) {
+    final indexes = (json['correctIndexes'] as List<dynamic>? ?? const [])
+        .whereType<num>()
+        .map((value) => value.toInt())
+        .where((value) => value >= 0)
+        .toSet();
+    final legacyIndex = json['correctIndex'] as int? ?? 0;
+    return StudyQuestion(
+      question: json['question'] as String? ?? '',
+      options: (json['options'] as List<dynamic>? ?? const [])
+          .whereType<String>()
+          .toList(),
+      correctIndex: indexes.isEmpty ? legacyIndex : indexes.first,
+      correctIndexes: indexes.isEmpty ? null : indexes,
+      graded: json['graded'] as bool? ?? true,
+      explanation: json['explanation'] as String? ?? '',
+      topic: json['topic'] as String? ?? 'Conteúdo da cartilha',
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'question': question,
     'options': options,
     'correctIndex': correctIndex,
+    'correctIndexes': correctIndexes.toList()..sort(),
+    'graded': graded,
     'explanation': explanation,
     'topic': topic,
   };
@@ -118,7 +151,12 @@ class AssessmentDeck {
   final List<StudyQuestion> items;
 
   bool get hasAnswerKey => items.every(
-    (item) => item.correctIndex >= 0 && item.correctIndex < item.options.length,
+    (item) =>
+        item.graded &&
+        item.correctIndexes.isNotEmpty &&
+        item.correctIndexes.every(
+          (index) => index >= 0 && index < item.options.length,
+        ),
   );
 
   factory AssessmentDeck.fromJson(Map<String, dynamic> json) => AssessmentDeck(
@@ -234,11 +272,165 @@ class SavedStudySummary {
   }
 }
 
+/// Immutable academic lineage of a question/quiz inside a published snapshot.
+/// The API re-resolves every field; this object is never an authorization grant.
+@immutable
+class PublishedAssessmentLineage {
+  const PublishedAssessmentLineage({
+    required this.organizationId,
+    required this.programId,
+    required this.classId,
+    required this.membershipId,
+    required this.enrollmentId,
+    required this.legacyEnrollmentId,
+    required this.courseId,
+    required this.courseVersionId,
+    required this.sectionId,
+    required this.sectionVersionId,
+    required this.blockId,
+    required this.blockVersionId,
+  });
+
+  final String organizationId;
+  final String programId;
+  final String classId;
+  final String membershipId;
+  final String enrollmentId;
+  final String legacyEnrollmentId;
+  final String courseId;
+  final String courseVersionId;
+  final String sectionId;
+  final String sectionVersionId;
+  final String blockId;
+  final String blockVersionId;
+
+  factory PublishedAssessmentLineage.fromJson(Map<String, dynamic> json) {
+    String field(String key) {
+      final value = json[key];
+      if (value is! String || value.trim().isEmpty) {
+        throw FormatException('Missing published assessment field: $key');
+      }
+      return value;
+    }
+
+    return PublishedAssessmentLineage(
+      organizationId: field('organization_id'),
+      programId: field('program_id'),
+      classId: field('class_id'),
+      membershipId: field('membership_id'),
+      enrollmentId: field('enrollment_id'),
+      legacyEnrollmentId: field('legacy_enrollment_id'),
+      courseId: field('course_id'),
+      courseVersionId: field('course_version_id'),
+      sectionId: field('section_id'),
+      sectionVersionId: field('section_version_id'),
+      blockId: field('block_id'),
+      blockVersionId: field('block_version_id'),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'organization_id': organizationId,
+    'program_id': programId,
+    'class_id': classId,
+    'membership_id': membershipId,
+    'enrollment_id': enrollmentId,
+    'legacy_enrollment_id': legacyEnrollmentId,
+    'course_id': courseId,
+    'course_version_id': courseVersionId,
+    'section_id': sectionId,
+    'section_version_id': sectionVersionId,
+    'block_id': blockId,
+    'block_version_id': blockVersionId,
+  };
+
+  bool sameAs(PublishedAssessmentLineage? other) =>
+      other != null && mapEquals(toJson(), other.toJson());
+}
+
+/// Device-only scope. [ownerId] and [apiUrl] isolate local persistence and are
+/// deliberately not sent as claims in the assessment payload.
+@immutable
+class PublishedAssessmentContext {
+  PublishedAssessmentContext({
+    required this.ownerId,
+    required String apiUrl,
+    required this.lineage,
+  }) : apiUrl = _normalizeApiUrl(apiUrl) {
+    if (ownerId.trim().isEmpty || this.apiUrl.isEmpty) {
+      throw const FormatException('Published assessment scope is incomplete.');
+    }
+  }
+
+  final String ownerId;
+  final String apiUrl;
+  final PublishedAssessmentLineage lineage;
+
+  factory PublishedAssessmentContext.fromJson(Map<String, dynamic> json) =>
+      PublishedAssessmentContext(
+        ownerId: json['owner_id'] as String? ?? '',
+        apiUrl: json['api_url'] as String? ?? '',
+        lineage: PublishedAssessmentLineage.fromJson(json),
+      );
+
+  Map<String, dynamic> toJson() => {
+    'owner_id': ownerId,
+    'api_url': apiUrl,
+    ...lineage.toJson(),
+  };
+
+  /// Owner is last so logout cleanup can identify scoped records without
+  /// guessing ownership of historical unscoped keys.
+  String get storageDiscriminator => jsonEncode([
+    apiUrl,
+    lineage.organizationId,
+    lineage.programId,
+    lineage.classId,
+    lineage.membershipId,
+    lineage.enrollmentId,
+    lineage.legacyEnrollmentId,
+    lineage.courseId,
+    lineage.courseVersionId,
+    lineage.sectionId,
+    lineage.sectionVersionId,
+    lineage.blockId,
+    lineage.blockVersionId,
+    ownerId,
+  ]);
+
+  /// Server-computable identity for one immutable published activity.
+  /// The device-only API URL deliberately remains outside this value.
+  String get canonicalAttemptDiscriminator => jsonEncode([
+    'published_block',
+    ownerId,
+    lineage.organizationId,
+    lineage.programId,
+    lineage.classId,
+    lineage.membershipId,
+    lineage.enrollmentId,
+    lineage.legacyEnrollmentId,
+    lineage.courseId,
+    lineage.courseVersionId,
+    lineage.sectionId,
+    lineage.sectionVersionId,
+    lineage.blockId,
+    lineage.blockVersionId,
+  ]);
+
+  bool sameAs(PublishedAssessmentContext? other) =>
+      other != null &&
+      ownerId == other.ownerId &&
+      apiUrl == other.apiUrl &&
+      lineage.sameAs(other.lineage);
+}
+
 @immutable
 class AssessmentAttempt {
   AssessmentAttempt({
     required this.id,
     String? assessmentContentId,
+    this.origin = AssessmentOrigin.practice,
+    this.publishedContext,
     required this.courseId,
     required this.topic,
     required this.mode,
@@ -254,13 +446,23 @@ class AssessmentAttempt {
     required this.isCompleted,
     required this.createdAt,
     required this.updatedAt,
-  }) : assessmentContentId = assessmentContentId ?? _contentIdForAttempt(id),
+  }) : assert(
+         origin != AssessmentOrigin.publishedBlock || publishedContext != null,
+         'Published attempts require complete local context.',
+       ),
+       assessmentContentId =
+           assessmentContentId ??
+           (origin == AssessmentOrigin.practice
+               ? _contentIdForAttempt(id)
+               : null),
        answers = Map.unmodifiable(answers),
        reviewQuestionIndexes = Set.unmodifiable(reviewQuestionIndexes),
        weakTopics = List.unmodifiable(weakTopics);
 
   final String id;
-  final String assessmentContentId;
+  final String? assessmentContentId;
+  final AssessmentOrigin origin;
+  final PublishedAssessmentContext? publishedContext;
   final String courseId;
   final String topic;
   final AssessmentMode mode;
@@ -290,6 +492,8 @@ class AssessmentAttempt {
     return AssessmentAttempt(
       id: id,
       assessmentContentId: assessmentContentId,
+      origin: origin,
+      publishedContext: publishedContext,
       courseId: courseId,
       topic: topic,
       mode: mode,
@@ -312,6 +516,9 @@ class AssessmentAttempt {
   Map<String, dynamic> toJson() => {
     'id': id,
     'assessmentContentId': assessmentContentId,
+    'origin': origin.apiValue,
+    if (publishedContext != null)
+      'publishedContext': publishedContext!.toJson(),
     'courseId': courseId,
     'topic': topic,
     'mode': mode.name,
@@ -351,6 +558,15 @@ class AssessmentAttempt {
       final deckJson = json['deck'];
       if (deckJson is! Map<String, dynamic>) return null;
       final deck = AssessmentDeck.fromJson(deckJson);
+      final origin = AssessmentOriginValue.fromApi(json['origin']);
+      final rawPublishedContext = json['publishedContext'];
+      final publishedContext = rawPublishedContext is Map<String, dynamic>
+          ? PublishedAssessmentContext.fromJson(rawPublishedContext)
+          : null;
+      if (origin == AssessmentOrigin.publishedBlock &&
+          publishedContext == null) {
+        return null;
+      }
 
       final rawAnswers = json['answers'];
       final answers = <int, int>{};
@@ -398,6 +614,8 @@ class AssessmentAttempt {
             ? id
             : '${courseId}_${mode.name}_${createdAt.millisecondsSinceEpoch}',
         assessmentContentId: json['assessmentContentId'] as String?,
+        origin: origin,
+        publishedContext: publishedContext,
         courseId: courseId.isNotEmpty ? courseId : topic,
         topic: topic.isNotEmpty ? topic : courseId,
         mode: mode,
@@ -419,6 +637,9 @@ class AssessmentAttempt {
     }
   }
 }
+
+String _normalizeApiUrl(String value) =>
+    value.trim().replaceFirst(RegExp(r'/+$'), '');
 
 String _contentIdForAttempt(String attemptId) {
   final safe = attemptId.replaceAll(RegExp(r'[^A-Za-z0-9_.:-]'), '_');

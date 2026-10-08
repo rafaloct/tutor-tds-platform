@@ -15,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import access_claims
+from app.config import Settings
 from app.course_editor import ensure_legacy_course_version, legacy_version_id, router
 from app.database import Database
 from app.models import Classroom, Course, CourseVersion, CourseVersionTransition, Institution, MediaAsset, Program, ProgramCourse, ProgramMembership, User
@@ -120,6 +121,10 @@ def editor(tmp_path: Path):
     command.upgrade(config, "head")
     app = FastAPI()
     app.state.database = database
+    app.state.settings = Settings(
+        database_url=str(database.engine.url),
+        allowed_origins=(),
+    )
     app.include_router(router)
 
     def claims(x_user: str = Header(default="creator")):
@@ -386,6 +391,64 @@ def test_incomplete_reader_content_can_save_but_cannot_submit(editor, message):
         record = session.get(CourseVersion, saved["version_id"])
         assert record.status == "draft" and record.revision == saved["revision"]
         assert not session.get(Course, "course").active
+
+
+@pytest.mark.parametrize(
+    "section",
+    [
+        {
+            "id": "module",
+            "title": "T" * 241,
+            "messages": [{"type": "bot", "content": "Texto"}],
+        },
+        {
+            "id": "module",
+            "title": " Módulo ",
+            "messages": [{"type": "bot", "content": "Texto"}],
+        },
+        {
+            "id": "module",
+            "title": "Módulo",
+            "messages": [
+                {
+                    "type": "quiz",
+                    "content": "Pergunta",
+                    "options": [
+                        {"label": f"Opção {index}", "isCorrect": index == 0}
+                        for index in range(21)
+                    ],
+                }
+            ],
+        },
+        {
+            "id": "module",
+            "title": "Módulo",
+            "messages": [
+                {
+                    "type": "question",
+                    "content": "Pergunta",
+                    "options": [{"label": "A" * 501}, {"label": "B"}],
+                }
+            ],
+        },
+    ],
+)
+def test_dynamic_activity_publish_limits_match_attempt_api(editor, section):
+    client, _ = editor
+    draft = create(client)
+    saved = client.patch(
+        "/courses/course",
+        json={
+            "version_id": draft["version_id"],
+            "expected_revision": draft["revision"],
+            "title": "Curso",
+            "author": "TDS",
+            "sections": [section],
+        },
+    )
+    assert saved.status_code == 200, saved.text
+    rejected = action(client, saved.json(), "submit")
+    assert rejected.status_code == 422, rejected.text
 
 
 def test_publish_revalidates_reviewed_content_before_changing_public_projection(editor):

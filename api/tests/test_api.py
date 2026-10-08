@@ -9,7 +9,11 @@ from app.config import Settings
 from app.models import Base, Course
 
 
-def make_client() -> tuple[TestClient, object]:
+def make_client(
+    *,
+    learning_context_enabled: bool = False,
+    dynamic_activity_enabled: bool = False,
+) -> tuple[TestClient, object]:
     app = create_app(
         database_url="sqlite+pysqlite:///:memory:",
         settings=Settings(
@@ -17,6 +21,8 @@ def make_client() -> tuple[TestClient, object]:
             allowed_origins=(),
             jwt_secret="j" * 32,
             cpf_pepper="p" * 32,
+            learning_context_enabled=learning_context_enabled,
+            dynamic_activity_enabled=dynamic_activity_enabled,
         ),
     )
     Base.metadata.create_all(app.state.database.engine)
@@ -141,3 +147,78 @@ def test_course_detail_hides_missing_and_inactive_records() -> None:
     assert response.json()["thumbnailUrl"] == "cover.png"
     assert draft.status_code == 404
     assert missing.status_code == 404
+
+
+def test_public_course_projection_hides_answer_keys_only_when_wave2b_is_enabled(
+) -> None:
+    content = {
+        "sections": [
+            {
+                "id": "module",
+                "title": "Módulo",
+                "messages": [
+                    {
+                        "id": "quiz",
+                        "type": "quiz",
+                        "content": "Qual?",
+                        "feedback": "Reservado",
+                        "explanation": "Explicação",
+                        "options": [
+                            {
+                                "id": "a",
+                                "label": "A",
+                                "value": "a",
+                                "isCorrect": True,
+                                "feedback": "Correta",
+                            },
+                            {"label": "B", "isCorrect": False},
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+    protected_client, protected_app = make_client(
+        learning_context_enabled=True,
+        dynamic_activity_enabled=True,
+    )
+    legacy_client, legacy_app = make_client(
+        learning_context_enabled=True,
+        dynamic_activity_enabled=False,
+    )
+    for app in (protected_app, legacy_app):
+        with Session(app.state.database.engine) as session:
+            session.add(
+                Course(
+                    id="course",
+                    title="Curso",
+                    author="TDS",
+                    active=True,
+                    content=content,
+                )
+            )
+            session.commit()
+
+    with protected_client:
+        listed = protected_client.get("/courses")
+        detailed = protected_client.get("/courses/course")
+        with Session(protected_app.state.database.engine) as session:
+            stored_answer = session.get(Course, "course").content["sections"][0][
+                "messages"
+            ][0]["options"][0]["isCorrect"]
+    assert listed.status_code == detailed.status_code == 200
+    for projection in (listed.json()["courses"][0], detailed.json()):
+        quiz = projection["sections"][0]["messages"][0]
+        assert quiz["options"] == [
+            {"id": "a", "label": "A"},
+            {"label": "B"},
+        ]
+        assert not {"feedback", "explanation"} & set(quiz)
+        assert not {"value", "isCorrect", "feedback"} & set(quiz["options"][0])
+    assert stored_answer is True
+
+    with legacy_client:
+        legacy = legacy_client.get("/courses/course")
+    legacy_quiz = legacy.json()["sections"][0]["messages"][0]
+    assert legacy_quiz["feedback"] == "Reservado"
+    assert legacy_quiz["options"][0]["isCorrect"] is True

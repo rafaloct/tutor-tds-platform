@@ -18,6 +18,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
     false,
+    text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -206,6 +207,10 @@ class AssessmentContentRecord(Base):
     __tablename__ = "assessment_contents"
     __table_args__ = (
         CheckConstraint(
+            "origin IN ('practice', 'published_block')",
+            name="ck_assessment_content_origin",
+        ),
+        CheckConstraint(
             "mode IN ('quiz', 'exam')", name="ck_assessment_content_mode"
         ),
         CheckConstraint(
@@ -215,6 +220,9 @@ class AssessmentContentRecord(Base):
     )
 
     id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    origin: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="practice", server_default="practice"
+    )
     owner_id: Mapped[str] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
@@ -236,6 +244,15 @@ class AssessmentContentRecord(Base):
 class AssessmentAttemptRecord(Base):
     __tablename__ = "assessment_attempts"
     __table_args__ = (
+        ForeignKeyConstraint(
+            ["course_version_id", "course_id"],
+            ["course_versions.id", "course_versions.course_id"],
+            name="fk_assessment_attempt_course_version",
+        ),
+        CheckConstraint(
+            "origin IN ('practice', 'published_block')",
+            name="ck_assessment_attempt_origin",
+        ),
         CheckConstraint("revision >= 1", name="ck_assessment_attempt_revision"),
         CheckConstraint("current_index >= 0", name="ck_assessment_attempt_current_index"),
         CheckConstraint("remaining_seconds >= 0", name="ck_assessment_attempt_remaining"),
@@ -249,6 +266,39 @@ class AssessmentAttemptRecord(Base):
             "NOT completed OR remaining_seconds = 0",
             name="ck_assessment_attempt_completed_remaining",
         ),
+        CheckConstraint(
+            "(origin = 'practice' AND organization_id IS NULL AND program_id IS NULL "
+            "AND class_id IS NULL AND membership_id IS NULL AND enrollment_id IS NULL "
+            "AND legacy_enrollment_id IS NULL AND course_version_id IS NULL "
+            "AND section_id IS NULL AND section_version_id IS NULL AND block_id IS NULL "
+            "AND block_version_id IS NULL) OR "
+            "(origin = 'published_block' AND organization_id IS NOT NULL AND program_id IS NOT NULL "
+            "AND class_id IS NOT NULL AND membership_id IS NOT NULL AND enrollment_id IS NOT NULL "
+            "AND legacy_enrollment_id IS NOT NULL AND course_version_id IS NOT NULL "
+            "AND section_id IS NOT NULL AND section_version_id IS NOT NULL AND block_id IS NOT NULL "
+            "AND block_version_id IS NOT NULL)",
+            name="ck_assessment_attempt_context_complete",
+        ),
+        Index(
+            "ix_assessment_attempts_context_owner",
+            "owner_id",
+            "class_id",
+            "course_version_id",
+            "updated_at",
+        ),
+        Index(
+            "uq_assessment_attempts_published_block",
+            "owner_id",
+            "enrollment_id",
+            "course_version_id",
+            "section_id",
+            "section_version_id",
+            "block_id",
+            "block_version_id",
+            unique=True,
+            sqlite_where=text("origin = 'published_block'"),
+            postgresql_where=text("origin = 'published_block'"),
+        ),
     )
 
     attempt_id: Mapped[str] = mapped_column(String(180), primary_key=True)
@@ -261,6 +311,28 @@ class AssessmentAttemptRecord(Base):
     assessment_content_id: Mapped[str | None] = mapped_column(
         ForeignKey("assessment_contents.id")
     )
+    origin: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="practice", server_default="practice"
+    )
+    organization_id: Mapped[str | None] = mapped_column(
+        ForeignKey("institutions.id")
+    )
+    program_id: Mapped[str | None] = mapped_column(ForeignKey("programs.id"))
+    class_id: Mapped[str | None] = mapped_column(ForeignKey("classes.id"))
+    membership_id: Mapped[str | None] = mapped_column(
+        ForeignKey("cohort_memberships.id")
+    )
+    enrollment_id: Mapped[str | None] = mapped_column(
+        ForeignKey("class_enrollments.context_id")
+    )
+    legacy_enrollment_id: Mapped[str | None] = mapped_column(
+        ForeignKey("enrollments.id")
+    )
+    course_version_id: Mapped[str | None] = mapped_column(String(36))
+    section_id: Mapped[str | None] = mapped_column(String(120))
+    section_version_id: Mapped[str | None] = mapped_column(String(36))
+    block_id: Mapped[str | None] = mapped_column(String(180))
+    block_version_id: Mapped[str | None] = mapped_column(String(36))
     topic: Mapped[str] = mapped_column(String(240), nullable=False)
     mode: Mapped[str] = mapped_column(String(16), nullable=False)
     revision: Mapped[int] = mapped_column(Integer, nullable=False)

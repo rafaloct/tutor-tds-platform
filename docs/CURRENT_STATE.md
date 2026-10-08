@@ -1,5 +1,129 @@
 # CURRENT STATE
 
+## 2026-10-07 — linha local de RC convergida, promoção ainda bloqueada
+
+A linha local de release engineering preserva `origin/staging` e compõe, sem
+push ou merge remoto, as correções revisadas dos PRs #160, #149 e #148 e a
+fatia seletiva do #88. Isso fecha a renovação indevida de sessão em desafio de
+check-in rejeitado, preserva no compose a configuração candidata de certificado,
+fixa IDs de CourseVersion nas nove cartilhas embarcadas e incorpora somente o
+runner sintético, seu manifesto de exemplo, testes e matriz reconciliada. Nenhum
+workflow, monitor, alerta, deploy ou secret do #88 foi instalado.
+
+O código convergido passou 580/580 testes Flutter, 592 testes API com 30 gates
+PostgreSQL opt-in ignorados sem URL, 17/17 testes de observabilidade e análise
+Dart sem issues. Os quatro arquivos PostgreSQL opt-in continuam prova separada:
+devem ser repetidos no SHA congelado antes de classificar o novo artefato como
+RC físico. O AAB/APK assinado no SHA `c83a95f` é intermediário e não representa
+esta linha convergida; hashes do novo build pertencem à evidência externa do SHA
+congelado, evitando um commit circular no próprio manifesto de fonte.
+
+Configuração do RC enxuto: API
+`https://ead.ipexdesenvolvimento.cloud/tutor-api`, gateway
+`https://tutor-tds-gateway.tdsipex.workers.dev` e todas as flags de risco
+desligadas (`REMOTE_CATALOG`, contexto, outbox, jornada, atividade dinâmica,
+identidade assinada de suporte e push). O candidato de certificado também fica
+desligado; URL e HMAC só são exigidos no staging quando esse gate for ativado.
+Não é necessário criar secret para o RC enxuto.
+
+O runner read-only observou HTTPS/status/latência/TLS saudáveis no Cloud staging,
+API produtiva e gateway. Isso não fecha compatibilidade: Cloud staging reporta
+schema `20261003_0024`, produção reporta `20261005_0028`, ambos com
+`compatibility_verified=false`, enquanto o candidato local adiciona `0030`.
+Logo, a Wave 2B permanece com `DYNAMIC_ACTIVITY_ENABLED=false` e não pode ser
+validada contra staging sem deploy/migration explicitamente autorizados.
+
+Em situação real, suporte textual app→Chatwoot→app passou e o gateway do Tutor
+respondeu HTTP 200 a uma pergunta sintética de aluno em 19,965 s, com resposta
+educacional não vazia e sem credencial no cliente. A captura da resposta dentro
+do app não foi aprovada: em duas tentativas o emulador entrou em ANR do System UI
+e Permission Controller ao pedir microfone; a regra de duas tentativas encerrou
+o ensaio. Vídeo/RealtimeKit continua desconectado e sem prova bilateral. Assim,
+as telas já capturadas de login, Home, turmas e suporte são coerentes no recorte,
+mas não constituem aceite visual integral de IA, atividade 2B, check-in e vídeo.
+
+`PRODUCTION_RELEASE_READY=false`. Um APK/AAB com flags desligadas pode servir a
+beta controlado após build assinado e custodiado no SHA exato, mas publicação
+ampla continua bloqueada por compatibilidade/schema, prova Android da Wave 2B se
+ela for ativada, RealtimeKit se vídeo for requisito e gates normais de
+branch/tag/restore/promoção. Google Auth/Supabase e a frente Drupal não são
+dependências para este RC enxuto e permanecem trilhas próprias.
+
+## 2026-10-07 — candidato local Dynamic Learning 2B
+
+Sobre a base `fbb4b6a`, a fatia 2B agora possui candidato local executável com a
+migration aditiva `20261007_0030`: blocos publicados `question`/`quiz` preservam
+IDs e versões, reutilizam `assessment_attempts`/`assessment_contents`, resolvem o
+LearningContext completo e obtêm gabarito exclusivamente do snapshot imutável de
+CourseVersion no servidor. A tentativa é persistida localmente antes de a tela
+avançar; fila/cache ficam escopados por dono, API, turma, matrícula, edição,
+seção e bloco. Conclusão cria `assessment_completed` determinístico com
+`active_seconds=0` e `validated_seconds=0`; não concede horas, frequência,
+matrícula ou certificado. Leitura da própria tentativa revalida o contexto e a
+visão pedagógica fica restrita a professor/admin da turma exata; monitor e pessoa
+externa são negados.
+
+A identidade da tentativa publicada é canônica nos dois lados: SHA-256 do array
+JSON compacto `published_block`, dono, organização, programa, turma, membership,
+matrículas contextual/legada, curso, edição, seção/versão e bloco/versão; a URL
+da API não participa da identidade. O servidor exige esse ID e a migration cria
+unicidade parcial por dono/contexto/bloco, fechando corrida entre dispositivos.
+`assessment_contents.origin` separa `practice` de `published_block`, o namespace
+`published-block:` é reservado e a migration recusa colisão legada sem mutar o
+banco. Projeções públicas/do aluno removem gabarito, `isCorrect`, `value`,
+feedback e explicações; payloads de `assessment_completed` não carregam IDs de
+pessoa/matrícula. Relógio futuro recebe erro estruturado e só permite reparar
+`updated_at`, mantendo tentativa, revisão, respostas e contexto idênticos.
+
+`DYNAMIC_ACTIVITY_ENABLED=false` é o padrão na API, Flutter, exemplos e gates de
+produção, e depende também de `LEARNING_CONTEXT_ENABLED`. API, Flutter e o
+runner sintético foram verificados localmente; a suíte API completa coletou 620
+casos: 590 passaram e 30 gates PostgreSQL opt-in foram ignorados sem URL. A
+suíte Flutter passou 567/567 e a análise estática terminou sem problemas. Isso
+valida o candidato e o contrato do runner, não um ensaio contra staging. Somente
+a branch local do candidato é alterada; não houve push, merge, deploy, alteração
+de staging/produção ou mudança de secret nesta fatia.
+
+O gate PostgreSQL opt-in foi executado separadamente no LARGeo contra uma
+instância descartável PostgreSQL 17.11 em loopback, no commit
+`de9ec577415bb6114d502191713816f78931313d`: 8/8 cenários passaram, incluindo
+upgrade vazio/downgrade/reupgrade, upgrades de 0024 e 0029, preservação do
+legado, proveniência `published_block` e unicidade por dono/contexto/bloco. Essa
+prova valida a migration física; não equivale a deploy ou aceite de staging.
+
+O estado remoto permanece separado: o Cloud canônico foi observado em `0024` e
+a VPS em `0029`; ambos reportaram `compatibility_verified=false` e não forneceram
+o SHA exato implantado. Portanto a migration `0030` existe somente no candidato
+local. Snapshot direto do Supabase em `2026-10-07T21:46:50Z`: 46/46 tabelas com
+RLS habilitado, zero policies, zero grants diretos para `anon`/`authenticated` e
+grants para `service_role`; default ACLs amplas para objetos futuros continuam
+inseguras e o toggle da Data API não foi verificado. Um alerta inicial do
+connector foi inconsistente com a leitura direta e não é evidência.
+
+Próximo gate: `dynamic_activity_contextual_android_e2e`, pendente e obrigatório
+antes de ligar a flag. Duas abordagens locais de harness foram encerradas pela
+regra de duas tentativas e não contam como evidência: a primeira travou na
+sincronização do binding; a substituição prebuilt compilou/instalou o APK e
+encontrou os controles na árvore, mas o display do emulador estava apagado, a
+captura ficou preta e o toque não chegou ao app. Nenhuma tentativa foi criada.
+A fronteira responsável observada é o preflight de tela acordada/desbloqueada do
+executor ADB, não uma falha demonstrada do domínio. Os harnesses falhos não são
+versionados. O gate não bloqueia um build de produção enquanto a flag continuar
+false. O runner remoto exige fixture sintética pré-provisionada, contas
+sintéticas student/teacher/admin/monitor/outsider e o host HTTPS canônico; a
+única credencial possivelmente nova ou a confirmar é a conta sintética outsider,
+caso ela ainda não exista. Nenhum secret de produção é necessário. Não há aceite
+de STAGING ou PRODUCTION para 2B.
+
+O build de release deve regenerar o tooling de plataforma depois dos testes.
+Por isso, `tooling/build_production.ps1` conserva `--no-pub` nos gates de análise
+e testes, mas não no `flutter build appbundle`: um registrant ignorado e obsoleto
+pode ainda citar o plugin dev `integration_test`, que corretamente não participa
+do classpath release. Não mover esse plugin para dependências produtivas nem
+versionar arquivos gerados para contornar o problema. Antes de empacotar, o
+wrapper executa `pub get --enforce-lockfile`; depois confirma que o hash de
+`pubspec.lock` e a árvore Git continuam idênticos ao SHA candidato.
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre

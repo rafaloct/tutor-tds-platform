@@ -6,6 +6,31 @@ mesmo estado. O Git local (`codex/onda-0-consolidacao`, HEAD `f3ee6f4`) ainda
 não tem remote/tags e contém mudanças/evidências não commitadas. Nenhum AAB ou
 deploy é autorizado por este documento.
 
+## Snapshot de compatibilidade — 07/10/2026
+
+O candidato Dynamic Learning 2B está somente local sobre `fbb4b6a`, com head
+Alembic `20261007_0030` e `DYNAMIC_ACTIVITY_ENABLED=false`. API, Flutter e runner
+foram verificados localmente. A migration passou 8/8 cenários opt-in em uma
+instância descartável PostgreSQL 17.11 do LARGeo no commit `de9ec577415b`.
+Não houve push, merge, deploy, alteração de secret, staging ou produção.
+
+| Backend observado | Revisão | compatibility_verified | SHA exato implantado | Consequência |
+| --- | --- | --- | --- | --- |
+| Cloud canônico | `20261003_0024` | `false` | ausente | não executar 2B; schema anterior a 0030 |
+| VPS IPEX | `20261006_0029` | `false` | ausente | não executar 2B; schema anterior a 0030 |
+
+Snapshot direto do Supabase em `2026-10-07T21:46:50Z`: RLS ativo em 46/46
+tabelas, zero policies, zero grants diretos para `anon`/`authenticated` e grants
+para `service_role`. Default ACLs amplas para objetos futuros são risco pendente;
+o toggle da Data API não foi verificado. Um aviso inicial do connector foi
+inconsistente com essa leitura direta e não deve ser usado como evidência.
+
+O gate `dynamic_activity_contextual_android_e2e` é obrigatório antes de ativar
+a flag, porém não bloqueia geração produtiva enquanto ela permanecer false. O
+runner depende de fixture sintética pré-provisionada e identidades sintéticas
+student/teacher/admin/monitor/outsider. Somente a conta outsider pode precisar
+ser criada ou confirmada, caso ausente; nenhum secret de produção é necessário.
+
 | Ambiente | Cliente | API e dados | Permitido | Proibido |
 | --- | --- | --- | --- | --- |
 | DEVELOPMENT | Flutter tests/mocks e API local; APK debug `.dev` ainda possui gate legado restrito a staging | localhost, `10.0.2.2`, PostgreSQL local Docker, SQLite temporário da API, outbox/cache no sandbox do app | iterar localmente onde permitido | usar em AAB/Play ou afirmar persistência produtiva |
@@ -27,9 +52,10 @@ estados diferentes; nunca inferir deploy a partir do Git local.
 | --- | --- | --- | --- |
 | API development | `Settings.from_environment`, `DATABASE_URL` explícita ou `sqlite+pysqlite:///./tutor_tds_local.db` somente fora de production; testes usam SQLite em tmp/memória | arquivo local descartável | jamais promover como DB principal |
 | Compose dev | `api/docker-compose.yml`: PostgreSQL 16, volume local `tutor_tds_api_db`, `DATABASE_URL` interna | volume Docker no computador de desenvolvimento | não é produção |
+| Gate PostgreSQL Wave 2B | PostgreSQL 17.11 descartável, loopback `127.0.0.1:15439`, role exclusiva de QA | cluster temporário no LARGeo; cada teste cria e remove seu próprio banco | 8/8 no commit `de9ec577415b`; não é staging nem fonte persistente |
 | Flutter em cada aparelho | `getDatabasesPath()/tds_learning_outbox.db`, SharedPreferences e secure storage | sandbox do dispositivo; outbox/retomada/cache | fila não autoriza matrícula; sincronizar quando feature e consentimento permitirem |
-| Staging Cloud | FastAPI Cloud com `DATABASE_URL` do PostgreSQL Supabase isolado; migration 0020 aplicada; Data API não exposta | gerenciada pelo provedor; backup QA verificado em 01/10 | somente dados sintéticos |
-| Produção VPS | compose define `DATABASE_URL=postgresql+psycopg://...@db:5432/tutor_tds`; PostgreSQL 16 em volume nomeado `tutor_tds_api_db` | volume da VPS; existência runtime/restore atual não revalidada nesta rodada | backup fora da VPS e restore drill bloqueantes |
+| Staging Cloud | FastAPI Cloud com `DATABASE_URL` do PostgreSQL Supabase isolado; revisão canônica observada `0024`; exposição Data API não verificada no snapshot direto de 07/10 | gerenciada pelo provedor; backup QA verificado em 01/10 | somente dados sintéticos; 0030 não implantada |
+| Produção VPS | compose define `DATABASE_URL=postgresql+psycopg://...@db:5432/tutor_tds`; revisão observada `0029`; PostgreSQL 16 em volume nomeado `tutor_tds_api_db` | volume da VPS; SHA implantado/compatibilidade não comprovados nesta rodada | backup fora da VPS e restore drill bloqueantes; 0030 não implantada |
 | Legado | PostgreSQL/pgvector compartilhado, Sheets, Cloudflare KV de certificados, acervo Drive | provedores distintos | não migrar/inferir equivalências automaticamente |
 
 `api/app/config.py` agora exige `DATABASE_URL` PostgreSQL explícita em staging
@@ -65,7 +91,8 @@ falhou para o estado presente; não abrir/editar secrets para forçar aprovaçã
 O validador Dart, o verificador de release e `preReleaseBuild` do Gradle aceitam
 somente endpoints IPEX/Worker exatos e flags `REMOTE_CATALOG_ENABLED`,
 `LEARNING_CONTEXT_ENABLED`, `DURABLE_LEARNING_OUTBOX_ENABLED`,
-`JOURNEY_TRACEABILITY_ENABLED`, `SIGNED_SUPPORT_IDENTITY` explicitamente false.
+`JOURNEY_TRACEABILITY_ENABLED`, `DYNAMIC_ACTIVITY_ENABLED`,
+`SIGNED_SUPPORT_IDENTITY` explicitamente false.
 A política opt-in que une nove assets ao cache remoto pode ressuscitar itens
 retirados editorialmente; até decisão, `REMOTE_CATALOG_ENABLED=true` bloqueia
 produção mesmo após o PASS isolado em staging.
@@ -81,6 +108,13 @@ confundir o pacote debug instalado com um candidato Play. STAGING aponta só ao
 host Cloud aprovado. O comando futuro único é `tooling/build_production.ps1`
 com Flutter 3.44.9 explícito e `PublishedVersionCode` comprovado. Não o executar
 sem checklist em `PRODUCTION_READINESS.md`; `-PreflightOnly` nunca cria AAB.
+O passo final de `flutter build appbundle` não usa `--no-pub`: ele precisa
+regenerar o registro de plugins depois dos testes, mantendo `integration_test`
+somente como dependência dev e fora do classpath release. O lockfile continua
+obrigatório; não versionar `GeneratedPluginRegistrant.java` nem promover plugin
+de teste para dependência produtiva.
+O wrapper executa `pub get --enforce-lockfile` e, antes de criar o manifesto,
+rejeita qualquer mudança no hash de `pubspec.lock` ou na árvore Git.
 
 Contrato proposto de `GET /version` (ainda ausente na produção atual):
 `api_version`, `schema_version` (revision Alembic aplicada ao DB conectado),

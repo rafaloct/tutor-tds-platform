@@ -22,6 +22,8 @@ from .models import Course, CourseVersion, CourseVersionTransition, MediaAsset, 
 router = APIRouter(tags=["course-editor"])
 EDITOR_ROLES = {"teacher", "creator", "coordinator", "admin"}
 REVIEWER_ROLES = {"coordinator", "admin"}
+MAX_DYNAMIC_SECTION_TITLE = 240
+MAX_DYNAMIC_OPTIONS = 20
 
 
 class CourseMaterial(BaseModel):
@@ -163,6 +165,41 @@ def snapshot_content(course_id: str, title: str, author: str, content: dict[str,
     return result
 
 
+def learner_course_projection(content: dict[str, Any]) -> dict[str, Any]:
+    """Hide server-owned assessment answers without mutating the edition."""
+    result = deepcopy(content)
+    sections = result.get("sections")
+    if not isinstance(sections, list):
+        return result
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        messages = section.get("messages")
+        if not isinstance(messages, list):
+            continue
+        for message in messages:
+            if not isinstance(message, dict) or message.get("type") not in {
+                "question",
+                "quiz",
+            }:
+                continue
+            message.pop("feedback", None)
+            message.pop("explanation", None)
+            options = message.get("options")
+            if not isinstance(options, list):
+                continue
+            projected: list[dict[str, Any]] = []
+            for option in options:
+                if not isinstance(option, dict):
+                    continue
+                safe = {"label": option.get("label")}
+                if isinstance(option.get("id"), str):
+                    safe["id"] = option["id"]
+                projected.append(safe)
+            message["options"] = projected
+    return result
+
+
 def _component_version(course_id: str, payload: dict[str, Any]) -> str:
     value = {key: val for key, val in payload.items() if key != "version_id"}
     digest = hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
@@ -177,6 +214,18 @@ def validate_publishable_content(content: dict[str, Any]) -> None:
     for section_index, section in enumerate(sections, start=1):
         if not isinstance(section, dict) or not isinstance(section.get("messages"), list) or not section["messages"]:
             raise HTTPException(422, f"Módulo {section_index}: inclua pelo menos uma mensagem.")
+        section_title = section.get("title")
+        if (
+            not isinstance(section_title, str)
+            or not section_title.strip()
+            or section_title != section_title.strip()
+            or len(section_title.strip()) > MAX_DYNAMIC_SECTION_TITLE
+            or any(ord(character) < 32 for character in section_title)
+        ):
+            raise HTTPException(
+                422,
+                f"Módulo {section_index}: título deve ter até {MAX_DYNAMIC_SECTION_TITLE} caracteres sem controles.",
+            )
         for message_index, message in enumerate(section["messages"], start=1):
             location = f"Módulo {section_index}, mensagem {message_index}"
             if not isinstance(message, dict) or not isinstance(message.get("type"), str) or message["type"] not in {"bot", "question", "quiz", "user"}:
@@ -192,8 +241,19 @@ def validate_publishable_content(content: dict[str, Any]) -> None:
                 options = []
             if not isinstance(options, list) or len(options) < minimum:
                 raise HTTPException(422, f"{location}: inclua pelo menos {minimum} opção(ões).")
+            if message["type"] in {"question", "quiz"} and len(options) > MAX_DYNAMIC_OPTIONS:
+                raise HTTPException(
+                    422,
+                    f"{location}: inclua no máximo {MAX_DYNAMIC_OPTIONS} opções.",
+                )
             for option in options:
-                if not isinstance(option, dict) or not isinstance(option.get("label"), str) or not option["label"].strip():
+                if (
+                    not isinstance(option, dict)
+                    or not isinstance(option.get("label"), str)
+                    or not option["label"].strip()
+                    or len(option["label"].strip()) > 500
+                    or any(ord(character) < 32 for character in option["label"])
+                ):
                     raise HTTPException(422, f"{location}: cada opção exige rótulo não vazio.")
                 for field in ("value", "feedback"):
                     if option.get(field) is not None and not isinstance(option[field], str):

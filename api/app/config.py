@@ -34,6 +34,7 @@ class Settings:
     certificate_candidate_url: str | None = None
     certificate_candidate_secret: str | None = None
     learning_context_enabled: bool = False
+    dynamic_activity_enabled: bool = False
     journey_traceability_enabled: bool = False
     minimum_supported_app_version: str = "1.2.0+11"
     compatibility_verified: bool = False
@@ -102,6 +103,7 @@ class Settings:
             certificate_candidate_url=os.getenv("CERTIFICATE_CANDIDATE_URL"),
             certificate_candidate_secret=os.getenv("CERTIFICATE_CANDIDATE_SECRET"),
             learning_context_enabled=os.getenv("LEARNING_CONTEXT_ENABLED", "false").lower() in {"1", "true", "yes"},
+            dynamic_activity_enabled=os.getenv("DYNAMIC_ACTIVITY_ENABLED", "false").lower() in {"1", "true", "yes"},
             journey_traceability_enabled=os.getenv("JOURNEY_TRACEABILITY_ENABLED", "false").lower() in {"1", "true", "yes"},
             minimum_supported_app_version=os.getenv("MINIMUM_SUPPORTED_APP_VERSION", "1.2.0+11").strip(),
             compatibility_verified=os.getenv("COMPATIBILITY_VERIFIED", "false").lower() in {"1", "true", "yes"},

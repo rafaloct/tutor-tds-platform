@@ -106,6 +106,7 @@ fun validateReleaseProductionDefines(defines: Map<String, String>) {
     val inactiveFlags = setOf(
         "REMOTE_CATALOG_ENABLED", "LEARNING_CONTEXT_ENABLED",
         "DURABLE_LEARNING_OUTBOX_ENABLED", "JOURNEY_TRACEABILITY_ENABLED",
+        "DYNAMIC_ACTIVITY_ENABLED",
         "SIGNED_SUPPORT_IDENTITY", "PUSH_NOTIFICATIONS_ENABLED",
     )
     // Metadados que o Flutter tool sempre injeta em -Pdart-defines; não são

@@ -17,6 +17,8 @@ extension AssessmentSyncStatusLabel on AssessmentSyncStatus {
 class AssessmentSyncPayload {
   AssessmentSyncPayload({
     this.assessmentContentId,
+    this.origin = AssessmentOrigin.practice,
+    this.publishedLineage,
     required this.courseId,
     required this.topic,
     required this.mode,
@@ -28,7 +30,10 @@ class AssessmentSyncPayload {
     required this.completed,
     required this.score,
     required this.updatedAt,
-  }) : answers = Map.unmodifiable(answers),
+  }) : assert(
+         origin != AssessmentOrigin.publishedBlock || publishedLineage != null,
+       ),
+       answers = Map.unmodifiable(answers),
        marked = Set.unmodifiable(marked);
 
   factory AssessmentSyncPayload.fromAttempt(
@@ -49,6 +54,8 @@ class AssessmentSyncPayload {
         .toSet();
     return AssessmentSyncPayload(
       assessmentContentId: attempt.assessmentContentId,
+      origin: attempt.origin,
+      publishedLineage: attempt.publishedContext?.lineage,
       courseId: attempt.courseId,
       topic: attempt.topic.trim().isEmpty ? attempt.courseId : attempt.topic,
       mode: attempt.mode,
@@ -77,8 +84,14 @@ class AssessmentSyncPayload {
       }
     }
     final modeName = json['mode'] as String?;
+    final origin = AssessmentOriginValue.fromApi(json['origin']);
+    final publishedLineage = origin == AssessmentOrigin.publishedBlock
+        ? PublishedAssessmentLineage.fromJson(json)
+        : null;
     return AssessmentSyncPayload(
       assessmentContentId: json['assessment_content_id'] as String?,
+      origin: origin,
+      publishedLineage: publishedLineage,
       courseId: json['course_id'] as String? ?? '',
       topic: json['topic'] as String? ?? '',
       mode: AssessmentMode.values.firstWhere(
@@ -102,6 +115,8 @@ class AssessmentSyncPayload {
   }
 
   final String? assessmentContentId;
+  final AssessmentOrigin origin;
+  final PublishedAssessmentLineage? publishedLineage;
   final String courseId;
   final String topic;
   final AssessmentMode mode;
@@ -117,6 +132,10 @@ class AssessmentSyncPayload {
   Map<String, dynamic> toJson() => {
     if (assessmentContentId != null)
       'assessment_content_id': assessmentContentId,
+    if (origin == AssessmentOrigin.publishedBlock) ...{
+      'origin': origin.apiValue,
+      ...publishedLineage!.toJson(),
+    },
     'course_id': courseId,
     'topic': topic,
     'mode': mode.name,
@@ -135,7 +154,10 @@ class AssessmentSyncPayload {
   };
 
   bool hasSameState(AssessmentSyncPayload other) =>
-      assessmentContentId == other.assessmentContentId &&
+      _sameContentIdentity(other) &&
+      origin == other.origin &&
+      (origin == AssessmentOrigin.practice ||
+          publishedLineage!.sameAs(other.publishedLineage)) &&
       courseId == other.courseId &&
       topic == other.topic &&
       mode == other.mode &&
@@ -157,8 +179,22 @@ class AssessmentSyncPayload {
       hasSameState(request) &&
       score >= 0;
 
+  bool _sameContentIdentity(AssessmentSyncPayload other) {
+    if (origin == AssessmentOrigin.publishedBlock &&
+        other.origin == AssessmentOrigin.publishedBlock) {
+      // The published snapshot is authoritative. The request omits this ID and
+      // the server returns the content record it resolved for the block.
+      return assessmentContentId == null ||
+          other.assessmentContentId == null ||
+          assessmentContentId == other.assessmentContentId;
+    }
+    return assessmentContentId == other.assessmentContentId;
+  }
+
   AssessmentSyncPayload withRevision(int value) => AssessmentSyncPayload(
     assessmentContentId: assessmentContentId,
+    origin: origin,
+    publishedLineage: publishedLineage,
     courseId: courseId,
     topic: topic,
     mode: mode,
@@ -170,6 +206,23 @@ class AssessmentSyncPayload {
     completed: completed,
     score: score,
     updatedAt: updatedAt,
+  );
+
+  AssessmentSyncPayload withUpdatedAt(DateTime value) => AssessmentSyncPayload(
+    assessmentContentId: assessmentContentId,
+    origin: origin,
+    publishedLineage: publishedLineage,
+    courseId: courseId,
+    topic: topic,
+    mode: mode,
+    revision: revision,
+    answers: answers,
+    marked: marked,
+    currentIndex: currentIndex,
+    remainingSeconds: remainingSeconds,
+    completed: completed,
+    score: score,
+    updatedAt: value.toUtc(),
   );
 }
 
@@ -210,15 +263,31 @@ class RemoteAssessmentContent {
         throw const FormatException('Alternativas remotas inválidas.');
       }
       var correctIndex = -1;
+      var correctIndexes = <int>{};
+      var graded = true;
       var explanation = '';
       if (keys != null && index < keys.length) {
         final key = keys[index];
         if (key is! Map<String, dynamic>) {
           throw const FormatException('Gabarito remoto inválido.');
         }
-        correctIndex = (key['correct_index'] as num?)?.toInt() ?? -1;
+        final multiple = key['correct_indices'];
+        if (multiple is List<dynamic>) {
+          correctIndexes = multiple
+              .whereType<num>()
+              .map((value) => value.toInt())
+              .toSet();
+          graded = key['graded'] as bool? ?? true;
+          correctIndex = correctIndexes.isEmpty ? -1 : correctIndexes.first;
+        } else {
+          correctIndex = (key['correct_index'] as num?)?.toInt() ?? -1;
+          correctIndexes = correctIndex < 0 ? {} : {correctIndex};
+        }
         explanation = key['explanation'] as String? ?? '';
-        if (correctIndex < 0 || correctIndex >= options.length) {
+        if ((graded && correctIndexes.isEmpty) ||
+            correctIndexes.any(
+              (index) => index < 0 || index >= options.length,
+            )) {
           throw const FormatException('Índice de gabarito inválido.');
         }
       }
@@ -227,6 +296,8 @@ class RemoteAssessmentContent {
           question: raw['question'] as String? ?? '',
           options: options,
           correctIndex: correctIndex,
+          correctIndexes: correctIndexes,
+          graded: graded,
           explanation: explanation,
           topic: raw['topic'] as String? ?? topic,
         ),
@@ -261,7 +332,8 @@ class RemoteAssessmentContent {
   final List<StudyQuestion> questions;
   final DateTime createdAt;
 
-  bool get hasAnswerKey => questions.every((item) => item.correctIndex >= 0);
+  bool get hasAnswerKey =>
+      questions.every((item) => !item.graded || item.correctIndexes.isNotEmpty);
 }
 
 @immutable
@@ -325,12 +397,14 @@ class AssessmentSyncRecord {
     this.confirmedPayload,
     this.remoteConflict,
     this.lastError,
+    this.localContext,
   }) : pending = List.unmodifiable(pending);
 
   factory AssessmentSyncRecord.fromJson(Map<String, dynamic> json) {
     final statusName = json['status'] as String?;
     final confirmedJson = json['confirmed_payload'];
     final conflictJson = json['remote_conflict'];
+    final localContextJson = json['local_context'];
     return AssessmentSyncRecord(
       attemptId: json['attempt_id'] as String? ?? '',
       status: AssessmentSyncStatus.values.firstWhere(
@@ -349,6 +423,9 @@ class AssessmentSyncRecord {
           ? RemoteAssessmentAttempt.fromJson(conflictJson)
           : null,
       lastError: json['last_error'] as String?,
+      localContext: localContextJson is Map<String, dynamic>
+          ? PublishedAssessmentContext.fromJson(localContextJson)
+          : null,
     );
   }
 
@@ -359,6 +436,7 @@ class AssessmentSyncRecord {
   final List<AssessmentPendingRevision> pending;
   final RemoteAssessmentAttempt? remoteConflict;
   final String? lastError;
+  final PublishedAssessmentContext? localContext;
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{
@@ -373,6 +451,8 @@ class AssessmentSyncRecord {
     if (conflict != null) json['remote_conflict'] = conflict.toJson();
     final error = lastError;
     if (error != null) json['last_error'] = error;
+    final context = localContext;
+    if (context != null) json['local_context'] = context.toJson();
     return json;
   }
 }
