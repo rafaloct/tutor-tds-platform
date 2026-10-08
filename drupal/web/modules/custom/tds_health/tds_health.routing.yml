@@ -1,0 +1,7 @@
+tds_health.status:
+  path: '/health'
+  defaults:
+    _controller: '\Drupal\tds_health\Controller\HealthController::status'
+    _title: 'Health'
+  requirements:
+    _access: 'TRUE'

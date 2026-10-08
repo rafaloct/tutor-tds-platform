@@ -1,0 +1,26 @@
+# Override declarativo para staging Drupal ISOLADO (Issue #163).
+# Uso: docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+#
+# ATENCAO: o provisionamento real do staging Drupal segue BLOCKED (G6 em
+# docs/drupal/ARCHITECTURE.md §7) ate Issue de infraestrutura. Este arquivo so
+# declara a forma do ambiente; segredos vem do gerenciador do ambiente, nunca
+# do Git. Producao, DNS e merge sao HUMAN-GATE.
+name: tds-drupal
+
+services:
+  web:
+    image: tutor-tds-drupal:staging
+    environment:
+      DRUPAL_ENVIRONMENT: staging
+      DRUPAL_DB_HOST: db
+      TUTOR_API_BASE_URL: ${TUTOR_API_BASE_URL:-https://tutor-tds-staging.fastapicloud.dev}
+    # Sem bind mounts de codigo em staging: todo o codigo vem da imagem.
+    volumes: []
+
+  db:
+    image: mariadb:11.8
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
