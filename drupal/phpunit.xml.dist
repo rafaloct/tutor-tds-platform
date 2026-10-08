@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="web/core/tests/bootstrap.php"
+         colors="true"
+         cacheResult="false">
+  <testsuites>
+    <testsuite name="tds-custom">
+      <directory>web/modules/custom</directory>
+      <directory>web/themes/custom</directory>
+    </testsuite>
+  </testsuites>
+  <php>
+    <ini name="error_reporting" value="-1"/>
+    <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
+    <!-- Necessarios apenas para testes kernel/functional futuros. -->
+    <env name="SIMPLETEST_BASE_URL" value="http://localhost"/>
+    <env name="SIMPLETEST_DB" value="mysql://drupal:drupal-dev-only@db/drupal"/>
+    <env name="BROWSERTEST_OUTPUT_DIRECTORY" value=""/>
+  </php>
+</phpunit>

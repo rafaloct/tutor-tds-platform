@@ -1,0 +1,21 @@
+name: 'TDS Portal'
+type: theme
+description: 'Tema base do portal Tutor TDS (fundacao DR-2). Extende stark; identidade visual definitiva depende de digest Stitch proprio.'
+package: 'Tutor TDS'
+core_version_requirement: ^11
+base theme: stark
+libraries:
+  - tds_portal/base
+regions:
+  header: 'Header'
+  primary_menu: 'Primary menu'
+  secondary_menu: 'Secondary menu'
+  highlighted: 'Highlighted'
+  help: 'Help'
+  breadcrumb: 'Breadcrumb'
+  content: 'Content'
+  sidebar_first: 'Sidebar first'
+  sidebar_second: 'Sidebar second'
+  footer: 'Footer'
+  page_top: 'Page top'
+  page_bottom: 'Page bottom'

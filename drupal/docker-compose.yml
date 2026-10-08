@@ -1,0 +1,65 @@
+# Stack local reproduzivel do portal Drupal Tutor TDS (Issue #163).
+# - web: PHP 8.3 + Apache + Drupal 11.4 (lockfile obrigatorio no build)
+# - db:  MariaDB EXCLUSIVA do Drupal — nunca o PostgreSQL do Tutor TDS.
+name: tds-drupal
+
+services:
+  web:
+    build:
+      context: .
+    image: tutor-tds-drupal:local
+    ports:
+      # Padrao loopback: so o host alcanca o portal. Para teste autorizado em
+      # LAN/Tailscale defina DRUPAL_HTTP_BIND explicitamente (ver .env.example).
+      - "${DRUPAL_HTTP_BIND:-127.0.0.1}:${DRUPAL_HTTP_PORT:-8080}:80"
+    environment:
+      DRUPAL_ENVIRONMENT: ${DRUPAL_ENVIRONMENT:-local}
+      DRUPAL_DB_DRIVER: ${DRUPAL_DB_DRIVER:-mysql}
+      DRUPAL_DB_HOST: db
+      DRUPAL_DB_PORT: ${DRUPAL_DB_PORT:-3306}
+      DRUPAL_DB_NAME: ${DRUPAL_DB_NAME:-drupal}
+      DRUPAL_DB_USER: ${DRUPAL_DB_USER:-drupal}
+      DRUPAL_DB_PASSWORD: ${DRUPAL_DB_PASSWORD:-drupal-dev-only}
+      DRUPAL_HASH_SALT: ${DRUPAL_HASH_SALT:-}
+      DRUPAL_TRUSTED_HOSTS: ${DRUPAL_TRUSTED_HOSTS:-}
+      DRUPAL_ADMIN_USER: ${DRUPAL_ADMIN_USER:-admin}
+      DRUPAL_ADMIN_PASSWORD: ${DRUPAL_ADMIN_PASSWORD:-admin-dev-only}
+      TUTOR_API_BASE_URL: ${TUTOR_API_BASE_URL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Codigo customizado e config montados para desenvolvimento; vendor e
+      # webroot scaffolded ficam na imagem (rebuild reproduzivel).
+      - ./web/modules/custom:/var/www/html/web/modules/custom
+      - ./web/themes/custom:/var/www/html/web/themes/custom
+      - ./web/sites/default/settings.php:/var/www/html/web/sites/default/settings.php
+      - ./config:/var/www/html/config
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  db:
+    # Banco Drupal isolado. NAO e o PostgreSQL transacional do Tutor TDS:
+    # contem somente conteudo editorial, config e sessoes do portal.
+    # Digest imutavel revisado em 2026-10-08 (review ACP PR #177).
+    image: mariadb:11.8@sha256:6422478cb8e159f080fb1d8ccf65101e26fe51385787fde7d16c3b165a331f15
+    environment:
+      MYSQL_DATABASE: ${DRUPAL_DB_NAME:-drupal}
+      MYSQL_USER: ${DRUPAL_DB_USER:-drupal}
+      MYSQL_PASSWORD: ${DRUPAL_DB_PASSWORD:-drupal-dev-only}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_DB_ROOT_PASSWORD:-drupal-root-dev-only}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 20s
+
+volumes:
+  db_data:

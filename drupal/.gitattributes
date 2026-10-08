@@ -1,0 +1,4 @@
+# Subarvore Drupal roda em container Linux: forcar LF em todo o conteudo
+# textual para que scripts .sh, Dockerfile e YAML funcionem independente do
+# autocrlf do host (Issue #163).
+* text=auto eol=lf

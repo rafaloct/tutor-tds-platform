@@ -1,0 +1,30 @@
+{#
+/**
+ * @file
+ * Template de pagina do tema TDS Portal (fundacao DR-2).
+ */
+#}
+<div class="layout-container">
+
+  <header role="banner" class="tds-header">
+    {{ page.header }}
+  </header>
+
+  {{ page.primary_menu }}
+  {{ page.secondary_menu }}
+  {{ page.breadcrumb }}
+  {{ page.highlighted }}
+  {{ page.help }}
+
+  <main role="main" class="tds-main">
+    <a id="main-content" tabindex="-1"></a>
+    {{ page.content }}
+  </main>
+
+  {% if page.footer %}
+    <footer role="contentinfo" class="tds-footer">
+      {{ page.footer }}
+    </footer>
+  {% endif %}
+
+</div>

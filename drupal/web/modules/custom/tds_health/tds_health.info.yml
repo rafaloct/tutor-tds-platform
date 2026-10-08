@@ -1,0 +1,7 @@
+name: 'TDS Health'
+type: module
+description: 'Endpoint de health do portal Drupal Tutor TDS (fundacao DR-2).'
+package: 'Tutor TDS'
+core_version_requirement: ^11
+dependencies:
+  - drupal:system

@@ -1,0 +1,22 @@
+uuid: 08c4ef90-253d-4e92-a38e-e206bf64a4bf
+langcode: en
+status: true
+dependencies:
+  theme:
+    - tds_portal
+_core:
+  default_config_hash: T0wbI6qVdThbbIqXDZFg_1VZ3_ittXBdEoUH7d7ux_E
+id: tds_portal_local_tasks
+theme: tds_portal
+region: content
+weight: -20
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  label_display: '0'
+  provider: core
+  primary: true
+  secondary: true
+visibility: {  }

@@ -1,0 +1,13 @@
+.env
+.env.*
+.git/
+vendor/
+docs/
+web/sites/*/files/
+web/sites/*/private/
+.phpunit.cache/
+.phpunit.result.cache
+
+# Overrides locais de settings nunca entram na imagem (review ACP PR #177).
+# Para override em runtime, bind-mount settings.local.php explicitamente.
+**/settings*.local.php
