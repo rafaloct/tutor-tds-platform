@@ -11,7 +11,9 @@
   },
   "release_build_allowed": true,
   "source_verification": {
-    "flutter_tests": "567/567",
+    "flutter_tests": "580/580",
+    "api_tests": "592 passed, 30 PostgreSQL opt-in skipped",
+    "observability_tests": "17/17",
     "dart_analyze": "passed",
     "verified_at": "2026-10-07"
   },

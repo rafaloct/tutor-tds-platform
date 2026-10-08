@@ -44,6 +44,11 @@ Na linha 2B, LOCAL_VERIFIED significa API, Flutter e runner verificados somente
 no candidato local da migration `20261007_0030`; não significa execução do
 runner em staging. O gate `dynamic_activity_contextual_android_e2e` é obrigatório
 antes de ativar a flag e não bloqueia build produtivo com a flag false.
+A linha local de RC de 07/10 também contém as correções #160/#149/#148 e a
+reconciliação seletiva do runner #88. Suas suítes passaram 580/580 Flutter,
+592 API com 30 skips PostgreSQL opt-in e 17/17 observabilidade; isso não promove
+o status 2B porque staging/produção permanecem abaixo da migration 0030 e com
+compatibilidade não confirmada.
 STAGING nas seis linhas da Wave 1 significa somente aceite funcional do recorte;
 Classroom integral e paridade visual permanecem PARTIAL na Wave 3. Os três
 caminhos usam também `integration_test/context_learning_path_test.dart`.

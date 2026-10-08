@@ -1,5 +1,54 @@
 # CURRENT STATE
 
+## 2026-10-07 — linha local de RC convergida, promoção ainda bloqueada
+
+A linha local de release engineering preserva `origin/staging` e compõe, sem
+push ou merge remoto, as correções revisadas dos PRs #160, #149 e #148 e a
+fatia seletiva do #88. Isso fecha a renovação indevida de sessão em desafio de
+check-in rejeitado, preserva no compose a configuração candidata de certificado,
+fixa IDs de CourseVersion nas nove cartilhas embarcadas e incorpora somente o
+runner sintético, seu manifesto de exemplo, testes e matriz reconciliada. Nenhum
+workflow, monitor, alerta, deploy ou secret do #88 foi instalado.
+
+O código convergido passou 580/580 testes Flutter, 592 testes API com 30 gates
+PostgreSQL opt-in ignorados sem URL, 17/17 testes de observabilidade e análise
+Dart sem issues. Os quatro arquivos PostgreSQL opt-in continuam prova separada:
+devem ser repetidos no SHA congelado antes de classificar o novo artefato como
+RC físico. O AAB/APK assinado no SHA `c83a95f` é intermediário e não representa
+esta linha convergida; hashes do novo build pertencem à evidência externa do SHA
+congelado, evitando um commit circular no próprio manifesto de fonte.
+
+Configuração do RC enxuto: API
+`https://ead.ipexdesenvolvimento.cloud/tutor-api`, gateway
+`https://tutor-tds-gateway.tdsipex.workers.dev` e todas as flags de risco
+desligadas (`REMOTE_CATALOG`, contexto, outbox, jornada, atividade dinâmica,
+identidade assinada de suporte e push). O candidato de certificado também fica
+desligado; URL e HMAC só são exigidos no staging quando esse gate for ativado.
+Não é necessário criar secret para o RC enxuto.
+
+O runner read-only observou HTTPS/status/latência/TLS saudáveis no Cloud staging,
+API produtiva e gateway. Isso não fecha compatibilidade: Cloud staging reporta
+schema `20261003_0024`, produção reporta `20261005_0028`, ambos com
+`compatibility_verified=false`, enquanto o candidato local adiciona `0030`.
+Logo, a Wave 2B permanece com `DYNAMIC_ACTIVITY_ENABLED=false` e não pode ser
+validada contra staging sem deploy/migration explicitamente autorizados.
+
+Em situação real, suporte textual app→Chatwoot→app passou e o gateway do Tutor
+respondeu HTTP 200 a uma pergunta sintética de aluno em 19,965 s, com resposta
+educacional não vazia e sem credencial no cliente. A captura da resposta dentro
+do app não foi aprovada: em duas tentativas o emulador entrou em ANR do System UI
+e Permission Controller ao pedir microfone; a regra de duas tentativas encerrou
+o ensaio. Vídeo/RealtimeKit continua desconectado e sem prova bilateral. Assim,
+as telas já capturadas de login, Home, turmas e suporte são coerentes no recorte,
+mas não constituem aceite visual integral de IA, atividade 2B, check-in e vídeo.
+
+`PRODUCTION_RELEASE_READY=false`. Um APK/AAB com flags desligadas pode servir a
+beta controlado após build assinado e custodiado no SHA exato, mas publicação
+ampla continua bloqueada por compatibilidade/schema, prova Android da Wave 2B se
+ela for ativada, RealtimeKit se vídeo for requisito e gates normais de
+branch/tag/restore/promoção. Google Auth/Supabase e a frente Drupal não são
+dependências para este RC enxuto e permanecem trilhas próprias.
+
 ## 2026-10-07 — candidato local Dynamic Learning 2B
 
 Sobre a base `fbb4b6a`, a fatia 2B agora possui candidato local executável com a
