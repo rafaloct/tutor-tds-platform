@@ -39,7 +39,9 @@ foreach (['config', 'web/modules/custom', 'web/themes/custom', 'drush'] as $dir)
 $errors = 0;
 foreach (array_unique($files) as $file) {
   try {
-    Yaml::parseFile($file);
+    // PARSE_CUSTOM_TAGS: aceita tags do Compose (!reset/!override) usadas no
+    // override de staging; o lint apenas valida sintaxe, nao semantica.
+    Yaml::parseFile($file, Yaml::PARSE_CUSTOM_TAGS);
   }
   catch (Throwable $e) {
     $errors++;

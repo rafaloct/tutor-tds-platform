@@ -11,6 +11,32 @@
 
 // phpcs:ignoreFile
 
+// Fail-closed (review ACP PR #177): fora de "local" as variaveis sensiveis sao
+// obrigatorias e os defaults inseguros de dev sao rejeitados — o site NAO sobe
+// com configuracao de desenvolvimento.
+$tds_environment = getenv('DRUPAL_ENVIRONMENT') ?: 'local';
+
+if ($tds_environment !== 'local') {
+  $tds_required = [
+    'DRUPAL_DB_NAME' => [],
+    'DRUPAL_DB_USER' => [],
+    'DRUPAL_DB_PASSWORD' => ['drupal-dev-only'],
+    'DRUPAL_DB_HOST' => [],
+    'DRUPAL_HASH_SALT' => ['drupal-local-dev-salt-insecure'],
+    'DRUPAL_TRUSTED_HOSTS' => [],
+  ];
+  foreach ($tds_required as $tds_var => $tds_forbidden) {
+    $tds_value = getenv($tds_var);
+    if ($tds_value === FALSE || $tds_value === '' || in_array($tds_value, $tds_forbidden, TRUE)) {
+      throw new \RuntimeException(sprintf(
+        'settings.php: %s obrigatoria (e nao pode usar o default inseguro de dev) quando DRUPAL_ENVIRONMENT="%s".',
+        $tds_var,
+        $tds_environment
+      ));
+    }
+  }
+}
+
 $databases['default']['default'] = [
   'database' => getenv('DRUPAL_DB_NAME') ?: 'drupal',
   'username' => getenv('DRUPAL_DB_USER') ?: 'drupal',
@@ -36,7 +62,7 @@ $settings['file_public_path'] = 'sites/default/files';
 $settings['file_private_path'] = 'sites/default/files/private';
 
 // Identificador de ambiente lido pelo endpoint /health (tds_health).
-$settings['tds_environment'] = getenv('DRUPAL_ENVIRONMENT') ?: 'local';
+$settings['tds_environment'] = $tds_environment;
 
 // URL base da API Tutor TDS (BFF). Vazia = integracao ainda nao configurada.
 $settings['tutor_api_base_url'] = getenv('TUTOR_API_BASE_URL') ?: '';
@@ -46,7 +72,7 @@ $settings['trusted_host_patterns'] = $trusted
   ? array_values(array_filter(array_map('trim', explode(',', $trusted))))
   : ['^localhost$', '^127\.0\.0\.1$'];
 
-if (getenv('DRUPAL_ENVIRONMENT') === 'local') {
+if ($tds_environment === 'local') {
   $settings['skip_permissions_hardening'] = TRUE;
 }
 

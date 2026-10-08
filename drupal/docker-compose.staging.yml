@@ -5,20 +5,46 @@
 # docs/drupal/ARCHITECTURE.md §7) ate Issue de infraestrutura. Este arquivo so
 # declara a forma do ambiente; segredos vem do gerenciador do ambiente, nunca
 # do Git. Producao, DNS e merge sao HUMAN-GATE.
+#
+# Fail-closed (review ACP PR #177): este override NAO herda bind mounts de
+# codigo nem path de build local do compose base, e todos os valores
+# sensiveis sao OBRIGATORIOS via ${VAR:?} — sem fallback para defaults dev.
 name: tds-drupal
 
 services:
   web:
     image: tutor-tds-drupal:staging
+    # Sem build em staging: a imagem vem de um artefato revisado, nunca do
+    # checkout local. !reset remove o "build:" herdado do compose base.
+    build: !reset null
     environment:
       DRUPAL_ENVIRONMENT: staging
-      DRUPAL_DB_HOST: db
+      DRUPAL_DB_DRIVER: ${DRUPAL_DB_DRIVER:-mysql}
+      DRUPAL_DB_HOST: ${DRUPAL_DB_HOST:-db}
+      DRUPAL_DB_PORT: ${DRUPAL_DB_PORT:-3306}
+      DRUPAL_DB_NAME: ${DRUPAL_DB_NAME:?obrigatorio em staging}
+      DRUPAL_DB_USER: ${DRUPAL_DB_USER:?obrigatorio em staging}
+      DRUPAL_DB_PASSWORD: ${DRUPAL_DB_PASSWORD:?obrigatorio em staging}
+      DRUPAL_HASH_SALT: ${DRUPAL_HASH_SALT:?obrigatorio em staging}
+      DRUPAL_TRUSTED_HOSTS: ${DRUPAL_TRUSTED_HOSTS:?obrigatorio em staging}
+      DRUPAL_ADMIN_USER: ${DRUPAL_ADMIN_USER:?obrigatorio em staging}
+      DRUPAL_ADMIN_PASSWORD: ${DRUPAL_ADMIN_PASSWORD:?obrigatorio em staging}
       TUTOR_API_BASE_URL: ${TUTOR_API_BASE_URL:-https://tutor-tds-staging.fastapicloud.dev}
+    # Porta publicada apenas em loopback por padrao; alargar exige
+    # DRUPAL_HTTP_BIND explicito (ver .env.example).
+    ports: !override
+      - "${DRUPAL_HTTP_BIND:-127.0.0.1}:${DRUPAL_HTTP_PORT:-8080}:80"
     # Sem bind mounts de codigo em staging: todo o codigo vem da imagem.
-    volumes: []
+    volumes: !reset []
 
   db:
-    image: mariadb:11.8
+    # Digest imutavel revisado em 2026-10-08 (review ACP PR #177).
+    image: mariadb:11.8@sha256:6422478cb8e159f080fb1d8ccf65101e26fe51385787fde7d16c3b165a331f15
+    environment:
+      MYSQL_DATABASE: ${DRUPAL_DB_NAME:?obrigatorio em staging}
+      MYSQL_USER: ${DRUPAL_DB_USER:?obrigatorio em staging}
+      MYSQL_PASSWORD: ${DRUPAL_DB_PASSWORD:?obrigatorio em staging}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_DB_ROOT_PASSWORD:?obrigatorio em staging}
     volumes:
       - db_data:/var/lib/mysql
 

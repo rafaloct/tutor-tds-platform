@@ -16,6 +16,20 @@ Caveat de ambiente documentada em `drupal/README.md`: neste host Windows
 materializa arquivos do `FROM` como 0 bytes; workaround validado = builder
 `docker-container` (`drupal163`). MERGE_ALLOWED=NO; aguardando reviewer.
 
+Fix ACP (review CHANGES_REQUESTED 2026-10-08): bases `php:8.3-apache`,
+`composer:2` e `mariadb:11.8` pinadas por digest imutavel revisado; limite de
+reprodutibilidade APT documentado (nao bit-for-bit). `.dockerignore` exclui
+`**/settings*.local.php` (canary testado: ausente na imagem). Override de
+staging sem `build:` nem bind mounts (`!reset`/`!override`), exige
+DB/salt/admin/trusted hosts via `${VAR:?}`; `settings.php` e
+`install-site.sh` rejeitam defaults dev fora de `local` (RuntimeException
+confirmado). Porta local em `127.0.0.1` via `DRUPAL_HTTP_BIND`; smoke assere
+`Cache-Control: no-store` no `/health`; `chmod -R 0777` substituido por
+`www-data` + 2775/0664. Validado em projeto isolado `tds-drupal-pr177-acp`
+(porta 18080): config local OK, staging fail-closed sem vars e OK com
+sinteticos, install+smoke 5/5, lint OK, unit 2/2. Stack preview `tds-drupal`
+inalterada. MERGE_ALLOWED=NO; PR segue DRAFT para reviewer ACP.
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre

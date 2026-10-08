@@ -17,7 +17,12 @@ Contrato de integração (o que este portal pode/não pode):
 - Tokens TDS ficam server-side (ver AUTH_SESSION_DECISION); nada disso está
   implementado ainda — esta Issue só entrega a fundação.
 - Segredos por ambiente via `.env` (gitignored) ou gerenciador do ambiente;
-  nunca no Git.
+  nunca no Git. `settings*.local.php` é excluído do build context via
+  `.dockerignore` — override local só por bind mount explícito em runtime,
+  nunca dentro da imagem.
+- Fora de `DRUPAL_ENVIRONMENT=local`, `settings.php` e `install-site.sh`
+  falham fechado: senhas, hash salt, admin e trusted hosts são obrigatórios e
+  os defaults inseguros de dev são rejeitados.
 - Nenhuma dependência de WordPress/LearnPress.
 - MERGE_ALLOWED=NO, PRODUCTION_ALLOWED=NO para agentes.
 
@@ -26,10 +31,16 @@ Contrato de integração (o que este portal pode/não pode):
 | Item | Versão |
 |---|---|
 | Drupal | 11.4.8 (`drupal/core-recommended`, pin no `composer.lock`) |
-| PHP | 8.3 (apache) |
-| Banco Drupal | MariaDB 11.8 (serviço `db`, isolado) |
+| PHP | 8.3 (apache) — imagem pinada por digest no `Dockerfile` |
+| Composer | 2 — imagem pinada por digest no `Dockerfile` |
+| Banco Drupal | MariaDB 11.8 (serviço `db`, isolado; digest pinado no compose) |
 | Webroot | `web/` (drupal/recommended-project) |
 | CLI | Drush 13 |
+
+Reprodutibilidade: bases Docker e dependências PHP são pinadas (digest +
+`composer.lock`). **Limite declarado:** pacotes APT são resolvidos do
+repositório Debian corrente no momento do build e não são bit-for-bit
+reproduzíveis — o digest fixa apenas o snapshot da imagem base.
 
 ## Estrutura
 
@@ -66,8 +77,11 @@ cp .env.example .env        # só na primeira vez; ajuste se precisar
 bash scripts/bootstrap.sh   # build + up + site:install + smoke
 ```
 
-Portal em `http://localhost:8080` (ou `DRUPAL_HTTP_PORT`). Admin local:
-`DRUPAL_ADMIN_USER` / `DRUPAL_ADMIN_PASSWORD` do `.env` (somente dev).
+Portal em `http://localhost:8080` (ou `DRUPAL_HTTP_PORT`). A porta é publicada
+apenas em loopback por padrão (`DRUPAL_HTTP_BIND=127.0.0.1`); para teste
+autorizado em LAN/Tailscale defina `DRUPAL_HTTP_BIND=0.0.0.0` ou o IP da
+interface no `.env`. Admin local: `DRUPAL_ADMIN_USER` / `DRUPAL_ADMIN_PASSWORD`
+do `.env` (somente dev).
 
 Comandos úteis:
 
@@ -118,8 +132,14 @@ Mudanças de config: editar no admin/drush, `drush cex`, commitar o diff.
 
 - **local**: compose acima, credenciais dev do `.env.example`.
 - **staging**: `docker compose -f docker-compose.yml -f docker-compose.staging.yml`
-  com `DRUPAL_ENVIRONMENT=staging` e segredos do ambiente. Provisionamento real
-  é BLOCKED (G6) até Issue de infra; este override apenas declara a forma.
+  com `DRUPAL_ENVIRONMENT=staging` e segredos do ambiente. O override remove o
+  `build:` local e os bind mounts de código (imagem `tutor-tds-drupal:staging`
+  pronta) e **exige** `DRUPAL_DB_NAME`, `DRUPAL_DB_USER`, `DRUPAL_DB_PASSWORD`,
+  `DRUPAL_DB_ROOT_PASSWORD`, `DRUPAL_HASH_SALT`, `DRUPAL_TRUSTED_HOSTS`,
+  `DRUPAL_ADMIN_USER` e `DRUPAL_ADMIN_PASSWORD` — `docker compose config`
+  falha se algum estiver ausente, e `settings.php`/`install-site.sh` rejeitam
+  os defaults dev. Provisionamento real é BLOCKED (G6) até Issue de infra;
+  este override apenas declara a forma.
 - **produção**: fora de escopo para agentes (HUMAN-GATE).
 
 ## Testes

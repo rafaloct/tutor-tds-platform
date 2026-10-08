@@ -13,9 +13,13 @@ echo "[smoke] 1/5 pagina inicial responde"
 code=$(curl -sS -o /dev/null -w '%{http_code}' "$BASE_URL/")
 [ "$code" = "200" ] || fail "home retornou HTTP $code"
 
-echo "[smoke] 2/5 endpoint /health"
-body=$(curl -fsS "$BASE_URL/health") || fail "/health inacessivel"
-echo "$body" | grep -q '"status":"ok"' || fail "health inesperado: $body"
+echo "[smoke] 2/5 endpoint /health (JSON ok + Cache-Control: no-store)"
+health_headers=$(mktemp)
+body=$(curl -fsS -D "$health_headers" "$BASE_URL/health") || { rm -f "$health_headers"; fail "/health inacessivel"; }
+echo "$body" | grep -q '"status":"ok"' || { rm -f "$health_headers"; fail "health inesperado: $body"; }
+grep -qiE '^Cache-Control:[^\r\n]*no-store' "$health_headers" \
+  || { rm -f "$health_headers"; fail "/health sem Cache-Control: no-store"; }
+rm -f "$health_headers"
 
 echo "[smoke] 3/5 bootstrap Drupal"
 vendor/bin/drush status --field=bootstrap | grep -qi 'Successful' \

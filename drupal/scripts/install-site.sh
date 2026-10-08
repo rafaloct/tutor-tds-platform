@@ -4,6 +4,24 @@
 set -euo pipefail
 cd /var/www/html
 
+# Fail-closed (review ACP PR #177): fora de "local" as variaveis sensiveis sao
+# obrigatorias e os defaults inseguros de dev sao rejeitados antes de instalar.
+if [ "${DRUPAL_ENVIRONMENT:-local}" != "local" ]; then
+  for var in DRUPAL_DB_NAME DRUPAL_DB_USER DRUPAL_DB_PASSWORD DRUPAL_HASH_SALT DRUPAL_TRUSTED_HOSTS DRUPAL_ADMIN_USER DRUPAL_ADMIN_PASSWORD; do
+    if [ -z "${!var:-}" ]; then
+      echo "[install] FAIL: $var obrigatoria quando DRUPAL_ENVIRONMENT != local" >&2
+      exit 1
+    fi
+  done
+  for pair in "DRUPAL_DB_PASSWORD=drupal-dev-only" "DRUPAL_HASH_SALT=drupal-local-dev-salt-insecure" "DRUPAL_ADMIN_PASSWORD=admin-dev-only"; do
+    var="${pair%%=*}"
+    if [ "${!var}" = "${pair#*=}" ]; then
+      echo "[install] FAIL: $var com default inseguro de dev e proibido fora de local" >&2
+      exit 1
+    fi
+  done
+fi
+
 DB_HOST="${DRUPAL_DB_HOST:-db}"
 DB_PORT="${DRUPAL_DB_PORT:-3306}"
 DB_USER="${DRUPAL_DB_USER:-drupal}"
