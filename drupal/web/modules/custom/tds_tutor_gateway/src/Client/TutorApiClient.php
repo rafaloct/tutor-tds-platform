@@ -45,7 +45,7 @@ final class TutorApiClient implements TutorApiClientInterface {
     }
     catch (GatewayException $error) {
       if ($error->httpStatus() === 401 || $error->httpStatus() === 403) {
-        throw new GatewayException('invalid_credentials', 401) from $error;
+        throw new GatewayException('invalid_credentials', 401, $error);
       }
       throw $error;
     }
@@ -126,7 +126,7 @@ final class TutorApiClient implements TutorApiClientInterface {
         if ($attempt < $attempts) {
           continue;
         }
-        throw new GatewayException('api_unavailable', 503) from $error;
+        throw new GatewayException('api_unavailable', 503, $error);
       }
       if ($attempt < $attempts && in_array($response->getStatusCode(), [502, 503, 504], TRUE)) {
         continue;
@@ -190,7 +190,7 @@ final class TutorApiClient implements TutorApiClientInterface {
       $decoded = json_decode($body, TRUE, 64, JSON_THROW_ON_ERROR);
     }
     catch (\JsonException $error) {
-      throw new GatewayException('invalid_api_response', 502) from $error;
+      throw new GatewayException('invalid_api_response', 502, $error);
     }
     if (!is_array($decoded) || array_is_list($decoded)) {
       throw new GatewayException('invalid_api_response', 502);

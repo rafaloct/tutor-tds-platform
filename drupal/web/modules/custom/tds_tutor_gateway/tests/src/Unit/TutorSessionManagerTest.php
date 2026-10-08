@@ -81,7 +81,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
   }
 
   /**
-   * 401 em /auth/me permite exatamente um refresh e replay GET.
+   * Erro 401 em /auth/me permite exatamente um refresh e replay GET.
    */
   public function testUnauthorizedContextRefreshesOnce(): void {
     $client = $this->createMock(TutorApiClientInterface::class);
@@ -159,20 +159,32 @@ final class TutorSessionManagerTest extends UnitTestCase {
  */
 final class MemoryTutorTokenStore implements TutorTokenStoreInterface {
 
+  /**
+   * Numero de limpezas de sessao observadas.
+   */
   public int $clearCount = 0;
 
   public function __construct(
     private ?TutorTokenSet $tokens = NULL,
   ) {}
 
+  /**
+   * {@inheritdoc}
+   */
   public function load(): ?TutorTokenSet {
     return $this->tokens;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function save(TutorTokenSet $tokens): void {
     $this->tokens = $tokens;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function clear(): void {
     $this->clearCount++;
     $this->tokens = NULL;

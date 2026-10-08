@@ -15,8 +15,9 @@ final class GatewayException extends \RuntimeException {
   public function __construct(
     private readonly string $publicCode,
     private readonly int $httpStatus,
+    ?\Throwable $previous = NULL,
   ) {
-    parent::__construct($publicCode);
+    parent::__construct($publicCode, 0, $previous);
   }
 
   /**

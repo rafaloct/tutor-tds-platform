@@ -17,7 +17,7 @@ interface TutorApiClientInterface {
    * @return array{
    *   tokens: \Drupal\tds_tutor_gateway\ValueObject\TutorTokenSet,
    *   user: array{id: string, name: string, role: string}
-   * }
+   *   }
    *   Tokens e usuario publico validados.
    */
   public function login(string $cpf, string $password): array;

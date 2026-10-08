@@ -112,7 +112,6 @@ final class TutorApiClientTest extends UnitTestCase {
 
   /**
    * Userinfo, query e fragment sao recusados individualmente.
-   *
    */
   #[DataProvider('unsafeBaseUrlProvider')]
   public function testUnsafeBaseUrlPartsAreRejected(string $baseUrl): void {
