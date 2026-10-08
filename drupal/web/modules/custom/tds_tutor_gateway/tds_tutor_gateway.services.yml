@@ -1,0 +1,18 @@
+services:
+  tds_tutor_gateway.client:
+    class: Drupal\tds_tutor_gateway\Client\TutorApiClient
+    arguments: ['@http_client', '@settings', '@uuid', '@datetime.time']
+  Drupal\tds_tutor_gateway\Client\TutorApiClientInterface:
+    alias: tds_tutor_gateway.client
+
+  tds_tutor_gateway.token_store:
+    class: Drupal\tds_tutor_gateway\Storage\DrupalSessionTutorTokenStore
+    arguments: ['@request_stack']
+  Drupal\tds_tutor_gateway\Storage\TutorTokenStoreInterface:
+    alias: tds_tutor_gateway.token_store
+
+  tds_tutor_gateway.session_manager:
+    class: Drupal\tds_tutor_gateway\Session\TutorSessionManager
+    arguments: ['@tds_tutor_gateway.client', '@tds_tutor_gateway.token_store', '@datetime.time']
+  Drupal\tds_tutor_gateway\Session\TutorSessionManagerInterface:
+    alias: tds_tutor_gateway.session_manager
