@@ -1,5 +1,21 @@
 # CURRENT STATE
 
+## 2026-10-08 Issue #163 — fundação Drupal (DR-2), candidato em review
+
+IMPLEMENTED/TESTED-LOCAL na branch `agent/drupal-163-auto-20261007-152725`,
+HEAD `3cdd976` sobre staging `fbb4b6a`, PR #177 DRAFT→staging.
+`drupal/` contém projeto Composer `drupal/core-recommended` 11.4.8 com
+lockfile, Dockerfile php:8.3-apache, compose web+MariaDB 11.8 dedicado,
+settings 100% por env, módulo `tds_health` (`GET /health`, `no-store`),
+tema `tds_portal` (stark), `config/sync/` versionado (minimal profile,
+site:install `--existing-config`), scripts bootstrap/install/smoke/lint/reset
+e PHPUnit unitário. Validado em container: smoke 5/5, lint OK, unit 2/2,
+reset completo OK. Sem integração acadêmica; staging Drupal segue BLOCKED (G6).
+Caveat de ambiente documentada em `drupal/README.md`: neste host Windows
+(Docker Desktop 29.8.2 + containerd store) o builder `docker`/`desktop-linux`
+materializa arquivos do `FROM` como 0 bytes; workaround validado = builder
+`docker-container` (`drupal163`). MERGE_ALLOWED=NO; aguardando reviewer.
+
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre
