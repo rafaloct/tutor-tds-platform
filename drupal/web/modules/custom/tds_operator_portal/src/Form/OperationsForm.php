@@ -112,7 +112,7 @@ final class OperationsForm extends FormBase {
       '#description' => $this->t('Use CPF somente quando necessário para localizar uma identidade fora do programa.'),
       '#maxlength' => 100,
       '#default_value' => '',
-      '#autocomplete' => 'off',
+      '#attributes' => ['autocomplete' => 'off'],
     ];
     $form['search_group']['search'] = [
       '#type' => 'submit',
@@ -134,12 +134,16 @@ final class OperationsForm extends FormBase {
         '#title' => $this->t('Resultado'),
         '#options' => $options,
         '#default_value' => $state['person_id'] ?? NULL,
-        '#required' => TRUE,
+        // Cadastro ('register') não usa pessoa existente e não pode ser
+        // bloqueado por este radio; a inspeção valida a seleção via
+        // ::validateInspectSelection.
+        '#required' => FALSE,
       ];
       $form['search_group']['inspect'] = [
         '#type' => 'submit',
         '#value' => $this->t('Inspecionar pessoa'),
         '#submit' => ['::inspect'],
+        '#validate' => ['::validateInspectSelection'],
         '#limit_validation_errors' => [['search_group', 'person_id']],
       ];
     }
@@ -180,6 +184,26 @@ final class OperationsForm extends FormBase {
       $this->messenger()->addError($this->message($error));
     }
     $form_state->setRebuild();
+  }
+
+  /**
+   * Fail-closed: inspeção exige seleção presente na busca guardada.
+   */
+  public function validateInspectSelection(array &$form, FormStateInterface $form_state): void {
+    $personId = $form_state->getValue(['search_group', 'person_id']);
+    $people = $this->operationsState->load()['people'] ?? [];
+    $valid = FALSE;
+    if (is_string($personId) && $personId !== '' && is_array($people)) {
+      foreach ($people as $person) {
+        if (is_array($person) && ($person['id'] ?? NULL) === $personId) {
+          $valid = TRUE;
+          break;
+        }
+      }
+    }
+    if (!$valid) {
+      $form_state->setErrorByName('search_group][person_id', $this->t('Selecione uma pessoa do resultado antes de inspecionar.'));
+    }
   }
 
   /**
@@ -312,11 +336,13 @@ final class OperationsForm extends FormBase {
       ],
     ];
     foreach ([
-      'registration_name' => [$this->t('Nome completo'), 'textfield'],
-      'registration_cpf' => [$this->t('CPF'), 'textfield'],
-      'registration_phone' => [$this->t('Telefone'), 'tel'],
-      'registration_password' => [$this->t('Senha inicial'), 'password'],
-    ] as $key => [$title, $type]) {
+      'registration_name' => [$this->t('Nome completo'), 'textfield', 'off'],
+      'registration_cpf' => [$this->t('CPF'), 'textfield', 'off'],
+      'registration_phone' => [$this->t('Telefone'), 'tel', 'off'],
+      // autocomplete="new-password" é o token correto para senha inicial:
+      // navegadores ignoram "off" em campos de senha.
+      'registration_password' => [$this->t('Senha inicial'), 'password', 'new-password'],
+    ] as $key => [$title, $type, $autocomplete]) {
       $elements[$key] = [
         '#type' => $type,
         '#title' => $title,
@@ -325,7 +351,7 @@ final class OperationsForm extends FormBase {
             ':input[name="command[action]"]' => ['value' => 'register'],
           ],
         ],
-        '#autocomplete' => 'off',
+        '#attributes' => ['autocomplete' => $autocomplete],
       ];
     }
     $elements['confirm'] = [
