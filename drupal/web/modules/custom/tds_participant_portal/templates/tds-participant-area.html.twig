@@ -1,0 +1,68 @@
+{# Dados allowlisted da FastAPI. Twig autoescapa todo texto. #}
+<section class="tds-participant-area" aria-labelledby="tds-participant-title">
+  <h1 id="tds-participant-title">Minha area</h1>
+
+  {% if state in ['session_required', 'access_denied', 'unavailable'] %}
+    <p class="tds-participant-status tds-participant-status--warning" role="alert">{{ message }}</p>
+  {% else %}
+    {% if state == 'stale' %}
+      <p class="tds-participant-status tds-participant-status--warning" role="status">
+        Exibindo a ultima consulta privada disponivel. Alguns dados podem estar desatualizados.
+      </p>
+    {% endif %}
+
+    <p class="tds-participant-identity">Sessao de <strong>{{ user.name }}</strong>.</p>
+
+    <section aria-labelledby="tds-classes-title">
+      <h2 id="tds-classes-title">Minhas turmas</h2>
+      {% if classes is empty %}
+        <p class="tds-participant-status" role="status">Nenhuma turma ativa foi retornada para esta conta.</p>
+      {% else %}
+        <ul class="tds-participant-grid" role="list">
+          {% for class in classes %}
+            <li class="tds-participant-card">
+              <h3>{{ class.name }}</h3>
+              <p>{{ class.start_date }} a {{ class.end_date }}</p>
+              {% if class.municipality %}<p>{{ class.municipality }}</p>{% endif %}
+              {% if class.state == 'needs_review' %}
+                <p class="tds-participant-status tds-participant-status--warning" role="status">
+                  O contexto desta turma precisa ser conferido pela equipe.
+                </p>
+              {% else %}
+                <p><strong>{{ class.course.title }}</strong>{% if class.course.author %} — {{ class.course.author }}{% endif %}</p>
+                {% if class.course.summary %}<p>{{ class.course.summary }}</p>{% endif %}
+                <label for="tds-progress-{{ loop.index }}">Progresso informado pela plataforma</label>
+                <progress id="tds-progress-{{ loop.index }}" value="{{ class.progress.progress_percent }}" max="100">
+                  {{ class.progress.progress_percent }}%
+                </progress>
+                <p>{{ class.progress.progress_percent }}% — status {{ class.progress.status }}</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    <section aria-labelledby="tds-certificates-title">
+      <h2 id="tds-certificates-title">Certificados</h2>
+      {% if certificates is empty %}
+        <p class="tds-participant-status" role="status">Nenhuma referencia oficial de certificado foi retornada.</p>
+      {% else %}
+        <ul role="list">
+          {% for certificate in certificates %}
+            <li>
+              <a href="{{ certificate.verification_url }}" rel="noopener noreferrer">
+                Verificar {{ certificate.course_title }}
+              </a>
+              {% if certificate.institution_name %} — {{ certificate.institution_name }}{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </section>
+
+    <p class="tds-participant-support">
+      <a class="tds-participant-button" href="/contato">Preciso de suporte</a>
+    </p>
+  {% endif %}
+</section>

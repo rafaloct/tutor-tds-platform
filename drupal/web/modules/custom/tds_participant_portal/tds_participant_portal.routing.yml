@@ -1,0 +1,9 @@
+tds_participant_portal.dashboard:
+  path: '/minha-area'
+  defaults:
+    _controller: '\Drupal\tds_participant_portal\Controller\ParticipantAreaController::dashboard'
+    _title: 'Minha area'
+  requirements:
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
