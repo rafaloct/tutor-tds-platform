@@ -514,3 +514,23 @@ OBSERVED:
   pre-existente gate x harness, commit de9ec57).
 BLOCKED (human): chave de provider de LLM dedicada ao staging (decisao);
   demais gates do bloco anterior inalterados.
+
+## 2026-10-09 (continuacao 2): #189 + #190 no harness + pin EAD no MCP
+
+OBSERVED:
+- #189 fechada (commit 7626402): `qa-server.log` ficava travado porque
+  `server.terminate()` so matava o processo direto; filhos herdeiros do handle
+  sobreviviam. Agora `_stop_server_tree` usa `taskkill /T /F` no Windows e
+  `_cleanup_temp_dir` faz rmtree com retry limitado; falha residual sai como
+  `CLEANUP_FAIL` exit 8 com `retained_path`, sem mascarar o resultado do fluxo.
+- #190 mitigada (commit af0b5ba): inventario `adb pm list packages
+  com.tutortds_cartilhas*` antes/depois do run; remocao de pacote alheio ao
+  run-id sai como `COLLATERAL_STATE_CHANGED` exit 9. Delta so computa com os
+  dois inventarios OK (sem falso positivo por falha de adb). Causa original da
+  remocao do r63 segue UNKNOWN - a guarda detecta, nao explica.
+- MCP `d2fadbd` (branch rafael_notebook/account-mcp-staging-20261008): pin de
+  URL migrado para `https://ead.ipexdesenvolvimento.cloud/tutor-staging-api`
+  (boundary canonica verificada); 9/9 testes locais passam.
+- Harness class_lifecycle: 18/18 testes locais.
+BLOCKED (human): aprovacao explicita de um run-id 32-hex para
+  `qa_create_accounts` na EAD staging; demais gates inalterados.
