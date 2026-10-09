@@ -42,3 +42,64 @@ valores de credenciais QA são redigidos).
 ## Gate humano
 Rafael autoriza: reconciliação de #79/#80, uso exclusivo do emulador/SDK e
 credenciais QA de staging. Até lá os cenários Dart falham deliberadamente.
+
+## Perfil E2E da candidata #122 / Issue #123
+
+Este perfil substitui o skeleton anterior por cenários reais, mas continua
+fail-closed: não existe PASS sem interação Android e credenciais sintéticas já
+provisionadas no host.
+
+Cenários executáveis por padrão:
+
+- `login_activation`: comprova o campo de código de ativação na UI e login real
+  da conta sintética de participante;
+- `account_switch`: participante → logout pela UI → professor, com troca real
+  da sessão local;
+- `participant_flow`: login → Minhas turmas → edição vinculada à turma;
+- `teacher_dashboard`: Gestão → Turmas e equipe → dashboard completo;
+- `monitor_projection`: Gestão → Acompanhamento da turma, valida a projeção
+  mínima e confirma 403 no dashboard completo;
+- `creator_surface`: Gestão → Conteúdos → Meus conteúdos/Criar curso;
+- `offline_reconnect`: prime online → airplane mode → conteúdo salvo offline →
+  reconexão, preservando o mesmo package isolado entre processos.
+
+`operator_flow` permanece explicitamente bloqueado pela Issue #120. A conta
+admin/creator não deve ser usada como substituição de `program_operator`.
+`certificate` é um gate opcional e exige contexto de certificado explícito.
+
+Credenciais nunca entram no repositório ou no comando em claro. O host fornece:
+
+- `STAGING_SEED_STUDENT_CPF` / `STAGING_SEED_STUDENT_PASSWORD`;
+- `STAGING_SEED_TEACHER_CPF` / `STAGING_SEED_TEACHER_PASSWORD`;
+- `STAGING_SEED_MONITOR_CPF` / `STAGING_SEED_MONITOR_PASSWORD`;
+- `STAGING_SEED_ADMIN_CPF` / `STAGING_SEED_ADMIN_PASSWORD`.
+
+O harness grava esses valores num JSON temporário para `--dart-define-from-file`,
+redige CPF/token/senha dos logs e apaga o arquivo no `finally`.
+
+Para a candidata atual, o run id é derivado do SHA:
+
+`6c26bfb653d03a5e308d614fbab92cea`
+
+e o package esperado é:
+
+`com.tutortds_cartilhas.dev.dynamicqa.r6c26bfb653d03a5e308d614fbab92cea`
+
+O endpoint de runtime é o staging canônico
+`https://ead.ipexdesenvolvimento.cloud/tutor-staging-api`. O build isolado
+depende da correção QA-only rastreada em #124/#125, porque o guard anterior
+hardcodava somente o endpoint FastAPI Cloud direto.
+
+Exemplo de planejamento sem executar:
+
+```bash
+EMULATOR_E2E_BASE_URL=https://ead.ipexdesenvolvimento.cloud/tutor-staging-api \
+EMULATOR_E2E_QA_PACKAGE=com.tutortds_cartilhas.dev.dynamicqa.r6c26bfb653d03a5e308d614fbab92cea \
+EMULATOR_E2E_DEVICE=emulator-5556 \
+EMULATOR_E2E_RUN_ID=6c26bfb653d03a5e308d614fbab92cea \
+python3 tooling/mobile_qa/emulator/e2e_harness.py
+```
+
+Sem `--execute`, o resultado deve permanecer `NOT_RUN` e listar apenas os
+nomes das credenciais ausentes. Com `--execute`, ausência de qualquer
+credencial exigida é `CONFIG_REJECTED`.

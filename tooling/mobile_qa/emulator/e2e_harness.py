@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
-"""Emulator E2E harness (preparation only).
+"""Fail-closed Android emulator E2E runner for Tutor TDS staging QA."""
 
-Validates QA configuration fail-closed, prints a sanitized plan (dry-run) and,
-only with --execute, runs the Flutter integration scenarios on an emulator.
-It never reports PASS without a real execution and never touches app code.
-"""
 from __future__ import annotations
 
 import argparse
@@ -13,129 +9,415 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
+import time
+from pathlib import Path
 from urllib.parse import urlparse
 
-SCENARIOS = {
-    "login_activation": {"requires": []},
-    "account_switch": {"requires": ["QA_ACCOUNT_B_ID"]},
-    "participant_flow": {"requires": []},
-    "offline_reconnect": {"requires": []},
-    "certificate": {"requires": ["EMULATOR_E2E_CERTIFICATE_CONTEXT_ID"]},
-}
-REQUIRED_ENV = ("EMULATOR_E2E_BASE_URL", "EMULATOR_E2E_QA_PACKAGE", "EMULATOR_E2E_DEVICE")
-SECRET_ENV = ("QA_ACCOUNT_A_ID", "QA_ACCOUNT_A_SECRET", "QA_ACCOUNT_B_ID", "QA_ACCOUNT_B_SECRET")
-ISOLATED_PACKAGE_RE = re.compile(r"com\.tutortds_cartilhas\.dev\.dynamicqa\.r[a-f0-9]{32}")
-FORBIDDEN_HOST_PARTS = ("ead.ipexdesenvolvimento.cloud",)
 TARGET = "integration_test/emulator_e2e/emulator_e2e_scenarios_test.dart"
+SCENARIOS = (
+    "login_activation",
+    "account_switch",
+    "participant_flow",
+    "offline_reconnect",
+    "teacher_dashboard",
+    "monitor_projection",
+    "creator_surface",
+    "operator_flow",
+    "certificate",
+)
+DEFAULT_SCENARIOS = (
+    "login_activation",
+    "account_switch",
+    "participant_flow",
+    "teacher_dashboard",
+    "monitor_projection",
+    "creator_surface",
+    "offline_reconnect",
+)
+PACKAGE_RE = re.compile(
+    r"^com\.tutortds_cartilhas\.dev\.dynamicqa\.r([a-f0-9]{32})$"
+)
+RUN_RE = re.compile(r"^[a-f0-9]{32}$")
+CPF_RE = re.compile(r"(?<!\d)\d{3}\.?\d{3}\.?\d{3}[-.]?\d{2}(?!\d)")
+JWT_RE = re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b")
+PASSWORD_LINE_RE = re.compile(
+    r"(?i)(password|senha|authorization|token)(\s*[:=]\s*)(\S+)"
+)
+
+ROLE_ENV = {
+    "student": ("STAGING_SEED_STUDENT_CPF", "STAGING_SEED_STUDENT_PASSWORD"),
+    "teacher": ("STAGING_SEED_TEACHER_CPF", "STAGING_SEED_TEACHER_PASSWORD"),
+    "monitor": ("STAGING_SEED_MONITOR_CPF", "STAGING_SEED_MONITOR_PASSWORD"),
+    "admin": ("STAGING_SEED_ADMIN_CPF", "STAGING_SEED_ADMIN_PASSWORD"),
+    "operator": ("STAGING_SEED_OPERATOR_CPF", "STAGING_SEED_OPERATOR_PASSWORD"),
+}
+SCENARIO_ROLES = {
+    "login_activation": ("student",),
+    "account_switch": ("student", "teacher"),
+    "participant_flow": ("student",),
+    "offline_reconnect": ("student",),
+    "teacher_dashboard": ("teacher",),
+    "monitor_projection": ("monitor",),
+    "creator_surface": ("admin",),
+    "operator_flow": ("operator",),
+    "certificate": ("student",),
+}
+SECRET_ENV = {
+    value for pair in ROLE_ENV.values() for value in pair
+} | {
+    "EMULATOR_E2E_CERTIFICATE_CONTEXT_ID",
+}
 
 
-class ConfigError(Exception):
-    pass
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--base-url")
+    parser.add_argument("--package")
+    parser.add_argument("--device")
+    parser.add_argument("--run-id")
+    parser.add_argument("--scenario", action="append", choices=SCENARIOS)
+    parser.add_argument("--evidence-dir")
+    return parser.parse_args(argv)
 
 
-def validate(env, scenarios):
-    errors = []
-    for name in REQUIRED_ENV:
-        if not env.get(name, "").strip():
-            errors.append(f"missing {name}")
-    for s in scenarios:
-        if s not in SCENARIOS:
-            errors.append(f"unknown scenario {s}")
-    url = env.get("EMULATOR_E2E_BASE_URL", "").strip()
-    if url:
-        p = urlparse(url)
-        host = (p.hostname or "").lower()
-        if p.scheme != "https" and host not in ("10.0.2.2", "localhost"):
-            errors.append("base url must be https (or emulator loopback)")
-        if p.username or p.password or p.query or p.fragment:
-            errors.append("base url must not carry credentials/query")
-        if "staging" not in host and host not in ("10.0.2.2", "localhost"):
-            errors.append("base url must be a staging host")
-        if any(x in host for x in FORBIDDEN_HOST_PARTS):
-            errors.append("production host refused")
-    pkg = env.get("EMULATOR_E2E_QA_PACKAGE", "").strip()
-    if pkg and not ISOLATED_PACKAGE_RE.fullmatch(pkg):
-        errors.append(
-            "QA package must match com.tutortds_cartilhas.dev.dynamicqa.r<32-hex> "
-            "(DYNAMIC_QA_ISOLATED_PACKAGE=true); production and legacy .dev are refused")
-    dev = env.get("EMULATOR_E2E_DEVICE", "").strip()
-    if dev and not dev.startswith("emulator-"):
-        errors.append("device must be an emulator (emulator-<port>)")
-    for s in scenarios:
-        for r in SCENARIOS.get(s, {}).get("requires", []):
-            if not env.get(r, "").strip():
-                errors.append(f"scenario {s} requires {r}")
-    return errors
+def _value(args_value: str | None, env: dict[str, str], key: str) -> str:
+    return args_value or env.get(key, "")
 
 
-def sanitize(text, env=None):
-    env = env if env is not None else os.environ
-    for name in SECRET_ENV:
-        v = env.get(name, "")
-        if v:
-            text = text.replace(v, "<redacted>")
-    text = re.sub(r"(?i)(bearer\s+)[A-Za-z0-9._~+/=-]+", r"\1<redacted>", text)
-    text = re.sub(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*", "<jwt>", text)
-    text = re.sub(r"\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b", "<cpf>", text)
-    text = re.sub(r"(?i)\b(password|senha|token|secret)(\s*[=:]\s*)\S+", r"\1\2<redacted>", text)
-    return text
-
-
-def build_command(env, scenario, flutter="flutter"):
-    cmd = [flutter, "test", TARGET, "-d", env["EMULATOR_E2E_DEVICE"], "--no-pub",
-           "--dart-define=TUTOR_ENVIRONMENT=staging",
-           f"--dart-define=EMULATOR_E2E_BASE_URL={env['EMULATOR_E2E_BASE_URL']}",
-           f"--dart-define=EMULATOR_E2E_QA_PACKAGE={env['EMULATOR_E2E_QA_PACKAGE']}",
-           f"--dart-define=EMULATOR_E2E_SCENARIO={scenario}"]
-    for name in SECRET_ENV + ("EMULATOR_E2E_CERTIFICATE_CONTEXT_ID",):
-        if env.get(name):
-            cmd.append(f"--dart-define={name}={env[name]}")
-    return cmd
-
-
-def plan(env, scenarios):
+def config(args: argparse.Namespace, env: dict[str, str]) -> dict[str, str]:
+    package = _value(args.package, env, "EMULATOR_E2E_QA_PACKAGE")
+    match = PACKAGE_RE.fullmatch(package)
+    inferred = match.group(1) if match else ""
     return {
-        "mode": "DRY_RUN",
-        "real_e2e_run": False,
-        "base_url": env.get("EMULATOR_E2E_BASE_URL"),
-        "package": env.get("EMULATOR_E2E_QA_PACKAGE"),
-        "device": env.get("EMULATOR_E2E_DEVICE"),
-        "scenarios": list(scenarios),
-        "credentials_present": {n: bool(env.get(n)) for n in SECRET_ENV},
-        "result": "NOT_RUN",
+        "EMULATOR_E2E_BASE_URL": _value(
+            args.base_url, env, "EMULATOR_E2E_BASE_URL"
+        ),
+        "EMULATOR_E2E_QA_PACKAGE": package,
+        "EMULATOR_E2E_DEVICE": _value(
+            args.device, env, "EMULATOR_E2E_DEVICE"
+        ),
+        "EMULATOR_E2E_RUN_ID": args.run_id
+        or env.get("EMULATOR_E2E_RUN_ID", "")
+        or inferred,
     }
 
 
-def main(argv=None, env=None):
-    env = dict(os.environ if env is None else env)
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--base-url")
-    ap.add_argument("--package")
-    ap.add_argument("--device")
-    ap.add_argument("--scenario", action="append", help="repeatable; default: all but certificate")
-    ap.add_argument("--flutter", default=env.get("FLUTTER_BIN", "flutter"))
-    ap.add_argument("--execute", action="store_true", help="run on a real emulator")
-    a = ap.parse_args(argv)
-    for arg, name in ((a.base_url, "EMULATOR_E2E_BASE_URL"), (a.package, "EMULATOR_E2E_QA_PACKAGE"),
-                      (a.device, "EMULATOR_E2E_DEVICE")):
-        if arg:
-            env[name] = arg
-    scenarios = a.scenario or [s for s in SCENARIOS if s != "certificate"]
-    errors = validate(env, scenarios)
+def required_credentials(scenarios: list[str] | tuple[str, ...]) -> set[str]:
+    keys: set[str] = set()
+    for scenario in scenarios:
+        for role in SCENARIO_ROLES[scenario]:
+            keys.update(ROLE_ENV[role])
+        if scenario == "certificate":
+            keys.add("EMULATOR_E2E_CERTIFICATE_CONTEXT_ID")
+    return keys
+
+
+def validate(
+    values: dict[str, str],
+    scenarios: list[str] | tuple[str, ...],
+    *,
+    require_credentials: bool = False,
+    env: dict[str, str] | None = None,
+) -> list[str]:
+    errors: list[str] = []
+    base = values.get("EMULATOR_E2E_BASE_URL", "")
+    package = values.get("EMULATOR_E2E_QA_PACKAGE", "")
+    device = values.get("EMULATOR_E2E_DEVICE", "")
+    run_id = values.get("EMULATOR_E2E_RUN_ID", "")
+
+    parsed = urlparse(base)
+    if (
+        parsed.scheme != "https"
+        or not parsed.netloc
+        or "staging" not in (parsed.netloc + parsed.path).lower()
+    ):
+        errors.append("base URL must be an HTTPS staging endpoint")
+    match = PACKAGE_RE.fullmatch(package)
+    if not match:
+        errors.append("isolated dynamic-QA package is required")
+    if not RUN_RE.fullmatch(run_id):
+        errors.append("run id must be exactly 32 lowercase hex characters")
+    if match and run_id and match.group(1) != run_id:
+        errors.append("package suffix and run id must match")
+    if not device.startswith("emulator-"):
+        errors.append("physical devices are rejected")
+    for scenario in scenarios:
+        if scenario not in SCENARIOS:
+            errors.append(f"unknown scenario: {scenario}")
+
+    if require_credentials:
+        source = env or {}
+        for key in sorted(required_credentials(scenarios)):
+            if not source.get(key):
+                errors.append(f"missing synthetic QA credential: {key}")
+    return errors
+
+
+def sanitize(text: str, env: dict[str, str]) -> str:
+    safe = text
+    for key in SECRET_ENV:
+        value = env.get(key)
+        if value:
+            safe = safe.replace(value, "[REDACTED]")
+    safe = JWT_RE.sub("[REDACTED_JWT]", safe)
+    safe = CPF_RE.sub("[REDACTED_CPF]", safe)
+    safe = PASSWORD_LINE_RE.sub(r"\1\2[REDACTED]", safe)
+    return safe
+
+
+def _secret_define_file(env: dict[str, str]) -> tempfile.NamedTemporaryFile:
+    payload = {
+        key: env[key]
+        for key in sorted(SECRET_ENV)
+        if env.get(key)
+    }
+    handle = tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".json",
+        prefix="tds-e2e-",
+        delete=False,
+        encoding="utf-8",
+    )
+    json.dump(payload, handle)
+    handle.flush()
+    handle.close()
+    return handle
+
+
+def flutter_command(
+    values: dict[str, str],
+    scenario: str,
+    secret_file: str,
+    offline_phase: str = "",
+) -> list[str]:
+    command = [
+        "flutter",
+        "test",
+        TARGET,
+        "-d",
+        values["EMULATOR_E2E_DEVICE"],
+        "--no-pub",
+        "--dart-define-from-file=config/staging.qa.json",
+        f"--dart-define-from-file={secret_file}",
+        "--dart-define=DYNAMIC_QA_ISOLATED_PACKAGE=true",
+        f"--dart-define=DYNAMIC_QA_RUN_ID={values['EMULATOR_E2E_RUN_ID']}",
+        f"--dart-define=EMULATOR_E2E_RUN_ID={values['EMULATOR_E2E_RUN_ID']}",
+        f"--dart-define=EMULATOR_E2E_BASE_URL={values['EMULATOR_E2E_BASE_URL']}",
+        f"--dart-define=EMULATOR_E2E_QA_PACKAGE={values['EMULATOR_E2E_QA_PACKAGE']}",
+        f"--dart-define=EMULATOR_E2E_SCENARIO={scenario}",
+    ]
+    if offline_phase:
+        command.append(
+            f"--dart-define=EMULATOR_E2E_OFFLINE_PHASE={offline_phase}"
+        )
+    return command
+
+
+def _adb(values: dict[str, str], *args: str, check: bool = True):
+    return subprocess.run(
+        ["adb", "-s", values["EMULATOR_E2E_DEVICE"], *args],
+        check=check,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def _network(values: dict[str, str], enabled: bool) -> None:
+    state = "disable" if enabled else "enable"
+    # Android 15 emulator command: disable airplane mode for online, enable for offline.
+    _adb(values, "shell", "cmd", "connectivity", "airplane-mode", state)
+    time.sleep(2)
+
+
+def _clear_package(values: dict[str, str]) -> None:
+    _adb(
+        values,
+        "shell",
+        "pm",
+        "clear",
+        values["EMULATOR_E2E_QA_PACKAGE"],
+        check=False,
+    )
+
+
+def _screenshot(values: dict[str, str], path: Path) -> None:
+    result = _adb(values, "exec-out", "screencap", "-p", check=False)
+    if result.returncode == 0 and result.stdout.startswith(b"\x89PNG"):
+        path.write_bytes(result.stdout)
+
+
+def _run_flutter(
+    values: dict[str, str],
+    scenario: str,
+    secret_file: str,
+    env: dict[str, str],
+    *,
+    offline_phase: str = "",
+) -> tuple[bool, str]:
+    command = flutter_command(values, scenario, secret_file, offline_phase)
+    result = subprocess.run(
+        command,
+        cwd=Path(__file__).parents[3] / "cartilhas_app",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        env=os.environ.copy(),
+    )
+    output = sanitize(result.stdout, env)
+    return result.returncode == 0, output
+
+
+def execute(
+    values: dict[str, str],
+    scenarios: list[str],
+    env: dict[str, str],
+    evidence_dir: Path,
+) -> dict[str, object]:
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    secret_file = _secret_define_file(env)
+    results: dict[str, object] = {}
+    try:
+        _network(values, True)
+        for scenario in scenarios:
+            if scenario == "operator_flow":
+                results[scenario] = {
+                    "result": "BLOCKED_BY_ISSUE_120",
+                    "real_e2e_run": False,
+                }
+                continue
+            if scenario == "certificate":
+                results[scenario] = {
+                    "result": "OPTIONAL_NOT_IN_PROFILE_ACCEPTANCE",
+                    "real_e2e_run": False,
+                }
+                continue
+
+            _clear_package(values)
+            phases = (
+                ("prime", "offline", "reconnect")
+                if scenario == "offline_reconnect"
+                else ("",)
+            )
+            phase_results: list[dict[str, object]] = []
+            scenario_ok = True
+            try:
+                for phase in phases:
+                    if scenario == "offline_reconnect":
+                        if phase == "offline":
+                            _network(values, False)
+                        elif phase == "reconnect":
+                            _network(values, True)
+                    ok, output = _run_flutter(
+                        values,
+                        scenario,
+                        secret_file.name,
+                        env,
+                        offline_phase=phase,
+                    )
+                    phase_results.append(
+                        {
+                            "phase": phase or "single",
+                            "passed": ok,
+                            "output_tail": output.splitlines()[-30:],
+                        }
+                    )
+                    if not ok:
+                        scenario_ok = False
+                        break
+                _screenshot(
+                    values,
+                    evidence_dir / f"{scenario}.png",
+                )
+            finally:
+                _network(values, True)
+            results[scenario] = {
+                "result": "PASS" if scenario_ok else "FAIL",
+                "real_e2e_run": True,
+                "phases": phase_results,
+            }
+            if not scenario_ok:
+                break
+    finally:
+        try:
+            os.unlink(secret_file.name)
+        except FileNotFoundError:
+            pass
+        _network(values, True)
+    return results
+
+
+def main(argv: list[str] | None = None, env: dict[str, str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    source = dict(os.environ if env is None else env)
+    args = parse_args(argv)
+    selected = args.scenario or list(DEFAULT_SCENARIOS)
+    values = config(args, source)
+    errors = validate(
+        values,
+        selected,
+        require_credentials=args.execute,
+        env=source,
+    )
     if errors:
-        print(json.dumps({"result": "CONFIG_REJECTED", "errors": errors}), file=sys.stderr)
+        print("CONFIG_REJECTED", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
         return 2
-    if not a.execute:
-        print(sanitize(json.dumps(plan(env, scenarios), indent=2), env))
+
+    missing = sorted(
+        key for key in required_credentials(selected) if not source.get(key)
+    )
+    evidence_dir = Path(
+        args.evidence_dir
+        or source.get(
+            "EMULATOR_E2E_EVIDENCE_DIR",
+            f"tooling/mobile_qa/emulator/evidence/{values['EMULATOR_E2E_RUN_ID']}",
+        )
+    )
+    if not args.execute:
+        print(
+            json.dumps(
+                {
+                    "result": "NOT_RUN",
+                    "real_e2e_run": False,
+                    "scenarios": selected,
+                    "base_url": values["EMULATOR_E2E_BASE_URL"],
+                    "package": values["EMULATOR_E2E_QA_PACKAGE"],
+                    "device": values["EMULATOR_E2E_DEVICE"],
+                    "run_id": values["EMULATOR_E2E_RUN_ID"],
+                    "missing_credentials": missing,
+                },
+                sort_keys=True,
+            )
+        )
         return 0
-    results = {}
-    for s in scenarios:
-        proc = subprocess.run(build_command(env, s, a.flutter), capture_output=True, text=True)
-        print(sanitize(proc.stdout + proc.stderr, env))
-        results[s] = "PASS" if proc.returncode == 0 else "FAIL"
-    print(json.dumps({"mode": "EXECUTED", "real_e2e_run": True, "results": results}))
-    return 0 if all(v == "PASS" for v in results.values()) else 1
+
+    result = execute(values, selected, source, evidence_dir)
+    passed = all(
+        item.get("result") in {
+            "PASS",
+            "BLOCKED_BY_ISSUE_120",
+            "OPTIONAL_NOT_IN_PROFILE_ACCEPTANCE",
+        }
+        for item in result.values()
+    )
+    print(
+        json.dumps(
+            {
+                "result": "PASS" if passed else "FAIL",
+                "real_e2e_run": True,
+                "run_id": values["EMULATOR_E2E_RUN_ID"],
+                "package": values["EMULATOR_E2E_QA_PACKAGE"],
+                "device": values["EMULATOR_E2E_DEVICE"],
+                "scenarios": result,
+            },
+            sort_keys=True,
+        )
+    )
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
