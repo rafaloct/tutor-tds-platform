@@ -55,7 +55,13 @@ bash scripts/reset.sh
 bash scripts/bootstrap.sh
 bash scripts/smoke.sh
 git diff --check
+# Overflow horizontal real (host, Node>=22 + Edge; viewport emulado via CDP):
+node scripts/check-viewport-overflow.mjs --base http://127.0.0.1:8080
 ```
+
+Nao usar `msedge --headless --screenshot --window-size` como evidencia de
+viewport: no Windows a largura minima de janela (~500px) torna o PNG um
+recorte de um layout mais largo. O script acima emula o viewport exato.
 
 Staging, DNS, provider de analytics, importacao WordPress e producao permanecem
 fora deste modulo e exigem gates proprios.

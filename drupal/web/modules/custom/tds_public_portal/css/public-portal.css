@@ -22,6 +22,7 @@
   border: 1px solid #b7c7c1;
   border-radius: 0.5rem;
   background: #fff;
+  overflow-wrap: break-word;
 }
 
 .tds-public-actions a {
@@ -56,7 +57,7 @@
 .tds-card__meta div,
 .tds-course-facts div {
   display: grid;
-  grid-template-columns: minmax(7rem, 0.35fr) 1fr;
+  grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
   gap: 0.5rem;
 }
 
@@ -74,6 +75,7 @@
   padding: 0.75rem 1rem;
   border-left: 0.25rem solid #0b6e4f;
   background: #edf7f3;
+  overflow-wrap: break-word;
 }
 
 .tds-public-status--warning {
