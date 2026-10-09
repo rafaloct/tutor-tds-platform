@@ -294,6 +294,39 @@ class HarnessTests(unittest.TestCase):
             harness._cleanup_temp_dir(missing, attempts=2, delay=0.01)
         )
 
+    def test_package_inventory_parses_pm_output(self):
+        import subprocess
+        from unittest.mock import patch
+
+        fake = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout=(
+                "package:com.tutortds_cartilhas.dev.dynamicqa.r" + "a1" * 16 + "\n"
+                "package:com.tutortds_cartilhas.dev.dynamicqa.r" + "b2" * 16 + "\n"
+            ),
+            stderr="",
+        )
+        with patch.object(harness.subprocess, "run", return_value=fake):
+            packages, error = harness._package_inventory("emulator-5554")
+        self.assertIsNone(error)
+        self.assertEqual(len(packages), 2)
+        self.assertTrue(
+            all(p.startswith("com.tutortds_cartilhas") for p in packages)
+        )
+
+    def test_collateral_removed_excludes_own_package(self):
+        before = {"com.x.raaa", "com.x.rbbb"}
+        after = {"com.x.raaa"}
+        self.assertEqual(
+            harness._collateral_removed(before, after, "com.x.rbbb"),
+            [],
+        )
+        self.assertEqual(
+            harness._collateral_removed(before, set(), "com.x.rzzz"),
+            ["com.x.raaa", "com.x.rbbb"],
+        )
+
     def test_stop_server_tree_exits_sleeping_process(self):
         import subprocess
 

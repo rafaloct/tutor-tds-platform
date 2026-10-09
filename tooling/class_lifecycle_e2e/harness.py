@@ -631,6 +631,36 @@ def _execute(args: argparse.Namespace, root: Path) -> int:
     return flow_result
 
 
+def _package_inventory(device: str) -> tuple[set[str], str | None]:
+    try:
+        result = subprocess.run(
+            [
+                "adb", "-s", device, "shell",
+                "pm", "list", "packages", "com.tutortds_cartilhas",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return set(), str(exc)
+    if result.returncode != 0:
+        return set(), (result.stderr or "pm list packages failed").strip()
+    return {
+        line.removeprefix("package:").strip()
+        for line in result.stdout.splitlines()
+        if line.startswith("package:")
+    }, None
+
+
+def _collateral_removed(
+    before: set[str],
+    after: set[str],
+    own_package: str,
+) -> list[str]:
+    return sorted(before - after - {own_package})
+
+
 def _stop_server_tree(server: subprocess.Popen) -> None:
     if server.poll() is not None:
         return
@@ -700,6 +730,7 @@ def _run_isolated_flow(
                 port=_port(args.base_url),
                 log_path=server_log,
             )
+            packages_before, inventory_error = _package_inventory(args.device)
             flutter = subprocess.run(
                 build_flutter_command(args),
                 cwd=root / "cartilhas_app",
@@ -708,6 +739,18 @@ def _run_isolated_flow(
             )
             sys.stdout.write(flutter.stdout)
             sys.stderr.write(flutter.stderr)
+            packages_after, inventory_after_error = _package_inventory(
+                args.device
+            )
+            collateral = (
+                _collateral_removed(
+                    packages_before,
+                    packages_after,
+                    args.package,
+                )
+                if inventory_error is None and inventory_after_error is None
+                else []
+            )
             if flutter.returncode != 0:
                 server_tail = server_log.read_text(
                     encoding="utf-8",
@@ -719,6 +762,15 @@ def _run_isolated_flow(
                             "result": "FLUTTER_E2E_FAIL",
                             "returncode": flutter.returncode,
                             "qa_server_log_tail": server_tail,
+                            "collateral_removed": collateral,
+                            "inventory_errors": [
+                                e
+                                for e in (
+                                    inventory_error,
+                                    inventory_after_error,
+                                )
+                                if e
+                            ],
                         }
                     ),
                     file=sys.stderr,
@@ -746,6 +798,27 @@ def _run_isolated_flow(
                     file=sys.stderr,
                 )
                 return 7
+
+            if collateral:
+                print(
+                    json.dumps(
+                        {
+                            "result": "COLLATERAL_STATE_CHANGED",
+                            "removed_packages": collateral,
+                            "own_package": args.package,
+                            "inventory_errors": [
+                                e
+                                for e in (
+                                    inventory_error,
+                                    inventory_after_error,
+                                )
+                                if e
+                            ],
+                        }
+                    ),
+                    file=sys.stderr,
+                )
+                return 9
 
             print(
                 json.dumps(
