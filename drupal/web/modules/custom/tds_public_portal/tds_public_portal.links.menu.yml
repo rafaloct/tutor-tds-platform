@@ -1,0 +1,59 @@
+tds_public_portal.program:
+  title: Programa
+  route_name: tds_public_portal.program
+  menu_name: main
+  weight: 0
+
+tds_public_portal.catalog:
+  title: Cursos
+  route_name: tds_public_portal.catalog
+  menu_name: main
+  weight: 10
+
+tds_public_portal.news:
+  title: Noticias
+  route_name: tds_public_portal.news
+  menu_name: main
+  weight: 20
+
+tds_public_portal.events:
+  title: Agenda
+  route_name: tds_public_portal.events
+  menu_name: main
+  weight: 30
+
+tds_public_portal.materials:
+  title: Materiais
+  route_name: tds_public_portal.materials
+  menu_name: main
+  weight: 40
+
+tds_public_portal.faq:
+  title: FAQ
+  route_name: tds_public_portal.faq
+  menu_name: main
+  weight: 50
+
+tds_public_portal.contact:
+  title: Contato
+  route_name: tds_public_portal.contact
+  menu_name: main
+  weight: 60
+
+tds_public_portal.privacy:
+  title: Privacidade
+  route_name: tds_public_portal.privacy
+  menu_name: footer
+  weight: 0
+
+tds_public_portal.rights:
+  title: 'Direitos e exclusao'
+  route_name: tds_public_portal.rights
+  menu_name: footer
+  weight: 10
+
+tds_public_portal.accessibility:
+  title: Acessibilidade
+  route_name: tds_public_portal.accessibility
+  menu_name: footer
+  weight: 20

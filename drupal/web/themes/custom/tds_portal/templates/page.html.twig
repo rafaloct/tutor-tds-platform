@@ -4,13 +4,19 @@
  * Template de pagina do tema TDS Portal (fundacao DR-2).
  */
 #}
+<a class="tds-skip-link" href="#main-content">Ir para o conteudo principal</a>
+
 <div class="layout-container">
 
   <header role="banner" class="tds-header">
     {{ page.header }}
   </header>
 
-  {{ page.primary_menu }}
+  {% if page.primary_menu %}
+    <nav class="tds-primary-nav" aria-label="Navegacao principal">
+      {{ page.primary_menu }}
+    </nav>
+  {% endif %}
   {{ page.secondary_menu }}
   {{ page.breadcrumb }}
   {{ page.highlighted }}

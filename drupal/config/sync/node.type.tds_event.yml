@@ -1,0 +1,11 @@
+uuid: 7d34a97f-4bbf-4ed6-a516-6a5c14ec700f
+langcode: pt-br
+status: true
+dependencies: {  }
+name: Evento
+type: tds_event
+description: 'Item publico de agenda.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: false

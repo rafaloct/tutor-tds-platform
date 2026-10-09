@@ -153,8 +153,19 @@ Mudanças de config: editar no admin/drush, `drush cex`, commitar o diff.
   ausência de referência ao PostgreSQL Tutor.
 - `scripts/lint.sh` — `php -l`, PHPCS (Drupal+DrupalPractice), YAML, Twig.
 
+### Portal publico/editorial (DR-4)
+
+`web/modules/custom/tds_public_portal` entrega workflow editorial e consome
+somente a projecao publica read-only da FastAPI. O mesmo
+`TUTOR_API_BASE_URL` usado pelo gateway e validado fail-closed; o cliente nao
+envia Authorization. Consulte `docs/drupal/DR4_PUBLIC_PORTAL.md`.
+
+Rotas locais principais: `/portal`, `/cursos`, `/noticias`, `/agenda`,
+`/materiais`, `/faq` e `/sitemap.xml`.
+
 ## Status
 
-IMPLEMENTED/TESTED-LOCAL — fundação reproduzível em container local. Nada
-desta pasta conversa com a API Tutor TDS ainda; integração BFF é Issue
-posterior ao scaffold.
+IMPLEMENTED/TESTED-LOCAL — fundação reproduzível em container local. O gateway
+de sessao DR-3 e o catalogo publico DR-4 sao clientes HTTP server-side; nenhuma
+integracao acessa diretamente o banco Tutor. Staging/producao continuam gates
+separados.

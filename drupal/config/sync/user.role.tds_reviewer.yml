@@ -1,0 +1,26 @@
+uuid: 55ba92fa-5c10-42bc-9631-1be521c9e87b
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - workflows.workflow.tds_editorial
+  module:
+    - content_moderation
+    - node
+    - system
+id: tds_reviewer
+label: 'Revisor TDS'
+weight: 3
+is_admin: false
+permissions:
+  - 'access content'
+  - 'access content overview'
+  - 'edit any tds_event content'
+  - 'edit any tds_faq content'
+  - 'edit any tds_institutional_page content'
+  - 'edit any tds_news content'
+  - 'edit any tds_public_material content'
+  - 'use tds_editorial transition create_new_draft'
+  - 'use tds_editorial transition submit_for_review'
+  - 'view any unpublished content'
+  - 'view latest version'

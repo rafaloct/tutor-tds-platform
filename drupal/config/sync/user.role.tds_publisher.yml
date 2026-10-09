@@ -1,0 +1,27 @@
+uuid: 178350ea-6b25-431c-8fcb-2151e616798f
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - workflows.workflow.tds_editorial
+  module:
+    - content_moderation
+    - node
+    - system
+id: tds_publisher
+label: 'Publicador TDS'
+weight: 4
+is_admin: false
+permissions:
+  - 'access content'
+  - 'access content overview'
+  - 'edit any tds_event content'
+  - 'edit any tds_faq content'
+  - 'edit any tds_institutional_page content'
+  - 'edit any tds_news content'
+  - 'edit any tds_public_material content'
+  - 'use tds_editorial transition create_new_draft'
+  - 'use tds_editorial transition publish'
+  - 'use tds_editorial transition submit_for_review'
+  - 'view any unpublished content'
+  - 'view latest version'

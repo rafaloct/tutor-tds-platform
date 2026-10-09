@@ -9,6 +9,13 @@ from pathlib import Path
 import pytest
 
 
+CONTRACT_PATH = Path(__file__).resolve().parents[1] / "ops" / "staging_smoke_contract.py"
+CONTRACT_SPEC = importlib.util.spec_from_file_location("staging_smoke_contract", CONTRACT_PATH)
+assert CONTRACT_SPEC is not None and CONTRACT_SPEC.loader is not None
+smoke_contract = importlib.util.module_from_spec(CONTRACT_SPEC)
+CONTRACT_SPEC.loader.exec_module(smoke_contract)
+
+
 MODULE_PATH = (
     Path(__file__).resolve().parents[1]
     / "ops"
@@ -48,6 +55,27 @@ def seed_env(path: Path, *, duplicate_token: bool = False) -> None:
 def test_validate_staging_base_url_fails_closed(url: str) -> None:
     with pytest.raises(RuntimeError, match="non-staging"):
         refresh_tool.validate_staging_base_url(url)
+
+
+def test_canonical_smoke_target_rejects_legacy_and_production() -> None:
+    assert smoke_contract.validate_canonical_staging_base_url(
+        "https://tutor-tds-staging.fastapicloud.dev/"
+    ) == "https://tutor-tds-staging.fastapicloud.dev"
+    for url in (
+        "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+        "https://ead.ipexdesenvolvimento.cloud/tutor-api",
+        "https://tutor-tds-staging.fastapicloud.dev?unsafe=true",
+        "http://tutor-tds-staging.fastapicloud.dev",
+    ):
+        with pytest.raises(RuntimeError, match="non-canonical"):
+            smoke_contract.validate_canonical_staging_base_url(url)
+
+
+def test_fixture_selector_accepts_only_disposable_staging_ids() -> None:
+    assert smoke_contract.validate_fixture_class_id("staging-qa-class") == "staging-qa-class"
+    for fixture_id in ("production-class", "staging_qa_class", "staging-qa-", ""):
+        with pytest.raises(RuntimeError, match="non-disposable"):
+            smoke_contract.validate_fixture_class_id(fixture_id)
 
 
 def test_replace_token_is_atomic_unique_and_keeps_mode_0600(

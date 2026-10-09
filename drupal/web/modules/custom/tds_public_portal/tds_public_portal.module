@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Hooks do portal publico Tutor TDS.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_theme().
+ */
+function tds_public_portal_theme(): array {
+  return [
+    'tds_public_catalog' => [
+      'variables' => [
+        'courses' => [],
+        'state' => 'empty',
+        'embedded' => FALSE,
+      ],
+      'template' => 'tds-public-catalog',
+    ],
+    'tds_public_course' => [
+      'variables' => [
+        'course' => [],
+        'state' => 'unavailable',
+      ],
+      'template' => 'tds-public-course',
+    ],
+  ];
+}

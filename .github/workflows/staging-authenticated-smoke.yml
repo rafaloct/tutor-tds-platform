@@ -7,6 +7,10 @@ on:
         description: Type RUN_STAGING_AUTHENTICATED_SMOKE
         required: true
         type: string
+      fixture_class_id:
+        description: Disposable isolated staging fixture class ID
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -24,72 +28,25 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - name: Configure pinned SSH host identity
+      - name: Run read-only authenticated staging smoke
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
-        run: |
-          install -d -m 700 "$HOME/.ssh"
-          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
-          chmod 600 "$HOME/.ssh/id_ed25519"
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
-          chmod 600 "$HOME/.ssh/known_hosts"
-
-      - id: remote
-        name: Create private remote runner directory
-        env:
-          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
-          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
-          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
-        run: |
-          path="$(ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST"             'umask 077; mktemp -d /tmp/tutor-tds-auth-smoke.XXXXXX')"
-          case "$path" in
-            /tmp/tutor-tds-auth-smoke.*) ;;
-            *) echo "Unexpected remote temporary path." >&2; exit 2 ;;
-          esac
-          echo "path=$path" >> "$GITHUB_OUTPUT"
-
-      - name: Copy reviewed smoke runners
-        env:
-          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
-          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
-          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
-          REMOTE_TMP: ${{ steps.remote.outputs.path }}
-        run: |
-          scp -P "$SSH_PORT"             api/ops/staging_evidence_session_refresh.py             api/ops/staging_role_smoke.py             api/ops/staging_evidence_smoke.py             api/ops/smoke_presence_staging.py             api/ops/smoke_course_editor_staging.py             "$SSH_USER@$SSH_HOST:$REMOTE_TMP/"
-
-      - name: Run authenticated staging smoke without exporting credentials
-        env:
-          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
-          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
-          SSH_PORT: ${{ secrets.STAGING_SSH_PORT }}
-          REMOTE_TMP: ${{ steps.remote.outputs.path }}
+          STAGING_SMOKE_ADMIN_CPF: ${{ secrets.STAGING_SMOKE_ADMIN_CPF }}
+          STAGING_SMOKE_ADMIN_PASSWORD: ${{ secrets.STAGING_SMOKE_ADMIN_PASSWORD }}
+          STAGING_SMOKE_TEACHER_CPF: ${{ secrets.STAGING_SMOKE_TEACHER_CPF }}
+          STAGING_SMOKE_TEACHER_PASSWORD: ${{ secrets.STAGING_SMOKE_TEACHER_PASSWORD }}
+          STAGING_SMOKE_MONITOR_CPF: ${{ secrets.STAGING_SMOKE_MONITOR_CPF }}
+          STAGING_SMOKE_MONITOR_PASSWORD: ${{ secrets.STAGING_SMOKE_MONITOR_PASSWORD }}
+          STAGING_SMOKE_STUDENT_CPF: ${{ secrets.STAGING_SMOKE_STUDENT_CPF }}
+          STAGING_SMOKE_STUDENT_PASSWORD: ${{ secrets.STAGING_SMOKE_STUDENT_PASSWORD }}
+          STAGING_SMOKE_BASE_URL: https://tutor-tds-staging.fastapicloud.dev
+          STAGING_SMOKE_CLASS_ID: ${{ inputs.fixture_class_id }}
         shell: bash
         run: |
           set +e
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST"             "bash -s -- '$REMOTE_TMP'"             > "$RUNNER_TEMP/authenticated-smoke.raw.log" 2>&1 <<'REMOTE'
           set -euo pipefail
-          remote_tmp="$1"
-          seed="/opt/tutor-tds-staging/.staging-seed.env"
-          base="https://ead.ipexdesenvolvimento.cloud/tutor-staging-api"
-          cleanup() {
-            rm -rf -- "$remote_tmp"
-          }
-          trap cleanup EXIT
-          test -f "$seed"
-          test "$(stat -c '%a' "$seed")" = "600"
-          test "$(stat -c '%u' "$seed")" = "$(id -u)"
-          set -a
-          . "$seed"
-          set +a
-          python3 "$remote_tmp/staging_role_smoke.py" "$base"
-          python3 "$remote_tmp/staging_evidence_session_refresh.py" "$base" "$seed"
-          python3 "$remote_tmp/staging_evidence_smoke.py" "$base"
-          (
-            cd "$remote_tmp"
-            python3 smoke_presence_staging.py --create-synthetic-session
-          )
-          REMOTE
+          python3 api/ops/staging_role_smoke.py \
+            "$STAGING_SMOKE_BASE_URL" "$STAGING_SMOKE_CLASS_ID" \
+            > "$RUNNER_TEMP/authenticated-smoke.raw.log" 2>&1
           status=$?
           set -e
 
@@ -120,6 +77,9 @@ jobs:
             echo "workflow_run_id=$GITHUB_RUN_ID"
             echo "workflow_run_attempt=$GITHUB_RUN_ATTEMPT"
             echo "environment=staging"
+            echo "target=https://tutor-tds-staging.fastapicloud.dev"
+            echo "fixture_class_id=${{ inputs.fixture_class_id }}"
+            echo "scope=read-only-authentication"
           } > "$evidence/metadata.txt"
           (
             cd "$evidence"

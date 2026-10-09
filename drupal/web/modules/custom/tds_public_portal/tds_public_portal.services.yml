@@ -1,0 +1,9 @@
+services:
+  tds_public_portal.catalog_client:
+    class: Drupal\tds_public_portal\Client\PublicCatalogClient
+    arguments:
+      - '@http_client'
+      - '@settings'
+      - '@uuid'
+      - '@datetime.time'
+      - '@cache.data'
