@@ -9,6 +9,11 @@ import sys
 import urllib.error
 import urllib.request
 
+from staging_smoke_contract import (
+    validate_canonical_staging_base_url,
+    validate_fixture_class_id,
+)
+
 
 def request(
     base_url: str,
@@ -48,9 +53,10 @@ def required(name: str) -> str:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        raise SystemExit("Usage: staging_role_smoke.py BASE_URL")
-    base_url = sys.argv[1]
+    if len(sys.argv) != 3:
+        raise SystemExit("Usage: staging_role_smoke.py BASE_URL FIXTURE_CLASS_ID")
+    base_url = validate_canonical_staging_base_url(sys.argv[1])
+    fixture_class_id = validate_fixture_class_id(sys.argv[2])
     tokens: dict[str, str] = {}
     for role in ("ADMIN", "TEACHER", "MONITOR", "STUDENT"):
         session = request(
@@ -58,8 +64,8 @@ def main() -> None:
             "/auth/login",
             method="POST",
             body={
-                "cpf": required(f"STAGING_SEED_{role}_CPF"),
-                "password": required(f"STAGING_SEED_{role}_PASSWORD"),
+                "cpf": required(f"STAGING_SMOKE_{role}_CPF"),
+                "password": required(f"STAGING_SMOKE_{role}_PASSWORD"),
             },
         )
         if not isinstance(session, dict) or not isinstance(
@@ -80,7 +86,7 @@ def main() -> None:
     for role in ("TEACHER", "MONITOR"):
         dashboard = request(
             base_url,
-            "/classes/staging-qa-class/dashboard",
+            f"/classes/{fixture_class_id}/dashboard",
             token=tokens[role],
         )
         if not isinstance(dashboard, dict) or not isinstance(
@@ -90,10 +96,10 @@ def main() -> None:
 
     sessions = request(
         base_url,
-        "/classes/staging-qa-class/sessions/open",
+        f"/classes/{fixture_class_id}/sessions/open",
         token=tokens["STUDENT"],
     )
-    if not isinstance(sessions, dict) or sessions.get("id") != "staging-qa-class-session":
+    if not isinstance(sessions, dict) or not isinstance(sessions.get("id"), str):
         raise RuntimeError("Synthetic open session was not recovered")
     if "checkin_token" in sessions and sessions["checkin_token"] is not None:
         raise RuntimeError("Read endpoint exposed a check-in token")
