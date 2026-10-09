@@ -7,7 +7,12 @@
 #
 # Uso host (em drupal/):  bash scripts/ci/verify-stack.sh
 # Opcionais (env):
-#   DRUPAL_CI_PROJECT=tds-drupal-ci    nome do projeto Compose de verificacao
+#   DRUPAL_CI_PROJECT=tds-drupal-ci    nome do projeto Compose de verificacao;
+#                                    SOMENTE 'tds-drupal-ci' ou
+#                                    'tds-drupal-ci-<suffix>' sao aceitos —
+#                                    'tds-drupal' (stack de dev) e
+#                                    'tds-drupal-restore-*' sao rejeitados
+#                                    antes de qualquer chamada docker
 #   DRUPAL_HTTP_PORT=18080             porta do stack de verificacao
 #   DRUPAL_RESTORE_PORT=18081          porta do projeto de rehearsal
 #   COMPOSE_BUILDER=drupal163          builder buildx (hosts Windows/Docker
@@ -21,6 +26,19 @@ cd "$(dirname "$0")/../.."
 PROJECT="${DRUPAL_CI_PROJECT:-tds-drupal-ci}"
 export DRUPAL_HTTP_PORT="${DRUPAL_HTTP_PORT:-18080}"
 export DRUPAL_RESTORE_PORT="${DRUPAL_RESTORE_PORT:-18081}"
+
+# Fail-closed ANTES de instalar o trap EXIT (que roda `compose down -v`):
+# o projeto de verificacao e sempre descartavel e dedicado. Um override
+# arbitrario para "tds-drupal" derrubaria a stack de dev e seu volume —
+# rejeitado aqui, junto com o prefixo de rehearsal "tds-drupal-restore-*"
+# (sem alias entre lanes) e qualquer nome fora de tds-drupal-ci[-<suffix>].
+case "$PROJECT" in
+  tds-drupal-ci|tds-drupal-ci-?*) ;;
+  *) echo "[ci] FAIL: DRUPAL_CI_PROJECT='$PROJECT' invalido — permitido somente 'tds-drupal-ci' ou 'tds-drupal-ci-<suffix>'; 'tds-drupal' e 'tds-drupal-restore-*' sao proibidos" >&2; exit 1 ;;
+esac
+[[ "$PROJECT" =~ ^[a-z0-9][a-z0-9_-]*$ ]] \
+  || { echo "[ci] FAIL: nome de projeto Compose invalido: '$PROJECT'" >&2; exit 1; }
+
 COMPOSE=(docker compose -p "$PROJECT" -f docker-compose.yml)
 
 cleanup() {

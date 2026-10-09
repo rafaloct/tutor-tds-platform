@@ -43,7 +43,11 @@ drupal/scripts/ops/
   config ativa; `DRUPAL_DRIFT_ALLOW` permite allowlist explícita e justificada.
 - `verify-stack.sh` usa projeto `tds-drupal-ci` + porta `18080` e o rehearsal
   `tds-drupal-restore-<pid>` + `18081`: nunca toca o projeto `tds-drupal` do
-  desenvolvedor. Hosts Windows/Docker Desktop com o bug containerd precisam de
+  desenvolvedor. Ambos os overrides de nome (`DRUPAL_CI_PROJECT`,
+  `DRUPAL_RESTORE_PROJECT`) são fail-closed por prefixo dedicado
+  (`tds-drupal-ci[-*]` / `tds-drupal-restore-*`) validado ANTES do trap
+  `down -v` — `tds-drupal` e aliases entre lanes são rejeitados sem qualquer
+  chamada docker. Hosts Windows/Docker Desktop com o bug containerd precisam de
   `COMPOSE_BUILDER=drupal163` (builder `docker-container`) — ver
   `drupal/README.md`.
 - `backup.sh` escreve em `drupal/backups/<UTC-ts>/` (gitignored) com
@@ -51,10 +55,16 @@ drupal/scripts/ops/
   `config.tar.gz`, `manifest.env` (SHA do commit, versão Drupal, timestamp) e
   `SHA256SUMS`. Credenciais nunca saem do container: usuário/senha são lidos
   do ambiente do serviço `db` dentro do próprio exec.
-- `restore-rehearsal.sh` confere `SHA256SUMS`, sobe `db` descartável, aplica o
-  dump, sobe `web` com a mesma imagem, restaura `files/` como `www-data`,
-  `cache:rebuild`, smoke 5/5 e drift limpo — prova do aceite da Issue
-  ("restore descartável sobe o mesmo portal") sem depender do WordPress.
+- `restore-rehearsal.sh` exige os 5 artefatos (`db.sql.gz`, `files.tar.gz`,
+  `config.tar.gz`, `manifest.env`, `SHA256SUMS` cobrindo exatamente os 3
+  arquivos) e confere os checksums ANTES de qualquer mutação Docker — payload
+  ausente ou corrompido aborta fail-closed. Extrai `config.tar.gz` num stage
+  descartável em `backups/` e o monta read-only por cima do bind-mount de dev
+  `./config` via compose override gerado só no projeto efêmero: o drift check
+  valida o config RESTAURADO, não o checkout corrente. Sobe `db` descartável,
+  aplica o dump, sobe `web` com a mesma imagem, restaura `files/` como
+  `www-data`, `cache:rebuild`, smoke 5/5 e drift limpo — prova do aceite da
+  Issue ("restore descartável sobe o mesmo portal") sem depender do WordPress.
 - `evidence.sh` emite Markdown somente com campos allowlisted (git SHA,
   branch, containers, `GET /health`+`Cache-Control`, `drush status` restrito a
   `drupal-version/bootstrap/db-driver/php-version/drush-version`). Nenhum env,
