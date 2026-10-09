@@ -1,0 +1,27 @@
+Tutor TDS QA — AVD diagnostic (worktree rc-reconverged-20261009, HEAD af0b5ba)
+=============================================================================
+OBSERVED (2026-10-09, AVD tutor_tds_remote_catalog_qa / emulator-5554,
+sdk_gtablet_x86_64 API 35 user build — NAO e o Pixel_8_Pro do LARGeo):
+
+1. Debug APK built from this branch (flutter-3.44.9) installs and renders the
+   HOME screen fine: persisted session shows "Olá, 61999990000!" and course
+   catalog. UI tree captured (qa-ui-tree-af0b5ba.xml, 13KB).
+2. Tap "Perguntar ao Tutor" (GenUIAssistantScreen route) -> screen turns BLACK,
+   uiautomator tree collapses to ~1.4KB, app stops rendering (8 frames total).
+3. Android InputDispatcher log: "Not sending touch gesture to MainActivity
+   because it has config NO_INPUT_CHANNEL" — the window lost its input channel.
+   ANR files generated at 14:08-14:18 (emulator clock 10-08).
+4. ANR trace (bugreport, pid 6409): Android main thread idle in epoll_pwait —
+   NOT compute-blocked. Flutter engine thread list lacks "1.ui" and
+   "1.platform"; only "1.io" and "1.raster" remain. No Dart exception, no
+   tombstone for the app pid (only com.google.android.bluetooth crashes).
+5. Same pattern repeats after force-stop+relaunch (home OK -> tap -> black).
+   Second AVD (Medium_Phone_API_36.1) refused to boot past "offline" — the
+   class of failure is environment/emulator-level, consistent with #184.
+
+ROOT CAUSE (likely): engine/platform-surface failure on this tablet image —
+NOT provably app-code. The #185 Tutor UI changes do not appear in the failure
+path (initState unchanged; no red error screen; frame pipeline dies).
+
+BOUNDARY: authorized QA AVD for release evidence is Pixel_8_Pro on LARGeo;
+this tablet AVD cannot serve as final E2E target. Evidence kept local.

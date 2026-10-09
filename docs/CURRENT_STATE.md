@@ -534,3 +534,23 @@ OBSERVED:
 - Harness class_lifecycle: 18/18 testes locais.
 BLOCKED (human): aprovacao explicita de um run-id 32-hex para
   `qa_create_accounts` na EAD staging; demais gates inalterados.
+
+## 2026-10-09 (continuacao 3): diagnostico AVD — reprodução do padrao ANR
+
+OBSERVED (AVD `tutor_tds_remote_catalog_qa`/emulator-5554, tablet x86_64 API 35):
+- APK debug desta branch (`af0b5ba`) instala e renderiza HOME com sessao
+  persistida (usuario `61999990000`) — primeiro frame OK neste build.
+- Tap em "Perguntar ao Tutor" -> tela PRETA, semantica colapsa, apenas 8 frames;
+  InputDispatcher: `NO_INPUT_CHANNEL` na MainActivity; ANR gravado (14:18,
+  relogio do emulador 10-08); thread `1.ui` ausente no trace — falha de
+  engine/superficie, nao excecao Dart nem bloqueio do main thread.
+- Reproduzivel apos force-stop+relaunch. `Medium_Phone_API_36.1` nao passou de
+  offline — duas tentativas esgotadas; parada por protocolo.
+- APK QA buildado com staging real (`TUTOR_GATEWAY_URL=tutor-tds-gateway-
+  staging.tdsipex.workers.dev`) — prova ponta-a-ponta do gate #182.
+- Evidencias: `docs/production/evidence/qa-avd-anr-diagnostic-af0b5ba.txt`,
+  `qa-ui-tree-af0b5ba.xml`, `qa-first-frame-af0b5ba.png`.
+BLOCKED: E2E autenticado exige o AVD Pixel_8_Pro do LARGeo (alvo autorizado) —
+  esta maquina so tem imagens tablet/phone genericas; a falha observada e de
+  classe emulador/superficie e provavelmente a mesma da #184, nao provada como
+  defeito do app.
