@@ -1,0 +1,24 @@
+uuid: eb18bd84-2b40-4ef3-b39c-e88f2ed65ae8
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - field.storage.node.body
+    - node.type.tds_event
+  module:
+    - text
+id: node.tds_event.body
+field_name: body
+entity_type: node
+bundle: tds_event
+label: Descricao
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: true
+  required_summary: false
+  allowed_formats: {  }
+field_type: text_with_summary

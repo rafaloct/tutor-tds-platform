@@ -1,0 +1,14 @@
+name: 'TDS Public Portal'
+type: module
+description: 'Superficie publica/editorial Drupal e adapter read-only do catalogo Tutor TDS.'
+package: 'Tutor TDS'
+core_version_requirement: ^11
+dependencies:
+  - drupal:content_moderation
+  - drupal:datetime
+  - drupal:link
+  - drupal:node
+  - drupal:options
+  - drupal:taxonomy
+  - drupal:text
+  - drupal:workflows

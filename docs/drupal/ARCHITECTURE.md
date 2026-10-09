@@ -249,3 +249,14 @@ Nenhum compartilhamento de banco, secrets ou sessões entre ambientes.
   rotas `/admin/*` são admin global e ficam fora do MVP do portal.
 - Webhooks Chatwoot→FastAPI, gamificação (só projeção futura da API), produção,
   DNS, secrets e qualquer escrita em `cartilhas_app/**`.
+
+## 10. Implementacao DR-4
+
+O modulo `drupal/web/modules/custom/tds_public_portal` implementa localmente a
+superficie publica/editorial da Issue #165. O catalogo usa exclusivamente
+`/public/courses*`, com allowlist de campos, cache curto isolado por ambiente e
+fallback stale limitado. Drupal continua autoridade somente do conteudo
+editorial. Detalhes, testes e limites estao em `DR4_PUBLIC_PORTAL.md`.
+
+Isto nao altera os estados BLOCKED G2/G6, nao prova staging e nao autoriza
+merge, DNS, analytics externo ou producao.

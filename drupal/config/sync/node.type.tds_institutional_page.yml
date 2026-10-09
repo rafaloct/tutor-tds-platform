@@ -1,0 +1,11 @@
+uuid: 163d0ca3-4966-4aa7-906e-a3143f2b7811
+langcode: pt-br
+status: true
+dependencies: {  }
+name: 'Pagina institucional'
+type: tds_institutional_page
+description: 'Conteudo institucional publico com chave fixa; nao armazena dado academico.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: false

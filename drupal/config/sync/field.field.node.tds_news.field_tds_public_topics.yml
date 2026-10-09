@@ -1,0 +1,29 @@
+uuid: f2c2bcc2-53fa-4cad-8a17-d0b6082f9a61
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tds_public_topics
+    - node.type.tds_news
+    - taxonomy.vocabulary.tds_public_topics
+id: node.tds_news.field_tds_public_topics
+field_name: field_tds_public_topics
+entity_type: node
+bundle: tds_news
+label: Topicos
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      tds_public_topics: tds_public_topics
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

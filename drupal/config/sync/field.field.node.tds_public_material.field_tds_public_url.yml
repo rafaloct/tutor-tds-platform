@@ -1,0 +1,23 @@
+uuid: dc976383-1609-4da4-9cdd-4818a8d9daf3
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_tds_public_url
+    - node.type.tds_public_material
+  module:
+    - link
+id: node.tds_public_material.field_tds_public_url
+field_name: field_tds_public_url
+entity_type: node
+bundle: tds_public_material
+label: 'URL publica aprovada'
+description: 'Somente recurso aprovado para publicacao; nunca use storage ID privado.'
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 1
+  link_type: 16
+field_type: link

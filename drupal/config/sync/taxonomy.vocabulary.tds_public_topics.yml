@@ -1,0 +1,9 @@
+uuid: 8bd604ca-c50c-477b-984d-a7e8d54174cc
+langcode: pt-br
+status: true
+dependencies: {  }
+name: 'Topicos publicos'
+vid: tds_public_topics
+description: 'Classificacao editorial; nunca representa estado academico.'
+weight: 0
+new_revision: false

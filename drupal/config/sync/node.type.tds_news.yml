@@ -1,0 +1,11 @@
+uuid: 2be0e961-91df-48d2-b335-ac61987550f4
+langcode: pt-br
+status: true
+dependencies: {  }
+name: Noticia
+type: tds_news
+description: 'Noticia editorial publica do Tutor TDS.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true
