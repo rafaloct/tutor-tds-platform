@@ -1,5 +1,7 @@
 import argparse
 import json
+import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -263,6 +265,51 @@ class HarnessTests(unittest.TestCase):
                 ),
                 3,
             )
+
+    def test_cleanup_temp_dir_retries_locked_log_and_recovers(self):
+        temp = Path(tempfile.mkdtemp(prefix="tds-cleanup-e2e-"))
+        try:
+            log = temp / "qa-server.log"
+            log.write_text("tail")
+            if os.name == "nt":
+                handle = log.open("r")
+                try:
+                    error = harness._cleanup_temp_dir(
+                        temp, attempts=2, delay=0.01
+                    )
+                    self.assertIsNotNone(error)
+                    self.assertTrue(temp.exists())
+                finally:
+                    handle.close()
+            self.assertIsNone(
+                harness._cleanup_temp_dir(temp, attempts=2, delay=0.01)
+            )
+            self.assertFalse(temp.exists())
+        finally:
+            shutil.rmtree(temp, ignore_errors=True)
+
+    def test_cleanup_temp_dir_missing_is_noop(self):
+        missing = Path(tempfile.gettempdir()) / "tds-cleanup-e2e-absent"
+        self.assertIsNone(
+            harness._cleanup_temp_dir(missing, attempts=2, delay=0.01)
+        )
+
+    def test_stop_server_tree_exits_sleeping_process(self):
+        import subprocess
+
+        command = (
+            ["powershell", "-NoProfile", "-Command", "Start-Sleep -Seconds 60"]
+            if os.name == "nt"
+            else ["sleep", "60"]
+        )
+        process = subprocess.Popen(command)
+        try:
+            harness._stop_server_tree(process)
+            self.assertIsNotNone(process.poll())
+        finally:
+            if process.poll() is None:
+                process.kill()
+                process.wait()
 
 
 if __name__ == "__main__":
