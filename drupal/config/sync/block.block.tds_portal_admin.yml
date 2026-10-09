@@ -1,0 +1,27 @@
+uuid: 4860257c-e5a4-41cc-9273-4e1d7fc000d9
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.admin
+  module:
+    - system
+  theme:
+    - tds_portal
+_core:
+  default_config_hash: O-D8Nl1TR7UCNonzFkR4yexcwpIbqT5arx6HdRFMzYU
+id: tds_portal_admin
+theme: tds_portal
+region: sidebar_first
+weight: 1
+provider: null
+plugin: 'system_menu_block:admin'
+settings:
+  id: 'system_menu_block:admin'
+  label: Administration
+  label_display: visible
+  provider: system
+  level: 1
+  depth: null
+  expand_all_items: false
+visibility: {  }

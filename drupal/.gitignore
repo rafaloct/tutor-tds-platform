@@ -1,0 +1,42 @@
+# Dependencias geradas pelo Composer
+/vendor/
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/libraries/
+/drush/contrib/
+/drush/Commands/contrib/
+
+# Arquivos do webroot gerados pelo drupal/core-composer-scaffold
+/web/autoload.php
+/web/index.php
+/web/robots.txt
+/web/update.php
+/web/.htaccess
+/web/.csslintrc
+/web/.eslintignore
+/web/.eslintrc.json
+/web/.ht.router.php
+/web/example.gitignore
+/web/sites/README.txt
+/web/sites/development.services.yml
+/web/sites/default/default.settings.php
+/web/sites/default/default.services.yml
+/web/sites/default/settings.local.php
+
+# Arquivos enviados por usuarios e caches do Drupal
+/web/sites/*/files/
+/web/sites/*/private/
+/web/sites/*/translations/
+
+# Ambiente local e segredos (ver .env.example)
+.env
+.env.*
+!.env.example
+
+# Saida de testes e ferramentas
+/phpunit.xml
+/phpcs.xml
+/.phpunit.cache/
+/.phpunit.result.cache

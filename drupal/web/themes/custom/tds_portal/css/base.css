@@ -1,0 +1,29 @@
+/**
+ * Tema base TDS Portal — fundacao DR-2.
+ * Apenas reset minimo e marca tipografica; identidade visual final depende
+ * de digest Stitch inspecionado (AGENTS.md).
+ */
+
+:root {
+  --tds-color-primary: #0b6e4f;
+  --tds-color-text: #1b1b1b;
+  --tds-color-bg: #ffffff;
+}
+
+body {
+  margin: 0;
+  color: var(--tds-color-text);
+  background: var(--tds-color-bg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.layout-container {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+a {
+  color: var(--tds-color-primary);
+}

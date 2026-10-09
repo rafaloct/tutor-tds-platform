@@ -1,0 +1,20 @@
+uuid: de4a4fa3-6005-42f1-a546-aa4a417086db
+langcode: en
+status: true
+dependencies:
+  theme:
+    - tds_portal
+_core:
+  default_config_hash: ABoKnlk20KHqZRw_2Qr4EvaFvH4lnQ2nuhunHeE1JIU
+id: tds_portal_local_actions
+theme: tds_portal
+region: content
+weight: -10
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility: {  }

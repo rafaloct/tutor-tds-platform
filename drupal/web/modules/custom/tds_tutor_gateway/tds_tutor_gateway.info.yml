@@ -1,0 +1,8 @@
+name: 'TDS Tutor Gateway'
+type: module
+description: 'BFF de sessão web para a API Tutor TDS; tokens permanecem server-side.'
+package: 'Tutor TDS'
+core_version_requirement: ^11
+dependencies:
+  - drupal:system
+  - drupal:user

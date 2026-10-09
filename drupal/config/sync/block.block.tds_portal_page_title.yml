@@ -1,0 +1,20 @@
+uuid: 0826aced-aa52-41d2-867c-8f2fad2a94c9
+langcode: en
+status: true
+dependencies:
+  theme:
+    - tds_portal
+_core:
+  default_config_hash: Oh72CHUkp6cj6dbrXMK2hzCsM05w9cHVoD22rMLQUfk
+id: tds_portal_page_title
+theme: tds_portal
+region: content
+weight: -30
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  label_display: '0'
+  provider: core
+visibility: {  }
