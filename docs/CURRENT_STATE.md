@@ -457,3 +457,35 @@ BLOCKED (human gates, inalterados):
   staging nem ponte de login segura. Não usar harness com `--dart-define` de senhas.
 - `PRODUCTION_RELEASE_READY=false`; produção `/version`/`/live` 404; schema,
   backup/restore e proveniência não provados. AAB/Play fora de escopo.
+
+## 2026-10-09 (configuração remota autorizada): auditoria Cloudflare + AnythingLLM staging isolado
+
+OBSERVED:
+- OAuth wrangler `tdsdados@gmail.com` ativo (workers/workers_routes/workers_kv write,
+  zone read, connectivity admin; SEM dns write nem zone edit).
+- Auditoria remota: prod `tutor-tds-gateway` (v`254148a8`) tem KV CERTIFICATES
+  `7d13364e…` + 3 secrets corretos. Staging `tutor-tds-gateway-staging` (v`08fdea1c`)
+  sem KV/secret de certificado, MAS `ANYTHING_LLM_BASE_URL` apontava para o
+  AnythingLLM de produção com workspace `tds-qa-legacy-unbound`.
+- Túnel `tds-ai-staging` já existia (id `0f03520c`, cfd_tunnel, status down, nunca
+  conectado). Token não recuperável via wrangler; hostname público não configurado.
+- VPS acessível via SSH alias `tutor-tds-vps` (root@46.202.150.132). Dokploy HTTP
+  na porta 3000 não respondeu desta rede; `dokploy.` não resolve em DNS.
+- Provisionado no VPS `/opt/tutor-tds-ai-staging/` (0600): compose do pacote,
+  rede `tutor-tds-ai-staging_tds_ai_staging`, volume dedicado, porta apenas
+  127.0.0.1:3002. AnythingLLM staging UP, multi-user ativado, admin
+  `tds-qa-admin` e API key `tds-qa-worker` gravados em `.env` host-only.
+  Workspaces criadas: `tds-qa-default`, `tds-qa-ctx-a-v1`, `tds-qa-ctx-b-v1`
+  (slugs iguais). Nenhum dado/DB/chave de produção copiado.
+- MCP pre-condições: na EAD staging (`ead…/tutor-staging-api`) admin gerenciado
+  autentica (role=admin) e `staging-qa-program` existe; `CPF_ACTIVATION_REQUIRED`
+  ausente → default false. Na fastapicloud staging o seed do VPS dá 401 e o
+  programa é `qa-program` — MCP pinado para fastapicloud.dev não casa com a
+  boundary EAD escolhida pelo pacote zero-config.
+BLOCKED (human):
+- Token do túnel + hostname `ia-tutor-staging` → `http://anythingllm-staging:3001`
+  no Zero Trust (dashboard) — depois subo `cloudflared-staging` e o Worker.
+- Chave de provider de modelo dedicada ao staging AnythingLLM (não copiar prod).
+- Deploy `wrangler deploy --env staging` + `secret put` só depois do hostname vivo.
+- CLOUDFLARE_API_TOKENs por ambiente no GitHub; decisão sobre URL do MCP
+  (EAD vs fastapicloud) pois o código pin da URL exige ajuste.
