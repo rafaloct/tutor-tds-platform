@@ -1,0 +1,4 @@
+# Issue 159 / PR 160: reviewed non-secret SHA-256 of auth_repository.dart.
+# Exact historical commit+path+rule+line only; no wildcard or rule disabled.
+# Recomputed with git show ff7d05f:cartilhas_app/lib/features/auth/data/auth_repository.dart | sha256sum.
+ff7d05f6ef339baa71bbf2ec5a7052d9b1dfacb3:docs/production/evidence/checkin-auth-domain-401-2026-10-07.json:generic-api-key:16
