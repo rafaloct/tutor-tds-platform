@@ -489,3 +489,28 @@ BLOCKED (human):
 - Deploy `wrangler deploy --env staging` + `secret put` só depois do hostname vivo.
 - CLOUDFLARE_API_TOKENs por ambiente no GitHub; decisão sobre URL do MCP
   (EAD vs fastapicloud) pois o código pin da URL exige ajuste.
+
+## 2026-10-09 (continuacao): provider AnythingLLM + gate Gradle #182
+
+OBSERVED:
+- AnythingLLM staging: `SEED_ADMIN` (`.staging-seed.env`) autentica na EAD staging
+  (role=admin) - seed file do MCP e compativel com a boundary EAD.
+- Provider configurado via `POST /api/v1/system/update-env` (chaves amigaveis
+  KEY_MAPPING; nomes de env crus sao ignorados com newValues={}):
+  `LLMProvider=ollama`, `OllamaLLMBasePath=http://172.17.0.1:11434`,
+  `OllamaLLMModelPref=qwen2.5:latest`, token limit 8192. AnythingLLM alcanca o
+  ollama compartilhado (context windows consultados; TokenManager criado).
+- INVIAVEL hoje: VPS compartilhado em load ~20; `qwen2.5:latest` nao respondeu a
+  generate direto em 240s nem a chat via workspace em 280s (modelo nunca sobe em
+  `ollama ps`). Modelos `*-cloud` (gpt-oss, glm-4.6, deepseek) retornam
+  `Unauthorized` - a conta ollama.com do tenant nao cobre esses modelos.
+  Duas tentativas esgotadas -> provider efetivamente indisponivel ate chave
+  dedicada ou box menos carregado.
+- #182 corrigida (commit local nesta branch): allowlists
+  `approvedStagingApiUrls` + `approvedStagingGatewayUrls`; gate de gateway aceita
+  staging no HOST ou path; QA isolado aceita as duas rotas staging aprovadas.
+  Harness ganhou casos Worker-staging (+4) e QA isolado EAD (+1/-1); flag
+  `DYNAMIC_ACTIVITY_ENABLED=false` adicionada ao set prod (divergencia
+  pre-existente gate x harness, commit de9ec57).
+BLOCKED (human): chave de provider de LLM dedicada ao staging (decisao);
+  demais gates do bloco anterior inalterados.

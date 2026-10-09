@@ -75,6 +75,7 @@ $production = [ordered]@{
     LEARNING_CONTEXT_ENABLED = 'false'
     DURABLE_LEARNING_OUTBOX_ENABLED = 'false'
     JOURNEY_TRACEABILITY_ENABLED = 'false'
+    DYNAMIC_ACTIVITY_ENABLED = 'false'
     SIGNED_SUPPORT_IDENTITY = 'false'
     PUSH_NOTIFICATIONS_ENABLED = 'false'
 }
@@ -99,11 +100,37 @@ Invoke-GateCase -Name 'debug aceita QA fisico isolado' `
 $isolated.DYNAMIC_QA_RUN_ID = 'invalid'
 Invoke-GateCase -Name 'debug rejeita QA isolado sem run valido' `
     -Task ':app:preDebugBuild' -Defines $isolated -ShouldPass $false
-$isolated.DYNAMIC_QA_RUN_ID = '11111111111111111111111111111111'
-$isolated.TUTOR_API_URL = $staging.TUTOR_API_URL
-$isolated.TUTOR_STAGING_API_URL = $staging.TUTOR_API_URL
-Invoke-GateCase -Name 'debug rejeita QA isolado fora do Cloud autorizado' `
-    -Task ':app:preDebugBuild' -Defines $isolated -ShouldPass $false
+$isolatedEad = [ordered]@{}
+foreach ($entry in $staging.GetEnumerator()) { $isolatedEad[$entry.Key] = $entry.Value }
+$isolatedEad.DYNAMIC_QA_ISOLATED_PACKAGE = 'true'
+$isolatedEad.DYNAMIC_QA_RUN_ID = '11111111111111111111111111111111'
+Invoke-GateCase -Name 'debug aceita QA isolado na rota EAD canonica' `
+    -Task ':app:preDebugBuild' -Defines $isolatedEad -ShouldPass $true
+$isolatedEad.TUTOR_API_URL = 'https://other-staging.fastapicloud.dev'
+$isolatedEad.TUTOR_STAGING_API_URL = $isolatedEad.TUTOR_API_URL
+Invoke-GateCase -Name 'debug rejeita QA isolado fora das rotas aprovadas' `
+    -Task ':app:preDebugBuild' -Defines $isolatedEad -ShouldPass $false
+
+$workerGateway = [ordered]@{}
+foreach ($entry in $cloudStaging.GetEnumerator()) { $workerGateway[$entry.Key] = $entry.Value }
+$workerGateway.TUTOR_GATEWAY_URL = 'https://tutor-tds-gateway-staging.tdsipex.workers.dev'
+$workerGateway.TUTOR_STAGING_GATEWAY_URL = $workerGateway.TUTOR_GATEWAY_URL
+Invoke-GateCase -Name 'debug aceita gateway Worker staging no hostname' `
+    -Task ':app:preDebugBuild' -Defines $workerGateway -ShouldPass $true
+$workerGateway.TUTOR_GATEWAY_URL = 'https://tutor-tds-gateway.tdsipex.workers.dev'
+Invoke-GateCase -Name 'debug rejeita bases de gateway divergentes' `
+    -Task ':app:preDebugBuild' -Defines $workerGateway -ShouldPass $false
+$workerGateway.TUTOR_STAGING_GATEWAY_URL = 'https://tutor-tds-gateway.tdsipex.workers.dev'
+Invoke-GateCase -Name 'debug rejeita gateway de producao' `
+    -Task ':app:preDebugBuild' -Defines $workerGateway -ShouldPass $false
+$workerGateway.TUTOR_GATEWAY_URL = 'https://staging.example.invalid/gateway'
+$workerGateway.TUTOR_STAGING_GATEWAY_URL = $workerGateway.TUTOR_GATEWAY_URL
+Invoke-GateCase -Name 'debug rejeita gateway externo com staging no nome' `
+    -Task ':app:preDebugBuild' -Defines $workerGateway -ShouldPass $false
+$workerGateway.TUTOR_GATEWAY_URL = 'http://tutor-tds-gateway-staging.tdsipex.workers.dev'
+$workerGateway.TUTOR_STAGING_GATEWAY_URL = $workerGateway.TUTOR_GATEWAY_URL
+Invoke-GateCase -Name 'debug rejeita gateway staging sem HTTPS' `
+    -Task ':app:preDebugBuild' -Defines $workerGateway -ShouldPass $false
 
 $unapproved = [ordered]@{}
 foreach ($entry in $cloudStaging.GetEnumerator()) {
