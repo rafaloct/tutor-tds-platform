@@ -177,6 +177,41 @@ final class TutorApiClientTest extends UnitTestCase {
   }
 
   /**
+   * Operacoes usam allowlist estrita, preservam 409 e nao repetem POST.
+   */
+  public function testOperationsPostIsAllowlistedWithoutTransportRetry(): void {
+    $history = [];
+    $client = $this->client([
+      new Response(409, [], '{"detail":"stale revision"}'),
+      new Response(200, [], '{}'),
+    ], $history);
+    try {
+      $client->operationsPost('/operations/class-1/commands', ['id' => 'command-00000001'], 'access');
+      self::fail('Era esperado conflito.');
+    }
+    catch (GatewayException $error) {
+      self::assertSame('operation_conflict', $error->publicCode());
+      self::assertSame(409, $error->httpStatus());
+      self::assertCount(1, $history);
+    }
+  }
+
+  /**
+   * Paths externos ao contrato sao recusados antes da rede.
+   */
+  public function testOperationsPathCannotEscapeAllowlist(): void {
+    $history = [];
+    $client = $this->client([], $history);
+    $this->expectException(\LogicException::class);
+    try {
+      $client->operationsGet('/admin/users', 'access');
+    }
+    finally {
+      self::assertSame([], $history);
+    }
+  }
+
+  /**
    * Cria cliente com fila HTTP deterministica.
    *
    * @param array<\Psr\Http\Message\ResponseInterface> $responses

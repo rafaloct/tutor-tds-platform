@@ -1,0 +1,4 @@
+operations:
+  css:
+    component:
+      css/operations.css: {}

@@ -78,6 +78,22 @@ final class TutorApiClient implements TutorApiClientInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function operationsGet(string $path, string $accessToken): array {
+    $this->assertOperationsPath('GET', $path);
+    return $this->request('GET', $path, NULL, $accessToken, TRUE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsPost(string $path, array $payload, string $accessToken): array {
+    $this->assertOperationsPath('POST', $path);
+    return $this->request('POST', $path, $payload, $accessToken);
+  }
+
+  /**
    * Executa request com redirect desligado e retry somente para GET seguro.
    *
    * @return array<string, mixed>
@@ -90,8 +106,10 @@ final class TutorApiClient implements TutorApiClientInterface {
     ?string $accessToken = NULL,
     bool $retrySafe = FALSE,
   ): array {
-    $allowed = ['/auth/login', '/auth/refresh', '/auth/me'];
-    if (!in_array($path, $allowed, TRUE)) {
+    $allowedAuth = ['/auth/login', '/auth/refresh', '/auth/me'];
+    $allowedOperation = $path === '/operations/scopes'
+      || preg_match('#^/operations/[A-Za-z0-9_-]{1,36}/(?:search|inspect|commands)$#D', $path) === 1;
+    if (!in_array($path, $allowedAuth, TRUE) && !$allowedOperation) {
       throw new \LogicException('Endpoint nao permitido pelo cliente tipado.');
     }
     $headers = [
@@ -176,6 +194,8 @@ final class TutorApiClient implements TutorApiClientInterface {
       throw match ($status) {
         401 => new GatewayException('invalid_or_expired_session', 401),
         403 => new GatewayException('access_denied', 403),
+        404 => new GatewayException('not_found', 404),
+        409 => new GatewayException('operation_conflict', 409),
         422 => new GatewayException('invalid_request', 422),
         429 => new GatewayException('rate_limited', 429),
         502, 503, 504 => new GatewayException('api_unavailable', 503),
@@ -196,6 +216,18 @@ final class TutorApiClient implements TutorApiClientInterface {
       throw new GatewayException('invalid_api_response', 502);
     }
     return $decoded;
+  }
+
+  /**
+   * Valida metodo e path antes de qualquer request de operacao.
+   */
+  private function assertOperationsPath(string $method, string $path): void {
+    $allowed = $method === 'GET'
+      ? $path === '/operations/scopes'
+      : preg_match('#^/operations/[A-Za-z0-9_-]{1,36}/(?:search|inspect|commands)$#D', $path) === 1;
+    if (!$allowed) {
+      throw new \LogicException('Endpoint operacional nao permitido.');
+    }
   }
 
   /**
