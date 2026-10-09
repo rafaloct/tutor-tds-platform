@@ -1,0 +1,39 @@
+# Tutor TDS: deployment target is chosen by the CI ref, never a developer toggle.
+# Top-level Worker intentionally retains the existing public production identity.
+name = "tutor-tds-gateway"
+account_id = "8b1d9dad829dd6927091666a1f186717"
+main = "src/index.js"
+compatibility_date = "2026-08-11"
+workers_dev = true
+keep_vars = true
+send_metrics = false
+
+[vars]
+TUTOR_ENVIRONMENT = "production"
+ANYTHING_LLM_BASE_URL = "https://ia-tutor.ipexdesenvolvimento.cloud"
+ANYTHING_LLM_WORKSPACE = "cartilhas"
+# Do not redefine production TUTOR_RAG_SCOPE_MAP: it exists as a secret.
+
+[secrets]
+required = ["ANYTHING_LLM_API_KEY", "CERTIFICATE_SIGNING_SECRET", "TUTOR_RAG_SCOPE_MAP"]
+
+[[kv_namespaces]]
+binding = "CERTIFICATES"
+id = "7d13364e03a44e22ae568ecd50629a65"
+
+[env.staging]
+name = "tutor-tds-gateway-staging"
+workers_dev = true
+kv_namespaces = [] # Explicit: do NOT inherit production KV
+
+[env.staging.vars]
+TUTOR_ENVIRONMENT = "staging"
+# A NEW AnythingLLM instance in its own volume and Docker network, NOT the production instance.
+# CI refuses staging deploy until this HTTPS host is live.
+ANYTHING_LLM_BASE_URL = "https://ia-tutor-staging.ipexdesenvolvimento.cloud"
+ANYTHING_LLM_WORKSPACE = "tds-qa-default"
+TUTOR_RAG_SCOPE_MAP = '{"tds-qa-course-a|tds-qa-version-a1":"tds-qa-ctx-a-v1","tds-qa-course-b|tds-qa-version-b1":"tds-qa-ctx-b-v1"}'
+
+[env.staging.secrets]
+required = ["ANYTHING_LLM_API_KEY"]
+# Staging intentionally has NO CERTIFICATES KV binding and NO signing secret.

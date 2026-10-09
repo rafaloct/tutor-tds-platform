@@ -1,0 +1,88 @@
+name: Tutor TDS zero-config Android target
+
+on:
+  pull_request:
+    paths:
+      - tools/ci/**
+      - .github/workflows/tds-zero-config-build.yml
+  push:
+    branches: [staging]
+    tags: ['v*']
+    paths:
+      - cartilhas_app/**
+      - tools/ci/**
+      - .github/workflows/tds-zero-config-build.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tds-android-config-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  select-target:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Test ref mapping
+        run: python3 -m unittest discover -s tools/ci -p 'test_*.py' -v
+      - name: Render ephemeral build JSON (not committed)
+        if: github.event_name == 'push'
+        env:
+          BUILD_REF: ${{ github.ref }}
+        run: |
+          python3 tools/ci/tds_env.py --ref "$BUILD_REF" --output "$RUNNER_TEMP/tds-build.json"
+          python3 -c 'import json,os; d=json.load(open(os.environ["RUNNER_TEMP"]+"/tds-build.json")); print("Selected:",d["TUTOR_ENVIRONMENT"],"; HTTPS endpoints only")'
+
+  # Do not create or sign a release AAB here. The release process still requires
+  # the preserved Android keystore custodian and the approved release-status gates.
+  # Staging debug APK can be enabled after GitHub Issue #182 (Gradle guard) is merged.
+
+  build-staging-debug:
+    # One-time enable ONLY after GitHub Issue #182 / Gradle QA gate is merged.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging' && vars.TDS_ANDROID_QA_BUILD_READY == 'true'
+    needs: select-target
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    env:
+      FLUTTER_VERSION: "3.44.9"
+      FLUTTER_ARCHIVE_SHA256: a9120fa4a01048bdef438ddc3a2d4b7389662ea98a95db86eeaf10382bc4efcb
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install pinned Flutter SDK
+        working-directory: ${{ runner.temp }}
+        run: |
+          archive="flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
+          curl --fail --silent --show-error --location --retry 3 --output "$archive" \
+            "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/${archive}"
+          echo "${FLUTTER_ARCHIVE_SHA256}  ${archive}" | sha256sum --check --strict
+          tar -xf "$archive"
+          rm "$archive"
+          echo "${RUNNER_TEMP}/flutter/bin" >> "$GITHUB_PATH"
+      - name: Render staging-only isolated QA package config
+        env:
+          BUILD_REF: ${{ github.ref }}
+          BUILD_SHA: ${{ github.sha }}
+        run: |
+          python3 tools/ci/tds_env.py --ref "$BUILD_REF" --commit-sha "$BUILD_SHA" --output "$RUNNER_TEMP/tds-build.json"
+      - name: Build isolated QA Android APK
+        working-directory: cartilhas_app
+        run: |
+          flutter --disable-analytics
+          flutter pub get --enforce-lockfile
+          flutter build apk --debug --dart-define-from-file="$RUNNER_TEMP/tds-build.json"
+      - name: Upload synthetic-only QA APK (never Play release)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tutor-tds-staging-qa-${{ github.sha }}
+          path: cartilhas_app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
