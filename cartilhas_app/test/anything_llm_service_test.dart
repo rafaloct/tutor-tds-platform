@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cartilhas_app/models/tutor_learning_context.dart';
@@ -19,14 +20,14 @@ void main() {
     );
     addTearDown(client.close);
 
-    expect(
-      await service.getChatResponse(
-        'Como funciona?',
-        mode: 'adaptive',
-        context: 'Cooperativismo',
-      ),
-      'Resposta TDS',
+    final result = await service.getChatResponse(
+      'Como funciona?',
+      mode: 'adaptive',
+      context: 'Cooperativismo',
     );
+    expect(result.status, TutorChatStatus.answer);
+    expect(result.isAnswer, isTrue);
+    expect(result.text, 'Resposta TDS');
     expect(captured.url.toString(), 'https://gateway.example/v1/chat');
     expect(captured.headers['content-type'], 'application/json');
     expect(jsonDecode(captured.body), {
@@ -48,8 +49,11 @@ void main() {
     );
     addTearDown(client.close);
 
+    final result = await service.getChatResponse('Pergunta', context: '  ');
+    expect(result.status, TutorChatStatus.emptyAnswer);
+    expect(result.isAnswer, isFalse);
     expect(
-      await service.getChatResponse('Pergunta', context: '  '),
+      result.text,
       'O Tutor não encontrou uma resposta. Tente reformular a pergunta.',
     );
     expect(requestBody, {'message': 'Pergunta', 'mode': 'tutor'});
@@ -65,10 +69,71 @@ void main() {
     );
     addTearDown(client.close);
 
-    expect(
-      await service.getChatResponse('Pergunta'),
-      contains('temporariamente indisponível'),
+    final result = await service.getChatResponse('Pergunta');
+    expect(result.status, TutorChatStatus.unavailable);
+    expect(result.isAnswer, isFalse);
+    expect(result.text, contains('temporariamente indisponível'));
+  });
+
+  test('malformed 200 body is an empty answer, never an answer', () async {
+    final client = MockClient((_) async => http.Response('not-json', 200));
+    final service = AnythingLLMService(
+      gatewayUrl: 'https://gateway.example',
+      client: client,
     );
+    addTearDown(client.close);
+
+    final result = await service.getChatResponse('Pergunta');
+    expect(result.status, TutorChatStatus.emptyAnswer);
+    expect(result.isAnswer, isFalse);
+  });
+
+  test('200 sem campo de texto conhecido é resposta vazia', () async {
+    final client = MockClient(
+      (_) async => http.Response('{"unexpected":true}', 200),
+    );
+    final service = AnythingLLMService(
+      gatewayUrl: 'https://gateway.example',
+      client: client,
+    );
+    addTearDown(client.close);
+
+    final result = await service.getChatResponse('Pergunta');
+    expect(result.status, TutorChatStatus.emptyAnswer);
+    expect(result.isAnswer, isFalse);
+  });
+
+  for (final statusCode in [400, 502, 503]) {
+    test('HTTP $statusCode usa o fallback de indisponibilidade', () async {
+      final client = MockClient(
+        (_) async => http.Response('{"error":"x"}', statusCode),
+      );
+      final service = AnythingLLMService(
+        gatewayUrl: 'https://gateway.example',
+        client: client,
+      );
+      addTearDown(client.close);
+
+      final result = await service.getChatResponse('Pergunta');
+      expect(result.status, TutorChatStatus.unavailable);
+      expect(result.isAnswer, isFalse);
+      expect(result.text, contains('temporariamente indisponível'));
+    });
+  }
+
+  test('timeout de rede usa o fallback de indisponibilidade', () async {
+    final client = MockClient(
+      (_) async => throw TimeoutException('slow gateway'),
+    );
+    final service = AnythingLLMService(
+      gatewayUrl: 'https://gateway.example',
+      client: client,
+    );
+    addTearDown(client.close);
+
+    final result = await service.getChatResponse('Pergunta');
+    expect(result.status, TutorChatStatus.unavailable);
+    expect(result.isAnswer, isFalse);
   });
 
   test('invalid configured gateway URL uses the availability fallback', () async {
@@ -79,10 +144,10 @@ void main() {
     );
     addTearDown(client.close);
 
-    expect(
-      await service.getChatResponse('Pergunta'),
-      contains('temporariamente indisponível'),
-    );
+    final result = await service.getChatResponse('Pergunta');
+    expect(result.status, TutorChatStatus.unavailable);
+    expect(result.isAnswer, isFalse);
+    expect(result.text, contains('temporariamente indisponível'));
   });
 
   test('context switches send only the new structured academic scope', () async {

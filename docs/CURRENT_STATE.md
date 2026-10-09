@@ -423,3 +423,37 @@ Candidate removes the union/empty fallback and rejects malformed snapshots as
 failures, not withdrawals. Details and limits: production/ISSUE4_CATALOG_POLICY.md.
 Targeted test evidence belongs on the PR; no physical E2E or release acceptance
 is inferred. Flag default, production, enrollment/progress and assets preserved.
+
+## 2026-10-09: re-convergência staging+RC, overlay Cloudflare zero-config e fix #185 (local)
+
+OBSERVED (somente local, sem push/deploy):
+- Branch `codex/rc-reconverged-20261009` na worktree `tds-agents/rc-reconverge-20261009`.
+  Merge `89bc03a` une staging `fbb4b6a` à linha RC `bba1055`; único conflito foi este
+  arquivo (resolvido por união). Overlay zero-config (#183) commitado como `aae02a4`:
+  seletor por Git ref fail-closed (`staging` → staging, tag `vX.Y.Z` → produção, demais
+  refs rejeitadas), Worker staging sem KV/secret de certificado, compose AnythingLLM
+  isolado, runbook em `docs/operations/TDS_CLOUDFLARE_ZERO_CONFIG_RUNBOOK.md`.
+  7/7 testes do pacote e validação de refs passaram; wrangler dry-run confirma
+  que staging não herda o KV de produção.
+- #185 implementada nesta branch: `AnythingLLMService.getChatResponse` retorna
+  `TutorChatResult` tipado (answer/emptyAnswer/unavailable); resposta inválida ou
+  indisponível não vira card educacional. `ChatMessage.isError`, `_TutorErrorNotice`
+  com liveRegion + botão "Tentar novamente" irmão, retry via `_lastQuestion`,
+  `TutorMessageText` (Markdown básico sem delimitadores literais, links com
+  confirmação), `tutorPlainText` para TTS (`_speak` normaliza; path legado
+  `chat_experience_screen` também normalizado). `speaker` injetável.
+- Evidência local: 30/30 testes focados (service: 200 válido/vazio/malformado,
+  400/429/502/503, timeout, URL inválida; tela: loading→resposta/erro→retry,
+  ausência de ações quiz/cartão no erro, link seguro, TTS sem sintaxe).
+  `flutter analyze` limpo; `git diff --check` limpo.
+- Wrangler local reparado para leitura (keyring `@napi-rs/keyring`); auditoria
+  #183 permanece read-only. Zona já está na Cloudflare (rene/margot.ns); `ead`
+  proxied. Nenhum DNS/Worker/secret foi escrito ou lido.
+BLOCKED (human gates, inalterados):
+- Deploy/push/merge não autorizados. Auditoria autenticada de bindings e
+  provisionamento do AnythingLLM staging isolado pendentes.
+- QA autenticado Android: #182 (gate Gradle do hostname staging), #184 (primeiro
+  frame/ANR), contas sintéticas via MCP `82beb93` ainda sem as 3 confirmações de
+  staging nem ponte de login segura. Não usar harness com `--dart-define` de senhas.
+- `PRODUCTION_RELEASE_READY=false`; produção `/version`/`/live` 404; schema,
+  backup/restore e proveniência não provados. AAB/Play fora de escopo.

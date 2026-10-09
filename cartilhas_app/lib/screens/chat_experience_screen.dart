@@ -8,6 +8,7 @@ import '../features/remote_materials/module_materials_screen.dart';
 import '../features/media/data/media_repository.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../widgets/linkify_text.dart';
+import '../widgets/tutor_message_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
 import 'genui_assistant_screen.dart';
@@ -1044,7 +1045,7 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   visualDensity: VisualDensity.compact,
-                  onPressed: () => _speak(msg.content),
+                  onPressed: () => _speak(tutorPlainText(msg.content)),
                 ),
               ),
           ],

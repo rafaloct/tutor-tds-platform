@@ -3,6 +3,25 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cartilhas_app/models/tutor_learning_context.dart';
 
+/// Resultado tipado do chat do Tutor: a UI precisa distinguir uma resposta
+/// educacional real de uma indisponibilidade para não renderizar erro como
+/// resposta normal com ações de quiz/cartões/feedback.
+enum TutorChatStatus { answer, emptyAnswer, unavailable }
+
+class TutorChatResult {
+  const TutorChatResult(this.status, this.text);
+
+  final TutorChatStatus status;
+  final String text;
+
+  bool get isAnswer => status == TutorChatStatus.answer;
+
+  static const emptyAnswerText =
+      'O Tutor não encontrou uma resposta. Tente reformular a pergunta.';
+  static const unavailableText =
+      'O Tutor de IA está temporariamente indisponível. Continue pelas cartilhas ou fale com a equipe TDS pelo suporte.';
+}
+
 /// Cliente do gateway do Tutor. Credenciais e seleção do modelo nunca fazem
 /// parte deste aplicativo; elas permanecem no Cloudflare e no AnythingLLM.
 class AnythingLLMService {
@@ -12,13 +31,18 @@ class AnythingLLMService {
   AnythingLLMService({required this.gatewayUrl, http.Client? client})
     : _client = client ?? http.Client();
 
-  Future<String> getChatResponse(
+  Future<TutorChatResult> getChatResponse(
     String message, {
     String mode = 'tutor',
     String? context,
     TutorLearningContext? learningContext,
   }) async {
-    if (gatewayUrl.isEmpty) return _friendlyUnavailableMessage;
+    if (gatewayUrl.isEmpty) {
+      return const TutorChatResult(
+        TutorChatStatus.unavailable,
+        TutorChatResult.unavailableText,
+      );
+    }
 
     try {
       final normalizedGatewayUrl = gatewayUrl.endsWith('/')
@@ -44,20 +68,38 @@ class AnythingLLMService {
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final text = data['text'] ?? data['textResponse'];
-        if (text is String && text.trim().isNotEmpty) return text;
-        return 'O Tutor não encontrou uma resposta. Tente reformular a pergunta.';
+        Object? data;
+        try {
+          data = jsonDecode(response.body);
+        } catch (_) {
+          data = null;
+        }
+        final text = data is Map<String, dynamic>
+            ? data['text'] ?? data['textResponse']
+            : null;
+        if (text is String && text.trim().isNotEmpty) {
+          return TutorChatResult(TutorChatStatus.answer, text);
+        }
+        return const TutorChatResult(
+          TutorChatStatus.emptyAnswer,
+          TutorChatResult.emptyAnswerText,
+        );
       }
 
-      return _friendlyUnavailableMessage;
+      return const TutorChatResult(
+        TutorChatStatus.unavailable,
+        TutorChatResult.unavailableText,
+      );
     } on ArgumentError {
-      return _friendlyUnavailableMessage;
+      return const TutorChatResult(
+        TutorChatStatus.unavailable,
+        TutorChatResult.unavailableText,
+      );
     } on Exception {
-      return _friendlyUnavailableMessage;
+      return const TutorChatResult(
+        TutorChatStatus.unavailable,
+        TutorChatResult.unavailableText,
+      );
     }
   }
-
-  static const _friendlyUnavailableMessage =
-      'O Tutor de IA está temporariamente indisponível. Continue pelas cartilhas ou fale com a equipe TDS pelo suporte.';
 }

@@ -48,13 +48,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     _scrollToBottom();
 
     final service = context.read<AnythingLLMService>();
-    final response = await service.getChatResponse(
+    final result = await service.getChatResponse(
       text,
       context: widget.initialContext,
     );
 
     setState(() {
-      _messages.add({'role': 'bot', 'content': response});
+      _messages.add({'role': 'bot', 'content': result.text});
       _isLoading = false;
     });
     _scrollToBottom();
