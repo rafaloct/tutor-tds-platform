@@ -17,11 +17,12 @@
   },
   "artifact": {
     "path": "release/Tutor-TDS-1.4.0+13-signed.aab",
-    "sha256": "B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66",
-    "status": "superseded",
+    "sha256": "6A6302C763DB3F70D3A8497B1866A9F3592D5A23B9C7BB4F039CB492F9482EF1",
+    "status": "candidate",
     "upload_allowed": false,
-    "matches_current_source": false,
-    "reason": "Antecede a retomada offline segura do Evidence/check-in."
+    "matches_current_source": true,
+    "source_sha": "6bc4548a4725bfe48b6e53b6b8b6e34cd1fe1a3c",
+    "reason": "Candidate reconstruído de staging@6bc4548 em DESKTOP-8T5DRBS (Flutter 3.44.9): bundletool validate PASS, assinatura confere o upload certificate, alinhamento 16K PASS. Upload segue bloqueado aguardando gate humano; build anterior B93FAD21 permanece superseded no histórico."
   },
   "required_physical_evidence": [
     {
