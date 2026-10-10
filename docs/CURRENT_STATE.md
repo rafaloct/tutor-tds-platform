@@ -554,3 +554,47 @@ BLOCKED: E2E autenticado exige o AVD Pixel_8_Pro do LARGeo (alvo autorizado) —
   esta maquina so tem imagens tablet/phone genericas; a falha observada e de
   classe emulador/superficie e provavelmente a mesma da #184, nao provada como
   defeito do app.
+
+## 2026-10-10: cadeia Cloudflare staging LIVE ponta-a-ponta + run MCP aprovado
+
+OBSERVED (verificado ao vivo, sem segredos em evidencia):
+- Tunel `tds-ai-staging` ativo; ingress corrigido para `http://anythingllm-staging:3001`
+  (o erro `tls: first record does not look like a TLS handshake` veio de https no
+  origin de servico HTTP).
+- `https://ia-tutor-staging.ipexdesenvolvimento.cloud` responde via Cloudflare;
+  auth de instancia OK (workspaces listadas via túnel).
+- `wrangler deploy --config wrangler.ci.toml --env staging`: worker
+  `tutor-tds-gateway-staging` versao `c6154579-6d8a-44df-8d3d-6df26b1a9b82` —
+  SEM KV `CERTIFICATES` (isolamento), vars `ANYTHING_LLM_BASE_URL=ia-tutor-staging`,
+  workspace `tds-qa-default`, `TUTOR_RAG_SCOPE_MAP` de staging.
+- `wrangler secret put ANYTHING_LLM_API_KEY --env staging`: aplicado com a chave
+  real da instancia (DB `api_keys`, nome `tds-qa-worker`), via pipe sem exposicao.
+- Producao `tutor-tds-gateway` INTACTA (sem deploy/secret/DNS).
+- Cadeia completa: `POST /v1/chat` no worker staging -> tunel -> AnythingLLM ->
+  provider `ollama` (`qwen2.5:latest`, 172.17.0.1:11434) -> `{"text":"ok"}` ~8s
+  (primeiro call frio ~56s; VPS load caiu de ~20 para ~7).
+- `.env` do VPS: `TDS_STAGING_ANYTHINGLLM_API_KEY` continha valor que NAO
+  autenticava na instancia (prefixo `HSRP`, 31c); sincronizado para a chave
+  real registrada no DB (prefixo `RYY7`). Se o valor anterior era chave de
+  provider externo, precisa ser recompartilhada — nao recuperavel do host.
+- Provider: usuario indicou "NAO E OLLAMA E ANYTHING"; em AnythingLLM nao existe
+  provider hosted proprio nesta versao — producao usa `openrouter` +
+  `google/gemini-2.5-flash-lite`. Ollama local responde agora (fumaca OK);
+  decisao de provider dedicado p/ staging segue aberta se qualidade importar.
+- MCP run APROVADO executado no VPS (Linux obrigatorio pelo design):
+  run-id `54a5b5f81dfd112ca1cb08bdff35a4a6`, programa `staging-qa-program`,
+  3 contas criadas (student/teacher/monitor), saida sanitizada, ledger privado
+  `/opt/tutor-tds-staging/.qa-ledger/` (0600). Ferramenta em `/opt/qa-mcp/`.
+- Bug encontrado e corrigido no MCP: WAF Cloudflare 403 para UA
+  `Python-urllib` — `_post` agora envia `User-Agent: TutorTDS-QA-MCP/1.0`;
+  commit `9cda849` no branch do MCP; 9/9 testes.
+- GitHub: secret `CLOUDFARE_API` existe NIVEL REPO (criado 2026-10-10 ~10:44),
+  mas workflow `tds-cloudflare-worker.yml` le `secrets.CLOUDFLARE_API_TOKEN`;
+  environments `tds-worker-staging`/`tds-worker-production` tem ZERO secrets.
+BLOCKED (human):
+1. Renomear/duplicar o token como `CLOUDFLARE_API_TOKEN` (nivel repo ja resolve
+   ambos envs; ou um por environment no desenho por-env).
+2. E2E autenticado final: Pixel_8_Pro no LARGeo (fora deste host); contas
+   sinteticas ja existem para o run.
+DECISION pendente: provider de modelo dedicado para staging (openrouter
+  dedicado) — hoje fumaca via ollama local funciona.

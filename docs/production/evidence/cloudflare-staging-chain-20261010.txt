@@ -1,0 +1,36 @@
+Cloudflare staging chain — verified live 2026-10-10 (no secrets in evidence)
+=========================================================================
+
+1) Tunnel tds-ai-staging (id 0f03520c)
+   - Status: connected (user fixed connector token + ingress)
+   - Ingress: ia-tutor-staging.ipexdesenvolvimento.cloud -> http://anythingllm-staging:3001
+   - Prior defect: https:// origin -> "tls: first record does not look like a TLS handshake"
+
+2) Hostname (external)
+   - GET https://ia-tutor-staging.ipexdesenvolvimento.cloud/api/v1/auth -> 403 (API up, no key)
+   - GET /api/v1/workspaces + Bearer <instance key> -> 200, lists tds-qa-default/ctx-a/ctx-b
+
+3) Worker tutor-tds-gateway-staging
+   - wrangler deploy --config wrangler.ci.toml --env staging
+   - Version c6154579-6d8a-44df-8d3d-6df26b1a9b82, URL tutor-tds-gateway-staging.tdsipex.workers.dev
+   - Bindings: TUTOR_ENVIRONMENT=staging, ANYTHING_LLM_BASE_URL=ia-tutor-staging...,
+     ANYTHING_LLM_WORKSPACE=tds-qa-default, TUTOR_RAG_SCOPE_MAP(staging map)
+   - NO CERTIFICATES KV on staging (isolation confirmed)
+   - secret ANYTHING_LLM_API_KEY set from instance DB key tds-qa-worker (pipe, not printed)
+   - GET /health -> {"status":"ok"}
+   - POST /v1/chat {"message":"Reply with only: ok","mode":"tutor"} -> {"text":"ok"} (~8s warm)
+   - Upstream: AnythingLLM -> OllamaAILLM qwen2.5:latest @ 172.17.0.1:11434
+
+4) Production tutor-tds-gateway: untouched (no deploy, no secret rotation, no DNS writes)
+
+5) MCP synthetic run (user-approved)
+   - Host: VPS /opt/qa-mcp (posix required), seed /opt/tutor-tds-staging/.staging-seed.env (0600)
+   - approved_run_id 54a5b5f81dfd112ca1cb08bdff35a4a6; program staging-qa-program
+   - Result: 3 accounts created (student/teacher/monitor); ledger .qa-ledger/<run>.json 0600
+   - Bugfix en route: WAF blocked Python-urllib UA (403) -> server.py sends
+     User-Agent TutorTDS-QA-MCP/1.0; MCP commit 9cda849; 9/9 tests pass.
+
+6) GitHub wiring gap
+   - Repo secret CLOUDFARE_API exists (created 2026-10-10) but workflow reads
+     secrets.CLOUDFLARE_API_TOKEN; environments tds-worker-{staging,production}
+     hold zero secrets.
