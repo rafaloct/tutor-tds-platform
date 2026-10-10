@@ -65,6 +65,22 @@ drupal/scripts/ops/
   aplica o dump, sobe `web` com a mesma imagem, restaura `files/` como
   `www-data`, `cache:rebuild`, smoke 5/5 e drift limpo — prova do aceite da
   Issue ("restore descartável sobe o mesmo portal") sem depender do WordPress.
+- **Fronteira de confiança do backup** (OBSERVED): `SHA256SUMS` prova
+  detecção de CORRUPÇÃO, não autenticidade — um backup adulterado pode chegar
+  com checksum recomputado pelo autor. Por isso o ensaio é fail-closed:
+  aceita somente diretório real sob `backups/` local (saída de `backup.sh`
+  neste checkout) e valida os membros de `config.tar.gz`/`files.tar.gz`
+  ANTES de extrair/injetar — somente arquivos regulares e diretórios sob
+  `config/`/`files/`, sem caminho absoluto, `..`, `.`, componente vazio,
+  `\`, `:`, symlink, hardlink ou tipo especial, seguida de contenção
+  canônica do stage (sem confiar na sanitização do `tar`). Backup de origem
+  externa/off-host exige integridade autenticada out-of-band (assinatura/MAC
+  ou digest de manifesto confiável) + HUMAN-GATE — este fluxo não aceita
+  entrada não confiável e nenhuma chave de assinatura real é introduzida
+  aqui. Rejeições provadas por
+  `scripts/ops/tests/restore-rehearsal-archive-test.sh` (tarballs ustar
+  forjados byte a byte + docker stubado — job `archive-validation` do CI,
+  sem docker).
 - `evidence.sh` emite Markdown somente com campos allowlisted (git SHA,
   branch, containers, `GET /health`+`Cache-Control`, `drush status` restrito a
   `drupal-version/bootstrap/db-driver/php-version/drush-version`). Nenhum env,

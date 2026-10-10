@@ -17,6 +17,15 @@
 # O backup-dir DEVE conter db.sql.gz, files.tar.gz, config.tar.gz,
 # manifest.env e SHA256SUMS cobrindo os tres arquivos — qualquer peca ausente
 # ou checksum invalido aborta ANTES de qualquer mutacao Docker (fail-closed).
+#
+# Fronteira de confianca: SHA256SUMS prova deteccao de CORRUPCAO, nao
+# autenticidade — um backup adulterado pode chegar com checksum recomputado
+# pelo autor da adulteracao. Por isso este script aceita SOMENTE diretorio
+# sob ./backups/ local (saida de scripts/ops/backup.sh neste checkout) e
+# valida os membros dos tarballs antes de extrair no host ou injetar no
+# container. Backup de origem externa/off-host exige integridade autenticada
+# out-of-band (assinatura/MAC ou digest de manifesto confiavel) + HUMAN-GATE
+# — este fluxo nao aceita entrada nao confiavel.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
@@ -26,6 +35,70 @@ KEEP=0
 
 log() { echo "[restore] $*"; }
 fail() { echo "[restore] FAIL: $*" >&2; exit 1; }
+
+# 0) Confianca da origem — fail-closed ANTES de inspecionar o payload:
+# somente diretorio real sob ./backups/ deste checkout (gitignored, saida de
+# scripts/ops/backup.sh). Rejeita symlink do backup-dir inteiro e qualquer
+# path externo — sem confiar silenciosamente em entrada externa.
+[ -d "$BACKUP_DIR" ] || fail "backup-dir '$BACKUP_DIR' nao existe"
+mkdir -p backups
+backups_root="$(cd backups && pwd -P)"
+backup_real="$(cd "$BACKUP_DIR" && pwd -P)"
+case "$backup_real" in
+  "$backups_root"/*) ;;
+  *) fail "backup-dir '$BACKUP_DIR' fora de backups/ local ($backups_root); origem externa exige integridade autenticada out-of-band + HUMAN-GATE" ;;
+esac
+BACKUP_DIR="$backup_real"
+
+# Validacao fail-closed dos membros de um tar.gz ANTES de qualquer extracao
+# (host) ou injecao (container). Somente arquivos regulares ('-') e
+# diretorios ('d') sob <prefix>/; rejeita caminho absoluto, '..', '.',
+# componente vazio, '\', ':', symlink, hardlink, device/fifo/especial.
+# Nao confiamos na sanitizacao de extracao do tar — o listing e validado por
+# completo primeiro. $1=arquivo.tar.gz $2=prefixo exigido $3=1 se vazio ok.
+# Retorna 0 (ok) ou imprime o motivo e retorna 1.
+check_archive() {
+  local archive="$1" prefix="$2" allow_empty="${3:-0}"
+  local names types n_names n_types
+  names="$(mktemp)"; types="$(mktemp)"
+  # --quoting-style=escape: um membro por linha mesmo com chars de controle
+  # (newline vira "\n" literal — que o filtro de '\' rejeita adiante).
+  tar --quoting-style=escape -tzf "$archive" >"$names" 2>/dev/null \
+    || { rm -f "$names" "$types"; echo "arquivo ilegivel/corrompido"; return 1; }
+  tar --quoting-style=escape -tzvf "$archive" 2>/dev/null | cut -c1 >"$types" \
+    || { rm -f "$names" "$types"; echo "arquivo ilegivel/corrompido"; return 1; }
+  n_names="$(wc -l <"$names")"; n_types="$(wc -l <"$types")"
+  if [ "$n_names" -ne "$n_types" ]; then
+    rm -f "$names" "$types"; echo "listagem inconsistente"; return 1
+  fi
+  if [ "$n_names" -eq 0 ] && [ "$allow_empty" != "1" ]; then
+    rm -f "$names" "$types"; echo "arquivo vazio"; return 1
+  fi
+  local bad="" m_name m_type rest p
+  local -a parts
+  while IFS=$'\t' read -r m_name m_type; do
+    case "$m_type" in
+      -|d) ;;
+      *) bad="membro '$m_name' com tipo proibido '$m_type'"; break ;;
+    esac
+    case "$m_name" in
+      "$prefix"|"$prefix"/*) ;;
+      *) bad="membro '$m_name' fora de $prefix/"; break ;;
+    esac
+    rest="${m_name#"$prefix"}"; rest="${rest#/}"
+    if [ -n "$rest" ]; then
+      IFS='/' read -ra parts <<< "$rest"
+      for p in "${parts[@]}"; do
+        case "$p" in
+          ''|.|..|*\\*|*:*) bad="membro '$m_name' com componente proibido '$p'"; break 2 ;;
+        esac
+      done
+    fi
+  done < <(paste -d$'\t' "$names" "$types")
+  rm -f "$names" "$types"
+  [ -z "$bad" ] || { echo "$bad"; return 1; }
+  return 0
+}
 
 # 1) Payload completo + integridade — antes de qualquer chamada docker.
 for f in db.sql.gz files.tar.gz config.tar.gz manifest.env SHA256SUMS; do
@@ -53,12 +126,35 @@ export DRUPAL_HTTP_PORT="${DRUPAL_RESTORE_PORT:-18081}"
 # (backups/ e gitignored) e montado POR CIMA do bind-mount de dev ./config
 # somente neste projeto efemero, via compose override gerado — assim
 # config-drift.sh valida o config RESTAURADO, nao o checkout corrente.
-mkdir -p backups
+#
+# ANTES de extrair no host: validacao fail-closed dos membros — um tarball
+# adulterado com traversal, caminho absoluto, symlink ou hardlink escaparia
+# do stage ou faria o bind-mount referenciar path nao pretendido, mesmo com
+# SHA256SUMS legitimo (checksum recomputado pelo autor). files.tar.gz e
+# validado do mesmo jeito antes de ser injetado no container (pode ser um
+# tar vazio — backup.sh gera assim quando files/ nao existe).
 STAGE="$(mktemp -d backups/.restore-XXXXXXXX)"
+if ! reason="$(check_archive "$BACKUP_DIR/config.tar.gz" config 0)"; then
+  rm -rf "$STAGE"; fail "config.tar.gz rejeitado: $reason"
+fi
+if ! reason="$(check_archive "$BACKUP_DIR/files.tar.gz" files 1)"; then
+  rm -rf "$STAGE"; fail "files.tar.gz rejeitado: $reason"
+fi
 tar -xzf "$BACKUP_DIR/config.tar.gz" -C "$STAGE" \
   || { rm -rf "$STAGE"; fail "config.tar.gz corrompido em $BACKUP_DIR"; }
 [ -d "$STAGE/config/sync" ] \
   || { rm -rf "$STAGE"; fail "config.tar.gz nao contem config/sync"; }
+
+# Contencao canonica pos-extracao: config deve ser um diretorio real dentro
+# do stage e o stage nao pode conter nada alem de arquivo/diretorio (um
+# symlink que escapasse da validacao seria detectado aqui — fail-closed).
+stage_real="$(cd "$STAGE" && pwd -P)"
+cfg_real="$(cd "$STAGE/config" && pwd -P)"
+[ "$cfg_real" = "$stage_real/config" ] \
+  || { rm -rf "$STAGE"; fail "config extraido fora do stage descartavel"; }
+strange="$(find "$STAGE" -mindepth 1 ! -type f ! -type d -print -quit)"
+[ -z "$strange" ] \
+  || { rm -rf "$STAGE"; fail "stage contem membro nao-regular: $strange"; }
 cat > "$STAGE/compose.restore.yml" <<OVERRIDE
 # Gerado por restore-rehearsal.sh: monta o snapshot de config RESTAURADO do
 # backup (read-only) por cima do bind-mount de desenvolvimento ./config,

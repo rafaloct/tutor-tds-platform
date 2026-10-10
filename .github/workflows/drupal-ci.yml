@@ -28,6 +28,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  archive-validation:
+    name: archive validation — negative tests (sem docker)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Testes negativos deterministicos de tarball malicioso
+        run: bash drupal/scripts/ops/tests/restore-rehearsal-archive-test.sh
+
   composer:
     name: composer validate + audit
     runs-on: ubuntu-24.04
