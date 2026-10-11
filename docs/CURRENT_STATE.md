@@ -598,3 +598,30 @@ BLOCKED (human):
    sinteticas ja existem para o run.
 DECISION pendente: provider de modelo dedicado para staging (openrouter
   dedicado) — hoje fumaca via ollama local funciona.
+
+## 2026-10-10 (noite): E2E autenticado COMPLETO no AVD autorizado — staging LIVE
+
+OBSERVED (Pixel_8_Pro / emulator-5554 no LARGEO via Tailscale+SSH, APK debug desta branch):
+- App abre welcome, login CPF+senha da conta sintetica `student`
+  (run `54a5b5f81dfd112ca1cb08bdff35a4a6`) autenticou na EAD staging,
+  consentimento, home autenticada "Olá, QA!".
+- Tutor abriu SEM black screen — confirma que a falha do tablet
+  (#184-class) e de superficie/imagem, nao do app.
+- ANR de digitacao: ROOT CAUSE identificado — o servico de autofill do
+  emulador trava a InputConnection (AutofillGroup + autofillHints da tela de
+  login); campo sem autofill e campo mascarado na welcome digitam normal.
+  Workaround do harness/QA: `adb shell settings put secure autofill_service null`.
+  NAO e defeito do app; documentar para quem reproduzir em AVD.
+- Mensagem -> Worker staging -> AnythingLLM -> `upstream_timeout` (ollama lento)
+  -> estado de erro #185 live com retry irmao ("Tentar novamente").
+- Provider migrado para `openrouter` + `google/gemini-2.5-flash-lite` com chave
+  dedicada de staging (`TDS_STAGING_OPENROUTER_API_KEY`, distinta da prod —
+  verificado por hash, sem exposicao). OpenRouterTimeout=60000.
+- Retry no app: resposta REAL do Tutor exibida (Resposta direta + acoes
+  Ouvir/Cartoes/Quiz) — cadeia Worker->tunnel->AnythingLLM->OpenRouter em ~1.9s.
+- Evidencias: `qa-pixel8pro-home-auth.png`, `qa-pixel8pro-tutor-open.png`,
+  `qa-pixel8pro-tutor-error-state.png`, `qa-pixel8pro-tutor-answer.png`.
+- Higiene: creds/tmp files removidos de LARGEO e VPS; ledger privado intacto.
+- ATENCAO (relatado ao operador): clipboard do emulador exibia fragmento de
+  chave OpenRouter — recomendado rotacionar se a chave foi transitada por ele.
+REMAINING: PR push/review, deploy CI staging no ref, gates de producao.
