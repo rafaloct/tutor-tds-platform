@@ -14,8 +14,11 @@ local, sozinho, não autentica a origem remota.
 
 O runner verifica formato e campos exatos do recibo nativo, hash SHA-256 e
 tamanho do objeto criptografado, cabeçalho age, decriptação e assinatura
-`PGDMP` do dump. A identidade age precisa ser arquivo regular do usuário
-atual, sem permissão de grupo/outros (`chmod 600`). O dump descriptografado
+`PGDMP` do dump. A identidade age precisa ser arquivo regular do operador,
+sem permissão de grupo/outros (`chmod 600`). Sob `sudo`, o runner exige dono
+igual ao `SUDO_UID` confirmado pelo `SUDO_USER` local; não copie nem altere o
+dono da chave para root. Ele abre a identidade uma vez, sem seguir symlink, e
+passa o descritor aberto ao age. O dump descriptografado
 fica em memória; não se escreve dump, identidade nem secret nos relatórios.
 O processo age e o Docker recebem os bytes por stdin; erros de subprocessos
 não imprimem argumentos ou stderr. O operador deve manter os três arquivos de
@@ -23,10 +26,17 @@ entrada em diretório privado e remover as cópias temporárias após a revisão
 
 ## Pré-requisitos
 
-- Host POSIX com `python3`, `git`, `age` e Docker locais.
+- Host POSIX com `/proc/self/fd` ou `/dev/fd`, `python3`, `git`, `age` e Docker
+  locais. Se o socket Docker exigir privilégio, execute a CLI com `sudo --`;
+  não use `sudo -E` nem preencha `SUDO_UID`/`SUDO_USER` manualmente.
+- Sob `sudo`, instale tanto o runner revisado quanto o executável age como
+  arquivos root-owned em diretórios sem escrita para outros usuários. O runner
+  rejeita um binário age do home do operador ao executar como root.
 - Imagem `postgres:16-alpine` já presente no Docker local; o runner usa
   `--pull=never`.
-- Checkout candidato com `api/` limpa e com uma única head Alembic versionada.
+- Checkout candidato de propriedade do mesmo operador que invocou `sudo`,
+  com `api/` limpa e uma única head Alembic versionada. As leituras Git usam
+  `safe.directory` somente para esse caminho, sem alterar configuração global.
 - Diretório de saída privado, já criado. Cada execução cria uma subpasta
   `0700`; os três JSON são `0600`.
 - Capacidade de memória: container limitado a 2 GiB; tmpfs do banco entre
@@ -49,18 +59,38 @@ manifesto de aceite.
 
 ## Execução supervisionada
 
-Com os arquivos de entrada já obtidos e sob custódia do operador:
+No terminal do container Dokploy, o operador pode localizar o ID e horário do
+último recibo local sem abrir configuração ou credenciais:
 
 ```sh
-python3 tooling/rehearse_scheduled_postgres_backup.py \
+node -e 'const r=require("/etc/dokploy/tds-backup-ops/last-success.json"); console.log(r.id, r.completedAt, r.status)'
+```
+
+Esse apontador local não substitui a conferência do recibo e objeto no R2
+privado. Com os arquivos de entrada já obtidos e sob custódia do operador, no
+host de ensaio com socket Docker restrito:
+
+```sh
+cd /caminho/do/checkout-candidato
+git rev-parse HEAD  # conferir com o commit revisado
+sudo install -D -o root -g root -m 0755 tooling/rehearse_scheduled_postgres_backup.py /usr/local/libexec/tds/rehearse_scheduled_postgres_backup.py
+expected_script_sha=$(git show HEAD:tooling/rehearse_scheduled_postgres_backup.py | sha256sum | cut -d' ' -f1)
+printf '%s  %s\n' "$expected_script_sha" /usr/local/libexec/tds/rehearse_scheduled_postgres_backup.py | sha256sum -c -
+sudo install -o root -g root -m 0755 /home/rafael/.cache/tds-restore-tools/age /usr/local/bin/age
+printf '%s  %s\n' eb7dd1b518f0a307c99cd97782623c5321da049154b04acd2d98d21aa7bc9b2c /usr/local/bin/age | sha256sum -c -
+sudo -- python3 /usr/local/libexec/tds/rehearse_scheduled_postgres_backup.py \
   --execute \
   --receipt /caminho/privado/receipt.json \
   --archive /caminho/privado/archive.dump.age \
   --identity /caminho/privado/age-identity \
   --candidate-root /caminho/do/checkout-candidato \
   --output-dir /caminho/privado/relatorios \
+  --age-bin /usr/local/bin/age \
   --tmpfs-mib 1024
 ```
+
+Os JSON de saída ficam na subpasta `0700` criada por root; o operador pode
+revisá-los com `sudo` e só copiar o conteúdo sanitizado após essa revisão.
 
 Sem `--execute`, a CLI falha antes de decriptar ou criar container. A saída
 `RESTORE_VERIFIED_PENDING_UPGRADE` aponta o manifesto `recovery-run-*.json`.

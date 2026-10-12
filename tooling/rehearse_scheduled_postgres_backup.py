@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import shutil
 import stat
 import subprocess
 import sys
@@ -74,16 +75,49 @@ def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
+def trusted_uid() -> int:
+    """Bind private inputs and the checkout to sudo's original local user."""
+    require(os.name == "posix", "sudo_runner_requires_posix_host")
+    euid = os.geteuid()
+    if euid != 0:
+        return euid
+    require(os.getuid() == 0, "sudo_invoker_invalid")
+    if "SUDO_UID" not in os.environ and "SUDO_USER" not in os.environ:
+        return 0
+    uid_text = os.environ.get("SUDO_UID", "")
+    user = os.environ.get("SUDO_USER", "")
+    require(re.fullmatch(r"[0-9]{1,10}", uid_text) is not None and user != "",
+            "sudo_invoker_invalid")
+    uid = int(uid_text)
+    require(0 < uid < 2**32 and str(uid) == uid_text, "sudo_invoker_invalid")
+    import pwd  # POSIX only; avoid making Windows import the runner impossible.
+    try:
+        account = pwd.getpwnam(user)
+        canonical = pwd.getpwuid(uid)
+    except KeyError as error:
+        raise DrillError("sudo_invoker_invalid") from error
+    require(account.pw_uid == uid and canonical.pw_name == user,
+            "sudo_invoker_invalid")
+    return uid
+
+
+def require_private_identity(details: os.stat_result) -> None:
+    require(stat.S_ISREG(details.st_mode), "input_must_be_regular_file")
+    require(os.name == "posix", "private_identity_requires_posix_host")
+    require(stat.S_IMODE(details.st_mode) & 0o077 == 0,
+            "private_identity_permissions_invalid")
+    require(details.st_uid == trusted_uid(), "private_identity_owner_invalid")
+
+
 def regular_file(path: Path, *, private: bool = False) -> os.stat_result:
     try:
         details = path.lstat()
     except OSError as error:
         raise DrillError("input_unavailable") from error
-    require(stat.S_ISREG(details.st_mode), "input_must_be_regular_file")
     if private:
-        require(os.name == "posix", "private_identity_requires_posix_host")
-        require(details.st_uid == os.geteuid() and stat.S_IMODE(details.st_mode) & 0o077 == 0,
-                "private_identity_permissions_invalid")
+        require_private_identity(details)
+    else:
+        require(stat.S_ISREG(details.st_mode), "input_must_be_regular_file")
     return details
 
 
@@ -144,14 +178,29 @@ def load_cipher(path: Path, receipt: dict[str, Any]) -> bytes:
 
 
 def command(args: list[str], *, input_bytes: bytes | bytearray | None = None,
-            timeout: int = 60) -> bytes:
+            timeout: int = 60, env: dict[str, str] | None = None,
+            pass_fds: tuple[int, ...] = ()) -> bytes:
     try:
         result = subprocess.run(args, input=input_bytes, stdout=subprocess.PIPE,
-                                stderr=subprocess.DEVNULL, timeout=timeout, check=False)
+                                stderr=subprocess.DEVNULL, timeout=timeout,
+                                env=env, pass_fds=pass_fds, check=False)
     except (OSError, subprocess.TimeoutExpired) as error:
         raise DrillError("isolated_command_unavailable_or_timed_out") from error
     require(result.returncode == 0, "isolated_command_failed")
     return result.stdout
+
+
+def read_git(root: Path, *args: str) -> bytes:
+    # Reset inherited safe.directory entries, then trust only this resolved
+    # candidate path. Disable repository-provided fsmonitor/hooks under sudo.
+    clean_env = {key: value for key, value in os.environ.items()
+                 if not key.startswith("GIT_")}
+    return command([
+        "git", "--no-optional-locks", "-c", "safe.directory=", "-c",
+        f"safe.directory={root}", "-c", "core.fsmonitor=false", "-c",
+        f"core.hooksPath={os.devnull}", "-c", "submodule.recurse=false",
+        "-C", str(root), *args,
+    ], env=clean_env)
 
 
 def candidate_identity(root: Path) -> tuple[str, str]:
@@ -159,11 +208,17 @@ def candidate_identity(root: Path) -> tuple[str, str]:
         root = root.resolve(strict=True)
     except OSError as error:
         raise DrillError("candidate_checkout_unavailable") from error
-    top = command(["git", "-C", str(root), "rev-parse", "--show-toplevel"]).decode().strip()
+    try:
+        details = root.stat()
+    except OSError as error:
+        raise DrillError("candidate_checkout_unavailable") from error
+    require(stat.S_ISDIR(details.st_mode), "candidate_checkout_unavailable")
+    require(details.st_uid == trusted_uid(), "candidate_checkout_owner_invalid")
+    top = read_git(root, "rev-parse", "--show-toplevel").decode().strip()
     require(Path(top).resolve() == root, "candidate_root_not_git_top_level")
-    dirty_api = command(["git", "-C", str(root), "status", "--porcelain=v1", "-uall", "--", "api"])
+    dirty_api = read_git(root, "status", "--porcelain=v1", "-uall", "--", "api")
     require(not dirty_api.strip(), "candidate_api_tree_dirty")
-    oid = command(["git", "-C", str(root), "rev-parse", "HEAD:api"]).decode().strip()
+    oid = read_git(root, "rev-parse", "HEAD:api").decode().strip()
     require(OID.fullmatch(oid) is not None, "candidate_api_tree_invalid")
     versions = root / "api" / "migrations" / "versions"
     require(versions.is_dir() and not versions.is_symlink(), "candidate_migrations_unavailable")
@@ -188,13 +243,46 @@ def candidate_identity(root: Path) -> tuple[str, str]:
     return oid, heads.pop()
 
 
+def age_executable(value: str) -> str:
+    found = shutil.which(value)
+    require(found is not None, "age_executable_unavailable")
+    path = Path(found)
+    if os.geteuid() == 0:
+        require(path.is_absolute(), "root_owned_age_required")
+        for candidate in (path, *path.parents):
+            try:
+                details = candidate.lstat()
+            except OSError as error:
+                raise DrillError("root_owned_age_required") from error
+            require(details.st_uid == 0 and
+                    stat.S_IMODE(details.st_mode) & 0o022 == 0 and
+                    (stat.S_ISREG(details.st_mode) if candidate == path
+                     else stat.S_ISDIR(details.st_mode)),
+                    "root_owned_age_required")
+    return str(path)
+
+
 def decrypt_dump(cipher: bytes, identity: Path, age_bin: str) -> bytearray:
-    regular_file(identity, private=True)
+    executable = age_executable(age_bin)
+    fd_root = next((path for path in (Path("/proc/self/fd"), Path("/dev/fd"))
+                    if path.is_dir()), None)
+    require(fd_root is not None and hasattr(os, "O_NOFOLLOW"),
+            "private_identity_fd_unavailable")
     try:
-        raw = command([age_bin, "--decrypt", "--identity", str(identity)],
-                      input_bytes=cipher, timeout=180)
-    except DrillError as error:
-        raise DrillError("age_decryption_failed") from error
+        identity_fd = os.open(identity, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    except OSError as error:
+        raise DrillError("private_identity_unavailable") from error
+    try:
+        require_private_identity(os.fstat(identity_fd))
+        try:
+            raw = command([executable, "--decrypt", "--identity",
+                           str(fd_root / str(identity_fd))],
+                          input_bytes=cipher, timeout=180,
+                          pass_fds=(identity_fd,))
+        except DrillError as error:
+            raise DrillError("age_decryption_failed") from error
+    finally:
+        os.close(identity_fd)
     require(5 < len(raw) <= MAX_DUMP_BYTES and raw.startswith(b"PGDMP"),
             "decrypted_dump_not_pg_custom")
     return bytearray(raw)
@@ -432,6 +520,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--candidate-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--tmpfs-mib", type=int, default=1024)
+    parser.add_argument("--age-bin", default="age",
+                        help="root-owned age executable when using sudo")
     args = parser.parse_args(argv)
     if not args.execute:
         print("OFFSITE_POSTGRES_DRILL=BLOCKED: --execute is required", file=sys.stderr)
@@ -439,7 +529,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         manifest = execute(args.receipt, args.archive, args.identity,
                            args.candidate_root, args.output_dir,
-                           tmpfs_mib=args.tmpfs_mib)
+                           age_bin=args.age_bin, tmpfs_mib=args.tmpfs_mib)
     except DrillError as error:
         print(f"OFFSITE_POSTGRES_DRILL=FAIL: {error}", file=sys.stderr)
         return 1

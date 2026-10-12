@@ -8,8 +8,11 @@ import json
 import os
 from pathlib import Path
 import secrets
+import stat
 import subprocess
+import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -140,12 +143,121 @@ class ScheduledPostgresDrillTests(unittest.TestCase):
     def test_decrypt_requires_pg_custom_dump(self) -> None:
         if os.name != "posix":
             self.skipTest("private age identity requires a POSIX host")
-        with patch.object(drill, "command", return_value=b"not-a-pg-dump") as command:
+        with patch.object(drill, "age_executable", return_value="age"), \
+                patch.object(drill, "command", return_value=b"not-a-pg-dump") as command:
             with self.assertRaisesRegex(drill.DrillError, "not_pg_custom"):
                 drill.decrypt_dump(CIPHER, self.identity_path, "age")
-        self.assertEqual(command.call_args.args[0],
-                         ["age", "--decrypt", "--identity", str(self.identity_path)])
+        arguments = command.call_args.args[0]
+        self.assertEqual(arguments[:3], ["age", "--decrypt", "--identity"])
+        self.assertIn(arguments[3].rsplit("/", 1)[0], ("/proc/self/fd", "/dev/fd"))
+        self.assertEqual(command.call_args.kwargs["pass_fds"],
+                         (int(arguments[3].rsplit("/", 1)[1]),))
         self.assertEqual(command.call_args.kwargs["input_bytes"], CIPHER)
+
+    def test_age_identity_is_passed_by_open_descriptor(self) -> None:
+        if os.name != "posix":
+            self.skipTest("descriptor based identity requires a POSIX host")
+        fake_age = self.root / "fake-age"
+        fake_age.write_text(
+            f"#!{sys.executable}\n"
+            "import sys\n"
+            "identity = sys.argv[sys.argv.index('--identity') + 1]\n"
+            "with open(identity, 'rb') as handle:\n"
+            "    assert handle.read() == b'fixture-identity-only\\n'\n"
+            "sys.stdout.buffer.write(b'PGDMPfixture')\n",
+            encoding="utf-8",
+        )
+        fake_age.chmod(0o700)
+        self.assertEqual(drill.decrypt_dump(CIPHER, self.identity_path, str(fake_age)),
+                         bytearray(b"PGDMPfixture"))
+        with patch.object(drill.os, "geteuid", return_value=0):
+            with self.assertRaisesRegex(drill.DrillError, "root_owned_age_required"):
+                drill.age_executable(str(fake_age))
+
+    def test_sudo_accepts_only_canonical_invoker_owned_private_identity(self) -> None:
+        if os.name != "posix":
+            self.skipTest("sudo identity ownership requires a POSIX host")
+        import pwd
+        identity = SimpleNamespace(st_mode=stat.S_IFREG | 0o600, st_uid=1234)
+        account = SimpleNamespace(pw_uid=1234)
+        canonical = SimpleNamespace(pw_name="operator")
+        with patch.object(drill.os, "geteuid", return_value=0), \
+                patch.object(drill.os, "getuid", return_value=0), \
+                patch.object(Path, "lstat", return_value=identity), \
+                patch.object(pwd, "getpwnam", return_value=account), \
+                patch.object(pwd, "getpwuid", return_value=canonical), \
+                patch.dict(os.environ, {"SUDO_UID": "1234", "SUDO_USER": "operator"}, clear=True):
+            self.assertEqual(drill.regular_file(self.identity_path, private=True).st_uid,
+                             1234)
+            os.environ.pop("SUDO_USER")
+            with self.assertRaisesRegex(drill.DrillError, "sudo_invoker_invalid"):
+                drill.regular_file(self.identity_path, private=True)
+            os.environ["SUDO_USER"] = "operator"
+            os.environ["SUDO_UID"] = "001234"
+            with self.assertRaisesRegex(drill.DrillError, "sudo_invoker_invalid"):
+                drill.regular_file(self.identity_path, private=True)
+            os.environ["SUDO_UID"] = "1234"
+            with patch.object(pwd, "getpwnam", return_value=SimpleNamespace(pw_uid=999)):
+                with self.assertRaisesRegex(drill.DrillError, "sudo_invoker_invalid"):
+                    drill.regular_file(self.identity_path, private=True)
+            identity.st_uid = 0
+            with self.assertRaisesRegex(drill.DrillError, "private_identity_owner_invalid"):
+                drill.regular_file(self.identity_path, private=True)
+            identity.st_uid = 1234
+            identity.st_mode = stat.S_IFREG | 0o644
+            with self.assertRaisesRegex(drill.DrillError, "permissions_invalid"):
+                drill.regular_file(self.identity_path, private=True)
+
+    def test_root_requires_age_and_parent_directories_owned_by_root(self) -> None:
+        program = "/usr/local/bin/age"
+
+        def owned_path(path: Path) -> SimpleNamespace:
+            kind = stat.S_IFREG if str(path) == program else stat.S_IFDIR
+            return SimpleNamespace(st_uid=0, st_mode=kind | 0o755)
+
+        with patch.object(drill.os, "geteuid", return_value=0), \
+                patch.object(drill.shutil, "which", return_value=program), \
+                patch.object(Path, "lstat", autospec=True, side_effect=owned_path):
+            self.assertEqual(drill.age_executable("age"), program)
+
+        def writable_parent(path: Path) -> SimpleNamespace:
+            result = owned_path(path)
+            if str(path) == "/usr/local/bin":
+                result.st_mode = stat.S_IFDIR | 0o775
+            return result
+
+        with patch.object(drill.os, "geteuid", return_value=0), \
+                patch.object(drill.shutil, "which", return_value=program), \
+                patch.object(Path, "lstat", autospec=True, side_effect=writable_parent):
+            with self.assertRaisesRegex(drill.DrillError, "root_owned_age_required"):
+                drill.age_executable("age")
+
+    def test_git_trust_is_scoped_to_clean_candidate_even_with_git_environment(self) -> None:
+        actual_command = drill.command
+        calls: list[tuple[list[str], dict[str, object]]] = []
+
+        def capture(args: list[str], **kwargs: object) -> bytes:
+            calls.append((args, kwargs))
+            return actual_command(args, **kwargs)
+
+        with patch.dict(os.environ, {"GIT_DIR": "/invalid-repository",
+                                      "GIT_CONFIG_COUNT": "1",
+                                      "GIT_CONFIG_KEY_0": "safe.directory",
+                                      "GIT_CONFIG_VALUE_0": "*"}), \
+                patch.object(drill, "command", side_effect=capture):
+            self.assertEqual(drill.candidate_identity(self.candidate),
+                             (self.api_tree, REVISION))
+        self.assertEqual(len(calls), 3)
+        for arguments, kwargs in calls:
+            self.assertEqual(arguments[:4],
+                             ["git", "--no-optional-locks", "-c", "safe.directory="])
+            self.assertIn(f"safe.directory={self.candidate.resolve()}", arguments)
+            self.assertEqual(arguments.count("safe.directory="), 1)
+            self.assertFalse(any(key.startswith("GIT_") for key in kwargs["env"]))
+        with patch.object(drill, "trusted_uid",
+                          return_value=self.candidate.stat().st_uid + 1):
+            with self.assertRaisesRegex(drill.DrillError, "checkout_owner_invalid"):
+                drill.candidate_identity(self.candidate)
 
     def test_failed_restore_emits_no_report_and_zeroes_buffer(self) -> None:
         plaintext = bytearray(PLAIN)
