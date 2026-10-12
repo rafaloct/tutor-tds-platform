@@ -9,7 +9,7 @@ Workers. A API produtiva declarou `schema_version=20261005_0028`,
 `environment=production`, `minimum_supported_app_version=1.2.0+11` e
 `compatibility_verified=false`; a API staging declarou `0029`. Esses probes
 são pontuais e não identificam o SHA implantado nem comprovam upstream de IA.
-As correções desta branch ainda não formam um SHA de release.
+As correções desta branch ainda não formam um SHA de release aprovado.
 **PRODUCTION_RELEASE_READY=false.** O AAB antigo está marcado como substituído
 e `upload_allowed=false` em `cartilhas_app/release/release_status.json`.
 
@@ -22,7 +22,7 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 | # | Gate | Estado em 12/10 | Evidência e prova restante |
 | --- | --- | --- | --- |
 | 1 | commit e tag | BLOCKED | `9b5778d` é identificável; não há tag de release no candidato. Congelar SHA e publicar tag após revisão. |
-| 2 | GitHub atualizado | BLOCKED | A integração está na branch remota `agent/production-readiness-20261012`, ainda sem SHA de release/revisão final. PR #194 permanece aberto sobre `staging`; seus três checks falharam no SHA `9b5778d`. As causas observadas de seleção de alvo e secret scan foram corrigidas localmente; CI novo ainda precisa executar no candidato final. |
+| 2 | GitHub atualizado | PARTIAL | A integração está na branch remota `agent/production-readiness-20261012` e no PR #194 sobre `staging`. Em `235e8b8`, todos os checks aplicáveis passaram; os jobs de deploy foram ignorados conforme configuração. Falta CI no SHA final, revisão e promoção. |
 | 3 | árvore limpa | PARTIAL | Base `9b5778d` estava limpa. Verificar novamente na worktree de release congelada, após testes e manifesto. |
 | 4 | API canônica | PARTIAL | `/tutor-api/health` e `/version` responderam via HTTPS em 12/10. O SHA implantado e a proveniência da API não foram confirmados. |
 | 5 | API e banco saudáveis | PARTIAL | `/health` declarou `status=ok` e consulta ao banco disponível em probe pontual de 12/10. Repetir na janela de promoção e conferir monitoramento contínuo. |
@@ -33,9 +33,9 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 | 10 | migrations no destino correto | BLOCKED | `0030` foi testada localmente em PostgreSQL; produção segue em `0028`. Aplicação e compatibilidade no destino de produção não foram comprovadas. |
 | 11 | backup configurado e monitorado | PARTIAL | Há automação e recibos históricos. Idade atual, alerta recebido e restauração de objeto PostgreSQL agendado do offsite seguem sem prova versionada. |
 | 12 | restauração independente | BLOCKED | `production-restore-acceptance.json` existe, com cinco booleans, mas sem referências. Track B comprova o volume AnythingLLM; o ensaio PostgreSQL versionado vai até `0020`. O verificador exige recibo agendado ligado ao dump restaurado, um ensaio PostgreSQL único, árvore Git da API e drill recente; o aceite histórico falha. |
-| 13 | secrets fora do Git | PARTIAL | O scanner local com gitleaks 8.28.0 não encontrou vazamentos em 48 commits da base de PR #194 até `f11d653`; o digest histórico que gerava falso positivo recebeu exceção fixada ao valor exato. Repetir em CI e no SHA final, sem copiar credenciais para evidências. |
+| 13 | secrets fora do Git | PARTIAL | O scanner local com gitleaks 8.28.0 não encontrou vazamentos em 48 commits da base de PR #194 até `f11d653`; o digest histórico que gerava falso positivo recebeu exceção fixada ao valor exato. O check de CI passou em `235e8b8`. Repetir no SHA final, sem copiar credenciais para evidências. |
 | 14 | HTTPS/domínio/SSL | PARTIAL | TLS passou em probes históricos; repetir validade e rota durante a janela de promoção. |
-| 15 | testes de release | PARTIAL | Suíte completa da API passou localmente; PostgreSQL 16 descartável na porta local passou 4/4 testes opcionais de turma/migration; gate de restore 17/17, harness 20/20, preflight RAG 8/8, promoção curricular 10/10 e Worker 32/32 passaram. No SHA `f11d653`, recorte Flutter 61/61 e análise Flutter 3.44.9 sem achados. Faltam CI do PR no SHA final, concorrência PostgreSQL específica e Android. |
+| 15 | testes de release | PARTIAL | Suíte completa da API passou localmente; PostgreSQL 16 descartável na porta local passou 4/4 testes opcionais de turma/migration; gate de restore 17/17, harness 20/20, preflight RAG 8/8, promoção curricular 10/10 e Worker 32/32 passaram. No checkout Windows do candidato, recorte Flutter 61/61, widget do Tutor contextual 7/7 e análise Flutter 3.44.9 sem achados. A CI aplicável passou em `235e8b8`. Faltam CI do SHA final, concorrência PostgreSQL específica e Android. |
 | 16 | upgrade do app publicado | BLOCKED | Evidência de 06/10 cobre o app publicado `1.2.0+11` contra backend anterior; falta upgrade real do candidato `1.4.0+13` preservando dados/sessão. |
 | 17 | manifesto do build | BLOCKED | Só é produzido após preflight e AAB do SHA congelado; nenhum manifesto atual foi gerado. |
 | 18 | SHA-256 do AAB | BLOCKED | O AAB registrado está `superseded`, não corresponde à fonte atual e tem `upload_allowed=false`. |
@@ -71,8 +71,8 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 
 ## Próxima evidência necessária
 
-1. Fechar a política nova de turma em código e provar migração de comportamento
-   por API, app e E2E, sem tocar dados reais.
+1. Reexecutar o E2E Android da política nova de turma e comprovar a tela de
+   ativação e o aviso acima de 30, sem tocar dados reais.
 2. Versionar prova sanitizada de restore PostgreSQL e offsite agendado para o
    schema candidato; revisar custódia humana dos recibos e a idade do backup.
 3. Obter exports atuais das CourseVersions publicadas e aprovação editorial;

@@ -16,8 +16,13 @@ históricos reconciliado com a evidência de 01/10. `course_promotion` passou a
 aceitar `course_version_id` legado somente quando igual ao `version_id` do
 export. O preflight stdlib recusa export, conteúdo, URL, versão, PDF, hash ou
 workspace divergente e emite manifesto determinístico apenas de bytes locais.
-Nenhum PDF está neste checkout; Drive, aprovação editorial, indexação e
-workspaces reais não foram verificados nem alterados. Testes focais em
+Nenhum PDF está neste checkout. Em 12/10, os nove arquivos obtidos pelos IDs
+do Drive conectado corresponderam aos originais históricos em assinatura PDF,
+tamanho e SHA-256; prova sanitizada em
+`docs/production/evidence/curricular-drive-bytes-20261012.json`. A busca no
+Drive acessível não encontrou os nove exports atuais de CourseVersion nem
+aprovação editorial rastreável. Indexação e workspaces reais não foram
+verificados nem alterados. Testes focais em
 `tooling/ai_qa` (8/8) e `api/tests/test_course_promotion.py` (10/10)
 passaram; equivalência de snapshots legados 9/9. Nenhum deploy.
 
@@ -26,8 +31,8 @@ passaram; equivalência de snapshots legados 9/9. Nenhum deploy.
 Candidato local sobre `9b5778d`: o leitor agora bloqueia a abertura do Tutor
 quando a edição da cartilha diverge da CourseVersion ativa da turma. Antes,
 essa divergência era detectada mas abria o caminho legado sem escopo RAG.
-Cartilhas sem versão continuam no caminho legado intencional. Teste de widget
-focal foi atualizado, mas não executado neste executor sem Flutter/Dart;
+Cartilhas sem versão continuam no caminho legado intencional. O teste de widget
+focal passou 7/7 no checkout Windows do candidato com Flutter 3.44.9 em 12/10;
 `git diff --check` passou. Sem staging, produção ou mudança no Worker.
 
 ## 2026-10-12 — gate 12 de proveniência de recuperação (candidato local)
