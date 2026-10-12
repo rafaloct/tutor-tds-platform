@@ -322,19 +322,28 @@ def main() -> int:
         )
         checkin_evidence = "docs/production/evidence/checkin-auth-domain-401-2026-10-07.json"
         source_key = "cartilhas_app/lib/features/auth/data/auth_repository.dart"
+        historical_source_digest = "203ba204f85026e6d602b029de30ca3c02daaa8598790326b9e139fbf842c2f3"
         clean_case(
             tmp_root,
             "historical_checkin_source_digest",
-            {checkin_evidence: json.dumps({source_key: secrets.token_hex(32)}, indent=2) + "\n"},
+            {checkin_evidence: json.dumps({source_key: historical_source_digest}, indent=2) + "\n"},
             gitleaks,
             config,
             default_config,
         )
         detected_case(
             tmp_root,
+            "different_digest_in_historical_checkin_field",
+            {checkin_evidence: json.dumps({source_key: secrets.token_hex(32)}, indent=2) + "\n"},
+            "generic-api-key",
+            gitleaks,
+            config,
+        )
+        detected_case(
+            tmp_root,
             "historical_checkin_digest_does_not_hide_secret",
             {checkin_evidence: json.dumps({
-                source_key: secrets.token_hex(32),
+                source_key: historical_source_digest,
                 "secret_access_key": secrets.token_hex(32),
             }, indent=2) + "\n"},
             "generic-api-key",
@@ -367,7 +376,7 @@ def main() -> int:
             config,
             default_config,
         )
-        fixture_like = f"tds_gitleaks_fixture_{random_alnum(24)}"
+        fixture_like = "tds_gitleaks_fixture_7zQ1pM9rX4wN8bY2jK6tC3vL"
         detected_case(
             tmp_root,
             "fixture_like_without_context",

@@ -42,4 +42,4 @@ description = "Historical check-in evidence SHA-256 for the auth repository sour
 condition = "AND"
 paths = ['''^docs/production/evidence/checkin-auth-domain-401-2026-10-07\.json$''']
 regexTarget = "line"
-regexes = ['''^\s*"cartilhas_app/lib/features/auth/data/auth_repository\.dart"\s*:\s*"[0-9a-f]{64}",?\s*$''']
+regexes = ['''^\s*"cartilhas_app/lib/features/auth/data/auth_repository\.dart"\s*:\s*"203ba204f85026e6d602b029de30ca3c02daaa8598790326b9e139fbf842c2f3",?\s*$''']
