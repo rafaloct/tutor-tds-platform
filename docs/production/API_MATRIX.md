@@ -94,7 +94,9 @@ o status dos endpoints.
 
 Para `published_block`, o cliente e a API calculam o mesmo ID canônico a partir
 da linhagem completa (sem `apiUrl`), e o banco impõe uma tentativa por
-dono/contexto/bloco. `assessment_contents.origin` e o namespace reservado
+dono/contexto/bloco. O conteúdo publicado também usa a linhagem completa na
+identidade, permitindo o mesmo bloco e edição em duas turmas da mesma pessoa.
+`assessment_contents.origin` e o namespace reservado
 impedem que gabarito publicado seja aceito pelo fluxo legado. Projeções do aluno
 e públicas removem campos reveladores; o evento conclusivo omite IDs pessoais.
 
@@ -103,7 +105,7 @@ e públicas removem campos reveladores; o evento conclusivo omite IDs pessoais.
 | PUT | /assessment-attempts/{attempt_id} | Bearer access_claims | `published_block`: próprio aluno com LearningContext exato e ativo; `practice` preserva regra student legada | origem, revisão/CAS, resposta/marcação e linhagem completa; sem conteúdo/gabarito do cliente | tentativa criada/replay idêntico; 409 em revisão/ID canônico/snapshot divergente; 422 `future_updated_at` reparável somente no relógio; score calculado no servidor | ChatExperienceScreen / PublishedAssessmentController | AssessmentAttemptRepository; AssessmentSyncService | assessment_attempts; assessment_contents; learning_events | test_dynamic_activity; published_assessment_sync_test; published_assessment_controller_test | LOCAL_CANDIDATE |
 | GET | /classes/{class_id}/assessment-attempts | Bearer access_claims | próprio aluno; matrícula, membership, programa, curso e edição revalidados | limit; offset | página de tentativas da linhagem exata | retomada/sync Flutter | AssessmentAttemptRepository | assessment_attempts | test_dynamic_activity; published_assessment_reader_test | LOCAL_CANDIDATE |
 | GET | /classes/{class_id}/assessment-attempts/{attempt_id} | Bearer access_claims | próprio aluno no contexto exato ativo | class_id; attempt_id | tentativa contextual ou 404/409 fail-closed | retomada Flutter | AssessmentAttemptRepository | assessment_attempts | test_dynamic_activity; published_assessment_reader_test | LOCAL_CANDIDATE |
-| GET | /classes/{class_id}/assessment-attempts/{attempt_id}/content | Bearer access_claims | próprio aluno no contexto exato ativo | class_id; attempt_id | conteúdo público; gabarito somente após conclusão | revisão da atividade | AssessmentAttemptRepository | assessment_attempts; assessment_contents | test_dynamic_activity | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/assessment-attempts/{attempt_id}/content | Bearer access_claims | próprio aluno no contexto exato ativo | class_id; attempt_id | conteúdo público sem gabarito ou explicação, mesmo após conclusão | revisão da atividade | AssessmentAttemptRepository | assessment_attempts; assessment_contents | test_dynamic_activity | LOCAL_CANDIDATE |
 | GET | /classes/{class_id}/students/{owner_id}/assessment-attempts | Bearer access_claims | professor/admin autorizado na turma exata; monitor/outsider negados | owner_id; limit; offset | página pedagógica do aluno naquela turma | acompanhamento | API contextual | assessment_attempts | test_dynamic_activity; test_staging_dynamic_activity_smoke | LOCAL_CANDIDATE |
 | GET | /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id} | Bearer access_claims | professor/admin autorizado na turma exata | owner_id; attempt_id | tentativa contextual exata | acompanhamento | API contextual | assessment_attempts | test_dynamic_activity; test_staging_dynamic_activity_smoke | LOCAL_CANDIDATE |
 | GET | /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id}/content | Bearer access_claims | professor/admin autorizado na turma exata | owner_id; attempt_id | conteúdo congelado; gabarito somente após conclusão | acompanhamento | API contextual | assessment_attempts; assessment_contents | test_dynamic_activity | LOCAL_CANDIDATE |

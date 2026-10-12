@@ -1,5 +1,19 @@
 # CURRENT STATE
 
+## 2026-10-12 — correções focais da revisão do PR #194 (candidato local)
+
+O conteúdo imutável de bloco publicado agora usa toda a linhagem de turma e
+matrícula na identidade, permitindo que a mesma pessoa conclua o mesmo bloco
+da mesma edição em duas turmas. A rota do aluno mantém gabarito e explicação
+fora da resposta mesmo após conclusão; professor e admin autorizados na turma
+podem consultar o gabarito de tentativa concluída. Professor/admin que também
+têm matrícula ativa na turma preservam a projeção de equipe; monitor continua
+com projeção pública. A hidratação Flutter aceita tentativa publicada concluída
+sem gabarito e preserva a nota calculada pelo servidor, sem inferir tópicos
+fracos. API focal: 34 testes locais passaram; SDK Flutter indisponível neste
+workspace Linux, então os testes Dart adicionados aguardam CI. Nenhum serviço
+externo, banco de staging ou produção foi alterado.
+
 ## 2026-10-12 — tentativa isolada de E2E Android da turma
 
 Seis contratos de API passaram no avellaria, mas o build Gradle da integração

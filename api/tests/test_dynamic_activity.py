@@ -21,6 +21,7 @@ from app.config import Settings
 from app.context_memberships import bind_membership, bind_student
 from app.course_editor import snapshot_content
 from app.database import Database
+from app.evidence import _active_student
 from app.events import router as events_router
 from app.events import student_claims as event_student_claims
 from app.models import (
@@ -345,7 +346,13 @@ def test_published_quiz_uses_server_snapshot_and_writes_zero_credit_evidence(
     assert contextual.status_code == 200
     assert legacy.status_code == 404
     assert hydrated.status_code == 200
-    assert hydrated.json()["answer_key"] == [
+    assert hydrated.json()["answer_key"] is None
+    teacher_content = client.get(
+        f"/classes/class/students/learner/assessment-attempts/{attempt_id}/content",
+        headers={"X-User": "teacher"},
+    )
+    assert teacher_content.status_code == 200
+    assert teacher_content.json()["answer_key"] == [
         {
             "correct_indices": [0, 1],
             "explanation": "Explicação reservada",
@@ -387,6 +394,74 @@ def test_published_quiz_uses_server_snapshot_and_writes_zero_credit_evidence(
         assert events[0].payload["course_id"] == "course"
         assert events[0].payload["graded"] is True
         assert events[0].payload["class_id"] == "class"
+
+
+def test_same_published_block_in_two_classes_has_distinct_content(
+    dynamic_activity,
+) -> None:
+    client, database, lineage, blocks = dynamic_activity
+    quiz = blocks["quiz"]
+    first_id = canonical_attempt_id(lineage, quiz)
+    first = client.put(
+        f"/assessment-attempts/{first_id}",
+        headers={"X-User": "learner"},
+        json=payload(lineage, quiz),
+    )
+    assert first.status_code == 201, first.text
+
+    with Session(database.engine) as session:
+        second_class = Classroom(
+            id="second-class",
+            program_id="program",
+            course_id="course",
+            course_version_id="version",
+            teacher_id="teacher",
+            name="Segunda turma",
+            start_date=date(2026, 1, 1),
+            end_date=date(2026, 12, 31),
+            status="active",
+        )
+        session.add(second_class)
+        session.flush()
+        link = ClassEnrollment(
+            class_id="second-class",
+            user_id="learner",
+            enrollment_id="legacy-enrollment",
+            program_id="program",
+            course_id="course",
+            status="active",
+        )
+        session.add(link)
+        session.flush()
+        bind_student(session, second_class, link)
+        second_lineage = {
+            **lineage,
+            "class_id": second_class.id,
+            "membership_id": link.membership_id,
+            "enrollment_id": link.context_id,
+        }
+        session.commit()
+
+    second_id = canonical_attempt_id(second_lineage, quiz)
+    second = client.put(
+        f"/assessment-attempts/{second_id}",
+        headers={"X-User": "learner"},
+        json=payload(second_lineage, quiz),
+    )
+    assert second.status_code == 201, second.text
+    assert second_id != first_id
+    assert second.json()["assessment_content_id"] != first.json()[
+        "assessment_content_id"
+    ]
+    assert second.json()["score"] == first.json()["score"] == 1
+    assert client.get(
+        f"/classes/second-class/assessment-attempts/{second_id}/content",
+        headers={"X-User": "learner"},
+    ).status_code == 200
+    with Session(database.engine) as session:
+        assert session.scalar(
+            select(func.count()).select_from(AssessmentContentRecord)
+        ) == 2
 
 
 def test_wave2b_course_projection_hides_answers_from_learners_and_monitors(
@@ -450,6 +525,61 @@ def test_wave2b_course_projection_hides_answers_from_learners_and_monitors(
     ] is True
 
 
+def test_teacher_and_admin_enrolled_in_their_class_keep_staff_projection(
+    dynamic_activity,
+) -> None:
+    client, database, _, _ = dynamic_activity
+    with Session(database.engine) as session:
+        session.add(
+            ProgramMembership(
+                user_id="admin", program_id="program", role="admin", status="active"
+            )
+        )
+        session.flush()
+        classroom = session.get(Classroom, "class")
+        for user_id in ("teacher", "admin", "monitor"):
+            enrollment = Enrollment(
+                id=f"enrollment-{user_id}",
+                user_id=user_id,
+                program_id="program",
+                course_id="course",
+                status="active",
+            )
+            session.add(enrollment)
+            session.flush()
+            link = ClassEnrollment(
+                class_id="class",
+                user_id=user_id,
+                enrollment_id=enrollment.id,
+                program_id="program",
+                course_id="course",
+                status="active",
+            )
+            session.add(link)
+            session.flush()
+            bind_student(session, classroom, link)
+        session.commit()
+        for user_id in ("teacher", "admin", "monitor"):
+            assert _active_student(session, classroom, user_id)
+
+    for user_id in ("teacher", "admin"):
+        response = client.get("/classes/class/course", headers={"X-User": user_id})
+        assert response.status_code == 200
+        quiz = response.json()["sections"][0]["messages"][0]
+        assert quiz["options"][0]["isCorrect"] is True
+        assert quiz["explanation"] == "Explicação reservada"
+
+    for user_id in ("learner", "monitor"):
+        response = client.get("/classes/class/course", headers={"X-User": user_id})
+        assert response.status_code == 200
+        quiz = response.json()["sections"][0]["messages"][0]
+        assert "explanation" not in quiz
+        assert all("isCorrect" not in option for option in quiz["options"])
+    assert client.get(
+        "/classes/class/course", headers={"X-User": "outsider"}
+    ).status_code == 403
+
+
 def test_published_content_provenance_canonical_attempt_and_answer_release(
     dynamic_activity,
 ) -> None:
@@ -471,6 +601,12 @@ def test_published_content_provenance_canonical_attempt_and_answer_release(
     )
     assert before_completion.status_code == 200
     assert before_completion.json()["answer_key"] is None
+    staff_before_completion = client.get(
+        f"/classes/class/students/learner/assessment-attempts/{attempt_id}/content",
+        headers={"X-User": "teacher"},
+    )
+    assert staff_before_completion.status_code == 200
+    assert staff_before_completion.json()["answer_key"] is None
 
     practice_laundering = client.put(
         "/assessment-attempts/practice-laundering",
@@ -534,9 +670,26 @@ def test_published_content_provenance_canonical_attempt_and_answer_release(
         f"/classes/class/assessment-attempts/{attempt_id}/content",
         headers={"X-User": "learner"},
     )
-    assert after_completion.json()["answer_key"] == [
+    assert after_completion.json()["answer_key"] is None
+    teacher_content = client.get(
+        f"/classes/class/students/learner/assessment-attempts/{attempt_id}/content",
+        headers={"X-User": "teacher"},
+    )
+    assert teacher_content.status_code == 200
+    assert teacher_content.json()["answer_key"] == [
         {"correct_indices": [0, 1], "explanation": "Explicação reservada", "graded": True}
     ]
+    admin_content = client.get(
+        f"/classes/class/students/learner/assessment-attempts/{attempt_id}/content",
+        headers={"X-User": "admin"},
+    )
+    assert admin_content.status_code == 200
+    assert admin_content.json()["answer_key"] == teacher_content.json()["answer_key"]
+    for user_id in ("monitor", "outsider"):
+        assert client.get(
+            f"/classes/class/students/learner/assessment-attempts/{attempt_id}/content",
+            headers={"X-User": user_id},
+        ).status_code == 403
 
     noncanonical = client.put(
         "/assessment-attempts/second-id-for-same-block",
@@ -642,9 +795,7 @@ def test_question_without_key_is_persisted_without_grade_and_client_key_is_rejec
     assert injected.status_code == 422
     assert supplied_content.status_code == 422
     assert supplied_content.json()["detail"]["code"] == "published_block_content_is_server_owned"
-    assert hydrated.json()["answer_key"] == [
-        {"correct_indices": [], "explanation": "", "graded": False}
-    ]
+    assert hydrated.json()["answer_key"] is None
 
 
 def test_contextual_completion_uses_revision_cas_and_replays_evidence_once(

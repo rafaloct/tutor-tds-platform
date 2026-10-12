@@ -320,6 +320,50 @@ void main() {
     expect(hydrated.deck.hasAnswerKey, isFalse);
   });
 
+  test('retoma bloco publicado concluído sem receber gabarito', () async {
+    final remote = RemoteAssessmentAttempt.fromJson({
+      'attempt_id': 'attempt:published:stable',
+      ..._payloadJson(completed: true),
+      'score': 1,
+    });
+    final service = _service((request) async {
+      expect(
+        request.url.path,
+        '/classes/class-1/assessment-attempts/attempt%3Apublished%3Astable/content',
+      );
+      return http.Response(
+        jsonEncode({
+          'assessment_content_id': 'published:server-derived',
+          'course_id': 'course-1',
+          'topic': 'Módulo',
+          'mode': 'quiz',
+          'title': 'Bloco publicado',
+          'duration_seconds': 0,
+          'questions': [
+            {
+              'question': 'Pergunta?',
+              'options': ['A', 'B', 'C'],
+              'topic': 'Módulo',
+            },
+          ],
+          'answer_key': null,
+          'created_at': '2026-10-07T12:00:00Z',
+        }),
+        200,
+      );
+    });
+
+    final hydrated = await service.hydrateRemoteAttempt(remote);
+
+    expect(hydrated.isCompleted, isTrue);
+    expect(hydrated.score, 1);
+    expect(hydrated.answers, {0: 1});
+    expect(hydrated.deck.hasAnswerKey, isFalse);
+    expect(hydrated.deck.items.single.correctIndex, -1);
+    expect(hydrated.deck.items.single.explanation, isEmpty);
+    expect(hydrated.weakTopics, isEmpty);
+  });
+
   test(
     'gabarito server-side preserva múltiplas corretas e questão sem nota',
     () {

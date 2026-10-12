@@ -533,12 +533,12 @@ def classroom_course(
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
         active_student = _active_student(session, classroom, claims["sub"])
-        can_view_answer_key = False
-        if not active_student:
+        can_view_answer_key = (
+            (claims["role"] == "admin" or classroom.teacher_id == claims["sub"])
+            and _is_staff(session, classroom, claims["sub"], claims["role"])
+        )
+        if not active_student and not can_view_answer_key:
             _staff(session, classroom, claims, monitor=True)
-            if claims["role"] == "admin" or classroom.teacher_id == claims["sub"]:
-                _staff(session, classroom, claims, monitor=False)
-                can_view_answer_key = True
         version = session.get(CourseVersion, classroom.course_version_id) if classroom.course_version_id else None
         if version is None or version.course_id != classroom.course_id or version.status not in {"published", "archived"}:
             raise HTTPException(409, "A versão do curso desta turma precisa ser conferida pela equipe.")

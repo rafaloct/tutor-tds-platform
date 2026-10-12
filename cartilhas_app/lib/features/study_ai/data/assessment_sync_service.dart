@@ -142,7 +142,9 @@ class AssessmentSyncService
         'O conteúdo recuperado não corresponde à tentativa.',
       );
     }
-    if (payload.completed && !content.hasAnswerKey) {
+    if (payload.completed &&
+        payload.origin == AssessmentOrigin.practice &&
+        !content.hasAnswerKey) {
       throw const AssessmentSyncConflictException(
         'O servidor ainda não liberou o gabarito desta tentativa concluída.',
       );
@@ -200,7 +202,9 @@ class AssessmentSyncService
       ),
       remainingSeconds: payload.remainingSeconds,
       score: payload.score,
-      weakTopics: payload.completed ? _weakTopics(deck, answers) : const [],
+      weakTopics: payload.completed && content.hasAnswerKey
+          ? _weakTopics(deck, answers)
+          : const [],
       isCompleted: payload.completed,
       createdAt: content.createdAt,
       updatedAt: payload.updatedAt,

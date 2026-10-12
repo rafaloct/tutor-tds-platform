@@ -691,7 +691,7 @@ def get_own_published_attempt_content(
         attempt = _contextual_attempt(
             session, context, claims["sub"], attempt_id
         )
-        return _contextual_content(session, attempt)
+        return _contextual_content(session, attempt, allow_answer_key=False)
 
 
 @context_router.get(
@@ -752,7 +752,7 @@ def get_student_published_attempt_content(
         attempt = _staff_contextual_attempt(
             session, classroom, owner_id, attempt_id
         )
-        return _contextual_content(session, attempt)
+        return _contextual_content(session, attempt, allow_answer_key=True)
 
 
 def _require_course_access(session: Session, owner_id: str, course_id: str) -> None:
@@ -932,11 +932,8 @@ def _published_block_content(
         json.dumps(
             [
                 owner_id,
-                context["course_version_id"],
-                context["section_id"],
-                context["section_version_id"],
-                context["block_id"],
-                context["block_version_id"],
+                payload.course_id,
+                *(context[field] for field in CONTEXT_FIELDS),
             ],
             separators=(",", ":"),
         ).encode()
@@ -1355,7 +1352,10 @@ def _staff_contextual_page(
 
 
 def _contextual_content(
-    session: Session, attempt: AssessmentAttemptRecord
+    session: Session,
+    attempt: AssessmentAttemptRecord,
+    *,
+    allow_answer_key: bool,
 ) -> AssessmentContentResponse:
     if attempt.assessment_content_id is None:
         raise HTTPException(409, "Tentativa contextual sem conteúdo imutável.")
@@ -1366,7 +1366,9 @@ def _contextual_content(
         raise HTTPException(409, "Conteúdo contextual não pôde ser conferido.")
     if content.origin != "published_block":
         raise HTTPException(409, "Conteúdo contextual possui origem inválida.")
-    return _content_response(content, include_answer_key=attempt.completed)
+    return _content_response(
+        content, include_answer_key=allow_answer_key and attempt.completed
+    )
 
 
 def _content_parts(
