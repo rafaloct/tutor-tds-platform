@@ -114,7 +114,7 @@ configuração produtiva exata, signing/freeze físico, tag+origin sincronizado,
 `status=passed`, `offsite_backup`, `postgres_restore`,
 `critical_volumes_restore`, `upgrade_compatibility`,
 `backend_schema_compatibility` verdadeiros, Flutter 3.44.9, testes/analyze.
-Esse arquivo de aceite **não existe** e não deve ser fabricado. Só após tudo
+Na fotografia de 02/10, esse arquivo de aceite **não existia**. Só após tudo
 isso o script construiria AAB e `release/build-manifest.json` com
 `versionName`, `versionCode`, `git_commit`, `git_tag`, timestamp UTC,
 environment, api_base_url, flags, api/schema version e SHA-256 do AAB. Nunca
@@ -128,3 +128,38 @@ foi bloqueado por configuração produtiva ignorada divergente, sem revelar seu
 conteúdo. Produção, Play, assinatura e `release_status.json` permaneceram
 intocados. Aprovação futura exige revisar este documento contra evidência real,
 nunca alterar security/freeze para fazer o build passar.
+
+## Revisão do gate 12 — 12/10/2026
+
+O arquivo `evidence/production-restore-acceptance.json` foi adicionado em
+06/10 com os cinco booleanos acima, mas sem vínculos verificáveis com os
+recibos de cada afirmação. O ensaio versionado
+`evidence/trackb-anythingllm-drill-2026-10-06.json` demonstra restauração
+isolada do volume AnythingLLM e cópia criptografada R2. O checkpoint dessa
+frente aponta a prova PostgreSQL mais recente para um arquivo privado na VPS e
+registra que os objetos agendados R2 não foram descriptografados e restaurados.
+O ensaio PostgreSQL versionado de 01/10 cobre apenas o candidato até `0020`.
+Esses registros não comprovam a recuperação do candidato atual `0030`.
+
+O preflight agora executa `tooling/verify_production_recovery_evidence.py`
+depois da verificação tipada dos booleanos. O aceite precisa acrescentar
+`candidate_schema_version` igual ao HEAD Alembic local e um objeto `evidence`
+com uma entrada para cada um dos cinco gates. Cada entrada contém somente
+`file` (nome de um JSON versionado em `docs/production/evidence/`) e `sha256`
+do arquivo exato. Caminho externo, link simbólico, arquivo ausente ou hash
+divergente bloqueiam o build. O validador também confere no conteúdo:
+
+| Gate | Prova mínima que o validador exige |
+| --- | --- |
+| `offsite_backup` | Recibo de backup PostgreSQL agendado, hashes iguais de upload/download e restauração isolada do objeto remoto |
+| `postgres_restore` | Ensaio PostgreSQL isolado com restore verificado, produção preservada e revision clonada igual ao HEAD candidato |
+| `critical_volumes_restore` | Ensaio Track B aprovado e checksum do snapshot descriptografado conferido |
+| `upgrade_compatibility` | Imagem anterior operando no banco migrado, catálogo compatível e revision candidata exata |
+| `backend_schema_compatibility` | Colunas anteriores preservadas, sem perda de rota produtiva ou operação exigida pelo AAB, na revision candidata |
+
+O mesmo ensaio PostgreSQL pode sustentar os três gates de banco se demonstrar
+todos os resultados. O ensaio de volume não pode substituir o recibo do backup
+PostgreSQL agendado. O arquivo de aceite atual permanece intacto e falha nesse
+novo gate até que provas sanitizadas correspondentes sejam revisadas e
+versionadas. Hash e checagem de campos tornam a afirmação rastreável, mas a
+revisão humana ainda deve confirmar execução, custódia e cobertura dos serviços.

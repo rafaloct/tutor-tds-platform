@@ -51,18 +51,24 @@ try {
     Require ($LASTEXITCODE -eq 0 -and $remote.Count -eq 1 -and ($remote[0] -split '\s+')[0] -eq $commit) 'branch remota diverge do commit local.'
     $remoteTags = @(& git ls-remote --tags origin "refs/tags/$($tags[0])" "refs/tags/$($tags[0])^{}")
     Require ($LASTEXITCODE -eq 0 -and @($remoteTags | Where-Object { ($_ -split '\s+')[0] -eq $commit }).Count -ge 1) 'tag de release ainda não está no GitHub.'
+    $localSchema = Get-CanonicalAlembicHead
     $restorePath = Join-Path $workspace 'docs/production/evidence/production-restore-acceptance.json'
     Require (Test-Path -LiteralPath $restorePath) 'backup/restauração de produção não comprovados.'
     $proof = Get-Content -LiteralPath $restorePath -Raw | ConvertFrom-Json
     try { Assert-ProductionRecoveryEvidence $proof | Out-Null }
     catch { throw 'PRODUCTION_RELEASE_READY=false: prova de recuperação/compatibilidade incompleta.' }
+    Run 'python' @(
+        (Join-Path $PSScriptRoot 'verify_production_recovery_evidence.py'),
+        '--acceptance', $restorePath,
+        '--evidence-dir', (Join-Path $workspace 'docs/production/evidence'),
+        '--expected-schema', $localSchema
+    )
     $health = Invoke-RestMethod -Uri "$expectedApi/health" -TimeoutSec 15
     Require ($health.status -eq 'ok' -and $health.database -eq 'available') 'health de produção sem banco disponível.'
     $version = Invoke-RestMethod -Uri "$expectedApi/version" -TimeoutSec 15
     Require ($version.environment -eq 'production' -and $version.schema_version -and
         $version.minimum_supported_app_version -and $version.compatibility_verified -eq $true) 'versão/schema/compatibilidade da API de produção não comprovados.'
     Require ($version.api_version -and $config.TUTOR_API_URL -eq $expectedApi) 'proveniência da API de produção divergente.'
-    $localSchema = Get-CanonicalAlembicHead
     Require ($version.schema_version -eq $localSchema) 'revision de produção diverge do HEAD Alembic.'
     try {
         Assert-ProductionBackendIdentity -VersionResponse $version -ExpectedSchemaVersion $localSchema `

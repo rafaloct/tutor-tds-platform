@@ -1,5 +1,16 @@
 # CURRENT STATE
 
+## 2026-10-12 — gate 12 de proveniência de recuperação (candidato local)
+
+IMPLEMENTED/TESTED-LOCAL: o preflight de AAB mantém a verificação tipada do
+aceite de recuperação e passa a exigir, em verificador Python offline, hashes e
+arquivos de evidência versionados para os cinco campos, além de revisão Alembic
+igual ao candidato. O aceite booleano histórico de 06/10 não contém essas
+referências e falha fechado. Track B comprova o volume AnythingLLM; o ensaio
+PostgreSQL versionado alcança apenas `0020`, e o checkpoint aponta prova mais
+recente ainda privada na VPS. Não foi fabricado recibo, executado restore,
+alterada produção nem gerado AAB. `PRODUCTION_RELEASE_READY=false`.
+
 ## 2026-10-08 Issue #163 — fundação Drupal (DR-2), candidato em review
 
 IMPLEMENTED/TESTED-LOCAL na branch `agent/drupal-163-auto-20261007-152725`,
