@@ -39,6 +39,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Antes de encerrar'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Certificados são independentes'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Certificados são independentes'), findsOneWidget);
     expect(
       find.textContaining('não emite, não valida e não fabrica certificados'),
@@ -62,6 +67,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('close_classroom_action')),
         300,
+        scrollable: find.byType(Scrollable).first,
       );
       expect(find.byKey(const Key('close_classroom_action')), findsOneWidget);
       expect(find.byType(CloseClassroomScreen), findsOneWidget);
@@ -118,14 +124,26 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final reason = find.byKey(const Key('close_reason'));
-    await tester.ensureVisible(reason);
+    await tester.scrollUntilVisible(
+      reason,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.enterText(reason, 'Atividades concluídas');
     final certificate = find.byType(CheckboxListTile);
-    await tester.ensureVisible(certificate);
+    await tester.scrollUntilVisible(
+      certificate,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(certificate);
     await tester.pumpAndSettle();
     final close = find.widgetWithText(FilledButton, 'Encerrar turma');
-    await tester.ensureVisible(close);
+    await tester.scrollUntilVisible(
+      close,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(close);
     await tester.pumpAndSettle();
     expect(
