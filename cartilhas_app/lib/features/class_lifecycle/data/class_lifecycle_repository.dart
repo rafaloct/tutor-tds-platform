@@ -218,7 +218,7 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
     }
     final body = <String, dynamic>{'id': _commandId(), ...requested};
     await _writePending(scope, body);
-    return _submitPending(scope, body);
+    return _submitPending(scope, body, firstAttempt: true);
   }
 
   @override
@@ -236,15 +236,16 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
     final result = _prepareQueue.then((_) => action());
     _prepareQueue = result.then<void>(
       (_) {},
-      onError: (Object _, StackTrace __) {},
+      onError: (Object _, StackTrace _) {},
     );
     return result;
   }
 
   Future<PreparedClassroomResult> _submitPending(
     String scope,
-    Map<String, dynamic> body,
-  ) async {
+    Map<String, dynamic> body, {
+    bool firstAttempt = false,
+  }) async {
     if (await _prepareScope() != scope) {
       throw const ClassLifecycleException(
         'A conta mudou. Entre novamente para conferir a preparação pendente.',
@@ -259,8 +260,9 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
       rethrow;
     } on ClassLifecycleRejectedException catch (error) {
       // Other 4xx responses may also reject an already committed receipt
-      // (for example, a revoked program membership checked before replay).
-      if (error.statusCode == 422) await _clearPending(scope);
+      // (for example, a revoked membership or schema validation before replay).
+      // A direct 422 on the first attempt confirms no class was committed.
+      if (firstAttempt && error.statusCode == 422) await _clearPending(scope);
       rethrow;
     }
     final snapshot = _LifecycleSnapshot.fromJson(response);

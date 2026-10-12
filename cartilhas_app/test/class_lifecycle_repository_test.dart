@@ -241,7 +241,7 @@ void main() {
 
     // HomeScreen constructs a fresh repository when the preparation screen
     // is opened again. A process restart has the same persisted-store path.
-    var replayAuthorized = false;
+    var replayStatus = 422;
     final reopened = ClassLifecycleRepository(
       apiUrl: 'https://api.example',
       authRepository: AuthRepository(
@@ -252,7 +252,7 @@ void main() {
       client: MockClient((request) async {
         if (request.method == 'POST') {
           posts.add(request.body);
-          if (!replayAuthorized) return http.Response('{}', 403);
+          if (replayStatus != 201) return http.Response('{}', replayStatus);
           final id = (jsonDecode(request.body) as Map<String, dynamic>)['id'];
           return _jsonResponse(committed[id]!, 201);
         }
@@ -275,13 +275,20 @@ void main() {
       throwsA(isA<ClassLifecycleRejectedException>()),
     );
     expect(pendingStore.values, hasLength(1));
-    replayAuthorized = true;
+    replayStatus = 403;
+    await expectLater(
+      reopened.reconcilePendingPreparation(),
+      throwsA(isA<ClassLifecycleRejectedException>()),
+    );
+    expect(pendingStore.values, hasLength(1));
+    replayStatus = 201;
     final screenController = PrepareClassroomController(reopened);
     await screenController.load();
     expect(screenController.result?.opaqueId, 'class-1');
     expect(screenController.result?.name, 'Turma Palmas — IA');
-    expect(posts, hasLength(3));
+    expect(posts, hasLength(4));
     expect(posts[1], posts.first);
+    expect(posts[2], posts.first);
     expect(posts.last, posts.first);
     expect(committed, hasLength(1));
     expect(pendingStore.values, isEmpty);
@@ -322,6 +329,42 @@ void main() {
         '{"schema":1,"body":{"id":"damaged"},"digest":"wrong"}';
     await expectLater(repository.prepare(command), throwsA(isA<ClassLifecycleException>()));
     expect(posts, 0);
+  });
+
+  test('422 recebido na primeira tentativa libera correção dos dados', () async {
+    final pendingStore = _PendingStore();
+    final receiptIds = <String>[];
+    final repository = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(accessToken: _jwt('operator-1')),
+      ),
+      pendingPrepareStore: pendingStore,
+      client: MockClient((request) async {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        receiptIds.add(body['id'] as String);
+        if (receiptIds.length == 1) return http.Response('{}', 422);
+        return _jsonResponse(_snapshot(status: 'planned', canClose: false), 201);
+      }),
+    );
+    final command = PrepareClassroomCommand(
+      className: 'Turma Palmas', offerMunicipality: 'Palmas',
+      offerLocation: 'Laboratório', institutionId: 'institution-1',
+      programId: 'program-1', courseId: 'course-1',
+      courseVersionId: 'version-7', startDate: DateTime(2026, 10, 11),
+      endDate: DateTime(2026, 10, 30), teacherId: 'teacher-1',
+      monitorIds: const [],
+    );
+
+    await expectLater(
+      repository.prepare(command),
+      throwsA(isA<ClassLifecycleRejectedException>()),
+    );
+    expect(pendingStore.values, isEmpty);
+    await repository.prepare(command);
+    expect(receiptIds, hasLength(2));
+    expect(receiptIds.last, isNot(receiptIds.first));
   });
 
   test('version conflict releases pending receipt for confirmed new edition', () async {
