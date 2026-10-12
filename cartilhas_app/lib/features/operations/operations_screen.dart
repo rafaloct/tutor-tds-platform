@@ -275,6 +275,19 @@ class _OperationsScreenState extends State<OperationsScreen> {
               Text(
                 'Vínculo com a turma: ${selected.assigned ? "ativo" : "inativo ou ausente"}',
               ),
+              if (selected.capacityWarning &&
+                  selected.capacityOccupancy != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      'Aviso de capacidade: ${selected.capacityOccupancy} participantes ativos. '
+                      '${selected.capacityReference} é a referência de planejamento; '
+                      'um novo vínculo autorizado continua permitido.',
+                    ),
+                  ),
+                ),
               if (selected.enrolled && selected.assigned)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),

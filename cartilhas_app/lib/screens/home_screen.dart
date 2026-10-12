@@ -6,6 +6,7 @@ import '../features/class_lifecycle/data/class_lifecycle_gateway.dart';
 import '../features/class_lifecycle/data/class_lifecycle_repository.dart';
 import '../features/class_lifecycle/models/class_lifecycle_models.dart';
 import '../features/class_lifecycle/presentation/prepare_classroom_screen.dart';
+import '../features/class_lifecycle/presentation/activate_classroom_screen.dart';
 import '../features/class_lifecycle/presentation/close_classroom_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
@@ -226,6 +227,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ? () => _openManagementTool('operations')
             : null,
       ),
+      'activate_class' => ActivateClassroomScreen(
+        gateway:
+            lifecycleGateway ??
+            (throw StateError('Lifecycle de turma indisponível.')),
+      ),
       'close_class' => CloseClassroomScreen(
         gateway:
             lifecycleGateway ??
@@ -300,6 +306,9 @@ class _HomeScreenState extends State<HomeScreen> {
               : null,
           onPrepareClassTap: _classLifecycleCapabilities?.canPrepare ?? false
               ? () => _openManagementTool('prepare_class')
+              : null,
+          onActivateClassTap: _classLifecycleCapabilities?.canActivate ?? false
+              ? () => _openManagementTool('activate_class')
               : null,
           onCloseClassTap: _classLifecycleCapabilities?.canClose ?? false
               ? () => _openManagementTool('close_class')

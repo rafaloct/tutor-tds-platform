@@ -477,7 +477,7 @@ class _ParticipantsStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Participantes continuam no fluxo já existente. Aqui você confere como o servidor aplicará capacidade e eventual exceção.',
+          'Participantes continuam no fluxo já existente. A referência de 30 gera aviso, sem bloquear inclusões adicionais.',
         ),
         const SizedBox(height: 16),
         if (capacity != null)
@@ -489,7 +489,7 @@ class _ParticipantsStep extends StatelessWidget {
                 children: [
                   Text(
                     capacity.deferredToParticipants
-                        ? 'Capacidade validada ao incluir participantes'
+                        ? 'Capacidade informada ao incluir participantes'
                         : "${capacity.occupancy} de ${capacity.capacity} vagas ocupadas",
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -497,12 +497,6 @@ class _ParticipantsStep extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(capacity.message),
-                  if (capacity.requiresOverrideReason) ...[
-                    const SizedBox(height: 8),
-                    const Text(
-                      'A exceção só será enviada com justificativa explícita na revisão.',
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -575,24 +569,9 @@ class _ReviewStep extends StatelessWidget {
         _ReviewRow(
           label: 'Capacidade',
           value: capacity.deferredToParticipants
-              ? 'Validada pelo servidor ao adicionar participantes'
+              ? 'Referência de 30; aviso ao adicionar participantes'
               : '${capacity.occupancy} de ${capacity.capacity}',
         ),
-        if (capacity.requiresOverrideReason) ...[
-          const SizedBox(height: 16),
-          TextFormField(
-            key: const Key('capacity_override_reason'),
-            initialValue: controller.capacityOverrideReason,
-            decoration: const InputDecoration(
-              labelText: 'Justificativa da exceção de capacidade',
-              helperText:
-                  'Obrigatória porque o servidor sinalizou uma exceção auditável.',
-              prefixIcon: Icon(Icons.rule_outlined),
-            ),
-            maxLines: 3,
-            onChanged: controller.setCapacityOverrideReason,
-          ),
-        ],
         const SizedBox(height: 16),
         const _InfoCard(
           icon: Icons.shield_outlined,

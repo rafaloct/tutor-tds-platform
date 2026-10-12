@@ -34,6 +34,7 @@ http.Response _jsonResponse(Object body, [int status = 200]) => http.Response(
 Map<String, dynamic> _snapshot({
   String status = 'active',
   int revision = 4,
+  bool canActivate = false,
   bool canClose = true,
   int openSessions = 0,
 }) => {
@@ -62,7 +63,7 @@ Map<String, dynamic> _snapshot({
   },
   'readiness': {
     'activation_blockers': <String>[],
-    'can_activate': false,
+    'can_activate': canActivate,
     'can_close': canClose,
     'closure_blockers': openSessions > 0 ? ['open_sessions'] : <String>[],
     'closure_warnings': {
@@ -78,9 +79,9 @@ Map<String, dynamic> _snapshot({
     'role': 'coordinator',
     'can_prepare': false,
     'can_change_team': true,
-    'can_activate': false,
+    'can_activate': canActivate,
     'can_close': canClose,
-    'can_override_capacity': true,
+    'can_override_capacity': false,
   },
 };
 
@@ -112,7 +113,7 @@ void main() {
                 'can_prepare': true,
                 'can_activate': true,
                 'can_close': true,
-                'can_override_capacity': true,
+                'can_override_capacity': false,
               },
             ],
           });
@@ -146,7 +147,9 @@ void main() {
 
     final bootstrap = await repository.bootstrap();
     expect(bootstrap.capabilities.canPrepare, isTrue);
+    expect(bootstrap.capabilities.canActivate, isTrue);
     expect(bootstrap.capabilities.canClose, isTrue);
+    expect(bootstrap.capabilities.canOverrideCapacity, isFalse);
     expect(bootstrap.programs.single.name, 'Programa TDS');
     expect(bootstrap.manageableClasses.single.name, 'Turma Palmas — IA');
     expect(bootstrap.manageableClasses.single.statusLabel, 'Em andamento');
@@ -193,7 +196,7 @@ void main() {
                   'can_prepare': true,
                   'can_activate': true,
                   'can_close': true,
-                  'can_override_capacity': true,
+                  'can_override_capacity': false,
                 },
               ],
             }),
@@ -242,6 +245,63 @@ void main() {
       reason: 'Atividades concluídas',
     );
     expect(result.statusLabel, 'Encerrada');
+    expect(requests.where((request) => request.method == 'POST'), hasLength(1));
+  });
+
+  test('operador ativa turma planejada com readiness e CAS do servidor', () async {
+    final requests = <http.Request>[];
+    final repository = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(),
+      ),
+      client: MockClient((request) async {
+        requests.add(request);
+        if (request.url.path == '/operations/classes/options') {
+          return _jsonResponse({
+            'options': [{
+              'institution_id': 'institution-1',
+              'program_id': 'program-1',
+              'program_name': 'Programa TDS',
+              'course_id': 'course-1',
+              'course_title': 'IA',
+              'course_version_id': 'version-7',
+              'role': 'program_operator',
+              'can_prepare': true,
+              'can_activate': true,
+              'can_close': true,
+              'can_override_capacity': false,
+            }],
+          });
+        }
+        if (request.method == 'GET' && request.url.path == '/operations/classes') {
+          return _jsonResponse({'classes': [_snapshot(status: 'planned', canActivate: true, canClose: false)]});
+        }
+        if (request.method == 'GET' && request.url.path.endsWith('/readiness')) {
+          return _jsonResponse(_snapshot(status: 'planned', canActivate: true, canClose: false));
+        }
+        if (request.method == 'POST' && request.url.path.endsWith('/transition')) {
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body['target_status'], 'active');
+          expect(body['reason'], 'Oferta e equipe conferidas');
+          expect(body['expected_revision'], 4);
+          expect(body['version_id'], 'version-7');
+          return _jsonResponse(_snapshot(status: 'active', revision: 5));
+        }
+        return http.Response('{}', 404);
+      }),
+    );
+
+    final bootstrap = await repository.bootstrap();
+    expect(bootstrap.capabilities.canActivate, isTrue);
+    expect(bootstrap.manageableClasses.single.status, 'planned');
+    final readiness = await repository.activationReadiness('class-1');
+    expect(readiness.canActivate, isTrue);
+    final result = await repository.activateClassroom(
+      classroomId: 'class-1', reason: 'Oferta e equipe conferidas',
+    );
+    expect(result.statusLabel, 'Em andamento');
     expect(requests.where((request) => request.method == 'POST'), hasLength(1));
   });
 

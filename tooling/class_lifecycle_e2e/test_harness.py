@@ -187,7 +187,7 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertIn(
             "backend-contract:"
-            "test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited",
+            "test_capacity_30_warns_without_blocking_scoped_assignments",
             manifest["invariants"]["capacity_policy_enforced"]["evidence"],
         )
 

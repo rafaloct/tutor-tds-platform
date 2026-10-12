@@ -176,7 +176,7 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
       requiresOverrideReason: false,
       deferredToParticipants: true,
       message:
-          'O limite de 30 e eventual exceção são validados pelo servidor ao adicionar participantes.',
+          '30 participantes é uma referência de planejamento. Inclusões adicionais são permitidas e geram aviso no fluxo de participantes.',
     );
   }
 
@@ -203,6 +203,61 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
     return PreparedClassroomResult(
       opaqueId: snapshot.classroomId,
       name: snapshot.classroomName,
+      statusLabel: _statusLabel(snapshot.status),
+    );
+  }
+
+  @override
+  Future<ClassActivationReadiness> activationReadiness(String classroomId) async {
+    final snapshot = await _readSnapshot(classroomId);
+    _snapshots[classroomId] = snapshot;
+    final blockers = snapshot.activationBlockers
+        .map((blocker) => switch (blocker) {
+              'offer_municipality_missing' => 'Informe o município da oferta.',
+              'offer_location_missing' => 'Informe o local físico da oferta.',
+              'course_version_invalid' => 'Confira a edição publicada do curso.',
+              'teacher_membership_invalid' => 'Confira o vínculo do professor.',
+              'monitor_membership_invalid' => 'Confira os vínculos dos monitores.',
+              _ => 'O servidor ainda não liberou a ativação desta turma.',
+            })
+        .toList(growable: false);
+    final canActivate = snapshot.canActivate && snapshot.capabilityCanActivate;
+    return ClassActivationReadiness(
+      classroomId: classroomId,
+      classroomName: snapshot.classroomName,
+      canActivate: canActivate,
+      blockers: canActivate
+          ? const []
+          : blockers.isNotEmpty
+              ? blockers
+              : const ['O servidor ainda não liberou a ativação desta turma.'],
+    );
+  }
+
+  @override
+  Future<ActivatedClassroomResult> activateClassroom({
+    required String classroomId,
+    required String reason,
+  }) async {
+    final current = _snapshots[classroomId] ?? await _readSnapshot(classroomId);
+    final response = await _request(
+      'POST',
+      '/operations/classes/${Uri.encodeComponent(classroomId)}/transition',
+      {
+        'id': _commandId(),
+        'reason': reason,
+        'institution_id': current.institutionId,
+        'program_id': current.programId,
+        'course_id': current.courseId,
+        'version_id': current.courseVersionId,
+        'expected_revision': current.revision,
+        'target_status': 'active',
+      },
+    );
+    final snapshot = _LifecycleSnapshot.fromJson(response);
+    _snapshots[classroomId] = snapshot;
+    return ActivatedClassroomResult(
+      classroomId: classroomId,
       statusLabel: _statusLabel(snapshot.status),
     );
   }
@@ -320,6 +375,7 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
             id: snapshot.classroomId,
             name: snapshot.classroomName,
             statusLabel: _statusLabel(snapshot.status),
+            status: snapshot.status,
           );
         })
         .toList(growable: false);
@@ -461,6 +517,9 @@ class _LifecycleSnapshot {
     required this.status,
     required this.revision,
     required this.occupancy,
+    required this.canActivate,
+    required this.capabilityCanActivate,
+    required this.activationBlockers,
     required this.canClose,
     required this.capabilityCanClose,
     required this.closureBlockers,
@@ -496,6 +555,7 @@ class _LifecycleSnapshot {
       return value;
     }
 
+    final rawActivationBlockers = ready['activation_blockers'];
     final rawBlockers = ready['closure_blockers'];
     final warnings = ready['closure_warnings'];
     return _LifecycleSnapshot(
@@ -508,6 +568,11 @@ class _LifecycleSnapshot {
       status: requiredString('status'),
       revision: _int(c['revision']),
       occupancy: _int(cap['occupancy']),
+      canActivate: ready['can_activate'] == true,
+      capabilityCanActivate: abilities['can_activate'] == true,
+      activationBlockers: rawActivationBlockers is List
+          ? rawActivationBlockers.whereType<String>().toList(growable: false)
+          : const [],
       canClose: ready['can_close'] == true,
       capabilityCanClose: abilities['can_close'] == true,
       closureBlockers: rawBlockers is List
@@ -528,6 +593,9 @@ class _LifecycleSnapshot {
   final String status;
   final int revision;
   final int occupancy;
+  final bool canActivate;
+  final bool capabilityCanActivate;
+  final List<String> activationBlockers;
   final bool canClose;
   final bool capabilityCanClose;
   final List<String> closureBlockers;

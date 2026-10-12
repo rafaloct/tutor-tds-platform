@@ -185,6 +185,19 @@ wrapper executa `pub get --enforce-lockfile`; depois confirma que o hash de
 
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
+2026-10-12 — candidato local da decisão 32: API passa a conceder a
+`program_operator` escopado preparação, ativação e encerramento; a coordenação
+conserva os poderes. Capacidade 30 é referência com aviso em preview, resposta
+de inclusão e snapshot; inclusões autorizadas 30→31 seguem sem justificativa
+especial. Flutter ganhou entrada de ativação por capability, readiness e CAS;
+o preparo, a lista de participantes e a operação contextual mostram o aviso
+sem bloquear. O E2E
+sintético foi alinhado para ativação/encerramento pelo operador. Os parágrafos
+de 05/10 abaixo descrevem o contrato histórico substituído pelo item 32 de
+`DECISIONS.md`. API SQLite focal 23/23 e harness #140 18/18 passaram;
+Flutter/Dart não estão disponíveis neste executor, então testes de UI e Android
+não foram executados. Esta mudança não altera migration, staging nem produção.
+
 2026-10-12 — TESTED-LOCAL, ajuste restrito ao endpoint legado de monitores:
 `POST /admin/classes/{class_id}/monitors/{user_id}` rejeita HTTP 409 quando a
 turma está `closed`, com `CLASS_LIFECYCLE_ENABLED` false ou true. A leitura da

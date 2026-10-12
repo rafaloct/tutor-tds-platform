@@ -16,6 +16,13 @@ abstract interface class ClassLifecycleGateway {
 
   Future<PreparedClassroomResult> prepare(PrepareClassroomCommand command);
 
+  Future<ClassActivationReadiness> activationReadiness(String classroomId);
+
+  Future<ActivatedClassroomResult> activateClassroom({
+    required String classroomId,
+    required String reason,
+  });
+
   Future<ClassCloseReadiness> closeReadiness(String classroomId);
 
   Future<ClosedClassroomResult> closeClassroom({
@@ -32,7 +39,7 @@ class ClassLifecycleException implements Exception {
   String toString() => message;
 }
 
-/// Fake de desenvolvimento para validar a UX antes do contrato HTTP da Issue #138.
+/// Fake de desenvolvimento para validar a UX do contrato da Issue #138.
 ///
 /// A UI nunca lê papel global. As diferenças entre os cenários abaixo chegam
 /// exclusivamente como capabilities, como acontecerá com o backend autoritativo.
@@ -41,11 +48,10 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
     required this.capabilities,
     this.failBootstrap = false,
     this.readinessCanClose = true,
+    this.readinessCanActivate = true,
     this.simulatedDelay = const Duration(milliseconds: 120),
     this.occupancy = 18,
     this.capacity = 30,
-    this.requiresOverrideReason = false,
-    this.capacityCanProceed = true,
   });
 
   factory FakeClassLifecycleGateway.coordinator({
@@ -55,7 +61,7 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
       canPrepare: true,
       canClose: true,
       canActivate: true,
-      canOverrideCapacity: true,
+      canOverrideCapacity: false,
     ),
     readinessCanClose: readinessCanClose,
   );
@@ -64,11 +70,9 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
       FakeClassLifecycleGateway(
         capabilities: const ClassLifecycleCapabilities(
           canPrepare: true,
-          canClose: false,
-          canActivate: false,
+          canClose: true,
+          canActivate: true,
           canOverrideCapacity: false,
-          closeDeniedMessage:
-              'Seu acesso permite preparar a turma, mas não encerrá-la.',
         ),
       );
 
@@ -88,14 +92,14 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
   final ClassLifecycleCapabilities capabilities;
   final bool failBootstrap;
   final bool readinessCanClose;
+  final bool readinessCanActivate;
   final Duration simulatedDelay;
   final int occupancy;
   final int capacity;
-  final bool requiresOverrideReason;
-  final bool capacityCanProceed;
 
   PrepareClassroomCommand? lastPrepareCommand;
   String? lastCloseReason;
+  String? lastActivationReason;
 
   static const _programs = [
     LifecycleProgram(
@@ -141,6 +145,13 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
       id: 'class-active-1',
       name: 'Turma Palmas — IA',
       statusLabel: 'Em andamento',
+      status: 'active',
+    ),
+    LifecycleClassSummary(
+      id: 'class-planned-1',
+      name: 'Turma Palmas — Inclusão Digital',
+      statusLabel: 'Planejada',
+      status: 'planned',
     ),
   ];
 
@@ -199,11 +210,11 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
     return ClassCapacitySnapshot(
       occupancy: occupancy,
       capacity: capacity,
-      canProceed: capacityCanProceed,
-      requiresOverrideReason: requiresOverrideReason,
-      message: requiresOverrideReason
-          ? 'O servidor exige justificativa para esta exceção de capacidade.'
-          : 'Capacidade confirmada pelo servidor.',
+      canProceed: true,
+      requiresOverrideReason: false,
+      message: occupancy >= capacity
+          ? 'A referência de $capacity participantes foi atingida. Você pode continuar; o servidor mostrará o aviso de capacidade.'
+          : 'Capacidade de referência informada pelo servidor.',
     );
   }
 
@@ -217,17 +228,6 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
         'O servidor não autorizou preparar esta turma.',
       );
     }
-    if (!capacityCanProceed) {
-      throw const ClassLifecycleException(
-        'A capacidade atual não permite preparar a turma.',
-      );
-    }
-    if (requiresOverrideReason &&
-        (command.capacityOverrideReason?.trim().isEmpty ?? true)) {
-      throw const ClassLifecycleException(
-        'Informe a justificativa da exceção de capacidade.',
-      );
-    }
     lastPrepareCommand = command;
     return const PreparedClassroomResult(
       opaqueId: 'class-prepared-1',
@@ -237,12 +237,44 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
   }
 
   @override
+  Future<ClassActivationReadiness> activationReadiness(String classroomId) async {
+    await _wait();
+    return ClassActivationReadiness(
+      classroomId: classroomId,
+      classroomName: 'Turma Palmas — Inclusão Digital',
+      canActivate: capabilities.canActivate && readinessCanActivate,
+      blockers: readinessCanActivate
+          ? const []
+          : const ['A turma ainda não está pronta para ativação.'],
+    );
+  }
+
+  @override
+  Future<ActivatedClassroomResult> activateClassroom({
+    required String classroomId,
+    required String reason,
+  }) async {
+    await _wait();
+    if (!capabilities.canActivate || !readinessCanActivate) {
+      throw const ClassLifecycleException('O servidor não autorizou ativar esta turma.');
+    }
+    if (reason.trim().isEmpty) {
+      throw const ClassLifecycleException('Informe o motivo da ativação.');
+    }
+    lastActivationReason = reason.trim();
+    return ActivatedClassroomResult(
+      classroomId: classroomId,
+      statusLabel: 'Em andamento',
+    );
+  }
+
+  @override
   Future<ClassCloseReadiness> closeReadiness(String classroomId) async {
     await _wait();
     final blockers = readinessCanClose
         ? const <String>[]
         : const <String>[
-            'Existem presenças ou evidências que ainda precisam de revisão.',
+            'Encerre a sessão aberta antes de encerrar a turma.',
           ];
     return ClassCloseReadiness(
       classroomId: classroomId,

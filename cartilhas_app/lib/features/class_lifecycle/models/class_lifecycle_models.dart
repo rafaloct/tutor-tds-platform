@@ -15,7 +15,7 @@ class ClassLifecycleCapabilities {
   final String? prepareDeniedMessage;
   final String? closeDeniedMessage;
 
-  bool get hasManagementSurface => canPrepare || canClose;
+  bool get hasManagementSurface => canPrepare || canActivate || canClose;
 }
 
 class LifecycleProgram {
@@ -71,11 +71,13 @@ class LifecycleClassSummary {
     required this.id,
     required this.name,
     required this.statusLabel,
+    this.status = 'unknown',
   });
 
   final String id;
   final String name;
   final String statusLabel;
+  final String status;
 }
 
 class ClassLifecycleBootstrap {
@@ -121,7 +123,6 @@ class PrepareClassroomCommand {
     required this.endDate,
     required this.teacherId,
     required this.monitorIds,
-    this.capacityOverrideReason,
   });
 
   final String className;
@@ -135,7 +136,6 @@ class PrepareClassroomCommand {
   final DateTime endDate;
   final String teacherId;
   final List<String> monitorIds;
-  final String? capacityOverrideReason;
 }
 
 class PreparedClassroomResult {
@@ -147,6 +147,30 @@ class PreparedClassroomResult {
 
   final String opaqueId;
   final String name;
+  final String statusLabel;
+}
+
+class ClassActivationReadiness {
+  const ClassActivationReadiness({
+    required this.classroomId,
+    required this.classroomName,
+    required this.canActivate,
+    required this.blockers,
+  });
+
+  final String classroomId;
+  final String classroomName;
+  final bool canActivate;
+  final List<String> blockers;
+}
+
+class ActivatedClassroomResult {
+  const ActivatedClassroomResult({
+    required this.classroomId,
+    required this.statusLabel,
+  });
+
+  final String classroomId;
   final String statusLabel;
 }
 

@@ -75,7 +75,7 @@ BACKEND_CONTRACTS = (
     (
         "capacity_policy_enforced",
         "tests/test_class_lifecycle.py::"
-        "test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited",
+        "test_capacity_30_warns_without_blocking_scoped_assignments",
     ),
     (
         "closed_class_rejects_new_link",
@@ -502,7 +502,7 @@ def _manifest_from_execution(
     _pass_entry(
         manifest["invariants"],
         "capacity_policy_enforced",
-        "backend-contract:test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited",
+        "backend-contract:test_capacity_30_warns_without_blocking_scoped_assignments",
     )
 
     if isinstance(boundary, dict):

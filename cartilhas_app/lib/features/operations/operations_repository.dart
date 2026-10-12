@@ -90,6 +90,14 @@ class OperationsRepository implements OperationsGateway {
     enrolled: data['enrolled'] as bool,
     assigned: data['assigned'] as bool,
     baselineLinked: data['baseline_linked'] as bool?,
+    capacityOccupancy: data['capacity'] is Map
+        ? (data['capacity'] as Map)['occupancy'] as int?
+        : null,
+    capacityReference: data['capacity'] is Map
+        ? ((data['capacity'] as Map)['limit'] as int? ?? 30)
+        : 30,
+    capacityWarning: data['capacity'] is Map &&
+        (data['capacity'] as Map)['warning'] == true,
     history: (data['history'] as List)
         .map(
           (entry) => OperationHistory(

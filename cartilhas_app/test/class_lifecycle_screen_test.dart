@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:cartilhas_app/features/class_lifecycle/data/class_lifecycle_gateway.dart';
 import 'package:cartilhas_app/features/class_lifecycle/presentation/close_classroom_screen.dart';
+import 'package:cartilhas_app/features/class_lifecycle/presentation/activate_classroom_screen.dart';
 import 'package:cartilhas_app/features/class_lifecycle/presentation/prepare_classroom_screen.dart';
 
 void main() {
@@ -46,7 +47,7 @@ void main() {
   });
 
   testWidgets(
-    'program operator can inspect readiness but has no close action',
+    'program operator receives the close action from server capability',
     (tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -57,8 +58,25 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.widgetWithText(FilledButton, 'Encerrar turma'), findsNothing);
+      expect(find.widgetWithText(FilledButton, 'Encerrar turma'), findsOneWidget);
       expect(find.byType(CloseClassroomScreen), findsOneWidget);
     },
   );
+
+  testWidgets('program operator can activate a planned class', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: ActivateClassroomScreen(
+        gateway: FakeClassLifecycleGateway.programOperator(),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Turma Palmas — Inclusão Digital'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('activate_reason')), 'Oferta conferida');
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Ativar turma'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirmar ativação'));
+    await tester.pumpAndSettle();
+    expect(find.text('Turma ativada'), findsOneWidget);
+  });
 }

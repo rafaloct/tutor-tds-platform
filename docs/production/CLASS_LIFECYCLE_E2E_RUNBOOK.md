@@ -18,6 +18,11 @@ execução final da #140 usa API HTTPS e banco descartáveis no avellaria, dados
 sintéticos e o adapter Flutter real no emulador. Nenhum PASS pode vir de mock,
 staging compartilhado ou produção.
 
+Atualização local de 12/10/2026: as seções de autoridade e capacidade abaixo
+seguem a decisão 32 de `docs/DECISIONS.md`. Os HEADs e o PASS no cabeçalho são
+evidência histórica da execução anterior; esta atualização ainda requer nova
+execução descartável antes de ser considerada validada em Android.
+
 ## 1. Contratos já observados que devem ser preservados
 
 1. `Classroom` é a turma canônica e fixa `CourseVersion`.
@@ -37,20 +42,20 @@ staging compartilhado ou produção.
 
 | Papel | Preparar | Ativar | Encerrar | Equipe | Participantes |
 |---|---:|---:|---:|---:|---:|
-| `program_operator` | sim | não | não | limitado por capability | sim, no escopo |
+| `program_operator` | sim | sim | sim | limitado por capability | sim, no escopo |
 | `coordinator` | sim | sim | sim | sim | sim |
 | `teacher` | não | não | não | não | inclusão operacional elegível |
 | `monitor` | não | não | não | não | acompanhamento/exceções |
 
 ### Capacidade
 
-- padrão: 30;
-- `program_operator` é bloqueado ao atingir 30;
-- `coordinator` pode ultrapassar 30;
-- exceção exige motivo, ator e auditoria;
-- nenhuma exceção silenciosa;
-- UI mostra ocupação/capacidade/estado da exceção;
-- backend decide.
+- referência: 30 vínculos ativos;
+- aviso antes da inclusão 30→31 e no resultado para operador, coordenação,
+  admin e professor autorizados;
+- ultrapassar 30 não exige motivo especial nem bloqueia inclusão autorizada;
+- comandos contextuais mantêm motivo e recibo auditável; recibos antigos de
+  exceção permanecem legíveis;
+- UI mostra ocupação e aviso de capacidade; backend decide permissões e escopo.
 
 ## 3. Dataset sintético canônico
 
@@ -118,7 +123,8 @@ integration test executados. Nenhuma branch upstream é reescrita.
 - nenhum campo residencial é inferido;
 - CourseVersion v1 fica gravada;
 - ator/motivo/auditoria são verificáveis;
-- program_operator não recebe ação de ativar/encerrar.
+- program_operator recebe ações de ativar/encerrar quando o servidor concede
+  capability e o readiness da turma permite.
 
 **Evidência:**
 
@@ -128,7 +134,7 @@ integration test executados. Nenhuma branch upstream é reescrita.
 
 ### E02 — Ativar turma
 
-**Ator:** coordinator.
+**Ator:** program_operator.
 
 1. Abrir a turma preparada.
 2. Ver readiness/capabilities.
@@ -137,8 +143,8 @@ integration test executados. Nenhuma branch upstream é reescrita.
 **PASS quando:**
 
 - `planned → active`;
-- coordinator é ator auditado;
-- program_operator/teacher/monitor não conseguem reproduzir a transição.
+- program_operator é ator auditado e coordinator conserva a autorização;
+- teacher/monitor não conseguem reproduzir a transição.
 
 ### E03 — Participante e matrícula
 
@@ -166,20 +172,20 @@ Tentar vincular participante estrangeiro.
 
 **PASS quando:** resposta fail-closed e nenhum vínculo é criado.
 
-### E05 — Capacidade 30 / exceção 31
+### E05 — Aviso de capacidade na inclusão 30→31
 
 Este caso de carga é executado pelo teste backend canônico
-`test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited`.
-O Android consome a capacidade retornada pelo mesmo contrato, mas não cria 31
-contas apenas para repetir uma prova já autoritativa.
+`test_capacity_30_warns_without_blocking_scoped_assignments`.
+O Android não cria 31 contas apenas para repetir essa prova de contrato.
 
 **PASS quando o teste canônico comprovar:**
 
-- program_operator é bloqueado em 30;
-- coordinator sem motivo é bloqueado;
-- coordinator com motivo explícito consegue apenas se capability autorizar;
-- auditoria registra ator/motivo;
-- backend continua autoridade da capacidade.
+- preview avisa ao chegar a 30 e continua autorizando a inclusão;
+- program_operator, coordinator, admin e professor autorizados incluem acima
+  de 30 sem justificativa especial;
+- respostas de inclusão e snapshots continuam sinalizando ocupação e aviso;
+- comando contextual mantém ator/motivo/recibo e replay idêntico;
+- escopo cruzado e turma fechada continuam recusados.
 
 ### E06 — Abrir encontro
 
@@ -272,7 +278,7 @@ rede, descarta a sessão HTTP do participante, autentica novamente e reapresenta
 
 ### E12 — Readiness de encerramento da turma
 
-**Ator:** coordinator.
+**Ator:** program_operator; coordinator também autorizado.
 
 Abrir Encerrar turma.
 
@@ -289,7 +295,8 @@ Se readiness não permitir fechar, registrar exatamente a pendência; não conto
 
 ### E13 — Encerrar turma
 
-Somente após readiness permitir, coordinator encerra.
+Somente após readiness permitir, program_operator encerra; coordinator também
+pode executar o mesmo fluxo.
 
 **PASS quando:**
 
@@ -324,12 +331,13 @@ Nenhum Worker/KV oficial é acionado neste E2E. “Aprovado” não pode aparece
 
 | Caso | Resultado |
 |---|---|
-| program_operator ativa turma | denied |
-| program_operator encerra turma | denied |
+| program_operator ativa turma planejada pronta | allowed, auditado |
+| program_operator encerra turma ativa sem sessão aberta | allowed, auditado |
+| program_operator encerra turma com sessão aberta | denied |
 | teacher encerra turma | denied |
 | monitor prepara/ativa/encerra | denied |
-| 31º aluno por program_operator | denied |
-| 31º por coordinator sem motivo | denied |
+| 31º aluno por program_operator autorizado | allowed, aviso e recibo |
+| 31º por coordinator/admin/professor autorizados | allowed, aviso |
 | participante de outro programa | denied |
 | participante de outra instituição | denied |
 | QR sem revisão humana | não vira presença oficial |
@@ -340,9 +348,10 @@ Nenhum Worker/KV oficial é acionado neste E2E. “Aprovado” não pode aparece
 
 ## 7. Evidência visual
 
-A apresentação do wizard já foi homologada no PR #144 e está versionada em
-`docs/qa/class-lifecycle-2026-10-05/`. Como a composição da #140 não altera UI,
-essas screenshots são reutilizadas para preparo/readiness/encerramento.
+A apresentação anterior do wizard foi homologada no PR #144 e está versionada em
+`docs/qa/class-lifecycle-2026-10-05/`. A nova tela de ativação e o aviso de
+capacidade de 12/10 ainda precisam de verificação Android e evidência visual
+próprias; as screenshots anteriores documentam somente a versão anterior.
 
 A #140 acrescenta evidência **estruturada** da integração real para QR, roster,
 reconnect, presença e certificado. Não é permitido criar screenshots que
@@ -389,7 +398,7 @@ Parar e registrar `BLOCKED` se:
 
 - API_HEAD ou APP_HEAD não estiver estável;
 - contrato de #138 divergir da decisão humana aprovada;
-- UI da #139 codificar autoridade/capacidade no cliente;
+- UI da #139 divergir das capabilities ou ocultar o aviso de capacidade;
 - algum passo exigir production/staging mutation;
 - segredo for necessário;
 - dado pessoal real for necessário;

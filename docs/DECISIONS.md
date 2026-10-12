@@ -239,3 +239,16 @@
     matrícula. Clock skew futuro é recuperável somente por uma correção de
     `updated_at`, sem mudar revisão, respostas ou contexto. O runner só considera
     restauração de revogação efetiva após reler a tentativa canônica.
+
+32. 2026-10-12: decisão posterior da pessoa responsável substitui, no item 29,
+    as restrições de autoridade para ativar/encerrar e o bloqueio de capacidade.
+    `program_operator` ativo no programa pode preparar, ativar e encerrar turma;
+    `coordinator` escopado conserva esses poderes. Alteração de equipe após
+    ativação continua reservada à coordenação. A referência de 30 participantes
+    ativos gera aviso antes da inclusão e no resultado, mas não bloqueia a 31ª
+    inclusão por operador, coordenação, admin ou professor autorizados. Motivo
+    especial de exceção deixa de ser obrigatório; comandos contextuais mantêm
+    motivo e recibo usuais. Recibos históricos `assign_capacity_override` são
+    preservados. Escopo institucional/programático, rejeição de novo vínculo em
+    turma fechada, sessão aberta como bloqueio ao encerramento e auditoria
+    permanecem. Esta decisão ainda não constitui aceite de staging ou produção.

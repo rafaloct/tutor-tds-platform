@@ -326,9 +326,11 @@ def test_staff_can_include_only_active_students_in_the_same_offering() -> None:
         path = "/classes/a/eligible-students"
         page = client.get(path, params={"limit": 1}, headers=headers["teacher"])
         assert page.status_code == 200
-        assert page.json() == {"students": [{"user_id": ids["admin"], "name": "Admin"}], "next_offset": 1}
+        assert page.json() == {"students": [{"user_id": ids["admin"], "name": "Admin"}], "next_offset": 1,
+                               "occupancy": 0, "capacity_reference": 30, "capacity_warning": False}
         second = client.get(path, params={"limit": 1, "offset": 1}, headers=headers["teacher"])
-        assert second.json() == {"students": [{"user_id": ids["student"], "name": "Student"}], "next_offset": None}
+        assert second.json() == {"students": [{"user_id": ids["student"], "name": "Student"}], "next_offset": None,
+                                 "occupancy": 0, "capacity_reference": 30, "capacity_warning": False}
         assert client.get(path, params={"q": "tud"}, headers=headers["teacher"]).json()["students"] == second.json()["students"]
         assert client.get(path, params={"q": "%"}, headers=headers["teacher"]).json()["students"] == []
         for params in ({"limit": 51}, {"offset": -1}, {"q": "a" * 101}):

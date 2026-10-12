@@ -77,6 +77,13 @@ deste incremento. #30 continua aberta até seus critérios integrais.
 
 ## Extensão #138 — lifecycle territorial da turma
 
+**Atualização de 12/10/2026 (decisão 32):** `program_operator` escopado passa
+a ativar e encerrar, além de preparar; `coordinator` conserva essas ações. A
+referência de 30 vínculos ativos é aviso, inclusive no preview e na resposta
+de inclusão, e não exige justificativa de exceção. Os parágrafos históricos
+abaixo registram o contrato anterior da #138. Escopo, auditoria, CAS/replay,
+turma fechada e sessão aberta como bloqueio ao encerramento continuam vigentes.
+
 O backend passa a expor o contrato contextual de turma em
 `/operations/classes`, atrás de `CLASS_LIFECYCLE_ENABLED=false` por padrão.
 A preparação fixa a CourseVersion publicada no servidor e persiste

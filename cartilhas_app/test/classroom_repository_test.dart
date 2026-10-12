@@ -55,6 +55,9 @@ void main() {
                 {'user_id': 'student/id', 'name': 'Ana Silva'},
               ],
               'next_offset': 40,
+              'occupancy': 30,
+              'capacity_reference': 30,
+              'capacity_warning': true,
             }),
             200,
           );
@@ -67,6 +70,8 @@ void main() {
       );
       expect(page.students.single.name, 'Ana Silva');
       expect(page.nextOffset, 40);
+      expect(page.capacityWarning, isTrue);
+      expect(page.occupancy, 30);
       expect(requests.single.url.queryParameters, {
         'q': 'Ana & Silva',
         'offset': '20',

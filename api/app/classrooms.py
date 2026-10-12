@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .auth import access_claims, require_roles
+from .classroom_policy import DEFAULT_CLASS_CAPACITY, active_occupancy, capacity_warning
 from .database import Database
 from .course_editor import (
     ensure_legacy_course_version,
@@ -19,7 +20,6 @@ from .course_editor import (
 )
 from .evidence import _active_student, _is_staff, _staff
 from .context_memberships import active_student_binding, bind_membership, bind_student
-from .classroom_policy import require_available_seat
 from .models import (
     ClassEnrollment,
     ClassMonitor,
@@ -84,6 +84,9 @@ class EligibleStudent(BaseModel):
 class EligibleStudentPage(BaseModel):
     students: list[EligibleStudent]
     next_offset: int | None
+    occupancy: int = 0
+    capacity_reference: int = DEFAULT_CLASS_CAPACITY
+    capacity_warning: bool = False
 
 
 class StudentAlert(BaseModel):
@@ -219,7 +222,7 @@ def add_student(
     user_id: str,
     request: Request,
     _: dict[str, str] = Depends(admin_claims),
-) -> dict[str, str]:
+) -> dict[str, object]:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = session.scalar(
@@ -243,7 +246,6 @@ def add_student(
             )
         if session.get(ClassEnrollment, (class_id, user_id)) is not None:
             raise HTTPException(status_code=409, detail="Estudante já está na turma.")
-        require_available_seat(session, classroom)
         link = ClassEnrollment(
                 class_id=class_id,
                 user_id=user_id,
@@ -255,7 +257,7 @@ def add_student(
         session.add(link)
         _bind_context(session, classroom, link, request)
         _commit(session, "Não foi possível adicionar o estudante.")
-        return {"class_id": class_id, "user_id": user_id, "status": "active"}
+        return _student_link_response(session, classroom, user_id)
 
 
 @admin_router.post("/{class_id}/monitors/{user_id}", status_code=201)
@@ -347,6 +349,9 @@ def eligible_students(
                 for row in records[:limit]
             ],
             next_offset=offset + limit if len(records) > limit else None,
+            occupancy=active_occupancy(session, class_id),
+            capacity_reference=DEFAULT_CLASS_CAPACITY,
+            capacity_warning=capacity_warning(session, classroom),
         )
 
 
@@ -356,7 +361,7 @@ def include_student(
     user_id: str,
     request: Request,
     claims: dict[str, str] = Depends(access_claims),
-) -> dict[str, str]:
+) -> dict[str, object]:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         # Serializa inclusões concorrentes na turma em bancos com row locking.
@@ -382,7 +387,6 @@ def include_student(
             )
         membership = session.get(ClassEnrollment, (class_id, user_id))
         if membership is None:
-            require_available_seat(session, classroom)
             membership = ClassEnrollment(
                     class_id=class_id,
                     user_id=user_id,
@@ -393,13 +397,22 @@ def include_student(
             )
             session.add(membership)
         elif membership.status != "active":
-            require_available_seat(session, classroom)
             membership.status = "active"
         else:
-            return {"class_id": class_id, "user_id": user_id, "status": "active"}
+            return _student_link_response(session, classroom, user_id)
         _bind_context(session, classroom, membership, request)
         _commit(session, "Não foi possível incluir o estudante. Tente novamente.")
-        return {"class_id": class_id, "user_id": user_id, "status": "active"}
+        return _student_link_response(session, classroom, user_id)
+
+
+def _student_link_response(session: Session, classroom: Classroom, user_id: str) -> dict[str, object]:
+    return {
+        "class_id": classroom.id,
+        "user_id": user_id,
+        "status": "active",
+        "occupancy": active_occupancy(session, classroom.id),
+        "capacity_warning": capacity_warning(session, classroom),
+    }
 
 
 def _bind_context(session, classroom, link, request):

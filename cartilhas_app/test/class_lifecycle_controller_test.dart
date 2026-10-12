@@ -41,17 +41,16 @@ void main() {
       },
     );
 
-    test('requires override reason only when gateway requests it', () async {
+    test('capacity above 30 remains an advisory warning', () async {
       final gateway = FakeClassLifecycleGateway(
         capabilities: const ClassLifecycleCapabilities(
           canPrepare: true,
           canClose: true,
           canActivate: true,
-          canOverrideCapacity: true,
+          canOverrideCapacity: false,
         ),
         occupancy: 31,
         capacity: 30,
-        requiresOverrideReason: true,
       );
       final controller = PrepareClassroomController(gateway);
       await controller.load();
@@ -70,25 +69,16 @@ void main() {
       controller.next();
 
       expect(controller.currentStep, 5);
-      expect(
-        controller.stepValidationMessage,
-        'Informe a justificativa da exceção de capacidade.',
-      );
-
-      controller.setCapacityOverrideReason(
-        'Ampliação autorizada pela coordenação',
-      );
+      expect(controller.stepValidationMessage, isNull);
+      expect(controller.capacity?.canProceed, isTrue);
+      expect(controller.capacity?.message, contains('referência de 30'));
       expect(controller.canAdvance, isTrue);
       await controller.submit();
-
-      expect(
-        gateway.lastPrepareCommand?.capacityOverrideReason,
-        'Ampliação autorizada pela coordenação',
-      );
+      expect(gateway.lastPrepareCommand, isNotNull);
     });
 
     test(
-      'does not calculate client-side capacity override permission',
+      'shows the soft capacity reference without blocking preparation',
       () async {
         final gateway = FakeClassLifecycleGateway(
           capabilities: const ClassLifecycleCapabilities(
@@ -99,18 +89,49 @@ void main() {
           ),
           occupancy: 30,
           capacity: 30,
-          capacityCanProceed: false,
         );
         final controller = PrepareClassroomController(gateway);
         await controller.load();
         await controller.selectProgram('program-tds');
         await controller.selectCourse('course-ia');
 
-        expect(controller.capacity?.canProceed, isFalse);
+        expect(controller.capacity?.canProceed, isTrue);
         expect(controller.capacity?.occupancy, 30);
         expect(controller.capacity?.capacity, 30);
       },
     );
+  });
+
+  group('ActivateClassroomController', () {
+    test('operator activates only after server readiness and a reason', () async {
+      final gateway = FakeClassLifecycleGateway.programOperator();
+      final controller = ActivateClassroomController(gateway);
+      await controller.load();
+      expect(controller.selectedClassId, 'class-planned-1');
+      expect(controller.canSubmit, isFalse);
+      controller.setReason('Oferta e equipe conferidas');
+      expect(controller.canSubmit, isTrue);
+      await controller.submit();
+      expect(controller.result?.statusLabel, 'Em andamento');
+      expect(gateway.lastActivationReason, 'Oferta e equipe conferidas');
+    });
+
+    test('activation remains blocked when readiness says no', () async {
+      final gateway = FakeClassLifecycleGateway(
+        capabilities: const ClassLifecycleCapabilities(
+          canPrepare: true,
+          canClose: true,
+          canActivate: true,
+          canOverrideCapacity: false,
+        ),
+        readinessCanActivate: false,
+      );
+      final controller = ActivateClassroomController(gateway);
+      await controller.load();
+      controller.setReason('Oferta conferida');
+      expect(controller.canSubmit, isFalse);
+      expect(controller.readiness?.blockers, isNotEmpty);
+    });
   });
 
   group('CloseClassroomController', () {
@@ -144,16 +165,17 @@ void main() {
       expect(gateway.lastCloseReason, 'Atividades concluídas');
     });
 
-    test('program operator capability never authorizes close', () async {
-      final controller = CloseClassroomController(
-        FakeClassLifecycleGateway.programOperator(),
-      );
+    test('program operator closes after server readiness', () async {
+      final gateway = FakeClassLifecycleGateway.programOperator();
+      final controller = CloseClassroomController(gateway);
       await controller.load();
-      controller.setCloseReason('Teste');
+      controller.setCloseReason('Atividades concluídas');
       controller.setCertificateNoticeConfirmed(true);
 
-      expect(controller.canCloseCapability, isFalse);
-      expect(controller.canSubmit, isFalse);
+      expect(controller.canCloseCapability, isTrue);
+      expect(controller.canSubmit, isTrue);
+      await controller.submit();
+      expect(gateway.lastCloseReason, 'Atividades concluídas');
     });
   });
 }
