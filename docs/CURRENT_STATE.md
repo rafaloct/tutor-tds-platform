@@ -1,5 +1,16 @@
 # CURRENT STATE
 
+## 2026-10-12 — runner opt-in de restore offsite (candidato local)
+
+IMPLEMENTED/TESTED-LOCAL: `tooling/rehearse_scheduled_postgres_backup.py`
+confere o recibo agendado e o hash do objeto `.dump.age` fornecidos pelo
+operador, decripta somente em memória e restaura em PostgreSQL 16 descartável
+sem rede, porta ou volume persistente. O teste sintético Docker conferiu
+tmpfs e limpeza após êxito e falha; 25 testes unitários do runner e gate
+passaram. O manifesto é parcial e não fecha upgrade/compatibilidade do gate
+12. Rafael autorizou avellaria como host do ensaio e informou que fornecerá
+o caminho da identidade age. Nenhum backup real foi restaurado até agora.
+
 ## 2026-10-12 — trava de sessão na transição de turma (candidato local)
 
 IMPLEMENTED/TESTED-LOCAL: a rota antiga de criação de `ClassSession` agora
@@ -19,9 +30,13 @@ workspace divergente e emite manifesto determinístico apenas de bytes locais.
 Nenhum PDF está neste checkout. Em 12/10, os nove arquivos obtidos pelos IDs
 do Drive conectado corresponderam aos originais históricos em assinatura PDF,
 tamanho e SHA-256; prova sanitizada em
-`docs/production/evidence/curricular-drive-bytes-20261012.json`. A busca no
-Drive acessível não encontrou os nove exports atuais de CourseVersion nem
-aprovação editorial rastreável. Indexação e workspaces reais não foram
+`docs/production/evidence/curricular-drive-bytes-20261012.json`. A pasta
+`Cartilhas (Versão Chatbot)` contém os mesmos nove PDFs byte a byte, conforme
+`docs/production/evidence/curricular-drive-folder-20261012.json`. Rafael
+identificou Gabriela como responsável pela diagramação e estagiários pela
+produção; não foi localizada decisão editorial por edição. A busca no Drive
+acessível também não encontrou os exports atuais de CourseVersion. Indexação
+e workspaces reais não foram
 verificados nem alterados. Testes focais em
 `tooling/ai_qa` (8/8) e `api/tests/test_course_promotion.py` (10/10)
 passaram; equivalência de snapshots legados 9/9. Nenhum deploy.

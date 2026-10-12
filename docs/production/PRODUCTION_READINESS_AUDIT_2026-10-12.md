@@ -32,10 +32,10 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 | 9 | schema/backend ↔ app | BLOCKED | Consulta pública de 12/10: produção `0028`, staging `0029`, candidato `0030`; produção declara `compatibility_verified=false`. Exigir comparação e upgrade compatível no SHA congelado. |
 | 10 | migrations no destino correto | BLOCKED | `0030` foi testada localmente em PostgreSQL; produção segue em `0028`. Aplicação e compatibilidade no destino de produção não foram comprovadas. |
 | 11 | backup configurado e monitorado | PARTIAL | Há automação e recibos históricos. Idade atual, alerta recebido e restauração de objeto PostgreSQL agendado do offsite seguem sem prova versionada. |
-| 12 | restauração independente | BLOCKED | `production-restore-acceptance.json` existe, com cinco booleans, mas sem referências. Track B comprova o volume AnythingLLM; o ensaio PostgreSQL versionado vai até `0020`. O verificador exige recibo agendado ligado ao dump restaurado, um ensaio PostgreSQL único, árvore Git da API e drill recente; o aceite histórico falha. |
+| 12 | restauração independente | BLOCKED | `production-restore-acceptance.json` existe, com cinco booleans, mas sem referências. Track B comprova o volume AnythingLLM; o ensaio PostgreSQL versionado vai até `0020`. O verificador exige recibo agendado ligado ao dump restaurado, um ensaio PostgreSQL único, árvore Git da API e drill recente; o aceite histórico falha. Há runner opt-in para restaurar o objeto agendado em container descartável e gerar prova parcial, mas nenhum backup real foi restaurado nesta sessão. |
 | 13 | secrets fora do Git | PARTIAL | O scanner local com gitleaks 8.28.0 não encontrou vazamentos em 48 commits da base de PR #194 até `f11d653`; o digest histórico que gerava falso positivo recebeu exceção fixada ao valor exato. O check de CI passou em `235e8b8`. Repetir no SHA final, sem copiar credenciais para evidências. |
 | 14 | HTTPS/domínio/SSL | PARTIAL | TLS passou em probes históricos; repetir validade e rota durante a janela de promoção. |
-| 15 | testes de release | PARTIAL | Suíte completa da API passou localmente; PostgreSQL 16 descartável na porta local passou 4/4 testes opcionais de turma/migration; gate de restore 17/17, harness 20/20, preflight RAG 8/8, promoção curricular 10/10 e Worker 32/32 passaram. No checkout Windows do candidato, recorte Flutter 61/61, widget do Tutor contextual 7/7 e análise Flutter 3.44.9 sem achados. A CI aplicável passou em `235e8b8`. Faltam CI do SHA final, concorrência PostgreSQL específica e Android. |
+| 15 | testes de release | PARTIAL | Suíte completa da API passou localmente; PostgreSQL 16 descartável na porta local passou 4/4 testes opcionais de turma/migration; gate de restore e runner opt-in 25 testes unitários passaram, com mais um restore Docker sintético incluindo cleanup; harness 20/20, preflight RAG 8/8, promoção curricular 10/10 e Worker 32/32 passaram. No checkout Windows do candidato, recorte Flutter 61/61, widget do Tutor contextual 7/7 e análise Flutter 3.44.9 sem achados. A CI aplicável passou em `235e8b8`. Faltam CI do SHA final, concorrência PostgreSQL específica e Android. |
 | 16 | upgrade do app publicado | BLOCKED | Evidência de 06/10 cobre o app publicado `1.2.0+11` contra backend anterior; falta upgrade real do candidato `1.4.0+13` preservando dados/sessão. |
 | 17 | manifesto do build | BLOCKED | Só é produzido após preflight e AAB do SHA congelado; nenhum manifesto atual foi gerado. |
 | 18 | SHA-256 do AAB | BLOCKED | O AAB registrado está `superseded`, não corresponde à fonte atual e tem `upload_allowed=false`. |
@@ -57,9 +57,12 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
   ingestão versionada, workspaces por edição nem mapa produtivo comprovado.
   Em 12/10, os nove PDFs obtidos pelos IDs do Drive conectado coincidiram em
   SHA-256, tamanho e assinatura PDF com os originais históricos; a prova
-  sanitizada está em `evidence/curricular-drive-bytes-20261012.json`. Os PDFs
-  não estão versionados no checkout. Ainda faltam exports atuais das
-  CourseVersions publicadas, aprovação editorial rastreável e indexação. O
+  sanitizada está em `evidence/curricular-drive-bytes-20261012.json`. Os nove
+  PDFs da pasta Drive `Cartilhas (Versão Chatbot)` também coincidiram byte a
+  byte (`evidence/curricular-drive-folder-20261012.json`). Rafael atribuiu a
+  diagramação a Gabriela e a produção a estagiários; não foi localizada uma
+  decisão editorial por edição. Os PDFs não estão versionados no checkout.
+  Ainda faltam exports atuais das CourseVersions publicadas e indexação. O
   Worker rejeita contexto
   sem fonte (`503`) de forma
   deliberada; validar o caminho cartilha → Tutor antes de aulas.
