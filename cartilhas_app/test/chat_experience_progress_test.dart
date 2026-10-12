@@ -302,7 +302,7 @@ void main() {
   });
 
   testWidgets(
-    'general Tutor fails closed when the CourseVersion differs from the snapshot',
+    'general Tutor stays closed when the CourseVersion differs from the snapshot',
     (tester) async {
       final controller = LearningContextController(
         FakeLearningContextRepository({
@@ -322,12 +322,14 @@ void main() {
         controller: controller,
       );
       await tester.tap(find.byTooltip('Perguntar ao Tutor de IA'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-      final tutor = tester.widget<GenUIAssistantScreen>(
-        find.byType(GenUIAssistantScreen),
+      expect(find.byType(GenUIAssistantScreen), findsNothing);
+      expect(
+        find.textContaining('A edição da cartilha não corresponde à turma'),
+        findsOneWidget,
       );
-      expect(tutor.learningContext, isNull);
     },
   );
 

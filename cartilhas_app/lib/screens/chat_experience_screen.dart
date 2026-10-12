@@ -793,14 +793,19 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     final contextVersion = widget.learningContextController?.snapshot?.context;
     final cartilhaVersion = widget.cartilha.courseVersionId;
     if (contextVersion?.courseId == widget.cartilha.id) {
-      if (cartilhaVersion != null &&
-          cartilhaVersion.trim().isNotEmpty &&
-          cartilhaVersion != contextVersion!.courseVersionId) {
-        return null;
-      }
+      if (_tutorCourseVersionMismatch) return null;
       return contextVersion!.courseVersionId;
     }
     return cartilhaVersion;
+  }
+
+  bool get _tutorCourseVersionMismatch {
+    final contextVersion = widget.learningContextController?.snapshot?.context;
+    final cartilhaVersion = widget.cartilha.courseVersionId;
+    return contextVersion?.courseId == widget.cartilha.id &&
+        cartilhaVersion != null &&
+        cartilhaVersion.trim().isNotEmpty &&
+        cartilhaVersion != contextVersion!.courseVersionId;
   }
 
   @override
@@ -863,6 +868,16 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
               tooltip: 'Perguntar ao Tutor de IA',
               icon: const Icon(Icons.psychology),
               onPressed: () {
+                if (_tutorCourseVersionMismatch) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'A edição da cartilha não corresponde à turma. Abra a cartilha novamente para perguntar ao Tutor.',
+                      ),
+                    ),
+                  );
+                  return;
+                }
                 final section = widget.cartilha.sections.isEmpty
                     ? null
                     : widget.cartilha.sections[_currentSectionIndex];

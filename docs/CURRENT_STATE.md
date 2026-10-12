@@ -1,5 +1,14 @@
 # CURRENT STATE
 
+## 2026-10-12 Tutor contextual — divergência de edição
+
+Candidato local sobre `9b5778d`: o leitor agora bloqueia a abertura do Tutor
+quando a edição da cartilha diverge da CourseVersion ativa da turma. Antes,
+essa divergência era detectada mas abria o caminho legado sem escopo RAG.
+Cartilhas sem versão continuam no caminho legado intencional. Teste de widget
+focal foi atualizado, mas não executado neste executor sem Flutter/Dart;
+`git diff --check` passou. Sem staging, produção ou mudança no Worker.
+
 ## 2026-10-12 — gate 12 de proveniência de recuperação (candidato local)
 
 IMPLEMENTED/TESTED-LOCAL: o preflight de AAB mantém a verificação tipada do
