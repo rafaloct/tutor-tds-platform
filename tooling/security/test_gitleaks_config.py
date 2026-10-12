@@ -320,6 +320,27 @@ def main() -> int:
             config,
             default_config,
         )
+        checkin_evidence = "docs/production/evidence/checkin-auth-domain-401-2026-10-07.json"
+        source_key = "cartilhas_app/lib/features/auth/data/auth_repository.dart"
+        clean_case(
+            tmp_root,
+            "historical_checkin_source_digest",
+            {checkin_evidence: json.dumps({source_key: secrets.token_hex(32)}, indent=2) + "\n"},
+            gitleaks,
+            config,
+            default_config,
+        )
+        detected_case(
+            tmp_root,
+            "historical_checkin_digest_does_not_hide_secret",
+            {checkin_evidence: json.dumps({
+                source_key: secrets.token_hex(32),
+                "secret_access_key": secrets.token_hex(32),
+            }, indent=2) + "\n"},
+            "generic-api-key",
+            gitleaks,
+            config,
+        )
         detected_case(
             tmp_root,
             "issue_140_git_sha_outside_allowlisted_path",
