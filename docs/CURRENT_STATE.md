@@ -9,6 +9,18 @@ de vida cobre os dois estados e confirma que encerramento não pode ser seguido
 por sessão aberta. PostgreSQL concorrente e E2E Android ainda precisam de prova
 no candidato final; produção não foi alterada.
 
+## 2026-10-12 RAG curricular — preflight offline candidato
+
+Mapa explícito de nove aulas Flutter, URLs/IDs do Drive e hashes dos originais
+históricos reconciliado com a evidência de 01/10. `course_promotion` passou a
+aceitar `course_version_id` legado somente quando igual ao `version_id` do
+export. O preflight stdlib recusa export, conteúdo, URL, versão, PDF, hash ou
+workspace divergente e emite manifesto determinístico apenas de bytes locais.
+Nenhum PDF está neste checkout; Drive, aprovação editorial, indexação e
+workspaces reais não foram verificados nem alterados. Testes focais em
+`tooling/ai_qa` (8/8) e `api/tests/test_course_promotion.py` (10/10)
+passaram; equivalência de snapshots legados 9/9. Nenhum deploy.
+
 ## 2026-10-12 Tutor contextual — divergência de edição
 
 Candidato local sobre `9b5778d`: o leitor agora bloqueia a abertura do Tutor
