@@ -66,6 +66,13 @@ class _ActivateClassroomScreenState extends State<ActivateClassroomScreen> {
                         .toList(growable: false),
                     onChanged: _controller.busy ? null : _controller.selectClass,
                   ),
+                  TextButton.icon(
+                    onPressed: _controller.busy
+                        ? null
+                        : _controller.refreshReadiness,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Atualizar prontidão'),
+                  ),
                   if (_controller.busy) ...[
                     const SizedBox(height: 12),
                     const LinearProgressIndicator(),
@@ -86,16 +93,19 @@ class _ActivateClassroomScreenState extends State<ActivateClassroomScreen> {
                         child: Text('• $blocker'),
                       ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      key: const Key('activate_reason'),
-                      initialValue: _controller.reason,
-                      enabled: _controller.readiness!.canActivate && !_controller.busy,
-                      decoration: const InputDecoration(
-                        labelText: 'Motivo da ativação',
-                        hintText: 'Ex.: local, equipe e oferta conferidos',
+                    KeyedSubtree(
+                      key: ValueKey('activate-reason-${_controller.selectedClassId}'),
+                      child: TextFormField(
+                        key: const Key('activate_reason'),
+                        initialValue: _controller.reason,
+                        enabled: _controller.readiness!.canActivate && !_controller.busy,
+                        decoration: const InputDecoration(
+                          labelText: 'Motivo da ativação',
+                          hintText: 'Ex.: local, equipe e oferta conferidos',
+                        ),
+                        maxLines: 2,
+                        onChanged: _controller.setReason,
                       ),
-                      maxLines: 2,
-                      onChanged: _controller.setReason,
                     ),
                     const SizedBox(height: 16),
                     FilledButton.icon(
@@ -111,11 +121,14 @@ class _ActivateClassroomScreenState extends State<ActivateClassroomScreen> {
   );
 
   Future<void> _confirmAndActivate() async {
+    final classId = _controller.selectedClassId;
+    final className = _controller.readiness?.classroomName;
+    if (classId == null || className == null) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Confirmar ativação'),
-        content: const Text('A turma passará de planejada para em andamento.'),
+        content: Text('Ativar "$className"? A turma passará de planejada para em andamento.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -128,6 +141,10 @@ class _ActivateClassroomScreenState extends State<ActivateClassroomScreen> {
         ],
       ),
     );
-    if (confirmed == true) await _controller.submit();
+    if (confirmed == true &&
+        mounted &&
+        _controller.selectedClassId == classId) {
+      await _controller.submit();
+    }
   }
 }

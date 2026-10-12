@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:cartilhas_app/features/class_lifecycle/data/class_lifecycle_gateway.dart';
+import 'package:cartilhas_app/features/class_lifecycle/models/class_lifecycle_models.dart';
 import 'package:cartilhas_app/features/class_lifecycle/presentation/close_classroom_screen.dart';
 import 'package:cartilhas_app/features/class_lifecycle/presentation/activate_classroom_screen.dart';
 import 'package:cartilhas_app/features/class_lifecycle/presentation/prepare_classroom_screen.dart';
@@ -79,8 +80,60 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Ativar turma'));
     await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.textContaining('Turma Palmas — Inclusão Digital'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.widgetWithText(FilledButton, 'Confirmar ativação'));
     await tester.pumpAndSettle();
     expect(find.text('Turma ativada'), findsOneWidget);
+  });
+
+  testWidgets('falha de prontidão da única turma permite nova consulta', (tester) async {
+    final gateway = FakeClassLifecycleGateway(
+      capabilities: const ClassLifecycleCapabilities(
+        canPrepare: true, canClose: true, canActivate: true,
+        canOverrideCapacity: false,
+      ),
+      failNextActivationReadiness: true,
+    );
+    await tester.pumpWidget(MaterialApp(
+      home: ActivateClassroomScreen(gateway: gateway),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Falha temporária'), findsOneWidget);
+    await tester.tap(find.text('Atualizar prontidão'));
+    await tester.pumpAndSettle();
+    expect(find.text('Preparação conferida pelo servidor.'), findsOneWidget);
+  });
+
+  testWidgets('confirmação de encerramento mostra nome da turma', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: CloseClassroomScreen(
+        gateway: FakeClassLifecycleGateway.programOperator(),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final reason = find.byKey(const Key('close_reason'));
+    await tester.ensureVisible(reason);
+    await tester.enterText(reason, 'Atividades concluídas');
+    final certificate = find.byType(CheckboxListTile);
+    await tester.ensureVisible(certificate);
+    await tester.tap(certificate);
+    await tester.pumpAndSettle();
+    final close = find.widgetWithText(FilledButton, 'Encerrar turma');
+    await tester.ensureVisible(close);
+    await tester.tap(close);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.textContaining('Turma Palmas — IA'),
+      ),
+      findsOneWidget,
+    );
   });
 }

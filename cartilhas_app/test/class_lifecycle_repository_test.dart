@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
 import 'package:cartilhas_app/features/class_lifecycle/data/class_lifecycle_repository.dart';
+import 'package:cartilhas_app/features/class_lifecycle/data/class_lifecycle_gateway.dart';
 import 'package:cartilhas_app/features/class_lifecycle/models/class_lifecycle_models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -86,6 +88,122 @@ Map<String, dynamic> _snapshot({
 };
 
 void main() {
+  test('preparo após resposta perdida repete corpo e recibo sem outra turma', () async {
+    final requests = <http.Request>[];
+    final createdByReceipt = <String, Map<String, dynamic>>{};
+    final repository = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(),
+      ),
+      client: MockClient((request) async {
+        requests.add(request);
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['version_id'], 'version-7');
+        final receiptId = body['id'] as String;
+        final previous = createdByReceipt[receiptId];
+        if (previous != null) return _jsonResponse(previous, 201);
+        final committed = _snapshot(status: 'planned', revision: 1, canClose: false);
+        createdByReceipt[receiptId] = committed;
+        throw const SocketException('Resposta perdida após commit');
+      }),
+    );
+    final command = PrepareClassroomCommand(
+      className: 'Turma Palmas',
+      offerMunicipality: 'Palmas',
+      offerLocation: 'Laboratório',
+      institutionId: 'institution-1',
+      programId: 'program-1',
+      courseId: 'course-1',
+      courseVersionId: 'version-7',
+      startDate: DateTime(2026, 10, 11),
+      endDate: DateTime(2026, 10, 30),
+      teacherId: 'teacher-1',
+      monitorIds: const ['monitor-1'],
+    );
+
+    await expectLater(repository.prepare(command), throwsA(isA<ClassLifecycleException>()));
+    await expectLater(
+      repository.prepare(PrepareClassroomCommand(
+        className: 'Turma alterada',
+        offerMunicipality: command.offerMunicipality,
+        offerLocation: command.offerLocation,
+        institutionId: command.institutionId,
+        programId: command.programId,
+        courseId: command.courseId,
+        courseVersionId: command.courseVersionId,
+        startDate: command.startDate,
+        endDate: command.endDate,
+        teacherId: command.teacherId,
+        monitorIds: command.monitorIds,
+      )),
+      throwsA(isA<ClassLifecycleException>()),
+    );
+    expect(requests, hasLength(1));
+    final result = await repository.prepare(command);
+    expect(result.opaqueId, 'class-1');
+    expect(createdByReceipt, hasLength(1));
+    expect(requests, hasLength(2));
+    expect(requests.first.body, requests.last.body);
+  });
+
+  test('version conflict releases pending receipt for confirmed new edition', () async {
+    final receiptIds = <String>[];
+    var optionsReads = 0;
+    final repository = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(),
+      ),
+      client: MockClient((request) async {
+        if (request.method == 'GET' &&
+            request.url.path == '/operations/classes/options') {
+          optionsReads++;
+          return _jsonResponse({'options': [{
+            'institution_id': 'institution-1',
+            'program_id': 'program-1',
+            'program_name': 'Programa TDS',
+            'course_id': 'course-1',
+            'course_title': 'IA',
+            'course_version_id': optionsReads == 1 ? 'version-7' : 'version-8',
+            'role': 'program_operator',
+            'can_prepare': true,
+            'can_activate': true,
+            'can_close': true,
+            'can_override_capacity': false,
+          }]});
+        }
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        receiptIds.add(body['id'] as String);
+        if (body['version_id'] == 'version-7') {
+          return _jsonResponse({
+            'detail': {'code': 'course_version_changed'},
+          }, 409);
+        }
+        return _jsonResponse(_snapshot(status: 'planned', canClose: false), 201);
+      }),
+    );
+    PrepareClassroomCommand command(String versionId) => PrepareClassroomCommand(
+      className: 'Turma Palmas', offerMunicipality: 'Palmas',
+      offerLocation: 'Laboratório', institutionId: 'institution-1',
+      programId: 'program-1', courseId: 'course-1',
+      courseVersionId: versionId, startDate: DateTime(2026, 10, 11),
+      endDate: DateTime(2026, 10, 30), teacherId: 'teacher-1',
+      monitorIds: const [],
+    );
+
+    expect((await repository.publishedVersion('course-1')).opaqueId, 'version-7');
+    await expectLater(repository.prepare(command('version-7')),
+        throwsA(isA<ClassVersionChangedException>()));
+    expect((await repository.publishedVersion('course-1')).opaqueId, 'version-8');
+    await repository.prepare(command('version-8'));
+    expect(optionsReads, 2);
+    expect(receiptIds, hasLength(2));
+    expect(receiptIds.first, isNot(receiptIds.last));
+  });
+
   test('integra options, turmas e candidatos do contrato #138', () async {
     final requests = <http.Request>[];
     final repository = ClassLifecycleRepository(

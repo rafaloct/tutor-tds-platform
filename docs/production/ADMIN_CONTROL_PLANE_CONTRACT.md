@@ -84,6 +84,12 @@ de inclusão, e não exige justificativa de exceção. Os parágrafos histórico
 abaixo registram o contrato anterior da #138. Escopo, auditoria, CAS/replay,
 turma fechada e sessão aberta como bloqueio ao encerramento continuam vigentes.
 
+Revisão local de 12/10: `POST /operations/classes` exige a `version_id`
+exibida no preparo. A API bloqueia o curso, confere a edição publicada e
+retorna 409 `course_version_changed` sem turma/recibo se ela mudou. O app
+obriga nova escolha da formação e conserva ID/corpo do comando durante retry
+após falha de transporte, permitindo ao servidor devolver o recibo original.
+
 O backend passa a expor o contrato contextual de turma em
 `/operations/classes`, atrás de `CLASS_LIFECYCLE_ENABLED=false` por padrão.
 A preparação fixa a CourseVersion publicada no servidor e persiste

@@ -39,6 +39,15 @@ class ClassLifecycleException implements Exception {
   String toString() => message;
 }
 
+class ClassLifecycleRejectedException extends ClassLifecycleException {
+  const ClassLifecycleRejectedException(super.message);
+}
+
+class ClassVersionChangedException extends ClassLifecycleRejectedException {
+  const ClassVersionChangedException()
+      : super('A edição publicada mudou. Selecione a formação novamente para confirmar a nova edição.');
+}
+
 /// Fake de desenvolvimento para validar a UX do contrato da Issue #138.
 ///
 /// A UI nunca lê papel global. As diferenças entre os cenários abaixo chegam
@@ -49,6 +58,10 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
     this.failBootstrap = false,
     this.readinessCanClose = true,
     this.readinessCanActivate = true,
+    this.manageableClasses,
+    this.failNextActivationReadiness = false,
+    this.failNextCloseReadiness = false,
+    this.failNextPrepareVersionChanged = false,
     this.simulatedDelay = const Duration(milliseconds: 120),
     this.occupancy = 18,
     this.capacity = 30,
@@ -93,6 +106,10 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
   final bool failBootstrap;
   final bool readinessCanClose;
   final bool readinessCanActivate;
+  final List<LifecycleClassSummary>? manageableClasses;
+  bool failNextActivationReadiness;
+  bool failNextCloseReadiness;
+  bool failNextPrepareVersionChanged;
   final Duration simulatedDelay;
   final int occupancy;
   final int capacity;
@@ -168,7 +185,7 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
     return ClassLifecycleBootstrap(
       capabilities: capabilities,
       programs: _programs,
-      manageableClasses: _classes,
+      manageableClasses: manageableClasses ?? _classes,
     );
   }
 
@@ -223,6 +240,10 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
     PrepareClassroomCommand command,
   ) async {
     await _wait();
+    if (failNextPrepareVersionChanged) {
+      failNextPrepareVersionChanged = false;
+      throw const ClassVersionChangedException();
+    }
     if (!capabilities.canPrepare) {
       throw const ClassLifecycleException(
         'O servidor não autorizou preparar esta turma.',
@@ -239,9 +260,15 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
   @override
   Future<ClassActivationReadiness> activationReadiness(String classroomId) async {
     await _wait();
+    if (failNextActivationReadiness) {
+      failNextActivationReadiness = false;
+      throw const ClassLifecycleException('Falha temporária ao consultar prontidão.');
+    }
+    final classes = manageableClasses ?? _classes;
+    final classroom = classes.where((item) => item.id == classroomId).firstOrNull;
     return ClassActivationReadiness(
       classroomId: classroomId,
-      classroomName: 'Turma Palmas — Inclusão Digital',
+      classroomName: classroom?.name ?? 'Turma Palmas — Inclusão Digital',
       canActivate: capabilities.canActivate && readinessCanActivate,
       blockers: readinessCanActivate
           ? const []
@@ -271,6 +298,12 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
   @override
   Future<ClassCloseReadiness> closeReadiness(String classroomId) async {
     await _wait();
+    if (failNextCloseReadiness) {
+      failNextCloseReadiness = false;
+      throw const ClassLifecycleException('Falha temporária ao consultar prontidão.');
+    }
+    final classes = manageableClasses ?? _classes;
+    final classroom = classes.where((item) => item.id == classroomId).firstOrNull;
     final blockers = readinessCanClose
         ? const <String>[]
         : const <String>[
@@ -278,7 +311,7 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
           ];
     return ClassCloseReadiness(
       classroomId: classroomId,
-      classroomName: 'Turma Palmas — IA',
+      classroomName: classroom?.name ?? 'Turma Palmas — IA',
       openSessions: readinessCanClose ? 0 : 1,
       pendingAttendance: readinessCanClose ? 0 : 2,
       pendingEvidence: readinessCanClose ? 0 : 1,

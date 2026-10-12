@@ -49,6 +49,7 @@ class PrepareClassCommand(BaseModel):
     institution_id: str = Field(min_length=1, max_length=36)
     program_id: str = Field(min_length=1, max_length=36)
     course_id: str = Field(min_length=1, max_length=120)
+    version_id: str = Field(min_length=1, max_length=36)
     teacher_id: str = Field(min_length=1, max_length=36)
     monitor_ids: list[str] = Field(default_factory=list)
     name: str = Field(min_length=2, max_length=240)
@@ -706,7 +707,11 @@ def prepare_class(
                 status_code=422,
                 detail="Curso não é ofertado por este programa.",
             )
-        course = session.get(Course, payload.course_id)
+        # Publishing also locks this row. Compare the reviewed version while
+        # holding the same lock, before any classroom or receipt is created.
+        course = session.scalar(
+            select(Course).where(Course.id == payload.course_id).with_for_update()
+        )
         if course is None or not course.active:
             raise HTTPException(
                 status_code=422,
@@ -719,6 +724,14 @@ def prepare_class(
             raise HTTPException(
                 status_code=409,
                 detail="Curso não possui versão publicada.",
+            )
+        if version.id != payload.version_id:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "course_version_changed",
+                    "message": "A edição publicada mudou. Confira e selecione a formação novamente.",
+                },
             )
         _validate_team(
             session,

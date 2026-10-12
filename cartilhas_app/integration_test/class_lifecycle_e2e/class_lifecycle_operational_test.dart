@@ -176,8 +176,8 @@ void main() {
 
         final bootstrap = await operator.lifecycle.bootstrap();
         expect(bootstrap.capabilities.canPrepare, isTrue);
-        expect(bootstrap.capabilities.canActivate, isFalse);
-        expect(bootstrap.capabilities.canClose, isFalse);
+        expect(bootstrap.capabilities.canActivate, isTrue);
+        expect(bootstrap.capabilities.canClose, isTrue);
         expect(bootstrap.programs, hasLength(1));
         final program = bootstrap.programs.single;
         expect(program.id, _program);

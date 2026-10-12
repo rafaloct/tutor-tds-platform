@@ -100,6 +100,38 @@ void main() {
         expect(controller.capacity?.capacity, 30);
       },
     );
+
+    test('mudança da edição exige nova escolha da formação', () async {
+      final gateway = FakeClassLifecycleGateway(
+        capabilities: const ClassLifecycleCapabilities(
+          canPrepare: true, canClose: false, canActivate: false,
+          canOverrideCapacity: false,
+        ),
+        failNextPrepareVersionChanged: true,
+      );
+      final controller = PrepareClassroomController(gateway);
+      await controller.load();
+      controller.setClassName('Turma Palmas');
+      controller.setOfferMunicipality('Palmas');
+      controller.setOfferLocation('Laboratório');
+      controller.next();
+      await controller.selectProgram('program-tds');
+      await controller.selectCourse('course-ia');
+      controller.next();
+      controller.setDates(DateTime(2026, 10, 11), DateTime(2026, 10, 30));
+      controller.next();
+      controller.setTeacher('teacher-1');
+      controller.next();
+      controller.next();
+      await controller.submit();
+
+      expect(controller.currentStep, 1);
+      expect(controller.courseId, isNull);
+      expect(controller.publishedVersion, isNull);
+      expect(controller.error, contains('edição publicada mudou'));
+      await controller.selectCourse('course-ia');
+      expect(controller.publishedVersion?.opaqueId, 'version-server-only');
+    });
   });
 
   group('ActivateClassroomController', () {
@@ -131,6 +163,34 @@ void main() {
       controller.setReason('Oferta conferida');
       expect(controller.canSubmit, isFalse);
       expect(controller.readiness?.blockers, isNotEmpty);
+    });
+
+    test('troca de turma limpa motivo e falha temporária permite atualizar', () async {
+      final gateway = FakeClassLifecycleGateway(
+        capabilities: const ClassLifecycleCapabilities(
+          canPrepare: true, canClose: true, canActivate: true,
+          canOverrideCapacity: false,
+        ),
+        manageableClasses: const [
+          LifecycleClassSummary(id: 'planned-a', name: 'Turma A',
+              statusLabel: 'Planejada', status: 'planned'),
+          LifecycleClassSummary(id: 'planned-b', name: 'Turma B',
+              statusLabel: 'Planejada', status: 'planned'),
+        ],
+        failNextActivationReadiness: true,
+      );
+      final controller = ActivateClassroomController(gateway);
+      await controller.load();
+      expect(controller.readiness, isNull);
+      expect(controller.error, isNotNull);
+      await controller.refreshReadiness();
+      expect(controller.readiness?.classroomName, 'Turma A');
+      controller.setReason('Primeira oferta conferida');
+      expect(controller.canSubmit, isTrue);
+      await controller.selectClass('planned-b');
+      expect(controller.reason, isEmpty);
+      expect(controller.readiness?.classroomName, 'Turma B');
+      expect(controller.canSubmit, isFalse);
     });
   });
 
@@ -176,6 +236,35 @@ void main() {
       expect(controller.canSubmit, isTrue);
       await controller.submit();
       expect(gateway.lastCloseReason, 'Atividades concluídas');
+    });
+
+    test('troca de turma limpa motivo e aceite; prontidão pode ser relida', () async {
+      final gateway = FakeClassLifecycleGateway(
+        capabilities: const ClassLifecycleCapabilities(
+          canPrepare: true, canClose: true, canActivate: true,
+          canOverrideCapacity: false,
+        ),
+        manageableClasses: const [
+          LifecycleClassSummary(id: 'active-a', name: 'Turma A',
+              statusLabel: 'Em andamento', status: 'active'),
+          LifecycleClassSummary(id: 'active-b', name: 'Turma B',
+              statusLabel: 'Em andamento', status: 'active'),
+        ],
+        failNextCloseReadiness: true,
+      );
+      final controller = CloseClassroomController(gateway);
+      await controller.load();
+      expect(controller.readiness, isNull);
+      await controller.refreshReadiness();
+      expect(controller.readiness?.classroomName, 'Turma A');
+      controller.setCloseReason('Atividades concluídas');
+      controller.setCertificateNoticeConfirmed(true);
+      expect(controller.canSubmit, isTrue);
+      await controller.selectClass('active-b');
+      expect(controller.closeReason, isEmpty);
+      expect(controller.certificateNoticeConfirmed, isFalse);
+      expect(controller.readiness?.classroomName, 'Turma B');
+      expect(controller.canSubmit, isFalse);
     });
   });
 }

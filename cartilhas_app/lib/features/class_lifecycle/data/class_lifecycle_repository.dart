@@ -21,6 +21,8 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
 
   List<_LifecycleOption> _options = const [];
   final Map<String, _LifecycleSnapshot> _snapshots = {};
+  Map<String, dynamic>? _pendingPrepareBody;
+  String? _pendingPrepareFingerprint;
 
   @override
   Future<ClassLifecycleBootstrap> bootstrap() async {
@@ -184,21 +186,49 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
   Future<PreparedClassroomResult> prepare(
     PrepareClassroomCommand command,
   ) async {
-    final response = await _request('POST', '/operations/classes', {
-      'id': _commandId(),
+    final requested = <String, dynamic>{
       'reason': 'Preparação territorial pelo app Tutor TDS',
       'institution_id': command.institutionId,
       'program_id': command.programId,
       'course_id': command.courseId,
+      'version_id': command.courseVersionId,
       'teacher_id': command.teacherId,
-      'monitor_ids': command.monitorIds,
+      'monitor_ids': List<String>.of(command.monitorIds),
       'name': command.className,
       'offer_municipality': command.offerMunicipality,
       'offer_location': command.offerLocation,
       'start_date': _date(command.startDate),
       'end_date': _date(command.endDate),
-    });
+    };
+    final fingerprint = jsonEncode(requested);
+    if (_pendingPrepareBody != null &&
+        _pendingPrepareFingerprint != fingerprint) {
+      throw const ClassLifecycleException(
+        'Há uma preparação sem resposta confirmada. Tente novamente com os mesmos dados antes de alterar a turma.',
+      );
+    }
+    final body = _pendingPrepareBody ?? <String, dynamic>{
+      'id': _commandId(),
+      ...requested,
+    };
+    _pendingPrepareBody = body;
+    _pendingPrepareFingerprint = fingerprint;
+    late final Map<String, dynamic> response;
+    try {
+      response = await _request('POST', '/operations/classes', body);
+    } on ClassVersionChangedException {
+      _options = const [];
+      _pendingPrepareBody = null;
+      _pendingPrepareFingerprint = null;
+      rethrow;
+    } on ClassLifecycleRejectedException {
+      _pendingPrepareBody = null;
+      _pendingPrepareFingerprint = null;
+      rethrow;
+    }
     final snapshot = _LifecycleSnapshot.fromJson(response);
+    _pendingPrepareBody = null;
+    _pendingPrepareFingerprint = null;
     _snapshots[snapshot.classroomId] = snapshot;
     return PreparedClassroomResult(
       opaqueId: snapshot.classroomId,
@@ -406,14 +436,32 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
         };
       });
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw ClassLifecycleException(switch (response.statusCode) {
+        if (response.statusCode == 409) {
+          try {
+            final body = jsonDecode(response.body);
+            if (body is Map &&
+                body['detail'] is Map &&
+                (body['detail'] as Map)['code'] == 'course_version_changed') {
+              throw const ClassVersionChangedException();
+            }
+          } on FormatException {
+            // A malformed error body still receives the generic rejection.
+          } on ClassVersionChangedException {
+            rethrow;
+          }
+        }
+        final message = switch (response.statusCode) {
           403 => 'Você não tem autorização para esta ação nesta turma.',
           404 => 'O ciclo de turma ainda não está habilitado neste ambiente.',
           409 =>
             'A turma mudou ou ainda não está pronta. Atualize os dados antes de continuar.',
           422 => 'Confira território, período e equipe antes de continuar.',
           _ => 'Não foi possível confirmar a operação de turma no servidor.',
-        });
+        };
+        if (response.statusCode >= 400 && response.statusCode < 500) {
+          throw ClassLifecycleRejectedException(message);
+        }
+        throw ClassLifecycleException(message);
       }
       final decoded = jsonDecode(response.body);
       if (decoded is! Map<String, dynamic>) throw const FormatException();

@@ -211,6 +211,16 @@ wrapper executa `pub get --enforce-lockfile`; depois confirma que o hash de
 
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
+2026-10-12 — revisão local após auditoria: o preparo envia a `version_id`
+efetivamente revisada; a API compara a edição publicada sob o bloqueio do
+curso antes de criar turma ou recibo. Conflito 409 obriga nova seleção da
+formação. Após resposta perdida, o repositório conserva o corpo e o ID do
+comando para retry idêntico durante a mesma sessão do app. Ativação e
+encerramento limpam motivo/aceite ao trocar turma, mostram o nome na
+confirmação e permitem reler prontidão da turma selecionada. API SQLite focal
+24/24; Flutter e Android pendentes neste executor sem SDK. Nenhum deploy ou
+migration foi feito nesta revisão.
+
 2026-10-12 — candidato local da decisão 32: API passa a conceder a
 `program_operator` escopado preparação, ativação e encerramento; a coordenação
 conserva os poderes. Capacidade 30 é referência com aviso em preview, resposta

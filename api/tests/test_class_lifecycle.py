@@ -20,6 +20,7 @@ from app.models import (
     ClassroomCommandReceipt,
     ClassSession,
     CohortMembership,
+    CourseVersion,
     Enrollment,
     EvidenceItem,
     OperatorCommandReceipt,
@@ -53,6 +54,7 @@ def prepare_payload(**overrides):
         "institution_id": "i1",
         "program_id": "p1",
         "course_id": "course",
+        "version_id": "v2",
         "teacher_id": "teacher",
         "monitor_ids": ["monitor"],
         "name": "Turma Palmas Centro",
@@ -398,6 +400,39 @@ def test_prepare_pins_published_version_separates_territory_and_replays(lifecycl
     for actor in ("teacher", "monitor", "outsider"):
         denied, _ = prepare(client, actor=actor)
         assert denied.status_code == 403
+
+
+def test_prepare_rejects_changed_published_version_before_creating_class(lifecycle_api):
+    client, engine = lifecycle_api
+    with Session(engine) as session:
+        before_classes = session.scalar(select(func.count()).select_from(Classroom))
+        current = session.get(CourseVersion, "v2")
+        next_version = session.get(CourseVersion, "draft")
+        assert current is not None and next_version is not None
+        next_version.status = "in_review"
+        session.flush()
+        next_version.status = "published"
+        session.flush()
+        current.status = "archived"
+        session.commit()
+
+    stale, _ = prepare(client, actor="other", version_id="v2")
+    assert stale.status_code == 409
+    assert stale.json()["detail"]["code"] == "course_version_changed"
+    with Session(engine) as session:
+        assert session.scalar(select(func.count()).select_from(Classroom)) == before_classes
+        assert session.scalar(
+            select(func.count()).select_from(ClassroomCommandReceipt)
+        ) == 0
+
+    refreshed = client.get(
+        "/operations/classes/options", headers=header("other")
+    )
+    assert refreshed.status_code == 200
+    assert refreshed.json()["options"][0]["course_version_id"] == "draft"
+    confirmed, _ = prepare(client, actor="other", version_id="draft")
+    assert confirmed.status_code == 201, confirmed.text
+    assert confirmed.json()["classroom"]["course_version_id"] == "draft"
 
 
 def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):

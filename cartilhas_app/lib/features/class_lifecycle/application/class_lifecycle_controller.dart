@@ -290,6 +290,12 @@ class PrepareClassroomController extends ChangeNotifier {
           monitorIds: monitorIds.toList(growable: false),
         ),
       );
+    } on ClassVersionChangedException catch (caught) {
+      currentStep = 1;
+      courseId = null;
+      publishedVersion = null;
+      capacity = null;
+      error = caught.message;
     } on Object catch (caught) {
       error = caught.toString();
     } finally {
@@ -340,12 +346,19 @@ class ActivateClassroomController extends ChangeNotifier {
   Future<void> selectClass(String? value) async {
     if (value == null || value == selectedClassId || busy) return;
     selectedClassId = value;
+    reason = '';
+    await refreshReadiness();
+  }
+
+  Future<void> refreshReadiness() async {
+    final classId = selectedClassId;
+    if (classId == null || busy) return;
     readiness = null;
     busy = true;
     error = null;
     notifyListeners();
     try {
-      readiness = await gateway.activationReadiness(value);
+      readiness = await gateway.activationReadiness(classId);
     } on Object catch (caught) {
       error = caught.toString();
     } finally {
@@ -434,12 +447,20 @@ class CloseClassroomController extends ChangeNotifier {
   Future<void> selectClass(String? value) async {
     if (value == null || value == selectedClassId || busy) return;
     selectedClassId = value;
+    closeReason = '';
+    certificateNoticeConfirmed = false;
+    await refreshReadiness();
+  }
+
+  Future<void> refreshReadiness() async {
+    final classId = selectedClassId;
+    if (classId == null || busy) return;
     readiness = null;
     busy = true;
     error = null;
     notifyListeners();
     try {
-      readiness = await gateway.closeReadiness(value);
+      readiness = await gateway.closeReadiness(classId);
     } on Object catch (caught) {
       error = caught.toString();
     } finally {
