@@ -100,6 +100,9 @@ class HarnessTests(unittest.TestCase):
             item.update(status="PASS", evidence=["synthetic-evidence.json"])
         for item in data["invariants"].values():
             item.update(status="PASS", evidence=["synthetic-evidence.json"])
+        data["invariants"]["capacity_policy_enforced"]["evidence"].append(
+            "backend-contract:test_capacity_30_warns_without_blocking_scoped_assignments"
+        )
         data["certificate_boundary"] = {
             "request_status": "approved",
             "emitted": False,
@@ -108,6 +111,38 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(
             harness.validate_manifest(data, require_complete=True),
             [],
+        )
+
+    def test_old_blocking_capacity_evidence_cannot_validate_current_policy(self):
+        data = harness.empty_manifest(args())
+        for item in (*data["stages"].values(), *data["invariants"].values()):
+            item.update(status="PASS", evidence=["synthetic-evidence.json"])
+        data["invariants"]["capacity_policy_enforced"]["evidence"] = [
+            "backend-contract:test_capacity_30_blocks_operator_without_override"
+        ]
+        data["certificate_boundary"] = {
+            "request_status": "approved",
+            "emitted": False,
+            "institutional_release": "blocked",
+        }
+        self.assertIn(
+            "current soft-capacity contract evidence missing",
+            harness.validate_manifest(data, require_complete=True),
+        )
+
+    def test_manifest_heads_must_match_requested_candidate(self):
+        data = harness.empty_manifest(args())
+        self.assertIn(
+            "api_head does not match the requested candidate",
+            harness.validate_manifest(
+                data,
+                require_complete=False,
+                expected_heads={
+                    "api_head": SHA_B,
+                    "app_head": SHA_B,
+                    "compose_head": SHA_C,
+                },
+            ),
         )
 
     def test_certificate_cannot_be_claimed_emitted(self):

@@ -390,7 +390,10 @@ python3 tooling/class_lifecycle_e2e/harness.py \
 ```
 
 O validador recusa PASS se qualquer etapa/invariante permanecer `NOT_RUN`,
-`BLOCKED` ou `FAIL`.
+`BLOCKED` ou `FAIL`. Ele também confere os três SHAs informados contra o
+manifesto e exige a prova da política vigente de aviso acima de 30. O PASS
+anterior à decisão de 12/10, que exercitava bloqueio rígido, não valida este
+candidato.
 
 ## 9. Stop conditions
 

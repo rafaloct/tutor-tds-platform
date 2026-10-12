@@ -201,7 +201,12 @@ def _entry_status(container: dict, key: str, errors: list[str], prefix: str) -> 
         errors.append(f"{prefix}.{key}.evidence must be a list")
 
 
-def validate_manifest(data: dict, *, require_complete: bool) -> list[str]:
+def validate_manifest(
+    data: dict,
+    *,
+    require_complete: bool,
+    expected_heads: dict[str, str] | None = None,
+) -> list[str]:
     errors: list[str] = []
     if data.get("front") != "CLASS_LIFECYCLE_E2E" or data.get("issue") != 140:
         errors.append("manifest identity mismatch")
@@ -209,6 +214,8 @@ def validate_manifest(data: dict, *, require_complete: bool) -> list[str]:
     for label in ("api_head", "app_head", "compose_head"):
         if not SHA_RE.fullmatch(str(data.get(label) or "")):
             errors.append(f"{label} invalid")
+        if expected_heads is not None and data.get(label) != expected_heads[label]:
+            errors.append(f"{label} does not match the requested candidate")
 
     stages = data.get("stages")
     invariants = data.get("invariants")
@@ -245,6 +252,14 @@ def validate_manifest(data: dict, *, require_complete: bool) -> list[str]:
         for invariant in INVARIANTS:
             if invariants.get(invariant, {}).get("status") != "PASS":
                 errors.append(f"invariant not passed: {invariant}")
+        capacity_evidence = invariants.get("capacity_policy_enforced", {}).get(
+            "evidence", []
+        )
+        if (
+            "backend-contract:test_capacity_30_warns_without_blocking_scoped_assignments"
+            not in capacity_evidence
+        ):
+            errors.append("current soft-capacity contract evidence missing")
         if boundary != {
             "request_status": "approved",
             "emitted": False,
@@ -533,7 +548,7 @@ def _manifest_from_execution(
         "Shared staging and production were not mutated.",
         "Backend contract suite: 6/6 PASS before Android execution.",
         "Participant residence is an external synthetic QA fixture because the current relational model intentionally does not persist residence; the E2E proves offer municipality remains a separate classroom field and the residence fixture is not copied into the classroom.",
-        "Visual wizard evidence is reused from docs/qa/class-lifecycle-2026-10-05 because PR #144 visual QA already passed and this composition did not change presentation.",
+        "Visual evidence from 2026-10-05 covers the previous wizard only; Android verification of the new activation screen and capacity warning remains separate.",
         "Certificate proof stops at approved request with /certificates still empty; no Worker/KV emission is invoked.",
     ]
     return manifest
@@ -862,6 +877,11 @@ def main(argv: list[str] | None = None) -> int:
         evidence_errors = validate_manifest(
             data,
             require_complete=args.require_complete,
+            expected_heads={
+                "api_head": args.api_head,
+                "app_head": args.app_head,
+                "compose_head": args.compose_head,
+            },
         )
         if evidence_errors:
             print(
