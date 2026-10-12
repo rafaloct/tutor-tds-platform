@@ -13,6 +13,10 @@ sem gabarito e preserva a nota calculada pelo servidor, sem inferir tópicos
 fracos. API focal: 34 testes locais passaram; SDK Flutter indisponível neste
 workspace Linux, então os testes Dart adicionados aguardam CI. Nenhum serviço
 externo, banco de staging ou produção foi alterado.
+No Flutter, a abertura da atividade reenvia uma revisão pendente após erro
+transitório, preservando o bloqueio de 403; URL nua no texto do Tutor mantém
+prefixo e pontuação sem duplicação. Testes focais adicionados; conferir a CI
+do SHA composto no PR antes de classificar a correção como validada.
 
 ## 2026-10-12 — tentativa isolada de E2E Android da turma
 
