@@ -20,6 +20,14 @@ class AppConfig {
     'JOURNEY_TRACEABILITY_ENABLED',
   );
 
+  /// Enables contextual attempts for question/quiz blocks from immutable
+  /// published course versions. Keep disabled until the matching API flag and
+  /// the Wave 2B acceptance gate are active.
+  static const dynamicActivityEnabled = bool.fromEnvironment(
+    'DYNAMIC_ACTIVITY_ENABLED',
+    defaultValue: false,
+  );
+
   /// QA-only seam for Issue #139 while the HTTP contract from #138 is not
   /// available. It is false by default and must never be enabled in production.
   static const classLifecycleFakeEnabled = bool.fromEnvironment(

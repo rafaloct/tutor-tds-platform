@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from .auth import AuthService, RegisterRequest, access_claims
 from .context_memberships import bind_student, membership_id
-from .classroom_policy import require_available_seat
+from .classroom_policy import DEFAULT_CLASS_CAPACITY, active_occupancy, capacity_warning
 from .models import (ClassEnrollment, Classroom, CohortMembership, Enrollment,
                      OperatorCommandReceipt, Program, ProgramCourse,
                      ProgramMembership, StudentBaseline, User)
@@ -127,11 +127,15 @@ def snapshot(session, classroom, program, person):
     history = session.scalars(select(OperatorCommandReceipt).where(
         OperatorCommandReceipt.subject_id == person.id, OperatorCommandReceipt.class_id == classroom.id)
         .order_by(OperatorCommandReceipt.revision.desc()).limit(100)).all()
+    occupancy = active_occupancy(session, classroom.id)
     return {"person": {"id": person.id, "name": person.name}, "scope": scope_of(classroom, program),
             "revision": revision(session, program.id, person.id),
             "enrolled": enrollment is not None and enrollment.status == "active",
             "assigned": link is not None and link.status == "active" and bound is not None and bound.status == "active",
             "baseline_linked": baseline is not None,
+            "capacity": {"limit": DEFAULT_CLASS_CAPACITY, "occupancy": occupancy,
+                         "warning": occupancy >= DEFAULT_CLASS_CAPACITY,
+                         "policy": "soft_alert"},
             "history_ids": [item.id for item in history]}
 
 
@@ -218,17 +222,12 @@ def execute(class_id: str, payload: Command, request: Request, claims=Depends(ac
                 person = require_person(session, request, program.id, claims["sub"], payload.person_id, payload.identity_proof)
                 if payload.expected_revision != revision(session, program.id, person.id):
                     raise HTTPException(409, "Outra operação alterou os vínculos; consulte novamente.")
-                actor_membership = session.get(
-                    ProgramMembership, (claims["sub"], program.id)
-                )
                 receipt_action = mutate(
                     session,
                     classroom,
                     program,
                     person,
                     payload.action,
-                    actor_membership=actor_membership,
-                    reason=payload.reason,
                 )
             receipt = OperatorCommandReceipt(id=payload.id, actor_id=claims["sub"], subject_id=person.id,
                 program_id=program.id, class_id=class_id, revision=revision(session, program.id, person.id)+1,
@@ -244,16 +243,7 @@ def execute(class_id: str, payload: Command, request: Request, claims=Depends(ac
             raise HTTPException(409, "Conflito de cadastro ou operação. Consulte novamente.") from None
 
 
-def mutate(
-    session,
-    classroom,
-    program,
-    person,
-    action,
-    *,
-    actor_membership=None,
-    reason=None,
-):
+def mutate(session, classroom, program, person, action):
     member = session.get(ProgramMembership, (person.id, program.id))
     if member is not None and member.status != "active":
         raise HTTPException(409, "Vínculo de programa inativo exige revisão específica.")
@@ -284,14 +274,9 @@ def mutate(
             )
         ):
             raise HTTPException(409, "Linhagem divergente.")
-        capacity_override = False
+        over_capacity = False
         if link is None or link.status != "active":
-            capacity_override = require_available_seat(
-                session,
-                classroom,
-                actor_membership=actor_membership,
-                reason=reason,
-            )
+            over_capacity = capacity_warning(session, classroom)
         if link is None:
             link = ClassEnrollment(class_id=classroom.id, user_id=person.id, enrollment_id=enrollment.id,
                 program_id=program.id, course_id=classroom.course_id, status="active")
@@ -302,7 +287,7 @@ def mutate(
         except ValueError:
             raise HTTPException(409, "Edição ou vínculo inconsistente.") from None
         session.flush()
-        return "assign_capacity_override" if capacity_override else "assign"
+        return "assign_capacity_warning" if over_capacity else "assign"
     else:
         if link is None:
             raise HTTPException(409, "Vínculo não existe.")

@@ -225,6 +225,7 @@ class ReleaseReadinessVerifier {
       'LEARNING_CONTEXT_ENABLED': false,
       'DURABLE_LEARNING_OUTBOX_ENABLED': false,
       'JOURNEY_TRACEABILITY_ENABLED': false,
+      'DYNAMIC_ACTIVITY_ENABLED': false,
       'SIGNED_SUPPORT_IDENTITY': false,
       'PUSH_NOTIFICATIONS_ENABLED': false,
     };

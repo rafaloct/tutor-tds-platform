@@ -51,18 +51,27 @@ try {
     Require ($LASTEXITCODE -eq 0 -and $remote.Count -eq 1 -and ($remote[0] -split '\s+')[0] -eq $commit) 'branch remota diverge do commit local.'
     $remoteTags = @(& git ls-remote --tags origin "refs/tags/$($tags[0])" "refs/tags/$($tags[0])^{}")
     Require ($LASTEXITCODE -eq 0 -and @($remoteTags | Where-Object { ($_ -split '\s+')[0] -eq $commit }).Count -ge 1) 'tag de release ainda não está no GitHub.'
+    $localSchema = Get-CanonicalAlembicHead
+    $apiTree = (& git rev-parse 'HEAD:api').Trim()
+    Require ($LASTEXITCODE -eq 0 -and $apiTree -match '^[a-f0-9]{40}$') 'árvore Git da API candidata não identificada.'
     $restorePath = Join-Path $workspace 'docs/production/evidence/production-restore-acceptance.json'
     Require (Test-Path -LiteralPath $restorePath) 'backup/restauração de produção não comprovados.'
     $proof = Get-Content -LiteralPath $restorePath -Raw | ConvertFrom-Json
     try { Assert-ProductionRecoveryEvidence $proof | Out-Null }
     catch { throw 'PRODUCTION_RELEASE_READY=false: prova de recuperação/compatibilidade incompleta.' }
+    Run 'python' @(
+        (Join-Path $PSScriptRoot 'verify_production_recovery_evidence.py'),
+        '--acceptance', $restorePath,
+        '--evidence-dir', (Join-Path $workspace 'docs/production/evidence'),
+        '--expected-schema', $localSchema,
+        '--expected-api-tree', $apiTree
+    )
     $health = Invoke-RestMethod -Uri "$expectedApi/health" -TimeoutSec 15
     Require ($health.status -eq 'ok' -and $health.database -eq 'available') 'health de produção sem banco disponível.'
     $version = Invoke-RestMethod -Uri "$expectedApi/version" -TimeoutSec 15
     Require ($version.environment -eq 'production' -and $version.schema_version -and
         $version.minimum_supported_app_version -and $version.compatibility_verified -eq $true) 'versão/schema/compatibilidade da API de produção não comprovados.'
     Require ($version.api_version -and $config.TUTOR_API_URL -eq $expectedApi) 'proveniência da API de produção divergente.'
-    $localSchema = Get-CanonicalAlembicHead
     Require ($version.schema_version -eq $localSchema) 'revision de produção diverge do HEAD Alembic.'
     try {
         Assert-ProductionBackendIdentity -VersionResponse $version -ExpectedSchemaVersion $localSchema `
@@ -82,7 +91,18 @@ try {
     try {
         Run $Flutter @('analyze', '--no-pub')
         Run $Flutter @('test', '--no-pub')
-        Run $Flutter @('build', 'appbundle', '--release', '--no-pub', '--dart-define-from-file=config/production.json')
+        $lockPath = Join-Path $appRoot 'pubspec.lock'
+        Require (Test-Path -LiteralPath $lockPath) 'pubspec.lock ausente.'
+        $lockBefore = (Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash
+        Run $Flutter @('pub', 'get', '--enforce-lockfile')
+        Require ((Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash -eq $lockBefore) 'pubspec.lock divergiu no pub get.'
+        # Release must regenerate platform tooling after tests. With --no-pub,
+        # a stale GeneratedPluginRegistrant.java can retain dev-only plugins
+        # that Gradle correctly excludes from the release classpath.
+        Run $Flutter @('build', 'appbundle', '--release', '--dart-define-from-file=config/production.json')
+        Require ((Get-FileHash -LiteralPath $lockPath -Algorithm SHA256).Hash -eq $lockBefore) 'pubspec.lock mudou durante o build.'
+        $postBuildDirty = @(& git status --porcelain=v1 -uall)
+        Require ($LASTEXITCODE -eq 0 -and $postBuildDirty.Count -eq 0) 'working tree mudou durante o build.'
         $artifact = Join-Path $appRoot 'build/app/outputs/bundle/release/app-release.aab'
         Require (Test-Path -LiteralPath $artifact) 'AAB não encontrado após build.'
         $manifest = [ordered]@{

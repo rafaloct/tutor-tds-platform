@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cartilhas_app/features/operations/operations_controller.dart';
+import 'package:cartilhas_app/features/operations/operations_models.dart';
 import 'package:cartilhas_app/features/operations/operations_screen.dart';
 import 'fake_operations_gateway.dart';
 
@@ -62,6 +63,30 @@ void main() {
   Finder field(String label) => find.byWidgetPredicate(
     (widget) => widget is TextField && widget.decoration?.labelText == label,
   );
+
+  testWidgets('avisa o operador antes do vínculo acima de 30', (tester) async {
+    gateway.records['${scopeA.classId}/synthetic-person'] = OperationSnapshot(
+      person: gateway.people.first,
+      scope: scopeA,
+      revision: 1,
+      enrolled: true,
+      assigned: false,
+      baselineLinked: false,
+      history: const [],
+      capacityOccupancy: 30,
+      capacityWarning: true,
+    );
+    await open(tester);
+    await tester.enterText(field('Buscar pessoa'), 'Pessoa');
+    await tap(tester, 'Localizar');
+    await tap(tester, 'Pessoa teste');
+    final warning = find.textContaining('Aviso de capacidade: 30');
+    await tester.scrollUntilVisible(warning, 180, scrollable: verticalScroll());
+    expect(warning, findsOneWidget);
+    final assign = find.widgetWithText(FilledButton, 'Vincular à turma');
+    await tester.scrollUntilVisible(assign, 180, scrollable: verticalScroll());
+    expect(assign, findsOneWidget);
+  });
 
   Future<void> revealField(WidgetTester tester, String label) async {
     final target = field(label);

@@ -25,6 +25,8 @@ class RemoteClasses implements LearnerClassroomGateway {
   String version = 'version-1';
   String contentVersion = 'version-1';
   String classStatus = 'active';
+  bool exposeAnswerKey = false;
+  bool exposeOptionValue = false;
   Future<void> Function()? duringCourse;
   @override
   Future<AuthUser> currentUser() async {
@@ -81,7 +83,27 @@ class RemoteClasses implements LearnerClassroomGateway {
         Section(
           id: 'module',
           title: 'Module',
-          messages: [Message(type: 'bot', content: 'Exact snapshot')],
+          messages: exposeAnswerKey || exposeOptionValue
+              ? [
+                  Message(
+                    type: 'quiz',
+                    content: 'Pergunta protegida',
+                    feedback: exposeAnswerKey ? 'Gabarito privado' : null,
+                    options: [
+                      Option(
+                        label: 'A',
+                        value: exposeOptionValue ? 'valor-privado-A' : null,
+                        isCorrect: exposeAnswerKey ? true : null,
+                      ),
+                      Option(
+                        label: 'B',
+                        value: exposeOptionValue ? 'valor-privado-B' : null,
+                        isCorrect: exposeAnswerKey ? false : null,
+                      ),
+                    ],
+                  ),
+                ]
+              : [Message(type: 'bot', content: 'Exact snapshot')],
         ),
       ],
     );
@@ -93,13 +115,16 @@ void main() {
   late LocalIdentity auth;
   late RemoteClasses remote;
   late DateTime now;
-  LearnerOfflineRepository repo({String url = 'https://api.example/staging'}) =>
-      LearnerOfflineRepository(
-        remote: remote,
-        auth: auth,
-        apiUrl: url,
-        clock: () => now,
-      );
+  LearnerOfflineRepository repo({
+    String url = 'https://api.example/staging',
+    bool dynamicActivityEnabled = false,
+  }) => LearnerOfflineRepository(
+    remote: remote,
+    auth: auth,
+    apiUrl: url,
+    dynamicActivityEnabled: dynamicActivityEnabled,
+    clock: () => now,
+  );
   Future<LearnerOfflineRepository> saved() async {
     final gateway = repo();
     await gateway.currentUser();
@@ -140,6 +165,68 @@ void main() {
       expect(course.legacyProgressCompatible, isFalse);
       expect(course.sections.single.messages.single.content, 'Exact snapshot');
       expect(reopened.usingSavedData, isTrue);
+    },
+  );
+
+  test(
+    'modo dinâmico não reutiliza cache v1; flag desligada preserva Wave 2A',
+    () async {
+      await saved();
+      remote.offline = true;
+
+      final legacy = repo();
+      expect((await legacy.currentUser()).id, 'student-a');
+      expect((await legacy.learnerClassrooms()).single.id, 'class');
+      expect((await legacy.course('class')).id, 'course');
+
+      final protected = repo(dynamicActivityEnabled: true);
+      await expectLater(protected.currentUser(), throwsA(isA<AuthException>()));
+      expect(
+        (await SharedPreferences.getInstance()).getKeys().single,
+        startsWith('classroom_private:v1:'),
+      );
+
+      remote.offline = false;
+      final refreshed = repo(dynamicActivityEnabled: true);
+      await refreshed.currentUser();
+      await refreshed.learnerClassrooms();
+      await refreshed.course('class');
+      expect(
+        (await SharedPreferences.getInstance()).getKeys(),
+        containsAll(<Matcher>[
+          startsWith('classroom_private:v1:'),
+          startsWith('classroom_private:v2:'),
+        ]),
+      );
+    },
+  );
+
+  test('modo dinâmico recusa resposta online com gabarito de aluno', () async {
+    remote.exposeAnswerKey = true;
+    final protected = repo(dynamicActivityEnabled: true);
+    await protected.currentUser();
+    await protected.learnerClassrooms();
+
+    await expectLater(
+      protected.course('class'),
+      throwsA(isA<ClassroomException>()),
+    );
+    expect((await SharedPreferences.getInstance()).getKeys(), isEmpty);
+  });
+
+  test(
+    'modo dinâmico recusa option.value removido da projeção learner',
+    () async {
+      remote.exposeOptionValue = true;
+      final protected = repo(dynamicActivityEnabled: true);
+      await protected.currentUser();
+      await protected.learnerClassrooms();
+
+      await expectLater(
+        protected.course('class'),
+        throwsA(isA<ClassroomException>()),
+      );
+      expect((await SharedPreferences.getInstance()).getKeys(), isEmpty);
     },
   );
 

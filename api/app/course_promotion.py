@@ -23,7 +23,7 @@ from .database import Database
 from .models import Course, CourseVersion, CourseVersionTransition, Program, ProgramCourse, ProgramMembership, User
 
 MANIFEST_KEYS = {"schema_version", "course_id", "version_id", "version_number", "content", "sha256"}
-CONTENT_KEYS = {"id", "title", "author", "sections", "downloadUrl", "thumbnailUrl"}
+CONTENT_KEYS = {"id", "title", "author", "sections", "downloadUrl", "thumbnailUrl", "course_version_id"}
 SECTION_KEYS = {"id", "version_id", "title", "messages"}
 MESSAGE_KEYS = {"id", "version_id", "type", "content", "options", "feedback", "explanation"}
 OPTION_KEYS = {"label", "value", "isCorrect", "feedback"}
@@ -62,6 +62,8 @@ def verify_manifest(manifest: Any, expected_digest: str) -> dict[str, Any]:
     _only_keys(content, CONTENT_KEYS, "Curso")
     if content.get("id") != manifest["course_id"]:
         raise ValueError("course_id difere do ID do snapshot.")
+    if "course_version_id" in content and content["course_version_id"] != manifest["version_id"]:
+        raise ValueError("course_version_id difere do ID da versão exportada.")
     for field in ("title", "author"):
         if not isinstance(content.get(field), str) or not content[field].strip() or len(content[field]) > 240:
             raise ValueError(f"{field} inválido no snapshot.")

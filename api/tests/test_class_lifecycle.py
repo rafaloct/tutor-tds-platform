@@ -15,9 +15,12 @@ from app.context_memberships import bind_student
 from app.models import (
     CertificateReference,
     ClassEnrollment,
+    ClassMonitor,
     Classroom,
     ClassroomCommandReceipt,
     ClassSession,
+    CohortMembership,
+    CourseVersion,
     Enrollment,
     EvidenceItem,
     OperatorCommandReceipt,
@@ -51,6 +54,7 @@ def prepare_payload(**overrides):
         "institution_id": "i1",
         "program_id": "p1",
         "course_id": "course",
+        "version_id": "v2",
         "teacher_id": "teacher",
         "monitor_ids": ["monitor"],
         "name": "Turma Palmas Centro",
@@ -109,7 +113,9 @@ def test_feature_flag_fail_closed_and_options_are_scoped(requests_api):
     assert row["course_id"] == "course"
     assert row["course_version_id"] == "v2"
     assert row["role"] == "coordinator"
-    assert row["can_override_capacity"] is True
+    assert row["can_activate"] is True
+    assert row["can_close"] is True
+    assert row["can_override_capacity"] is False
 
     for actor in ("teacher", "monitor", "learner"):
         assert client.get(
@@ -207,6 +213,34 @@ def test_legacy_admin_routes_remain_compatible_when_lifecycle_flag_is_off(
     assert strict_monitor.status_code == 409
 
 
+@pytest.mark.parametrize("lifecycle_enabled", [False, True])
+def test_legacy_admin_cannot_add_monitor_to_closed_class(
+    requests_api, lifecycle_enabled
+):
+    client, engine = requests_api
+    # Closed classrooms reject new team links on every write path, regardless
+    # of whether the contextual lifecycle is enabled.
+    client.app.state.settings = replace(
+        client.app.state.settings,
+        class_lifecycle_enabled=lifecycle_enabled,
+    )
+    response = client.post(
+        "/admin/classes/c1/monitors/monitor",
+        headers=header("admin"),
+    )
+    assert response.status_code == 409
+    assert "monitores" in response.json()["detail"]
+    with Session(engine) as session:
+        assert session.get(ClassMonitor, ("c1", "monitor")) is None
+        assert not session.scalars(
+            select(CohortMembership).where(
+                CohortMembership.class_id == "c1",
+                CohortMembership.user_id == "monitor",
+                CohortMembership.role == "monitor",
+            )
+        ).all()
+
+
 def test_team_candidates_and_manageable_classes_are_contextual(lifecycle_api):
     client, _ = lifecycle_api
 
@@ -290,6 +324,17 @@ def test_team_candidates_and_manageable_classes_are_contextual(lifecycle_api):
 
 def test_prepare_pins_published_version_separates_territory_and_replays(lifecycle_api):
     client, engine = lifecycle_api
+    operator_options = client.get(
+        "/operations/classes/options", headers=header("other")
+    )
+    assert operator_options.status_code == 200
+    operator_row = operator_options.json()["options"][0]
+    assert operator_row["role"] == "program_operator"
+    assert operator_row["can_prepare"] is True
+    assert operator_row["can_activate"] is True
+    assert operator_row["can_close"] is True
+    assert operator_row["can_override_capacity"] is False
+
     response, body = prepare(client, actor="other")
     assert response.status_code == 201, response.text
     result = response.json()
@@ -306,10 +351,13 @@ def test_prepare_pins_published_version_separates_territory_and_replays(lifecycl
         "occupancy": 0,
         "remaining": 30,
         "over_capacity": False,
+        "policy": "soft_alert",
+        "warning": False,
         "exception": None,
     }
     assert result["capabilities"]["role"] == "program_operator"
-    assert result["capabilities"]["can_activate"] is False
+    assert result["capabilities"]["can_activate"] is True
+    assert result["capabilities"]["can_close"] is False
     assert result["readiness"]["activation_blockers"] == []
     assert result["history"][0]["action"] == "prepare"
 
@@ -354,6 +402,39 @@ def test_prepare_pins_published_version_separates_territory_and_replays(lifecycl
         assert denied.status_code == 403
 
 
+def test_prepare_rejects_changed_published_version_before_creating_class(lifecycle_api):
+    client, engine = lifecycle_api
+    with Session(engine) as session:
+        before_classes = session.scalar(select(func.count()).select_from(Classroom))
+        current = session.get(CourseVersion, "v2")
+        next_version = session.get(CourseVersion, "draft")
+        assert current is not None and next_version is not None
+        next_version.status = "in_review"
+        session.flush()
+        next_version.status = "published"
+        session.flush()
+        current.status = "archived"
+        session.commit()
+
+    stale, _ = prepare(client, actor="other", version_id="v2")
+    assert stale.status_code == 409
+    assert stale.json()["detail"]["code"] == "course_version_changed"
+    with Session(engine) as session:
+        assert session.scalar(select(func.count()).select_from(Classroom)) == before_classes
+        assert session.scalar(
+            select(func.count()).select_from(ClassroomCommandReceipt)
+        ) == 0
+
+    refreshed = client.get(
+        "/operations/classes/options", headers=header("other")
+    )
+    assert refreshed.status_code == 200
+    assert refreshed.json()["options"][0]["course_version_id"] == "draft"
+    confirmed, _ = prepare(client, actor="other", version_id="draft")
+    assert confirmed.status_code == 201, confirmed.text
+    assert confirmed.json()["classroom"]["course_version_id"] == "draft"
+
+
 def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     client, engine = lifecycle_api
     prepared, _ = prepare(client)
@@ -395,18 +476,21 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     result = changed.json()
     assert result["classroom"]["revision"] == 3
 
+    planned_session = client.post(
+        f"/admin/classes/{class_id}/sessions",
+        headers=header("teacher"),
+        json={
+            "starts_at": "2026-10-20T12:00:00Z",
+            "ends_at": "2026-10-20T14:00:00Z",
+        },
+    )
+    assert planned_session.status_code == 409
+
     operator_activate = scoped(result, target_status="active")
-    assert client.post(
+    activated = client.post(
         f"/operations/classes/{class_id}/transition",
         headers=header("other"),
         json=operator_activate,
-    ).status_code == 403
-
-    activate = scoped(result, target_status="active")
-    activated = client.post(
-        f"/operations/classes/{class_id}/transition",
-        headers=header("coordinator"),
-        json=activate,
     )
     assert activated.status_code == 200, activated.text
     result = activated.json()
@@ -415,8 +499,8 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
 
     replay = client.post(
         f"/operations/classes/{class_id}/transition",
-        headers=header("coordinator"),
-        json=activate,
+        headers=header("other"),
+        json=operator_activate,
     )
     assert replay.status_code == 200
     assert replay.json() == result
@@ -506,7 +590,7 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     close = scoped(readiness.json(), target_status="closed")
     blocked_close = client.post(
         f"/operations/classes/{class_id}/transition",
-        headers=header("coordinator"),
+        headers=header("other"),
         json=close,
     )
     assert blocked_close.status_code == 409
@@ -539,7 +623,7 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
 
     closed = client.post(
         f"/operations/classes/{class_id}/transition",
-        headers=header("coordinator"),
+        headers=header("other"),
         json=close,
     )
     assert closed.status_code == 200, closed.text
@@ -549,6 +633,24 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     assert result["classroom"]["course_version_id"] == pinned_version
     assert result["readiness"]["closure_warnings"]["open_sessions"] == 0
     assert result["readiness"]["closure_warnings"]["pending_evidence"] == 1
+
+    for actor in ("teacher2", "admin"):
+        new_session = client.post(
+            f"/admin/classes/{class_id}/sessions",
+            headers=header(actor),
+            json={
+                "starts_at": "2026-10-21T12:00:00Z",
+                "ends_at": "2026-10-21T14:00:00Z",
+            },
+        )
+        assert new_session.status_code == 409
+    with Session(engine) as session:
+        assert session.scalar(
+            select(func.count()).select_from(ClassSession).where(
+                ClassSession.class_id == class_id,
+                ClassSession.status == "open",
+            )
+        ) == 0
 
     reopen = scoped(result, target_status="active")
     assert client.post(
@@ -641,9 +743,7 @@ def _add_student_lineage(session, *, user_id: str, class_id: str, active_link: b
         )
 
 
-def test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited(
-    lifecycle_api,
-):
+def test_capacity_30_warns_without_blocking_scoped_assignments(lifecycle_api):
     client, engine = lifecycle_api
     prepared, _ = prepare(client)
     result = prepared.json()
@@ -665,24 +765,34 @@ def test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited(
                 class_id=class_id,
                 active_link=True,
             )
-        _add_student_lineage(
-            session,
-            user_id="overflow",
-            class_id=class_id,
-            active_link=False,
-        )
-        _add_student_lineage(
-            session,
-            user_id="overflow2",
-            class_id=class_id,
-            active_link=False,
-        )
+        for user_id in ("overflow", "overflow2", "overflow3", "overflow4"):
+            _add_student_lineage(
+                session, user_id=user_id, class_id=class_id, active_link=False
+            )
         session.commit()
+
+    preview = client.get(
+        f"/classes/{class_id}/eligible-students", headers=header("teacher")
+    )
+    assert preview.status_code == 200
+    assert preview.json()["occupancy"] == 30
+    assert preview.json()["capacity_warning"] is True
+    assert preview.json()["capacity_reference"] == 30
+
+    operator_preview = client.post(
+        f"/operations/{class_id}/inspect",
+        headers=header("other"),
+        json={"person_id": "overflow"},
+    )
+    assert operator_preview.status_code == 200
+    assert operator_preview.json()["capacity"] == {
+        "limit": 30, "occupancy": 30, "warning": True, "policy": "soft_alert"
+    }
 
     command_body = {
         "id": str(uuid4()),
         "action": "assign",
-        "reason": "Capacidade padrão atingida",
+        "reason": "Matrícula ativa conferida",
         "institution_id": "i1",
         "program_id": "p1",
         "course_id": "course",
@@ -690,35 +800,58 @@ def test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited(
         "person_id": "overflow",
         "expected_revision": 0,
     }
-    blocked = client.post(
+    assigned = client.post(
         f"/operations/{class_id}/commands",
         headers=header("other"),
         json=command_body,
     )
-    assert blocked.status_code == 409
-    assert "Somente a coordenação" in blocked.json()["detail"]
+    assert assigned.status_code == 200, assigned.text
+    assert assigned.json()["capacity"] == {
+        "limit": 30, "occupancy": 31, "warning": True, "policy": "soft_alert"
+    }
+    assert client.post(
+        f"/operations/{class_id}/commands",
+        headers=header("other"),
+        json=command_body,
+    ).json() == assigned.json()
 
     coordinator_body = command_body | {
         "id": str(uuid4()),
-        "reason": "Exceção aprovada pela coordenação para esta oferta",
+        "person_id": "overflow2",
+        "reason": "Inclusão regular após conferência de matrícula",
     }
-    overridden = client.post(
+    coordinator_assigned = client.post(
         f"/operations/{class_id}/commands",
         headers=header("coordinator"),
         json=coordinator_body,
     )
-    assert overridden.status_code == 200, overridden.text
+    assert coordinator_assigned.status_code == 200, coordinator_assigned.text
+    assert coordinator_assigned.json()["capacity"]["occupancy"] == 32
+
+    admin_added = client.post(
+        f"/admin/classes/{class_id}/students/overflow3",
+        headers=header("admin"),
+    )
+    teacher_added = client.put(
+        f"/classes/{class_id}/students/overflow4",
+        headers=header("teacher"),
+    )
+    assert admin_added.status_code == 201, admin_added.text
+    assert teacher_added.status_code == 200, teacher_added.text
+    assert admin_added.json()["occupancy"] == 33
+    assert teacher_added.json()["occupancy"] == 34
+    assert admin_added.json()["capacity_warning"] is True
+    assert teacher_added.json()["capacity_warning"] is True
 
     with Session(engine) as session:
-        receipt = session.scalar(
-            select(OperatorCommandReceipt).where(
-                OperatorCommandReceipt.subject_id == "overflow"
-            )
-        )
-        assert receipt is not None
-        assert receipt.action == "assign_capacity_override"
-        assert receipt.actor_id == "coordinator"
-        assert receipt.reason == coordinator_body["reason"]
+        receipts = session.scalars(select(OperatorCommandReceipt).where(
+            OperatorCommandReceipt.subject_id.in_(["overflow", "overflow2"])
+        )).all()
+        assert {receipt.action for receipt in receipts} == {"assign_capacity_warning"}
+        assert {(receipt.actor_id, receipt.reason) for receipt in receipts} == {
+            ("other", command_body["reason"]),
+            ("coordinator", coordinator_body["reason"]),
+        }
         assert session.scalar(
             select(func.count())
             .select_from(ClassEnrollment)
@@ -726,7 +859,7 @@ def test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited(
                 ClassEnrollment.class_id == class_id,
                 ClassEnrollment.status == "active",
             )
-        ) == 31
+        ) == 34
 
     readiness = client.get(
         f"/operations/classes/{class_id}/readiness",
@@ -735,22 +868,35 @@ def test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited(
     assert readiness.status_code == 200
     capacity = readiness.json()["capacity"]
     assert capacity["limit"] == 30
-    assert capacity["occupancy"] == 31
+    assert capacity["occupancy"] == 34
     assert capacity["over_capacity"] is True
-    assert capacity["exception"]["state"] == "authorized"
-    assert capacity["exception"]["actor_id"] == "coordinator"
-    assert capacity["exception"]["reason"] == coordinator_body["reason"]
+    assert capacity["policy"] == "soft_alert"
+    assert capacity["warning"] is True
+    assert capacity["exception"] is None
 
-    admin_bypass = client.post(
-        f"/admin/classes/{class_id}/students/overflow2",
-        headers=header("admin"),
+    # A receipt issued under the former hard-cap policy remains readable.
+    with Session(engine) as session:
+        old_receipt = session.scalar(
+            select(OperatorCommandReceipt).where(
+                OperatorCommandReceipt.subject_id == "overflow"
+            )
+        )
+        assert old_receipt is not None
+        occurred_at = old_receipt.occurred_at.isoformat()
+        old_receipt.action = "assign_capacity_override"
+        session.commit()
+    historical = client.get(
+        f"/operations/classes/{class_id}/readiness",
+        headers=header("coordinator"),
     )
-    teacher_bypass = client.put(
-        f"/classes/{class_id}/students/overflow2",
-        headers=header("teacher"),
-    )
-    assert admin_bypass.status_code == 409
-    assert teacher_bypass.status_code == 409
+    assert historical.status_code == 200
+    assert historical.json()["capacity"]["exception"] == {
+        "state": "authorized",
+        "historical": True,
+        "actor_id": "other",
+        "reason": command_body["reason"],
+        "occurred_at": occurred_at,
+    }
 
     with Session(engine) as session:
         classroom = session.get(Classroom, class_id)

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 class _Roster implements ClassroomRosterGateway {
   bool fail = false;
+  bool capacityWarning = false;
   final queries = <String>[];
   final offsets = <int>[];
 
@@ -25,6 +26,8 @@ class _Roster implements ClassroomRosterGateway {
         ),
       ],
       nextOffset: offset == 0 ? 20 : null,
+      occupancy: capacityWarning ? 30 : 0,
+      capacityWarning: capacityWarning,
     );
   }
 
@@ -51,6 +54,20 @@ void main() {
     studentIds: const [],
     monitorIds: const [],
   );
+
+  testWidgets('mostra aviso de capacidade antes de incluir o 31º aluno', (
+    tester,
+  ) async {
+    await tester.pumpWidget(MaterialApp(
+      home: ClassroomRosterScreen(
+        classroom: classroom,
+        gateway: _Roster()..capacityWarning = true,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('30 é a referência de planejamento'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Incluir na turma'), findsOneWidget);
+  });
 
   testWidgets(
     'busca por nome, carrega próxima página e mantém erro de inclusão',

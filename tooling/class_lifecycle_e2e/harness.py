@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import shutil
 import ssl
 import subprocess
 import sys
@@ -73,7 +75,7 @@ BACKEND_CONTRACTS = (
     (
         "capacity_policy_enforced",
         "tests/test_class_lifecycle.py::"
-        "test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited",
+        "test_capacity_30_warns_without_blocking_scoped_assignments",
     ),
     (
         "closed_class_rejects_new_link",
@@ -199,7 +201,12 @@ def _entry_status(container: dict, key: str, errors: list[str], prefix: str) -> 
         errors.append(f"{prefix}.{key}.evidence must be a list")
 
 
-def validate_manifest(data: dict, *, require_complete: bool) -> list[str]:
+def validate_manifest(
+    data: dict,
+    *,
+    require_complete: bool,
+    expected_heads: dict[str, str] | None = None,
+) -> list[str]:
     errors: list[str] = []
     if data.get("front") != "CLASS_LIFECYCLE_E2E" or data.get("issue") != 140:
         errors.append("manifest identity mismatch")
@@ -207,6 +214,8 @@ def validate_manifest(data: dict, *, require_complete: bool) -> list[str]:
     for label in ("api_head", "app_head", "compose_head"):
         if not SHA_RE.fullmatch(str(data.get(label) or "")):
             errors.append(f"{label} invalid")
+        if expected_heads is not None and data.get(label) != expected_heads[label]:
+            errors.append(f"{label} does not match the requested candidate")
 
     stages = data.get("stages")
     invariants = data.get("invariants")
@@ -243,6 +252,14 @@ def validate_manifest(data: dict, *, require_complete: bool) -> list[str]:
         for invariant in INVARIANTS:
             if invariants.get(invariant, {}).get("status") != "PASS":
                 errors.append(f"invariant not passed: {invariant}")
+        capacity_evidence = invariants.get("capacity_policy_enforced", {}).get(
+            "evidence", []
+        )
+        if (
+            "backend-contract:test_capacity_30_warns_without_blocking_scoped_assignments"
+            not in capacity_evidence
+        ):
+            errors.append("current soft-capacity contract evidence missing")
         if boundary != {
             "request_status": "approved",
             "emitted": False,
@@ -500,7 +517,7 @@ def _manifest_from_execution(
     _pass_entry(
         manifest["invariants"],
         "capacity_policy_enforced",
-        "backend-contract:test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited",
+        "backend-contract:test_capacity_30_warns_without_blocking_scoped_assignments",
     )
 
     if isinstance(boundary, dict):
@@ -531,7 +548,7 @@ def _manifest_from_execution(
         "Shared staging and production were not mutated.",
         "Backend contract suite: 6/6 PASS before Android execution.",
         "Participant residence is an external synthetic QA fixture because the current relational model intentionally does not persist residence; the E2E proves offer municipality remains a separate classroom field and the residence fixture is not copied into the classroom.",
-        "Visual wizard evidence is reused from docs/qa/class-lifecycle-2026-10-05 because PR #144 visual QA already passed and this composition did not change presentation.",
+        "Visual evidence from 2026-10-05 covers the previous wizard only; Android verification of the new activation screen and capacity warning remains separate.",
         "Certificate proof stops at approved request with /certificates still empty; no Worker/KV emission is invoked.",
     ]
     return manifest
@@ -607,99 +624,231 @@ def _execute(args: argparse.Namespace, root: Path) -> int:
         )
         return backend.returncode or 5
 
-    with tempfile.TemporaryDirectory(prefix="tds-class-lifecycle-e2e-") as temp:
-        temp_path = Path(temp)
-        certfile, keyfile = _create_certificate(args, temp_path)
-        database_path = temp_path / "qa.db"
-        database_url = f"sqlite+pysqlite:///{database_path}"
-        server_log = temp_path / "qa-server.log"
+    temp_root = Path(tempfile.mkdtemp(prefix="tds-class-lifecycle-e2e-"))
+    flow_result = 0
+    try:
+        flow_result = _run_isolated_flow(args, root, temp_root)
+    finally:
+        cleanup_error = _cleanup_temp_dir(temp_root)
+    if cleanup_error is not None:
+        print(
+            json.dumps(
+                {
+                    "result": "CLEANUP_FAIL",
+                    "flow_result": flow_result,
+                    "error": cleanup_error,
+                    "retained_path": str(temp_root),
+                }
+            ),
+            file=sys.stderr,
+        )
+        return 8
+    return flow_result
 
-        with server_log.open("w", encoding="utf-8") as log:
-            server = subprocess.Popen(
-                build_server_command(
-                    args,
-                    root=root,
-                    database_url=database_url,
-                    certfile=certfile,
-                    keyfile=keyfile,
-                ),
-                cwd=root,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                text=True,
+
+def _package_inventory(device: str) -> tuple[set[str], str | None]:
+    try:
+        result = subprocess.run(
+            [
+                "adb", "-s", device, "shell",
+                "pm", "list", "packages", "com.tutortds_cartilhas",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return set(), str(exc)
+    if result.returncode != 0:
+        return set(), (result.stderr or "pm list packages failed").strip()
+    return {
+        line.removeprefix("package:").strip()
+        for line in result.stdout.splitlines()
+        if line.startswith("package:")
+    }, None
+
+
+def _collateral_removed(
+    before: set[str],
+    after: set[str],
+    own_package: str,
+) -> list[str]:
+    return sorted(before - after - {own_package})
+
+
+def _stop_server_tree(server: subprocess.Popen) -> None:
+    if server.poll() is not None:
+        return
+    if os.name == "nt":
+        # Windows children may outlive a terminated parent and keep the
+        # inherited log handle open; kill the whole tree before cleanup.
+        subprocess.run(
+            ["taskkill", "/PID", str(server.pid), "/T", "/F"],
+            capture_output=True,
+            check=False,
+        )
+    else:
+        server.terminate()
+    try:
+        server.wait(timeout=8)
+    except subprocess.TimeoutExpired:
+        server.kill()
+        server.wait(timeout=5)
+
+
+def _cleanup_temp_dir(
+    temp: Path,
+    attempts: int = 6,
+    delay: float = 0.5,
+) -> str | None:
+    last_error: OSError | None = None
+    for _ in range(attempts):
+        try:
+            shutil.rmtree(temp)
+        except FileNotFoundError:
+            return None
+        except OSError as exc:
+            last_error = exc
+            time.sleep(delay)
+        else:
+            return None
+    return str(last_error)
+
+
+def _run_isolated_flow(
+    args: argparse.Namespace,
+    root: Path,
+    temp_path: Path,
+) -> int:
+    certfile, keyfile = _create_certificate(args, temp_path)
+    database_path = temp_path / "qa.db"
+    database_url = f"sqlite+pysqlite:///{database_path}"
+    server_log = temp_path / "qa-server.log"
+
+    with server_log.open("w", encoding="utf-8") as log:
+        server = subprocess.Popen(
+            build_server_command(
+                args,
+                root=root,
+                database_url=database_url,
+                certfile=certfile,
+                keyfile=keyfile,
+            ),
+            cwd=root,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        try:
+            _wait_for_server(
+                server,
+                port=_port(args.base_url),
+                log_path=server_log,
             )
-            try:
-                _wait_for_server(
-                    server,
-                    port=_port(args.base_url),
-                    log_path=server_log,
+            packages_before, inventory_error = _package_inventory(args.device)
+            flutter = subprocess.run(
+                build_flutter_command(args),
+                cwd=root / "cartilhas_app",
+                text=True,
+                capture_output=True,
+            )
+            sys.stdout.write(flutter.stdout)
+            sys.stderr.write(flutter.stderr)
+            packages_after, inventory_after_error = _package_inventory(
+                args.device
+            )
+            collateral = (
+                _collateral_removed(
+                    packages_before,
+                    packages_after,
+                    args.package,
                 )
-                flutter = subprocess.run(
-                    build_flutter_command(args),
-                    cwd=root / "cartilhas_app",
-                    text=True,
-                    capture_output=True,
-                )
-                sys.stdout.write(flutter.stdout)
-                sys.stderr.write(flutter.stderr)
-                if flutter.returncode != 0:
-                    server_tail = server_log.read_text(
-                        encoding="utf-8",
-                        errors="replace",
-                    )[-4000:]
-                    print(
-                        json.dumps(
-                            {
-                                "result": "FLUTTER_E2E_FAIL",
-                                "returncode": flutter.returncode,
-                                "qa_server_log_tail": server_tail,
-                            }
-                        ),
-                        file=sys.stderr,
-                    )
-                    return flutter.returncode or 6
-
-                payload = _parse_flutter_marker(
-                    (flutter.stdout or "") + "\n" + (flutter.stderr or "")
-                )
-                manifest = _manifest_from_execution(args, payload)
-                evidence_errors = validate_manifest(
-                    manifest,
-                    require_complete=True,
-                )
-                _write_manifest(args.evidence_output, manifest)
-                if evidence_errors:
-                    print(
-                        json.dumps(
-                            {
-                                "result": "EVIDENCE_REJECTED",
-                                "errors": evidence_errors,
-                            },
-                            indent=2,
-                        ),
-                        file=sys.stderr,
-                    )
-                    return 7
-
+                if inventory_error is None and inventory_after_error is None
+                else []
+            )
+            if flutter.returncode != 0:
+                server_tail = server_log.read_text(
+                    encoding="utf-8",
+                    errors="replace",
+                )[-4000:]
                 print(
                     json.dumps(
                         {
-                            "result": "PASS",
-                            "real_e2e_run": True,
-                            "backend_contracts": len(BACKEND_CONTRACTS),
-                            "manifest_complete": True,
-                            "evidence_output": args.evidence_output,
+                            "result": "FLUTTER_E2E_FAIL",
+                            "returncode": flutter.returncode,
+                            "qa_server_log_tail": server_tail,
+                            "collateral_removed": collateral,
+                            "inventory_errors": [
+                                e
+                                for e in (
+                                    inventory_error,
+                                    inventory_after_error,
+                                )
+                                if e
+                            ],
                         }
-                    )
+                    ),
+                    file=sys.stderr,
                 )
-                return 0
-            finally:
-                server.terminate()
-                try:
-                    server.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    server.kill()
-                    server.wait(timeout=5)
+                return flutter.returncode or 6
+
+            payload = _parse_flutter_marker(
+                (flutter.stdout or "") + "\n" + (flutter.stderr or "")
+            )
+            manifest = _manifest_from_execution(args, payload)
+            evidence_errors = validate_manifest(
+                manifest,
+                require_complete=True,
+            )
+            _write_manifest(args.evidence_output, manifest)
+            if evidence_errors:
+                print(
+                    json.dumps(
+                        {
+                            "result": "EVIDENCE_REJECTED",
+                            "errors": evidence_errors,
+                        },
+                        indent=2,
+                    ),
+                    file=sys.stderr,
+                )
+                return 7
+
+            if collateral:
+                print(
+                    json.dumps(
+                        {
+                            "result": "COLLATERAL_STATE_CHANGED",
+                            "removed_packages": collateral,
+                            "own_package": args.package,
+                            "inventory_errors": [
+                                e
+                                for e in (
+                                    inventory_error,
+                                    inventory_after_error,
+                                )
+                                if e
+                            ],
+                        }
+                    ),
+                    file=sys.stderr,
+                )
+                return 9
+
+            print(
+                json.dumps(
+                    {
+                        "result": "PASS",
+                        "real_e2e_run": True,
+                        "backend_contracts": len(BACKEND_CONTRACTS),
+                        "manifest_complete": True,
+                        "evidence_output": args.evidence_output,
+                    }
+                )
+            )
+            return 0
+        finally:
+            _stop_server_tree(server)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -728,6 +877,11 @@ def main(argv: list[str] | None = None) -> int:
         evidence_errors = validate_manifest(
             data,
             require_complete=args.require_complete,
+            expected_heads={
+                "api_head": args.api_head,
+                "app_head": args.app_head,
+                "compose_head": args.compose_head,
+            },
         )
         if evidence_errors:
             print(

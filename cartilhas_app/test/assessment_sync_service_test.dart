@@ -394,6 +394,50 @@ void main() {
     },
   );
 
+  test('prática concluída continua exigindo gabarito do servidor', () async {
+    final remote = RemoteAssessmentAttempt(
+      attemptId: 'attempt-practice-without-key',
+      payload: AssessmentSyncPayload.fromJson({
+        ..._payload(revision: 4, answers: const {'0': 2}),
+        'assessment_content_id': 'content:practice-without-key',
+        'completed': true,
+        'remaining_seconds': 0,
+        'score': 1,
+      }),
+    );
+    final service = _service((request) async {
+      expect(
+        request.url.path,
+        '/assessment-attempts/attempt-practice-without-key/content',
+      );
+      return http.Response(
+        jsonEncode({
+          'assessment_content_id': 'content:practice-without-key',
+          'course_id': 'course-1',
+          'topic': 'Cooperativismo',
+          'mode': 'exam',
+          'title': 'Simulado remoto',
+          'duration_seconds': 600,
+          'questions': [
+            {
+              'question': 'Questão?',
+              'options': ['A', 'B', 'C'],
+              'topic': 'Cooperativismo',
+            },
+          ],
+          'answer_key': null,
+          'created_at': '2026-09-20T15:25:00.000Z',
+        }),
+        200,
+      );
+    });
+
+    await expectLater(
+      service.hydrateRemoteAttempt(remote),
+      throwsA(isA<AssessmentSyncConflictException>()),
+    );
+  });
+
   test(
     'legado sem assessment_content_id é informado sem chamada insegura',
     () async {

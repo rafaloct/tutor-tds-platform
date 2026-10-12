@@ -112,6 +112,11 @@ class _CloseClassroomScreenState extends State<CloseClassroomScreen> {
                 .toList(growable: false),
             onChanged: _controller.busy ? null : _controller.selectClass,
           ),
+          TextButton.icon(
+            onPressed: _controller.busy ? null : _controller.refreshReadiness,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Atualizar prontidão'),
+          ),
           if (_controller.busy) ...[
             const SizedBox(height: 14),
             const LinearProgressIndicator(),
@@ -204,17 +209,20 @@ class _CloseClassroomScreenState extends State<CloseClassroomScreen> {
                     'Você pode acompanhar a readiness, mas o servidor não liberou o encerramento.',
               )
             else ...[
-              TextFormField(
-                key: const Key('close_reason'),
-                initialValue: _controller.closeReason,
-                enabled: readiness.canClose && !_controller.busy,
-                decoration: const InputDecoration(
-                  labelText: 'Motivo do encerramento',
-                  hintText: 'Ex.: atividades concluídas e evidências revisadas',
-                  prefixIcon: Icon(Icons.notes_outlined),
+              KeyedSubtree(
+                key: ValueKey('close-reason-${_controller.selectedClassId}'),
+                child: TextFormField(
+                  key: const Key('close_reason'),
+                  initialValue: _controller.closeReason,
+                  enabled: readiness.canClose && !_controller.busy,
+                  decoration: const InputDecoration(
+                    labelText: 'Motivo do encerramento',
+                    hintText: 'Ex.: atividades concluídas e evidências revisadas',
+                    prefixIcon: Icon(Icons.notes_outlined),
+                  ),
+                  maxLines: 3,
+                  onChanged: _controller.setCloseReason,
                 ),
-                maxLines: 3,
-                onChanged: _controller.setCloseReason,
               ),
               const SizedBox(height: 8),
               CheckboxListTile(
@@ -231,6 +239,7 @@ class _CloseClassroomScreenState extends State<CloseClassroomScreen> {
               ),
               const SizedBox(height: 8),
               FilledButton.icon(
+                key: const Key('close_classroom_action'),
                 onPressed: _controller.canSubmit
                     ? () => _confirmAndClose(context)
                     : null,
@@ -252,12 +261,15 @@ class _CloseClassroomScreenState extends State<CloseClassroomScreen> {
   }
 
   Future<void> _confirmAndClose(BuildContext context) async {
+    final classId = _controller.selectedClassId;
+    final className = _controller.readiness?.classroomName;
+    if (classId == null || className == null) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Confirmar encerramento'),
-        content: const Text(
-          'Esta ação encerra a turma institucionalmente. Ela não emite certificados.',
+        content: Text(
+          'Encerrar "$className" institucionalmente? Esta ação não emite certificados.',
         ),
         actions: [
           TextButton(
@@ -271,7 +283,9 @@ class _CloseClassroomScreenState extends State<CloseClassroomScreen> {
         ],
       ),
     );
-    if (confirmed == true) {
+    if (confirmed == true &&
+        mounted &&
+        _controller.selectedClassId == classId) {
       await _controller.submit();
     }
   }

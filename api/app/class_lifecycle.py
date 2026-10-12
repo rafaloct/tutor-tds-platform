@@ -49,6 +49,7 @@ class PrepareClassCommand(BaseModel):
     institution_id: str = Field(min_length=1, max_length=36)
     program_id: str = Field(min_length=1, max_length=36)
     course_id: str = Field(min_length=1, max_length=120)
+    version_id: str = Field(min_length=1, max_length=36)
     teacher_id: str = Field(min_length=1, max_length=36)
     monitor_ids: list[str] = Field(default_factory=list)
     name: str = Field(min_length=2, max_length=240)
@@ -388,17 +389,18 @@ def _capacity_snapshot(session: Session, classroom: Classroom) -> dict[str, obje
     if occupancy > DEFAULT_CLASS_CAPACITY and override is not None:
         exception = {
             "state": "authorized",
+            "historical": True,
             "actor_id": override.actor_id,
             "reason": override.reason,
             "occurred_at": override.occurred_at.isoformat(),
         }
-    elif occupancy > DEFAULT_CLASS_CAPACITY:
-        exception = {"state": "audit_missing"}
     return {
         "limit": DEFAULT_CLASS_CAPACITY,
         "occupancy": occupancy,
         "remaining": max(0, DEFAULT_CLASS_CAPACITY - occupancy),
         "over_capacity": occupancy > DEFAULT_CLASS_CAPACITY,
+        "policy": "soft_alert",
+        "warning": occupancy >= DEFAULT_CLASS_CAPACITY,
         "exception": exception,
     }
 
@@ -477,13 +479,13 @@ def _snapshot(
             and classroom.status != "closed"
             or operator
             and classroom.status == "planned",
-            "can_activate": coordinator
+            "can_activate": (operator or coordinator)
             and classroom.status == "planned"
             and not blockers,
-            "can_close": coordinator
+            "can_close": (operator or coordinator)
             and classroom.status == "active"
             and not closure_blockers,
-            "can_override_capacity": coordinator,
+            "can_override_capacity": False,
         },
         "history": _history(session, classroom),
     }
@@ -571,9 +573,9 @@ def options(
                     "version_number": version.version_number if version else None,
                     "role": membership.role,
                     "can_prepare": True,
-                    "can_activate": membership.role == "coordinator",
-                    "can_close": membership.role == "coordinator",
-                    "can_override_capacity": membership.role == "coordinator",
+                    "can_activate": True,
+                    "can_close": True,
+                    "can_override_capacity": False,
                 }
             )
         return {"options": items}
@@ -705,7 +707,11 @@ def prepare_class(
                 status_code=422,
                 detail="Curso não é ofertado por este programa.",
             )
-        course = session.get(Course, payload.course_id)
+        # Publishing also locks this row. Compare the reviewed version while
+        # holding the same lock, before any classroom or receipt is created.
+        course = session.scalar(
+            select(Course).where(Course.id == payload.course_id).with_for_update()
+        )
         if course is None or not course.active:
             raise HTTPException(
                 status_code=422,
@@ -718,6 +724,14 @@ def prepare_class(
             raise HTTPException(
                 status_code=409,
                 detail="Curso não possui versão publicada.",
+            )
+        if version.id != payload.version_id:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "course_version_changed",
+                    "message": "A edição publicada mudou. Confira e selecione a formação novamente.",
+                },
             )
         _validate_team(
             session,
@@ -902,10 +916,10 @@ def transition_class(
         )
         if replay is not None:
             return replay.result
-        if membership.role != "coordinator":
+        if membership.role not in {"program_operator", "coordinator"}:
             raise HTTPException(
                 status_code=403,
-                detail="Somente a coordenação pode ativar ou encerrar turmas.",
+                detail="Ator não autorizado para ativar ou encerrar turmas.",
             )
         if payload.target_status == "active":
             if classroom.status != "planned":

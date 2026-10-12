@@ -37,3 +37,15 @@ def test_sheets_workers_have_outbound_network_without_database_exposure() -> Non
         database_block = compose.split(f'  {database}:\n', 1)[1].split('\n  api', 1)[0]
         assert 'sheets-egress' not in database_block
         assert 'ports:' not in database_block
+
+
+def test_staging_api_persists_certificate_candidate_environment_contract() -> None:
+    compose = (API_ROOT / "docker-compose.staging.yml").read_text(encoding="utf-8")
+    api_block = compose.split("  api-staging:\n", 1)[1].split("\n  sync-worker-staging:", 1)[0]
+
+    assert "CERTIFICATE_CANDIDATE_ENABLED: ${STAGING_CERTIFICATE_CANDIDATE_ENABLED:-false}" in api_block
+    assert "CERTIFICATE_CANDIDATE_URL: ${STAGING_CERTIFICATE_CANDIDATE_URL:-}" in api_block
+    assert "CERTIFICATE_CANDIDATE_SECRET: ${STAGING_CERTIFICATE_CANDIDATE_SECRET:-}" in api_block
+
+    worker_block = compose.split("  sync-worker-staging:\n", 1)[1].split("\n  policy-web:", 1)[0]
+    assert "CERTIFICATE_CANDIDATE_SECRET" not in worker_block

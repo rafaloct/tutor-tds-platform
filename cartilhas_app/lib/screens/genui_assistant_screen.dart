@@ -12,6 +12,7 @@ import '../widgets/linkify_text.dart';
 import '../widgets/responsive_body.dart';
 import '../widgets/tds_wait_experience.dart';
 import '../widgets/tutor_conversation_starter.dart';
+import '../widgets/tutor_message_text.dart';
 import '../widgets/tutor_response_card.dart';
 import 'guide_screen.dart';
 import '../features/analytics/app_telemetry_service.dart';
@@ -27,11 +28,16 @@ class GenUIAssistantScreen extends StatefulWidget {
   final String? contextLabel;
   final TutorLearningContext? learningContext;
 
+  /// Injetável em testes para observar o texto exato enviado à fala sem
+  /// tocar no plugin flutter_tts (canal de plataforma).
+  final Future<void> Function(String text)? speaker;
+
   const GenUIAssistantScreen({
     super.key,
     this.initialContext = '',
     this.contextLabel,
     this.learningContext,
+    this.speaker,
   });
 
   @override
@@ -75,8 +81,12 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   }
 
   Future<void> _initTts() async {
-    await _tts.setLanguage('pt-BR');
-    await _tts.setSpeechRate(0.5);
+    try {
+      await _tts.setLanguage('pt-BR');
+      await _tts.setSpeechRate(0.5);
+    } on Exception {
+      // TTS é opcional: ausência do plugin/serviço não bloqueia o chat.
+    }
   }
 
   Future<void> _initSpeech() async {
@@ -105,8 +115,13 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
   }
 
   Future<void> _speak(String text) async {
+    final speaker = widget.speaker;
+    if (speaker != null) {
+      await speaker(tutorPlainText(text));
+      return;
+    }
     await _tts.stop();
-    await _tts.speak(text);
+    await _tts.speak(tutorPlainText(text));
   }
 
   Future<void> _startListening() async {
@@ -264,9 +279,12 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
     );
   }
 
+  String? _lastQuestion;
+
   void _sendMessage([String? message, bool hidden = false]) async {
     final text = message ?? _controller.text.trim();
     if (text.isEmpty || !mounted || _isLoading) return;
+    _lastQuestion = text;
 
     final telemetry = Provider.of<AppTelemetryService?>(context, listen: false);
     if (telemetry?.journeyEnabled == true) {
@@ -281,17 +299,34 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
     _scrollToBottom();
 
     final service = context.read<AnythingLLMService>();
-    final response = await service.getChatResponse(
+    final result = await service.getChatResponse(
       text,
       mode: _chatMode == 'Minha Realidade' ? 'adaptive' : 'tutor',
       context: widget.learningContext == null ? widget.initialContext : null,
       learningContext: widget.learningContext,
     );
-    _processResponse(response);
+    _processResponse(result);
   }
 
-  void _processResponse(String response) {
+  void _retryLastQuestion() {
+    final question = _lastQuestion;
+    if (question == null || _isLoading) return;
+    _sendMessage(question, true);
+  }
+
+  void _processResponse(TutorChatResult result) {
     if (!mounted) return;
+    if (!result.isAnswer) {
+      setState(() {
+        _messages.add(
+          ChatMessage(role: 'bot', text: result.text, isError: true),
+        );
+        _isLoading = false;
+      });
+      _scrollToBottom();
+      return;
+    }
+    final response = result.text;
     try {
       final jsonStart = response.indexOf('{');
       final jsonEnd = response.lastIndexOf('}');
@@ -484,11 +519,17 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
             if (isUser && msg.text != null) LinkifyText(msg.text!),
             if (!isUser && isGreeting && msg.text != null)
               LinkifyText(msg.text!),
-            if (!isUser && !isGreeting && msg.text != null)
+            if (!isUser && msg.isError && msg.text != null)
+              _TutorErrorNotice(
+                message: msg.text!,
+                onRetry: _retryLastQuestion,
+              ),
+            if (!isUser && !isGreeting && !msg.isError && msg.text != null)
               TutorResponseCard(
                 text: msg.text!,
                 contextLabel: widget.contextLabel,
                 onListen: () => _speak(msg.text!),
+                onOpenLink: _launchUrlWithConfirmation,
                 onCreateCards: _openCards,
                 onPracticeQuiz: _openQuiz,
                 onContinue: _focusComposer,
@@ -570,6 +611,53 @@ class _GenUIAssistantScreenState extends State<GenUIAssistantScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Estado de falha do Tutor: a mensagem é anunciada como liveRegion e o botão
+/// de nova tentativa fica em nó irmão, nunca aninhado ao texto do erro.
+class _TutorErrorNotice extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _TutorErrorNotice({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          liveRegion: true,
+          label: 'Erro do Tutor: $message',
+          excludeSemantics: true,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.cloud_off_outlined,
+                size: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  message,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        TextButton.icon(
+          onPressed: onRetry,
+          icon: const Icon(Icons.refresh, size: 18),
+          label: const Text('Tentar novamente'),
+        ),
+      ],
     );
   }
 }

@@ -51,6 +51,7 @@ class _LearningHomeCardState extends State<LearningHomeCard> {
           remote: _remote!,
           auth: auth,
           apiUrl: AppConfig.tutorApiUrl,
+          dynamicActivityEnabled: AppConfig.dynamicActivityEnabled,
         ),
         contexts: _contexts!,
         selection: LocalHomeSelectionRepository(AppConfig.tutorApiUrl),

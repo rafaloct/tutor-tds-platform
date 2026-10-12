@@ -9,7 +9,7 @@ import pytest
 from sqlalchemy import create_engine, event, select, text
 from sqlalchemy.orm import Session
 
-from app.course_editor import snapshot_content
+from app.course_editor import legacy_version_id, snapshot_content
 from app.course_promotion import export_manifest, import_manifest, main, manifest_digest, verify_manifest
 from app.models import CertificateReference, Classroom, Course, CourseVersion, CourseVersionTransition, Institution, Program, ProgramCourse, ProgramMembership, User
 
@@ -18,8 +18,10 @@ def content(course_id="course", body="Conteúdo publicado"):
     return snapshot_content(course_id, "Curso", "Crédito editorial TDS", {"sections": [{"id": "module", "title": "Módulo", "messages": [{"id": "message", "type": "bot", "content": body}]}]})
 
 
-def seed_course(engine, course_id, version_id, number, body, program_id, actor):
+def seed_course(engine, course_id, version_id, number, body, program_id, actor, embedded_version_id=None):
     snapshot = content(course_id, body)
+    if embedded_version_id is not None:
+        snapshot["course_version_id"] = embedded_version_id
     with Session(engine) as session:
         session.add(Course(id=course_id, title=snapshot["title"], author=snapshot["author"], content={"sections": snapshot["sections"]}, active=True))
         session.flush()
@@ -101,6 +103,40 @@ def test_export_is_content_only_and_checksum_detects_tampering(promotion):
     for version_id in ("exported-v2", "draft-v3"):
         with pytest.raises(ValueError, match="publicada"):
             export_manifest(source, "course", version_id)
+
+
+def test_legacy_course_version_id_must_match_exported_version(promotion):
+    source, target, _, kwargs = promotion
+    seed_course(source, "legacy-course", "legacy-v1", 1, "Cartilha legada", "source-program", "source-reviewer", embedded_version_id="legacy-v1")
+    manifest = export_manifest(source, "legacy-course", "legacy-v1")
+    assert manifest["content"]["course_version_id"] == manifest["version_id"]
+    assert verify_manifest(manifest, manifest["sha256"]) == manifest
+    plan = import_manifest(target, manifest, **{**kwargs, "expected_digest": manifest["sha256"]})
+    assert plan["dry_run"] is True and plan["will_create_course"] is True
+
+    mismatched = deepcopy(manifest)
+    mismatched["content"]["course_version_id"] = "old-v1"
+    mismatched["sha256"] = manifest_digest(mismatched)
+    with pytest.raises(ValueError, match="course_version_id"):
+        verify_manifest(mismatched, mismatched["sha256"])
+
+    seed_course(source, "legacy-bad", "legacy-bad-v1", 1, "Cartilha divergente", "source-program", "source-reviewer", embedded_version_id="old-v1")
+    with pytest.raises(ValueError, match="course_version_id"):
+        export_manifest(source, "legacy-bad", "legacy-bad-v1")
+
+
+def test_nine_bundled_legacy_snapshots_keep_exact_course_version_id():
+    lessons = Path(__file__).resolve().parents[2] / "cartilhas_app/assets/data/lessons"
+    paths = sorted(lessons.glob("*.json"))
+    assert len(paths) == 9
+    for path in paths:
+        lesson = json.loads(path.read_text(encoding="utf-8"))
+        version_id = legacy_version_id(lesson["id"])
+        assert lesson["course_version_id"] == version_id
+        snapshot = snapshot_content(lesson["id"], lesson["title"], lesson["author"], lesson, legacy=True)
+        manifest = {"schema_version": 1, "course_id": lesson["id"], "version_id": version_id, "version_number": 1, "content": snapshot}
+        manifest["sha256"] = manifest_digest(manifest)
+        assert verify_manifest(manifest, manifest["sha256"]) == manifest
 
 
 def test_dry_run_default_is_read_only_and_apply_preserves_pinned_history(promotion):

@@ -30,6 +30,12 @@
 | `SYNC_MAX_ATTEMPTS` | limite de tentativas; padrão 3 | Dokploy env |
 | `SYNC_LEASE_SECONDS` | recupera lote abandonado; padrão 300 s | Dokploy env |
 | `CERTIFICATE_VERIFICATION_URL_PREFIX` | prefixo HTTPS autorizado do Worker/KV para registrar referências | Dokploy env |
+| `CERTIFICATE_CANDIDATE_ENABLED` | opt-in do candidato de emissão; deve permanecer `false` no RC enxuto | API staging |
+| `CERTIFICATE_CANDIDATE_URL` | URL HTTPS fixa do Worker candidato, exigida somente quando o opt-in estiver ativo | API staging |
+| `CERTIFICATE_CANDIDATE_SECRET` | segredo HMAC compartilhado com o Worker candidato, exigido somente quando o opt-in estiver ativo | secret staging |
+| `STAGING_CERTIFICATE_CANDIDATE_ENABLED` | valor do host encaminhado para `CERTIFICATE_CANDIDATE_ENABLED`; padrão `false` | Dokploy staging |
+| `STAGING_CERTIFICATE_CANDIDATE_URL` | valor do host encaminhado para a URL candidata; vazio com a flag desligada | Dokploy staging |
+| `STAGING_CERTIFICATE_CANDIDATE_SECRET` | valor do host encaminhado para o HMAC candidato; vazio com a flag desligada | secret Dokploy staging |
 | `STAGING_TRAEFIK_ENABLED` | publica opcionalmente a API staging via Traefik; padrão `false` | Dokploy staging |
 | `STAGING_PUBLIC_HOST` | host HTTPS compartilhado de staging | Dokploy staging |
 | `STAGING_PUBLIC_PATH` | prefixo exclusivo; padrão `/tutor-staging-api` | Dokploy staging |

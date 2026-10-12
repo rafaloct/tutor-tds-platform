@@ -1,0 +1,148 @@
+name: Tutor TDS Cloudflare zero-config Workers
+
+on:
+  pull_request:
+    paths:
+      - cartilhas_app/cloudflare/tutor-tds-gateway/**
+      - tools/ci/**
+      - .github/workflows/tds-cloudflare-worker.yml
+  push:
+    branches: [staging]
+    tags: ['v*']
+    paths:
+      - cartilhas_app/cloudflare/tutor-tds-gateway/**
+      - tools/ci/**
+      - .github/workflows/tds-cloudflare-worker.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tds-worker-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Strict environment mapping and Worker tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 pinned as in existing repo
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify environment isolation and CI config
+        run: |
+          python3 -m unittest discover -s tools/ci -p 'test_*.py' -v
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, 'tools/ci')
+          from tds_env import assert_environment_integrity
+          assert_environment_integrity()
+          print('CLOUDFLARE_ISOLATION_STATIC=PASS')
+          PY
+      - name: Run Worker tests
+        working-directory: cartilhas_app/cloudflare/tutor-tds-gateway
+        run: node --test
+      - name: Compile both Workers without deploying
+        working-directory: cartilhas_app/cloudflare/tutor-tds-gateway
+        run: |
+          npx --yes wrangler@4.147.0 deploy --dry-run --config wrangler.ci.toml --env "" --outdir "$RUNNER_TEMP/cf-production"
+          npx --yes wrangler@4.147.0 deploy --dry-run --config wrangler.ci.toml --env staging --outdir "$RUNNER_TEMP/cf-staging"
+      - name: Audit release tag ancestry
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Not an exact release tag'; exit 2; }
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/staging || {
+            echo 'Refusing deploy: tagged SHA is not an ancestor of staging.' >&2
+            exit 2
+          }
+
+  deploy-staging:
+    name: Deploy staging only
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: tds-worker-staging
+    concurrency:
+      group: tds-worker-deploy-staging
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      STAGING_ORIGIN_READY: ${{ vars.TDS_STAGING_ORIGIN_READY }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: One-time isolated upstream readiness gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$STAGING_ORIGIN_READY" = 'true' || { echo 'STAGING_UNPROVISIONED: set TDS_STAGING_ORIGIN_READY only after isolated AnythingLLM and QA keys are ready.'; exit 3; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Cloudflare staging deploy token absent'; exit 3; }
+          curl --fail --silent --show-error --max-time 15 --retry 2 \
+            https://ia-tutor-staging.ipexdesenvolvimento.cloud/api/v1/ping > /dev/null
+      - name: Verify staging contains no production certificate bindings
+        run: python3 tools/ci/verify_worker_bindings.py staging
+      - name: Publish only the staging Worker
+        working-directory: cartilhas_app/cloudflare/tutor-tds-gateway
+        run: npx --yes wrangler@4.147.0 deploy --config wrangler.ci.toml --env staging
+      - name: HTTPS smoke without inference
+        run: |
+          curl --fail --silent --show-error --max-time 15 \
+            https://tutor-tds-gateway-staging.tdsipex.workers.dev/health > /dev/null
+
+  deploy-production:
+    name: Protected production release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: tds-worker-production
+    concurrency:
+      group: tds-worker-deploy-production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Release freeze / physical evidence gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYGATE'
+          import json
+          from pathlib import Path
+          path = Path('cartilhas_app/release/release_status.json')
+          if not path.is_file():
+              raise SystemExit('Release freeze file absent; production deploy refused')
+          state = json.loads(path.read_text())
+          if state.get('release_build_allowed') is not True:
+              raise SystemExit('Release build has not been approved; production deploy refused')
+          for item in state.get('required_physical_evidence', []):
+              if item.get('required_for_release_build') is True and item.get('status') != 'passed':
+                  raise SystemExit('Physical release gate incomplete; production deploy refused')
+          print('RELEASE_FREEZE_CHECK=PASS')
+          PYGATE
+      - name: Production identity and compatibility gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Cloudflare production deploy token absent'; exit 3; }
+          curl --fail --silent --show-error --max-time 15 \
+            https://ead.ipexdesenvolvimento.cloud/tutor-api/version |
+          python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("environment")=="production" and d.get("compatibility_verified") is True, "Production API is not compatible with the candidate; rollout blocked."'
+      - name: Verify production certificate bindings before deploy
+        run: python3 tools/ci/verify_worker_bindings.py production
+      - name: Publish existing production Worker (keep certificate KV/secrets)
+        working-directory: cartilhas_app/cloudflare/tutor-tds-gateway
+        run: npx --yes wrangler@4.147.0 deploy --config wrangler.ci.toml --env ""
+      - name: HTTPS smoke without inference
+        run: |
+          curl --fail --silent --show-error --max-time 15 \
+            https://tutor-tds-gateway.tdsipex.workers.dev/health > /dev/null

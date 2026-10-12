@@ -147,6 +147,7 @@ void main() {
     {'EXTRA_ENDPOINT': 'https://tutor-tds.local'},
     {'REMOTE_CATALOG_ENABLED': true},
     {'JOURNEY_TRACEABILITY_ENABLED': true},
+    {'DYNAMIC_ACTIVITY_ENABLED': true},
     {'PUSH_NOTIFICATIONS_ENABLED': true},
   ]) {
     test('bloqueia configuração produtiva insegura: ${unsafe.keys.first}', () {
@@ -294,6 +295,7 @@ validateReleaseFreezeState(rootProject.file(
       'LEARNING_CONTEXT_ENABLED': false,
       'DURABLE_LEARNING_OUTBOX_ENABLED': false,
       'JOURNEY_TRACEABILITY_ENABLED': false,
+      'DYNAMIC_ACTIVITY_ENABLED': false,
       'SIGNED_SUPPORT_IDENTITY': false,
       'PUSH_NOTIFICATIONS_ENABLED': false,
     }),

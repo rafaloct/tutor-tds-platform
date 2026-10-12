@@ -12,6 +12,7 @@ class ManagementWorkspaceScreen extends StatelessWidget {
     this.lifecycleCapabilities,
     this.onParticipantsTap,
     this.onPrepareClassTap,
+    this.onActivateClassTap,
     this.onCloseClassTap,
     this.onContentTap,
     this.onTeamTap,
@@ -24,6 +25,7 @@ class ManagementWorkspaceScreen extends StatelessWidget {
   final ClassLifecycleCapabilities? lifecycleCapabilities;
   final VoidCallback? onParticipantsTap;
   final VoidCallback? onPrepareClassTap;
+  final VoidCallback? onActivateClassTap;
   final VoidCallback? onCloseClassTap;
   final VoidCallback? onContentTap;
   final VoidCallback? onTeamTap;
@@ -112,6 +114,13 @@ class ManagementWorkspaceScreen extends StatelessWidget {
                 subtitle:
                     'Definir local, formação, período e equipe em um fluxo guiado.',
                 onTap: onPrepareClassTap,
+              ),
+            if (lifecycleCapabilities?.canActivate ?? false)
+              _ManagementActionCard(
+                icon: Icons.play_circle_outline,
+                title: 'Ativar turma',
+                subtitle: 'Conferir a preparação e iniciar uma turma planejada.',
+                onTap: onActivateClassTap,
               ),
             if (lifecycleCapabilities?.canClose ?? false)
               _ManagementActionCard(

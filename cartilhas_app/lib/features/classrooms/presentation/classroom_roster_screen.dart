@@ -22,6 +22,9 @@ class _ClassroomRosterScreenState extends State<ClassroomRosterScreen> {
   List<EligibleStudent> _students = const [];
   EligibleStudent? _selected;
   int? _nextOffset;
+  int _occupancy = 0;
+  int _capacityReference = 30;
+  bool _capacityWarning = false;
   String _query = '';
   String? _error;
   String? _success;
@@ -63,6 +66,9 @@ class _ClassroomRosterScreenState extends State<ClassroomRosterScreen> {
       setState(() {
         _students = more ? [..._students, ...page.students] : page.students;
         _nextOffset = page.nextOffset;
+        _occupancy = page.occupancy;
+        _capacityReference = page.capacityReference;
+        _capacityWarning = page.capacityWarning;
       });
     } on Object catch (error) {
       if (mounted) {
@@ -119,6 +125,17 @@ class _ClassroomRosterScreenState extends State<ClassroomRosterScreen> {
           const Text(
             'Selecione um estudante já matriculado nesta oferta. A lista mostra apenas quem ainda não está na turma.',
           ),
+          if (_capacityWarning) ...[
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  'A turma tem $_occupancy participantes. $_capacityReference é a referência de planejamento; a inclusão adicional é permitida e ficará visível no acompanhamento.',
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           TextField(
             controller: _search,

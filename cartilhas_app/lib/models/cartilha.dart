@@ -43,12 +43,15 @@ class Cartilha {
 @JsonSerializable()
 class Section {
   final String id;
+  @JsonKey(name: 'version_id')
+  final String? versionId;
   final String title;
   final List<Message> messages;
   final List<CourseMaterial> materials;
 
   Section({
     required this.id,
+    this.versionId,
     required this.title,
     required this.messages,
     this.materials = const [],
@@ -61,6 +64,9 @@ class Section {
 
 @JsonSerializable()
 class Message {
+  final String? id;
+  @JsonKey(name: 'version_id')
+  final String? versionId;
   final String type; // bot, user, question, quiz
   final String content;
   final List<Option>? options;
@@ -70,6 +76,8 @@ class Message {
   bool get isAssessmentQuestion => type == 'question' || type == 'quiz';
 
   Message({
+    this.id,
+    this.versionId,
     required this.type,
     required this.content,
     this.options,

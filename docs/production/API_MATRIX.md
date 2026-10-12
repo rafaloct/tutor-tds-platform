@@ -23,6 +23,13 @@ jornadas, não a todos os consumidores legados da rota. Resultados atuais em
 | GET | /courses | público | catálogo publicado | sem body | courses[] com edição publicada | Home | CourseRepository | courses; course_versions | test_api; course_repository_test | STAGING |
 | GET | /courses/{course_id} | público | curso ativo | course_id | conteúdo da edição pública | leitor público | CourseRepository | courses; course_versions | test_classroom_course_versions | STAGING |
 | GET | /classes | Bearer | escopo legado; enrolled_only exige vínculos ativos após correção | enrolled_only bool | ClassroomPage | Minhas turmas/equipe | ClassroomRepository | classes; cohort_memberships; class_enrollments; enrollments; program_memberships; class_monitors | test_context_access_revocation; test_classrooms | STAGING |
+| POST | /admin/classes/{class_id}/monitors/{user_id} | Bearer admin | monitor com vínculo ativo no programa; turma `closed` rejeita novo vínculo mesmo com `CLASS_LIFECYCLE_ENABLED=false`; com flag true, equipe administrativa só muda em `planned` | class_id; user_id | 201 novo vínculo; 409 turma encerrada, sem gravação | administração legada | API transacional | classes; program_memberships; class_monitors; cohort_memberships | test_class_lifecycle::test_legacy_admin_cannot_add_monitor_to_closed_class | TESTED-LOCAL para bloqueio de turma `closed`; demais superfícies não revalidadas |
+| GET | /operations/classes/options; /operations/classes/{id}/readiness | Bearer | program_operator/coordinator com vínculo ativo no programa; professor só lê própria turma | contexto; id | capabilities de preparo/ativação/encerramento, readiness e capacidade soft_alert; sessão aberta bloqueia encerramento | Gestão Flutter | ClassLifecycleRepository | classes; program_memberships; classroom_command_receipts; class_sessions | test_class_lifecycle; class_lifecycle_repository_test | TESTED-LOCAL API; Flutter não executado neste candidato |
+| POST | /operations/classes | Bearer | program_operator/coordinator escopados; edição publicada conferida sob bloqueio do curso | ID de comando, contexto, `version_id` revisada, território, datas e equipe | 201 snapshot/recibo; replay idêntico; 409 `course_version_changed` sem escrita | Preparar turma; pendência segura por API/conta e replay após reentrada | ClassLifecycleRepository | classes; course_versions; classroom_command_receipts | test_class_lifecycle::test_prepare_rejects_changed_published_version_before_creating_class; class_lifecycle_repository_test (repositório recriado/falha local) | TESTED-LOCAL API; Flutter não executado neste candidato |
+| POST | /operations/classes/{id}/transition | Bearer | program_operator/coordinator escopados; planned→active ou active→closed com readiness, CAS e motivo | id, contexto, expected_revision, target_status, reason | snapshot e recibo idempotente; 409 para sessão aberta/CAS | Ativar/Encerrar turma | ClassLifecycleRepository | classes; classroom_command_receipts; class_sessions | test_class_lifecycle; class_lifecycle_repository_test; class_lifecycle_screen_test | TESTED-LOCAL API; Flutter não executado neste candidato |
+| POST | /admin/classes/{class_id}/sessions | Bearer | admin ou professor vinculado; turma ativa; lock de Classroom coordena com transição de encerramento | starts_at; ends_at | 201 sessão aberta; 409 em turma planejada/encerrada | Encontro | ClassroomRepository | classes; class_sessions | test_class_lifecycle; test_evidence | TESTED-LOCAL API; concorrência PostgreSQL a validar |
+| GET | /classes/{id}/eligible-students | Bearer | professor/equipe autorizada da turma | busca/paginação | candidatos com occupancy, capacity_reference=30 e capacity_warning | Participantes | ClassroomRepository | classes; class_enrollments; enrollments | test_class_lifecycle; test_classrooms; classroom_repository_test | TESTED-LOCAL API; Flutter não executado neste candidato |
+| PUT; POST | /classes/{id}/students/{user_id}; /admin/classes/{id}/students/{user_id}; /operations/{id}/commands | Bearer | professor, admin ou operador/coordenação conforme rota e escopo; turma closed negada | vínculo ou comando contextual | inclusão acima de 30 permitida com aviso na resposta; comando mantém recibo/replay | Participantes e operação | ClassroomRepository; OperationsRepository/Screen | classes; class_enrollments; operator_command_receipts | test_class_lifecycle; test_classrooms; test_operator_operations; operations_repository_test; operations_screen_test | TESTED-LOCAL API; Flutter não executado neste candidato |
 | GET | /classes/{class_id}/course | Bearer | _active_student ou _staff; programa ativo após correção | class_id | conteúdo snapshot + course_version_id/version_id/version_number/class_id | leitor da turma | ClassroomRepository; LearnerOfflineRepository | classes; cohort_memberships; class_enrollments; enrollments; program_memberships; course_versions | test_context_access_revocation; test_classroom_course_versions | STAGING |
 | POST | /events | Bearer; flag ativa dispensa role global em atividade com turma+edição | matrícula contextual ativa; vínculo programa revalidado após correção | EventCreate: event_id, event_type, course_id, session_id, occurred_at, payload; active_seconds somente study_activity | EventResponse; 201 novo/200 retry idêntico/409 divergente | outbox | LearningEventSyncService | learning_events; enrollments; class_enrollments; classes; course_versions; program_memberships | test_course_version_events; learning_event_sync_service_test | STAGING |
 | GET | /events | Bearer, student_claims | próprio usuário | paginação | EventPage | auditoria cliente | N/A, teste/consulta | learning_events | test_course_version_events | STAGING |
@@ -71,6 +78,52 @@ automático da edição anterior ao publicar a seguinte.
 Os comandos legados de preparação de programa/matrícula/turma continuam exigindo
 admin global; sua migração não foi implicitamente declarada pelo gate editorial.
 Nenhuma operação de IA ou LearningEvent cria esses vínculos.
+
+## Atividades contextuais publicadas — candidato local Wave 2B
+
+Candidato sobre `fbb4b6a`, migration `20261007_0030`. O mesmo domínio de
+`assessment_attempts`/`assessment_contents` recebe origem `published_block` e
+linhagem completa; o legado `practice` continua todo nulo. A API deriva conteúdo,
+gabarito e nota do snapshot imutável de CourseVersion e cria, na mesma transação,
+`assessment_completed` determinístico com crédito zero. A feature exige
+`LEARNING_CONTEXT_ENABLED=true` e `DYNAMIC_ACTIVITY_ENABLED=true`; ambas seguem
+false por padrão. API, Flutter e runner foram verificados localmente, sem deploy
+ou aceite STAGING/PRODUCTION. A migration passou ainda 8/8 cenários físicos em
+PostgreSQL 17.11 descartável no LARGeo, commit `de9ec577415b`; isso não promove
+o status dos endpoints.
+
+Para `published_block`, o cliente e a API calculam o mesmo ID canônico a partir
+da linhagem completa (sem `apiUrl`), e o banco impõe uma tentativa por
+dono/contexto/bloco. O conteúdo publicado também usa a linhagem completa na
+identidade, permitindo o mesmo bloco e edição em duas turmas da mesma pessoa.
+`assessment_contents.origin` e o namespace reservado
+impedem que gabarito publicado seja aceito pelo fluxo legado. Projeções do aluno
+e públicas removem campos reveladores; o evento conclusivo omite IDs pessoais.
+
+| Method | Path | Authentication | Permission | Request | Response | Consumer | Repository | Tables | Test | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PUT | /assessment-attempts/{attempt_id} | Bearer access_claims | `published_block`: próprio aluno com LearningContext exato e ativo; `practice` preserva regra student legada | origem, revisão/CAS, resposta/marcação e linhagem completa; sem conteúdo/gabarito do cliente | tentativa criada/replay idêntico; 409 em revisão/ID canônico/snapshot divergente; 422 `future_updated_at` reparável somente no relógio; score calculado no servidor | ChatExperienceScreen / PublishedAssessmentController | AssessmentAttemptRepository; AssessmentSyncService | assessment_attempts; assessment_contents; learning_events | test_dynamic_activity; published_assessment_sync_test; published_assessment_controller_test | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/assessment-attempts | Bearer access_claims | próprio aluno; matrícula, membership, programa, curso e edição revalidados | limit; offset | página de tentativas da linhagem exata | retomada/sync Flutter | AssessmentAttemptRepository | assessment_attempts | test_dynamic_activity; published_assessment_reader_test | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/assessment-attempts/{attempt_id} | Bearer access_claims | próprio aluno no contexto exato ativo | class_id; attempt_id | tentativa contextual ou 404/409 fail-closed | retomada Flutter | AssessmentAttemptRepository | assessment_attempts | test_dynamic_activity; published_assessment_reader_test | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/assessment-attempts/{attempt_id}/content | Bearer access_claims | próprio aluno no contexto exato ativo | class_id; attempt_id | conteúdo público sem gabarito ou explicação, mesmo após conclusão | revisão da atividade | AssessmentAttemptRepository | assessment_attempts; assessment_contents | test_dynamic_activity | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/students/{owner_id}/assessment-attempts | Bearer access_claims | professor/admin autorizado na turma exata; monitor/outsider negados | owner_id; limit; offset | página pedagógica do aluno naquela turma | acompanhamento | API contextual | assessment_attempts | test_dynamic_activity; test_staging_dynamic_activity_smoke | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id} | Bearer access_claims | professor/admin autorizado na turma exata | owner_id; attempt_id | tentativa contextual exata | acompanhamento | API contextual | assessment_attempts | test_dynamic_activity; test_staging_dynamic_activity_smoke | LOCAL_CANDIDATE |
+| GET | /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id}/content | Bearer access_claims | professor/admin autorizado na turma exata | owner_id; attempt_id | conteúdo congelado; gabarito somente após conclusão | acompanhamento | API contextual | assessment_attempts; assessment_contents | test_dynamic_activity | LOCAL_CANDIDATE |
+
+Runner remoto: `staging_dynamic_activity_smoke.py` exige
+`WAVE2B_STAGING_LANE` e combinação exata de lane/URL. `cloud` em
+`https://tutor-tds-staging.fastapicloud.dev` é a aceitação canônica; `vps` em
+`https://ead.ipexdesenvolvimento.cloud/tutor-staging-api` produz somente
+pré-aceitação. Não há default, fallback ou redirect. O runner usa descriptor não
+secreto de fixture pré-provisionada e contas sintéticas
+student/teacher/admin/monitor/outsider. Não provisiona nem revoga dados sem hook
+descartável + guard. A única credencial possivelmente nova ou a confirmar é a
+conta sintética outsider, se ausente; nenhum secret de produção é requerido.
+Após hook de restauração, o runner exige GET autenticado da mesma tentativa com
+ID/revisão/origem exatos; HTTP 200 isolado não aprova nem oculta fixture ainda
+revogada.
+`dynamic_activity_contextual_android_e2e` permanece pendente antes de ativar a
+flag, mas não é gate de build quando ela está false.
 
 ## Identidade e jornada — QA isolado, 01/10/2026
 

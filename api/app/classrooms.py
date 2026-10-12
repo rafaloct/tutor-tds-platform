@@ -11,11 +11,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .auth import access_claims, require_roles
+from .classroom_policy import DEFAULT_CLASS_CAPACITY, active_occupancy, capacity_warning
 from .database import Database
-from .course_editor import latest_published_version, ensure_legacy_course_version
+from .course_editor import (
+    ensure_legacy_course_version,
+    latest_published_version,
+    learner_course_projection,
+)
 from .evidence import _active_student, _is_staff, _staff
 from .context_memberships import active_student_binding, bind_membership, bind_student
-from .classroom_policy import require_available_seat
 from .models import (
     ClassEnrollment,
     ClassMonitor,
@@ -80,6 +84,9 @@ class EligibleStudent(BaseModel):
 class EligibleStudentPage(BaseModel):
     students: list[EligibleStudent]
     next_offset: int | None
+    occupancy: int = 0
+    capacity_reference: int = DEFAULT_CLASS_CAPACITY
+    capacity_warning: bool = False
 
 
 class StudentAlert(BaseModel):
@@ -215,7 +222,7 @@ def add_student(
     user_id: str,
     request: Request,
     _: dict[str, str] = Depends(admin_claims),
-) -> dict[str, str]:
+) -> dict[str, object]:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = session.scalar(
@@ -239,7 +246,6 @@ def add_student(
             )
         if session.get(ClassEnrollment, (class_id, user_id)) is not None:
             raise HTTPException(status_code=409, detail="Estudante já está na turma.")
-        require_available_seat(session, classroom)
         link = ClassEnrollment(
                 class_id=class_id,
                 user_id=user_id,
@@ -251,7 +257,7 @@ def add_student(
         session.add(link)
         _bind_context(session, classroom, link, request)
         _commit(session, "Não foi possível adicionar o estudante.")
-        return {"class_id": class_id, "user_id": user_id, "status": "active"}
+        return _student_link_response(session, classroom, user_id)
 
 
 @admin_router.post("/{class_id}/monitors/{user_id}", status_code=201)
@@ -263,7 +269,12 @@ def add_monitor(
 ) -> dict[str, str]:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
-        classroom = _classroom(session, class_id)
+        classroom = session.scalar(
+            select(Classroom).where(Classroom.id == class_id).with_for_update()
+        )
+        if classroom is None:
+            raise HTTPException(status_code=404, detail="Turma não encontrada.")
+        _require_open_classroom(classroom, member_type="monitores")
         if (
             _class_lifecycle_enabled(request)
             and classroom.status != "planned"
@@ -338,6 +349,9 @@ def eligible_students(
                 for row in records[:limit]
             ],
             next_offset=offset + limit if len(records) > limit else None,
+            occupancy=active_occupancy(session, class_id),
+            capacity_reference=DEFAULT_CLASS_CAPACITY,
+            capacity_warning=capacity_warning(session, classroom),
         )
 
 
@@ -347,7 +361,7 @@ def include_student(
     user_id: str,
     request: Request,
     claims: dict[str, str] = Depends(access_claims),
-) -> dict[str, str]:
+) -> dict[str, object]:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         # Serializa inclusões concorrentes na turma em bancos com row locking.
@@ -373,7 +387,6 @@ def include_student(
             )
         membership = session.get(ClassEnrollment, (class_id, user_id))
         if membership is None:
-            require_available_seat(session, classroom)
             membership = ClassEnrollment(
                     class_id=class_id,
                     user_id=user_id,
@@ -384,13 +397,22 @@ def include_student(
             )
             session.add(membership)
         elif membership.status != "active":
-            require_available_seat(session, classroom)
             membership.status = "active"
         else:
-            return {"class_id": class_id, "user_id": user_id, "status": "active"}
+            return _student_link_response(session, classroom, user_id)
         _bind_context(session, classroom, membership, request)
         _commit(session, "Não foi possível incluir o estudante. Tente novamente.")
-        return {"class_id": class_id, "user_id": user_id, "status": "active"}
+        return _student_link_response(session, classroom, user_id)
+
+
+def _student_link_response(session: Session, classroom: Classroom, user_id: str) -> dict[str, object]:
+    return {
+        "class_id": classroom.id,
+        "user_id": user_id,
+        "status": "active",
+        "occupancy": active_occupancy(session, classroom.id),
+        "capacity_warning": capacity_warning(session, classroom),
+    }
 
 
 def _bind_context(session, classroom, link, request):
@@ -405,11 +427,13 @@ def _bind_context(session, classroom, link, request):
         raise HTTPException(409, "Matrícula contextual inconsistente; confira a edição da turma.") from error
 
 
-def _require_open_classroom(classroom: Classroom) -> None:
+def _require_open_classroom(
+    classroom: Classroom, *, member_type: str = "estudantes"
+) -> None:
     if classroom.status == "closed":
         raise HTTPException(
             status_code=409,
-            detail="Esta turma está encerrada e não pode receber estudantes.",
+            detail=f"Esta turma está encerrada e não pode receber {member_type}.",
         )
 
 
@@ -508,13 +532,26 @@ def classroom_course(
     database: Database = request.app.state.database
     with Session(database.engine) as session:
         classroom = _classroom(session, class_id)
-        if not _active_student(session, classroom, claims["sub"]):
+        active_student = _active_student(session, classroom, claims["sub"])
+        can_view_answer_key = (
+            (claims["role"] == "admin" or classroom.teacher_id == claims["sub"])
+            and _is_staff(session, classroom, claims["sub"], claims["role"])
+        )
+        if not active_student and not can_view_answer_key:
             _staff(session, classroom, claims, monitor=True)
         version = session.get(CourseVersion, classroom.course_version_id) if classroom.course_version_id else None
         if version is None or version.course_id != classroom.course_id or version.status not in {"published", "archived"}:
             raise HTTPException(409, "A versão do curso desta turma precisa ser conferida pela equipe.")
+        settings = request.app.state.settings
+        content = (
+            learner_course_projection(version.content)
+            if not can_view_answer_key
+            and settings.learning_context_enabled
+            and settings.dynamic_activity_enabled
+            else version.content
+        )
         return {
-            **version.content,
+            **content,
             "course_version_id": version.id,
             "version_id": version.id,
             "version_number": version.version_number,

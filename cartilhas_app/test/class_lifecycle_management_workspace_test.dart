@@ -14,6 +14,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     var prepare = 0;
+    var activate = 0;
     var close = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -25,22 +26,26 @@ void main() {
             canPrepare: true,
             canClose: true,
             canActivate: true,
-            canOverrideCapacity: true,
+            canOverrideCapacity: false,
           ),
           onPrepareClassTap: () => prepare++,
+          onActivateClassTap: () => activate++,
           onCloseClassTap: () => close++,
         ),
       ),
     );
 
     expect(find.text('Preparar turma'), findsOneWidget);
+    expect(find.text('Ativar turma'), findsOneWidget);
     expect(find.text('Encerrar turma'), findsOneWidget);
     expect(find.text('Participantes'), findsNothing);
 
     await tester.tap(find.text('Preparar turma'));
+    await tester.tap(find.text('Ativar turma'));
     await tester.tap(find.text('Encerrar turma'));
 
     expect(prepare, 1);
+    expect(activate, 1);
     expect(close, 1);
   });
 
@@ -64,6 +69,7 @@ void main() {
     );
 
     expect(find.text('Preparar turma'), findsNothing);
+    expect(find.text('Ativar turma'), findsNothing);
     expect(find.text('Encerrar turma'), findsNothing);
     expect(
       find.text('Nenhuma ferramenta de gestão disponível'),

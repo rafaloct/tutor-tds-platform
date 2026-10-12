@@ -1,0 +1,32 @@
+{
+  "evidence_type": "class_lifecycle_android_e2e_attempt",
+  "date_utc": "2026-10-12",
+  "candidate_commit": "f5f679eef8e7a680b13c1119074b4a79ff16689b",
+  "environment": "avellaria/emulator-5554",
+  "backend_contracts": {
+    "passed": 6,
+    "failed": 0
+  },
+  "android_integration": {
+    "status": "BLOCKED_ENVIRONMENT",
+    "reason": "Gradle/Kotlin build exhausted safe swap headroom before an APK or test result marker was produced",
+    "peak_swap_used_gib": 14.4,
+    "total_swap_gib": 15,
+    "flutter_result_marker_observed": false,
+    "complete_e2e_manifest_produced": false
+  },
+  "cleanup": {
+    "qa_api_stopped": true,
+    "flutter_gradle_kotlin_attempt_processes_stopped": true,
+    "temporary_qa_directory_removed": true,
+    "port_18040_closed": true,
+    "dynamic_qa_package_installed": false
+  },
+  "alternate_host": {
+    "host": "LARGeo",
+    "status": "BLOCKED_IN_USE",
+    "reason": "existing emulator-5554 was running the user's app; no exact candidate checkout or candidate E2E APK was available"
+  },
+  "e2e_pass_claimed": false,
+  "production_or_shared_staging_mutated": false
+}

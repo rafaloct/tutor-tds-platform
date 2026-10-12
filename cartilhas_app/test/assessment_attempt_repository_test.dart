@@ -149,4 +149,82 @@ void main() {
     expect(parsed?.weakTopics, ['Princípios do cooperativismo']);
     expect(parsed?.remainingSeconds, 300);
   });
+
+  test('isola bloco publicado por owner, API, turma e edição', () async {
+    const repository = AssessmentAttemptRepository();
+    final first = _publishedContext();
+    final otherOwner = _publishedContext(owner: 'student-2');
+    final otherApi = _publishedContext(api: 'https://other.example');
+    final otherClass = _publishedContext(classId: 'class-2');
+    final otherVersion = _publishedContext(courseVersion: 'version-2');
+    final attempt = _publishedAttempt(first);
+
+    await repository.saveConfirmed(attempt);
+
+    expect((await repository.loadPublished(first))?.id, attempt.id);
+    expect(await repository.loadPublished(otherOwner), isNull);
+    expect(await repository.loadPublished(otherApi), isNull);
+    expect(await repository.loadPublished(otherClass), isNull);
+    expect(await repository.loadPublished(otherVersion), isNull);
+    expect(await repository.loadLast(), isNull);
+  });
 }
+
+PublishedAssessmentContext _publishedContext({
+  String owner = 'student-1',
+  String api = 'https://api.example/',
+  String classId = 'class-1',
+  String courseVersion = 'version-1',
+}) => PublishedAssessmentContext(
+  ownerId: owner,
+  apiUrl: api,
+  lineage: PublishedAssessmentLineage(
+    organizationId: 'org-1',
+    programId: 'program-1',
+    classId: classId,
+    membershipId: 'membership-$classId',
+    enrollmentId: 'context-enrollment-$classId',
+    legacyEnrollmentId: 'legacy-enrollment-1',
+    courseId: 'course-1',
+    courseVersionId: courseVersion,
+    sectionId: 'section-1',
+    sectionVersionId: 'section-version-1',
+    blockId: 'block-1',
+    blockVersionId: 'block-version-1',
+  ),
+);
+
+AssessmentAttempt _publishedAttempt(PublishedAssessmentContext context) =>
+    AssessmentAttempt(
+      id: 'attempt:published:stable',
+      origin: AssessmentOrigin.publishedBlock,
+      publishedContext: context,
+      courseId: 'course-1',
+      topic: 'Módulo',
+      mode: AssessmentMode.quiz,
+      difficulty: StudyDifficulty.intermediate,
+      totalQuestions: 1,
+      deck: AssessmentDeck(
+        title: 'Bloco',
+        durationMinutes: 0,
+        items: [
+          StudyQuestion(
+            question: 'Pergunta?',
+            options: const ['A', 'B'],
+            correctIndex: -1,
+            correctIndexes: const {},
+            graded: false,
+            explanation: '',
+            topic: 'Módulo',
+          ),
+        ],
+      ),
+      answers: const {0: 1},
+      currentIndex: 0,
+      remainingSeconds: 0,
+      score: 0,
+      weakTopics: const [],
+      isCompleted: false,
+      createdAt: DateTime.utc(2026, 10, 7),
+      updatedAt: DateTime.utc(2026, 10, 7),
+    );

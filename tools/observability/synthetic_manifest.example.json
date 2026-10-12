@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "services": [
+    {
+      "service_id": "example_api",
+      "url": "https://api.example.invalid/health",
+      "timeout_seconds": 5,
+      "expected_status": 200,
+      "max_latency_ms": 2000,
+      "tls_min_days": 14,
+      "health_json": {
+        "required_keys": [
+          "status"
+        ]
+      },
+      "content_allowlist": [
+        "ready"
+      ]
+    }
+  ]
+}
