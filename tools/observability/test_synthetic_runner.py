@@ -27,7 +27,7 @@ def manifest(**overrides):
         "timeout_seconds": 3,
         "max_latency_ms": 2000,
         "tls_min_days": 14,
-        "health_json": {"required_keys": ["status"]},
+        "health_json": {"required_keys": ["status"], "expected_values": {"status": "ok"}},
         "content_allowlist": ["ready"],
     }
     service.update(overrides)
@@ -96,6 +96,34 @@ class SyntheticRunnerContract(unittest.TestCase):
         output = run_manifest(manifest(content_allowlist=None), now=NOW, http_probe=malformed, tls_probe=tls_ok)
         health = next(item for item in output["results"] if item["check_id"] == "health_json")
         self.assertEqual((health["status"], health["safe_reason"]), ("FAIL", "malformed_json"))
+
+    def test_health_value_mismatch_fails_without_echoing_response(self):
+        sentinel = "PRIVATE_SENTINEL_DO_NOT_LOG"
+
+        def degraded(url, timeout):
+            return HttpObservation(200, 10, ('{"status":"degraded","detail":"' + sentinel + '"}').encode())
+
+        output = run_manifest(manifest(content_allowlist=None), now=NOW,
+                              http_probe=degraded, tls_probe=tls_ok)
+        health = next(item for item in output["results"] if item["check_id"] == "health_json")
+        self.assertEqual((health["status"], health["safe_reason"]),
+                         ("FAIL", "health_value_mismatch"))
+        self.assertNotIn(sentinel, json.dumps(output))
+
+    def test_legacy_required_keys_only_manifest_remains_valid(self):
+        output = run_manifest(manifest(health_json={"required_keys": ["status"]}),
+                              now=NOW, http_probe=http_ok, tls_probe=tls_ok)
+        health = next(item for item in output["results"] if item["check_id"] == "health_json")
+        self.assertEqual(health["status"], "PASS")
+
+    def test_health_expected_values_reject_unlisted_keys_and_invalid_literals(self):
+        for expected in ({"database": "available"}, {"status": ""},
+                         {"status": "line\nfeed"}, {"status": True}):
+            with self.subTest(expected=expected), self.assertRaises(ManifestError):
+                validate_manifest(manifest(health_json={"required_keys": ["status"],
+                                                        "expected_values": expected}))
+        with self.assertRaises(ManifestError):
+            validate_manifest(manifest(health_json={"required_keys": [{"bad": "key"}]}))
 
     def test_tls_expiry_and_unavailable_metadata_are_not_success(self):
         def expiring(url, timeout, *, now=None):

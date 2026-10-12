@@ -218,3 +218,35 @@ desta execução. O PR #88 não deve alterar o PR #85 nem instalar qualquer moni
 #32 permanece aberta até monitor externo Tier 1, responsáveis/destinos aprovados
 e prova controlada de indisponibilidade sintética, sem derrubar produção. Registrar
 SHA/config, timestamps e recibos sanitizados; não repetir restores da #2.
+
+## Candidato de probe público da IA — 12/10/2026
+
+**IMPLEMENTED / TESTED-LOCAL** nesta branch: o runner aceita
+`health_json.expected_values` para exigir, por exemplo, `status=ok` sem imprimir
+o valor recebido. Antes, um HTTP 200 com `{"status":"degraded"}` passava se a
+chave `status` existisse. O contrato antigo `required_keys` continua válido.
+O [manifesto público](../../tools/observability/ai_public_manifest.json) verifica:
+
+| Check | Sinal que realmente mede | Não comprova |
+| --- | --- | --- |
+| `gateway_production_edge` | HTTPS, TLS, latência e `GET /health` 200 com `status=ok` do Worker produtivo | AnythingLLM, túnel produtivo, workspace ou modelo |
+| `gateway_staging_edge` | Os mesmos sinais no Worker isolado de staging | Chamada ao upstream ou RAG |
+| `staging_tunnel_http_route` | HTTPS, TLS, latência e 403 em `GET /api/v1/auth` sem chave, igual ao observado em [10/10](../production/evidence/cloudflare-staging-chain-20261010.txt) | Saúde do container/modelo; um 403 de WAF/Access também pode coincidir |
+
+O [watchdog externo](../../.github/workflows/tds-vps-watchdog.yml) executa esses
+probes e usa o e-mail SMTP já existente somente quando a variável de repositório
+`TDS_AI_MONITOR_ENABLED=true` estiver configurada, ou quando uma execução manual
+usar `check_ai=true`. A agenda da API continua `17,47 * * * *`; nenhuma nova
+credencial, chamada de geração, compra de SaaS ou alteração de produção foi feita.
+Um check com falha faz a execução falhar e tenta enviar uma mensagem que distingue
+API/banco de edge/túnel. Aceite pelo servidor SMTP não prova recebimento.
+
+**HUMAN-GATE — ativação do alerta:** responsável pela operação executa
+`workflow_dispatch` com `check_ai=true`, verifica os três resultados e a origem
+do 403 em logs sanitizados de WAF/AnythingLLM, confirma o canal SMTP com
+`test_email=true`, e só então configura `TDS_AI_MONITOR_ENABLED=true` nas variáveis
+do repositório. Se o 403 vier do WAF ou o runner GitHub for bloqueado, revisar o
+contrato do probe antes da ativação. Para reverter somente estes checks, remover
+ou definir a variável como `false`; o watchdog atual da API continua ativo.
+Owner nominal, recebimento do alerta, comportamento em falha controlada e saúde
+real de AnythingLLM/OpenRouter permanecem **UNKNOWN** até evidência específica.

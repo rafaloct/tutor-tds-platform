@@ -39,6 +39,7 @@ SAFE_REASONS = {
     "latency_exceeded",
     "malformed_json",
     "health_shape_mismatch",
+    "health_value_mismatch",
     "content_missing",
     "content_decode_error",
     "body_too_large",
@@ -157,13 +158,23 @@ def validate_manifest(manifest: object) -> dict:
 
         health = service.get("health_json")
         if health is not None:
-            if not isinstance(health, dict) or set(health) != {"required_keys"}:
+            if (not isinstance(health, dict) or "required_keys" not in health
+                    or set(health) - {"required_keys", "expected_values"}):
                 raise ManifestError("health_json")
             keys = health["required_keys"]
             if not isinstance(keys, list) or not 1 <= len(keys) <= 16:
                 raise ManifestError("health_json")
-            if len(set(keys)) != len(keys) or any(not _safe_identifier(key) for key in keys):
+            if any(not _safe_identifier(key) for key in keys) or len(set(keys)) != len(keys):
                 raise ManifestError("health_json")
+            expected = health.get("expected_values")
+            if expected is not None:
+                if (not isinstance(expected, dict) or not 1 <= len(expected) <= 16
+                        or set(expected) - set(keys)):
+                    raise ManifestError("health_json")
+                for value in expected.values():
+                    if (not isinstance(value, str) or not 1 <= len(value) <= 80
+                            or any(ord(char) < 32 for char in value)):
+                        raise ManifestError("health_json")
 
         markers = service.get("content_allowlist")
         if markers is not None:
@@ -367,6 +378,9 @@ def run_manifest(
                         results.append(_result(service_id, "health_json", "FAIL", "malformed_json", observed_at, latency_ms=latency))
                     elif not all(key in payload for key in required):
                         results.append(_result(service_id, "health_json", "FAIL", "health_shape_mismatch", observed_at, latency_ms=latency))
+                    elif not all(payload[key] == value for key, value in
+                                 service["health_json"].get("expected_values", {}).items()):
+                        results.append(_result(service_id, "health_json", "FAIL", "health_value_mismatch", observed_at, latency_ms=latency))
                     else:
                         results.append(_result(service_id, "health_json", "PASS", "valid_health_json", observed_at, latency_ms=latency))
 
