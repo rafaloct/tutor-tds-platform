@@ -1,5 +1,9 @@
 # Tutor TDS — prontidão produtiva e recuperação (02/10/2026)
 
+Esta seção registra a fotografia de 02/10. Para o estado da branch de
+reconvergência e os 18 gates reavaliados em 12/10, consultar
+[`PRODUCTION_READINESS_AUDIT_2026-10-12.md`](PRODUCTION_READINESS_AUDIT_2026-10-12.md).
+
 **PRODUCTION_RELEASE_READY=false. Nenhum AAB deve ser gerado nesta rodada.**
 Pergunta operacional: "Se o notebook desaparecer hoje, o Tutor TDS continua
 funcionando?" A API histórica na VPS respondeu `/health` 200 e o app Play
