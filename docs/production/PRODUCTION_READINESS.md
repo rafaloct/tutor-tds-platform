@@ -199,3 +199,10 @@ versionado pode expirar e exigir novo drill; isso é intencional. A idade do
 verificar recibo/monitoramento vivo na janela de promoção e o limite de 26h
 de `tooling/backup_automation/backup.mjs`. Não congelar esse último recibo
 em uma tag Git, que ficaria obsoleta no dia seguinte.
+
+O procedimento supervisionado para restaurar um objeto `.dump.age` agendado,
+fornecido localmente pelo operador, está em
+[`SCHEDULED_POSTGRES_RESTORE_DRILL.md`](SCHEDULED_POSTGRES_RESTORE_DRILL.md).
+Seu manifesto é **parcial**: confirma restore isolado, mas não atesta migração,
+compatibilidade da imagem antiga ou fechamento do gate 12. O operador ainda
+precisa confirmar a custódia do par recibo/objeto obtido no R2 privado.
