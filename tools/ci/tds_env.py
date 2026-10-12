@@ -68,7 +68,10 @@ def assert_environment_integrity(root: Path = ROOT) -> None:
 
 def render_build_config(ref: str, root: Path = ROOT, commit_sha: str | None = None) -> dict:
     env = environment_for_ref(ref)
-    path = root / "tools/ci/config" / ("staging.json" if env == "staging" else "production.json")
+    # Production signing/configuration is intentionally ignored by Git. CI only
+    # renders an ephemeral, public target config from the tracked example.
+    path = (root / "tools/ci/config/staging.json" if env == "staging"
+            else root / "cartilhas_app/config/production.example.json")
     config = json.loads(path.read_text(encoding="utf-8"))
     if env == "staging":
         commit_sha = commit_sha or os.environ.get("GITHUB_SHA", "")

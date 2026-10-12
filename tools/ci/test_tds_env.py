@@ -39,6 +39,21 @@ class TestZeroConfig(unittest.TestCase):
             for forbidden in ["anything_llm_api_key", "jwt_secret", "client_secret", "database_url", "cf_api_token", "tailscale_auth_key"]:
                 self.assertNotIn(forbidden, keys)
 
+    def test_production_render_uses_tracked_example_without_local_release_config(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            template = root / "cartilhas_app/config/production.example.json"
+            template.parent.mkdir(parents=True)
+            template.write_text(json.dumps({
+                "TUTOR_API_URL": tds.PRODUCTION_API,
+                "TUTOR_GATEWAY_URL": tds.PRODUCTION_WORKER,
+                "REMOTE_CATALOG_ENABLED": True,
+            }), encoding="utf-8")
+            result = tds.render_build_config("refs/tags/v1.4.0", root=root)
+            self.assertEqual(result["TUTOR_ENVIRONMENT"], "production")
+            self.assertFalse(result["REMOTE_CATALOG_ENABLED"])
+            self.assertFalse((root / "tools/ci/config/production.json").exists())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
