@@ -74,6 +74,9 @@ class PrepareClassroomController extends ChangeNotifier {
     notifyListeners();
     try {
       bootstrap = await gateway.bootstrap();
+      if (bootstrap!.capabilities.canPrepare) {
+        result = await gateway.reconcilePendingPreparation();
+      }
     } on Object catch (caught) {
       error = caught.toString();
       bootstrap = null;

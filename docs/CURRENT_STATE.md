@@ -215,7 +215,11 @@ wrapper executa `pub get --enforce-lockfile`; depois confirma que o hash de
 efetivamente revisada; a API compara a edição publicada sob o bloqueio do
 curso antes de criar turma ou recibo. Conflito 409 obriga nova seleção da
 formação. Após resposta perdida, o repositório conserva o corpo e o ID do
-comando para retry idêntico durante a mesma sessão do app. Ativação e
+comando em armazenamento seguro escopado por API/conta antes do POST. Ao
+reabrir o preparo ou reiniciar o app, relê e reconcilia o mesmo recibo antes
+de aceitar outro preparo; falha de leitura/gravação local impede novo POST.
+O teste com repositório recriado e resposta perdida é sintético; Flutter e
+Android ainda requerem execução no SDK validado. Ativação e
 encerramento limpam motivo/aceite ao trocar turma, mostram o nome na
 confirmação e permitem reler prontidão da turma selecionada. API SQLite focal
 24/24; Flutter e Android pendentes neste executor sem SDK. Nenhum deploy ou

@@ -4,18 +4,24 @@ import 'dart:io';
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
-import 'package:cartilhas_app/features/class_lifecycle/data/class_lifecycle_repository.dart';
+import 'package:cartilhas_app/features/class_lifecycle/application/class_lifecycle_controller.dart';
 import 'package:cartilhas_app/features/class_lifecycle/data/class_lifecycle_gateway.dart';
+import 'package:cartilhas_app/features/class_lifecycle/data/class_lifecycle_repository.dart';
+import 'package:cartilhas_app/features/class_lifecycle/data/pending_class_prepare_store.dart';
 import 'package:cartilhas_app/features/class_lifecycle/models/class_lifecycle_models.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 class _TokenStore implements AuthTokenStore {
-  AuthTokens? value = const AuthTokens(
-    accessToken: 'access-token',
-    refreshToken: 'refresh-token',
-  );
+  _TokenStore({String accessToken = 'access-token'})
+    : value = AuthTokens(
+        accessToken: accessToken,
+        refreshToken: 'refresh-token',
+      );
+
+  AuthTokens? value;
 
   @override
   Future<void> clear() async => value = null;
@@ -25,6 +31,34 @@ class _TokenStore implements AuthTokenStore {
 
   @override
   Future<void> write(AuthTokens tokens) async => value = tokens;
+}
+
+String _jwt(String subject) {
+  final payload = base64Url.encode(utf8.encode(jsonEncode({'sub': subject})));
+  return 'header.$payload.signature';
+}
+
+class _PendingStore implements PendingClassPrepareStore {
+  final values = <String, String>{};
+  bool failWrite = false;
+  bool failRead = false;
+
+  @override
+  Future<String?> read(String scope) async {
+    if (failRead) throw const FileSystemException('storage unavailable');
+    return values[scope];
+  }
+
+  @override
+  Future<void> write(String scope, String body) async {
+    if (failWrite) throw const FileSystemException('storage unavailable');
+    values[scope] = body;
+  }
+
+  @override
+  Future<void> clear(String scope) async {
+    values.remove(scope);
+  }
 }
 
 http.Response _jsonResponse(Object body, [int status = 200]) => http.Response(
@@ -88,15 +122,35 @@ Map<String, dynamic> _snapshot({
 };
 
 void main() {
+  test('armazenamento seguro mantém recibo entre instâncias e separa contas', () async {
+    FlutterSecureStorage.setMockInitialValues({});
+    final first = SecurePendingClassPrepareStore();
+    await first.write('https://api.example\u0000operator-1', '{"id":"app-1"}');
+    final reopened = SecurePendingClassPrepareStore();
+    expect(
+      await reopened.read('https://api.example\u0000operator-1'),
+      '{"id":"app-1"}',
+    );
+    expect(await reopened.read('https://api.example\u0000operator-2'), isNull);
+    expect(
+      await reopened.read('https://another-api.example\u0000operator-1'),
+      isNull,
+    );
+    await reopened.clear('https://api.example\u0000operator-1');
+    expect(await first.read('https://api.example\u0000operator-1'), isNull);
+  });
+
   test('preparo após resposta perdida repete corpo e recibo sem outra turma', () async {
     final requests = <http.Request>[];
     final createdByReceipt = <String, Map<String, dynamic>>{};
+    final pendingStore = _PendingStore();
     final repository = ClassLifecycleRepository(
       apiUrl: 'https://api.example',
       authRepository: AuthRepository(
         apiUrl: 'https://api.example',
-        tokenStore: _TokenStore(),
+        tokenStore: _TokenStore(accessToken: _jwt('operator-1')),
       ),
+      pendingPrepareStore: pendingStore,
       client: MockClient((request) async {
         requests.add(request);
         final body = jsonDecode(request.body) as Map<String, dynamic>;
@@ -124,39 +178,163 @@ void main() {
     );
 
     await expectLater(repository.prepare(command), throwsA(isA<ClassLifecycleException>()));
-    await expectLater(
-      repository.prepare(PrepareClassroomCommand(
-        className: 'Turma alterada',
-        offerMunicipality: command.offerMunicipality,
-        offerLocation: command.offerLocation,
-        institutionId: command.institutionId,
-        programId: command.programId,
-        courseId: command.courseId,
-        courseVersionId: command.courseVersionId,
-        startDate: command.startDate,
-        endDate: command.endDate,
-        teacherId: command.teacherId,
-        monitorIds: command.monitorIds,
-      )),
-      throwsA(isA<ClassLifecycleException>()),
-    );
     expect(requests, hasLength(1));
-    final result = await repository.prepare(command);
+    final result = await repository.prepare(PrepareClassroomCommand(
+      className: 'Outra turma digitada após a falha',
+      offerMunicipality: command.offerMunicipality,
+      offerLocation: command.offerLocation,
+      institutionId: command.institutionId,
+      programId: command.programId,
+      courseId: command.courseId,
+      courseVersionId: command.courseVersionId,
+      startDate: command.startDate,
+      endDate: command.endDate,
+      teacherId: command.teacherId,
+      monitorIds: command.monitorIds,
+    ));
     expect(result.opaqueId, 'class-1');
     expect(createdByReceipt, hasLength(1));
     expect(requests, hasLength(2));
     expect(requests.first.body, requests.last.body);
+    expect(pendingStore.values, isEmpty);
+  });
+
+  test('reentrada recupera recibo pendente antes de outro preparo', () async {
+    final pendingStore = _PendingStore();
+    final posts = <String>[];
+    final committed = <String, Map<String, dynamic>>{};
+    final first = ClassLifecycleRepository(
+      apiUrl: 'https://api.example/',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(accessToken: _jwt('operator-1')),
+      ),
+      pendingPrepareStore: pendingStore,
+      client: MockClient((request) async {
+        posts.add(request.body);
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        committed[body['id'] as String] =
+            _snapshot(status: 'planned', revision: 1, canClose: false);
+        throw const SocketException('Resposta perdida após commit');
+      }),
+    );
+    final command = PrepareClassroomCommand(
+      className: 'Turma Palmas', offerMunicipality: 'Palmas',
+      offerLocation: 'Laboratório', institutionId: 'institution-1',
+      programId: 'program-1', courseId: 'course-1',
+      courseVersionId: 'version-7', startDate: DateTime(2026, 10, 11),
+      endDate: DateTime(2026, 10, 30), teacherId: 'teacher-1',
+      monitorIds: const ['monitor-1'],
+    );
+    await expectLater(first.prepare(command), throwsA(isA<ClassLifecycleException>()));
+    expect(pendingStore.values, hasLength(1));
+
+    final anotherAccount = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(accessToken: _jwt('operator-2')),
+      ),
+      pendingPrepareStore: pendingStore,
+    );
+    expect(await anotherAccount.reconcilePendingPreparation(), isNull);
+
+    // HomeScreen constructs a fresh repository when the preparation screen
+    // is opened again. A process restart has the same persisted-store path.
+    var replayAuthorized = false;
+    final reopened = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(accessToken: _jwt('operator-1')),
+      ),
+      pendingPrepareStore: pendingStore,
+      client: MockClient((request) async {
+        if (request.method == 'POST') {
+          posts.add(request.body);
+          if (!replayAuthorized) return http.Response('{}', 403);
+          final id = (jsonDecode(request.body) as Map<String, dynamic>)['id'];
+          return _jsonResponse(committed[id]!, 201);
+        }
+        if (request.url.path == '/operations/classes/options') {
+          return _jsonResponse({'options': [{
+            'institution_id': 'institution-1', 'program_id': 'program-1',
+            'program_name': 'Programa TDS', 'course_id': 'course-1',
+            'course_title': 'IA', 'course_version_id': 'version-7',
+            'can_prepare': true, 'can_activate': true, 'can_close': true,
+          }]});
+        }
+        if (request.url.path == '/operations/classes') {
+          return _jsonResponse({'classes': [committed.values.single]});
+        }
+        return http.Response('{}', 404);
+      }),
+    );
+    await expectLater(
+      reopened.reconcilePendingPreparation(),
+      throwsA(isA<ClassLifecycleRejectedException>()),
+    );
+    expect(pendingStore.values, hasLength(1));
+    replayAuthorized = true;
+    final screenController = PrepareClassroomController(reopened);
+    await screenController.load();
+    expect(screenController.result?.opaqueId, 'class-1');
+    expect(screenController.result?.name, 'Turma Palmas — IA');
+    expect(posts, hasLength(3));
+    expect(posts[1], posts.first);
+    expect(posts.last, posts.first);
+    expect(committed, hasLength(1));
+    expect(pendingStore.values, isEmpty);
+    screenController.dispose();
+  });
+
+  test('falha de armazenamento impede novo POST e mantém pendência', () async {
+    final pendingStore = _PendingStore()..failWrite = true;
+    var posts = 0;
+    final repository = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(accessToken: _jwt('operator-1')),
+      ),
+      pendingPrepareStore: pendingStore,
+      client: MockClient((request) async {
+        posts++;
+        return _jsonResponse(_snapshot(status: 'planned'), 201);
+      }),
+    );
+    final command = PrepareClassroomCommand(
+      className: 'Turma Palmas', offerMunicipality: 'Palmas',
+      offerLocation: 'Laboratório', institutionId: 'institution-1',
+      programId: 'program-1', courseId: 'course-1',
+      courseVersionId: 'version-7', startDate: DateTime(2026, 10, 11),
+      endDate: DateTime(2026, 10, 30), teacherId: 'teacher-1',
+      monitorIds: const [],
+    );
+    await expectLater(repository.prepare(command), throwsA(isA<ClassLifecycleException>()));
+    expect(posts, 0);
+    pendingStore.failWrite = false;
+    pendingStore.failRead = true;
+    await expectLater(repository.prepare(command), throwsA(isA<ClassLifecycleException>()));
+    expect(posts, 0);
+    pendingStore.failRead = false;
+    pendingStore.values['https://api.example\u0000operator-1'] =
+        '{"schema":1,"body":{"id":"damaged"},"digest":"wrong"}';
+    await expectLater(repository.prepare(command), throwsA(isA<ClassLifecycleException>()));
+    expect(posts, 0);
   });
 
   test('version conflict releases pending receipt for confirmed new edition', () async {
     final receiptIds = <String>[];
+    final pendingStore = _PendingStore();
     var optionsReads = 0;
     final repository = ClassLifecycleRepository(
       apiUrl: 'https://api.example',
       authRepository: AuthRepository(
         apiUrl: 'https://api.example',
-        tokenStore: _TokenStore(),
+        tokenStore: _TokenStore(accessToken: _jwt('operator-1')),
       ),
+      pendingPrepareStore: pendingStore,
       client: MockClient((request) async {
         if (request.method == 'GET' &&
             request.url.path == '/operations/classes/options') {

@@ -16,6 +16,9 @@ abstract interface class ClassLifecycleGateway {
 
   Future<PreparedClassroomResult> prepare(PrepareClassroomCommand command);
 
+  /// Replays an ambiguous prepare receipt before starting another class.
+  Future<PreparedClassroomResult?> reconcilePendingPreparation();
+
   Future<ClassActivationReadiness> activationReadiness(String classroomId);
 
   Future<ActivatedClassroomResult> activateClassroom({
@@ -40,7 +43,9 @@ class ClassLifecycleException implements Exception {
 }
 
 class ClassLifecycleRejectedException extends ClassLifecycleException {
-  const ClassLifecycleRejectedException(super.message);
+  const ClassLifecycleRejectedException(super.message, {this.statusCode});
+
+  final int? statusCode;
 }
 
 class ClassVersionChangedException extends ClassLifecycleRejectedException {
@@ -115,6 +120,7 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
   final int capacity;
 
   PrepareClassroomCommand? lastPrepareCommand;
+  PreparedClassroomResult? recoveredPreparation;
   String? lastCloseReason;
   String? lastActivationReason;
 
@@ -187,6 +193,12 @@ class FakeClassLifecycleGateway implements ClassLifecycleGateway {
       programs: _programs,
       manageableClasses: manageableClasses ?? _classes,
     );
+  }
+
+  @override
+  Future<PreparedClassroomResult?> reconcilePendingPreparation() async {
+    await _wait();
+    return recoveredPreparation;
   }
 
   @override
