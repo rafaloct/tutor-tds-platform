@@ -58,6 +58,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('close_classroom_action')),
+        300,
+      );
       expect(find.byKey(const Key('close_classroom_action')), findsOneWidget);
       expect(find.byType(CloseClassroomScreen), findsOneWidget);
     },
