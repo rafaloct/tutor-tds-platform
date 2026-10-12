@@ -1,0 +1,109 @@
+{
+  "method": "Google Drive connector raw-file fetch; materialized bytes hashed locally",
+  "observed_at_utc": "2026-10-12T15:27:03Z",
+  "schema_version": 1,
+  "sha256": "b6ffa03ac903b9ae4dafa6d5116fa8d2ff5b5b6f961e1b1c265939529cd66c59",
+  "source_map_sha256": "20ff11bfbeb53dcb3ebfead7efe9975ea6ae3d32dd3db97fdad6ebe44a4a8da0",
+  "sources": [
+    {
+      "bytes": 15456861,
+      "course_id": "agricultura-sustentavel",
+      "course_version_id": "0674ba94-afc2-5953-a5a0-78177b26179a",
+      "drive_file_id": "1EIoyoCKBQAlvyGZU-7ATNylY18SIyb4m",
+      "drive_modified_time": "2026-05-11T07:35:52.000Z",
+      "matches_historical_original": true,
+      "name": "Agricultura Sustentável - Cartilha - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "2ff77f94a5e14e695cfa11b9e51cae1dbf2f840ee12bacb7c7821555eb4ee0fc"
+    },
+    {
+      "bytes": 12884363,
+      "course_id": "atendimento-cliente",
+      "course_version_id": "e999578b-ad08-5ec5-85d9-a73884b08384",
+      "drive_file_id": "1fwUY22DnXLUqa4yOYGOssepOO8HXbSM9",
+      "drive_modified_time": "2026-05-08T15:07:14.000Z",
+      "matches_historical_original": true,
+      "name": "Atendimento ao Cliente - Cartilha - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "1fcae9c36debe6e6d88c2ecf30ef8c1bea8b7c601d072884a25064fea06e475f"
+    },
+    {
+      "bytes": 7952948,
+      "course_id": "audiovisual",
+      "course_version_id": "d1dce262-153d-5b7d-92ae-af2b30b0f6d8",
+      "drive_file_id": "1fPAdXQDn7Hult1XYzJtFY3TNDNJtA6Kq",
+      "drive_modified_time": "2026-05-08T15:05:46.000Z",
+      "matches_historical_original": true,
+      "name": "Audiovisual - CARTILHA - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "c09f5e9e6bdcc92cda535b742b40bb37b433f3cff75336e82e2d34981667812e"
+    },
+    {
+      "bytes": 15405631,
+      "course_id": "cooperativismo",
+      "course_version_id": "389184fc-822c-541f-aff0-bd527c9f1b71",
+      "drive_file_id": "1oet1ol6TD2bvW3hYuqWew_8NVAuaxBKo",
+      "drive_modified_time": "2026-05-08T15:31:52.000Z",
+      "matches_historical_original": true,
+      "name": "Cooperativismo - CARTILHA - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "86a79c14afc613e335cb662b5228a8cd79df3c8cd0ca1e8f58a31399224f2af4"
+    },
+    {
+      "bytes": 18218144,
+      "course_id": "economia-lar",
+      "course_version_id": "02f0ea37-d7e1-569b-adbb-0b85db2437af",
+      "drive_file_id": "180gptw_rGSTa9bvK7v6YYhIrFn846ifo",
+      "drive_modified_time": "2026-05-08T15:32:18.000Z",
+      "matches_historical_original": true,
+      "name": "Economia do Lar - Cartilha - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "fae2ad89a4a2c48aa9fd8bcd3136a07b69e18a988e27e930c289727e5fd3b6f0"
+    },
+    {
+      "bytes": 6581296,
+      "course_id": "educacao-financeira",
+      "course_version_id": "1fc331d9-3a76-5eb3-996a-9161ba0c995a",
+      "drive_file_id": "1dwHJKEctoaz0qZ2Lf2LKvsaFXiP7W3lE",
+      "drive_modified_time": "2026-05-08T15:05:26.000Z",
+      "matches_historical_original": true,
+      "name": "Ed. Financeira - CARTILHA - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "c3d90ed88919191f6ae5c4d1f7c18f182651415a60eebc1b2563a3f975ff3c02"
+    },
+    {
+      "bytes": 9472927,
+      "course_id": "ia-cartilha",
+      "course_version_id": "d496856d-6bf3-5f8a-92a3-f292cca92ed5",
+      "drive_file_id": "1vjwT_uoi_tw2rmSL2Y4kldjkqo5P-n4f",
+      "drive_modified_time": "2026-05-08T15:06:00.000Z",
+      "matches_historical_original": true,
+      "name": "IA - CARTILHA - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "1f2a545931899de821d3c734acf840d8b06a04b1ed6c3eda029576c89d3ef3af"
+    },
+    {
+      "bytes": 15457007,
+      "course_id": "saf",
+      "course_version_id": "9350c62e-14fd-5340-9408-c73a5b36b399",
+      "drive_file_id": "1H-DpKPxnqwUjOUZfX6UDc5ewiOX-wijY",
+      "drive_modified_time": "2026-05-11T07:38:40.000Z",
+      "matches_historical_original": true,
+      "name": "SAF - CARTILHA - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "e6ea47cd96e60723e0898cb6baee24077b7101b9939b1330b05fcd12ad1f68e5"
+    },
+    {
+      "bytes": 7102374,
+      "course_id": "sim-sima",
+      "course_version_id": "59a3021e-be92-5e3e-ad63-5427bbb49374",
+      "drive_file_id": "1nlOUG9xT8WRsj3oFNl7LqTiaSjHx0aVl",
+      "drive_modified_time": "2026-05-08T15:06:20.000Z",
+      "matches_historical_original": true,
+      "name": "SIM e SIMA - Cartilha - TDS 2026.pdf",
+      "pdf_signature_checked": true,
+      "sha256": "1f804b761aa8212856294080ece632872c3b9e280cc0f411cc064908a541f8e1"
+    }
+  ],
+  "validation_scope": "Nine Drive file IDs and raw PDF bytes matched historical originals; current CourseVersion export, editorial approval, RAG indexing and live citation behavior unverified"
+}

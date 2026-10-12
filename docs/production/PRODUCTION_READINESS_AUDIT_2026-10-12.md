@@ -54,10 +54,13 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
   `CLASS_LIFECYCLE_ENABLED` segue false até promoção.
 - **Tutor contextual:** o sentinel A/B prova isolamento CourseVersion com
   documentos sintéticos em staging. As cartilhas curriculares ainda não têm
-  ingestão versionada, bytes atuais do Drive validados, workspaces por edição
-  nem mapa produtivo comprovado. Um preflight offline confere nove PDFs locais
-  contra os hashes históricos, mas não há PDFs neste checkout; ele não prova
-  origem no Drive, aprovação editorial ou indexação. O Worker rejeita contexto
+  ingestão versionada, workspaces por edição nem mapa produtivo comprovado.
+  Em 12/10, os nove PDFs obtidos pelos IDs do Drive conectado coincidiram em
+  SHA-256, tamanho e assinatura PDF com os originais históricos; a prova
+  sanitizada está em `evidence/curricular-drive-bytes-20261012.json`. Os PDFs
+  não estão versionados no checkout. Ainda faltam exports atuais das
+  CourseVersions publicadas, aprovação editorial rastreável e indexação. O
+  Worker rejeita contexto
   sem fonte (`503`) de forma
   deliberada; validar o caminho cartilha → Tutor antes de aulas.
 - **Observabilidade:** o watchdog atual mede API/banco. O candidato de probes
@@ -72,7 +75,8 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
    por API, app e E2E, sem tocar dados reais.
 2. Versionar prova sanitizada de restore PostgreSQL e offsite agendado para o
    schema candidato; revisar custódia humana dos recibos e a idade do backup.
-3. Preparar corpus curricular aprovado por edição com hashes, ingestão isolada e
+3. Obter exports atuais das CourseVersions publicadas e aprovação editorial;
+   preparar corpus por edição com os nove PDFs verificados, ingestão isolada e
    reconciliação; validar citações e revogação na rota real do app.
 4. Validar probes, donos e canal de alerta; conferir saúde do upstream/modelo
    por sinal próprio antes de declarar o Tutor monitorado.
