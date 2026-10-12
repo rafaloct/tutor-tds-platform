@@ -10,7 +10,7 @@ on:
         type: boolean
         default: false
       check_ai:
-        description: Run the public Worker and staging tunnel probes once
+        description: Run the public Worker edge probes once
         type: boolean
         default: false
 
@@ -54,13 +54,21 @@ jobs:
         id: checkout_ai
         if: ${{ always() && (vars.TDS_AI_MONITOR_ENABLED == 'true' || (github.event_name == 'workflow_dispatch' && inputs.check_ai)) }}
         uses: actions/checkout@v4
-      - name: Check public Worker edge and staging tunnel HTTP route
+      - name: Check public Worker edges
         id: ai_health
-        if: ${{ always() && (vars.TDS_AI_MONITOR_ENABLED == 'true' || (github.event_name == 'workflow_dispatch' && inputs.check_ai)) }}
+        if: ${{ always() && steps.checkout_ai.outcome == 'success' }}
         shell: bash
-        run: python3 tools/observability/synthetic_runner.py tools/observability/ai_public_manifest.json
+        run: |
+          set +e
+          python3 tools/observability/synthetic_runner.py tools/observability/ai_public_manifest.json
+          probe_exit=$?
+          set -e
+          if [[ "$probe_exit" != 0 && "$probe_exit" != 1 ]]; then
+            echo 'infra_failed=true' >> "$GITHUB_OUTPUT"
+          fi
+          exit "$probe_exit"
       - name: Email the TDS operations mailbox
-        if: ${{ always() && (steps.health.outcome == 'failure' || steps.ai_health.outcome == 'failure' || (github.event_name == 'workflow_dispatch' && inputs.test_email)) }}
+        if: ${{ always() && (steps.health.outcome == 'failure' || steps.checkout_ai.outcome == 'failure' || steps.ai_health.outcome == 'failure' || (github.event_name == 'workflow_dispatch' && inputs.test_email)) }}
         shell: bash
         env:
           SMTP_HOST: ${{ vars.TDS_WATCHDOG_SMTP_HOST }}
@@ -70,7 +78,8 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.TDS_WATCHDOG_SMTP_PASSWORD }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           API_FAILED: ${{ steps.health.outcome == 'failure' }}
-          AI_FAILED: ${{ steps.ai_health.outcome == 'failure' }}
+          AI_FAILED: ${{ steps.ai_health.outcome == 'failure' && steps.ai_health.outputs.infra_failed != 'true' }}
+          MONITOR_INFRA_FAILED: ${{ steps.checkout_ai.outcome == 'failure' || steps.ai_health.outputs.infra_failed == 'true' }}
         run: |
           python3 - <<'PY'
           import os
@@ -90,7 +99,9 @@ jobs:
               if os.environ['API_FAILED'] == 'true':
                   failed_checks.append('API/banco de producao')
               if os.environ['AI_FAILED'] == 'true':
-                  failed_checks.append('edge/tunel de IA')
+                  failed_checks.append('edge dos Workers de IA')
+              if os.environ['MONITOR_INFRA_FAILED'] == 'true':
+                  failed_checks.append('infraestrutura do monitor de IA')
               failure = bool(failed_checks)
               message = EmailMessage()
               message['Subject'] = ('[Tutor TDS] Falha: ' + ', '.join(failed_checks)

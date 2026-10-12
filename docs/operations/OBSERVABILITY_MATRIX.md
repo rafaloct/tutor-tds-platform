@@ -219,7 +219,7 @@ desta execução. O PR #88 não deve alterar o PR #85 nem instalar qualquer moni
 e prova controlada de indisponibilidade sintética, sem derrubar produção. Registrar
 SHA/config, timestamps e recibos sanitizados; não repetir restores da #2.
 
-## Candidato de probe público da IA — 12/10/2026
+## Candidato de probe público dos Workers de IA — 12/10/2026
 
 **IMPLEMENTED / TESTED-LOCAL** nesta branch: o runner aceita
 `health_json.expected_values` para exigir, por exemplo, `status=ok` sem imprimir
@@ -231,22 +231,32 @@ O [manifesto público](../../tools/observability/ai_public_manifest.json) verifi
 | --- | --- | --- |
 | `gateway_production_edge` | HTTPS, TLS, latência e `GET /health` 200 com `status=ok` do Worker produtivo | AnythingLLM, túnel produtivo, workspace ou modelo |
 | `gateway_staging_edge` | Os mesmos sinais no Worker isolado de staging | Chamada ao upstream ou RAG |
-| `staging_tunnel_http_route` | HTTPS, TLS, latência e 403 em `GET /api/v1/auth` sem chave, igual ao observado em [10/10](../production/evidence/cloudflare-staging-chain-20261010.txt) | Saúde do container/modelo; um 403 de WAF/Access também pode coincidir |
+
+O candidato inicial incluía `GET /api/v1/auth` sem chave no túnel de staging,
+esperando HTTP 403 conforme a [observação de 10/10](../production/evidence/cloudflare-staging-chain-20261010.txt).
+Esse resultado também pode ser produzido por Cloudflare WAF/Access quando o
+upstream está indisponível, então foi removido: não serve como prova confiável de
+saúde do túnel ou do AnythingLLM. Um futuro probe do upstream precisa de um
+contrato de resposta inequívoco, sem geração, sem PII e testado no ambiente real.
 
 O [watchdog externo](../../.github/workflows/tds-vps-watchdog.yml) executa esses
-probes e usa o e-mail SMTP já existente somente quando a variável de repositório
-`TDS_AI_MONITOR_ENABLED=true` estiver configurada, ou quando uma execução manual
-usar `check_ai=true`. A agenda da API continua `17,47 * * * *`; nenhuma nova
-credencial, chamada de geração, compra de SaaS ou alteração de produção foi feita.
+probes quando a variável de repositório `TDS_AI_MONITOR_ENABLED=true` estiver
+configurada, ou quando uma execução manual usar `check_ai=true`. Em caso de falha,
+reaproveita o e-mail SMTP já existente. A agenda da API continua
+`17,47 * * * *`; nenhuma nova credencial, chamada de geração, compra de SaaS ou
+alteração de produção foi feita.
 Um check com falha faz a execução falhar e tenta enviar uma mensagem que distingue
-API/banco de edge/túnel. Aceite pelo servidor SMTP não prova recebimento.
+falha da API/banco e falha de edge dos Workers. Falha no checkout ou saída inválida
+do runner (código diferente de 0/1) é rotulada como infraestrutura do monitor,
+sem atribuir indisponibilidade à IA. O runner só executa após checkout bem
+sucedido. Aceite pelo SMTP não prova recebimento.
 
 **HUMAN-GATE — ativação do alerta:** responsável pela operação executa
-`workflow_dispatch` com `check_ai=true`, verifica os três resultados e a origem
-do 403 em logs sanitizados de WAF/AnythingLLM, confirma o canal SMTP com
-`test_email=true`, e só então configura `TDS_AI_MONITOR_ENABLED=true` nas variáveis
-do repositório. Se o 403 vier do WAF ou o runner GitHub for bloqueado, revisar o
-contrato do probe antes da ativação. Para reverter somente estes checks, remover
-ou definir a variável como `false`; o watchdog atual da API continua ativo.
+`workflow_dispatch` com `check_ai=true`, verifica os dois resultados, confirma o
+canal SMTP com `test_email=true`, e só então configura
+`TDS_AI_MONITOR_ENABLED=true` nas variáveis do repositório. Se o runner GitHub for
+bloqueado, revisar a infraestrutura antes da ativação. Para reverter somente estes
+checks, remover ou definir a variável como `false`; o watchdog atual da API
+continua ativo.
 Owner nominal, recebimento do alerta, comportamento em falha controlada e saúde
 real de AnythingLLM/OpenRouter permanecem **UNKNOWN** até evidência específica.

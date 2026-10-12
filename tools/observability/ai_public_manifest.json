@@ -24,14 +24,6 @@
         "required_keys": ["status"],
         "expected_values": {"status": "ok"}
       }
-    },
-    {
-      "service_id": "staging_tunnel_http_route",
-      "url": "https://ia-tutor-staging.ipexdesenvolvimento.cloud/api/v1/auth",
-      "timeout_seconds": 5,
-      "expected_status": 403,
-      "max_latency_ms": 5000,
-      "tls_min_days": 14
     }
   ]
 }
