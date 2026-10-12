@@ -1,15 +1,24 @@
 # CURRENT STATE
 
-## 2026-10-12 — runner opt-in de restore offsite (candidato local)
+## 2026-10-12 — custódia do backup agendado e runner de restore isolado
 
 IMPLEMENTED/TESTED-LOCAL: `tooling/rehearse_scheduled_postgres_backup.py`
 confere o recibo agendado e o hash do objeto `.dump.age` fornecidos pelo
 operador, decripta somente em memória e restaura em PostgreSQL 16 descartável
 sem rede, porta ou volume persistente. O teste sintético Docker conferiu
-tmpfs e limpeza após êxito e falha; 25 testes unitários do runner e gate
-passaram. O manifesto é parcial e não fecha upgrade/compatibilidade do gate
+tmpfs e limpeza após êxito e falha; 29 testes unitários do runner e gate
+passaram, com 1 integração Docker opt-in ignorada nessa execução. O
+manifesto é parcial e não fecha upgrade/compatibilidade do gate
 12. Rafael autorizou avellaria como host do ensaio e informou que fornecerá
-o caminho da identidade age. Nenhum backup real foi restaurado até agora.
+o caminho da identidade age. O apontador local do Dokploy e o download somente
+leitura via Wrangler identificaram o backup
+`20261012T034000Z-80e0615f8a9a453a9a4936c60b420e17`, concluído às
+03:40:08 UTC; os 249216 bytes criptografados coincidiram em SHA-256 com o
+recibo. Prova sanitizada em
+`docs/production/evidence/scheduled-postgres-backup-custody-20261012.json`.
+O runner aceita `sudo` supervisionado com identidade age 0600 de Rafael,
+binário age protegido por root e checkout candidato conferido. Nenhum backup
+real foi descriptografado ou restaurado até agora.
 
 ## 2026-10-12 — trava de sessão na transição de turma (candidato local)
 

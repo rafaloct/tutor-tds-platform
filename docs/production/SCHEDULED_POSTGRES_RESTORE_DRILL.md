@@ -76,7 +76,7 @@ git rev-parse HEAD  # conferir com o commit revisado
 sudo install -D -o root -g root -m 0755 tooling/rehearse_scheduled_postgres_backup.py /usr/local/libexec/tds/rehearse_scheduled_postgres_backup.py
 expected_script_sha=$(git show HEAD:tooling/rehearse_scheduled_postgres_backup.py | sha256sum | cut -d' ' -f1)
 printf '%s  %s\n' "$expected_script_sha" /usr/local/libexec/tds/rehearse_scheduled_postgres_backup.py | sha256sum -c -
-sudo install -o root -g root -m 0755 /home/rafael/.cache/tds-restore-tools/age /usr/local/bin/age
+sudo install -o root -g root -m 0755 /home/rafael/.cache/tds-restore-tools/age-v1.3.2 /usr/local/bin/age
 printf '%s  %s\n' eb7dd1b518f0a307c99cd97782623c5321da049154b04acd2d98d21aa7bc9b2c /usr/local/bin/age | sha256sum -c -
 sudo -- python3 /usr/local/libexec/tds/rehearse_scheduled_postgres_backup.py \
   --execute \
