@@ -9,6 +9,7 @@ receipts and confirm their custody separately.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 from pathlib import Path
@@ -27,7 +28,12 @@ GATES = (
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 EVIDENCE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*\.json\Z")
 ALEMBIC_REVISION = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*\Z")
+GIT_TREE_OID = re.compile(r"[0-9a-f]{40}\Z")
+RECEIPT_ID = re.compile(r"\d{8}T\d{6}Z-[0-9a-f]{32}\Z")
+UTC_TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z\Z")
 MAX_EVIDENCE_BYTES = 1024 * 1024
+MAX_DRILL_AGE = timedelta(days=30)
+MAX_CLOCK_SKEW = timedelta(minutes=5)
 
 
 class EvidenceError(ValueError):
@@ -61,7 +67,22 @@ def _require(condition: bool, reason: str) -> None:
         raise EvidenceError(reason)
 
 
-def _gate_claim(gate: str, record: dict[str, Any], schema: str) -> None:
+def _utc_time(value: Any, name: str) -> datetime:
+    _require(isinstance(value, str) and UTC_TIMESTAMP.fullmatch(value) is not None,
+             f"{name} must be an ISO UTC timestamp")
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise EvidenceError(f"{name} is invalid") from error
+
+
+def _fresh_drill(when: datetime, now: datetime, name: str) -> None:
+    _require(when <= now + MAX_CLOCK_SKEW, f"{name} is in the future")
+    _require(now - when <= MAX_DRILL_AGE, f"{name} is older than 30 days")
+
+
+def _gate_claim(gate: str, record: dict[str, Any], schema: str,
+                api_tree: str) -> None:
     _require(record.get("status") == "passed", "evidence status is not passed")
 
     if gate == "offsite_backup":
@@ -78,6 +99,36 @@ def _gate_claim(gate: str, record: dict[str, Any], schema: str) -> None:
         )
         _require(record.get("isolated_restore_from_offsite_verified") is True,
                  "offsite archive was not restored in isolation")
+        receipt = record.get("scheduled_receipt")
+        _require(isinstance(receipt, dict), "scheduled receipt is missing")
+        receipt_id = receipt.get("id")
+        _require(isinstance(receipt_id, str) and RECEIPT_ID.fullmatch(receipt_id) is not None,
+                 "scheduled receipt ID is invalid")
+        _require(type(receipt.get("schema")) is int and receipt["schema"] == 1 and
+                 receipt.get("owner") == "tutor-tds-issue2-scheduled-v1" and
+                 receipt.get("status") == "verified" and
+                 receipt.get("bucket") == "tds-backups" and
+                 receipt.get("key") == f"postgres/scheduled/v1/{receipt_id}/archive.dump.age" and
+                 receipt.get("sha256") == hashes[0] and
+                 receipt.get("source") == "tutor-tds-api-db-1/tutor_tds" and
+                 receipt.get("sourceReadOnly") is True and
+                 receipt.get("clientEncryption") == "age" and
+                 receipt.get("privateKeyUsed") is False and
+                 receipt.get("restoreExecuted") is False,
+                 "scheduled receipt does not match the native backup stream")
+        completed = _utc_time(receipt.get("completedAt"), "scheduled receipt completedAt")
+        _require(receipt.get("day") == completed.date().isoformat() and
+                 receipt_id[:8] == completed.strftime("%Y%m%d"),
+                 "scheduled receipt day does not match its ID")
+        drill = record.get("restore_drill")
+        _require(isinstance(drill, dict) and
+                 drill.get("source_receipt_id") == receipt_id and
+                 drill.get("source_object_key") == receipt["key"] and
+                 drill.get("source_cipher_sha256") == receipt["sha256"] and
+                 isinstance(drill.get("decrypted_dump_sha256"), str) and
+                 SHA256.fullmatch(drill["decrypted_dump_sha256"]) is not None,
+                 "offsite restore drill is not linked to the scheduled receipt")
+        _utc_time(drill.get("restored_at"), "offsite restore drill restored_at")
         return
 
     if gate == "critical_volumes_restore":
@@ -88,6 +139,7 @@ def _gate_claim(gate: str, record: dict[str, Any], schema: str) -> None:
         _require(isinstance(restored, dict) and
                  restored.get("decrypted_sha256_equals_snapshot") is True,
                  "critical volume restore checksum is unverified")
+        _utc_time(record.get("executed_at"), "critical volume drill executed_at")
         return
 
     # PostgreSQL restore, upgrade, and schema compatibility may cite the same
@@ -95,6 +147,19 @@ def _gate_claim(gate: str, record: dict[str, Any], schema: str) -> None:
     _require(record.get("clone_revision") == schema and
              record.get("production_unchanged") is True,
              "PostgreSQL rehearsal is stale or changed production")
+    _require(record.get("api_tree_oid") == api_tree and
+             isinstance(record.get("run_id"), str) and bool(record["run_id"]),
+             "PostgreSQL rehearsal is not bound to the candidate API tree")
+    _utc_time(record.get("completed_at"), "PostgreSQL rehearsal completed_at")
+    source = record.get("source_backup")
+    backup = record.get("backup")
+    _require(isinstance(source, dict) and isinstance(backup, dict) and
+             isinstance(source.get("receipt_id"), str) and
+             isinstance(source.get("object_key"), str) and
+             isinstance(source.get("plaintext_sha256"), str) and
+             SHA256.fullmatch(source["plaintext_sha256"]) is not None and
+             backup.get("sha256") == source["plaintext_sha256"],
+             "PostgreSQL rehearsal does not identify its restored backup")
     if gate == "postgres_restore":
         _require(record.get("restore_verified") is True,
                  "PostgreSQL restore is unverified")
@@ -111,8 +176,13 @@ def _gate_claim(gate: str, record: dict[str, Any], schema: str) -> None:
                  "backend schema or API compatibility is unverified")
 
 
-def verify(acceptance_path: Path, evidence_dir: Path, expected_schema: str) -> None:
+def verify(acceptance_path: Path, evidence_dir: Path, expected_schema: str,
+           expected_api_tree: str, now: datetime | None = None) -> None:
     _require(bool(ALEMBIC_REVISION.fullmatch(expected_schema)), "expected schema is invalid")
+    _require(bool(GIT_TREE_OID.fullmatch(expected_api_tree)), "expected API tree is invalid")
+    now = now or datetime.now(timezone.utc)
+    _require(now.tzinfo is not None and now.utcoffset() == timedelta(0),
+             "verification clock must be UTC")
     _require(evidence_dir.is_dir() and not evidence_dir.is_symlink(),
              "evidence directory is unavailable")
     _require(acceptance_path.is_file() and not acceptance_path.is_symlink(),
@@ -123,10 +193,13 @@ def verify(acceptance_path: Path, evidence_dir: Path, expected_schema: str) -> N
         _require(acceptance.get(gate) is True, "acceptance field is missing or false")
     _require(acceptance.get("candidate_schema_version") == expected_schema,
              "acceptance schema does not match the candidate")
+    _require(acceptance.get("candidate_api_tree_oid") == expected_api_tree,
+             "acceptance API tree does not match the candidate")
     references = acceptance.get("evidence")
     _require(isinstance(references, dict) and set(references) == set(GATES),
              "acceptance evidence map is incomplete")
 
+    records: dict[str, dict[str, Any]] = {}
     for gate in GATES:
         reference = references[gate]
         _require(isinstance(reference, dict) and set(reference) == {"file", "sha256"},
@@ -142,11 +215,35 @@ def verify(acceptance_path: Path, evidence_dir: Path, expected_schema: str) -> N
                  "evidence file is missing or outside its directory")
         record, raw = _read_object(path)
         _require(hashlib.sha256(raw).hexdigest() == digest, "evidence hash does not match")
-        _gate_claim(gate, record, expected_schema)
+        _gate_claim(gate, record, expected_schema, expected_api_tree)
+        records[gate] = record
 
     _require(references["offsite_backup"]["file"] !=
              references["critical_volumes_restore"]["file"],
              "offsite backup and critical volume drill need distinct evidence")
+    postgres_ref = references["postgres_restore"]
+    _require(references["upgrade_compatibility"] == postgres_ref and
+             references["backend_schema_compatibility"] == postgres_ref,
+             "PostgreSQL restore, upgrade, and schema claims need one rehearsal")
+
+    offsite = records["offsite_backup"]
+    receipt = offsite["scheduled_receipt"]
+    drill = offsite["restore_drill"]
+    postgres = records["postgres_restore"]
+    source = postgres["source_backup"]
+    _require(source["receipt_id"] == receipt["id"] and
+             source["object_key"] == receipt["key"] and
+             source["plaintext_sha256"] == drill["decrypted_dump_sha256"],
+             "PostgreSQL rehearsal backup differs from the offsite restore drill")
+    receipt_time = _utc_time(receipt["completedAt"], "scheduled receipt completedAt")
+    drill_time = _utc_time(drill["restored_at"], "offsite restore drill restored_at")
+    rehearsal_time = _utc_time(postgres["completed_at"], "PostgreSQL rehearsal completed_at")
+    _require(receipt_time <= drill_time <= rehearsal_time,
+             "receipt, offsite restore, and PostgreSQL rehearsal are out of order")
+    _fresh_drill(drill_time, now, "offsite restore drill")
+    _fresh_drill(rehearsal_time, now, "PostgreSQL rehearsal")
+    _fresh_drill(_utc_time(records["critical_volumes_restore"]["executed_at"],
+                           "critical volume drill executed_at"), now, "critical volume drill")
 
 
 def main() -> int:
@@ -154,9 +251,11 @@ def main() -> int:
     parser.add_argument("--acceptance", type=Path, required=True)
     parser.add_argument("--evidence-dir", type=Path, required=True)
     parser.add_argument("--expected-schema", required=True)
+    parser.add_argument("--expected-api-tree", required=True)
     args = parser.parse_args()
     try:
-        verify(args.acceptance, args.evidence_dir, args.expected_schema)
+        verify(args.acceptance, args.evidence_dir, args.expected_schema,
+               args.expected_api_tree)
     except EvidenceError as error:
         print(f"RECOVERY_EVIDENCE_PROVENANCE=FAIL: {error}", file=sys.stderr)
         return 1

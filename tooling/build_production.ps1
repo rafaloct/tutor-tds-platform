@@ -52,6 +52,8 @@ try {
     $remoteTags = @(& git ls-remote --tags origin "refs/tags/$($tags[0])" "refs/tags/$($tags[0])^{}")
     Require ($LASTEXITCODE -eq 0 -and @($remoteTags | Where-Object { ($_ -split '\s+')[0] -eq $commit }).Count -ge 1) 'tag de release ainda não está no GitHub.'
     $localSchema = Get-CanonicalAlembicHead
+    $apiTree = (& git rev-parse 'HEAD:api').Trim()
+    Require ($LASTEXITCODE -eq 0 -and $apiTree -match '^[a-f0-9]{40}$') 'árvore Git da API candidata não identificada.'
     $restorePath = Join-Path $workspace 'docs/production/evidence/production-restore-acceptance.json'
     Require (Test-Path -LiteralPath $restorePath) 'backup/restauração de produção não comprovados.'
     $proof = Get-Content -LiteralPath $restorePath -Raw | ConvertFrom-Json
@@ -61,7 +63,8 @@ try {
         (Join-Path $PSScriptRoot 'verify_production_recovery_evidence.py'),
         '--acceptance', $restorePath,
         '--evidence-dir', (Join-Path $workspace 'docs/production/evidence'),
-        '--expected-schema', $localSchema
+        '--expected-schema', $localSchema,
+        '--expected-api-tree', $apiTree
     )
     $health = Invoke-RestMethod -Uri "$expectedApi/health" -TimeoutSec 15
     Require ($health.status -eq 'ok' -and $health.database -eq 'available') 'health de produção sem banco disponível.'

@@ -167,3 +167,35 @@ PostgreSQL agendado. O arquivo de aceite atual permanece intacto e falha nesse
 novo gate até que provas sanitizadas correspondentes sejam revisadas e
 versionadas. Hash e checagem de campos tornam a afirmação rastreável, mas a
 revisão humana ainda deve confirmar execução, custódia e cobertura dos serviços.
+
+O aceite também precisa declarar `candidate_api_tree_oid`, obtido por
+`git rev-parse HEAD:api`; o ensaio PostgreSQL precisa repetir esse OID e a
+revision Alembic candidata. Usar o OID da árvore da API evita um ciclo de SHA
+quando os comprovantes são adicionados ao mesmo commit de release. Os três
+gates PostgreSQL devem apontar ao **mesmo arquivo e SHA-256** de ensaio. Um
+`clone_revision` igual em ensaios diferentes não basta.
+
+O arquivo de offsite deve conter o `scheduled_receipt` nativo do fluxo
+`postgres/scheduled/v1/` (ID, chave do objeto, hash SHA-256 do objeto `.age`,
+`completedAt` e demais campos de origem) e `restore_drill` com
+`source_receipt_id`, `source_object_key`, `source_cipher_sha256`,
+`decrypted_dump_sha256` e `restored_at`. Os hashes de upload/download devem
+coincidir com o hash **criptografado** do recibo. O mesmo ensaio PostgreSQL
+deve declarar `source_backup.receipt_id`, `object_key` e `plaintext_sha256`;
+este último deve coincidir com o dump **descriptografado** do drill e com
+`backup.sha256` do ensaio. O recibo agendado registra
+`restoreExecuted=false` por desenho; só o drill independente comprova restore.
+O runner atual `api/ops/rehearse_production_upgrade.py` cria um `pg_dump`
+direto e ainda não consome esse arquivo offsite. Portanto sua saída atual,
+mesmo com revision correta, não fecha este vínculo sem um novo ensaio real.
+
+Política candidata de frescor no preflight: o restore offsite, o ensaio
+PostgreSQL e o drill de volume precisam ter ocorrido nos últimos **30 dias**
+em UTC, com tolerância máxima de cinco minutos para relógio futuro. A ordem
+deve ser `scheduled_receipt.completedAt <= restore_drill.restored_at <=
+postgres_rehearsal.completed_at`. Cada timestamp deve incluir `Z`. O arquivo
+versionado pode expirar e exigir novo drill; isso é intencional. A idade do
+**último backup agendado** é um controle operacional separado do gate 11:
+verificar recibo/monitoramento vivo na janela de promoção e o limite de 26h
+de `tooling/backup_automation/backup.mjs`. Não congelar esse último recibo
+em uma tag Git, que ficaria obsoleta no dia seguinte.

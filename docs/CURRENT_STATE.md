@@ -14,8 +14,13 @@ focal foi atualizado, mas não executado neste executor sem Flutter/Dart;
 IMPLEMENTED/TESTED-LOCAL: o preflight de AAB mantém a verificação tipada do
 aceite de recuperação e passa a exigir, em verificador Python offline, hashes e
 arquivos de evidência versionados para os cinco campos, além de revisão Alembic
-igual ao candidato. O aceite booleano histórico de 06/10 não contém essas
-referências e falha fechado. Track B comprova o volume AnythingLLM; o ensaio
+igual ao candidato. O verificador também exige a árvore Git da API candidata,
+um único ensaio PostgreSQL para os três gates correspondentes e vínculo entre
+recibo agendado R2, dump offsite descriptografado e dump usado no ensaio.
+Drills devem ter até 30 dias, seguir a ordem temporal e não estar no futuro;
+a idade de 26h do último backup fica para inspeção operacional na promoção.
+O aceite booleano histórico de 06/10 não contém essas referências e falha
+fechado. Track B comprova o volume AnythingLLM; o ensaio
 PostgreSQL versionado alcança apenas `0020`, e o checkpoint aponta prova mais
 recente ainda privada na VPS. Não foi fabricado recibo, executado restore,
 alterada produção nem gerado AAB. `PRODUCTION_RELEASE_READY=false`.
