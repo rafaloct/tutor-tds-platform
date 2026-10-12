@@ -35,7 +35,7 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 | 12 | restauração independente | BLOCKED | `production-restore-acceptance.json` existe, com cinco booleans, mas sem referências. Track B comprova o volume AnythingLLM; o ensaio PostgreSQL versionado vai até `0020`. O verificador exige recibo agendado ligado ao dump restaurado, um ensaio PostgreSQL único, árvore Git da API e drill recente; o aceite histórico falha. |
 | 13 | secrets fora do Git | PARTIAL | O scanner local com gitleaks 8.28.0 não encontrou vazamentos no histórico da candidata a partir da base de PR #194; o digest histórico que gerava falso positivo recebeu exceção fixada ao valor exato. Repetir em CI e no SHA final, sem copiar credenciais para evidências. |
 | 14 | HTTPS/domínio/SSL | PARTIAL | TLS passou em probes históricos; repetir validade e rota durante a janela de promoção. |
-| 15 | testes de release | PARTIAL | API focal de turma/evidência 14/14, gate de restore 17/17, harness 18/18, preflight RAG 8/8, promoção curricular 10/10, Worker 32/32 e análise Flutter 3.44.9 passaram. Uma rodada Flutter teve 38 PASS e 1 teste de rolagem corrigido e repetido com 4/4 PASS. Reexecutar recorte afetado e gates completos no SHA final, inclusive PostgreSQL concorrente e Android. |
+| 15 | testes de release | PARTIAL | Suíte completa da API passou localmente; PostgreSQL 16 descartável na porta local passou 4/4 testes opcionais de turma/migration; gate de restore 17/17, harness 20/20, preflight RAG 8/8, promoção curricular 10/10, Worker 32/32 e análise Flutter 3.44.9 passaram. O recorte de telas Flutter passou 6/6 após corrigir rolagem dos testes. Reexecutar recorte afetado e CI no SHA final, inclusive concorrência PostgreSQL específica e Android. |
 | 16 | upgrade do app publicado | BLOCKED | Evidência de 06/10 cobre o app publicado `1.2.0+11` contra backend anterior; falta upgrade real do candidato `1.4.0+13` preservando dados/sessão. |
 | 17 | manifesto do build | BLOCKED | Só é produzido após preflight e AAB do SHA congelado; nenhum manifesto atual foi gerado. |
 | 18 | SHA-256 do AAB | BLOCKED | O AAB registrado está `superseded`, não corresponde à fonte atual e tem `upload_allowed=false`. |
@@ -46,7 +46,10 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
   sintéticos em API/banco descartáveis. A decisão de 12/10 altera autoridade do
   operador e capacidade; os PASS de 05/10 não aceitam essa regra nova. Testes
   locais de API e Flutter exercitaram a nova regra; revisão ainda encontrou
-  retries ambíguos e reconfirmação de versão em correção. Reexecutar o E2E
+  retries ambíguos e reconfirmação de versão; a candidata corrigiu a versão
+  revisada e o replay na mesma instância, e está fechando replay após recriar
+  a tela. O validador agora rejeita o PASS antigo de capacidade rígida.
+  Reexecutar o E2E
   depois da mudança, primeiro em ambiente isolado, depois em staging.
   `CLASS_LIFECYCLE_ENABLED` segue false até promoção.
 - **Tutor contextual:** o sentinel A/B prova isolamento CourseVersion com
