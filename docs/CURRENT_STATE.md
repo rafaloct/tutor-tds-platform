@@ -218,6 +218,9 @@ formação. Após resposta perdida, o repositório conserva o corpo e o ID do
 comando em armazenamento seguro escopado por API/conta antes do POST. Ao
 reabrir o preparo ou reiniciar o app, relê e reconcilia o mesmo recibo antes
 de aceitar outro preparo; falha de leitura/gravação local impede novo POST.
+O POST confere o `sub` do token usado com a conta da pendência. Rejeições
+403/404/422 no primeiro envio liberam correção; no replay ambíguo conservam
+o recibo para evitar duplicação.
 O teste com repositório recriado e resposta perdida é sintético; Flutter e
 Android ainda requerem execução no SDK validado. Ativação e
 encerramento limpam motivo/aceite ao trocar turma, mostram o nome na

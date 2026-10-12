@@ -22,12 +22,24 @@ class _TokenStore implements AuthTokenStore {
       );
 
   AuthTokens? value;
+  int reads = 0;
+  int? replaceOnRead;
+  String? replacementAccessToken;
 
   @override
   Future<void> clear() async => value = null;
 
   @override
-  Future<AuthTokens?> read() async => value;
+  Future<AuthTokens?> read() async {
+    reads++;
+    if (reads == replaceOnRead) {
+      value = AuthTokens(
+        accessToken: replacementAccessToken!,
+        refreshToken: 'refresh-token',
+      );
+    }
+    return value;
+  }
 
   @override
   Future<void> write(AuthTokens tokens) async => value = tokens;
@@ -281,14 +293,21 @@ void main() {
       throwsA(isA<ClassLifecycleRejectedException>()),
     );
     expect(pendingStore.values, hasLength(1));
+    replayStatus = 404;
+    await expectLater(
+      reopened.reconcilePendingPreparation(),
+      throwsA(isA<ClassLifecycleRejectedException>()),
+    );
+    expect(pendingStore.values, hasLength(1));
     replayStatus = 201;
     final screenController = PrepareClassroomController(reopened);
     await screenController.load();
     expect(screenController.result?.opaqueId, 'class-1');
     expect(screenController.result?.name, 'Turma Palmas — IA');
-    expect(posts, hasLength(4));
+    expect(posts, hasLength(5));
     expect(posts[1], posts.first);
     expect(posts[2], posts.first);
+    expect(posts[3], posts.first);
     expect(posts.last, posts.first);
     expect(committed, hasLength(1));
     expect(pendingStore.values, isEmpty);
@@ -329,6 +348,100 @@ void main() {
         '{"schema":1,"body":{"id":"damaged"},"digest":"wrong"}';
     await expectLater(repository.prepare(command), throwsA(isA<ClassLifecycleException>()));
     expect(posts, 0);
+  });
+
+  test('403/404 iniciais liberam preparo em outro programa autorizado', () async {
+    final pendingStore = _PendingStore();
+    final requests = <Map<String, dynamic>>[];
+    var rejectedStatus = 403;
+    final repository = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: _TokenStore(accessToken: _jwt('operator-1')),
+      ),
+      pendingPrepareStore: pendingStore,
+      client: MockClient((request) async {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        requests.add(body);
+        if (body['program_id'] == 'program-revoked') {
+          return http.Response('{}', rejectedStatus);
+        }
+        return _jsonResponse(_snapshot(status: 'planned', canClose: false), 201);
+      }),
+    );
+    PrepareClassroomCommand command(String programId) => PrepareClassroomCommand(
+      className: 'Turma Palmas', offerMunicipality: 'Palmas',
+      offerLocation: 'Laboratório', institutionId: 'institution-1',
+      programId: programId, courseId: 'course-1',
+      courseVersionId: 'version-7', startDate: DateTime(2026, 10, 11),
+      endDate: DateTime(2026, 10, 30), teacherId: 'teacher-1',
+      monitorIds: const [],
+    );
+
+    await expectLater(
+      repository.prepare(command('program-revoked')),
+      throwsA(isA<ClassLifecycleRejectedException>()),
+    );
+    expect(pendingStore.values, isEmpty);
+    rejectedStatus = 404;
+    await expectLater(
+      repository.prepare(command('program-revoked')),
+      throwsA(isA<ClassLifecycleRejectedException>()),
+    );
+    expect(pendingStore.values, isEmpty);
+    await repository.prepare(command('program-authorized'));
+    expect(requests, hasLength(3));
+    expect(requests.last['program_id'], 'program-authorized');
+    expect(requests.last['id'], isNot(requests.first['id']));
+    expect(requests.last['id'], isNot(requests[1]['id']));
+  });
+
+  test('troca de token antes do POST não envia preparo na conta nova', () async {
+    final tokenStore = _TokenStore(accessToken: _jwt('operator-1'))
+      ..replaceOnRead = 3
+      ..replacementAccessToken = _jwt('operator-2');
+    final pendingStore = _PendingStore();
+    final requests = <Map<String, dynamic>>[];
+    final repository = ClassLifecycleRepository(
+      apiUrl: 'https://api.example',
+      authRepository: AuthRepository(
+        apiUrl: 'https://api.example',
+        tokenStore: tokenStore,
+      ),
+      pendingPrepareStore: pendingStore,
+      client: MockClient((request) async {
+        requests.add(jsonDecode(request.body) as Map<String, dynamic>);
+        return _jsonResponse(_snapshot(status: 'planned', canClose: false), 201);
+      }),
+    );
+    final command = PrepareClassroomCommand(
+      className: 'Turma Palmas', offerMunicipality: 'Palmas',
+      offerLocation: 'Laboratório', institutionId: 'institution-1',
+      programId: 'program-1', courseId: 'course-1',
+      courseVersionId: 'version-7', startDate: DateTime(2026, 10, 11),
+      endDate: DateTime(2026, 10, 30), teacherId: 'teacher-1',
+      monitorIds: const [],
+    );
+
+    await expectLater(
+      repository.prepare(command),
+      throwsA(isA<ClassLifecycleException>()),
+    );
+    expect(requests, isEmpty);
+    expect(pendingStore.values, hasLength(1));
+    final pending = jsonDecode(pendingStore.values.values.single)
+        as Map<String, dynamic>;
+    final pendingId = (pending['body'] as Map<String, dynamic>)['id'];
+
+    tokenStore.value = AuthTokens(
+      accessToken: _jwt('operator-1'),
+      refreshToken: 'refresh-token',
+    );
+    await repository.reconcilePendingPreparation();
+    expect(requests, hasLength(1));
+    expect(requests.single['id'], pendingId);
+    expect(pendingStore.values, isEmpty);
   });
 
   test('422 recebido na primeira tentativa libera correção dos dados', () async {

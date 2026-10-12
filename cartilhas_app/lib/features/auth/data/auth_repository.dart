@@ -69,9 +69,13 @@ class AuthRepository {
   /// This is not authentication or authorization and grants no roles.
   Future<String?> localUserId() async {
     final tokens = await _readTokens();
-    if (tokens == null) return null;
+    return tokens == null ? null : unverifiedSubject(tokens.accessToken);
+  }
+
+  /// Local owner partition only. Callers must still use [authorized] for HTTP.
+  static String? unverifiedSubject(String accessToken) {
     try {
-      final segments = tokens.accessToken.split('.');
+      final segments = accessToken.split('.');
       if (segments.length != 3 || segments.any((part) => part.isEmpty)) {
         return null;
       }

@@ -253,16 +253,20 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
     }
     late final Map<String, dynamic> response;
     try {
-      response = await _request('POST', '/operations/classes', body);
+      response = await _request('POST', '/operations/classes', body, scope);
     } on ClassVersionChangedException {
       _options = const [];
       await _clearPending(scope);
       rethrow;
     } on ClassLifecycleRejectedException catch (error) {
-      // Other 4xx responses may also reject an already committed receipt
-      // (for example, a revoked membership or schema validation before replay).
-      // A direct 422 on the first attempt confirms no class was committed.
-      if (firstAttempt && error.statusCode == 422) await _clearPending(scope);
+      // The API rejects 403/404/422 before creating a class or receipt. On replay,
+      // any response may instead precede lookup of an existing receipt.
+      if (firstAttempt &&
+          (error.statusCode == 403 ||
+              error.statusCode == 404 ||
+              error.statusCode == 422)) {
+        await _clearPending(scope);
+      }
       rethrow;
     }
     final snapshot = _LifecycleSnapshot.fromJson(response);
@@ -523,11 +527,19 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
     String method,
     String path, [
     Map<String, dynamic>? body,
+    String? expectedPrepareScope,
   ]) async {
     try {
-      final base = apiUrl.replaceFirst(RegExp(r'/+$'), '');
+      final base = apiUrl.trim().replaceFirst(RegExp(r'/+$'), '');
       final uri = Uri.parse('$base$path');
       final response = await authRepository.authorized((token) {
+        if (expectedPrepareScope != null &&
+            '$base\u0000${AuthRepository.unverifiedSubject(token)}' !=
+                expectedPrepareScope) {
+          throw const ClassLifecycleException(
+            'A conta mudou. Entre novamente para conferir a preparação pendente.',
+          );
+        }
         final headers = {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
