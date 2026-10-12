@@ -73,6 +73,31 @@ void main() {
       expect(tapped, 'https://exemplo.br/doc');
     });
 
+    testWidgets('URL nua preserva prefixo e pontuação uma única vez', (
+      tester,
+    ) async {
+      String? tapped;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TutorMessageText(
+              'Veja https://example.com, agora.',
+              onLinkTap: (url) => tapped = url,
+            ),
+          ),
+        ),
+      );
+      final rendered = tester.widget<Text>(
+        find.descendant(
+          of: find.byType(TutorMessageText),
+          matching: find.byType(Text),
+        ),
+      );
+      expect(rendered.textSpan!.toPlainText(), 'Veja https://example.com, agora.');
+      await tester.tapOnText(find.textRange.ofSubstring('https://example.com'));
+      expect(tapped, 'https://example.com');
+    });
+
     testWidgets('lista vira marcador legível', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(

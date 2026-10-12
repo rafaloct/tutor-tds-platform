@@ -94,6 +94,12 @@ class PublishedAssessmentController extends ChangeNotifier {
         _showBlockingError(notify: false);
       }
       await _reconcileOwnedRemote(block, local);
+      final pending = _syncRecord;
+      if (pending?.status == AssessmentSyncStatus.pending &&
+          !_hasBlockingError &&
+          _attempt != null) {
+        unawaited(_deliver(_attempt!.id));
+      }
       await _restoreMissingQueue();
     } on Object {
       _error = 'Não foi possível retomar esta atividade agora.';

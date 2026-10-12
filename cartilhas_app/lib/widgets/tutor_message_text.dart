@@ -151,9 +151,8 @@ class _TutorMessageTextState extends State<TutorMessageText> {
           );
           break;
         case 2:
-          final url = first
-              .group(0)!
-              .replaceAll(RegExp(r'[.,!?;:\)]+$'), '');
+          final matchText = first.group(0)!;
+          final url = matchText.replaceAll(RegExp(r'[.,!?;:\)]+$'), '');
           spans.add(
             TextSpan(
               text: url,
@@ -161,11 +160,9 @@ class _TutorMessageTextState extends State<TutorMessageText> {
               recognizer: _linkRecognizer(url),
             ),
           );
-          rest = rest.replaceRange(
-            first.start,
-            first.start + url.length,
-            '',
-          );
+          final punctuation = matchText.substring(url.length);
+          if (punctuation.isNotEmpty) spans.add(TextSpan(text: punctuation));
+          rest = rest.substring(first.end);
           continue;
         default:
           final token = first.group(0)!;

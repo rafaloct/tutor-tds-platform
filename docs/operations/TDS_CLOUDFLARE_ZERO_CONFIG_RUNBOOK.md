@@ -99,7 +99,7 @@ If a **GitHub-runner** later needs tailnet SSH, generate a separate tagged Tails
 |---|---|---|---|
 | PR from feature branch | Static tests only | Never deploy | No production secrets |
 | Push to `staging` | `tools/ci/config/staging.json` via `tds_env.py` | `npx wrangler deploy --env staging` after readiness gate | Staging environment only |
-| Release tag exactly `vMAJOR.MINOR.PATCH` already in staging ancestry | `tools/ci/config/production.json` via `tds_env.py` | `npx wrangler deploy` after API compatibility check | Production environment only |
+| Release tag exactly `vMAJOR.MINOR.PATCH` already in staging ancestry | `cartilhas_app/config/production.example.json` via `tds_env.py` | `npx wrangler deploy` after API compatibility check | Production environment only |
 | Any other branch/tag | Explicitly rejected | No deploy | None |
 
 The environment selector contains no secrets. Staging's URL is `https://ead.ipexdesenvolvimento.cloud/tutor-staging-api` and production's is `https://ead.ipexdesenvolvimento.cloud/tutor-api`. Worker URLs remain the existing `workers.dev` names and **must not change without a new Android release**.

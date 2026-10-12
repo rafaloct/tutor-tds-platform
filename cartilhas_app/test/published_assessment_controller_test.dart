@@ -166,6 +166,36 @@ void main() {
     },
   );
 
+  test('retomada reenvia revisão pendente após falha transitória', () async {
+    final calls = <String>[];
+    final block = _block();
+    final attempt = _completedAttempt(block);
+    final store = _MemoryStore(calls)..value = attempt;
+    final sync = _FakeSync(calls)
+      ..record = AssessmentSyncRecord(
+        attemptId: attempt.id,
+        status: AssessmentSyncStatus.pending,
+        confirmedRevision: 0,
+        pending: [
+          AssessmentPendingRevision(
+            payload: AssessmentSyncPayload.fromAttempt(attempt, revision: 1),
+          ),
+        ],
+        localContext: attempt.publishedContext,
+        lastError: 'network_unavailable',
+      );
+    final controller = PublishedAssessmentController(store, sync);
+    addTearDown(controller.dispose);
+
+    await controller.open(block);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(sync.retryIds, [attempt.id]);
+    expect(sync.record?.lastError, isNull);
+    expect(controller.isCompleted, isTrue);
+    expect(controller.selectionReady, isTrue);
+  });
+
   test('conclusão remota prevalece sobre rascunho local na retomada', () async {
     final calls = <String>[];
     final store = _MemoryStore(calls);
@@ -241,9 +271,11 @@ void main() {
       expect(controller.error, contains('não está ativo'));
       expect(await controller.complete(), isFalse);
 
+      final retryCount = sync.retryIds.length;
       final restarted = PublishedAssessmentController(store, sync);
       addTearDown(restarted.dispose);
       await restarted.open(block);
+      expect(sync.retryIds, hasLength(retryCount));
       expect(restarted.accessDenied, isTrue);
       expect(restarted.selectionReady, isFalse);
       expect(await restarted.complete(), isFalse);
@@ -431,6 +463,7 @@ class _FakeSync
 
   final List<String> calls;
   final List<String> queuedIds = [];
+  final List<String> retryIds = [];
   AssessmentSyncRecord? record;
   bool forceConflict = false;
   bool failQueue = false;
@@ -472,6 +505,7 @@ class _FakeSync
 
   @override
   Future<AssessmentSyncRecord> retry(String attemptId) async {
+    retryIds.add(attemptId);
     final error = denyOnRetry ? 'active_enrollment_required' : retryError;
     if (error != null) {
       final current = record!;
