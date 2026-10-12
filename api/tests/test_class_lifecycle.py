@@ -15,9 +15,11 @@ from app.context_memberships import bind_student
 from app.models import (
     CertificateReference,
     ClassEnrollment,
+    ClassMonitor,
     Classroom,
     ClassroomCommandReceipt,
     ClassSession,
+    CohortMembership,
     Enrollment,
     EvidenceItem,
     OperatorCommandReceipt,
@@ -205,6 +207,34 @@ def test_legacy_admin_routes_remain_compatible_when_lifecycle_flag_is_off(
         headers=header("admin"),
     )
     assert strict_monitor.status_code == 409
+
+
+@pytest.mark.parametrize("lifecycle_enabled", [False, True])
+def test_legacy_admin_cannot_add_monitor_to_closed_class(
+    requests_api, lifecycle_enabled
+):
+    client, engine = requests_api
+    # Closed classrooms reject new team links on every write path, regardless
+    # of whether the contextual lifecycle is enabled.
+    client.app.state.settings = replace(
+        client.app.state.settings,
+        class_lifecycle_enabled=lifecycle_enabled,
+    )
+    response = client.post(
+        "/admin/classes/c1/monitors/monitor",
+        headers=header("admin"),
+    )
+    assert response.status_code == 409
+    assert "monitores" in response.json()["detail"]
+    with Session(engine) as session:
+        assert session.get(ClassMonitor, ("c1", "monitor")) is None
+        assert not session.scalars(
+            select(CohortMembership).where(
+                CohortMembership.class_id == "c1",
+                CohortMembership.user_id == "monitor",
+                CohortMembership.role == "monitor",
+            )
+        ).all()
 
 
 def test_team_candidates_and_manageable_classes_are_contextual(lifecycle_api):

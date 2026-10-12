@@ -185,6 +185,13 @@ wrapper executa `pub get --enforce-lockfile`; depois confirma que o hash de
 
 ## 2026-10-05 Issue #138 — candidato lifecycle territorial
 
+2026-10-12 — TESTED-LOCAL, ajuste restrito ao endpoint legado de monitores:
+`POST /admin/classes/{class_id}/monitors/{user_id}` rejeita HTTP 409 quando a
+turma está `closed`, com `CLASS_LIFECYCLE_ENABLED` false ou true. A leitura da
+turma usa bloqueio por linha nos bancos que o suportam, como a inclusão de
+estudantes. Teste sintético reproduziu 201 antes da correção e passou após ela;
+nenhuma validação PostgreSQL, staging ou produção foi executada neste ajuste.
+
 IMPLEMENTED local na branch `agent/issue-138-class-lifecycle-api-20261005` sobre
 `911c454`: Classroom recebe município/local da oferta e revisão de lifecycle;
 fluxo contextual `planned -> active -> closed`, equipe, readiness, CAS/replay e

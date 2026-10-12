@@ -267,7 +267,12 @@ def add_monitor(
 ) -> dict[str, str]:
     database: Database = request.app.state.database
     with Session(database.engine) as session:
-        classroom = _classroom(session, class_id)
+        classroom = session.scalar(
+            select(Classroom).where(Classroom.id == class_id).with_for_update()
+        )
+        if classroom is None:
+            raise HTTPException(status_code=404, detail="Turma não encontrada.")
+        _require_open_classroom(classroom, member_type="monitores")
         if (
             _class_lifecycle_enabled(request)
             and classroom.status != "planned"
@@ -409,11 +414,13 @@ def _bind_context(session, classroom, link, request):
         raise HTTPException(409, "Matrícula contextual inconsistente; confira a edição da turma.") from error
 
 
-def _require_open_classroom(classroom: Classroom) -> None:
+def _require_open_classroom(
+    classroom: Classroom, *, member_type: str = "estudantes"
+) -> None:
     if classroom.status == "closed":
         raise HTTPException(
             status_code=409,
-            detail="Esta turma está encerrada e não pode receber estudantes.",
+            detail=f"Esta turma está encerrada e não pode receber {member_type}.",
         )
 
 
