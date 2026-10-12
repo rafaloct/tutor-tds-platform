@@ -44,15 +44,19 @@ class TestZeroConfig(unittest.TestCase):
             root = Path(temporary)
             template = root / "cartilhas_app/config/production.example.json"
             template.parent.mkdir(parents=True)
-            template.write_text(json.dumps({
-                "TUTOR_API_URL": tds.PRODUCTION_API,
-                "TUTOR_GATEWAY_URL": tds.PRODUCTION_WORKER,
-                "REMOTE_CATALOG_ENABLED": True,
-            }), encoding="utf-8")
+            approved = json.loads(
+                (tds.ROOT / "cartilhas_app/config/production.example.json").read_text(encoding="utf-8")
+            )
+            template.write_text(json.dumps(approved), encoding="utf-8")
             result = tds.render_build_config("refs/tags/v1.4.0", root=root)
-            self.assertEqual(result["TUTOR_ENVIRONMENT"], "production")
-            self.assertFalse(result["REMOTE_CATALOG_ENABLED"])
+            self.assertEqual(result, tds.PRODUCTION_BUILD_CONFIG)
             self.assertFalse((root / "tools/ci/config/production.json").exists())
+            for changed in (approved | {"EXTRA_TOGGLE": True}, approved | {
+                "PRIVACY_POLICY_URL": "https://other.example/privacy",
+            }):
+                template.write_text(json.dumps(changed), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    tds.render_build_config("refs/tags/v1.4.0", root=root)
 
 
 if __name__ == "__main__":

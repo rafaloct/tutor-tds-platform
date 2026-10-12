@@ -23,6 +23,20 @@ STAGING_WORKER = "https://tutor-tds-gateway-staging.tdsipex.workers.dev"
 STAGING_AI_ORIGIN = "https://ia-tutor-staging.ipexdesenvolvimento.cloud"
 PROD_AI_ORIGIN = "https://ia-tutor.ipexdesenvolvimento.cloud"
 RELEASE_TAG = re.compile(r"^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$")
+PRODUCTION_BUILD_CONFIG = {
+    "TUTOR_ENVIRONMENT": "production",
+    "TUTOR_API_URL": PRODUCTION_API,
+    "TUTOR_GATEWAY_URL": PRODUCTION_WORKER,
+    "PRIVACY_POLICY_URL": "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
+    "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html",
+    "REMOTE_CATALOG_ENABLED": False,
+    "LEARNING_CONTEXT_ENABLED": False,
+    "DURABLE_LEARNING_OUTBOX_ENABLED": False,
+    "JOURNEY_TRACEABILITY_ENABLED": False,
+    "DYNAMIC_ACTIVITY_ENABLED": False,
+    "SIGNED_SUPPORT_IDENTITY": False,
+    "PUSH_NOTIFICATIONS_ENABLED": False,
+}
 
 
 def environment_for_ref(ref: str) -> str:
@@ -110,6 +124,8 @@ def render_build_config(ref: str, root: Path = ROOT, commit_sha: str | None = No
     assert config["TUTOR_API_URL"] == (STAGING_API if env == "staging" else PRODUCTION_API)
     if env == "production":
         assert not any("staging" in str(value).lower() for value in config.values())
+        if config != PRODUCTION_BUILD_CONFIG:
+            raise ValueError("Production target differs from approved release configuration")
     return config
 
 
