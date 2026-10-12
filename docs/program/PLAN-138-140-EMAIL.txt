@@ -1,5 +1,10 @@
 Assunto: Tutor TDS — plano de execução #138/#139/#140 (ciclo de vida da turma) — para o próximo agente
 
+AVISO 12/10/2026: texto histórico de handoff. Não enviar como status atual.
+Os gates humanos já foram decididos: operador prepara/ativa/encerra; acima de
+30 participantes, avisar sem bloquear. Ver docs/DECISIONS.md item 32 e a
+auditoria de prontidão de 12/10 antes de preparar qualquer comunicação nova.
+
 Olá,
 
 Segue o plano consolidado da trilha de ciclo de vida de turmas (#138 → #139 → #140),

@@ -231,6 +231,7 @@ class _CloseClassroomScreenState extends State<CloseClassroomScreen> {
               ),
               const SizedBox(height: 8),
               FilledButton.icon(
+                key: const Key('close_classroom_action'),
                 onPressed: _controller.canSubmit
                     ? () => _confirmAndClose(context)
                     : null,

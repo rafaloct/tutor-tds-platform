@@ -1,5 +1,14 @@
 # Plano de execução — #138 → #139 → #140 (ciclo de vida da turma)
 
+> **Atualização de 12/10/2026:** este é o plano histórico de handoff, não o
+> estado atual de execução. Backend, app e E2E tiveram uma execução sintética
+> anterior. A decisão posterior registrada em `docs/DECISIONS.md` item 32
+> autoriza `program_operator` a preparar, ativar e encerrar, e transforma 30
+> participantes em referência com aviso. A implementação candidata está em
+> revisão; seus testes locais passaram, mas a nova jornada Android e o staging
+> ainda precisam de aceite. Consulte `docs/production/CLASS_LIFECYCLE_E2E_RUNBOOK.md`
+> e `docs/production/PRODUCTION_READINESS_AUDIT_2026-10-12.md` antes de agir.
+
 > Documento para o próximo agente. Redigido 2026-10-10 na branch
 > `codex/rc-reconverged-20261009` (PR #194). Ler `AGENTS.md`,
 > `docs/CURRENT_STATE.md`, `docs/DOMAIN_CONTRACT.md` e os corpos

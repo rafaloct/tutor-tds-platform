@@ -58,7 +58,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.widgetWithText(FilledButton, 'Encerrar turma'), findsOneWidget);
+      expect(find.byKey(const Key('close_classroom_action')), findsOneWidget);
       expect(find.byType(CloseClassroomScreen), findsOneWidget);
     },
   );
