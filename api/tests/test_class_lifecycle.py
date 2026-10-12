@@ -441,6 +441,16 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     result = changed.json()
     assert result["classroom"]["revision"] == 3
 
+    planned_session = client.post(
+        f"/admin/classes/{class_id}/sessions",
+        headers=header("teacher"),
+        json={
+            "starts_at": "2026-10-20T12:00:00Z",
+            "ends_at": "2026-10-20T14:00:00Z",
+        },
+    )
+    assert planned_session.status_code == 409
+
     operator_activate = scoped(result, target_status="active")
     activated = client.post(
         f"/operations/classes/{class_id}/transition",
@@ -588,6 +598,24 @@ def test_plan_team_and_strict_lifecycle_authority(lifecycle_api):
     assert result["classroom"]["course_version_id"] == pinned_version
     assert result["readiness"]["closure_warnings"]["open_sessions"] == 0
     assert result["readiness"]["closure_warnings"]["pending_evidence"] == 1
+
+    for actor in ("teacher2", "admin"):
+        new_session = client.post(
+            f"/admin/classes/{class_id}/sessions",
+            headers=header(actor),
+            json={
+                "starts_at": "2026-10-21T12:00:00Z",
+                "ends_at": "2026-10-21T14:00:00Z",
+            },
+        )
+        assert new_session.status_code == 409
+    with Session(engine) as session:
+        assert session.scalar(
+            select(func.count()).select_from(ClassSession).where(
+                ClassSession.class_id == class_id,
+                ClassSession.status == "open",
+            )
+        ) == 0
 
     reopen = scoped(result, target_status="active")
     assert client.post(

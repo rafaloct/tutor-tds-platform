@@ -1,5 +1,14 @@
 # CURRENT STATE
 
+## 2026-10-12 — trava de sessão na transição de turma (candidato local)
+
+IMPLEMENTED/TESTED-LOCAL: a rota antiga de criação de `ClassSession` agora
+adquire a mesma trava de `Classroom` usada pelo encerramento e só abre sessão
+em turma `active`. Turmas `planned` e `closed` recebem 409. O teste de ciclo
+de vida cobre os dois estados e confirma que encerramento não pode ser seguido
+por sessão aberta. PostgreSQL concorrente e E2E Android ainda precisam de prova
+no candidato final; produção não foi alterada.
+
 ## 2026-10-12 Tutor contextual — divergência de edição
 
 Candidato local sobre `9b5778d`: o leitor agora bloqueia a abertura do Tutor

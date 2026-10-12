@@ -115,7 +115,16 @@ class ReportResponse(BaseModel):
 def create_session(class_id: str, payload: SessionCreate, request: Request, claims=Depends(access_claims)):
     db: Database = request.app.state.database
     with Session(db.engine) as session:
-        classroom = _class(session, class_id); _staff(session, classroom, claims, monitor=False)
+        # Serialize with the lifecycle transition: a close must never commit
+        # between checking the class state and opening its new session.
+        classroom = session.scalar(
+            select(Classroom).where(Classroom.id == class_id).with_for_update()
+        )
+        if classroom is None:
+            raise HTTPException(404, "Turma não encontrada.")
+        _staff(session, classroom, claims, monitor=False)
+        if classroom.status != "active":
+            raise HTTPException(409, "Somente turma ativa aceita nova sessão.")
         token = secrets.token_urlsafe(24); now = datetime.now(timezone.utc)
         code = _new_checkin_code(session)
         record = ClassSession(id=str(uuid4()), class_id=class_id, starts_at=payload.starts_at,
