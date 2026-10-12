@@ -69,8 +69,10 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 - **Observabilidade:** o watchdog atual mede API/banco. O candidato de probes
   públicos cobre somente os dois Workers, sem inferência ou saúde do túnel,
   AnythingLLM/OpenRouter; ativação e teste de entrega do alerta ainda faltam.
-- **Continuidade:** nomear owner e substituto de VPS, túnel, Worker, AnythingLLM,
-  OpenRouter, backups e release; conferir reboot/recuperação e orçamento/quotas.
+- **Continuidade:** Rafael assumiu a responsabilidade principal por VPS,
+  Dokploy, túnel, Worker, AnythingLLM, OpenRouter, backups e release em 12/10.
+  Ainda faltam substituto, teste de recuperação de acesso, reboot e
+  orçamento/quotas.
 
 ## Próxima evidência necessária
 
