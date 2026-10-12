@@ -1,5 +1,23 @@
 # CURRENT STATE
 
+## 2026-10-12 — ensaio de migração 0028→0030 APROVADO sobre dump ao vivo
+
+OBSERVED: `api/ops/rehearse_production_upgrade.py` executado no VPS contra o
+banco de produção em modo somente-leitura. Dump pg_dump (custom) restaurado em
+`postgres:16-alpine` isolado (tmpfs, rede `--internal`, sem portas) com
+fingerprint de todas as colunas idêntico; `alembic upgrade head` subiu
+`20261005_0028 → 20261007_0030` sem erro; dados originais preservados;
+imagem de produção `d6701c77` iniciou e respondeu contra o banco migrado
+(rollback compatível); OpenAPI comparado: 7 operações apenas-candidatas
+(aditivas), `only_production=[]`, nenhum schema comum quebrado; catálogo
+público com projeção legada intacta; produção re-verificada inalterada
+(`production_writes=false`, mesmo image id e revisão ao final). Recursos
+isolados removidos. Evidência:
+`docs/production/evidence/migration-rehearsal-0028-0030-20261012.json`;
+dump protegido permanece em `/opt/tds-rehearsal-50d0c4b3f5a4/` no VPS para
+revisão de promoção. Gates 9/10/12: parcial→prova de migração no candidato;
+não é promoção nem upgrade aplicado em produção.
+
 ## 2026-10-12 — correções focais da revisão do PR #194 (candidato local)
 
 O conteúdo imutável de bloco publicado agora usa toda a linhagem de turma e
