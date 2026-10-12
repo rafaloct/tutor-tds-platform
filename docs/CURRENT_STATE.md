@@ -1,5 +1,24 @@
 # CURRENT STATE
 
+## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
+
+OBSERVED: `tooling/class_lifecycle_e2e/harness.py --execute` em checkout isolado
+`b2784ba` (junction ASCII, Flutter 3.44.9 validado, Python `uv.lock`),
+emulador local `Medium_Phone_API_36.1` (API 36, `emulator-5554`) com
+`autofill_service` desativado. Contratos backend 6/6; servidor QA HTTPS local
+(SQLite descartável, cert efêmero `10.0.2.2`); APK de integração compilado em
+210s e executado com adapter HTTP real: 10 etapas PASS (preparar turma,
+participante, matrícula, encontro, QR, presença, fechar encontro, readiness,
+fronteira de certificado, offline/reconnect) e 12 invariantes PASS. Validador
+`--validate-evidence --require-complete` → `EVIDENCE_VALID`. Sem colateral:
+`com.tutortds_cartilhas.dev` preservado; pacote QA isolado
+`…dynamicqa.r3fccf38bc2ab35eaac5a2f3bb1707262` instalado. Staging compartilhado
+e produção não mutados. Limite: aviso de capacidade >30 e tela de ativação
+provados por contrato backend, não por evidência visual Android (nota do
+manifesto). Evidência:
+`docs/production/evidence/class-lifecycle-e2e-3fccf38bc2ab35eaac5a2f3bb1707262.json`.
+Substitui o `BLOCKED_ENVIRONMENT` do avellaria para este gate.
+
 ## 2026-10-12 — ensaio de migração 0028→0030 APROVADO sobre dump ao vivo
 
 OBSERVED: `api/ops/rehearse_production_upgrade.py` executado no VPS contra o
