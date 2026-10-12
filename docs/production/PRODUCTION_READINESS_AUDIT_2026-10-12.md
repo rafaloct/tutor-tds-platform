@@ -22,7 +22,7 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 | # | Gate | Estado em 12/10 | Evidência e prova restante |
 | --- | --- | --- | --- |
 | 1 | commit e tag | BLOCKED | `9b5778d` é identificável; não há tag de release no candidato. Congelar SHA e publicar tag após revisão. |
-| 2 | GitHub atualizado | PARTIAL | A integração está na branch remota `agent/production-readiness-20261012` e no PR #194 sobre `staging`. Em `235e8b8`, todos os checks aplicáveis passaram; os jobs de deploy foram ignorados conforme configuração. Falta CI no SHA final, revisão e promoção. |
+| 2 | GitHub atualizado | PARTIAL | A integração está na branch remota `agent/production-readiness-20261012` e no PR #194 sobre `staging`. Em `f5f679e`, todos os checks aplicáveis passaram; os jobs de deploy foram ignorados conforme configuração. Confirmar a CI do SHA final no PR, além de revisão e promoção. |
 | 3 | árvore limpa | PARTIAL | Base `9b5778d` estava limpa. Verificar novamente na worktree de release congelada, após testes e manifesto. |
 | 4 | API canônica | PARTIAL | `/tutor-api/health` e `/version` responderam via HTTPS em 12/10. O SHA implantado e a proveniência da API não foram confirmados. |
 | 5 | API e banco saudáveis | PARTIAL | `/health` declarou `status=ok` e consulta ao banco disponível em probe pontual de 12/10. Repetir na janela de promoção e conferir monitoramento contínuo. |
@@ -33,9 +33,9 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 | 10 | migrations no destino correto | BLOCKED | `0030` foi testada localmente em PostgreSQL; produção segue em `0028`. Aplicação e compatibilidade no destino de produção não foram comprovadas. |
 | 11 | backup configurado e monitorado | PARTIAL | O apontador `last-success.json` do Dokploy indicou o backup `20261012T034000Z-80e0615f8a9a453a9a4936c60b420e17`, concluído às 03:40:08 UTC com estado `verified`. Recibo e arquivo criptografado foram baixados em modo somente leitura do R2; 249216 bytes e SHA-256 coincidiram. Prova sanitizada em `evidence/scheduled-postgres-backup-custody-20261012.json`. Ainda faltam teste de entrega do alerta e nova verificação de idade na janela de promoção. |
 | 12 | restauração independente | BLOCKED | `production-restore-acceptance.json` existe, com cinco booleans, mas sem referências. Track B comprova o volume AnythingLLM; o ensaio PostgreSQL versionado vai até `0020`. O verificador exige recibo agendado ligado ao dump restaurado, um ensaio PostgreSQL único, árvore Git da API e drill recente; o aceite histórico falha. Há runner opt-in para restaurar o objeto agendado em container descartável e gerar prova parcial. O par criptografado mais recente está conferido, mas ainda não foi descriptografado nem restaurado: falta o caminho da identidade age privada e a execução supervisionada com `sudo` no avellaria. |
-| 13 | secrets fora do Git | PARTIAL | O scanner local com gitleaks 8.28.0 não encontrou vazamentos em 48 commits da base de PR #194 até `f11d653`; o digest histórico que gerava falso positivo recebeu exceção fixada ao valor exato. O check de CI passou em `235e8b8`. Repetir no SHA final, sem copiar credenciais para evidências. |
+| 13 | secrets fora do Git | PARTIAL | O scanner local com gitleaks 8.28.0 não encontrou vazamentos em 52 commits da base de PR #194 até `f5f679e`; o digest histórico que gerava falso positivo recebeu exceção fixada ao valor exato. O check de CI passou nesse head. Repetir no SHA final, sem copiar credenciais para evidências. |
 | 14 | HTTPS/domínio/SSL | PARTIAL | TLS passou em probes históricos; repetir validade e rota durante a janela de promoção. |
-| 15 | testes de release | PARTIAL | Suíte completa da API passou localmente; PostgreSQL 16 descartável na porta local passou 4/4 testes opcionais de turma/migration; gate de restore e runner opt-in 25 testes unitários passaram, com mais um restore Docker sintético incluindo cleanup; harness 20/20, preflight RAG 8/8, promoção curricular 10/10 e Worker 32/32 passaram. No checkout Windows do candidato, recorte Flutter 61/61, widget do Tutor contextual 7/7 e análise Flutter 3.44.9 sem achados. A CI aplicável passou em `235e8b8`. Faltam CI do SHA final, concorrência PostgreSQL específica e Android. |
+| 15 | testes de release | PARTIAL | Suíte completa da API passou localmente; PostgreSQL 16 descartável na porta local passou 4/4 testes opcionais de turma/migration; gate de restore e runner opt-in 29 testes unitários passaram (1 integração opt-in ignorada nessa execução), com restore Docker sintético separado incluindo cleanup; harness 20/20, preflight RAG 8/8, promoção curricular 10/10 e Worker 32/32 passaram. No checkout Windows do candidato, recorte Flutter 61/61, widget do Tutor contextual 7/7 e análise Flutter 3.44.9 sem achados. A CI aplicável passou em `f5f679e`; confirmar a CI do SHA final no PR #194. Seis contratos backend do E2E de turma passaram, mas a compilação Android foi interrompida antes do APK por pressão de swap no avellaria; ver `evidence/class-lifecycle-e2e-attempt-20261012.json`. Faltam concorrência PostgreSQL específica e E2E Android completo. |
 | 16 | upgrade do app publicado | BLOCKED | Evidência de 06/10 cobre o app publicado `1.2.0+11` contra backend anterior; falta upgrade real do candidato `1.4.0+13` preservando dados/sessão. |
 | 17 | manifesto do build | BLOCKED | Só é produzido após preflight e AAB do SHA congelado; nenhum manifesto atual foi gerado. |
 | 18 | SHA-256 do AAB | BLOCKED | O AAB registrado está `superseded`, não corresponde à fonte atual e tem `upload_allowed=false`. |
@@ -49,8 +49,11 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
   edição revisada, preserva recibo de preparo antes do POST em armazenamento
   seguro com escopo API/conta e reconcilia ao reabrir a tela, inclusive após
   resposta perdida. O validador agora rejeita o PASS antigo de capacidade rígida.
-  Reexecutar o E2E
-  depois da mudança, primeiro em ambiente isolado, depois em staging.
+  A execução isolada de 12/10 passou seis contratos backend, mas o Gradle
+  consumiu quase todo o swap no avellaria antes do APK ou resultado Flutter;
+  o harness limpou API e arquivos temporários. O emulador alternativo LARGeo
+  estava em uso pela pessoa usuária. Não há manifesto PASS do Android.
+  Reexecutar o E2E em host com recursos livres, depois em staging.
   `CLASS_LIFECYCLE_ENABLED` segue false até promoção.
 - **Tutor contextual:** o sentinel A/B prova isolamento CourseVersion com
   documentos sintéticos em staging. As cartilhas curriculares ainda não têm
@@ -76,8 +79,8 @@ release não satisfaz o gate. Histórico de serviço não é prova do SHA futuro
 
 ## Próxima evidência necessária
 
-1. Reexecutar o E2E Android da política nova de turma e comprovar a tela de
-   ativação e o aviso acima de 30, sem tocar dados reais.
+1. Reexecutar o E2E Android da política nova de turma em host com recursos
+   livres e comprovar a tela de ativação e o aviso acima de 30, sem tocar dados reais.
 2. Versionar prova sanitizada de restore PostgreSQL e offsite agendado para o
    schema candidato; revisar custódia humana dos recibos e a idade do backup.
 3. Obter exports atuais das CourseVersions publicadas e aprovação editorial;

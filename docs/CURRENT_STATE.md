@@ -1,5 +1,17 @@
 # CURRENT STATE
 
+## 2026-10-12 — tentativa isolada de E2E Android da turma
+
+Seis contratos de API passaram no avellaria, mas o build Gradle da integração
+Android elevou o uso de swap de cerca de 12 para 15 GiB; a execução foi
+interrompida antes de produzir APK, marcador de resultado ou manifesto PASS.
+O harness, a API temporária e os processos de build foram encerrados; porta
+18040 ficou livre e nenhum pacote QA foi instalado. O emulador alternativo
+LARGeo estava em uso com o app da pessoa usuária e não foi tocado. Evidência
+sanitizada: `docs/production/evidence/class-lifecycle-e2e-attempt-20261012.json`.
+E2E Android da política nova continua BLOCKED_ENVIRONMENT, sem inferência de
+falha funcional ou prontidão de produção.
+
 ## 2026-10-12 — custódia do backup agendado e runner de restore isolado
 
 IMPLEMENTED/TESTED-LOCAL: `tooling/rehearse_scheduled_postgres_backup.py`
