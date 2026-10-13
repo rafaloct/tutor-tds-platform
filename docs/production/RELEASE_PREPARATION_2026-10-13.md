@@ -37,8 +37,9 @@ Não alterar recibos ou booleanos para contornar o gate.
 Acesso HTTP ao domínio de produção e download do Dart foram recusados pelo
 proxy do workspace (`CONNECT 403`); isso não demonstra indisponibilidade do
 serviço. O LARGeo respondeu ao ping e depois retornou ENOENT para o caminho
-histórico de Flutter; a descoberta de diretórios ainda estava pendente.
-Comandos remotos anteriores expiraram. O SDK local não ficou utilizável.
+histórico de Flutter; a descoberta de diretórios também expirou em
+2026-10-13T13:13:04Z (`Timeout - no response from device`). Comandos
+remotos anteriores expiraram. O SDK local não ficou utilizável.
 
 Permanecem necessários: restauração offsite com proveniência e volumes
 críticos, compatibilidade/schema atual de produção, Flutter 3.44.9 com testes,
