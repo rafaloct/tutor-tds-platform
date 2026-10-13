@@ -1,5 +1,18 @@
 # API matrix — Wave 1 aceita e Wave 2 ativa
 
+## Referência exaustiva do candidato — Issue #201, 13/10/2026
+
+[Guia completo](../api/README.md), [133 operações](../api/ENDPOINTS.md),
+[107 schemas](../api/SCHEMAS.md) e [OpenAPI integral](../api/openapi.json) agora
+documentam a árvore API `dc32d081dffd4d778e51871a85ae4077eb75f6ce` (staging
+`dd928ff`). O gerador confirma igualdade de cobertura entre rotas/OpenAPI/notas
+e valida 52 bodies, 67 respostas estruturadas, 30 mappings e links locais.
+Exemplos das 66 operações sem modelo preciso são derivados dos serializers;
+nenhum schema adicional foi inventado no runtime. Autorização por Header/Depends,
+papéis globais, vínculos de programa/turma, flags e erros condicionais são
+explicitados. Status: IMPLEMENTED/TESTED-LOCAL da documentação. Não promove os
+status de implantação/aceite das features abaixo nem fecha gates da release.
+
 | Issue #5 candidate (2026-10-03) | Authorization / behavior | Evidence / limit |
 | --- | --- | --- |
 | POST `/certificate-requests/{id}/emission-candidate` | Owner/current canonical enrollment; v1 approved request + baseline, v2 full configured trail (pending permitted, rejected blocked); development opt-in, authenticated local transport | Actual API/transport/Worker tests with simulated HTTP/KV; no installed E2E |

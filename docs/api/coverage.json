@@ -1,0 +1,15 @@
+{
+  "example_operation_count": 133,
+  "operation_count": 133,
+  "path_count": 120,
+  "production_requests": false,
+  "runtime_mutations": false,
+  "schema_count": 107,
+  "source_reviewed_untyped_responses": 66,
+  "source_tree": "dc32d081dffd4d778e51871a85ae4077eb75f6ce",
+  "validated_documentation_links": 558,
+  "validated_mapping_response_examples": 30,
+  "validated_model_response_examples": 67,
+  "validated_request_examples": 52,
+  "validated_response_examples": 97
+}

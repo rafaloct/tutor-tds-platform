@@ -1,0 +1,1657 @@
+{
+  "POST /auth/activation-invites": {
+    "status": 201,
+    "body": {
+      "activation_token": "TOKEN_DE_ATIVACAO_SINTETICO_NAO_UTILIZAVEL",
+      "expires_in_hours": 24
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente admin. O token retornado é secreto; o texto aqui não é um token real."
+  },
+  "DELETE /auth/me": {
+    "status": 204,
+    "body": null,
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Sem corpo de resposta após exclusão autorizada. Há proteção contra autoexclusão de contas de equipe."
+  },
+  "GET /support/identity": {
+    "status": 200,
+    "body": {
+      "identifier": "tds-exemplo:00000000-0000-4000-8000-000000000004",
+      "identifier_hash": "86c8cab63067f9c6325631e2ae6a51ed70e9479a2ac03d71d26b7af5e48fb37d"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CHATWOOT_IDENTITY_SECRET e CHATWOOT_IDENTITY_NAMESPACE. O hash mostrado foi calculado apenas com segredo sintético e não autentica nenhum ambiente; resposta Cache-Control: no-store."
+  },
+  "POST /classes/{class_id}/evidence/{evidence_id}/review": {
+    "status": 200,
+    "body": {
+      "evidence_id": "00000000-0000-4000-8000-000000000010",
+      "decision": "accepted",
+      "reason_code": "verified",
+      "decided_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "GET /classes/{class_id}/exceptions": {
+    "status": 200,
+    "body": {
+      "exceptions": [
+        {
+          "code": "evidence_needs_review",
+          "user_id": "00000000-0000-4000-8000-000000000004",
+          "evidence_id": "00000000-0000-4000-8000-000000000010"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. A visibilidade depende do vínculo; um item ainda sem pessoa associada pode ter user_id null e ser visível somente à equipe."
+  },
+  "GET /classes/{class_id}/sessions/{session_id}/attendance/{user_id}": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000011",
+          "original_session_id": "00000000-0000-4000-8000-000000000009",
+          "makeup_session_id": null,
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "user_id": "00000000-0000-4000-8000-000000000004",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "revision": 1,
+          "status": "VALID",
+          "reason": "Presença conferida pelo instrutor.",
+          "actor_user_id": "00000000-0000-4000-8000-000000000005",
+          "decided_at": "2026-10-13T12:00:00Z"
+        }
+      ],
+      "total": 1,
+      "limit": 50,
+      "offset": 0,
+      "can_decide": true
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/attendance/{user_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000011",
+      "original_session_id": "00000000-0000-4000-8000-000000000009",
+      "makeup_session_id": null,
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "revision": 1,
+      "status": "VALID",
+      "reason": "Presença conferida pelo instrutor.",
+      "actor_user_id": "00000000-0000-4000-8000-000000000005",
+      "decided_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente o instrutor da turma pode decidir sobre outra pessoa. required expected_revision controla concorrência e idempotency_key preserva replay."
+  },
+  "GET /classes/{class_id}/sessions/{session_id}/presence": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "user_id": "00000000-0000-4000-8000-000000000004",
+          "user_name": "Pessoa Exemplo",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "status": "confirmed_present",
+          "revision": 1,
+          "checkin_count": 1,
+          "checkout_count": 0,
+          "activity_count": 0,
+          "reason": "Presença conferida pelo instrutor.",
+          "decided_at": "2026-10-13T12:00:00Z"
+        }
+      ],
+      "total": 1,
+      "limit": 50,
+      "offset": 0,
+      "session_status": "open"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/presence/{user_id}": {
+    "status": 200,
+    "body": {
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "user_name": "Pessoa Exemplo",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "status": "confirmed_present",
+      "revision": 1,
+      "checkin_count": 1,
+      "checkout_count": 0,
+      "activity_count": 0,
+      "reason": "Presença conferida pelo instrutor.",
+      "decided_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Check-in e atividade são sugestões, não presença formal; a resposta mostra uma decisão humana autorizada."
+  },
+  "GET /classes/{class_id}/students/{user_id}/mentors": {
+    "status": 200,
+    "body": {
+      "mentors": [
+        {
+          "user_id": "00000000-0000-4000-8000-000000000005",
+          "name": "Instrutora Exemplo"
+        },
+        {
+          "user_id": "00000000-0000-4000-8000-000000000006",
+          "name": "Monitor Exemplo"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "GET /classes/{class_id}/students/{user_id}/baseline": {
+    "status": 200,
+    "body": {
+      "baseline": {
+        "id": "00000000-0000-4000-8000-000000000012",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "user_id": "00000000-0000-4000-8000-000000000004",
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "source": "forms:exemplo",
+        "record_id": "baseline-exemplo-001",
+        "baseline_date": "2026-10-13",
+        "territory_id": "territorio-exemplo",
+        "revision": 1,
+        "reviewed_at": "2026-10-13T12:00:00Z",
+        "reviewed_by": "00000000-0000-4000-8000-000000000005"
+      },
+      "history": [
+        {
+          "revision": 1,
+          "actor_user_id": "00000000-0000-4000-8000-000000000005",
+          "actor_role": "teacher",
+          "reason": "Referência conferida no ambiente de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z",
+          "snapshot": {
+            "id": "00000000-0000-4000-8000-000000000012",
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "user_id": "00000000-0000-4000-8000-000000000004",
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "source": "forms:exemplo",
+            "record_id": "baseline-exemplo-001",
+            "baseline_date": "2026-10-13",
+            "territory_id": "territorio-exemplo",
+            "revision": 1,
+            "reviewed_at": "2026-10-13T12:00:00Z"
+          }
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Sem baseline a resposta é {\"baseline\":null,\"history\":[]}. Com JOURNEY_TRACEABILITY_ENABLED e SHEETS_PSEUDONYM_SECRET válido, acrescenta pessoa_id pseudonimizado."
+  },
+  "PUT /classes/{class_id}/students/{user_id}/baseline": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000012",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "source": "forms:exemplo",
+      "record_id": "baseline-exemplo-001",
+      "baseline_date": "2026-10-13",
+      "territory_id": "territorio-exemplo",
+      "revision": 1,
+      "reviewed_at": "2026-10-13T12:00:00Z",
+      "reviewed_by": "00000000-0000-4000-8000-000000000005"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige JOURNEY_TRACEABILITY_ENABLED=true; em estado desligado responde 404: Vínculo de rastreio ainda não habilitado. Não consulta a fonte externa; registra referência humana auditável."
+  },
+  "GET /classes/{class_id}/mentorship-cases": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000013",
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "user_id": "00000000-0000-4000-8000-000000000004",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "objective": "Revisar o conteúdo da aula de exemplo.",
+          "next_action": "Agendar revisão com a mentora.",
+          "status": "open",
+          "revision": 1,
+          "opened_at": "2026-10-13T12:00:00Z",
+          "updated_at": "2026-10-13T12:00:00Z",
+          "closed_at": null,
+          "mentor_id": "00000000-0000-4000-8000-000000000005",
+          "mentor_name": "Instrutora Exemplo"
+        }
+      ],
+      "total": 1,
+      "limit": 50,
+      "offset": 0
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "GET /classes/{class_id}/mentorship-cases/{case_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000013",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "objective": "Revisar o conteúdo da aula de exemplo.",
+      "next_action": "Agendar revisão com a mentora.",
+      "status": "open",
+      "revision": 1,
+      "opened_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "closed_at": null,
+      "mentor_id": "00000000-0000-4000-8000-000000000005",
+      "mentor_name": "Instrutora Exemplo",
+      "history": [
+        {
+          "revision": 1,
+          "actor_user_id": "00000000-0000-4000-8000-000000000005",
+          "actor_role": "teacher",
+          "reason": "Acompanhamento solicitado.",
+          "occurred_at": "2026-10-13T12:00:00Z",
+          "snapshot": {
+            "id": "00000000-0000-4000-8000-000000000013",
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "user_id": "00000000-0000-4000-8000-000000000004",
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "objective": "Revisar o conteúdo da aula de exemplo.",
+            "next_action": "Agendar revisão com a mentora.",
+            "status": "open",
+            "revision": 1,
+            "opened_at": "2026-10-13T12:00:00Z",
+            "updated_at": "2026-10-13T12:00:00Z",
+            "closed_at": null,
+            "mentor_id": "00000000-0000-4000-8000-000000000005",
+            "mentor_name": "Instrutora Exemplo"
+          }
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "POST /classes/{class_id}/mentorship-cases": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000013",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "objective": "Revisar o conteúdo da aula de exemplo.",
+      "next_action": "Agendar revisão com a mentora.",
+      "status": "open",
+      "revision": 1,
+      "opened_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "closed_at": null,
+      "mentor_id": "00000000-0000-4000-8000-000000000005",
+      "mentor_name": "Instrutora Exemplo"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Replay idêntico de idempotency_key retorna 200 e o snapshot previamente gravado."
+  },
+  "PATCH /classes/{class_id}/mentorship-cases/{case_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000013",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "objective": "Revisar o conteúdo da aula de exemplo.",
+      "next_action": "Agendar revisão com a mentora.",
+      "status": "in_progress",
+      "revision": 2,
+      "opened_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "closed_at": null,
+      "mentor_id": "00000000-0000-4000-8000-000000000005",
+      "mentor_name": "Instrutora Exemplo"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. expected_revision precisa coincidir com a revisão atual; replay retorna o snapshot da revisão original."
+  },
+  "POST /admin/programs/{program_id}/courses/{course_id}": {
+    "status": 201,
+    "body": {
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "PUT /admin/programs/{program_id}/courses/{course_id}/workload": {
+    "status": 200,
+    "body": {
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "planned_hours": 80.0
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "GET /operations/scopes": {
+    "status": 200,
+    "body": {
+      "scopes": [
+        {
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "course_id": "curso-exemplo",
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "version_id": "00000000-0000-4000-8000-000000000008",
+          "label": "Programa Exemplo / Turma Exemplo"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível."
+  },
+  "POST /operations/{class_id}/search": {
+    "status": 200,
+    "body": {
+      "people": [
+        {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "name": "Pessoa Exemplo",
+          "identity_proof": "PROVA_SINTETICA_NAO_UTILIZAVEL"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível. identity_proof real é um JWT de dez minutos vinculado a pessoa, operador e programa; o texto de exemplo não é uma prova válida."
+  },
+  "POST /operations/{class_id}/inspect": {
+    "status": 200,
+    "body": {
+      "person": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "name": "Pessoa Exemplo"
+      },
+      "scope": {
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "course_id": "curso-exemplo",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "label": "Programa Exemplo / Turma Exemplo"
+      },
+      "revision": 0,
+      "enrolled": false,
+      "assigned": false,
+      "baseline_linked": false,
+      "capacity": {
+        "limit": 30,
+        "occupancy": 0,
+        "warning": false,
+        "policy": "soft_alert"
+      },
+      "history": []
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível."
+  },
+  "POST /operations/{class_id}/commands": {
+    "status": 200,
+    "body": {
+      "person": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "name": "Pessoa Exemplo"
+      },
+      "scope": {
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "course_id": "curso-exemplo",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "label": "Programa Exemplo / Turma Exemplo"
+      },
+      "revision": 1,
+      "enrolled": true,
+      "assigned": false,
+      "baseline_linked": false,
+      "capacity": {
+        "limit": 30,
+        "occupancy": 0,
+        "warning": false,
+        "policy": "soft_alert"
+      },
+      "history": [
+        {
+          "action": "enroll",
+          "reason": "Matrícula solicitada pelo operador.",
+          "actor_label": "00000000-0000-4000-8000-000000000014",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível. Exemplo de resultado de action=enroll; outras ações mudam enrolled/assigned/history. Não cria resultado acadêmico."
+  },
+  "GET /operations/classes/options": {
+    "status": 200,
+    "body": {
+      "options": [
+        {
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "program_name": "Programa Exemplo",
+          "course_id": "curso-exemplo",
+          "course_title": "Curso Exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "version_number": 1,
+          "role": "coordinator",
+          "can_prepare": true,
+          "can_activate": true,
+          "can_close": true,
+          "can_override_capacity": false
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível."
+  },
+  "GET /operations/classes/team-candidates": {
+    "status": 200,
+    "body": {
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "candidates": [
+        {
+          "user_id": "00000000-0000-4000-8000-000000000005",
+          "display_name": "Instrutora Exemplo",
+          "role": "teacher"
+        },
+        {
+          "user_id": "00000000-0000-4000-8000-000000000006",
+          "display_name": "Monitor Exemplo",
+          "role": "monitor"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível."
+  },
+  "GET /operations/classes": {
+    "status": 200,
+    "body": {
+      "classes": [
+        {
+          "classroom": {
+            "id": "00000000-0000-4000-8000-000000000003",
+            "institution_id": "00000000-0000-4000-8000-000000000001",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "course_id": "curso-exemplo",
+            "course_version_id": "00000000-0000-4000-8000-000000000008",
+            "teacher_id": "00000000-0000-4000-8000-000000000005",
+            "monitor_ids": [
+              "00000000-0000-4000-8000-000000000006"
+            ],
+            "name": "Turma Exemplo",
+            "offer_municipality": "Município Exemplo",
+            "offer_location": "Sala Exemplo",
+            "start_date": "2026-11-01",
+            "end_date": "2026-11-30",
+            "status": "planned",
+            "revision": 1
+          },
+          "capacity": {
+            "limit": 30,
+            "occupancy": 0,
+            "remaining": 30,
+            "over_capacity": false,
+            "policy": "soft_alert",
+            "warning": false,
+            "exception": null
+          },
+          "readiness": {
+            "activation_blockers": [],
+            "can_activate": true,
+            "can_close": false,
+            "closure_blockers": [],
+            "closure_warnings": {
+              "open_sessions": 0,
+              "pending_evidence": 0,
+              "pending_makeup": 0,
+              "pending_certificate_requests": 0
+            },
+            "closure_warnings_block_close": false,
+            "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION"
+          },
+          "capabilities": {
+            "role": "coordinator",
+            "can_prepare": true,
+            "can_change_team": true,
+            "can_activate": true,
+            "can_close": false,
+            "can_override_capacity": false
+          }
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível."
+  },
+  "POST /operations/classes": {
+    "status": 201,
+    "body": {
+      "classroom": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "course_id": "curso-exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "teacher_id": "00000000-0000-4000-8000-000000000005",
+        "monitor_ids": [
+          "00000000-0000-4000-8000-000000000006"
+        ],
+        "name": "Turma Exemplo",
+        "offer_municipality": "Município Exemplo",
+        "offer_location": "Sala Exemplo",
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-30",
+        "status": "planned",
+        "revision": 1
+      },
+      "capacity": {
+        "limit": 30,
+        "occupancy": 0,
+        "remaining": 30,
+        "over_capacity": false,
+        "policy": "soft_alert",
+        "warning": false,
+        "exception": null
+      },
+      "readiness": {
+        "activation_blockers": [],
+        "can_activate": true,
+        "can_close": false,
+        "closure_blockers": [],
+        "closure_warnings": {
+          "open_sessions": 0,
+          "pending_evidence": 0,
+          "pending_makeup": 0,
+          "pending_certificate_requests": 0
+        },
+        "closure_warnings_block_close": false,
+        "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION"
+      },
+      "capabilities": {
+        "role": "coordinator",
+        "can_prepare": true,
+        "can_change_team": true,
+        "can_activate": true,
+        "can_close": false,
+        "can_override_capacity": false
+      },
+      "history": [
+        {
+          "id": "00000000-0000-4000-8000-000000000015",
+          "revision": 1,
+          "action": "prepare",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Preparação da turma de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível. Replay idêntico retorna o snapshot original. Permissão de preparação exige program_operator ou coordinator."
+  },
+  "POST /operations/classes/{class_id}/plan": {
+    "status": 200,
+    "body": {
+      "classroom": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "course_id": "curso-exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "teacher_id": "00000000-0000-4000-8000-000000000005",
+        "monitor_ids": [
+          "00000000-0000-4000-8000-000000000006"
+        ],
+        "name": "Turma Exemplo",
+        "offer_municipality": "Município Exemplo",
+        "offer_location": "Sala Exemplo",
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-30",
+        "status": "planned",
+        "revision": 2
+      },
+      "capacity": {
+        "limit": 30,
+        "occupancy": 0,
+        "remaining": 30,
+        "over_capacity": false,
+        "policy": "soft_alert",
+        "warning": false,
+        "exception": null
+      },
+      "readiness": {
+        "activation_blockers": [],
+        "can_activate": true,
+        "can_close": false,
+        "closure_blockers": [],
+        "closure_warnings": {
+          "open_sessions": 0,
+          "pending_evidence": 0,
+          "pending_makeup": 0,
+          "pending_certificate_requests": 0
+        },
+        "closure_warnings_block_close": false,
+        "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION"
+      },
+      "capabilities": {
+        "role": "coordinator",
+        "can_prepare": true,
+        "can_change_team": true,
+        "can_activate": true,
+        "can_close": false,
+        "can_override_capacity": false
+      },
+      "history": [
+        {
+          "id": "00000000-0000-4000-8000-000000000015",
+          "revision": 1,
+          "action": "prepare",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Preparação da turma de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000016",
+          "revision": 2,
+          "action": "plan",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Ajuste autorizado de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível."
+  },
+  "POST /operations/classes/{class_id}/team": {
+    "status": 200,
+    "body": {
+      "classroom": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "course_id": "curso-exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "teacher_id": "00000000-0000-4000-8000-000000000005",
+        "monitor_ids": [
+          "00000000-0000-4000-8000-000000000006"
+        ],
+        "name": "Turma Exemplo",
+        "offer_municipality": "Município Exemplo",
+        "offer_location": "Sala Exemplo",
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-30",
+        "status": "planned",
+        "revision": 2
+      },
+      "capacity": {
+        "limit": 30,
+        "occupancy": 0,
+        "remaining": 30,
+        "over_capacity": false,
+        "policy": "soft_alert",
+        "warning": false,
+        "exception": null
+      },
+      "readiness": {
+        "activation_blockers": [],
+        "can_activate": true,
+        "can_close": false,
+        "closure_blockers": [],
+        "closure_warnings": {
+          "open_sessions": 0,
+          "pending_evidence": 0,
+          "pending_makeup": 0,
+          "pending_certificate_requests": 0
+        },
+        "closure_warnings_block_close": false,
+        "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION"
+      },
+      "capabilities": {
+        "role": "coordinator",
+        "can_prepare": true,
+        "can_change_team": true,
+        "can_activate": true,
+        "can_close": false,
+        "can_override_capacity": false
+      },
+      "history": [
+        {
+          "id": "00000000-0000-4000-8000-000000000015",
+          "revision": 1,
+          "action": "prepare",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Preparação da turma de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000016",
+          "revision": 2,
+          "action": "team",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Ajuste autorizado de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível."
+  },
+  "POST /operations/classes/{class_id}/transition": {
+    "status": 200,
+    "body": {
+      "classroom": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "course_id": "curso-exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "teacher_id": "00000000-0000-4000-8000-000000000005",
+        "monitor_ids": [
+          "00000000-0000-4000-8000-000000000006"
+        ],
+        "name": "Turma Exemplo",
+        "offer_municipality": "Município Exemplo",
+        "offer_location": "Sala Exemplo",
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-30",
+        "status": "active",
+        "revision": 2
+      },
+      "capacity": {
+        "limit": 30,
+        "occupancy": 0,
+        "remaining": 30,
+        "over_capacity": false,
+        "policy": "soft_alert",
+        "warning": false,
+        "exception": null
+      },
+      "readiness": {
+        "activation_blockers": [],
+        "can_activate": false,
+        "can_close": true,
+        "closure_blockers": [],
+        "closure_warnings": {
+          "open_sessions": 0,
+          "pending_evidence": 0,
+          "pending_makeup": 0,
+          "pending_certificate_requests": 0
+        },
+        "closure_warnings_block_close": false,
+        "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION"
+      },
+      "capabilities": {
+        "role": "coordinator",
+        "can_prepare": false,
+        "can_change_team": true,
+        "can_activate": false,
+        "can_close": true,
+        "can_override_capacity": false
+      },
+      "history": [
+        {
+          "id": "00000000-0000-4000-8000-000000000015",
+          "revision": 1,
+          "action": "prepare",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Preparação da turma de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000016",
+          "revision": 2,
+          "action": "transition_active",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Ativação autorizada da turma.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível. Exemplo de transição planned → active com blockers vazios. Encerramento é bloqueado quando há encontro aberto."
+  },
+  "GET /operations/classes/{class_id}/readiness": {
+    "status": 200,
+    "body": {
+      "classroom": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "course_id": "curso-exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "teacher_id": "00000000-0000-4000-8000-000000000005",
+        "monitor_ids": [
+          "00000000-0000-4000-8000-000000000006"
+        ],
+        "name": "Turma Exemplo",
+        "offer_municipality": "Município Exemplo",
+        "offer_location": "Sala Exemplo",
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-30",
+        "status": "planned",
+        "revision": 1
+      },
+      "capacity": {
+        "limit": 30,
+        "occupancy": 0,
+        "remaining": 30,
+        "over_capacity": false,
+        "policy": "soft_alert",
+        "warning": false,
+        "exception": null
+      },
+      "readiness": {
+        "activation_blockers": [],
+        "can_activate": true,
+        "can_close": false,
+        "closure_blockers": [],
+        "closure_warnings": {
+          "open_sessions": 0,
+          "pending_evidence": 0,
+          "pending_makeup": 0,
+          "pending_certificate_requests": 0
+        },
+        "closure_warnings_block_close": false,
+        "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION"
+      },
+      "capabilities": {
+        "role": "coordinator",
+        "can_prepare": true,
+        "can_change_team": true,
+        "can_activate": true,
+        "can_close": false,
+        "can_override_capacity": false
+      },
+      "history": [
+        {
+          "id": "00000000-0000-4000-8000-000000000015",
+          "revision": 1,
+          "action": "prepare",
+          "actor_id": "00000000-0000-4000-8000-000000000014",
+          "reason": "Preparação da turma de exemplo.",
+          "occurred_at": "2026-10-13T12:00:00Z"
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível."
+  },
+  "POST /admin/classes/{class_id}/students/{user_id}": {
+    "status": 201,
+    "body": {
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "status": "active",
+      "occupancy": 1,
+      "capacity_warning": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "POST /admin/classes/{class_id}/monitors/{user_id}": {
+    "status": 201,
+    "body": {
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000006"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "PUT /classes/{class_id}/students/{user_id}": {
+    "status": 200,
+    "body": {
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "status": "active",
+      "occupancy": 1,
+      "capacity_warning": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Operação idempotente para inclusão autorizada em turma aberta; preserva vínculo contextual e alertas de capacidade."
+  },
+  "GET /classes/{class_id}/course": {
+    "status": 200,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_version_id": "00000000-0000-4000-8000-000000000008",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "legacy_progress_compatible": false,
+      "class_id": "00000000-0000-4000-8000-000000000003"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Snapshot da edição fixada na turma; inclui campos de conteúdo editorial. Sem edição consistente retorna 409. A projeção de aluno protege gabaritos quando as flags contextuais/dinâmicas estão ativas."
+  },
+  "GET /classes/{class_id}/journey-export": {
+    "status": 200,
+    "body": {
+      "contract": "tds-journey-v1",
+      "generated_at": "2026-10-13T12:00:00Z",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "total": 1,
+      "offset": 0,
+      "limit": 100,
+      "items": [
+        {
+          "registro_id": "inscricao-exemplo-001",
+          "pessoa_id": "pseudonimo-sintetico-exemplo",
+          "turma_id": "00000000-0000-4000-8000-000000000003",
+          "programa_id": "00000000-0000-4000-8000-000000000002",
+          "curso_id": "curso-exemplo",
+          "curso": "Curso Exemplo",
+          "curso_versao_id": "00000000-0000-4000-8000-000000000008",
+          "matricula_contextual_id": "00000000-0000-4000-8000-000000000017",
+          "status_baseline": "Vínculo conferido",
+          "vinculo_revisao": 1,
+          "vinculo_conferido_em": "2026-10-13T12:00:00Z",
+          "carga_horaria_prevista": 80.0,
+          "horas_estudo_validadas": 1.0,
+          "progresso_estudo_percentual": 1.25,
+          "frequencia_percentual": null,
+          "concluiu_frequencia_flag": null,
+          "certificado_flag": null,
+          "certificado_emitido_em": null,
+          "certificado_cobertura": "api_class_references_only",
+          "elegivel_mentoria": null,
+          "status_convite_mentoria": null,
+          "mentor_id": null,
+          "status_mentoria": null,
+          "data_ultima_interacao": "2026-10-13T12:00:00Z",
+          "interacoes_qtd": 1,
+          "plano_aplicacao_status": null,
+          "aplicacao_iniciada_flag": null,
+          "evidencia_validada_flag": null,
+          "acompanhamento_30d": null,
+          "acompanhamento_60d": null,
+          "acompanhamento_90d": null,
+          "encaminhamentos_qtd": null,
+          "estagio_jornada": null,
+          "data_proxima_acao": null,
+          "status_qualidade": "confirmed_identity_partial_outcomes",
+          "atualizado_em": "2026-10-13T12:00:00Z"
+        }
+      ],
+      "pending": []
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige JOURNEY_TRACEABILITY_ENABLED=true e SHEETS_PSEUDONYM_SECRET com pelo menos 32 caracteres; flag desligada retorna 404: Exportação de rastreio ainda não habilitada. Somente projeção analítica; null preserva resultados desconhecidos. items exige baseline reconciliada à inscrição fabric:tds-inscription-v1; demais participantes aparecem em pending."
+  },
+  "GET /classes/{class_id}/journey-activity": {
+    "status": 200,
+    "body": {
+      "contract": "tds-activity-v1",
+      "total": 1,
+      "offset": 0,
+      "limit": 100,
+      "items": [
+        {
+          "event_id": "00000000-0000-4000-8000-000000000018",
+          "pessoa_id": "pseudonimo-sintetico-exemplo",
+          "evento": "page_viewed",
+          "alvo_tipo": "page_id",
+          "alvo_id": "home",
+          "ocorreu_em": "2026-10-13T12:00:00Z",
+          "segundos_tela": null,
+          "escopo": "conta_autenticada",
+          "atribuicao_turma": null
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige JOURNEY_TRACEABILITY_ENABLED=true e SHEETS_PSEUDONYM_SECRET com pelo menos 32 caracteres; flag desligada retorna 404: Exportação de rastreio ainda não habilitada. Somente projeção analítica; null preserva resultados desconhecidos. O consumidor deduplica por event_id entre turmas; telemetria de conta não atribui atividade acadêmica à turma."
+  },
+  "GET /certificate-requests/contexts": {
+    "status": 200,
+    "body": {
+      "contexts": [
+        {
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "program_name": "Programa Exemplo",
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "class_name": "Turma Exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "course_title": "Curso Exemplo",
+          "eligibility": {
+            "required_seconds": 288000,
+            "validated_seconds": 0,
+            "completed": false,
+            "eligible": false
+          }
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "POST /certificate-requests": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "course_id": "curso-exemplo",
+      "course_version_id": "00000000-0000-4000-8000-000000000008",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "holder_name": "Pessoa Exemplo",
+      "course_title": "Curso Exemplo",
+      "program_name": "Programa Exemplo",
+      "institution_name": "Instituição Exemplo",
+      "status": "pending",
+      "revision": 1,
+      "requested_at": "2026-10-13T12:00:00Z",
+      "reviewed_at": null,
+      "review_reason": null,
+      "class_name": "Turma Exemplo",
+      "eligibility": {
+        "required_seconds": 288000,
+        "validated_seconds": 0,
+        "completed": false,
+        "eligible": false
+      }
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Pedido novo é pending. Replay da mesma matrícula/edição e contexto retorna 200; contexto de turma divergente retorna 409. Criação não emite certificado."
+  },
+  "GET /certificate-requests": {
+    "status": 200,
+    "body": {
+      "requests": [
+        {
+          "id": "00000000-0000-4000-8000-000000000019",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "course_id": "curso-exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "holder_name": "Pessoa Exemplo",
+          "course_title": "Curso Exemplo",
+          "program_name": "Programa Exemplo",
+          "institution_name": "Instituição Exemplo",
+          "status": "pending",
+          "revision": 1,
+          "requested_at": "2026-10-13T12:00:00Z",
+          "reviewed_at": null,
+          "review_reason": null,
+          "class_name": "Turma Exemplo",
+          "eligibility": {
+            "required_seconds": 288000,
+            "validated_seconds": 0,
+            "completed": false,
+            "eligible": false
+          }
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Visibilidade do autor ou revisor autorizado; aprovação/rejeição são decisões humanas e não emissão."
+  },
+  "GET /certificate-requests/review-queue": {
+    "status": 200,
+    "body": {
+      "requests": [
+        {
+          "id": "00000000-0000-4000-8000-000000000019",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "course_id": "curso-exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "holder_name": "Pessoa Exemplo",
+          "course_title": "Curso Exemplo",
+          "program_name": "Programa Exemplo",
+          "institution_name": "Instituição Exemplo",
+          "status": "pending",
+          "revision": 1,
+          "requested_at": "2026-10-13T12:00:00Z",
+          "reviewed_at": null,
+          "review_reason": null,
+          "class_name": "Turma Exemplo",
+          "eligibility": {
+            "required_seconds": 288000,
+            "validated_seconds": 0,
+            "completed": false,
+            "eligible": false
+          }
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Visibilidade do autor ou revisor autorizado; aprovação/rejeição são decisões humanas e não emissão."
+  },
+  "GET /certificate-requests/{request_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "course_id": "curso-exemplo",
+      "course_version_id": "00000000-0000-4000-8000-000000000008",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "holder_name": "Pessoa Exemplo",
+      "course_title": "Curso Exemplo",
+      "program_name": "Programa Exemplo",
+      "institution_name": "Instituição Exemplo",
+      "status": "pending",
+      "revision": 1,
+      "requested_at": "2026-10-13T12:00:00Z",
+      "reviewed_at": null,
+      "review_reason": null,
+      "class_name": "Turma Exemplo",
+      "eligibility": {
+        "required_seconds": 288000,
+        "validated_seconds": 0,
+        "completed": false,
+        "eligible": false
+      }
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "POST /certificate-requests/{request_id}/review": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "course_id": "curso-exemplo",
+      "course_version_id": "00000000-0000-4000-8000-000000000008",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "holder_name": "Pessoa Exemplo",
+      "course_title": "Curso Exemplo",
+      "program_name": "Programa Exemplo",
+      "institution_name": "Instituição Exemplo",
+      "status": "approved",
+      "revision": 2,
+      "requested_at": "2026-10-13T12:00:00Z",
+      "reviewed_at": "2026-10-13T12:00:00Z",
+      "review_reason": "Conclusão e carga horária conferidas.",
+      "class_name": "Turma Exemplo",
+      "eligibility": {
+        "required_seconds": 288000,
+        "validated_seconds": 288000,
+        "completed": true,
+        "eligible": true
+      }
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo de decision=approve com elegibilidade comprovada na fixture. Exige outra pessoa autorizada no programa/turma. Aprovação não emite certificado."
+  },
+  "POST /certificate-requests/{request_id}/resubmit": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000019",
+      "enrollment_id": "00000000-0000-4000-8000-000000000007",
+      "course_id": "curso-exemplo",
+      "course_version_id": "00000000-0000-4000-8000-000000000008",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "holder_name": "Pessoa Exemplo",
+      "course_title": "Curso Exemplo",
+      "program_name": "Programa Exemplo",
+      "institution_name": "Instituição Exemplo",
+      "status": "pending",
+      "revision": 3,
+      "requested_at": "2026-10-13T12:00:00Z",
+      "reviewed_at": null,
+      "review_reason": null,
+      "class_name": "Turma Exemplo",
+      "eligibility": {
+        "required_seconds": 288000,
+        "validated_seconds": 0,
+        "completed": false,
+        "eligible": false
+      }
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo após rejeição na revisão 2. Somente autor; deve fornecer expected_revision atual."
+  },
+  "POST /certificate-requests/{request_id}/emit": {
+    "status": 503,
+    "body": {
+      "detail": "Emissão final bloqueada pelo gate de ativação institucional: candidato sintético não homologa provedor instalado, assinatura institucional nem liberação em ambiente real."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Mesmo um pedido autorizado e elegível alcança este bloqueio permanente. Nenhuma flag ou payload abre a emissão institucional final; autenticação e _authorized podem falhar antes deste gate."
+  },
+  "POST /certificate-requests/{request_id}/emission-candidate": {
+    "status": 503,
+    "body": {
+      "detail": "Candidato sintético desativado neste ambiente."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta com candidato desativado ou em produção. Ativação de ensaio exige CERTIFICATE_CANDIDATE_ENABLED=true, ambiente development ou staging, CERTIFICATE_CANDIDATE_SECRET com pelo menos 32 caracteres e URL específica isolada. Development: HTTP loopback; staging: HTTPS em tutor-tds-cert-staging.tdsipex.workers.dev, sem transporte injetado. Pedido/vínculos, elegibilidade e provas continuam autorizados no backend. Referência candidata não integra carteira oficial."
+  },
+  "POST /certificate-requests/{request_id}/reconcile-candidate": {
+    "status": 503,
+    "body": {
+      "detail": "Candidato sintético desativado neste ambiente."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta com candidato desativado ou em produção. Ativação de ensaio exige CERTIFICATE_CANDIDATE_ENABLED=true, ambiente development ou staging, CERTIFICATE_CANDIDATE_SECRET com pelo menos 32 caracteres e URL específica isolada. Development: HTTP loopback; staging: HTTPS em tutor-tds-cert-staging.tdsipex.workers.dev, sem transporte injetado. Pedido/vínculos, elegibilidade e provas continuam autorizados no backend. Referência candidata não integra carteira oficial."
+  },
+  "PUT /classes/{class_id}/certificate-policy-candidate": {
+    "status": 503,
+    "body": {
+      "detail": "Contrato candidato desativado neste ambiente."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final."
+  },
+  "POST /certificate-requests/{request_id}/candidate-checkpoints/{checkpoint_id}": {
+    "status": 503,
+    "body": {
+      "detail": "Contrato candidato desativado neste ambiente."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final."
+  },
+  "POST /certificate-requests/{request_id}/candidate-evidence": {
+    "status": 503,
+    "body": {
+      "detail": "Contrato candidato desativado neste ambiente."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final."
+  },
+  "GET /certificate-requests/{request_id}/candidate-status": {
+    "status": 503,
+    "body": {
+      "detail": "Contrato candidato desativado neste ambiente."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final."
+  },
+  "POST /certificate-requests/{request_id}/candidate-lifecycle": {
+    "status": 503,
+    "body": {
+      "detail": "Contrato candidato desativado neste ambiente."
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final."
+  },
+  "GET /media/{media_id}/playback/{token}": {
+    "status": 307,
+    "body": null,
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta de redirecionamento, corpo vazio; cabeçalho Location aponta para URL do provedor configurado, por exemplo https://video.example.com/playback-sintetico. Exige grant válido, mídia publicada e autorização ainda ativa; URL demonstrativa não é um playback real."
+  },
+  "GET /editor/context": {
+    "status": 200,
+    "body": {
+      "programs": [
+        {
+          "id": "00000000-0000-4000-8000-000000000002",
+          "name": "Programa Exemplo",
+          "role": "coordinator",
+          "can_create": true,
+          "can_publish": true
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "GET /editor/courses": {
+    "status": 200,
+    "body": {
+      "courses": [
+        {
+          "sections": [
+            {
+              "id": "modulo-1",
+              "title": "Introdução",
+              "messages": [
+                {
+                  "id": "mensagem-1",
+                  "type": "bot",
+                  "content": "Bem-vindo ao curso de exemplo.",
+                  "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+                }
+              ],
+              "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+            }
+          ],
+          "id": "curso-exemplo",
+          "title": "Curso Exemplo",
+          "author": "Autoria Exemplo",
+          "course_id": "curso-exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "version_id": "00000000-0000-4000-8000-000000000008",
+          "version_number": 1,
+          "revision": 1,
+          "status": "draft",
+          "created_at": "2026-10-13T12:00:00Z",
+          "updated_at": "2026-10-13T12:00:00Z",
+          "can_edit": true,
+          "can_submit": true,
+          "can_publish": false,
+          "can_archive": false,
+          "can_fork": false
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Lista apenas versões editoriais visíveis no programa solicitado."
+  },
+  "GET /editor/courses/{course_id}": {
+    "status": 200,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_id": "curso-exemplo",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "revision": 1,
+      "status": "draft",
+      "created_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "can_edit": true,
+      "can_submit": true,
+      "can_publish": false,
+      "can_archive": false,
+      "can_fork": false,
+      "versions": [
+        {
+          "version_id": "00000000-0000-4000-8000-000000000008",
+          "version_number": 1,
+          "status": "draft",
+          "revision": 1
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado."
+  },
+  "POST /courses": {
+    "status": 201,
+    "body": {
+      "sections": [],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_id": "curso-exemplo",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "revision": 1,
+      "status": "draft",
+      "created_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "can_edit": true,
+      "can_submit": true,
+      "can_publish": false,
+      "can_archive": false,
+      "can_fork": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Curso novo começa em draft, com sections vazias, e ainda não entra no catálogo público."
+  },
+  "PATCH /courses/{course_id}": {
+    "status": 200,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_id": "curso-exemplo",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "revision": 2,
+      "status": "draft",
+      "created_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "can_edit": true,
+      "can_submit": true,
+      "can_publish": false,
+      "can_archive": false,
+      "can_fork": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente draft autorizado; version_id e expected_revision controlam concorrência. IDs/version_id dos componentes pertencem ao snapshot do conteúdo."
+  },
+  "POST /courses/{course_id}/versions": {
+    "status": 201,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_id": "curso-exemplo",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 2,
+      "revision": 1,
+      "status": "draft",
+      "created_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "can_edit": true,
+      "can_submit": true,
+      "can_publish": false,
+      "can_archive": false,
+      "can_fork": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Cria novo draft a partir de edição published/archived. O exemplo pressupõe a edição 1 publicada na fixture."
+  },
+  "POST /courses/{course_id}/submit": {
+    "status": 200,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_id": "curso-exemplo",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "revision": 3,
+      "status": "in_review",
+      "created_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "can_edit": false,
+      "can_submit": false,
+      "can_publish": true,
+      "can_archive": false,
+      "can_fork": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige draft autorizado e conteúdo publicável. A mudança de estado não publica no catálogo."
+  },
+  "POST /courses/{course_id}/publish": {
+    "status": 200,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_id": "curso-exemplo",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "revision": 4,
+      "status": "published",
+      "created_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "can_edit": false,
+      "can_submit": false,
+      "can_publish": false,
+      "can_archive": true,
+      "can_fork": true
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige in_review e autoridade de publicação em todos os programas que ofertam o curso. Atualiza a projeção pública do Course e arquiva a edição anterior."
+  },
+  "POST /courses/{course_id}/archive": {
+    "status": 200,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_id": "curso-exemplo",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "revision": 5,
+      "status": "archived",
+      "created_at": "2026-10-13T12:00:00Z",
+      "updated_at": "2026-10-13T12:00:00Z",
+      "can_edit": false,
+      "can_submit": false,
+      "can_publish": false,
+      "can_archive": false,
+      "can_fork": true
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige published e autoridade de publicação; desativa a projeção pública. Snapshot já fixado em turma permanece histórico."
+  },
+  "GET /live": {
+    "status": 200,
+    "body": {
+      "status": "ok"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Liveness do processo sem depender do banco."
+  },
+  "GET /health": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "database": "available"
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo de SELECT 1 bem-sucedido no banco; não declara prontidão de release."
+  },
+  "GET /version": {
+    "status": 200,
+    "body": {
+      "api_version": "0.1.0",
+      "schema_version": "20261007_0030",
+      "minimum_supported_app_version": "1.2.0+11",
+      "environment": "production",
+      "compatibility_verified": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo hipotético de deployment após migração; não é observação da produção atual. compatibility_verified depende de COMPATIBILITY_VERIFIED e não é calculado por esta rota. Falta de revisão Alembic única retorna 503."
+  },
+  "GET /courses": {
+    "status": 200,
+    "body": {
+      "courses": [
+        {
+          "sections": [
+            {
+              "id": "modulo-1",
+              "title": "Introdução",
+              "messages": [
+                {
+                  "id": "mensagem-1",
+                  "type": "bot",
+                  "content": "Bem-vindo ao curso de exemplo.",
+                  "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+                }
+              ],
+              "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+            }
+          ],
+          "id": "curso-exemplo",
+          "title": "Curso Exemplo",
+          "author": "Autoria Exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "version_id": "00000000-0000-4000-8000-000000000008",
+          "version_number": 1,
+          "legacy_progress_compatible": false
+        }
+      ]
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente Course.active=true. Conteúdo editorial preserva campos legados; campos de versão são adicionados quando há edição published. Gabaritos protegidos quando flags contextuais/dinâmicas estão ativas."
+  },
+  "GET /courses/{course_id}": {
+    "status": 200,
+    "body": {
+      "sections": [
+        {
+          "id": "modulo-1",
+          "title": "Introdução",
+          "messages": [
+            {
+              "id": "mensagem-1",
+              "type": "bot",
+              "content": "Bem-vindo ao curso de exemplo.",
+              "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+            }
+          ],
+          "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+        }
+      ],
+      "id": "curso-exemplo",
+      "title": "Curso Exemplo",
+      "author": "Autoria Exemplo",
+      "course_version_id": "00000000-0000-4000-8000-000000000008",
+      "version_id": "00000000-0000-4000-8000-000000000008",
+      "version_number": 1,
+      "legacy_progress_compatible": false
+    },
+    "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Curso inexistente/inativo retorna 404. Os campos além de id/title/author provêm do snapshot editorial e podem variar entre cursos."
+  }
+}

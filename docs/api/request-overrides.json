@@ -1,0 +1,359 @@
+{
+  "PATCH /admin/media/{media_id}": {},
+  "PATCH /classes/{class_id}/mentorship-cases/{case_id}": {
+    "expected_revision": 1,
+    "idempotency_key": "qa-command-20261013-0001",
+    "next_action": "Registrar acompanhamento sintético",
+    "reason": "Validação com dados sintéticos"
+  },
+  "PATCH /courses/{course_id}": {
+    "author": "Equipe Sintética QA",
+    "expected_revision": 1,
+    "sections": [
+      {
+        "id": "modulo-qa",
+        "messages": [
+          {
+            "content": "Conteúdo sintético para validar o contrato.",
+            "id": "mensagem-qa",
+            "type": "bot"
+          }
+        ],
+        "title": "Módulo sintético"
+      }
+    ],
+    "title": "Curso Sintético QA",
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /admin/accounts": {
+    "cpf": "12345678909",
+    "name": "Pessoa Sintética QA",
+    "password": "Apenas-exemplo-nao-utilizar-2026",
+    "phone": "00000000000",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "role": "student"
+  },
+  "POST /admin/classes": {
+    "course_id": "curso-exemplo",
+    "end_date": "2026-10-14",
+    "name": "Pessoa Sintética QA",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "start_date": "2026-10-13",
+    "status": "planned",
+    "teacher_id": "00000000-0000-4000-8000-000000000005"
+  },
+  "POST /admin/classes/{class_id}/sessions": {
+    "ends_at": "2026-10-13T13:00:00Z",
+    "starts_at": "2026-10-13T12:00:00Z"
+  },
+  "POST /admin/creator-scores/calculate": {
+    "media_id": "00000000-0000-4000-8000-000000000001",
+    "window_end": "2026-10-02T00:00:00Z",
+    "window_start": "2026-10-01T00:00:00Z"
+  },
+  "POST /admin/enrollments": {
+    "course_id": "curso-exemplo",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "user_id": "00000000-0000-4000-8000-000000000004"
+  },
+  "POST /admin/institutions": {
+    "name": "Pessoa Sintética QA"
+  },
+  "POST /admin/ledger/simulate": {
+    "amount_minor": 100,
+    "creator_score_id": "00000000-0000-4000-8000-000000000001",
+    "currency": "BRL",
+    "entry_type": "accrual",
+    "idempotency_key": "qa-command-20261013-0001",
+    "source_event_id": "00000000-0000-4000-8000-000000000001"
+  },
+  "POST /admin/media": {
+    "competency_id": "00000000-0000-4000-8000-000000000001",
+    "course_id": "curso-exemplo",
+    "description": "",
+    "duration_seconds": 1,
+    "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+    "institution_id": "00000000-0000-4000-8000-000000000001",
+    "module_id": "modulo-qa",
+    "offline_policy": "forbidden",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "provider": "youtube",
+    "provider_asset_id": "dQw4w9WgXcQ",
+    "rights_confirmed": false,
+    "title": "Curso Sintético QA",
+    "visibility": "public"
+  },
+  "POST /admin/media/{media_id}/archive": {
+    "reason": "Validação com dados sintéticos"
+  },
+  "POST /admin/media/{media_id}/block": {
+    "reason": "Validação com dados sintéticos"
+  },
+  "POST /admin/programs": {
+    "institution_id": "00000000-0000-4000-8000-000000000001",
+    "name": "Pessoa Sintética QA"
+  },
+  "POST /admin/programs/{program_id}/memberships": {
+    "role": "student",
+    "user_id": "00000000-0000-4000-8000-000000000004"
+  },
+  "POST /auth/activation-invites": {
+    "cpf": "12345678909",
+    "expires_in_hours": 24
+  },
+  "POST /auth/login": {
+    "cpf": "12345678909",
+    "password": "Apenas-exemplo-nao-utilizar-2026"
+  },
+  "POST /auth/refresh": {
+    "refresh_token": "REFRESH_TOKEN_SINTETICO"
+  },
+  "POST /auth/register": {
+    "cpf": "12345678909",
+    "name": "Pessoa Sintética QA",
+    "password": "Apenas-exemplo-nao-utilizar-2026",
+    "phone": "00000000000"
+  },
+  "POST /certificate-requests": {
+    "course_version_id": "00000000-0000-4000-8000-000000000008",
+    "enrollment_id": "00000000-0000-4000-8000-000000000007"
+  },
+  "POST /certificate-requests/{request_id}/candidate-checkpoints/{checkpoint_id}": {
+    "answers": {}
+  },
+  "POST /certificate-requests/{request_id}/candidate-evidence": {
+    "document_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "document_reference": "qa-example",
+    "kind": "baseline",
+    "origin": "qa-example",
+    "reason": "Validação com dados sintéticos"
+  },
+  "POST /certificate-requests/{request_id}/candidate-lifecycle": {
+    "action": "submit",
+    "expected_state": "GENERATED"
+  },
+  "POST /certificate-requests/{request_id}/resubmit": {
+    "expected_revision": 1
+  },
+  "POST /certificate-requests/{request_id}/review": {
+    "decision": "approve",
+    "expected_revision": 1,
+    "reason": "Validação com dados sintéticos"
+  },
+  "POST /certificates/references": {
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "course_id": "curso-exemplo",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "issued_at": "2026-10-01T12:00:00Z",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "verification_url": "https://example.org/verify/qa-certificate"
+  },
+  "POST /checkins/code": {
+    "code": "000000",
+    "idempotency_key": "qa-command-20261013-0001",
+    "kind": "checkin"
+  },
+  "POST /classes/{class_id}/evidence-imports": {
+    "idempotency_key": "qa-command-20261013-0001",
+    "items": [
+      {
+        "evidence_type": "observation",
+        "item_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "occurred_at": "2026-10-01T12:00:00Z"
+      }
+    ],
+    "retention_until": "2026-10-01T12:00:00Z",
+    "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_type": "whatsapp_export"
+  },
+  "POST /classes/{class_id}/evidence/{evidence_id}/review": {
+    "decision": "accepted",
+    "reason_code": "verified"
+  },
+  "POST /classes/{class_id}/mentorship-cases": {
+    "idempotency_key": "qa-command-20261013-0001",
+    "mentor_id": "00000000-0000-4000-8000-000000000005",
+    "next_action": "qa-example",
+    "objective": "qa-example",
+    "reason": "Validação com dados sintéticos",
+    "user_id": "00000000-0000-4000-8000-000000000004"
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/attendance/{user_id}": {
+    "expected_revision": 0,
+    "idempotency_key": "qa-command-20261013-0001",
+    "reason": "Validação com dados sintéticos",
+    "status": "VALID"
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/checkins": {
+    "idempotency_key": "qa-command-20261013-0001",
+    "kind": "checkin",
+    "token": "TOKEN_SINTETICO_DO_ENCONTRO"
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/presence/{user_id}": {
+    "expected_revision": 0,
+    "idempotency_key": "qa-command-20261013-0001",
+    "reason": "Validação com dados sintéticos",
+    "status": "confirmed_present"
+  },
+  "POST /courses": {
+    "author": "Equipe Sintética QA",
+    "course_id": "curso-exemplo",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "title": "Curso Sintético QA"
+  },
+  "POST /courses/{course_id}/archive": {
+    "expected_revision": 1,
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /courses/{course_id}/publish": {
+    "expected_revision": 1,
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /courses/{course_id}/submit": {
+    "expected_revision": 1,
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /courses/{course_id}/versions": {
+    "source_version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /events": {
+    "course_id": "curso-exemplo",
+    "event_id": "00000000-0000-4000-8000-000000000001",
+    "event_type": "page_viewed",
+    "occurred_at": "2026-10-01T12:00:00Z",
+    "payload": {
+      "page_id": "classroom"
+    },
+    "session_id": "00000000-0000-4000-8000-000000000009"
+  },
+  "POST /operations/classes": {
+    "course_id": "curso-exemplo",
+    "end_date": "2026-10-14",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "institution_id": "00000000-0000-4000-8000-000000000001",
+    "name": "Pessoa Sintética QA",
+    "offer_location": "qa-example",
+    "offer_municipality": "qa-example",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "reason": "Validação com dados sintéticos",
+    "start_date": "2026-10-13",
+    "teacher_id": "00000000-0000-4000-8000-000000000005",
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /operations/classes/{class_id}/plan": {
+    "course_id": "curso-exemplo",
+    "end_date": "2026-10-14",
+    "expected_revision": 0,
+    "id": "00000000-0000-4000-8000-000000000001",
+    "institution_id": "00000000-0000-4000-8000-000000000001",
+    "name": "Pessoa Sintética QA",
+    "offer_location": "qa-example",
+    "offer_municipality": "qa-example",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "reason": "Validação com dados sintéticos",
+    "start_date": "2026-10-13",
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /operations/classes/{class_id}/team": {
+    "course_id": "curso-exemplo",
+    "expected_revision": 0,
+    "id": "00000000-0000-4000-8000-000000000001",
+    "institution_id": "00000000-0000-4000-8000-000000000001",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "reason": "Validação com dados sintéticos",
+    "teacher_id": "00000000-0000-4000-8000-000000000005",
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /operations/classes/{class_id}/transition": {
+    "course_id": "curso-exemplo",
+    "expected_revision": 0,
+    "id": "00000000-0000-4000-8000-000000000001",
+    "institution_id": "00000000-0000-4000-8000-000000000001",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "reason": "Validação com dados sintéticos",
+    "target_status": "active",
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /operations/{class_id}/commands": {
+    "action": "register",
+    "course_id": "curso-exemplo",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "institution_id": "00000000-0000-4000-8000-000000000001",
+    "program_id": "00000000-0000-4000-8000-000000000002",
+    "reason": "Validação com dados sintéticos",
+    "registration": {
+      "cpf": "12345678909",
+      "name": "Pessoa Sintética QA",
+      "password": "Apenas-exemplo-nao-utilizar-2026",
+      "phone": "00000000000"
+    },
+    "version_id": "00000000-0000-4000-8000-000000000008"
+  },
+  "POST /operations/{class_id}/inspect": {
+    "person_id": "00000000-0000-4000-8000-000000000004"
+  },
+  "POST /operations/{class_id}/search": {
+    "query": "qa-example"
+  },
+  "PUT /admin/programs/{program_id}/courses/{course_id}/workload": {
+    "planned_hours": 1.0
+  },
+  "PUT /assessment-attempts/{attempt_id}": {
+    "assessment_content_id": "qa-assessment-content",
+    "completed": false,
+    "course_id": "curso-exemplo",
+    "current_index": 0,
+    "mode": "quiz",
+    "origin": "practice",
+    "remaining_seconds": 0,
+    "revision": 1,
+    "score": 0,
+    "topic": "Tema sintético",
+    "updated_at": "2026-10-01T12:00:00Z"
+  },
+  "PUT /assessment-contents/{content_id}": {
+    "course_id": "curso-exemplo",
+    "duration_seconds": 0,
+    "mode": "quiz",
+    "questions": [
+      {
+        "correct_index": 0,
+        "explanation": "",
+        "options": [
+          "qa-example",
+          "qa-example"
+        ],
+        "question": "Questão sintética?",
+        "topic": "Tema sintético"
+      }
+    ],
+    "title": "Curso Sintético QA",
+    "topic": "Tema sintético"
+  },
+  "PUT /classes/{class_id}/certificate-policy-candidate": {
+    "checkpoints": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "kind": "assessment",
+        "source_id": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "course_version_id": "00000000-0000-4000-8000-000000000008",
+    "formal_hours": 80,
+    "operational_owner_id": "00000000-0000-4000-8000-000000000001",
+    "session_ids": [
+      "00000000-0000-4000-8000-000000000001"
+    ]
+  },
+  "PUT /classes/{class_id}/students/{user_id}/baseline": {
+    "baseline_date": "2026-10-01",
+    "expected_revision": 0,
+    "idempotency_key": "qa-command-20261013-0001",
+    "reason": "Validação com dados sintéticos",
+    "record_id": "00000000-0000-4000-8000-000000000001",
+    "source": "app"
+  },
+  "PUT /media/{media_id}/rating": {
+    "rating": 1
+  }
+}

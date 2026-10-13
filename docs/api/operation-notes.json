@@ -1,0 +1,767 @@
+{
+  "POST /auth/register": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Cria conta student e emite tokens. CPF único, senha de 12 a 128 caracteres e telefone de 10 a 15 dígitos. Com CPF_ACTIVATION_REQUIRED, exige convite válido, não utilizado e associado ao CPF; não concede matrícula.",
+    "flags": [
+      "CPF_ACTIVATION_REQUIRED"
+    ]
+  },
+  "POST /auth/login": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Autentica por CPF e senha, aplica limite compartilhado de tentativas inclusive nas falhas e emite access/refresh tokens. Conta sem ativação é recusada quando a ativação por CPF é exigida.",
+    "flags": [
+      "CPF_ACTIVATION_REQUIRED"
+    ]
+  },
+  "POST /auth/refresh": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Exige refresh_token válido no corpo, revoga o token anterior e emite um novo par. Não reutilize o refresh_token após rotação.",
+    "flags": []
+  },
+  "POST /auth/activation-invites": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Emite convite de ativação vinculado ao CPF, válido por 1 a 168 horas. O segredo retornado deve ser entregue por canal privado.",
+    "flags": []
+  },
+  "GET /auth/me": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Retorna id, nome e papel global da conta autenticada.",
+    "flags": []
+  },
+  "DELETE /auth/me": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular.",
+    "behavior": "Exclui a própria conta e os dados transacionais associados; retorna 204 sem corpo. Vínculo docente, monitor ou equipe/creator ativa exige exclusão assistida e produz 409; agenda remoção da sincronização externa.",
+    "flags": []
+  },
+  "GET /support/identity": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Assina somente a identidade do titular para Chatwoot; não recebe identidade alvo nem expõe CPF/telefone. Retorna 503 se segredo/namespace do suporte não estão configurados; Cache-Control: no-store.",
+    "flags": []
+  },
+  "GET /analytics/usage": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin pode consultar todo o escopo ou uma turma. Instrutor designado pode consultar alunos ativos de sua turma; monitor não pode consultar analytics da turma. Outros usuários acessam apenas a si mesmos.",
+    "behavior": "Agrega page_viewed, resource_opened e feature_used por curso/alvo nos últimos 1 a 90 dias. Quem possui vínculo docente/monitor precisa informar class_id. user_id fora da turma ativa retorna 404; telemetria não concede resultado acadêmico.",
+    "flags": []
+  },
+  "GET /admin/sync/status": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Consulta contagens da fila e horários da última sincronização/falha; exhausted conta falhas que atingiram SYNC_MAX_ATTEMPTS. Não executa sincronização.",
+    "flags": []
+  },
+  "GET /events": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular.",
+    "behavior": "Lista eventos do titular com filtro opcional de curso e paginação offset/limit; ordenação por occurred_at decrescente.",
+    "flags": []
+  },
+  "POST /events": {
+    "permission": "Token Bearer. Papel global student no caminho legado; outros papéis podem enviar telemetria com JOURNEY_TRACEABILITY_ENABLED ou eventos versionados de turma com LEARNING_CONTEXT_ENABLED, sempre sujeitos à autorização relacional.",
+    "behavior": "event_id é idempotente: repetição idêntica do mesmo titular retorna 200; nova inserção 201; divergência retorna 409. screen_engagement exige JOURNEY_TRACEABILITY_ENABLED. Evento de edição/turma deve corresponder à matrícula ativa e edição fixada; eventos não concedem autorização, presença ou certificado.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "JOURNEY_TRACEABILITY_ENABLED"
+    ]
+  },
+  "GET /live": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Verifica processo sem depender do PostgreSQL; status ok não comprova disponibilidade do banco.",
+    "flags": []
+  },
+  "GET /health": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Executa SELECT 1 no banco e retorna disponibilidade; falha de conexão não é ocultada.",
+    "flags": []
+  },
+  "GET /version": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Retorna versão da API, revisão única do Alembic, ambiente, versão mínima do app e compatibility_verified. Schema indisponível ou múltiplas revisões retornam 503.",
+    "flags": []
+  },
+  "GET /courses": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Catálogo legado de cursos ativos com a edição publicada mais recente, quando existente. LEARNING_CONTEXT_ENABLED e DYNAMIC_ACTIVITY_ENABLED juntos removem gabaritos da projeção pública; curso inexistente/inativo retorna 404.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /courses/{course_id}": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Catálogo legado de cursos ativos com a edição publicada mais recente, quando existente. LEARNING_CONTEXT_ENABLED e DYNAMIC_ACTIVITY_ENABLED juntos removem gabaritos da projeção pública; curso inexistente/inativo retorna 404.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "POST /admin/institutions": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Cria instituição com nome único; duplicata retorna 409.",
+    "flags": []
+  },
+  "POST /admin/programs": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Cria programa de instituição existente; nome duplicado na mesma instituição retorna 409.",
+    "flags": []
+  },
+  "POST /admin/programs/{program_id}/courses/{course_id}": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Vincula curso existente a programa existente; oferta já cadastrada retorna 409.",
+    "flags": []
+  },
+  "PUT /admin/programs/{program_id}/courses/{course_id}/workload": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Atualiza carga prevista da oferta em horas, armazenada em segundos; oferta inexistente retorna 404. Carga formal não equivale a tempo medido.",
+    "flags": []
+  },
+  "POST /admin/programs/{program_id}/memberships": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Cria participação ativa de conta existente no programa. Participação já existente retorna 409; papel do programa não altera automaticamente o papel global.",
+    "flags": []
+  },
+  "POST /admin/accounts": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Cria conta e participação ativa no programa em uma única transação; atribui o papel global solicitado. Reutiliza validação de cadastro, incluindo convite de ativação quando exigido, embora este payload não exponha activation_token.",
+    "flags": [
+      "CPF_ACTIVATION_REQUIRED"
+    ]
+  },
+  "POST /admin/enrollments": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Cria matrícula legado para participante ativo e curso ofertado; duplicata retorna 409. Associa eventos study_activity anteriormente sem matrícula. Não cria automaticamente matrícula contextual de turma.",
+    "flags": []
+  },
+  "GET /admin/hierarchy": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Consulta instituições, programas, ofertas e participações; filtro de instituição opcional.",
+    "flags": []
+  },
+  "POST /admin/classes/{class_id}/sessions": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Abre encontro somente em turma active. Gera token de check-in e código de seis dígitos; validade limitada a dez minutos ou ao fim do encontro.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/sessions": {
+    "permission": "Token Bearer; equipe autorizada da turma ou aluno com matrícula e vínculos ativos e linhagem consistente.",
+    "behavior": "Consulta encontros da turma sem expor token/código secreto. /open retorna o encontro aberto mais recente ou 404.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/sessions/open": {
+    "permission": "Token Bearer; equipe autorizada da turma ou aluno com matrícula e vínculos ativos e linhagem consistente.",
+    "behavior": "Consulta encontros da turma sem expor token/código secreto. /open retorna o encontro aberto mais recente ou 404.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/sessions/{session_id}": {
+    "permission": "Token Bearer; equipe autorizada da turma ou aluno com matrícula e vínculos ativos e linhagem consistente.",
+    "behavior": "Consulta encontros da turma sem expor token/código secreto. /open retorna o encontro aberto mais recente ou 404.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/token": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Rotaciona token e código de encontro aberto; incrementa token_version e invalida os valores anteriores. Encontro encerrado retorna 409.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/checkins": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Aluno só registra a si mesmo; equipe autorizada da turma pode informar outro user_id. O alvo precisa ter matrícula ativa.",
+    "behavior": "idempotency_key idêntica para encontro/aluno/kind retorna 200; divergência 409. Novo registro exige encontro aberto e janela de 15 minutos antes do início até o fim. QR exige token atual válido; registro manual pela equipe dispensa token. Check-in é evidência, não presença oficial.",
+    "flags": []
+  },
+  "POST /checkins/code": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Titular precisa de matrícula ativa na turma resolvida pelo código.",
+    "behavior": "Resolve código vigente de seis dígitos de encontro aberto e registra o próprio check-in, com limite compartilhado de tentativas (429 ao exceder). Código expirado/inválido retorna 401, rotação concorrente 409. Exige janela do encontro; mesmo idempotency_key/aluno/kind/encontro retorna registro existente. Não concede presença oficial.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/evidence-imports": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Importa metadados de evidências com retenção futura, digest e idempotency_key. Retry com mesma turma, ator, source_type, source_digest e retenção retorna 200 com a importação original; divergência desses campos retorna 409. Aluno/encontro fora da turma é recusado. Não faz upload do arquivo original.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/evidence-imports/{import_id}": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Consulta importação e IDs das evidências somente na turma da rota.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/evidence/{evidence_id}/review": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Registra decisão humana sobre evidência da turma e histórico de revisão; evidência revisada não equivale automaticamente a frequência oficial.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/exceptions": {
+    "permission": "Token Bearer; equipe autorizada da turma ou aluno com matrícula e vínculos ativos e linhagem consistente.",
+    "behavior": "Equipe vê pendências da turma; aluno ativo vê apenas suas próprias evidências pendentes.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/close": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Fecha encontro e congela relatório. Pendências de evidência/presença exigem confirm_pending=true; repetição retorna o relatório já existente. Integrações externas permanecem disabled no resumo.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/reports/{report_id}": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Consulta relatório congelado de encontro; report_id de outra turma retorna 404.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/sessions/{session_id}/attendance/{user_id}": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo. Alvo precisa manter matrícula ativa.",
+    "behavior": "Lista histórico imutável de decisões oficiais. can_decide só é verdadeiro para o instrutor designado com vínculo ativo e alvo diferente do próprio instrutor.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/attendance/{user_id}": {
+    "permission": "Token Bearer; somente instrutor designado da turma com vínculo ativo no programa/coorte, inclusive quando tem papel global admin; alvo deve ser outra pessoa com matrícula ativa. Admin global isoladamente não autoriza.",
+    "behavior": "Append-only por revisão. Exige expected_revision, motivo e idempotency_key; replay idêntico retorna decisão existente e divergência/conflito concorrente 409. Reposição precisa referenciar outro encontro da mesma turma; histórico preserva linhagem da matrícula.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/sessions/{session_id}/presence": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Lista roster ativo e sugestão derivada de evidências. Check-in/atividade só sugerem presença; decisão humana é separada.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/presence/{user_id}": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo. Alvo deve ser outra pessoa com matrícula ativa.",
+    "behavior": "Decide presença formal em encontro aberto com expected_revision, reason e idempotency_key. Replay idêntico preserva decisão; divergência ou revisão concorrente retorna 409. Retificação append-only preserva contagens de evidência usadas na decisão.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/learning-context": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Exige matrícula própria, vínculos ativos e linhagem contextual persistida; papel global não substitui matrícula.",
+    "behavior": "Resolve contrato cohort-enrollment-v2 com edição published/archived fixada e progresso canônico. Contexto ausente/inconsistente exige reconciliação e retorna 409.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/students/{user_id}/learning-context": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo. Aluno alvo precisa ter matrícula contextual ativa e consistente.",
+    "behavior": "Resolve o mesmo snapshot/progresso canônico usado pelo aluno; não cria matrícula fictícia para professor/monitor.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED"
+    ]
+  },
+  "PUT /assessment-contents/{content_id}": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular. Exige curso ativo e matrícula legado ativa no curso.",
+    "behavior": "Cria conteúdo practice imutável pertencente ao titular. ID publicado reservado é recusado. Primeiro PUT retorna 201; mesmo digest 200; digest divergente 409. Preview omite gabarito.",
+    "flags": []
+  },
+  "GET /assessment-contents/{content_id}": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular.",
+    "behavior": "Consulta preview de conteúdo próprio practice sem gabarito; conteúdo de outra pessoa/outra origem retorna 404.",
+    "flags": []
+  },
+  "PUT /assessment-attempts/{attempt_id}": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. practice exige papel global student e matrícula legado ativa em curso ativo; published_block exige matrícula contextual própria ativa e edição fixada, sem depender do papel global.",
+    "behavior": "score deve ser zero: servidor calcula a nota. Nova tentativa começa na revisão 1 e retorna 201; replay idêntico retorna 200. Atualização exige revisão consecutiva e timestamp não regressivo; tentativa concluída é imutável. published_block exige ID canônico, contexto exato e conteúdo editorial do servidor; conclusão grava evidência determinística na mesma transação.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /assessment-attempts/{attempt_id}": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular.",
+    "behavior": "Consulta somente tentativas próprias de origem practice; tentativas editoriais devem usar rotas contextuais da turma.",
+    "flags": []
+  },
+  "GET /assessment-attempts": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular.",
+    "behavior": "Consulta somente tentativas próprias de origem practice; tentativas editoriais devem usar rotas contextuais da turma.",
+    "flags": []
+  },
+  "GET /assessment-attempts/{attempt_id}/content": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular.",
+    "behavior": "Retorna conteúdo imutável da tentativa própria practice; inclui gabarito apenas após completed=true. Tentativa legado sem conteúdo associado retorna 409.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/assessment-attempts": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Exige contexto próprio resolvido com matrícula e vínculos ativos.",
+    "behavior": "Consulta tentativas published_block cuja linhagem corresponde ao contexto atual da turma e titular. Não mistura tentativas practice.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/assessment-attempts/{attempt_id}": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Exige contexto próprio resolvido com matrícula e vínculos ativos.",
+    "behavior": "Consulta tentativas published_block cuja linhagem corresponde ao contexto atual da turma e titular. Não mistura tentativas practice.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/assessment-attempts/{attempt_id}/content": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Exige contexto próprio ativo e tentativa correspondente.",
+    "behavior": "Consulta conteúdo editorial imutável da própria tentativa; gabarito não é exposto por este endpoint, inclusive após conclusão.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/students/{owner_id}/assessment-attempts": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Consulta tentativas editoriais contextuais do aluno na turma. Monitor não recebe a visão pedagógica de respostas/notas.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id}": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Consulta tentativas editoriais contextuais do aluno na turma. Monitor não recebe a visão pedagógica de respostas/notas.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id}/content": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Consulta snapshot editorial imutável da tentativa contextual; equipe docente autorizada recebe gabarito somente após completed=true.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /public/courses": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Projeção pública somente de curso ativo com edição publicada; expõe metadados editoriais aprovados, omite campos nulos. Cache-Control: public, max-age=60, stale-while-revalidate=300; detalhe sem publicação retorna 404.",
+    "flags": []
+  },
+  "GET /public/courses/{slug}": {
+    "permission": "Público, sem token Bearer.",
+    "behavior": "Projeção pública somente de curso ativo com edição publicada; expõe metadados editoriais aprovados, omite campos nulos. Cache-Control: public, max-age=60, stale-while-revalidate=300; detalhe sem publicação retorna 404.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/students/{user_id}/mentors": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo. Aluno alvo precisa ter matrícula ativa e consistente.",
+    "behavior": "Lista instrutor/monitores ativos da turma, excluindo o aluno alvo. Admin global sem atribuição contextual não é mentor automaticamente.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/students/{user_id}/baseline": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo. Aluno alvo precisa ter matrícula ativa e consistente.",
+    "behavior": "Consulta vínculo da baseline e histórico; vínculo ausente retorna baseline=null e history=[]. pessoa_id pseudônimo só é acrescentado quando rastreio e segredo analítico estão configurados.",
+    "flags": [
+      "JOURNEY_TRACEABILITY_ENABLED"
+    ]
+  },
+  "PUT /classes/{class_id}/students/{user_id}/baseline": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo. Aluno alvo precisa ter matrícula ativa e consistente.",
+    "behavior": "Concilia referência de baseline com revisão, motivo e idempotency_key; referência reservada a outra pessoa, mudança da linhagem e conflito de revisão retornam 409. Não consulta o documento externo. bi_record_id explicitamente enviado exige JOURNEY_TRACEABILITY_ENABLED.",
+    "flags": [
+      "JOURNEY_TRACEABILITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/mentorship-cases": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Consulta casos de mentoria associados à turma e matrícula ativa consistente; detalhe inclui histórico. Não concede presença, matrícula ou certificado.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/mentorship-cases/{case_id}": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Consulta casos de mentoria associados à turma e matrícula ativa consistente; detalhe inclui histórico. Não concede presença, matrícula ou certificado.",
+    "flags": []
+  },
+  "POST /classes/{class_id}/mentorship-cases": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo. Aluno alvo precisa ter matrícula ativa e mentor deve ser outra pessoa da equipe contextual ativa.",
+    "behavior": "Cria caso open na revisão 1. idempotency_key idêntica retorna 200; nova criação 201; divergência/conflito retorna 409.",
+    "flags": []
+  },
+  "PATCH /classes/{class_id}/mentorship-cases/{case_id}": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Atualiza campos explícitos não nulos com expected_revision, motivo e idempotency_key; replay retorna snapshot da revisão original. Revalida mentor ativo; fechamento registra closed_at e reabertura o remove.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/journey-export": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Exporta projeção tds-journey-v1 para BI usando pseudônimo e vínculos confirmados. Pendências/inconsistências são explícitas; resultados não comprovados permanecem null. Exige segredo de pseudonimização configurado; certificados candidatos não entram na exportação.",
+    "flags": [
+      "JOURNEY_TRACEABILITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/journey-activity": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Exporta telemetria de contas dos participantes ativos; atribuicao_turma permanece null. Consumidor deve deduplicar event_id entre turmas. Janela since/until exige fuso; limite até 500; segredo de pseudonimização é obrigatório.",
+    "flags": [
+      "JOURNEY_TRACEABILITY_ENABLED"
+    ]
+  },
+  "GET /users/{user_id}/hours": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Titular, admin global ou instrutor/monitor atribuído a turma que contenha a matrícula ativa do alvo.",
+    "behavior": "Agrega active_seconds e validated_seconds somente de study_activity da matrícula selecionada. Matrículas paralelas exigem program_id. Tempo medido não equivale a frequência nem às horas formais do certificado.",
+    "flags": []
+  },
+  "POST /admin/classes": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Cria turma para oferta e professor com vínculo teacher ativo; fixa edição publicada do curso e vínculo contextual docente. Com CLASS_LIFECYCLE_ENABLED, novas turmas devem iniciar em planned.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "POST /admin/classes/{class_id}/students/{user_id}": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Adiciona aluno com matrícula legado ativa compatível; turma closed recusa inclusão e vínculo existente retorna 409. Materializa contexto da edição quando disponível; capacidade 30 é aviso, sem impedir inclusão.",
+    "flags": []
+  },
+  "POST /admin/classes/{class_id}/monitors/{user_id}": {
+    "permission": "Token Bearer com papel global admin.",
+    "behavior": "Adiciona monitor com vínculo monitor ativo no programa. Turma closed recusa; monitor existente retorna 409. Com CLASS_LIFECYCLE_ENABLED, mudança de equipe após planned usa o fluxo contextual de coordenação.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/eligible-students": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Busca candidatos com matrícula ativa no mesmo programa/curso e sem inclusão ativa na turma. Turma closed recusa consulta; paginação por next_offset e aviso de ocupação.",
+    "flags": []
+  },
+  "PUT /classes/{class_id}/students/{user_id}": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Inclui ou reativa vínculo de aluno com matrícula ativa no programa/curso. Vínculo já ativo retorna representação existente; turma closed é recusada. Capacidade 30 é referência indicativa, não limite bloqueante.",
+    "flags": []
+  },
+  "GET /classes/{class_id}": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Consulta detalhe de turma com IDs dos participantes/monitores; aluno comum não recebe esta visão da equipe.",
+    "flags": []
+  },
+  "GET /classes": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Lista turmas segundo vínculos ativos: admin global vê todas, equipe atribuída e aluno ativo veem seus escopos. enrolled_only=true restringe também o admin às próprias matrículas ativas e consistentes.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/course": {
+    "permission": "Token Bearer; equipe autorizada da turma ou aluno com matrícula e vínculos ativos e linhagem consistente.",
+    "behavior": "Retorna snapshot imutável da edição published/archived fixada à turma, sem fallback silencioso ao catálogo público. Instrutor/admin autorizado vê gabarito; demais têm gabarito removido quando as duas flags estão ativas.",
+    "flags": [
+      "LEARNING_CONTEXT_ENABLED",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ]
+  },
+  "GET /classes/{class_id}/dashboard": {
+    "permission": "Token Bearer; admin global ou instrutor designado com participação ativa teacher/coordinator/admin no programa e vínculo contextual docente ativo quando existente. Monitor isoladamente não autoriza.",
+    "behavior": "Retorna projeção pedagógica completa dos alunos ativos com o mesmo cálculo canônico de progresso usado pelo contexto do aluno; monitor usa o fluxo de exceções.",
+    "flags": []
+  },
+  "GET /classes/{class_id}/monitor-exceptions": {
+    "permission": "Token Bearer; admin global ou equipe vinculada à turma. Instrutor designado exige participação ativa teacher/coordinator/admin no programa; monitor atribuído exige monitor/teacher/coordinator/admin ativo. Vínculo contextual de equipe, quando existente, precisa estar ativo.",
+    "behavior": "Retorna sinais acionáveis de acompanhamento da turma com escopo reduzido; não concede a visão pedagógica completa de tentativas/gabaritos.",
+    "flags": []
+  },
+  "GET /operations/scopes": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator, coordinator ou admin. Papel global admin sem vínculo de programa não autoriza.",
+    "behavior": "Lista até 100 turmas dos programas autorizados que possuem edição fixada. Ausência de escopos retorna lista vazia.",
+    "flags": [
+      "OPERATOR_OPERATIONS_ENABLED"
+    ]
+  },
+  "POST /operations/{class_id}/search": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator, coordinator ou admin. Papel global admin sem vínculo de programa não autoriza.",
+    "behavior": "Busca CPF exato em contas existentes ou nome somente no programa; devolve identity_proof com validade de dez minutos, vinculado ao operador/programa/pessoa. Não retorna CPF nem senha.",
+    "flags": [
+      "OPERATOR_OPERATIONS_ENABLED"
+    ]
+  },
+  "POST /operations/{class_id}/inspect": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator, coordinator ou admin. Papel global admin sem vínculo de programa não autoriza.",
+    "behavior": "Consulta identidade e vínculos acadêmicos. Pessoa ainda fora do programa exige identity_proof de busca exata; resposta inclui revisão, histórico e aviso de capacidade.",
+    "flags": [
+      "OPERATOR_OPERATIONS_ENABLED"
+    ]
+  },
+  "POST /operations/{class_id}/commands": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator, coordinator ou admin. Papel global admin sem vínculo de programa não autoriza.",
+    "behavior": "Executa register/enroll/assign/revoke em escopo instituição/programa/curso/edição exato. id identifica recibo idempotente; replay divergente retorna 409. Comandos de pessoa existente exigem expected_revision e identity_proof se ainda fora do programa; turma closed bloqueia novos comandos. Cadastro cria identidade/participação, sem fabricar baseline.",
+    "flags": [
+      "OPERATOR_OPERATIONS_ENABLED",
+      "CPF_ACTIVATION_REQUIRED"
+    ]
+  },
+  "GET /operations/classes/options": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo.",
+    "behavior": "Lista programas/ofertas para preparação de turmas no escopo do ator, com edições publicadas elegíveis.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "GET /operations/classes/team-candidates": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo.",
+    "behavior": "Lista até 250 candidatos teacher/monitor ativos do programa informado, com ID/nome/papel seguros para exibição.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "GET /operations/classes": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo. Instrutor designado com participação teacher ativa pode apenas consultar suas turmas/readiness.",
+    "behavior": "Lista até 250 turmas no escopo contextual, com readiness e capacidades do ator; omite histórico completo.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "POST /operations/classes": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo.",
+    "behavior": "Prepara turma planned para oferta/edição publicada e equipe válida. id é chave do recibo: mesma requisição e ator retornam snapshot original; divergência retorna 409. Valida instituição/programa e registra motivo/histórico.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "POST /operations/classes/{class_id}/plan": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo.",
+    "behavior": "Altera planejamento territorial somente em planned, com contexto exato e expected_revision. id de comando idempotente devolve snapshot original; alteração aumenta lifecycle_revision.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "POST /operations/classes/{class_id}/team": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo. program_operator altera equipe somente em planned; após ativação exige coordinator.",
+    "behavior": "Substitui instrutor/monitores validando vínculos teacher/monitor ativos; turma closed é imutável. Exige contexto exato, expected_revision, motivo e idempotência por id.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "POST /operations/classes/{class_id}/transition": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo.",
+    "behavior": "Transições planned→active e active→closed com expected_revision e idempotência. Ativação exige readiness sem bloqueios; fechamento exige ausência de encontros abertos. Demais pendências são avisos preservados no snapshot.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "GET /operations/classes/{class_id}/readiness": {
+    "permission": "Token Bearer; participação ativa no programa com papel program_operator ou coordinator. Papel global admin não substitui esse vínculo. Instrutor designado com participação teacher ativa pode apenas consultar suas turmas/readiness.",
+    "behavior": "Consulta snapshot com revisão, bloqueios de ativação/fechamento, ocupação, capacidades e histórico. Um aviso de capacidade não concede override.",
+    "flags": [
+      "CLASS_LIFECYCLE_ENABLED"
+    ]
+  },
+  "POST /certificates/references": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular. Exige matrícula ativa no programa/curso e turma compatível quando fornecida.",
+    "behavior": "Registra referência oficial legado, após elegibilidade de carga/conclusão e verificação pública na origem configurada. Mesmo ID/payload retorna 200; nova referência 201; conflito 409. Com CERTIFICATE_APPROVAL_REQUIRED exige aprovação humana única correspondente à matrícula/edição/turma. Referência candidata é recusada.",
+    "flags": [
+      "CERTIFICATE_APPROVAL_REQUIRED"
+    ]
+  },
+  "GET /certificates": {
+    "permission": "Token Bearer com papel global student; acesso somente aos dados do próprio titular.",
+    "behavior": "Lista somente referências oficiais do titular por data de emissão; referências sintéticas candidatas são excluídas.",
+    "flags": []
+  },
+  "GET /certificate-requests/contexts": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Lista contextos de matrícula próprios ativos compatíveis com curso/edição e calcula elegibilidade. Sem turma exige edição publicamente publicada; turma exige edição fixada e linhagem correspondente.",
+    "flags": []
+  },
+  "POST /certificate-requests": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Matrícula/participação próprias devem estar ativas, com edição published/archived autorizada e turma correspondente quando informada.",
+    "behavior": "Cria pedido pending revisão 1; unicidade matrícula+edição torna retry no mesmo contexto idempotente (200). Pedido do mesmo par com outra turma retorna 409. Pedido pendente não equivale a certificado emitido.",
+    "flags": []
+  },
+  "GET /certificate-requests": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Lista pedidos privados do próprio titular com estado e projeção de elegibilidade.",
+    "flags": []
+  },
+  "GET /certificate-requests/review-queue": {
+    "permission": "Token Bearer; admin global, coordinator/admin com participação ativa no programa ou teacher ativo designado à turma do pedido.",
+    "behavior": "Lista pedidos pending no escopo de revisão e de outra pessoa; sem escopo retorna 403. Monitor não recebe a fila por papel de monitor.",
+    "flags": []
+  },
+  "GET /certificate-requests/{request_id}": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Titular ou revisor autorizado: Token Bearer; admin global, coordinator/admin com participação ativa no programa ou teacher ativo designado à turma do pedido.",
+    "behavior": "Consulta pedido visível com histórico/eligibilidade; pedido fora do escopo retorna 404.",
+    "flags": []
+  },
+  "POST /certificate-requests/{request_id}/review": {
+    "permission": "Token Bearer; admin global, coordinator/admin com participação ativa no programa ou teacher ativo designado à turma do pedido. Pedido deve pertencer a outra pessoa; autoaprovação é recusada.",
+    "behavior": "Aprova/rejeita somente pending na expected_revision. Aprovação revalida contexto, instituição e elegibilidade deterministicamente. Atualiza revisão e registra auditoria; conflito 409, inelegibilidade 422.",
+    "flags": []
+  },
+  "POST /certificate-requests/{request_id}/resubmit": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Somente titular do pedido.",
+    "behavior": "Reapresenta pedido rejected na expected_revision para pending; revalida contexto e registra auditoria. Pedido aprovado/pendente ou revisão divergente retorna 409.",
+    "flags": []
+  },
+  "POST /certificate-requests/{request_id}/emit": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Somente titular com contexto/elegibilidade exigidos pelo adaptador.",
+    "behavior": "Emissão institucional final permanece bloqueada deliberadamente: após validações, retorna 503; nenhuma flag abre este gate ou autoriza publicação real de certificado.",
+    "flags": []
+  },
+  "POST /certificate-requests/{request_id}/emission-candidate": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Somente titular com matrícula contextual reconciliada, pedido não rejeitado e trilha completa da política; adaptador legado adicionalmente exige aprovação/elegibilidade e baseline.",
+    "behavior": "Candidato sintético: reserva comando duravelmente antes do envio autenticado ao Worker isolado. development exige HTTP loopback; staging exige host HTTPS exato permitido. Produção retorna 503. Timeout/resposta perdida preserva estado indeterminado; não reenviar/resetar automaticamente.",
+    "flags": [
+      "CERTIFICATE_CANDIDATE_ENABLED"
+    ]
+  },
+  "POST /certificate-requests/{request_id}/reconcile-candidate": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Somente titular com contexto candidato autorizado.",
+    "behavior": "Reconcilia reserva existente exclusivamente por lookup no Worker; não inicia primeiro envio nem transforma ausência em autorização de reenvio. development/staging isolados; produção permanece bloqueada.",
+    "flags": [
+      "CERTIFICATE_CANDIDATE_ENABLED"
+    ]
+  },
+  "PUT /classes/{class_id}/certificate-policy-candidate": {
+    "permission": "Token Bearer; admin global ou participação ativa coordinator/admin no programa da oferta.",
+    "behavior": "Somente development. Configura política imutável da edição com 80 horas formais, encontros/checkpoints distintos e responsável autorizado. Mesma política retorna documento; mudança retroativa ou transporte anterior sem reconciliação retorna 409. Só assessment possui adaptador determinístico nesta versão.",
+    "flags": [
+      "CERTIFICATE_CANDIDATE_ENABLED"
+    ]
+  },
+  "POST /certificate-requests/{request_id}/candidate-checkpoints/{checkpoint_id}": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Somente titular do pedido contextual ativo e não rejeitado.",
+    "behavior": "Somente development. Recebe todas as respostas do checkpoint configurado, calcula conclusão/nota no backend e registra prova idempotente. Resposta divergente após conclusão retorna 409. Último checkpoint dispara geração sintética candidata, sem aguardar baseline/frequência/assinaturas posteriores.",
+    "flags": [
+      "CERTIFICATE_CANDIDATE_ENABLED"
+    ]
+  },
+  "POST /certificate-requests/{request_id}/candidate-evidence": {
+    "permission": "Token Bearer; titular do pedido ou admin global/coordinator/admin ativo no programa/instrutor teacher ativo designado à turma. Exige matrícula contextual do titular ativa e consistente. Registro exige revisor autorizado; attendance_sheet exige instrutor teacher ativo designado.",
+    "behavior": "Somente development. Registra referência privada/digest e atestação humana, sem ler documento externo nem assinar PDF criptograficamente. attendance_exception fica pending_human_validation e não cria presença; ficha deve cobrir encontros configurados.",
+    "flags": [
+      "CERTIFICATE_CANDIDATE_ENABLED"
+    ]
+  },
+  "GET /certificate-requests/{request_id}/candidate-status": {
+    "permission": "Token Bearer; titular do pedido ou admin global/coordinator/admin ativo no programa/instrutor teacher ativo designado à turma. Exige matrícula contextual do titular ativa e consistente.",
+    "behavior": "Somente development. Projeta trilha, baseline, frequência oficial, fichas e ciclo do candidato. CAPACITADO/VALID são estados do contrato candidato; institutional_release permanece blocked.",
+    "flags": [
+      "CERTIFICATE_CANDIDATE_ENABLED"
+    ]
+  },
+  "POST /certificate-requests/{request_id}/candidate-lifecycle": {
+    "permission": "Token Bearer; titular do pedido ou admin global/coordinator/admin ativo no programa/instrutor teacher ativo designado à turma. Exige matrícula contextual do titular ativa e consistente. submit: titular ou revisor; instructor_validate: instrutor teacher ativo designado; coordinator_sign: participação coordinator ativa, sem override admin global.",
+    "behavior": "Somente development. Exige expected_state e ordem GENERATED→PENDING_INSTRUCTOR_VALIDATION→PENDING_COORDINATOR_SIGNATURE→VALID. Validação/assinatura exigem capacitação e fichas; assinatura exige referência documental privada/digest. Estado candidato não libera emissão institucional.",
+    "flags": [
+      "CERTIFICATE_CANDIDATE_ENABLED"
+    ]
+  },
+  "POST /admin/creator-scores/calculate": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou coordinator ativo no programa da mídia.",
+    "behavior": "Calcula score por janela e versão de regra com sinais pedagógicos qualificados e avaliações explícitas. Mesma mídia/creator/regra/janela retorna 200; nova janela 201. Não executa pagamento.",
+    "flags": []
+  },
+  "GET /creators/me/scores": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Consulta scores do próprio creator_user_id; não há autorização para escolher outro titular.",
+    "flags": []
+  },
+  "POST /admin/ledger/simulate": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou finance ativo no programa.",
+    "behavior": "Cria somente lançamento simulated; PAYMENT_ADAPTER deve ser disabled. idempotency_key idêntica retorna 200; nova simulação 201; payload divergente 409. Evento-fonte deve pertencer à mídia do score; não movimenta dinheiro.",
+    "flags": [
+      "COMMERCIAL_SIMULATION_ENABLED"
+    ]
+  },
+  "GET /admin/ledger": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou finance ativo no programa solicitado.",
+    "behavior": "Consulta lançamentos de simulação do programa; não registra aprovação financeira nem efetua pagamento.",
+    "flags": [
+      "COMMERCIAL_SIMULATION_ENABLED"
+    ]
+  },
+  "POST /admin/media": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou creator ativo no programa; creator só cria conteúdo próprio. Creator alvo sempre precisa de participação creator ativa.",
+    "behavior": "Cria metadados de mídia draft e transição editorial. Valida linhagem institucional/oferta e IDs/URLs do provedor; não faz upload do vídeo nem publica automaticamente.",
+    "flags": []
+  },
+  "PATCH /admin/media/{media_id}": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global, coordinator ativo no programa ou creator ativo proprietário da mídia.",
+    "behavior": "Edita somente draft; outros estados retornam 409. Valida provedor, HTTPS de thumbnail/legendas e rejeita hosts Drive/Google usados como entrega de mídia.",
+    "flags": []
+  },
+  "POST /admin/media/{media_id}/publish": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou coordinator ativo no programa da mídia; creator isoladamente não autoriza.",
+    "behavior": "Publica draft/processing apenas com direitos confirmados; registra ator/horário/transição editorial. Não implanta provedor externo.",
+    "flags": []
+  },
+  "POST /admin/media/{media_id}/block": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou coordinator ativo no programa da mídia; creator isoladamente não autoriza.",
+    "behavior": "Bloqueia mídia published/processing com motivo auditável, retirando-a do consumo publicado; outro estado retorna 409.",
+    "flags": []
+  },
+  "POST /admin/media/{media_id}/archive": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou coordinator ativo no programa da mídia; creator isoladamente não autoriza.",
+    "behavior": "Arquiva mídia com motivo auditável; mídia já archived retorna 409.",
+    "flags": []
+  },
+  "GET /admin/media/{media_id}/history": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global, coordinator ativo no programa ou creator ativo proprietário da mídia.",
+    "behavior": "Lista histórico de transições editoriais em ordem de ocorrência, com ator/papel/motivo.",
+    "flags": []
+  },
+  "GET /media": {
+    "permission": "Bearer opcional. public/unlisted são acessíveis sem login; institution exige participação ativa no programa da mídia; enrolled exige matrícula ativa no programa/curso. Token presente é validado normalmente, inclusive em mídia pública.",
+    "behavior": "Lista somente mídias published visíveis ao solicitante. unlisted é omitida do catálogo, mesmo quando seu link direto é acessível; filtros de curso/módulo são opcionais.",
+    "flags": []
+  },
+  "GET /media/{media_id}": {
+    "permission": "Bearer opcional. public/unlisted são acessíveis sem login; institution exige participação ativa no programa da mídia; enrolled exige matrícula ativa no programa/curso. Token presente é validado normalmente, inclusive em mídia pública.",
+    "behavior": "Consulta mídia published autorizada. Estado não publicado ou falta de vínculo necessário retorna 404; detalhe direto de unlisted é permitido.",
+    "flags": []
+  },
+  "PUT /media/{media_id}/rating": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Exige matrícula ativa no programa/curso da mídia e conclusão qualificada registrada para essa matrícula.",
+    "behavior": "Avaliação explícita de 1 a 5; primeira gravação 201, substituição/repetição 200. Sem conclusão qualificada retorna 409. Não infere avaliação por conclusão ou evento.",
+    "flags": []
+  },
+  "GET /media/{media_id}/rating": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Consulta apenas avaliação do titular; inexistente retorna 404. Não altera avaliação nem exige novo envio de evento.",
+    "flags": []
+  },
+  "POST /media/{media_id}/playback-authorizations": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Revalida visibilidade e vínculos da mídia publicada.",
+    "behavior": "Emite URL de autorização de playback de cinco minutos, com token aleatório armazenado por digest. Entrega não configurada retorna 503. Autorização não modifica offline_policy nem concede acesso acadêmico.",
+    "flags": []
+  },
+  "GET /media/{media_id}/playback/{token}": {
+    "permission": "Sem Bearer; exige token de playback vigente para a mídia da rota, emitido para usuário cuja autorização continua válida.",
+    "behavior": "Revalida mídia publicada e vínculo do usuário vinculado ao token; redireciona 307 ao provedor. Token inválido/expirado retorna 401, acesso revogado 404, entrega indisponível 503.",
+    "flags": []
+  },
+  "GET /creators/me/media": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Lista mídias cujo creator_user_id é o titular, inclusive rascunhos e estados editoriais; não aceita escolher outro creator.",
+    "flags": []
+  },
+  "GET /creators/me/analytics": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
+    "behavior": "Agrega sinais somente das mídias próprias: starts, participantes únicos, conclusões/follow-ups qualificados, saves e avaliações explícitas. Não efetua pagamento nem concede certificado.",
+    "flags": []
+  },
+  "GET /editor/context": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou participação ativa teacher/creator/coordinator/admin no programa do curso.",
+    "behavior": "Lista programas em que o titular pode editar e capacidades de criação/publicação; sem vínculo editorial a lista é vazia.",
+    "flags": []
+  },
+  "GET /editor/courses": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou participação ativa teacher/creator/coordinator/admin no programa do curso. Edições published/archived são visíveis; rascunhos/revisões são restritos ao autor ou coordinator/admin autorizado.",
+    "behavior": "Consulta a versão visível mais recente de cada curso ofertado no program_id; vínculo editorial fora do programa retorna 403.",
+    "flags": []
+  },
+  "GET /editor/courses/{course_id}": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou participação ativa teacher/creator/coordinator/admin no programa do curso. Edições published/archived são visíveis; rascunhos/revisões são restritos ao autor ou coordinator/admin autorizado.",
+    "behavior": "Consulta edição visível selecionada por version_id ou a mais recente visível, com versões/capacidades. Edição fora do escopo retorna 404.",
+    "flags": []
+  },
+  "POST /courses": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou participação ativa teacher/creator/coordinator/admin no programa do curso.",
+    "behavior": "Cria curso inativo e primeira edição draft revisão 1, vinculados ao programa; course_id existente retorna 409. Não aparece no catálogo até publicação.",
+    "flags": []
+  },
+  "PATCH /courses/{course_id}": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou participação ativa teacher/creator/coordinator/admin no programa do curso. Somente autor do draft ou coordinator/admin autorizado.",
+    "behavior": "Edita edição draft com version_id e expected_revision; publicada/arquivada é imutável. Conflito de revisão retorna 409; snapshot normaliza IDs/versões de componentes.",
+    "flags": []
+  },
+  "POST /courses/{course_id}/versions": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou participação ativa teacher/creator/coordinator/admin no programa do curso. Edições published/archived são visíveis; rascunhos/revisões são restritos ao autor ou coordinator/admin autorizado.",
+    "behavior": "Cria fork draft de edição published/archived visível e incrementa version_number; não modifica edição origem nem turma já fixada. Conflito de criação paralela retorna 409.",
+    "flags": []
+  },
+  "POST /courses/{course_id}/submit": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou participação ativa teacher/creator/coordinator/admin no programa do curso. Somente autor do draft ou coordinator/admin autorizado.",
+    "behavior": "Transição draft→in_review na expected_revision; valida estrutura publicável e linhagem de materiais. Não publica no catálogo; conflito de revisão retorna 409.",
+    "flags": []
+  },
+  "POST /courses/{course_id}/publish": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou coordinator/admin com participação ativa em TODOS os programas que ofertam o curso.",
+    "behavior": "Transição in_review→published na expected_revision; exige conteúdo/material válidos e número posterior à última release. Arquiva edição pública anterior e atualiza projeção pública; turmas mantêm edição fixada.",
+    "flags": []
+  },
+  "POST /courses/{course_id}/archive": {
+    "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou coordinator/admin com participação ativa em TODOS os programas que ofertam o curso.",
+    "behavior": "Transição published→archived na expected_revision, desativa catálogo público. Snapshot arquivado permanece acessível a turmas que o fixaram; não migra seus dados/progresso.",
+    "flags": []
+  }
+}
