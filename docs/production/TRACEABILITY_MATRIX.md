@@ -69,6 +69,16 @@ Home/entrega passam a STAGING. Resultados e limites atuais em WAVE1_ACCEPTANCE.m
 retenção de recibos e gates de release permanecem necessários para promoção.
 Nenhum aceite visual integral ou PRODUCTION_READY.
 
+## Google Analytics — Issue #195, 13/10/2026
+
+Medição Android opcional: Settings → GoogleUsageAnalytics → Firebase Analytics,
+com consentimento separado por ambiente/projeto/app, lista fechada de categorias
+e sem autoridade acadêmica. Flag `GOOGLE_ANALYTICS_ENABLED=false`; offline pelo
+SDK somente após consentimento. Testes: `google_usage_analytics_test.dart`,
+`app_telemetry_service_test.dart`, `classroom_dashboard_screen_test.dart`.
+Status IMPLEMENTED, validação Flutter/DebugView pendente; não promovido.
+Contrato: `GOOGLE_ANALYTICS_RELEASE_195.md`. Painel permanece na API TDS.
+
 ## Pitch público — 29/09/2026
 
 | Entrega | Evidência | Estado | Limite |

@@ -538,7 +538,7 @@ class _Dashboard extends StatelessWidget {
           _EmptyCard(message: usageWarning!),
           const SizedBox(height: 8),
         ],
-        if (topItems.isEmpty)
+        if (usageWarning == null && topItems.isEmpty)
           const _EmptyCard(
             message: 'Ainda não há uso registrado neste período.',
           )

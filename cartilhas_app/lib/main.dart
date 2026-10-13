@@ -19,6 +19,8 @@ import 'features/learning_events/learning_event_sync_service.dart';
 import 'features/learning_events/learning_event_sync_lifecycle.dart';
 import 'features/analytics/app_telemetry_service.dart';
 import 'features/analytics/telemetry_route.dart';
+import 'features/analytics/google_usage_analytics.dart';
+import 'features/analytics/firebase_usage_analytics.dart';
 import 'features/push/push_notification_provider.dart';
 import 'features/push/push_notification_service.dart';
 import 'screens/chatwoot_screen.dart';
@@ -41,7 +43,14 @@ Future<void> main() async {
   final pushService = await createConfiguredPushNotificationService(
     _navigateFromPush,
   );
-  runApp(CartilhasApp(pushService: pushService));
+  final googleAnalytics = createGoogleUsageAnalytics();
+  if (googleAnalytics != null) {
+    unawaited(googleAnalytics.initialize().catchError((Object _) {}));
+  }
+  runApp(CartilhasApp(
+    pushService: pushService,
+    googleAnalytics: googleAnalytics,
+  ));
 }
 
 void _navigateFromPush(PushNavigationAction action) {
@@ -79,9 +88,11 @@ class CartilhasApp extends StatefulWidget {
   const CartilhasApp({
     super.key,
     this.pushService = const NoopPushNotificationService(),
+    this.googleAnalytics,
   });
 
   final PushNotificationService pushService;
+  final GoogleUsageAnalytics? googleAnalytics;
 
   @override
   State<CartilhasApp> createState() => _CartilhasAppState();
@@ -133,7 +144,15 @@ class _CartilhasAppState extends State<CartilhasApp> {
         Provider(
           create: (_) => AuthRepository(
             apiUrl: AppConfig.tutorApiUrl,
-            onSessionEnded: const UnscopedAccountDataCleaner().clear,
+            onSessionEnded: () async {
+              // A new account must make its own optional measurement choice.
+              try {
+                await widget.googleAnalytics?.setConsent(false);
+              } on Object {
+                // A measurement outage cannot prevent session termination.
+              }
+              await const UnscopedAccountDataCleaner().clear();
+            },
           ),
           dispose: (_, repository) => repository.dispose(),
         ),
@@ -156,9 +175,13 @@ class _CartilhasAppState extends State<CartilhasApp> {
         Provider(
           create: (context) => AppTelemetryService(
             syncService: context.read<LearningEventSyncService>(),
+            googleAnalytics: widget.googleAnalytics,
           ),
         ),
         Provider<PushNotificationService>.value(value: widget.pushService),
+        ChangeNotifierProvider<GoogleUsageAnalytics?>.value(
+          value: widget.googleAnalytics,
+        ),
       ],
       child: PushNotificationLifecycle(
         child: LearningEventSyncLifecycle(child: const _AppView()),

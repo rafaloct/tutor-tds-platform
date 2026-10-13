@@ -1,5 +1,6 @@
 import 'package:cartilhas_app/features/analytics/app_telemetry_service.dart';
 import 'package:cartilhas_app/features/analytics/telemetry_route.dart';
+import 'package:cartilhas_app/features/analytics/google_usage_analytics.dart';
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event.dart';
 import 'package:cartilhas_app/features/learning_events/learning_event_queue.dart';
@@ -12,6 +13,58 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  test('Google consent is independent and academic IDs never reach its gateway', () async {
+    final gateway = _GoogleGateway();
+    final google = GoogleUsageAnalytics(
+      gateway: gateway,
+      readConsent: () async => false,
+      writeConsent: (_) async {},
+    );
+    final auth = AuthRepository(apiUrl: '');
+    final sync = LearningEventSyncService(apiUrl: '', authRepository: auth);
+    final telemetry = AppTelemetryService(
+      syncService: sync,
+      googleAnalytics: google,
+      consentChecker: () async => false,
+    );
+    await google.setConsent(true);
+    expect(await telemetry.trackPage(
+      pageId: 'home', courseId: 'private-course-id', resourceId: 'ai_quiz',
+    ), 0);
+    await Future<void>.delayed(Duration.zero);
+    expect(gateway.events, ['page_viewed:home', 'resource_opened:ai_quiz']);
+    expect(await const LearningEventQueue().pending(), isEmpty);
+    await google.setConsent(false);
+    await telemetry.trackPage(pageId: 'home');
+    expect(gateway.events, hasLength(2));
+    google.dispose();
+    sync.dispose();
+    auth.dispose();
+  });
+
+  test('Google outage cannot prevent the existing telemetry outbox', () async {
+    final gateway = _GoogleGateway()..fail = true;
+    final google = GoogleUsageAnalytics(
+      gateway: gateway,
+      readConsent: () async => false,
+      writeConsent: (_) async {},
+    );
+    await google.setConsent(true);
+    final auth = AuthRepository(apiUrl: '');
+    final sync = LearningEventSyncService(apiUrl: '', authRepository: auth);
+    final telemetry = AppTelemetryService(
+      syncService: sync,
+      googleAnalytics: google,
+      consentChecker: () async => true,
+    );
+    expect(await telemetry.trackPage(pageId: 'home'), 1);
+    await Future<void>.delayed(Duration.zero);
+    expect(await const LearningEventQueue().pending(), hasLength(1));
+    google.dispose();
+    sync.dispose();
+    auth.dispose();
+  });
 
   test(
     'registra página, recurso e funcionalidade na fila autenticada',
@@ -132,4 +185,21 @@ void main() {
     sync.dispose();
     auth.dispose();
   });
+}
+
+class _GoogleGateway implements GoogleAnalyticsGateway {
+  final events = <String>[];
+  bool fail = false;
+
+  @override
+  Future<void> setConsent(bool enabled) async {}
+
+  @override
+  Future<void> reset() async {}
+
+  @override
+  Future<void> log(String event, String target) async {
+    if (fail) throw StateError('SDK unavailable');
+    events.add('$event:$target');
+  }
 }

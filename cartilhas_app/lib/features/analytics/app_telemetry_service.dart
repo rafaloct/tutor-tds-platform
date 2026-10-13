@@ -6,6 +6,7 @@ import '../learning_events/learning_event.dart';
 import '../learning_events/learning_event_queue.dart';
 import '../learning_events/learning_event_sync_service.dart';
 import 'screen_engagement_clock.dart';
+import 'google_usage_analytics.dart';
 
 typedef TelemetryConsentChecker = Future<bool> Function();
 
@@ -14,6 +15,7 @@ class AppTelemetryService {
     required this.syncService,
     this.queue = const LearningEventQueue(),
     this.consentChecker = PrivacyPreferences.hasConsent,
+    this.googleAnalytics,
     String? sessionId,
     this.journeyEnabled = AppConfig.journeyTraceabilityEnabled,
     Duration Function()? elapsed,
@@ -30,6 +32,7 @@ class AppTelemetryService {
   final LearningEventSyncService syncService;
   final LearningEventQueue queue;
   final TelemetryConsentChecker consentChecker;
+  final GoogleUsageAnalytics? googleAnalytics;
   final String sessionId;
   final bool journeyEnabled;
   final ScreenEngagementClock screenClock;
@@ -166,6 +169,14 @@ class AppTelemetryService {
     List<(LearningEventType, String)> targets, {
     required String courseId,
   }) async {
+    final google = googleAnalytics;
+    if (google != null) {
+      for (final target in targets) {
+        unawaited(
+          google.track(target.$1.apiValue, target.$2).catchError((Object _) {}),
+        );
+      }
+    }
     final generation = syncService.authRepository.sessionGeneration;
     final needsOwner = queue.isDurable || journeyEnabled;
     final owner = needsOwner

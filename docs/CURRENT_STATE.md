@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-13 — Google Analytics #195, integração candidata
+
+Rafael pediu painel e medição Google Analytics, além da ativação de produção;
+confirmou que ainda não existe projeto Firebase. Sobre `staging`/`dd928ff6`,
+candidato adiciona adapter Firebase Android, consentimento separado nas
+Configurações, taxonomia fechada sem identidade acadêmica, revogação no logout
+e bloqueio nativo da coleta por padrão. Painel TDS existente permanece na API;
+erro de analytics deixa de aparecer também como ausência de uso. API focal
+3/3 PASS; Flutter analyze/test e DebugView pendentes por acesso/SDK.
+Nenhuma configuração real Google, AAB ou deploy de produção nesta sessão.
+Gates de release e allowlists de produção preservados. Contrato e próximos
+passos: `production/GOOGLE_ANALYTICS_RELEASE_195.md`.
+
 ## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
 
 OBSERVED: `tooling/class_lifecycle_e2e/harness.py --execute` em checkout isolado

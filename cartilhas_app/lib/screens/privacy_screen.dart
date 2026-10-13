@@ -61,6 +61,22 @@ class PrivacyPolicyScreen extends StatelessWidget {
               body:
                   'O microfone é opcional e só é ativado depois que você toca no botão de voz e autoriza o acesso. O app usa a fala para preencher o campo de pergunta e não mantém uma gravação de áudio.',
             ),
+            if (AppConfig.googleAnalyticsEnabled)
+              const _PrivacySection(
+                title: 'Google Analytics opcional',
+                body:
+                    'A medição de uso pelo Google Analytics só é habilitada se você '
+                    'ativar a opção nas Configurações. Ela usa o SDK Firebase para '
+                    'medir categorias de telas e recursos, informações técnicas '
+                    'do dispositivo e um identificador da instalação. Não enviamos '
+                    'nome, CPF, telefone, conversas, respostas, notas nem IDs '
+                    'acadêmicos ao Google. Publicidade e personalização de anúncios '
+                    'ficam desativadas. Essa escolha é separada do acompanhamento '
+                    'pedagógico. Ao desativar ou sair da conta, a coleta é interrompida '
+                    'e os dados analíticos locais são redefinidos; dados já enviados '
+                    'seguem a retenção configurada na propriedade Google Analytics. '
+                    'O painel da turma usa a API TDS e não depende do Google.',
+              ),
             const _PrivacySection(
               title: 'Seus controles',
               body:
