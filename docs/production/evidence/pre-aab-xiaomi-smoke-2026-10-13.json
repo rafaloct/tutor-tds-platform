@@ -1,0 +1,368 @@
+{
+  "run_id": "342ccb9374bc46dba63533ed465dbf57",
+  "started_at_utc": "2026-10-13T15:10:58.624188+00:00",
+  "execution_host": "LARGeo",
+  "source": {
+    "sha": "34186ae8e07f21ee06077f74462947c831ddb2ad",
+    "app_tree": "6b341117f7c9a83eb79b132f5c3b2d9236fa267a",
+    "api_tree": "dc32d081dffd4d778e51871a85ae4077eb75f6ce",
+    "release_candidate_sha": "d3b1331a14ec77b37a8b05e9f5f19e2ccfe57c2e",
+    "candidate_runtime_tree_equal": true,
+    "actual_build_checkout": "C:\\Temp\\tds-release-198-20261013 (detached; tracked clean)"
+  },
+  "toolchain": {
+    "flutter": "3.44.9",
+    "dart": "3.12.2",
+    "java": "25",
+    "android_build_tools": "36.1.0",
+    "adb_executable": "D:\\DevTools\\AndroidSDK\\platform-tools\\adb.exe",
+    "adb_version": "36.0.2-14143358"
+  },
+  "device": {
+    "serial": "ZT6HPRHQHATSEQPR",
+    "model": "2311DRK48G",
+    "product": "duchamp_global",
+    "build_fingerprint": "POCO/duchamp_global/duchamp:15/AP3A.240905.015.A2/OS2.0.209.0.VNLMIXM:user/release-keys",
+    "android_version": "15",
+    "api_level": "35",
+    "abi": "arm64-v8a",
+    "ro_kernel_qemu": ""
+  },
+  "qa_apk": {
+    "package": "com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57",
+    "path": "C:\\Temp\\tds-release-198-20261013\\cartilhas_app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+    "sha256": "85ab6261519abf62fbde4f71fbefeb2a63ee28037a6c6ba7eaea8d19be2d1ea5",
+    "versionName": "1.4.0-dev",
+    "versionCode": 13,
+    "signer_sha256": "6af6c35e5ede92952c97861129900eabd297d006ca50db952cb60880deddc4f8",
+    "build_mode": "debug",
+    "config": {
+      "TUTOR_ENVIRONMENT": "staging",
+      "TUTOR_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+      "TUTOR_STAGING_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+      "TUTOR_GATEWAY_URL": "",
+      "TUTOR_STAGING_GATEWAY_URL": "",
+      "PRIVACY_POLICY_URL": "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
+      "ACCOUNT_DELETION_URL": "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html",
+      "REMOTE_CATALOG_ENABLED": false,
+      "LEARNING_CONTEXT_ENABLED": false,
+      "DURABLE_LEARNING_OUTBOX_ENABLED": false,
+      "JOURNEY_TRACEABILITY_ENABLED": false,
+      "DYNAMIC_ACTIVITY_ENABLED": false,
+      "SIGNED_SUPPORT_IDENTITY": false,
+      "PUSH_NOTIFICATIONS_ENABLED": false,
+      "DYNAMIC_QA_ISOLATED_PACKAGE": true,
+      "DYNAMIC_QA_RUN_ID": "342ccb9374bc46dba63533ed465dbf57"
+    },
+    "install": "fresh isolated package via adb --no-streaming -t; installed before first host-ADB interruption; APK unchanged",
+    "installed_metadata": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~3mNtDoAqQtNExma-JblN7A==/com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57-ymOpmHrAwdk8FHldBhvJlQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-13 12:12:07",
+      "lastUpdateTime": "2026-10-13 12:12:07",
+      "base_apk_sha256": "85ab6261519abf62fbde4f71fbefeb2a63ee28037a6c6ba7eaea8d19be2d1ea5"
+    }
+  },
+  "baseline_packages": {
+    "com.tutortds_cartilhas.dev.dynamicqa.rbff3ed98da7d91b56bb44a8214d2fb71": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.rbff3ed98da7d91b56bb44a8214d2fb71",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~2cbbv8NGSPJI381VIlXIcQ==/com.tutortds_cartilhas.dev.dynamicqa.rbff3ed98da7d91b56bb44a8214d2fb71-J4ENoty7RL2IJ6-YdoyOHA==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-03 17:46:00",
+      "lastUpdateTime": "2026-10-03 17:46:00",
+      "base_apk_sha256": "3b63c70fa8553789258370f7e99fb49fb1f05f1e67419e8c45275bca57e88143"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa.rabbdfe6c3fd54366b26c46d1d6075954": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.rabbdfe6c3fd54366b26c46d1d6075954",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~WknZGAsQMVHjfHpfR_n0tQ==/com.tutortds_cartilhas.dev.dynamicqa.rabbdfe6c3fd54366b26c46d1d6075954-v-AgsMbM7txgK5y6bLkF6g==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-01 15:17:31",
+      "lastUpdateTime": "2026-10-01 15:17:31",
+      "base_apk_sha256": "c1864113d395948e06c6fa95dc06d25204a3f10e4b42a99c3efa510440874ec2"
+    },
+    "com.tutortds_cartilhas": {
+      "package": "com.tutortds_cartilhas",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~xKnLs_eC93fRGaREDNaQZA==/com.tutortds_cartilhas-97c73DlB8cpKRKrSII6cmQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0",
+      "firstInstallTime": "2026-10-08 06:50:45",
+      "lastUpdateTime": "2026-10-08 06:50:45",
+      "base_apk_sha256": "6bab8d8bfec310515093952494dc77828a7a151889939a052b041ab6f2dea30e"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~eh9kS-7bJJN68WXrEshdDQ==/com.tutortds_cartilhas.dev.dynamicqa-Jq_0GnbqcTWcf6_jqPbjXQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-01 14:27:07",
+      "lastUpdateTime": "2026-10-06 19:00:35",
+      "base_apk_sha256": "00b2a1fe083f9f08b6165d6e2d9d14561fed33acb55f931385ea82228e2827c6"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa.r3c2d38851f024a1eb50667aa86dc7ce0": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r3c2d38851f024a1eb50667aa86dc7ce0",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~8YUcdohuqzUxUQWuUMkQVQ==/com.tutortds_cartilhas.dev.dynamicqa.r3c2d38851f024a1eb50667aa86dc7ce0-nNnEsSP5mHuawLo8Zak1zg==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-01 14:34:49",
+      "lastUpdateTime": "2026-10-06 01:40:22",
+      "base_apk_sha256": "51c4073dbe04257e765f424d1d8e905d0615352e119e72b84bae0ea2bb61dbbc"
+    },
+    "com.tutortds_cartilhas.dev157": {
+      "package": "com.tutortds_cartilhas.dev157",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~kUL3sDCC1wu7cS_2360WiA==/com.tutortds_cartilhas.dev157-sNfW7qgUVJrlHMuGKscxTQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-06 21:48:37",
+      "lastUpdateTime": "2026-10-06 21:48:37",
+      "base_apk_sha256": "1b42e9a6f49f51a3122a763f1e1b39679d8710acb2c191390ab2e4e88f47ef80"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa.r914f029e18f4454bae1eafde37b5c822": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r914f029e18f4454bae1eafde37b5c822",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~xu2_P1yFpK6f6CqXz1uc3g==/com.tutortds_cartilhas.dev.dynamicqa.r914f029e18f4454bae1eafde37b5c822-BxOwz8AHrZgD_AX1YRGAtw==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-06 01:52:57",
+      "lastUpdateTime": "2026-10-06 02:41:30",
+      "base_apk_sha256": "953ecc5f9ee13d4532cc3bffb93bbdb0d5483b4d4563b011bfc3dab9e635530e"
+    },
+    "com.tutortds_cartilhas.dev": {
+      "package": "com.tutortds_cartilhas.dev",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~vPUOq2GV3xo6Qz2sCbVPCQ==/com.tutortds_cartilhas.dev-C7PZz5VsP3srMdCFil-ssQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-06 12:41:02",
+      "lastUpdateTime": "2026-10-06 12:41:02",
+      "base_apk_sha256": "fc9c015688ed7da78d71baecd46dadc6e628ec6958ad034a525b596e60a1fe79"
+    }
+  },
+  "pubspec_lock_sha256": "3e044de97ea5eabe70563b12d84345dc685192241185f64ac964a23186de1bfe",
+  "git_tracked_clean": true,
+  "prior_attempt": {
+    "result": "blocked_environment",
+    "responsible_boundary": "Windows ADB daemon listener",
+    "stage": "before QA resolve-activity/cold launch",
+    "application_crash_inferred": false,
+    "evidence_file": "pre-aab-xiaomi-smoke-20261013-attempt1.json",
+    "evidence_sha256": "b99a71e9dc16fe8f2d528fcd9e937672e49656dfdc80af045e897cec9088a4d0",
+    "structural_followup": "Confirmed device/daemon stable and reused actual daemon executable (byte-identical SDK adb); no reinstall, clear or daemon kill."
+  },
+  "gate": "pre_aab_xiaomi_smoke",
+  "result": "pass",
+  "qa_smoke": {
+    "cold_launch": {
+      "result": "pass",
+      "activity": "com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57/com.tutortds_cartilhas.MainActivity",
+      "pid": 22647,
+      "resumed": true,
+      "window_focus": true,
+      "fatal_exception": false,
+      "anr": false,
+      "ui_hierarchy_sha256": "dae10cb10b9f1c65d04ff1fb8afa3ffaf021f45da6fab1d8f0e1addb5b098b67",
+      "screenshot_sha256": "60a7a96536c9e6099ae66c1b7c3d70e91ebed605e595ed6a5079d32e2994d0ac",
+      "observation_seconds": 8,
+      "sanitized_ui_hierarchy_file": "pre-aab-xiaomi-smoke-20261013-cold-ui-sanitized.xml",
+      "sanitized_ui_hierarchy_sha256": "b4fba38c603448ea8984b40141cc533c265378ab46a80d69871029e94b0f90c9",
+      "qa_ui_node_count": 18,
+      "screenshot_publication": "excluded: OS notification overlay; raw image retained privately only"
+    },
+    "force_stop_confirmed": true,
+    "relaunch": {
+      "result": "pass",
+      "activity": "com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57/com.tutortds_cartilhas.MainActivity",
+      "pid": 24245,
+      "resumed": true,
+      "window_focus": true,
+      "fatal_exception": false,
+      "anr": false,
+      "ui_hierarchy_sha256": "dae10cb10b9f1c65d04ff1fb8afa3ffaf021f45da6fab1d8f0e1addb5b098b67",
+      "screenshot_sha256": "89b3529b15e2083fadf28cbb9df17c9bad42a37e38455646928cfc815c22866a",
+      "observation_seconds": 8,
+      "sanitized_ui_hierarchy_file": "pre-aab-xiaomi-smoke-20261013-relaunch-ui-sanitized.xml",
+      "sanitized_ui_hierarchy_sha256": "b4fba38c603448ea8984b40141cc533c265378ab46a80d69871029e94b0f90c9",
+      "qa_ui_node_count": 18,
+      "screenshot_publication": "excluded: OS notification overlay; raw image retained privately only"
+    },
+    "final_force_stop": true,
+    "qa_kept_installed_for_inspection": true
+  },
+  "preserved_packages_after": {
+    "com.tutortds_cartilhas.dev.dynamicqa.rbff3ed98da7d91b56bb44a8214d2fb71": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.rbff3ed98da7d91b56bb44a8214d2fb71",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~2cbbv8NGSPJI381VIlXIcQ==/com.tutortds_cartilhas.dev.dynamicqa.rbff3ed98da7d91b56bb44a8214d2fb71-J4ENoty7RL2IJ6-YdoyOHA==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-03 17:46:00",
+      "lastUpdateTime": "2026-10-03 17:46:00",
+      "base_apk_sha256": "3b63c70fa8553789258370f7e99fb49fb1f05f1e67419e8c45275bca57e88143"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa.rabbdfe6c3fd54366b26c46d1d6075954": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.rabbdfe6c3fd54366b26c46d1d6075954",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~WknZGAsQMVHjfHpfR_n0tQ==/com.tutortds_cartilhas.dev.dynamicqa.rabbdfe6c3fd54366b26c46d1d6075954-v-AgsMbM7txgK5y6bLkF6g==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-01 15:17:31",
+      "lastUpdateTime": "2026-10-01 15:17:31",
+      "base_apk_sha256": "c1864113d395948e06c6fa95dc06d25204a3f10e4b42a99c3efa510440874ec2"
+    },
+    "com.tutortds_cartilhas": {
+      "package": "com.tutortds_cartilhas",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~xKnLs_eC93fRGaREDNaQZA==/com.tutortds_cartilhas-97c73DlB8cpKRKrSII6cmQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0",
+      "firstInstallTime": "2026-10-08 06:50:45",
+      "lastUpdateTime": "2026-10-08 06:50:45",
+      "base_apk_sha256": "6bab8d8bfec310515093952494dc77828a7a151889939a052b041ab6f2dea30e"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~eh9kS-7bJJN68WXrEshdDQ==/com.tutortds_cartilhas.dev.dynamicqa-Jq_0GnbqcTWcf6_jqPbjXQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-01 14:27:07",
+      "lastUpdateTime": "2026-10-06 19:00:35",
+      "base_apk_sha256": "00b2a1fe083f9f08b6165d6e2d9d14561fed33acb55f931385ea82228e2827c6"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa.r3c2d38851f024a1eb50667aa86dc7ce0": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r3c2d38851f024a1eb50667aa86dc7ce0",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~8YUcdohuqzUxUQWuUMkQVQ==/com.tutortds_cartilhas.dev.dynamicqa.r3c2d38851f024a1eb50667aa86dc7ce0-nNnEsSP5mHuawLo8Zak1zg==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-01 14:34:49",
+      "lastUpdateTime": "2026-10-06 01:40:22",
+      "base_apk_sha256": "51c4073dbe04257e765f424d1d8e905d0615352e119e72b84bae0ea2bb61dbbc"
+    },
+    "com.tutortds_cartilhas.dev157": {
+      "package": "com.tutortds_cartilhas.dev157",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~kUL3sDCC1wu7cS_2360WiA==/com.tutortds_cartilhas.dev157-sNfW7qgUVJrlHMuGKscxTQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-06 21:48:37",
+      "lastUpdateTime": "2026-10-06 21:48:37",
+      "base_apk_sha256": "1b42e9a6f49f51a3122a763f1e1b39679d8710acb2c191390ab2e4e88f47ef80"
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa.r914f029e18f4454bae1eafde37b5c822": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r914f029e18f4454bae1eafde37b5c822",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~xu2_P1yFpK6f6CqXz1uc3g==/com.tutortds_cartilhas.dev.dynamicqa.r914f029e18f4454bae1eafde37b5c822-BxOwz8AHrZgD_AX1YRGAtw==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-06 01:52:57",
+      "lastUpdateTime": "2026-10-06 02:41:30",
+      "base_apk_sha256": "953ecc5f9ee13d4532cc3bffb93bbdb0d5483b4d4563b011bfc3dab9e635530e"
+    },
+    "com.tutortds_cartilhas.dev": {
+      "package": "com.tutortds_cartilhas.dev",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/~~vPUOq2GV3xo6Qz2sCbVPCQ==/com.tutortds_cartilhas.dev-C7PZz5VsP3srMdCFil-ssQ==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-06 12:41:02",
+      "lastUpdateTime": "2026-10-06 12:41:02",
+      "base_apk_sha256": "fc9c015688ed7da78d71baecd46dadc6e628ec6958ad034a525b596e60a1fe79"
+    }
+  },
+  "existing_dev_packages_preserved": true,
+  "hardware_rom_sanity": {
+    "physical_xiaomi": true,
+    "not_qemu": true,
+    "android_15_api35": true,
+    "arm64": true,
+    "activity_responsive": true,
+    "no_fatal_exception": true,
+    "no_anr": true
+  },
+  "prohibitions_respected": {
+    "production_api_mutated": false,
+    "worker_or_rag_mutated": false,
+    "play_console_touched": false,
+    "aab_generated": false,
+    "release_build_allowed_modified": false,
+    "source_code_modified": false,
+    "play_package_modified": false,
+    "pm_clear_or_uninstall_existing_packages": false,
+    "account_or_network_settings_changed": false
+  },
+  "scope_limitations": [
+    "Short physical-device cold launch and relaunch only; no full functional matrix repeated.",
+    "Debug APK uses approved staging URLs with new feature flags false; this is not the production AAB.",
+    "Exact app/API Git trees equal candidate d3b1331; checkout head differs only outside those trees.",
+    "No authentication, academic records, user registration, API production mutation or Play upload.",
+    "PNG captures are private because of an unrelated OS notification; public evidence retains image hashes and sanitized QA-only UI trees.",
+    "The preserved production package namespace contains sideloaded 1.4.0+13 via Android PackageInstaller. This smoke does not execute the Play-published 1.2.0+11 or prove the highest Play versionCode."
+  ],
+  "completed_at_utc": "2026-10-13T15:15:17.229588+00:00",
+  "evidence_privacy": {
+    "public_screenshots": false,
+    "raw_screenshots_private": true,
+    "raw_ui_hierarchies_private": true,
+    "public_ui_hierarchy_scope": "only static nodes from fresh unauthenticated QA package; system overlays excluded",
+    "notification_content_not_published": true,
+    "visual_inspection": "Onboarding rendered on both captures; OS notification overlay excludes images from publication."
+  },
+  "production_package_namespace_preserved": true,
+  "production_package_install_source": {
+    "package": "com.tutortds_cartilhas",
+    "installed_version_name": "1.4.0",
+    "installed_version_code": 13,
+    "installer_package_name": "com.google.android.packageinstaller",
+    "initiating_package_name": "com.google.android.packageinstaller",
+    "first_install_time": "2026-10-08 06:50:45",
+    "last_update_time": "2026-10-08 06:50:45",
+    "google_play_installation_proven": false,
+    "source_observation": "Android PackageInstaller, not com.android.vending; this device does not prove the currently published Play version."
+  },
+  "git_tracked_clean_after_smoke": true
+}

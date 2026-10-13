@@ -4,5 +4,29 @@
   "postgres_restore": true,
   "critical_volumes_restore": true,
   "upgrade_compatibility": true,
-  "backend_schema_compatibility": true
+  "backend_schema_compatibility": true,
+  "candidate_schema_version": "20261007_0030",
+  "candidate_api_tree_oid": "dc32d081dffd4d778e51871a85ae4077eb75f6ce",
+  "evidence": {
+    "offsite_backup": {
+      "file": "scheduled-postgres-offsite-20261013T141953Z-f5948745ff6593fe.json",
+      "sha256": "6c7b434f99087083a5ba6247c6aadf56c52d3cc1a8b43485fe92e57bbfb1fc31"
+    },
+    "postgres_restore": {
+      "file": "postgres-upgrade-20261013T141953Z-f5948745ff6593fe.json",
+      "sha256": "9df288f35b25664fad1938f6c9c650655e258c5e40d17a32c66979c19929babb"
+    },
+    "critical_volumes_restore": {
+      "file": "critical-volume-restore-20261013T151344Z-5a4bc102.json",
+      "sha256": "0260fc5c331572767035cfa521aa0bfb9d8376b13da49eab211280258e069e2c"
+    },
+    "upgrade_compatibility": {
+      "file": "postgres-upgrade-20261013T141953Z-f5948745ff6593fe.json",
+      "sha256": "9df288f35b25664fad1938f6c9c650655e258c5e40d17a32c66979c19929babb"
+    },
+    "backend_schema_compatibility": {
+      "file": "postgres-upgrade-20261013T141953Z-f5948745ff6593fe.json",
+      "sha256": "9df288f35b25664fad1938f6c9c650655e258c5e40d17a32c66979c19929babb"
+    }
+  }
 }

@@ -1,5 +1,26 @@
 # CURRENT STATE
 
+## 2026-10-13 — recuperação offsite e smoke Xiaomi aprovados
+
+OBSERVED: backup agendado R2 nativo restaurado em PostgreSQL16 isolado;
+upgrade 0028→0030, imagem antiga com uvicorn direto, catálogo e dados originais
+preservados. Volume AnythingLLM/LanceDB restaurado: 13 workspaces, 21 documentos,
+1.255 vetores, SQLite e três buscas com proveniência por documento PASS.
+Configurações API/backup/provider também restauradas byte a byte em tmpfs.
+Verificador original de recuperação PASS no schema0030 e árvore API dc32d081….
+Identidade nova custodiada no desktop; identidade temporária e recursos de
+drill removidos. Archives antigos preservados; a identidade antiga segue ausente.
+Smoke Xiaomi fresco em pacote QA isolado: cold launch/relaunch, UI e ausência
+de crash/ANR PASS; produção instalada e DEV preservados. O pacote principal
+1.4.0+13 instalado no aparelho é sideload, não prova do maior código Play.
+Operador apresentou produção Play11; candidata13. API ainda em0028/compatfalse
+neste registro; promoção, tag e AAB seguem pendentes. Os registros anteriores
+de restore bloqueado foram superados por `production/RECOVERY_EXECUTION_2026-10-13.md`.
+Compatibilidade é condicional aos apps suportados com rollout false; prepare
+HTTP antigo sem version_id não está coberto. Documentação completa da API no
+PR#204: 133 operações, 107 schemas e exemplos validados; MCP stdio no PR#200
+continua separado, sem cliente configurado ou cadastro real.
+
 ## 2026-10-13 — acesso LARGeo restabelecido, assinatura de backup conferida
 
 OBSERVED: backup JKS do perfil Rafael foi localizado e validado por keytool;

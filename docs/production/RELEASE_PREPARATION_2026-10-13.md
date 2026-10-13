@@ -1,5 +1,27 @@
 # Preparação de produção — 2026-10-13 (#197)
 
+## Estado vigente — continuação de 13/10
+
+Recuperação real e smoke Xiaomi foram aprovados. A identidade antiga não foi
+localizada; uma identidade nova custodiada permitiu gerar e restaurar backups
+novos, mantendo archives anteriores. Cinco gates passaram no verificador
+original com hashes de recibos/reports reais, schema0030 e árvore API dc32d081….
+Ver `RECOVERY_EXECUTION_2026-10-13.md`, o aceite versionado e
+`API_COMPATIBILITY_REVIEW_2026-10-13.md`. O aceite de compatibilidade é restrito
+aos apps suportados com flags false; não é aditividade universal de HTTP.
+
+O smoke físico fresco de 13/10 usou APK QA exclusivo, mesmas fontes de runtime,
+debug/staging e flags false; Play/DEV não foram substituídos. Configuração de
+assinatura no LARGeo passou no gate de build, preservando a chave validada.
+O operador informou o pacote de produção Play11 (1.2.0); a candidata13 excede
+essa versão. O pacote principal13 instalado no Xiaomi é sideload e não comprova
+inventário de testes/rascunhos Play. Esse inventário continua necessário antes
+de upload; gerar AAB e publicar Play são operações distintas.
+
+Promoção da API, freeze/tag GitHub e novo AAB ainda pendentes neste registro.
+As seções seguintes preservam o histórico das descobertas; pendências de
+restore, certificado e SDK ali registradas foram superadas pelas provas acima.
+
 ## Escopo e decisão
 
 Base: staging `dd928ff6b58788af930aa6722557728d74dfe97c` (PR #194 já
