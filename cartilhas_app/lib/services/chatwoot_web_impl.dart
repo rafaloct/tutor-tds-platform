@@ -1,84 +1,125 @@
-// Implementação web — injeta o SDK do Chatwoot na página Flutter web
+import 'dart:async';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
+
+import '../features/support/chatwoot_config.dart';
+import '../features/support/chatwoot_host_html.dart';
 import 'chatwoot_script_value.dart';
 
-bool _injected = false;
+int _nextLease = 0;
+int? _activeLease;
+Timer? _loadTimer;
 
-void _evaluateJavaScript(String script) {
-  globalContext.callMethod('eval'.toJS, script.toJS);
+void _evaluate(String source) =>
+    globalContext.callMethod('eval'.toJS, source.toJS);
+
+/// Reserve before async work: an older screen cannot open over a newer screen.
+int chatwootReserve() {
+  chatwootClose();
+  return _activeLease = ++_nextLease;
 }
 
-void chatwootOpen(
+bool chatwootSessionCurrent(int lease) => _activeLease == lease;
+
+int chatwootOpen(
   String baseUrl,
   String token,
   String supportContactId,
   String name,
   String phone, {
   String? identifierHash,
+  int? lease,
+  bool Function()? canIdentify,
+  void Function()? onOpened,
+  void Function()? onError,
+  void Function()? onClosed,
+  Duration loadTimeout = const Duration(seconds: 20),
 }) {
-  final signedField = identifierHash == null
-      ? ''
-      : 'identifier_hash: ${chatwootScriptValue(identifierHash)},';
-  final safeSupportId = chatwootScriptValue(supportContactId);
-  final safeName = chatwootScriptValue(name);
-  final safePhone = chatwootScriptValue(phone);
-  final safeBase = chatwootScriptValue(baseUrl);
-  final safeToken = chatwootScriptValue(token);
-
-  // Keep only the latest opening request while the SDK loads. Closing clears
-  // this callback so a late ready event cannot reopen a disposed screen.
-  _evaluateJavaScript('''
-    window.__tdsSupportOpen = function() {
-      if (!window.\$chatwoot) return;
-      window.\$chatwoot.setUser($safeSupportId, {
-        name: $safeName, phone_number: $safePhone, $signedField
-      });
-      window.\$chatwoot.setCustomAttributes({ origem: "App Cartilhas TDS Web" });
-      window.\$chatwoot.toggle("open");
-    };
-  ''');
-
-  if (!_injected) {
-    _injected = true;
-    _evaluateJavaScript('''
-      window.chatwootSettings = {
-        hideMessageBubble: true,
-        locale: "pt_BR",
-        type: "standard",
-        darkMode: "auto",
-      };
-      (function(d,t){
-        var BASE_URL = $safeBase;
-        var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
-        g.src = BASE_URL + "/packs/js/sdk.js";
-        g.defer = true; g.async = true;
-        s.parentNode.insertBefore(g, s);
-        g.onload = function() {
-          window.addEventListener("chatwoot:ready", function() {
-            if (window.__tdsSupportOpen) window.__tdsSupportOpen();
-          });
-          window.chatwootSDK.run({ websiteToken: $safeToken, baseUrl: BASE_URL });
-        };
-      })(document, "script");
-    ''');
-  } else {
-    // SDK já injetado: atualizar também identidade/assinatura, não só abrir.
-    _evaluateJavaScript(r'''
-      if (window.$chatwoot) {
-        window.__tdsSupportOpen();
-      }
-    ''');
+  final current = lease ?? chatwootReserve();
+  if (!chatwootSessionCurrent(current)) return current;
+  final config = ChatwootConfig(baseUrl: baseUrl, websiteToken: token);
+  final html = chatwootHostHtml(config, webSession: current);
+  void fail() {
+    if (!chatwootSessionCurrent(current)) return;
+    chatwootClose(current);
+    onError?.call();
   }
+
+  final signal = ((JSString status) {
+    if (!chatwootSessionCurrent(current)) return;
+    if (canIdentify != null && !canIdentify()) {
+      fail();
+      return;
+    }
+    switch (status.toDart) {
+      case 'ready':
+        _evaluate('''
+          var host = window.__tdsSupportHost;
+          if (host && host.session === $current) host.frame.contentWindow.postMessage({
+            kind:"tds-support-identify",session:$current,profile:{
+              id:${chatwootScriptValue(supportContactId)},name:${chatwootScriptValue(name)},
+              phone:${chatwootScriptValue(phone)},
+              identifierHash:${identifierHash == null ? 'null' : chatwootScriptValue(identifierHash)}
+            }
+          }, window.location.origin);
+        ''');
+      case 'opened':
+        _loadTimer?.cancel();
+        onOpened?.call();
+      case 'error':
+        fail();
+      case 'closed':
+        _evaluate('''
+          var host=window.__tdsSupportHost;
+          if(host && host.session===$current) host.frame.style.display="none";
+        ''');
+        onClosed?.call();
+    }
+  }).toJS;
+  globalContext.setProperty('__tdsSupportSignal'.toJS, signal);
+  _loadTimer = Timer(loadTimeout, fail);
+  _evaluate('''
+    (function() {
+      var frame=document.createElement("iframe");
+      frame.id="tds-support-host-$current";
+      frame.title="Suporte TDS";
+      frame.setAttribute("sandbox","allow-scripts allow-forms allow-same-origin allow-popups allow-downloads");
+      frame.style.cssText="position:fixed;right:0;bottom:0;width:min(440px,100vw);height:min(720px,90vh);border:0;z-index:2147483000;background:transparent;";
+      var host={session:$current,frame:frame};
+      host.listener=function(event) {
+        var data=event.data;
+        if(window.__tdsSupportHost!==host || event.source!==frame.contentWindow ||
+           event.origin!==window.location.origin || !data || data.kind!=="tds-support-status" ||
+           data.session!==$current || typeof data.status!=="string") return;
+        window.__tdsSupportSignal(data.status);
+      };
+      window.__tdsSupportHost=host;
+      window.addEventListener("message",host.listener);
+      frame.srcdoc=${chatwootScriptValue(html)};
+      document.body.appendChild(frame);
+    })();
+  ''');
+  return current;
 }
 
-void chatwootClose() {
-  _evaluateJavaScript(r'''
-    window.__tdsSupportOpen = null;
-    if (window.$chatwoot) {
-      window.$chatwoot.toggle("close");
-      window.$chatwoot.reset();
-    }
+void chatwootClose([int? lease]) {
+  if (lease != null && !chatwootSessionCurrent(lease)) return;
+  _activeLease = null; // Invalidate callbacks before reset can emit events.
+  _loadTimer?.cancel();
+  _loadTimer = null;
+  _evaluate(r'''
+    (function() {
+      var host=window.__tdsSupportHost;
+      window.__tdsSupportHost=null;
+      window.__tdsSupportSignal=null;
+      if(!host) return;
+      window.removeEventListener("message",host.listener);
+      try {
+        var sdk=host.frame.contentWindow.$chatwoot;
+        if(sdk) { sdk.toggle("close"); sdk.reset(); }
+      } catch (_) {}
+      host.frame.remove();
+    })();
   ''');
 }
 
