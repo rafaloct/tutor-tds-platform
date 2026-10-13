@@ -214,6 +214,12 @@ def api_tree_context_cases(
             "candidate_api_tree_oid",
             "api_tree_oid",
         ),
+        (
+            "postgres_upgrade_supplement",
+            "docs/production/evidence/postgres-upgrade-supplement-20261013T155604Z-0bcdb75b5c0f6d51.json",
+            "api_tree_oid",
+            "api_tree",
+        ),
     )
     for context, path, field, wrong_context_field in contexts:
         clean_case(

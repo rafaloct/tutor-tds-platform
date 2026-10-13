@@ -18,7 +18,11 @@ essa versão. O pacote principal13 instalado no Xiaomi é sideload e não compro
 inventário de testes/rascunhos Play. Esse inventário continua necessário antes
 de upload; gerar AAB e publicar Play são operações distintas.
 
-Promoção da API, freeze/tag GitHub e novo AAB ainda pendentes neste registro.
+API promovida com schema0030, compatibilidade true, mínimo11 e flags false;
+HTTPS externo passou, catálogo/credenciais/serviços preservados. Complemento
+de restore passou com bytes Git/imagem, metadata original completa e rollback
+anterior explícito. Ver `API_PROMOTION_2026-10-13.md`. Freeze/tag GitHub e novo
+AAB ainda pendentes neste registro.
 As seções seguintes preservam o histórico das descobertas; pendências de
 restore, certificado e SDK ali registradas foram superadas pelas provas acima.
 

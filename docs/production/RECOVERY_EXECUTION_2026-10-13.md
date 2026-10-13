@@ -10,8 +10,8 @@ conta Hostinger ou serviços de aplicações não relacionadas.
 
 | Prova real | Registro versionado |
 | --- | --- |
-| Recibo agendado R2, download e restore do mesmo cipher | `evidence/scheduled-postgres-offsite-20261013T141953Z-f5948745ff6593fe.json` |
-| PostgreSQL 16 isolado: restore 0028, upgrade 0030, dados originais preservados, imagem antiga e catálogo compatíveis | `evidence/postgres-upgrade-20261013T141953Z-f5948745ff6593fe.json` |
+| Recibo agendado R2, download e restore do mesmo cipher | `evidence/scheduled-postgres-offsite-20261013T155604Z-0bcdb75b5c0f6d51.json` |
+| PostgreSQL 16 isolado: restore 0028, upgrade 0030, valores e schema originais preservados, imagem antiga e catálogo compatíveis | `evidence/postgres-upgrade-supplement-20261013T155604Z-0bcdb75b5c0f6d51.json` |
 | AnythingLLM/LanceDB: snapshot, R2, decriptação, restore, SQLite e buscas por workspace | `evidence/critical-volume-restore-20261013T151344Z-5a4bc102.json` |
 | Configurações privadas da API, compose, backup e provider: R2 e restore byte a byte isolado | `evidence/config-recovery-20261013T144355Z-05aaf1d1.json` |
 | Inspeção anterior da promoção: imagem, redes, mounts, catálogo e preservação de JWT/CPF/banco | `evidence/production-before-promotion-20261013.json` |
@@ -21,6 +21,21 @@ Os três primeiros registros têm hashes ligados pelo aceite
 `RECOVERY_EVIDENCE_PROVENANCE=PASS`, schema `20261007_0030` e árvore API
 `dc32d081dffd4d778e51871a85ae4077eb75f6ce`. O teste offline verifica referências;
 a execução externa foi também observada e auditada, não inferida de booleanos.
+
+O primeiro ensaio das 14:19 permanece versionado como histórico. O aceite final
+usa o complemento das 15:56, após os três comentários reais do PR203 serem
+corrigidos, respondidos e resolvidos; seu código passou 49 testes Python e
+29 Node (um opt-in ignorado), revisão independente e CI.
+
+O complemento verificou bytes e flags executáveis de 73 arquivos dos cinco
+COPY roots de produção contra blobs Git, manifest SHA-256
+`b7e6b909c035f0a149b56a627473df512822a575d18f3f2a695fa4bb2b3eb2ac`.
+Preservou exatamente 447 colunas (tipo/null/default/collation), 270 constraints,
+109 índices, 16 triggers e 15 funções públicas. Apenas as 14 colunas,
+10 constraints e três índices previstos nas migrations 0029/0030 foram
+acrescentados. 8.192 combinações de contexto e provas de defaults/FKs/checks
+passaram. A imagem anterior d6701c77… foi selecionada explicitamente, pois a
+produção já usa a candidata; não houve downgrade ou escrita produtiva no ensaio.
 
 O backup agendado `20261013T140846Z-84914ff4cb9648a6afad19cff311caa1` teve
 251.528 bytes e SHA-256
@@ -62,6 +77,10 @@ O aceite cobre PostgreSQL e o volume AnythingLLM ativo com LanceDB, além da
 prova separada de configurações. Não cobre Weaviate legado separado, certificados
 KV, restauração do ZIP completo do Dokploy, Drive/Sheets, WordPress ou Chatwoot.
 Não houve inferência LLM no clone nem uso de fontes externas para autorização.
+
+A comparação da imagem abrange fontes dos cinco COPY roots, não atesta bytes
+da base/dependências nem reprodutibilidade geral. A prova semântica de
+constraints é finita, sobre as migrations conhecidas, não equivalência SQL geral.
 
 A compatibilidade HTTP é condicional aos apps suportados e às flags false;
 ver `API_COMPATIBILITY_REVIEW_2026-10-13.md`. O prepare antigo de turma sem

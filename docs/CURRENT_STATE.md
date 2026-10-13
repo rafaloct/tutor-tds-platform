@@ -1,5 +1,20 @@
 # CURRENT STATE
 
+## 2026-10-13 — API promovida e HTTPS verificado
+
+OBSERVED: API produtiva migrou0028→0029→0030 e usa imagem4ed8a189… da fonte
+d3b1331/árvore API dc32d081…. Compatibilidade true após validação, mínimo11 e
+flags de risco false/defaultfalse; nove cursos e projeção legada preservados.
+JWT/CPF/banco, redes/mounts/compose e containers db/policy-web preservados.
+HTTPS externo no LARGeo confirmou health/live/version/courses às15:39:42UTC.
+Recibos em `production/API_PROMOTION_2026-10-13.md`. Revisão dos PRs203/204
+identificou melhorias reais; correções e CI passaram, threads resolvidas.
+Prova suplementar isolada PASS: 73 fontes reais da imagem conferidas com Git;
+447 colunas, 270 constraints, 109 índices, 16 triggers e 15 funções originais
+preservados, somente adições previstas, rollback antigo explícito e cleanup.
+Aceite final/revisão independente PASS; 86 regressões da política de segredos
+PASS. AAB novo/tag/upload ainda não executados.
+
 ## 2026-10-13 — recuperação offsite e smoke Xiaomi aprovados
 
 OBSERVED: backup agendado R2 nativo restaurado em PostgreSQL16 isolado;
