@@ -1,5 +1,21 @@
 # CURRENT STATE
 
+## 2026-10-13 — preparação de produção #197
+
+DECISION: a observação geral usa Google Analytics do domínio e Cloudflare,
+conforme informação do usuário; a candidata Firebase #196 permanece fora
+desta release. Base: staging `dd928ff6b58788af930aa6722557728d74dfe97c`.
+OBSERVED: o runner de produção agora instala o extra de testes pelo lock e
+executa `python -m pytest`, evitando falha de importação de `ops` em ambiente
+novo. Suíte API: 601 passed, 30 skipped, 5 subtests passed. Ferramentas de
+recuperação: 29 passed/1 skipped; ferramentas de CI: 8 passed. PostgreSQL
+17.11 descartável: 30 passed; container removido.
+UNKNOWN/BLOCKED: o aceite versionado de recuperação falha no verificador
+de proveniência (`acceptance schema does not match the candidate`). AAB
+novo, assinatura, versionCode publicado e saúde/compatibilidade atual de
+produção ainda não comprovados. Não houve deploy, tag ou upload. Ver
+`docs/production/RELEASE_PREPARATION_2026-10-13.md`.
+
 ## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
 
 OBSERVED: `tooling/class_lifecycle_e2e/harness.py --execute` em checkout isolado

@@ -86,7 +86,7 @@ try {
         return
     }
     Push-Location $apiRoot
-    try { Run 'uv' @('run', '--locked', 'pytest', '-q') } finally { Pop-Location }
+    try { Run 'uv' @('run', '--locked', '--extra', 'test', 'python', '-m', 'pytest', '-q') } finally { Pop-Location }
     Push-Location $appRoot
     try {
         Run $Flutter @('analyze', '--no-pub')
