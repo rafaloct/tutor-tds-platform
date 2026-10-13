@@ -208,6 +208,12 @@ def api_tree_context_cases(
             "api_tree",
             "api_tree_oid",
         ),
+        (
+            "production_restore_acceptance",
+            "docs/production/evidence/production-restore-acceptance.json",
+            "candidate_api_tree_oid",
+            "api_tree_oid",
+        ),
     )
     for context, path, field, wrong_context_field in contexts:
         clean_case(
