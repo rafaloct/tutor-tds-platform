@@ -53,3 +53,9 @@ jobs:
         run: flutter analyze
       - name: Unit and widget tests
         run: flutter test --reporter expanded
+      - name: Chatwoot browser lifecycle tests
+        run: |
+          chrome=$(command -v google-chrome || command -v chromium || true)
+          test -n "$chrome" || { echo "Chrome is required for browser lifecycle tests." >&2; exit 1; }
+          export CHROME_EXECUTABLE="$chrome"
+          flutter test --platform chrome --reporter expanded test/chatwoot_web_lifecycle_test.dart

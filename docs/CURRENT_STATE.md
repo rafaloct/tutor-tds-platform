@@ -17,6 +17,12 @@ token legado aceito em consulta pública, sem prova de resposta humana.
 DECISION: operador autorizou correção e publicação Play e aceitou tablet Samsung
 físico no lugar do Xiaomi. UNKNOWN: máximo de códigos Play, promoção da nova API,
 smoke da fonte alterada, novo AAB e estado final Play ainda em verificação.
+IMPLEMENTED/TESTED-LOCAL: verificador aceita statusv1 externo pós-build, mantendo
+todos os gates originais; 36 testes e três negativos CLI PASS no Windows. Nova
+candidata permanece congelada até recuperação/smoke frescos; artefato e provas
+anteriores preservados no histórico. Testes Chrome canônicos entram no workflow
+Linux: runner Flutter web no Windows encontrou erro de path CanvasKit404,
+sem alteração de SDK ou alegação de PASS desse runner.
 
 ## 2026-10-13 — fonte consolidada para a release
 

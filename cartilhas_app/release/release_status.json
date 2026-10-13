@@ -9,21 +9,21 @@
     "compile_sdk": 36,
     "upload_certificate_sha256": "16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50"
   },
-  "release_build_allowed": true,
+  "release_build_allowed": false,
   "source_verification": {
-    "flutter_tests": "625/625",
-    "api_tests": "601 passed, 30 PostgreSQL opt-in skipped, 5 subtests passed",
-    "observability_tests": "17/17",
-    "dart_analyze": "passed",
+    "api_support_focal_tests": "100 passed",
+    "api_documentation_tests": "3 passed, 5 subtests passed",
+    "full_candidate_api_and_flutter_tests": "pending final release gate",
+    "dart_analyze": "pending final integrated source",
     "verified_at": "2026-10-13"
   },
   "artifact": {
-    "path": "release/Tutor-TDS-1.4.0+13-signed.aab",
-    "sha256": "B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66",
-    "status": "superseded",
+    "path": "build/app/outputs/bundle/release/app-release.aab",
+    "sha256": null,
+    "status": "not_built",
     "upload_allowed": false,
     "matches_current_source": false,
-    "reason": "Antecede a retomada offline segura do Evidence/check-in."
+    "reason": "Nova configuração remota Chatwoot em preparação; código Play, fonte final, recuperação e smoke fresco precisam de evidência antes do build."
   },
   "required_physical_evidence": [
     {
@@ -68,13 +68,10 @@
     },
     {
       "id": "pre_aab_xiaomi_smoke",
-      "status": "passed",
+      "status": "pending",
       "required_for_release_build": true,
-      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador.",
-      "verified_at": "2026-10-13T15:15:17.229588+00:00",
-      "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-13.json",
-      "evidence_sha256": "df3c783408160b85f0e53f6a790a8d0728ebd60aa16318480ade4214de445747",
-      "scope": "Fresh Xiaomi ZT6HPRHQHATSEQPR (Android15/API35 arm64) isolated debug/staging QA package; cold launch and relaunch in new PID, responsive UI, no crash/ANR, existing production-namespace and DEV packages preserved. App/API runtime trees match d3b1331 candidate; later release metadata/documentation only. This is hardware smoke, not production AAB integration or Play inventory."
+      "description": "Smoke curto em dispositivo Android físico imediatamente antes do AAB; operador aceitou tablet Samsung no lugar do Xiaomi.",
+      "scope": "Nova fonte Chatwoot requer nova evidência física; provas históricas permanecem preservadas, sem inferência de PASS desta candidata."
     },
     {
       "id": "dynamic_activity_contextual_android_e2e",
@@ -82,6 +79,50 @@
       "required_for_release_build": false,
       "description": "Validar atividade publicada contextual, marcação, offline/reinício/replay e observação pedagógica em Android antes de habilitar DYNAMIC_ACTIVITY_ENABLED.",
       "scope": "Obrigatório para ativar a feature; não bloqueia build de produção enquanto DYNAMIC_ACTIVITY_ENABLED=false. Candidato local sobre fbb4b6a/migration 0030; duas abordagens de harness encerradas sem aceite, a última por display do emulador apagado antes do gesto; sem aceite de staging ou produção."
+    }
+  ],
+  "artifact_history": [
+    {
+      "path": "release/Tutor-TDS-1.4.0+13-signed.aab",
+      "sha256": "B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66",
+      "status": "superseded",
+      "upload_allowed": false,
+      "matches_current_source": false,
+      "reason": "Antecede a retomada offline segura do Evidence/check-in."
+    },
+    {
+      "version_name": "1.4.0",
+      "version_code": 13,
+      "source_commit": "207e2128dcbcedec70bf5132b05a7081501480ed",
+      "git_tag": "v1.4.0",
+      "sha256": "1665ee362eebdad4d299579508e8a57c5b36c55f2adff89c1eed8930cc2af3e0",
+      "bytes": 68240658,
+      "status": "historical_verified",
+      "upload_allowed": false,
+      "matches_current_source": false,
+      "delivery": "https://github.com/rafaloct/tutor-tds-platform/releases/tag/untagged-70d3219a3cd2f307627e",
+      "reason": "AAB anterior preservado; configuração Chatwoot ainda compilada; nova fonte exige outro artefato."
+    }
+  ],
+  "source_verification_history": [
+    {
+      "flutter_tests": "625/625",
+      "api_tests": "601 passed, 30 PostgreSQL opt-in skipped, 5 subtests passed",
+      "observability_tests": "17/17",
+      "dart_analyze": "passed",
+      "verified_at": "2026-10-13"
+    }
+  ],
+  "physical_evidence_history": [
+    {
+      "id": "pre_aab_xiaomi_smoke",
+      "status": "passed",
+      "required_for_release_build": true,
+      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador.",
+      "verified_at": "2026-10-13T15:15:17.229588+00:00",
+      "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-13.json",
+      "evidence_sha256": "df3c783408160b85f0e53f6a790a8d0728ebd60aa16318480ade4214de445747",
+      "scope": "Fresh Xiaomi ZT6HPRHQHATSEQPR (Android15/API35 arm64) isolated debug/staging QA package; cold launch and relaunch in new PID, responsive UI, no crash/ANR, existing production-namespace and DEV packages preserved. App/API runtime trees match d3b1331 candidate; later release metadata/documentation only. This is hardware smoke, not production AAB integration or Play inventory."
     }
   ]
 }
