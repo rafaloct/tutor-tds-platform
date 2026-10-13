@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-13 — MCP de contas gerenciadas (#199), candidato local
+
+DECISION: usuário solicitou criar perfis Tutor TDS via MCP. OBSERVED: adapter
+stdio em `tools/account_mcp` reutiliza `POST /admin/accounts`, lê token e
+cadastro de arquivos privados, expõe preview sem CPF/senha, vincula criação
+a digest de ambiente/conteúdo e impede repetição após resultado incerto.
+20 testes passaram, incluindo handshake stdio real; HTTP externo simulado.
+UNKNOWN/BLOCKED: configuração nos clientes reais, endpoint remoto autenticado
+para ChatGPT, credenciais/pessoas/programas e homologação externa. Nenhuma
+conta real criada. Release #198 continua separada; Desktop Commander retornou
+Connection failed no LARGeo e offline no DESKTOP-8T5DRBS. Ver
+`tools/account_mcp/README.md`.
+
 ## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
 
 OBSERVED: `tooling/class_lifecycle_e2e/harness.py --execute` em checkout isolado

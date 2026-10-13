@@ -1,0 +1,23 @@
+name: Account MCP contract
+on:
+  pull_request:
+    paths:
+      - 'tools/account_mcp/**'
+      - '.github/workflows/account-mcp.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'tools/account_mcp/**'
+      - '.github/workflows/account-mcp.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+      - run: uv run --locked --extra test python -m pytest -q
+        working-directory: tools/account_mcp
