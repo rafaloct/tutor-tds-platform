@@ -34,6 +34,23 @@ fun httpsUri(variable: String, value: String): URI {
     return uri.normalize()
 }
 
+fun validateGoogleAnalyticsDefines(defines: Map<String, String>) {
+    val enabled = defines["GOOGLE_ANALYTICS_ENABLED"] ?: "false"
+    if (enabled !in setOf("true", "false")) {
+        throw GradleException("GOOGLE_ANALYTICS_ENABLED deve ser true ou false.")
+    }
+    if (enabled != "true") return
+    val appId = defines["FIREBASE_APP_ID"].orEmpty()
+    val sender = defines["FIREBASE_MESSAGING_SENDER_ID"].orEmpty()
+    if (defines["TUTOR_ENVIRONMENT"] !in setOf("staging", "production") ||
+        !appId.matches(Regex("^1:[0-9]+:android:[a-fA-F0-9]+$")) ||
+        sender != appId.split(':').getOrNull(1) ||
+        !defines["FIREBASE_PROJECT_ID"].orEmpty().matches(Regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$")) ||
+        !defines["FIREBASE_API_KEY"].orEmpty().matches(Regex("^AIza[A-Za-z0-9_-]{35}$"))) {
+        throw GradleException("Google Analytics exige registro Firebase Android e ambiente validos.")
+    }
+}
+
 val approvedStagingApiUrls = setOf(
     "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
     "https://tutor-tds-staging.fastapicloud.dev",
@@ -224,6 +241,18 @@ android {
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        val analyticsDefines = decodeDartDefines(project.findProperty("dart-defines")?.toString())
+        validateGoogleAnalyticsDefines(analyticsDefines)
+        manifestPlaceholders["googleAnalyticsDeactivated"] =
+            (analyticsDefines["GOOGLE_ANALYTICS_ENABLED"] != "true").toString()
+        if (analyticsDefines["GOOGLE_ANALYTICS_ENABLED"] == "true") {
+            // Measurement reads Android resources in addition to FirebaseOptions.
+            // These are public client identifiers, never server credentials.
+            resValue("string", "google_app_id", analyticsDefines.getValue("FIREBASE_APP_ID"))
+            resValue("string", "google_api_key", analyticsDefines.getValue("FIREBASE_API_KEY"))
+            resValue("string", "gcm_defaultSenderId", analyticsDefines.getValue("FIREBASE_MESSAGING_SENDER_ID"))
+            resValue("string", "project_id", analyticsDefines.getValue("FIREBASE_PROJECT_ID"))
+        }
     }
 
     val keystorePropertiesFile = rootProject.file("key.properties")

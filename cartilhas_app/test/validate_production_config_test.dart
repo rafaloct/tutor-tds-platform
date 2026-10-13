@@ -53,6 +53,11 @@ void main() {
 
     expect(result.exitCode, 1);
   });
+
+  test('rejeita Google Analytics sem configuração e aceite de produção', () {
+    final config = _canonicalConfig()..['GOOGLE_ANALYTICS_ENABLED'] = true;
+    expect(_run(root, config).exitCode, 1);
+  });
 }
 
 ProcessResult _run(Directory root, Map<String, Object> config) {

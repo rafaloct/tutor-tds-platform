@@ -346,6 +346,7 @@ void main() {
       find.textContaining('Analytics de recursos temporariamente indisponível'),
       findsOneWidget,
     );
+    expect(find.text('Ainda não há uso registrado neste período.'), findsNothing);
   });
 
   testWidgets('estudante sem vínculo de equipe não recebe painel', (

@@ -200,6 +200,29 @@ $enabledInactiveFlag.PUSH_NOTIFICATIONS_ENABLED = 'true'
 Invoke-GateCase -Name 'release rejeita flag inativa habilitada' `
     -Task ':app:preReleaseBuild' -Defines $enabledInactiveFlag -ShouldPass $false
 
+$googleMissing = [ordered]@{}
+foreach ($entry in $staging.GetEnumerator()) {
+    $googleMissing[$entry.Key] = $entry.Value
+}
+$googleMissing.GOOGLE_ANALYTICS_ENABLED = 'true'
+Invoke-GateCase -Name 'analytics rejeita registro Firebase ausente' `
+    -Task ':app:preDebugBuild' -Defines $googleMissing -ShouldPass $false
+
+$googleStaging = [ordered]@{}
+foreach ($entry in $googleMissing.GetEnumerator()) {
+    $googleStaging[$entry.Key] = $entry.Value
+}
+$googleStaging.FIREBASE_PROJECT_ID = 'tds-synthetic-analytics'
+$googleStaging.FIREBASE_APP_ID = '1:123456789:android:abcdef1234567890'
+$googleStaging.FIREBASE_MESSAGING_SENDER_ID = '123456789'
+$googleStaging.FIREBASE_API_KEY = 'AIza' + ('0' * 35)
+Invoke-GateCase -Name 'analytics aceita formato Android completo em staging sintetico' `
+    -Task ':app:preDebugBuild' -Defines $googleStaging -ShouldPass $true
+
+$googleStaging.FIREBASE_MESSAGING_SENDER_ID = '999999999'
+Invoke-GateCase -Name 'analytics rejeita sender divergente do app' `
+    -Task ':app:preDebugBuild' -Defines $googleStaging -ShouldPass $false
+
 Write-Output 'Matriz de ambiente Android aprovada; nenhum APK ou AAB foi gerado.'
 # The last case intentionally fails Gradle. Do not leak that expected rejection
 # as the validation script's status to its caller.

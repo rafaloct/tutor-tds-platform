@@ -1,6 +1,12 @@
 class AppConfig {
   const AppConfig._();
 
+  static const environment = String.fromEnvironment('TUTOR_ENVIRONMENT');
+  static const googleAnalyticsEnabled = bool.fromEnvironment(
+    'GOOGLE_ANALYTICS_ENABLED',
+    defaultValue: false,
+  );
+
   /// Endereço público e estável do gateway. Em produção, o app nunca recebe
   /// a credencial usada para acessar o AnythingLLM ou o provedor do modelo.
   static const tutorGatewayUrl = String.fromEnvironment('TUTOR_GATEWAY_URL');

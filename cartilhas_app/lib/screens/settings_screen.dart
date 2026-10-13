@@ -16,6 +16,7 @@ import 'onboarding_screen.dart';
 import 'privacy_screen.dart';
 import 'welcome_screen.dart';
 import '../features/analytics/telemetry_route.dart';
+import '../features/analytics/google_usage_analytics.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -33,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   AuthUser? _onlineUser;
   bool _deletingAccount = false;
   bool _loggingOut = false;
+  bool _savingGoogleConsent = false;
 
   @override
   void initState() {
@@ -122,6 +124,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _setSharing(bool value) async {
     await PrivacyPreferences.saveDecision(consent: value);
     if (mounted) setState(() => _shareLearningData = value);
+  }
+
+  Future<void> _setGoogleConsent(bool value) async {
+    final analytics = context.read<GoogleUsageAnalytics?>();
+    if (analytics == null || _savingGoogleConsent) return;
+    setState(() => _savingGoogleConsent = true);
+    try {
+      await analytics.setConsent(value);
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Não foi possível atualizar a medição de uso. Tente novamente.'),
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _savingGoogleConsent = false);
+    }
   }
 
   Future<void> _setCertificateConsent(bool value) async {
@@ -371,6 +390,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 20),
             const _SectionTitle('Privacidade'),
+            if (context.watch<GoogleUsageAnalytics?>() case final analytics?)
+              Card(
+                child: SwitchListTile(
+                  value: analytics.consentGranted,
+                  onChanged: _savingGoogleConsent ? null : _setGoogleConsent,
+                  secondary: const Icon(Icons.analytics_outlined),
+                  title: const Text('Medição de uso com Google Analytics'),
+                  subtitle: const Text(
+                    'Opcional: envia ao Google categorias de telas e recursos usados, '
+                    'informações técnicas do dispositivo e um identificador do app. '
+                    'Não envia seu nome, CPF, conversas ou dados da turma. '
+                    'Sem personalização de anúncios. Você pode desativar a qualquer momento.',
+                  ),
+                ),
+              ),
             Card(
               child: Column(
                 children: [
