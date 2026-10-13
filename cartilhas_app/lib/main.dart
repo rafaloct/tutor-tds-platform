@@ -147,7 +147,9 @@ class _CartilhasAppState extends State<CartilhasApp> {
             onSessionEnded: () async {
               // A new account must make its own optional measurement choice.
               try {
-                await widget.googleAnalytics?.setConsent(false);
+                await widget.googleAnalytics?.setConsent(false).timeout(
+                  const Duration(seconds: 2),
+                );
               } on Object {
                 // A measurement outage cannot prevent session termination.
               }

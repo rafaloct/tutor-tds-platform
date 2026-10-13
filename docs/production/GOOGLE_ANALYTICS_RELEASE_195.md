@@ -52,7 +52,11 @@ Analytics preparado com versões/hashes publicados no pub.dev; ainda exige
 UNKNOWN/BLOCKED: Firebase/GA não provisionados, recebimento em DebugView não
 verificado, nenhum novo AAB, nenhuma promoção de produção. Probes do domínio
 produtivo receberam CONNECT 403 do proxy (não é evidência de serviço fora do ar).
-LARGeo apareceu online, mas `start_process` expirou e `get_config` ficou pendente.
+LARGeo apareceu online, mas `start_process` e `get_config` expiraram sem resposta.
+O verificador offline de recuperação foi executado para o schema candidato
+`20261007_0030` e a árvore Git atual da API; recusou o aceite histórico com
+`RECOVERY_EVIDENCE_PROVENANCE=FAIL: acceptance schema does not match the candidate`.
+O ensaio de migração não substitui o aceite completo do backup agendado.
 
 ## Sequência de ativação
 
