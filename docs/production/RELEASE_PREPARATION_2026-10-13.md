@@ -88,3 +88,31 @@ versionado acima. Nenhuma senha ou chave privada foi retornada. Flutter foi
 localizado em `D:\flutter-3.44.9\bin\flutter.bat`; versão e gates ainda por
 verificar. A correspondência com o certificado de upload atual do Play segue
 UNKNOWN; o checkout do DESKTOP-8T5DRBS não foi validado.
+
+
+OBSERVED remoto: API pública consultada pelo LARGeo em 2026-10-13:
+`/health` → `status=ok`, `database=available`; `/version` →
+`environment=production`, `api_version=0.1.0`,
+`schema_version=20261005_0028`, `minimum_supported_app_version=1.2.0+11`,
+`compatibility_verified=false`. Portanto a produção está acessível, mas não
+comprova o contrato de promoção da candidata `20261007_0030`.
+Checkouts isolados criados no LARGeo, sem modificar o checkout principal:
+`C:\Temp\tds-release-198-20261013` em `34186ae` e
+`C:\Temp\tds-mcp-200-20261013` em `74f84ce`.
+
+Flutter `--version --machine` executado no LARGeo confirmou 3.44.9, revisão
+`6b182d2c7585eba26d4edce0f97630effd256c33`, Dart 3.12.2. O comando agregado
+terminou com exit 1; a saída do Flutter forneceu os metadados acima,
+mas isso não representa aprovação da suíte ou build. MCP #200: dependências
+instaladas pelo lock em worktree isolada; testes Windows 19 passed/1 skipped
+(checagem de permissões POSIX, inaplicável ao Windows). Clientes ainda não
+configurados, nenhuma credencial administrativa ou conta real provisionada.
+
+
+Resposta posterior do operador: o caminho esperado da identidade age é
+`/home/rafael/tds-restore-private-20261012/inputs/age-identity` no avellaria,
+mas a identidade privada **não foi localizada**. O fingerprint informado
+coincide com o PEM, porém foi validado historicamente contra certificado local,
+**não reconfirmado diretamente na Play Console**. Esses dados não satisfazem
+os respectivos gates. O alias SSH `tutor-tds-vps` no LARGeo retornou 255 em
+duas consultas somente leitura, sem diagnóstico útil; sem alterações no VPS.

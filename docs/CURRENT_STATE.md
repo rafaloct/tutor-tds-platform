@@ -1,5 +1,15 @@
 # CURRENT STATE
 
+## 2026-10-13 — acesso LARGeo restabelecido, assinatura de backup conferida
+
+OBSERVED: backup JKS do perfil Rafael foi localizado e validado por keytool;
+o certificado SHA-256 coincide com o PEM versionado. Senha permaneceu no
+host. Certificado de upload atual do Google Play ainda UNKNOWN. API pública
+responde health ok/database available; schema 0028, compatibility_verified=false.
+Checkouts isolados dos PRs #198/#200 criados no LARGeo. Não houve promoção,
+novo AAB ou alteração de chave. Evidência em
+`docs/production/RELEASE_PREPARATION_2026-10-13.md`.
+
 ## 2026-10-13 — preparação de produção #197
 
 DECISION: a observação geral usa Google Analytics do domínio e Cloudflare,
