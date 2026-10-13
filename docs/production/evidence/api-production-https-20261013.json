@@ -1,0 +1,22 @@
+﻿{
+    "executed_at_utc":  "2026-10-13T15:39:42.5412983Z",
+    "source":  "LARGeo HTTPS",
+    "health":  {
+                   "status":  "ok",
+                   "database":  "available"
+               },
+    "live":  {
+                 "status":  "ok"
+             },
+    "version":  {
+                    "api_version":  "0.1.0",
+                    "schema_version":  "20261007_0030",
+                    "minimum_supported_app_version":  "1.2.0+11",
+                    "environment":  "production",
+                    "compatibility_verified":  true
+                },
+    "catalog_count":  9,
+    "tls_standard_validation":  true,
+    "private_values_emitted":  false,
+    "status":  "passed"
+}

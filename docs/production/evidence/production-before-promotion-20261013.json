@@ -1,0 +1,80 @@
+{
+  "api_resource_configuration_preserved": true,
+  "candidate_image_id": "sha256:4ed8a189b3741d8b8f536a0b790cc0215f997f05c4254ea65d9e67826b1a858b",
+  "candidate_revision": "d3b1331a14ec77b37a8b05e9f5f19e2ccfe57c2e",
+  "candidate_source": "https://github.com/rafaloct/tutor-tds-platform",
+  "compose_sha256": "85e30ed3b5dd4aebc9d97abe0751d0b75ad3238617ea66014f887c01a54d3282",
+  "compose_version": "5.1.1",
+  "current_image_id": "sha256:d6701c77b8a48b84fa4b9cea7bbc1c2858bf69aa75dd2367c9a3a4f6fb30666c",
+  "current_image_ref": "ghcr.io/rafaloct/tutor-tds-platform/tutor-tds-api:9577541289037d7a9d4eff1e8555cf3b3e11f611@sha256:d6701c77b8a48b84fa4b9cea7bbc1c2858bf69aa75dd2367c9a3a4f6fb30666c",
+  "directory": "/opt/tutor-tds-api",
+  "jwt_cpf_database_values_preserved": true,
+  "mode": "READ_ONLY",
+  "observed_at": "2026-10-13T15:10:22.372778+00:00",
+  "other_services_must_not_be_recreated": true,
+  "planned_dotenv_changes": {
+    "CERTIFICATE_CANDIDATE_ENABLED": "false",
+    "CLASS_LIFECYCLE_ENABLED": "false",
+    "COMMERCIAL_SIMULATION_ENABLED": "false",
+    "COMPATIBILITY_VERIFIED": "false",
+    "CPF_ACTIVATION_REQUIRED": "false",
+    "DYNAMIC_ACTIVITY_ENABLED": "false",
+    "JOURNEY_TRACEABILITY_ENABLED": "false",
+    "LEARNING_CONTEXT_ENABLED": "false",
+    "MINIMUM_SUPPORTED_APP_VERSION": "1.2.0+11",
+    "OPERATOR_OPERATIONS_ENABLED": "false",
+    "PRODUCTION_API_IMAGE": "tutor-tds-candidate:d3b1331a14ec"
+  },
+  "planned_public_env": {
+    "CERTIFICATE_CANDIDATE_ENABLED": "<absent; candidate default applies>",
+    "CLASS_LIFECYCLE_ENABLED": "<absent; candidate default applies>",
+    "COMMERCIAL_SIMULATION_ENABLED": "false",
+    "COMPATIBILITY_VERIFIED": "false",
+    "CPF_ACTIVATION_REQUIRED": "<absent; candidate default applies>",
+    "DYNAMIC_ACTIVITY_ENABLED": "<absent; candidate default applies>",
+    "JOURNEY_TRACEABILITY_ENABLED": "false",
+    "LEARNING_CONTEXT_ENABLED": "false",
+    "MINIMUM_SUPPORTED_APP_VERSION": "1.2.0+11",
+    "OPERATOR_OPERATIONS_ENABLED": "<absent; candidate default applies>",
+    "PAYMENT_ADAPTER": "disabled",
+    "TUTOR_ENVIRONMENT": "production"
+  },
+  "production_mutations": false,
+  "project": "tutor-tds-api",
+  "public_before": null,
+  "review_ready": true,
+  "reviewed_source_tree": "dc32d081dffd4d778e51871a85ae4077eb75f6ce",
+  "running_public_env": {
+    "CERTIFICATE_CANDIDATE_ENABLED": "<absent; candidate default applies>",
+    "CLASS_LIFECYCLE_ENABLED": "<absent; candidate default applies>",
+    "COMMERCIAL_SIMULATION_ENABLED": "false",
+    "COMPATIBILITY_VERIFIED": "false",
+    "CPF_ACTIVATION_REQUIRED": "<absent; candidate default applies>",
+    "DYNAMIC_ACTIVITY_ENABLED": "<absent; candidate default applies>",
+    "JOURNEY_TRACEABILITY_ENABLED": "false",
+    "LEARNING_CONTEXT_ENABLED": "false",
+    "MINIMUM_SUPPORTED_APP_VERSION": "1.2.0+11",
+    "OPERATOR_OPERATIONS_ENABLED": "<absent; candidate default applies>",
+    "PAYMENT_ADAPTER": "disabled",
+    "TUTOR_ENVIRONMENT": "production"
+  },
+  "container_http_before": {
+    "health": {
+      "status": "ok",
+      "database": "available"
+    },
+    "live": {
+      "status": "ok"
+    },
+    "version": {
+      "api_version": "0.1.0",
+      "schema_version": "20261005_0028",
+      "minimum_supported_app_version": "1.2.0+11",
+      "environment": "production",
+      "compatibility_verified": false
+    }
+  },
+  "catalog_before_sha256": "212c860f04d95d87e48f39d7cd0326a6b12a2cc0cd581a1f957459c632389e42",
+  "catalog_before_count": 9,
+  "external_http_probe_note": "VPS urllib direct public request returned403; LARGeo separately confirmed health/live/version/courses200. No WAF configuration altered."
+}

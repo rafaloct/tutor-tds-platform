@@ -1,5 +1,129 @@
 # CURRENT STATE
 
+## 2026-10-13 — fonte consolidada para a release
+
+IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e
+#204 (referência da API) foram integrados por merges no PR #198, preservando
+seus históricos. Conflitos de CURRENT_STATE reconciliados com os recibos da
+promoção e restauração efetivamente executadas; runtime API e fonte Flutter
+permanecem idênticos. Referência: 133 operações, 120 paths, 107 schemas,
+52 requests, 97 responses e 560 links conferidos. Contratos de recuperação:
+49 passed/1 skipped opt-in; produtor Node: 29 passed. No LARGeo, o verificador
+original, configuração e assinatura passaram; checkout limpo após restaurar
+um comprovante cujos bytes tinham sido convertidos para CRLF pelo Git antes
+da política de preservação. Nenhum hash de recibo ou gate foi alterado.
+UNKNOWN/BLOCKED: landing do SHA consolidado aguarda aprovação; tag e novo AAB
+não executados. ADB às 16:22UTC não encontrou o Xiaomi; smoke QA das15:15
+continua registrado, sem alegação de teste do futuro AAB.
+
+## 2026-10-13 — API promovida e HTTPS verificado
+
+OBSERVED: API produtiva migrou0028→0029→0030 e usa imagem4ed8a189… da fonte
+d3b1331/árvore API dc32d081…. Compatibilidade true após validação, mínimo11 e
+flags de risco false/defaultfalse; nove cursos e projeção legada preservados.
+JWT/CPF/banco, redes/mounts/compose e containers db/policy-web preservados.
+HTTPS externo no LARGeo confirmou health/live/version/courses às15:39:42UTC.
+Recibos em `production/API_PROMOTION_2026-10-13.md`. Revisão dos PRs203/204
+identificou melhorias reais; correções e CI passaram, threads resolvidas.
+Prova suplementar isolada PASS: 73 fontes reais da imagem conferidas com Git;
+447 colunas, 270 constraints, 109 índices, 16 triggers e 15 funções originais
+preservados, somente adições previstas, rollback antigo explícito e cleanup.
+Aceite final/revisão independente PASS; 86 regressões da política de segredos
+PASS. AAB novo/tag/upload ainda não executados.
+
+## 2026-10-13 — recuperação offsite e smoke Xiaomi aprovados
+
+OBSERVED: backup agendado R2 nativo restaurado em PostgreSQL16 isolado;
+upgrade 0028→0030, imagem antiga com uvicorn direto, catálogo e dados originais
+preservados. Volume AnythingLLM/LanceDB restaurado: 13 workspaces, 21 documentos,
+1.255 vetores, SQLite e três buscas com proveniência por documento PASS.
+Configurações API/backup/provider também restauradas byte a byte em tmpfs.
+Verificador original de recuperação PASS no schema0030 e árvore API dc32d081….
+Identidade nova custodiada no desktop; identidade temporária e recursos de
+drill removidos. Archives antigos preservados; a identidade antiga segue ausente.
+Smoke Xiaomi fresco em pacote QA isolado: cold launch/relaunch, UI e ausência
+de crash/ANR PASS; produção instalada e DEV preservados. O pacote principal
+1.4.0+13 instalado no aparelho é sideload, não prova do maior código Play.
+Operador apresentou produção Play11; candidata13. API ainda em0028/compatfalse
+neste registro; promoção, tag e AAB seguem pendentes. Os registros anteriores
+de restore bloqueado foram superados por `production/RECOVERY_EXECUTION_2026-10-13.md`.
+Compatibilidade é condicional aos apps suportados com rollout false; prepare
+HTTP antigo sem version_id não está coberto. Documentação completa da API no
+PR#204: 133 operações, 107 schemas e exemplos validados; MCP stdio no PR#200
+continua separado, sem cliente configurado ou cadastro real.
+
+## 2026-10-13 — acesso LARGeo restabelecido, assinatura de backup conferida
+
+OBSERVED: backup JKS do perfil Rafael foi localizado e validado por keytool;
+o certificado SHA-256 coincide com o PEM versionado. Senha permaneceu no
+host. Certificado de upload do Play confirmado pelo texto fornecido pelo operador:
+SHA-256/SHA-1/MD5 coincidem com o PEM; SHA-256 do backup JKS também coincide. API pública
+responde health ok/database available; schema 0028, compatibility_verified=false.
+Checkouts isolados dos PRs #198/#200 criados no LARGeo. Flutter 3.44.9:
+625 testes passaram, analyze e config de produção PASS; lock preservado e
+checkout limpo. MCP Windows: 19 passed/1 skipped POSIX. Não houve promoção,
+novo AAB ou alteração de chave. Evidência em
+`docs/production/RELEASE_PREPARATION_2026-10-13.md`.
+
+## 2026-10-13 — preparação de produção #197
+
+DECISION: a observação geral usa Google Analytics do domínio e Cloudflare,
+conforme informação do usuário; a candidata Firebase #196 permanece fora
+desta release. Base: staging `dd928ff6b58788af930aa6722557728d74dfe97c`.
+OBSERVED: o runner de produção agora instala o extra de testes pelo lock e
+executa `python -m pytest`, evitando falha de importação de `ops` em ambiente
+novo. Suíte API: 601 passed, 30 skipped, 5 subtests passed. Ferramentas de
+recuperação: 29 passed/1 skipped; ferramentas de CI: 8 passed. PostgreSQL
+17.11 descartável: 30 passed; container removido.
+UNKNOWN/BLOCKED: o aceite versionado de recuperação falha no verificador
+de proveniência (`acceptance schema does not match the candidate`). AAB
+novo, assinatura, versionCode publicado e saúde/compatibilidade atual de
+produção ainda não comprovados. Não houve deploy, tag ou upload. Ver
+`docs/production/RELEASE_PREPARATION_2026-10-13.md`.
+
+## 2026-10-13 — Issue #202, ensaio ligado ao dump agendado offsite
+
+IMPLEMENTED/TESTED-LOCAL: companheiro opt-in
+`tooling/rehearse_scheduled_postgres_upgrade.py` reutiliza recibo/arquivo/age do
+runner existente e liga restore, migration, rollback, catálogo e OpenAPI ao
+mesmo dump e à árvore Git da API candidata. Inspeção de produção não lê env;
+SQL produtivo é read-only. Clone/migrator/APIs usam recursos próprios de Docker,
+rede interna, tmpfs e secrets sintéticos. Verificador de aceite permanece
+inalterado; manifesto exige revisão separada de schemas/custódia/volume crítico.
+Revisão do PR #203: os fontes materializados da imagem precisam coincidir com
+os blobs Git; tipos/defaults/nullability/constraints/índices antigos são
+comparados, e novas restrições precisam aceitar campos omitidos pelo legado.
+O runbook confere os hashes dos scripts de origem e instalados antes de sudo.
+`--rollback-image` permite testar o digest anterior depois de uma promoção,
+mantendo a imagem produtiva atual separada no relatório.
+Suíte focal: 49 passed/1 skipped opt-in; contratos do produtor Node: 29 passed.
+Árvores `api/` e Flutter preservadas.
+OBSERVED: a implementação desse PR foi validada sem acesso externo. A execução
+operacional posterior e o aceite estão registrados acima e em
+`production/RECOVERY_EXECUTION_2026-10-13.md`; não são inferidos dos testes locais.
+Procedimento: `production/SCHEDULED_POSTGRES_RESTORE_DRILL.md`.
+
+
+## 2026-10-13 — referência completa da API candidata, Issue #201
+
+IMPLEMENTED/TESTED-LOCAL: `docs/api/` documenta as 133 operações e 120 paths da
+árvore API `dc32d081dffd4d778e51871a85ae4077eb75f6ce` (base staging `dd928ff`).
+OpenAPI e referência legível são reproduzidos por
+`tooling/generate_api_reference.py`: 107 schemas, 52 exemplos de request validados
+nos modelos reais, 67 respostas com modelos estruturados e 30 mappings validados;
+as 66 operações sem schema com propriedades fixas possuem exemplos conferidos
+nos serializers. Todas as operações possuem notas de autorização por papel/vínculo,
+flags, status e limites de idempotência; o export mantém a limitação observada de
+autenticação via Header/Depends sem security scheme. O guia referencia o recibo da promoção produtiva para schema0030/compatibility
+true, separadamente da validação offline do contrato. Somente documentação e
+tooling; a promoção registrada acima ocorreu por procedimento operacional
+separado. Cobertura, exemplos e links verificados offline.
+Revisão do PR #204: check documental isolado em workflow somente leitura;
+exemplos anônimos omitem Bearer opcional; 29 respostas tipadas curadas com estados
+e projeções dos serializers. Testes em SQLite sintético verificam acesso público
+sem token e publicação/bloqueio/arquivo de mídia contra os exemplos gerados.
+
+
 ## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
 
 OBSERVED: `tooling/class_lifecycle_e2e/harness.py --execute` em checkout isolado

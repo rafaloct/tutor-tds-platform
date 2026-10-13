@@ -1,0 +1,34 @@
+{
+  "isolated_restore_from_offsite_verified": true,
+  "offsite": {
+    "downloaded_sha256": "bb75db7fec1db23ecf02de23d4268b506bbb85c4d615da5c25b1a1d6cce4ecb4",
+    "uploaded_sha256": "bb75db7fec1db23ecf02de23d4268b506bbb85c4d615da5c25b1a1d6cce4ecb4"
+  },
+  "restore_drill": {
+    "decrypted_dump_sha256": "36b495c3fe3fdaf8bedea9755d3472cadd0e78376649b05869ed219a115ed2e1",
+    "restored_at": "2026-10-13T14:20:48.874Z",
+    "run_id": "20261013T141953Z-f5948745ff6593fe",
+    "source_cipher_sha256": "bb75db7fec1db23ecf02de23d4268b506bbb85c4d615da5c25b1a1d6cce4ecb4",
+    "source_object_key": "postgres/scheduled/v1/20261013T140846Z-84914ff4cb9648a6afad19cff311caa1/archive.dump.age",
+    "source_receipt_id": "20261013T140846Z-84914ff4cb9648a6afad19cff311caa1"
+  },
+  "scheduled_receipt": {
+    "bucket": "tds-backups",
+    "bytes": 251528,
+    "clientEncryption": "age",
+    "completedAt": "2026-10-13T14:08:58.164Z",
+    "day": "2026-10-13",
+    "id": "20261013T140846Z-84914ff4cb9648a6afad19cff311caa1",
+    "key": "postgres/scheduled/v1/20261013T140846Z-84914ff4cb9648a6afad19cff311caa1/archive.dump.age",
+    "owner": "tutor-tds-issue2-scheduled-v1",
+    "privateKeyUsed": false,
+    "restoreExecuted": false,
+    "schema": 1,
+    "sha256": "bb75db7fec1db23ecf02de23d4268b506bbb85c4d615da5c25b1a1d6cce4ecb4",
+    "source": "tutor-tds-api-db-1/tutor_tds",
+    "sourceReadOnly": true,
+    "status": "verified"
+  },
+  "scope": "postgres-prod-scheduled",
+  "status": "passed"
+}
