@@ -161,6 +161,18 @@ banco disponível, nenhuma rota legada ou exigida pelo AAB pode desaparecer e
 o catálogo precisa preservar valores, tipos e ordem legados. Schemas OpenAPI
 alterados e suas definições antes/depois são listados para revisão; presença
 de rotas, sozinha, não comprova compatibilidade semântica de todos os campos.
+Além dos labels OCI, o runner compara os bytes e o bit executável de todos
+os arquivos materializados de `app/`, `migrations/`, `alembic.ini`,
+`pyproject.toml` e `uv.lock` com os blobs de `HEAD`. Um container descartável
+nunca iniciado fornece os arquivos via `docker cp`; arquivos extras, ausentes,
+alterados e links falham fechado. Essa prova cobre os fontes copiados pelo
+Dockerfile atual, não uma attestation de toda a cadeia de dependências da imagem.
+Antes/depois da migração, tipos, nullability, defaults, collation,
+identity/generated, constraints e índices existentes precisam ser iguais.
+Adições em tabelas antigas também precisam aceitar campos omitidos pelo cliente
+legado: defaults não nulos, checks satisfeitos pelos defaults, FKs MATCH SIMPLE
+com nova chave nullable e unicidade NULLS DISTINCT com nova chave nullable.
+As adições e os deltas OpenAPI ainda ficam sujeitos à revisão semântica final.
 
 O comando precisa de acesso Docker local no VPS onde existem
 `tutor-tds-api-api-1` e `tutor-tds-api-db-1`; esse acesso é usado apenas para
@@ -178,12 +190,17 @@ Instalar **ambos** os scripts revisados como root-owned no mesmo diretório e
 conferir seus hashes contra o commit antes de invocar com sudo:
 
 ```sh
-sudo install -D -o root -g root -m 0755 \
-  tooling/rehearse_scheduled_postgres_backup.py \
-  /usr/local/libexec/tds/rehearse_scheduled_postgres_backup.py
-sudo install -D -o root -g root -m 0755 \
-  tooling/rehearse_scheduled_postgres_upgrade.py \
-  /usr/local/libexec/tds/rehearse_scheduled_postgres_upgrade.py
+set -eu
+reviewed_runner_commit=$(git rev-parse HEAD)
+printf '%s\n' "$reviewed_runner_commit"  # conferir com o commit revisado
+for runner_script in rehearse_scheduled_postgres_backup.py rehearse_scheduled_postgres_upgrade.py; do
+  git cat-file -e "$reviewed_runner_commit:tooling/$runner_script"
+  expected_runner_sha=$(git show "$reviewed_runner_commit:tooling/$runner_script" | sha256sum | cut -d' ' -f1)
+  printf '%s  %s\n' "$expected_runner_sha" "tooling/$runner_script" | sha256sum -c -
+  sudo install -D -o root -g root -m 0755 \
+    "tooling/$runner_script" "/usr/local/libexec/tds/$runner_script"
+  printf '%s  %s\n' "$expected_runner_sha" "/usr/local/libexec/tds/$runner_script" | sha256sum -c -
+done
 sudo -- python3 /usr/local/libexec/tds/rehearse_scheduled_postgres_upgrade.py \
   --execute \
   --receipt /caminho/privado/receipt.json \
@@ -194,6 +211,11 @@ sudo -- python3 /usr/local/libexec/tds/rehearse_scheduled_postgres_upgrade.py \
   --output-dir /caminho/privado/relatorios \
   --age-bin /usr/local/bin/age
 ```
+
+Depois de uma promoção, passar `--rollback-image sha256:...` com o digest
+imutável comprovado da imagem produtiva anterior. Sem essa opção, o runner
+testa a imagem da produção observada no início do ensaio. O relatório separa
+`production_image_id` de `rollback_image_id`, sem reescrever a identidade atual.
 
 Saída de sucesso:
 `OFFSITE_POSTGRES_UPGRADE=COMPATIBILITY_VERIFIED_PENDING_REVIEW; manifest=...`.

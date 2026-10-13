@@ -11,12 +11,14 @@ import argparse
 import ast
 from datetime import datetime
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import re
 import secrets
 import tempfile
+import tarfile
 import time
 from typing import Any
 
@@ -30,6 +32,149 @@ PURPOSE = "scheduled-offsite-upgrade"
 IMAGE_ID = re.compile(r"sha256:[0-9a-f]{64}\Z")
 METHODS = {"get", "post", "put", "patch", "delete"}
 SOURCE = "https://github.com/rafaloct/tutor-tds-platform"
+IMAGE_SOURCE_ROOTS = ("app", "migrations", "alembic.ini", "pyproject.toml", "uv.lock")
+
+
+def canonical_sha256(value: Any) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def compare_schema_metadata(before: dict, after: dict, run: "Rehearsal", database: str) -> dict:
+    additions = {}
+    for kind in ("columns", "constraints", "indexes"):
+        restore.require(isinstance(before.get(kind), dict) and isinstance(after.get(kind), dict),
+                        "schema_metadata_invalid")
+        restore.require(all(after[kind].get(key) == value for key, value in before[kind].items()),
+                        "migration_changed_existing_schema_metadata")
+        additions[kind] = {key: value for key, value in after[kind].items() if key not in before[kind]}
+    old_tables = {column["table_name"] for column in before["columns"].values()}
+    added_columns = {(column["table_name"], column["column_name"]): column
+                     for column in additions["columns"].values()}
+
+    def nullable_omitted(table: str, names: list[str]) -> bool:
+        return any((table, name) in added_columns and
+                   not added_columns[table, name]["not_null"] and
+                   added_columns[table, name]["default_expr"] is None and
+                   not added_columns[table, name]["identity"] and
+                   not added_columns[table, name]["generated"] for name in names)
+
+    for column in additions["columns"].values():
+        if column["table_name"] not in old_tables:
+            continue
+        restore.require(not column["identity"] and not column["generated"],
+                        "added_column_requires_schema_review")
+        restore.require(not column["not_null"] or column["default_expr"] is not None,
+                        "added_column_breaks_legacy_insert")
+        if column["default_expr"] is not None:
+            predicate = "IS NOT NULL" if column["not_null"] else "IS NULL"
+            accepted = run.sql(database, f"SELECT ({column['default_expr']})::{column['type']} {predicate}")
+            restore.require(accepted in {"t", "f"} and (not column["not_null"] or accepted == "t"),
+                            "added_column_breaks_legacy_insert")
+    for constraint in additions["constraints"].values():
+        table, names = constraint["table_name"], constraint["columns"]
+        if table not in old_tables:
+            continue
+        kind = constraint["type"]
+        if kind == "f":
+            restore.require(constraint["match_type"] == "s" and nullable_omitted(table, names),
+                            "added_constraint_breaks_legacy_insert")
+        elif kind == "u":
+            restore.require(nullable_omitted(table, names), "added_constraint_breaks_legacy_insert")
+        elif kind == "c":
+            restore.require(bool(names) and all((table, name) in added_columns for name in names) and
+                            isinstance(constraint["check_expr"], str),
+                            "added_constraint_breaks_legacy_insert")
+            projection = []
+            for name in names:
+                column = added_columns[table, name]
+                restore.require(re.fullmatch(r"[a-z_]+", name) is not None, "database_identifiers_invalid")
+                projection.append(f"({column['default_expr'] or 'NULL'})::{column['type']} AS \"{name}\"")
+            query = f"SELECT ({constraint['check_expr']}) IS NOT FALSE FROM " + \
+                "(SELECT " + ",".join(projection) + ") legacy_default_row"
+            restore.require(run.sql(database, query) == "t", "added_constraint_breaks_legacy_insert")
+        else:
+            raise restore.DrillError("added_constraint_requires_schema_review")
+    for index in additions["indexes"].values():
+        if index["table_name"] not in old_tables:
+            continue
+        restore.require(index["valid"] and index["ready"] and index["expressions"] is None,
+                        "added_index_requires_schema_review")
+        if index["unique_index"]:
+            restore.require(not index["nulls_not_distinct"] and
+                            nullable_omitted(index["table_name"], index["columns"]),
+                            "added_index_breaks_legacy_insert")
+    return {"existing_objects_preserved": True, "legacy_omitted_fields_accepted": True,
+            "before_sha256": canonical_sha256(before), "after_sha256": canonical_sha256(after),
+            "additions": additions}
+
+
+def committed_image_sources(candidate: Path) -> dict[str, dict[str, Any]]:
+    records = restore.read_git(candidate, "ls-tree", "-r", "-z", "HEAD", "--",
+                               *("api/" + root for root in IMAGE_SOURCE_ROOTS))
+    sources = {}
+    for record in records.split(b"\x00"):
+        if not record:
+            continue
+        metadata, name = record.split(b"\t", 1)
+        mode, kind, oid = metadata.decode().split()
+        path = name.decode()
+        restore.require(mode in {"100644", "100755"} and kind == "blob" and
+                        re.fullmatch(r"[0-9a-f]{40}", oid) is not None and
+                        path.startswith("api/"), "candidate_source_manifest_invalid")
+        relative = path.removeprefix("api/")
+        restore.require(relative not in sources, "candidate_source_manifest_invalid")
+        content = restore.read_git(candidate, "cat-file", "blob", oid)
+        sources[relative] = {"sha256": hashlib.sha256(content).hexdigest(),
+                             "executable": mode == "100755"}
+    restore.require(bool(sources) and all(any(name == root or name.startswith(root + "/")
+                                            for name in sources) for root in IMAGE_SOURCE_ROOTS),
+                    "candidate_source_manifest_invalid")
+    return sources
+
+
+def archive_sources(payload: bytes, root: str) -> dict[str, dict[str, Any]]:
+    sources = {}
+    try:
+        archive = tarfile.open(fileobj=io.BytesIO(payload), mode="r:*")
+    except tarfile.TarError as error:
+        raise restore.DrillError("image_source_archive_invalid") from error
+    with archive:
+        for member in archive:
+            path = member.name.rstrip("/")
+            restore.require(path == root or path.startswith(root + "/"), "image_source_path_invalid")
+            restore.require(all(part not in {"", ".", ".."} for part in path.split("/")),
+                            "image_source_path_invalid")
+            if member.isdir():
+                continue
+            restore.require(member.isfile() and path not in sources, "image_source_file_invalid")
+            content = archive.extractfile(member)
+            restore.require(content is not None, "image_source_file_invalid")
+            sources[path] = {"sha256": hashlib.sha256(content.read()).hexdigest(),
+                             "executable": bool(member.mode & 0o111)}
+    restore.require(bool(sources), "image_source_manifest_empty")
+    return sources
+
+
+def materialized_source_identity(run: "Rehearsal", image: str, candidate: Path) -> dict[str, Any]:
+    expected = committed_image_sources(candidate)
+    name = f"tds-offsite-upgrade-{run.run_id}-source"
+    actual = {}
+    try:
+        # Never start the candidate interpreter to attest its own files.
+        run.resources.append(("container", name))
+        run.docker("container", "create", "--pull=never", "--name", name,
+                   "--network", "none", "--read-only", *run.labels(), image)
+        for root in IMAGE_SOURCE_ROOTS:
+            files = archive_sources(run.docker("cp", f"{name}:/app/{root}", "-"), root)
+            restore.require(not actual.keys() & files.keys(), "image_source_file_invalid")
+            actual.update(files)
+        restore.require(actual == expected, "candidate_image_source_mismatch")
+        return {"image_id": image,
+                "api_tree_oid": restore.read_git(candidate, "rev-parse", "HEAD:api").decode().strip(),
+                "source_file_count": len(actual), "materialized_sources_sha256": canonical_sha256(actual),
+                "tracked_source_bytes_verified": True}
+    finally:
+        run.cleanup()
 
 
 def required_operations(candidate: Path) -> set[str]:
@@ -155,6 +300,56 @@ class Rehearsal:
         restore.require(bool(result), "restored_database_empty")
         return result
 
+    def schema_metadata(self, container: str) -> dict[str, dict[str, dict]]:
+        # Stable catalog names/definitions only: OIDs change during restore.
+        queries = {
+            "columns": """SELECT r.relname AS table_name,a.attname AS column_name,
+                a.attnum AS position,format_type(a.atttypid,a.atttypmod) AS type,
+                a.attnotnull AS not_null,pg_get_expr(d.adbin,d.adrelid,false) AS default_expr,
+                CASE WHEN a.attcollation=0 THEN NULL ELSE cn.nspname||'.'||co.collname END AS collation,
+                a.attidentity AS identity,a.attgenerated AS generated
+                FROM pg_attribute a JOIN pg_class r ON r.oid=a.attrelid
+                JOIN pg_namespace n ON n.oid=r.relnamespace
+                LEFT JOIN pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum
+                LEFT JOIN pg_collation co ON co.oid=a.attcollation
+                LEFT JOIN pg_namespace cn ON cn.oid=co.collnamespace
+                WHERE n.nspname='public' AND r.relkind IN ('r','p')
+                AND a.attnum>0 AND NOT a.attisdropped ORDER BY r.relname,a.attnum""",
+            "constraints": """SELECT r.relname AS table_name,c.conname AS name,c.contype AS type,
+                pg_get_constraintdef(c.oid,false) AS definition,c.convalidated AS validated,
+                c.condeferrable AS deferrable,c.condeferred AS deferred,c.confmatchtype AS match_type,
+                pg_get_expr(c.conbin,c.conrelid,false) AS check_expr,
+                ARRAY(SELECT a.attname FROM unnest(c.conkey) WITH ORDINALITY k(num,ord)
+                JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k.num ORDER BY k.ord) AS columns
+                FROM pg_constraint c JOIN pg_class r ON r.oid=c.conrelid
+                JOIN pg_namespace n ON n.oid=r.relnamespace
+                WHERE n.nspname='public' AND r.relkind IN ('r','p') ORDER BY r.relname,c.conname""",
+            "indexes": """SELECT r.relname AS table_name,ix.relname AS name,
+                pg_get_indexdef(i.indexrelid) AS definition,i.indisunique AS unique_index,
+                i.indisprimary AS primary_index,i.indisvalid AS valid,i.indisready AS ready,
+                i.indnullsnotdistinct AS nulls_not_distinct,
+                pg_get_expr(i.indexprs,i.indrelid,false) AS expressions,
+                pg_get_expr(i.indpred,i.indrelid,false) AS predicate,
+                ARRAY(SELECT a.attname FROM unnest(i.indkey::smallint[]) WITH ORDINALITY k(num,ord)
+                LEFT JOIN pg_attribute a ON a.attrelid=i.indrelid AND a.attnum=k.num
+                WHERE k.ord<=i.indnkeyatts ORDER BY k.ord) AS columns
+                FROM pg_index i JOIN pg_class r ON r.oid=i.indrelid
+                JOIN pg_class ix ON ix.oid=i.indexrelid JOIN pg_namespace n ON n.oid=r.relnamespace
+                WHERE n.nspname='public' AND r.relkind IN ('r','p') ORDER BY r.relname,ix.relname""",
+        }
+        result = {}
+        for kind, query in queries.items():
+            rows = json.loads(self.sql(container, "SELECT coalesce(json_agg(x),'[]'::json) FROM (" + query + ") x"))
+            restore.require(isinstance(rows, list), "schema_metadata_invalid")
+            result[kind] = {}
+            for row in rows:
+                name = row["column_name"] if kind == "columns" else row["name"]
+                key = row["table_name"] + "." + name
+                restore.require(key not in result[kind], "schema_metadata_invalid")
+                result[kind][key] = row
+        restore.require(bool(result["columns"]), "schema_metadata_empty")
+        return result
+
     def fingerprint(self, container: str, columns: dict[str, list[str]]) -> dict[str, str]:
         result = {}
         for table, fields in columns.items():
@@ -205,28 +400,35 @@ class Rehearsal:
         raise restore.DrillError("isolated_api_not_ready")
 
 
-def image_identity(run: Rehearsal, image: str, candidate: Path) -> str:
+def image_identity(run: Rehearsal, image: str, candidate: Path) -> dict[str, Any]:
     record = run.inspect("image", image)
     digest = record.get("Id", "")
     labels = record.get("Config", {}).get("Labels", {})
     commit = restore.read_git(candidate, "rev-parse", "HEAD").decode().strip()
     created = restore.read_git(candidate, "show", "-s", "--format=%cI", "HEAD").decode().strip()
     restore.require(IMAGE_ID.fullmatch(digest) is not None and
+                    isinstance(labels, dict) and record.get("Config", {}).get("Volumes") in (None, {}) and
                     labels.get("org.opencontainers.image.revision") == commit and
                     labels.get("org.opencontainers.image.version") == commit and
                     labels.get("org.opencontainers.image.source") == SOURCE and
                     labels.get("org.opencontainers.image.created") == created,
                     "candidate_image_provenance_invalid")
-    return digest
+    return materialized_source_identity(run, digest, candidate)
 
 
 def rehearse(dump: bytearray, candidate: Path, image: str, run: Rehearsal,
-             api_tree: str, schema: str, tmpfs_mib: int) -> tuple[dict, datetime]:
+             api_tree: str, schema: str, tmpfs_mib: int,
+             rollback_image: str | None = None) -> tuple[dict, datetime]:
     restore.require(256 <= tmpfs_mib <= 1536, "tmpfs_size_invalid")
-    candidate_digest = image_identity(run, image, candidate)
+    image_proof = image_identity(run, image, candidate)
+    candidate_digest = image_proof["image_id"]
+    restore.require(image_proof["api_tree_oid"] == api_tree, "candidate_image_tree_mismatch")
     required = required_operations(candidate)
     before = run.production_state()
     restore.require(IMAGE_ID.fullmatch(before["image_id"]) is not None, "rollback_image_invalid")
+    rollback_digest = before["image_id"] if rollback_image is None else rollback_image
+    restore.require(IMAGE_ID.fullmatch(rollback_digest) is not None and
+                    run.inspect("image", rollback_digest)["Id"] == rollback_digest, "rollback_image_invalid")
     postgres_digest = run.inspect("image", restore.POSTGRES_IMAGE)["Id"]
     restore.require(IMAGE_ID.fullmatch(postgres_digest) is not None, "postgres_image_invalid")
     prefix = f"tds-offsite-upgrade-{run.run_id}"
@@ -290,6 +492,7 @@ def rehearse(dump: bytearray, candidate: Path, image: str, run: Rehearsal,
             restore.require({"users", "courses", "learning_events"} <= columns.keys(),
                             "restored_core_tables_missing")
             restored = run.fingerprint(database, columns)
+            metadata_before = run.schema_metadata(database)
             restored_schema = run.sql(database, "SELECT version_num FROM alembic_version")
             restore.require(restore.REVISION.fullmatch(restored_schema) is not None, "restored_schema_invalid")
             migrator = prefix + "-migrate"
@@ -300,9 +503,10 @@ def rehearse(dump: bytearray, candidate: Path, image: str, run: Rehearsal,
             clone_schema = run.sql(database, "SELECT version_num FROM alembic_version")
             restore.require(clone_schema == schema, "upgraded_schema_differs_from_candidate")
             restore.require(run.fingerprint(database, columns) == restored, "migration_changed_original_data")
+            metadata_comparison = compare_schema_metadata(metadata_before, run.schema_metadata(database), run, database)
             candidate_api, rollback_api = prefix + "-new", prefix + "-old"
             run.start_api(candidate_api, candidate_digest, network, env_file)
-            run.start_api(rollback_api, before["image_id"], network, env_file)
+            run.start_api(rollback_api, rollback_digest, network, env_file)
             comparison = compare_openapi(run.get(rollback_api, "/openapi.json"),
                                          run.get(candidate_api, "/openapi.json"), required)
             restore.require(legacy_matches(run.get(rollback_api, "/courses"),
@@ -313,6 +517,8 @@ def rehearse(dump: bytearray, candidate: Path, image: str, run: Rehearsal,
             return {"status": "passed", "run_id": run.run_id, "api_tree_oid": api_tree,
                     "clone_revision": clone_schema, "restored_schema_version": restored_schema,
                     "candidate_image_id": candidate_digest, "production_image_id": before["image_id"],
+                    "rollback_image_id": rollback_digest, "candidate_source_identity": image_proof,
+                    "schema_metadata_comparison": metadata_comparison,
                     "postgres_image_id": postgres_digest, "postgres_version_num": postgres_version,
                     "restore_verified": True, "production_unchanged": True,
                     "original_columns_preserved": True, "old_image_runs_on_upgraded_database": True,
@@ -324,7 +530,8 @@ def rehearse(dump: bytearray, candidate: Path, image: str, run: Rehearsal,
 
 def execute(receipt_path: Path, archive_path: Path, identity_path: Path,
             candidate: Path, image: str, output_dir: Path, *, age_bin: str = "age",
-            docker_bin: str = "docker", tmpfs_mib: int = 1024) -> Path:
+            docker_bin: str = "docker", tmpfs_mib: int = 1024,
+            rollback_image: str | None = None) -> Path:
     restore.require(IMAGE_ID.fullmatch(image) is not None or
                     re.fullmatch(r"tutor-tds-(?:candidate|context-gate):[a-z0-9.-]+", image) is not None,
                     "candidate_image_reference_invalid")
@@ -338,7 +545,7 @@ def execute(receipt_path: Path, archive_path: Path, identity_path: Path,
     try:
         plain_sha = hashlib.sha256(dump).hexdigest()
         record, restored_at = rehearse(dump, candidate, image, Rehearsal(run_id, docker_bin),
-                                       api_tree, schema, tmpfs_mib)
+                                       api_tree, schema, tmpfs_mib, rollback_image)
         restore.require(restore.parse_utc(receipt["completedAt"]) <= restored_at,
                         "receipt_completed_after_restore")
     finally:
@@ -382,6 +589,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--candidate-image", required=True)
     parser.add_argument("--age-bin", default="age")
     parser.add_argument("--tmpfs-mib", type=int, default=1024)
+    parser.add_argument("--rollback-image", help="Optional immutable digest of the previously promoted image")
     args = parser.parse_args(argv)
     if not args.execute:
         print("OFFSITE_POSTGRES_UPGRADE=BLOCKED: --execute is required")
@@ -389,11 +597,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         manifest = execute(args.receipt, args.archive, args.identity, args.candidate_root,
                            args.candidate_image, args.output_dir, age_bin=args.age_bin,
-                           tmpfs_mib=args.tmpfs_mib)
+                           tmpfs_mib=args.tmpfs_mib, rollback_image=args.rollback_image)
     except restore.DrillError as error:
         print(f"OFFSITE_POSTGRES_UPGRADE=FAIL: {error}")
         return 1
-    except (OSError, ValueError, KeyError, TypeError):
+    except (OSError, ValueError, KeyError, TypeError, tarfile.TarError):
         # A raw exception may contain paths, SQL, a DSN or values from subprocesses.
         print("OFFSITE_POSTGRES_UPGRADE=FAIL: inspect prerequisites and isolated resources")
         return 1

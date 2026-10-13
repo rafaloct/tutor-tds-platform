@@ -9,7 +9,13 @@ mesmo dump e à árvore Git da API candidata. Inspeção de produção não lê 
 SQL produtivo é read-only. Clone/migrator/APIs usam recursos próprios de Docker,
 rede interna, tmpfs e secrets sintéticos. Verificador de aceite permanece
 inalterado; manifesto exige revisão separada de schemas/custódia/volume crítico.
-Suíte focal: 42 passed/1 skipped opt-in; contratos do produtor Node: 29 passed.
+Revisão do PR #203: os fontes materializados da imagem precisam coincidir com
+os blobs Git; tipos/defaults/nullability/constraints/índices antigos são
+comparados, e novas restrições precisam aceitar campos omitidos pelo legado.
+O runbook confere os hashes dos scripts de origem e instalados antes de sudo.
+`--rollback-image` permite testar o digest anterior depois de uma promoção,
+mantendo a imagem produtiva atual separada no relatório.
+Suíte focal: 49 passed/1 skipped opt-in; contratos do produtor Node: 29 passed.
 Árvores `api/` e Flutter preservadas.
 UNKNOWN: nenhuma chave age real, R2, VPS ou produção foi acessada nesta
 implementação; a execução operacional e o aceite final continuam pendentes.
