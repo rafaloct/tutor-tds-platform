@@ -22,10 +22,14 @@ class ReleaseVerificationResult {
 class ReleaseReadinessVerifier {
   ReleaseReadinessVerifier({
     required this.root,
+    this.statusFile,
     this.verifySigningIdentity = true,
   });
 
   final Directory root;
+
+  /// An absolute status input; every release gate still applies to [root].
+  final File? statusFile;
   final bool verifySigningIdentity;
 
   ReleaseVerificationResult verify(
@@ -33,7 +37,21 @@ class ReleaseReadinessVerifier {
     String? artifactPath,
   }) {
     final issues = <ReleaseVerificationIssue>[];
-    final status = _readJson('release/release_status.json', issues);
+    final alternateStatus = statusFile;
+    if (alternateStatus != null && !alternateStatus.isAbsolute) {
+      issues.add(
+        const ReleaseVerificationIssue(
+          'invalid_status_file',
+          'O arquivo de status alternativo deve ter caminho absoluto.',
+        ),
+      );
+      return ReleaseVerificationResult(issues);
+    }
+    final status = _readJson(
+      alternateStatus?.path ?? 'release/release_status.json',
+      issues,
+      sourceFile: alternateStatus,
+    );
     if (status == null) return ReleaseVerificationResult(issues);
 
     final release = _map(status['release']);
@@ -404,9 +422,10 @@ class ReleaseReadinessVerifier {
 
   Map<String, dynamic>? _readJson(
     String path,
-    List<ReleaseVerificationIssue> issues,
-  ) {
-    final raw = _read(path, issues);
+    List<ReleaseVerificationIssue> issues, {
+    File? sourceFile,
+  }) {
+    final raw = _read(path, issues, sourceFile: sourceFile);
     if (raw == null) return null;
     try {
       final decoded = jsonDecode(raw);
@@ -420,8 +439,12 @@ class ReleaseReadinessVerifier {
     return null;
   }
 
-  String? _read(String path, List<ReleaseVerificationIssue> issues) {
-    final file = _file(path);
+  String? _read(
+    String path,
+    List<ReleaseVerificationIssue> issues, {
+    File? sourceFile,
+  }) {
+    final file = sourceFile ?? _file(path);
     if (!file.existsSync()) {
       issues.add(
         ReleaseVerificationIssue(
@@ -431,7 +454,17 @@ class ReleaseReadinessVerifier {
       );
       return null;
     }
-    return file.readAsStringSync();
+    try {
+      return file.readAsStringSync();
+    } on FileSystemException {
+      issues.add(
+        ReleaseVerificationIssue(
+          'required_file_unreadable',
+          'Não foi possível ler o arquivo: $path',
+        ),
+      );
+      return null;
+    }
   }
 
   File _file(String path) => File.fromUri(root.uri.resolve(path));
@@ -510,6 +543,7 @@ void main(List<String> arguments) {
   var intent = ReleaseIntent.audit;
   var rootPath = Directory.current.path;
   String? artifactPath;
+  String? statusPath;
   for (final argument in arguments) {
     if (argument.startsWith('--intent=')) {
       intent = ReleaseIntent.values.byName(argument.substring(9));
@@ -517,10 +551,16 @@ void main(List<String> arguments) {
       rootPath = argument.substring(7);
     } else if (argument.startsWith('--artifact=')) {
       artifactPath = argument.substring(11);
+    } else if (argument.startsWith('--status-file=')) {
+      statusPath = argument.substring('--status-file='.length);
+    } else if (argument == '--status-file') {
+      // A missing value must not silently select the checkout status.
+      statusPath = '';
     }
   }
   final result = ReleaseReadinessVerifier(
     root: Directory(rootPath),
+    statusFile: statusPath == null ? null : File(statusPath),
   ).verify(intent, artifactPath: artifactPath);
   if (result.isReady) {
     stdout.writeln('Release ${intent.name}: READY.');
