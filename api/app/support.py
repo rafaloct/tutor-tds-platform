@@ -1,13 +1,40 @@
-"""Authenticated identity for the existing Chatwoot website widget."""
+"""Public widget configuration and authenticated Chatwoot identity."""
 import hashlib
 import hmac
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from pydantic import BaseModel, ConfigDict
 
 from .auth import access_claims
 
 router = APIRouter(prefix="/support", tags=["support"])
+NO_STORE = {"Cache-Control": "no-store", "Pragma": "no-cache"}
+
+
+class SupportWidgetConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    base_url: str
+    website_token: str
+
+
+@router.get(
+    "/config",
+    response_model=SupportWidgetConfig,
+    responses={503: {"description": "Configuração pública do suporte ausente ou inválida."}},
+)
+def support_config(request: Request, response: Response) -> SupportWidgetConfig:
+    """The website token is public; never return admin/HMAC credentials."""
+    try:
+        base_url, website_token = request.app.state.settings.resolved_chatwoot_widget_config()
+    except ValueError:
+        raise HTTPException(
+            status_code=503,
+            detail="Configuração do suporte indisponível.",
+            headers=NO_STORE,
+        ) from None
+    response.headers.update(NO_STORE)
+    return SupportWidgetConfig(base_url=base_url, website_token=website_token)
 
 
 @router.get("/identity")
