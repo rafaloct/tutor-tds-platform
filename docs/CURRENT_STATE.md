@@ -88,6 +88,26 @@ operacional posterior e o aceite estão registrados acima e em
 Procedimento: `production/SCHEDULED_POSTGRES_RESTORE_DRILL.md`.
 
 
+## 2026-10-13 — referência completa da API candidata, Issue #201
+
+IMPLEMENTED/TESTED-LOCAL: `docs/api/` documenta as 133 operações e 120 paths da
+árvore API `dc32d081dffd4d778e51871a85ae4077eb75f6ce` (base staging `dd928ff`).
+OpenAPI e referência legível são reproduzidos por
+`tooling/generate_api_reference.py`: 107 schemas, 52 exemplos de request validados
+nos modelos reais, 67 respostas com modelos estruturados e 30 mappings validados;
+as 66 operações sem schema com propriedades fixas possuem exemplos conferidos
+nos serializers. Todas as operações possuem notas de autorização por papel/vínculo,
+flags, status e limites de idempotência; o export mantém a limitação observada de
+autenticação via Header/Depends sem security scheme. O guia referencia o recibo da promoção produtiva para schema0030/compatibility
+true, separadamente da validação offline do contrato. Somente documentação e
+tooling; a promoção registrada acima ocorreu por procedimento operacional
+separado. Cobertura, exemplos e links verificados offline.
+Revisão do PR #204: check documental isolado em workflow somente leitura;
+exemplos anônimos omitem Bearer opcional; 29 respostas tipadas curadas com estados
+e projeções dos serializers. Testes em SQLite sintético verificam acesso público
+sem token e publicação/bloqueio/arquivo de mídia contra os exemplos gerados.
+
+
 ## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
 
 OBSERVED: `tooling/class_lifecycle_e2e/harness.py --execute` em checkout isolado

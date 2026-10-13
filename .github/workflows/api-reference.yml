@@ -1,0 +1,51 @@
+name: API reference validation
+
+on:
+  pull_request:
+    paths:
+      - "api/**"
+      - "docs/api/**"
+      - "tooling/generate_api_reference.py"
+      - "tooling/test_api_reference.py"
+      - ".github/workflows/api-reference.yml"
+  push:
+    paths:
+      - "api/**"
+      - "docs/api/**"
+      - "tooling/generate_api_reference.py"
+      - "tooling/test_api_reference.py"
+      - ".github/workflows/api-reference.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - name: Install uv pinned by the API image digest
+        env:
+          UV_IMAGE: ghcr.io/astral-sh/uv:0.12.18@sha256:3adc3706091ce7c2fe595e669628caedd6d951551b92b258b7e7dbe06d9440bc
+        run: |
+          grep -Fq "COPY --from=${UV_IMAGE} /uv" api/Dockerfile ||
+            { echo "UV_IMAGE must match the uv image pinned in api/Dockerfile." >&2; exit 1; }
+          install -d "$RUNNER_TEMP/uv-bin"
+          container=$(docker create "$UV_IMAGE" /uv)
+          docker cp "$container:/uv" "$RUNNER_TEMP/uv-bin/uv"
+          docker rm "$container" > /dev/null
+          echo "$RUNNER_TEMP/uv-bin" >> "$GITHUB_PATH"
+      - name: Install locked API and test dependencies
+        working-directory: api
+        run: |
+          echo "UV_PROJECT_ENVIRONMENT=$RUNNER_TEMP/api-reference-venv" >> "$GITHUB_ENV"
+          export UV_PROJECT_ENVIRONMENT="$RUNNER_TEMP/api-reference-venv"
+          uv lock --check
+          uv sync --locked --extra test --no-install-project --python "$(command -v python)" --no-python-downloads
+      - name: Verify examples against anonymous access and real media transitions
+        run: '"$UV_PROJECT_ENVIRONMENT/bin/python" -m unittest discover -s tooling -p test_api_reference.py -v'
+      - name: Check generated API documentation and examples
+        run: '"$UV_PROJECT_ENVIRONMENT/bin/python" tooling/generate_api_reference.py --check'
