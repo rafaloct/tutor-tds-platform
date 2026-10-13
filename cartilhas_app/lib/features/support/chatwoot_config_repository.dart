@@ -45,10 +45,9 @@ class HttpChatwootConfigRepository implements ChatwootConfigRepository {
       final response = await _client
           .get(
             endpoint,
-            headers: const {
-              'Accept': 'application/json',
-              'Cache-Control': 'no-cache, no-store',
-            },
+            // Keep this public GET CORS-safelisted. The server sends no-store;
+            // a request Cache-Control header would require a denied preflight.
+            headers: const {'Accept': 'application/json'},
           )
           .timeout(timeout);
       if (response.statusCode != 200) {

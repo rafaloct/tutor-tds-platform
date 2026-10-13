@@ -9,7 +9,7 @@ import 'package:http/testing.dart';
 
 void main() {
   test(
-    'fresh public fetch preserves API prefix and observes token rotation',
+    'fresh public fetch stays CORS-safelisted and observes token rotation',
     () async {
       var token = 'token_a';
       var base = 'https://chat.example.org/chat/';
@@ -22,8 +22,13 @@ void main() {
             request.url.toString(),
             'https://api.example.org/tutor-api/support/config',
           );
-          expect(request.headers['Cache-Control'], contains('no-store'));
-          expect(request.headers['Cache-Control'], contains('no-cache'));
+          expect(request.headers['Accept'], 'application/json');
+          // API CORS permits no Cache-Control request header. Public support
+          // must work without preflight, while its response remains no-store.
+          expect(
+            request.headers.keys.map((key) => key.toLowerCase()),
+            everyElement(isIn(['accept', 'accept-language', 'content-language'])),
+          );
           expect(request.headers.containsKey('Authorization'), isFalse);
           return http.Response(
             jsonEncode({'base_url': base, 'website_token': token}),

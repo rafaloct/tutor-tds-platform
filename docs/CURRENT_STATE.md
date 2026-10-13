@@ -1,5 +1,26 @@
 # CURRENT STATE
 
+## 2026-10-13 — candidata1.4.1+14 e retomada operacional
+
+IMPLEMENTED: configuração Chatwoot remota e recarga fresca, confirmação por
+evento real do SDK, fechamento após mudança de sessão e rotação sem fallback
+compilado. Cliente público usa headers CORS safelisted; teste local da API
+confirmou preflight com Cache-Control400 e GET simples200/no-store. FQDN/IPv6
+global validados em ambas as camadas. Referência API134 e status externo de
+upload preservam os controles de fonte, assinatura e evidências.
+TESTED: 100API focais, 76Flutter focais, 36readiness/3CLI negativos;
+CI7293a2a passou suites API/Flutter e nove Chrome canônicosLinux. Correção CORS
+e metadados posteriores serão verificados no seu próprio head pelo CI.
+UNKNOWN/BLOCKED: ambos desktops remotos desconectaram; build da imagem API,
+novo restore/smoke, tag e AAB1.4.1+14 não executados. Ensaio Chatwoot parou
+na pré-verificação, sem fixture/mensagem criada. Transporte Git não-thin da
+mesma fonte6e3 foi preparado, sem imagem/digest presumidos. Upload Play não
+ocorreu; maior código em todos os tracks e declaração registrada desconhecidos.
+DECISION: publicação já autorizada pelo operador; retomar os comandos pendentes
+e comprovantes reais quando os agentes voltarem. Assinatura/archives, produção
+API4ed/schema0030 e AAB histórico13 permanecem preservados. Build e upload da
+candidata seguem congelados, sem marcar preparação como aceite de produção.
+
 ## 2026-10-13 — configuração remota de suporte, Issue #205
 
 IMPLEMENTED/TESTED-LOCAL: API oferece GET `/support/config` público, somente URL
