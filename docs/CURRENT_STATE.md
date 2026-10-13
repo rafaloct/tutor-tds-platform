@@ -4,7 +4,8 @@
 
 OBSERVED: backup JKS do perfil Rafael foi localizado e validado por keytool;
 o certificado SHA-256 coincide com o PEM versionado. Senha permaneceu no
-host. Certificado de upload atual do Google Play ainda UNKNOWN. API pública
+host. Certificado de upload do Play confirmado pelo texto fornecido pelo operador:
+SHA-256/SHA-1/MD5 coincidem com o PEM; SHA-256 do backup JKS também coincide. API pública
 responde health ok/database available; schema 0028, compatibility_verified=false.
 Checkouts isolados dos PRs #198/#200 criados no LARGeo. Flutter 3.44.9:
 625 testes passaram, analyze e config de produção PASS; lock preservado e

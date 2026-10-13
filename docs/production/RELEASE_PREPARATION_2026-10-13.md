@@ -134,3 +134,29 @@ Configuração produtiva foi gerada no checkout isolado por `tds_env.py` e
 validada por `validate_production_config.dart`: PASS, sem credenciais,
 checkout limpo. As alterações posteriores do PR são documentação; não mudam
 a árvore do app testada. Não houve build AAB, migração ou publicação.
+
+
+## Certificados Play confirmados pelo operador — 2026-10-13
+
+O operador forneceu o texto da seção **Certificado da chave de upload** da
+Play Console. Comparação local por OpenSSL com o PEM versionado:
+
+- SHA-256: `16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50`.
+- SHA-1: `B3:58:06:31:51:2B:2C:06:40:D9:4E:F2:9A:B1:76:E1:4E:85:55:81`.
+- MD5: `B0:E9:5B:FD:D8:F6:ED:96:B7:B3:34:D7:01:84:91:7F`.
+
+Os três fingerprints coincidem. O backup JKS já teve o SHA-256 conferido ao
+vivo por keytool. Isso resolve a pendência de identidade da chave de upload
+com evidência fornecida pelo operador; não houve acesso automatizado à Play
+Console nem comprovação de um novo AAB assinado. Não solicitar reset de chave.
+
+O arquivo público `deployment_cert.der`, inspecionado por OpenSSL, tem SHA-256
+`DF:CB:2D:5E:7E:C8:3D:90:42:A7:DE:1E:60:42:B2:01:D7:C3:71:F4:95:84:A4:1C:D3:18:D4:00:51:18:F5:62`.
+O operador confirmou que veio da seção **assinatura do app**. O snippet
+Digital Asset Links fornecido usa esse mesmo certificado e o pacote
+`com.tutortds_cartilhas`, coerente com o app distribuído pelo Play. Não houve
+alteração de assetlinks.json ou verificação de associação do domínio.
+
+Permanecem pendentes: identidade age/restore comprovado, promoção compatível
+da API, versionCode atual do Play, tag e novo AAB com gates de artefato.
+Esta confirmação substitui os registros anteriores de certificado Play UNKNOWN.
