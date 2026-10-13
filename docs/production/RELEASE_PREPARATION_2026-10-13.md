@@ -56,3 +56,35 @@ age já custodiada para o restore, sem copiar a chave para chat/Git; confirmar
 que comandos do Desktop Commander executam no LARGeo, além do status online.
 What remains unblocked: revisão da correção do runner e CI da candidata;
 os testes locais não alteram produção nem a assinatura Android.
+
+## Localização histórica da assinatura — informação do operador
+
+Em 2026-10-13 o operador informou os caminhos abaixo, explicitamente sem
+confirmação ao vivo nem comprovação de uso na última publicação:
+
+| Recurso | Máquina | Caminho histórico |
+| --- | --- | --- |
+| Checkout principal | avellaria | `/home/rafael/StudioProjects/tutor-tds-platform` |
+| Checkout do último AAB assinado | DESKTOP-8T5DRBS | `C:\Temp\tutor-tds-build-prep` |
+| Keystore desse checkout | DESKTOP-8T5DRBS | `C:\Temp\tutor-tds-build-prep\cartilhas_app\android\upload-keystore.jks` |
+| Backup da chave | LARGeo | `C:\Users\Rafael\Documents\TutorTDS-signing-backup-20260810\upload-keystore.jks` |
+
+OBSERVED local: `openssl x509 -in cartilhas_app/android/upload_certificate.pem
+-noout -fingerprint -sha256` confirmou o fingerprint público versionado:
+`16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50`.
+Isso prova apenas o certificado PEM do repositório. Não comprova existência
+ou correspondência dos keystores históricos, nem o certificado de upload
+atualmente aceito no Google Play. Comparar com o certificado de **upload**,
+que pode ser diferente do certificado de **assinatura do app** do Play App Signing.
+Não gerar chave nova, sobrescrever backup ou solicitar reset de assinatura
+para resolver a falta de evidência. Senhas e material privado permanecem no host.
+
+
+OBSERVED remoto posterior: no LARGeo, `get_file_info` confirmou o backup JKS
+(2.253 bytes). `keytool -list -v` com senha lida apenas no host, passada por
+variável de ambiente temporária e removida ao final, concluiu com código zero.
+O SHA-256 do certificado do keystore e do PEM adjacente coincide com o PEM
+versionado acima. Nenhuma senha ou chave privada foi retornada. Flutter foi
+localizado em `D:\flutter-3.44.9\bin\flutter.bat`; versão e gates ainda por
+verificar. A correspondência com o certificado de upload atual do Play segue
+UNKNOWN; o checkout do DESKTOP-8T5DRBS não foi validado.
