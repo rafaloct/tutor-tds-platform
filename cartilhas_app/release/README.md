@@ -8,9 +8,16 @@ nos clientes desta candidata. [Procedimento](../../docs/production/CHATWOOT_RUNT
 e [referência completa da API](../../docs/api/README.md).
 
 Esta candidata mantém minSdk24/targetSdk36 e o certificado de upload aprovado.
-Build e upload permanecem congelados até os comprovantes atuais de recuperação,
-fonte, API e smoke físico. O AAB1.4.1+14 ainda não foi gerado; não existe hash
-aprovado para ele. Inventário completo e estado da Play ainda pendentes.
+CI da fonte5fe0b419, imagem isolada da API e smoke físico no Samsung passaram.
+O Chatwoot recebeu mensagens sintéticas por HTTP; resposta criada em Rails foi
+lida pelo widget. Os registros QA foram removidos, com erro do verificador de
+limpeza preservado e ausência conferida separadamente. Isso não comprova
+resposta humana ou Chatwoot dentro do futuro AAB. [Provas e limites](../../docs/production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/chatwoot-functional-http-qa.json).
+
+Build e upload permanecem congelados até o restore ligado à nova árvore API,
+integração/tag, promoção da configuração e inventário Play. O DESKTOP com a
+identidade age e a sessão de publicação está offline no conector. O AAB1.4.1+14
+ainda não foi gerado; não existe hash aprovado para ele.
 
 O AAB anterior, da tagv1.4.0/fonte207e212, foi gerado e verificado em13/10:
 SHA256 `1665ee362eebdad4d299579508e8a57c5b36c55f2adff89c1eed8930cc2af3e0`,

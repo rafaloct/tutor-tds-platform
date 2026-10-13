@@ -1,25 +1,46 @@
 # CURRENT STATE
 
-## 2026-10-13 — candidata1.4.1+14 e retomada operacional
+## 2026-10-13 — candidata 1.4.1+14: CI, imagem e smoke verificados
 
-IMPLEMENTED: configuração Chatwoot remota e recarga fresca, confirmação por
-evento real do SDK, fechamento após mudança de sessão e rotação sem fallback
-compilado. Cliente público usa headers CORS safelisted; teste local da API
-confirmou preflight com Cache-Control400 e GET simples200/no-store. FQDN/IPv6
-global validados em ambas as camadas. Referência API134 e status externo de
-upload preservam os controles de fonte, assinatura e evidências.
-TESTED: 100API focais, 76Flutter focais, 36readiness/3CLI negativos;
-CI7293a2a passou suites API/Flutter e nove Chrome canônicosLinux. Correção CORS
-e metadados posteriores serão verificados no seu próprio head pelo CI.
-UNKNOWN/BLOCKED: ambos desktops remotos desconectaram; build da imagem API,
-novo restore/smoke, tag e AAB1.4.1+14 não executados. Ensaio Chatwoot parou
-na pré-verificação, sem fixture/mensagem criada. Transporte Git não-thin da
-mesma fonte6e3 foi preparado, sem imagem/digest presumidos. Upload Play não
-ocorreu; maior código em todos os tracks e declaração registrada desconhecidos.
-DECISION: publicação já autorizada pelo operador; retomar os comandos pendentes
-e comprovantes reais quando os agentes voltarem. Assinatura/archives, produção
-API4ed/schema0030 e AAB histórico13 permanecem preservados. Build e upload da
-candidata seguem congelados, sem marcar preparação como aceite de produção.
+IMPLEMENTED: configuração Chatwoot remota, recarga fresca, confirmação pelos
+eventos do SDK e fechamento após mudança de sessão. O GET público usa somente
+Accept, preservando CORS e no-store. Trocar as duas variáveis na API e recriá-la
+permite rotação do token sem reconstruir os clientes desta candidata.
+TESTED: CI de `5fe0b419` passou API/Worker, referência da API, segredos e Flutter:
+analyze sem problemas, 718 testes VM/widget e nove Chrome canônicos. Revisão
+independente não encontrou P1/P2. Chrome usa SDK simulado; não comprova o widget
+real dentro do futuro AAB. A documentação tem 134 operações e 121 paths.
+
+OBSERVED: imagem isolada `sha256:8f71af5a6a5caf6ec535ae8f5d00b518839fde3b143e7c82f459726d93dc39b8`
+da fonte `6e3cd5f3`, árvore API `ae0d777f`, conferiu os 73 arquivos COPY contra
+Git. Nenhum container/configuração/banco da API produtiva foi alterado pelo
+build. OCI-created usa o `%cI` da VPS, `2026-10-13T20:59:56+00:00`; Git local
+renderiza o mesmo instante com Z. Não houve novo restore PostgreSQL dessa árvore.
+
+OBSERVED: APK debug QA 1.4.1-dev+14, mínimo24/alvo36, fonte `5fe0b419`, hash
+`75fb9ccec47542ad1c9840e65faa92a3eda72916e77a3e7b2f7c763cc70687d6`.
+Samsung SM-T835/API29 passou abertura/reabertura de oito segundos, foco e UI,
+sem fatal/ANR observado. Pacotes existentes ficaram intactos; sem clear,
+reinstalação ou instalação produtiva. Falhas dos verificadores de snapshot/foco
+foram corrigidas conservando as provas originais e os mesmos controles.
+
+OBSERVED: Chatwoot4.17, porta interna3005, recebeu duas mensagens por WebWidget
+HTTP; uma resposta criada por Rails apareceu na leitura HTTP. A conta QA não
+tinha usuários, atendentes ou destinatários reais. O verificador de limpeza
+retornou NoMethodError; consulta independente confirmou todos os registros
+próprios removidos, saúde200 e estado privado finalizado, sem repetir deletes.
+Não houve prova de resposta humana, login de atendente, WebSocket ou SDK Android.
+Provas públicas, hashes e limites:
+`production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/`.
+
+BLOCKED: DESKTOP-8T5DRBS continua offline no conector. A identidade age guardada
+nele é necessária ao restore novo; o acesso autenticado à Play também depende
+dessa máquina. No LARGeo, a conta aberta pediu criar conta de desenvolvedor;
+nenhuma conta foi criada. Maior versionCode de todos os tracks permanece
+UNKNOWN. PR#206 está draft; merge/tag, promoção da nova API, AAB14 e upload Play
+não ocorreram. Publicação já autorizada; build/upload continuam false enquanto
+os controles reais restantes não passam. API4ed/schema0030 e AAB histórico13
+permanecem preservados.
 
 ## 2026-10-13 — configuração remota de suporte, Issue #205
 

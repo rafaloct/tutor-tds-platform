@@ -1,0 +1,52 @@
+{
+  "candidate_api_tree_oid": "ae0d777f9d029370063426f71ee8b2bb7f6ea607",
+  "candidate_checkout": "/opt/tds-chatwoot-candidate-205-20261013",
+  "candidate_commit": "6e3cd5f31bb40cab4415e6aec7b90a5373220a76",
+  "candidate_image_id": "sha256:8f71af5a6a5caf6ec535ae8f5d00b518839fde3b143e7c82f459726d93dc39b8",
+  "candidate_image_tag": "tutor-tds-candidate:6e3cd5f31bb4",
+  "candidate_source_identity": {
+    "api_tree_oid": "ae0d777f9d029370063426f71ee8b2bb7f6ea607",
+    "image_id": "sha256:8f71af5a6a5caf6ec535ae8f5d00b518839fde3b143e7c82f459726d93dc39b8",
+    "materialized_sources_sha256": "7622ca428bd89dac6338bcdc1d47f3c3f61edbcffeb475684ade2b0710e84f57",
+    "source_file_count": 73,
+    "tracked_source_bytes_verified": true
+  },
+  "identity_inputs_used": false,
+  "oci_created": "2026-10-13T20:59:56+00:00",
+  "postgres_drill_executed": false,
+  "production_container_identity_before_after": {
+    "api": {
+      "Id": "dd72cd13c14e584e7f2b3f93316d306b1b6b1c6016fdcb6846b256265a4f6bef",
+      "Image": "sha256:4ed8a189b3741d8b8f536a0b790cc0215f997f05c4254ea65d9e67826b1a858b",
+      "Running": true
+    },
+    "db": {
+      "Id": "eea0c10b6773dce4d0efffa9354ab3001757ba9ab3be722828b5715c5a6f396f",
+      "Image": "sha256:3c5c8892d184f738f4fe282d14ddaa613a38f00f4189d2d94725ebe6f2909ddb",
+      "Running": true
+    }
+  },
+  "production_container_identity_unchanged": true,
+  "production_mutations": false,
+  "reviewed_source_proof_runner_sha256": {
+    "rehearse_scheduled_postgres_backup.py": "da7a50f33f693b9d34aadc473235172e945da85b61907db221917967e4a6ea0a",
+    "rehearse_scheduled_postgres_upgrade.py": "3fa8ac7c6caca74939fe5df4ea10992c262dbb35d0d0e86c151a4ebccf7d8679"
+  },
+  "rollback_image_id": "sha256:4ed8a189b3741d8b8f536a0b790cc0215f997f05c4254ea65d9e67826b1a858b",
+  "schema_and_build_sources_unchanged": true,
+  "scope_notes": [
+    "Five COPY roots are compared byte for byte and for executable flags with tracked Git source.",
+    "This does not attest base operating system or dependency bytes or claim reproducibility."
+  ],
+  "source_bundle_bytes": 229128,
+  "source_bundle_sha256": "f649b957e62b46603188f242b31e4136e9902466219ab12648f0047c7632486e",
+  "source_check_container_removed": true,
+  "source_check_container_started": false,
+  "status": "built_copy_sources_verified_pending_isolated_postgres_recovery",
+  "transport_repair": {
+    "bytes": 317214,
+    "file": "candidate-source-nonthin.bundle",
+    "reason": "Original thin bundle lacked five external delta base objects; exact ref preserved.",
+    "sha256": "9bc06016a834fdb531c86a1041f0203c99d9ac13629d03cc36456f13e0e40c71"
+  }
+}

@@ -81,8 +81,14 @@ nova candidata e a promoção desta configuração devem ter recibos próprios;
 não são inferidos desses testes nem dos artefatos históricos de `v1.4.0`.
 
 OBSERVED em 13/10/2026: instalação Chatwoot 4.17.0, serviço web saudável e worker
-em execução; o widget legado aceitou seu token em uma consulta pública de leitura.
-Isso não comprova envio/resposta ponta a ponta. Restores de PostgreSQL e
+em execução. Uma conta WebWidget isolada, sem usuários/atendentes ou integrações,
+recebeu duas mensagens HTTP; uma resposta criada em Rails foi lida pelo widget.
+O verificador de limpeza retornou NoMethodError; consulta independente confirmou
+todos os registros próprios removidos e saúde200. Não houve repetição de deletes.
+[Recibo e limites](evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/chatwoot-functional-http-qa.json).
+Isso não comprova resposta humana, WebSocket ou widget Android dentro do AAB.
+A configuração desta candidata ainda não foi promovida na API produtiva.
+Restores de PostgreSQL e
 AnythingLLM anteriores não comprovam backup específico de conversas/anexos do
 Chatwoot. Referências: [contrato de suporte](CHATWOOT_TDS_SUPPORT_CONTRACT.md),
 [matriz da API](API_MATRIX.md) e [API completa](../api/README.md).

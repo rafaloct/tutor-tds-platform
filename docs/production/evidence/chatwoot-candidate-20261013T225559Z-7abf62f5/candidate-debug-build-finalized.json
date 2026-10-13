@@ -1,0 +1,148 @@
+{
+  "run_id": "20261013T225559Z-7abf62f5",
+  "started_at_utc": "2026-10-13T22:57:55.104622+00:00",
+  "execution_host": "LARGeo",
+  "result": "pass",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6",
+  "source_sha": "5fe0b4194d6f7fe4501fedc4a7eb12cab006e973",
+  "source_branch": "codex/chatwoot-runtime-release-20261013",
+  "source_pr": 206,
+  "source_base_branch": "staging",
+  "defines": {
+    "TUTOR_ENVIRONMENT": "staging",
+    "TUTOR_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+    "TUTOR_STAGING_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+    "TUTOR_GATEWAY_URL": "",
+    "REMOTE_CATALOG_ENABLED": "false",
+    "LEARNING_CONTEXT_ENABLED": "false",
+    "DURABLE_LEARNING_OUTBOX_ENABLED": "false",
+    "JOURNEY_TRACEABILITY_ENABLED": "false",
+    "DYNAMIC_ACTIVITY_ENABLED": "false",
+    "CLASS_LIFECYCLE_FAKE_ENABLED": "false",
+    "SIGNED_SUPPORT_IDENTITY": "false",
+    "PUSH_NOTIFICATIONS_ENABLED": "false",
+    "DYNAMIC_QA_ISOLATED_PACKAGE": "true",
+    "DYNAMIC_QA_RUN_ID": "7abf62f53fc74f59bed8a156cfac36a6"
+  },
+  "global_flutter_settings_sha256_before": "e5d0d49a690dfa0fe3f69a50b6b3bbca6dd6699d0f2e2516fb777a00ed7a252d",
+  "protected_checkouts_before": {
+    "C:\\Temp\\tds-release-198-20261013": {
+      "head_sha": "207e2128dcbcedec70bf5132b05a7081501480ed",
+      "status_porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tracked_runtime_file_count": 172,
+      "tracked_runtime_sha256": "68c0a246b2f3a9a63532476e54daeb356989824c860ba5219eae387daa3c50ea",
+      "existing_debug_apk_sha256": "85ab6261519abf62fbde4f71fbefeb2a63ee28037a6c6ba7eaea8d19be2d1ea5"
+    },
+    "C:\\Temp\\tds-chatwoot-app-205-20261013": {
+      "head_sha": "207e2128dcbcedec70bf5132b05a7081501480ed",
+      "status_porcelain_sha256": "2a600e38347e89d4999035a38177b0468ac7caeb005ccf094dafcaf766c06423",
+      "tracked_runtime_file_count": 172,
+      "tracked_runtime_sha256": "5b3e36d1788d165805740af8d841710484b1e80d8ab5ec99df3e94eb14ea4a8b"
+    }
+  },
+  "source_tree_bindings": {
+    "cartilhas_app": "9389aca0f54d12a56f29340f2f70c3fb06addcd8",
+    "cartilhas_app/lib": "2dfc689463eeb9069d9c95b20fd2abc9888b7386",
+    "cartilhas_app/android": "5c5ceab6a3c3932f8e419706a5afad1a195df481",
+    "cartilhas_app/pubspec.yaml": "2e3608712191fea50132ae930dd3ca119ad9e1eb",
+    "cartilhas_app/pubspec.lock": "62359f412a0f638995e68d59601b5f4f49d1b550",
+    "api": "ae0d777f9d029370063426f71ee8b2bb7f6ea607"
+  },
+  "tracked_inputs_before": {
+    "head_sha": "5fe0b4194d6f7fe4501fedc4a7eb12cab006e973",
+    "status_porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tracked_runtime_file_count": 176,
+    "tracked_runtime_sha256": "1f92c665bce6a21811223b6bfb441701da8b55a3d19cc8f28fa064faa377da33"
+  },
+  "toolchain": {
+    "flutter": {
+      "frameworkVersion": "3.44.9",
+      "channel": "[user-branch]",
+      "repositoryUrl": "unknown source",
+      "frameworkRevision": "6b182d2c7585eba26d4edce0f97630effd256c33",
+      "frameworkCommitDate": "2026-08-05 10:04:07 -0700",
+      "engineRevision": "5a2a6a42cce67f965cf540fcecf616faca624aa1",
+      "engineCommitDate": "2026-07-31 18:31:59.000Z",
+      "engineContentHash": "b9499e4c25212536ba3a4eec4f5c1905fb3214fe",
+      "engineBuildDate": "2026-07-31 17:30:03.301",
+      "dartSdkVersion": "3.12.2",
+      "devToolsVersion": "2.57.0",
+      "flutterVersion": "3.44.9",
+      "flutterRoot": "D:\\flutter-3.44.9"
+    },
+    "jdk_path": "C:/Program Files/Java/jdk-25",
+    "java_version": "java version \"25\" 2025-09-16 LTS\r\nJava(TM) SE Runtime Environment (build 25+37-LTS-3491)\r\nJava HotSpot(TM) 64-Bit Server VM (build 25+37-LTS-3491, mixed mode, sharing)",
+    "android_sdk": "D:/DevTools/AndroidSDK",
+    "configuration_scope": "owned process-local APPDATA settings"
+  },
+  "defines_sha256": "3a198ea9965debb2be05a2e855289fe29d01050c1645bc51e09773b493f3d09e",
+  "build_command": [
+    "D:/flutter-3.44.9/bin/flutter.bat",
+    "build",
+    "apk",
+    "--debug",
+    "--no-pub",
+    "--dart-define-from-file=C:\\Temp\\tds-chatwoot-physical-206-20261013T225559Z-7abf62f5\\qa-defines.json"
+  ],
+  "qa_apk": {
+    "path": "C:\\Temp\\tds-chatwoot-physical-206-20261013T225559Z-7abf62f5\\source\\cartilhas_app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+    "sha256": "75fb9ccec47542ad1c9840e65faa92a3eda72916e77a3e7b2f7c763cc70687d6",
+    "package": "com.tutortds_cartilhas.dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6",
+    "versionCode": 14,
+    "versionName": "1.4.1-dev",
+    "build_mode": "debug",
+    "signature_verified": true,
+    "signer_sha256": "6af6c35e5ede92952c97861129900eabd297d006ca50db952cb60880deddc4f8"
+  },
+  "tracked_inputs_after": {
+    "head_sha": "5fe0b4194d6f7fe4501fedc4a7eb12cab006e973",
+    "status_porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tracked_runtime_file_count": 176,
+    "tracked_runtime_sha256": "1f92c665bce6a21811223b6bfb441701da8b55a3d19cc8f28fa064faa377da33",
+    "existing_debug_apk_sha256": "75fb9ccec47542ad1c9840e65faa92a3eda72916e77a3e7b2f7c763cc70687d6"
+  },
+  "tracked_source_diff_paths": [],
+  "completed_at_utc": "2026-10-13T23:16:44.341139+00:00",
+  "prior_harness_failure": {
+    "file": "candidate-debug-build.json",
+    "sha256": "54a1f88ad47a7d39177eb258072ee0f557d21bf298bd5da9d92f12df141fdb8b",
+    "cause": "Snapshot equality included the newly generated APK in only the after snapshot.",
+    "structural_fix": "Source/runtime fields remain exact; generated APK is verified separately. Protected checkouts retain full artifact equality."
+  },
+  "read_only_finalization": {
+    "build_repeated": false,
+    "tracked_source_changed": false,
+    "generated_apk_present_before": false,
+    "generated_apk_sha256_verified": true,
+    "debug_build_log_sha256": "1f70faeceacd22b2239f4a9ea84f0cf4033e3114067eafd96531cc2944f03804",
+    "manifest_min24_target36_verified": true,
+    "apksigner_reverified": true,
+    "protected_checkouts_unchanged": true,
+    "global_flutter_settings_unchanged": true
+  },
+  "qa_overlay": {
+    "tracked_source_changes": [],
+    "gradle_configuration_only": true,
+    "application_id_suffix": ".dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6",
+    "version_name_suffix": "-dev",
+    "label": "Tutor TDS QA",
+    "candidate_version_code_preserved": 14
+  },
+  "protected_checkouts_after": {
+    "C:\\Temp\\tds-release-198-20261013": {
+      "head_sha": "207e2128dcbcedec70bf5132b05a7081501480ed",
+      "status_porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tracked_runtime_file_count": 172,
+      "tracked_runtime_sha256": "68c0a246b2f3a9a63532476e54daeb356989824c860ba5219eae387daa3c50ea",
+      "existing_debug_apk_sha256": "85ab6261519abf62fbde4f71fbefeb2a63ee28037a6c6ba7eaea8d19be2d1ea5"
+    },
+    "C:\\Temp\\tds-chatwoot-app-205-20261013": {
+      "head_sha": "207e2128dcbcedec70bf5132b05a7081501480ed",
+      "status_porcelain_sha256": "2a600e38347e89d4999035a38177b0468ac7caeb005ccf094dafcaf766c06423",
+      "tracked_runtime_file_count": 172,
+      "tracked_runtime_sha256": "5b3e36d1788d165805740af8d841710484b1e80d8ab5ec99df3e94eb14ea4a8b"
+    }
+  },
+  "global_flutter_settings_sha256_after": "e5d0d49a690dfa0fe3f69a50b6b3bbca6dd6699d0f2e2516fb777a00ed7a252d",
+  "release_status_unchanged": true
+}

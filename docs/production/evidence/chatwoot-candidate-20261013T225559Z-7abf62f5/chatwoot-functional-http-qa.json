@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WIDGET_HTTP_PASSED_OWNED_FIXTURES_REMOVED",
+  "execution_host": "LARGeo via existing trusted VPS SSH",
+  "chatwoot_version": "4.17.0",
+  "chatwoot_image_id": "sha256:add3f6f48e8150dd3abdf3c50ad51f63c394937086e88c88f10b964ee415d1e8",
+  "run_sha256": "10ae217ed83e13f7a98d0f16ee45b1c939723ce1469854059ed3299e5e7c3980",
+  "fixture_scope": "One isolated Account/WebWidget/anonymous Contact/conversation; no Users or AccountUsers, real recipients, integrations, email, attachments or staff actors.",
+  "create": {
+    "remote_pid": 44416,
+    "process_exit_code": 0,
+    "actual_public_result": {
+      "passed": true,
+      "staff_http_auth_tested": false,
+      "websocket_delivery_tested": false,
+      "global_webhook_nil_or_false": true,
+      "no_human_users_or_external_recipients": true,
+      "incoming_widget_http": true,
+      "outgoing_rails_visible_via_widget_http": true,
+      "run_sha256": "10ae217ed83e13f7a98d0f16ee45b1c939723ce1469854059ed3299e5e7c3980",
+      "synthetic_messages_sha256": "477c12d6e2a6256a85c698c7fbc9b959726ccbb57220d4773901a7ae7f3018b1",
+      "cleanup_performed": false,
+      "asynchronous_job_history_proven": false,
+      "image_pin_matches": true,
+      "source_pins_match": true,
+      "original_source_pin_count": 43,
+      "total_source_pin_count": 53,
+      "ruby_syntax_pass": true,
+      "bounded_child_timeout_available": true,
+      "http_loopback_port": 3005,
+      "qa_script_binding_sha256": "9f1ad70eb1bf3bbc7bb0dca9d705ece8e775b166ce41f9be4f5022ef930f1696",
+      "public_source_binding_sha256": "d3fe296091ed480e5f5b5245f20f00c8e6d42bd2ddc16a823b9ab94795613a52"
+    }
+  },
+  "cleanup": {
+    "remote_pid": 53264,
+    "process_exit_code": 1,
+    "actual_public_result": {
+      "passed": false,
+      "staff_http_auth_tested": false,
+      "websocket_delivery_tested": false,
+      "error_class_sha256": "307ae83d68a45a906ad52ebf6bc10eb2906aea68a2e5e3d24e2b8e8d3d8bdbbc",
+      "error_code_sha256": "e3ac017df4c11747250bd309af4784b7a9ad175fc45de52b82a0a7f686ed7e85",
+      "retry_permitted": false,
+      "private_state_inspection_required": true,
+      "image_pin_matches": true,
+      "source_pins_match": true,
+      "original_source_pin_count": 43,
+      "total_source_pin_count": 53,
+      "ruby_syntax_pass": true,
+      "bounded_child_timeout_available": true,
+      "http_loopback_port": 3005,
+      "qa_script_binding_sha256": "9f1ad70eb1bf3bbc7bb0dca9d705ece8e775b166ce41f9be4f5022ef930f1696",
+      "public_source_binding_sha256": "d3fe296091ed480e5f5b5245f20f00c8e6d42bd2ddc16a823b9ab94795613a52"
+    },
+    "scope_note": "Original cleanup verifier raised NoMethodError; its failure is retained. A separate read-only check found all six owned parent records and three messages absent. No destruction was replayed."
+  },
+  "finalization": {
+    "remote_pid": 3796,
+    "process_exit_code": 0,
+    "actual_public_result": {
+      "read_only": false,
+      "fixture_writes": false,
+      "cleanup_replayed": false,
+      "phase": "verified",
+      "owned_record_presence": {
+        "account_id": false,
+        "inbox_id": false,
+        "channel_id": false,
+        "contact_id": false,
+        "contact_inbox_id": false,
+        "conversation_id": false
+      },
+      "remaining_owned_message_count": 0,
+      "all_owned_records_absent": true,
+      "database_writes": false,
+      "private_state_finalized": true,
+      "original_cleanup_executor_passed": false,
+      "chatwoot_health_http200": true,
+      "status": "OWNED_QA_ROWS_ABSENT_PRIVATE_STATE_FINALIZED",
+      "completed": true
+    },
+    "private_state_transition": "verified -> cleaned after exact owned-row/name absence checks; no database write"
+  },
+  "guarded_preflight_reference": "port3005-preflight-pass-receipt.json",
+  "private_values_in_public_evidence": false,
+  "scope_limitations": [
+    "Two incoming messages used WebWidget HTTP; outgoing message was created through Rails and observed through widget HTTP.",
+    "Staff HTTP authentication, human response, email/WhatsApp, WebSocket delivery and asynchronous job history were not proven.",
+    "This is live Chatwoot service QA, not Android/AAB widget end-to-end or production API config deployment.",
+    "No private admin/HMAC/auth-token/key values or raw logs/screenshots were exported."
+  ]
+}

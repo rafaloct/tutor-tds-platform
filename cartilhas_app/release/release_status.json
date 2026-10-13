@@ -14,8 +14,10 @@
     "api_support_focal_tests": "100 passed",
     "api_documentation_tests": "3 passed, 5 subtests passed",
     "full_candidate_api_and_flutter_tests": "pending final release gate",
-    "dart_analyze": "pending final integrated source",
-    "verified_at": "2026-10-13"
+    "dart_analyze": "passed on CI source5fe0b419; final production runner pending",
+    "verified_at": "2026-10-13",
+    "ci_source_commit": "5fe0b4194d6f7fe4501fedc4a7eb12cab006e973",
+    "ci_api_worker_and_flutter": "passed; Flutter718 VM/widget +9 canonical Chrome; final production runner pending"
   },
   "artifact": {
     "path": "build/app/outputs/bundle/release/app-release.aab",
@@ -23,7 +25,7 @@
     "status": "not_built",
     "upload_allowed": false,
     "matches_current_source": false,
-    "reason": "Nova configuração remota Chatwoot em preparação; código Play, fonte final, recuperação e smoke fresco precisam de evidência antes do build."
+    "reason": "Configuração Chatwoot implementada, imagem isolada e smoke físico verificados; restore novo, integração/tag e inventário Play ainda pendentes. Nenhum AAB14 gerado."
   },
   "required_physical_evidence": [
     {
@@ -68,10 +70,13 @@
     },
     {
       "id": "pre_aab_xiaomi_smoke",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
       "description": "Smoke curto em dispositivo Android físico imediatamente antes do AAB; operador aceitou tablet Samsung no lugar do Xiaomi.",
-      "scope": "Nova fonte Chatwoot requer nova evidência física; provas históricas permanecem preservadas, sem inferência de PASS desta candidata."
+      "scope": "Samsung SM-T835 físico autorizado; fonte5fe0b419/Flutter lib2dfc6894/android5c5ceab6/pubspec2e360871/lock62359f41. APK QA isolado 1.4.1-dev+14; cold/relaunch8s, foco/UI e ausência observada de fatal/ANR. Não é prova de Chatwoot SDK, AAB ou produção.",
+      "verified_at": "2026-10-13T23:26:38.624053+00:00",
+      "evidence": "docs/production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/pre-aab-candidate-tablet-smoke-retry.json",
+      "evidence_sha256": "ae0bedd7990d9cdf424595a089c9558e61880694df760372b134fe7a5d234d34"
     },
     {
       "id": "dynamic_activity_contextual_android_e2e",
