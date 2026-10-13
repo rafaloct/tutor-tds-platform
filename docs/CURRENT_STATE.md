@@ -6,7 +6,9 @@ OBSERVED: backup JKS do perfil Rafael foi localizado e validado por keytool;
 o certificado SHA-256 coincide com o PEM versionado. Senha permaneceu no
 host. Certificado de upload atual do Google Play ainda UNKNOWN. API pública
 responde health ok/database available; schema 0028, compatibility_verified=false.
-Checkouts isolados dos PRs #198/#200 criados no LARGeo. Não houve promoção,
+Checkouts isolados dos PRs #198/#200 criados no LARGeo. Flutter 3.44.9:
+625 testes passaram, analyze e config de produção PASS; lock preservado e
+checkout limpo. MCP Windows: 19 passed/1 skipped POSIX. Não houve promoção,
 novo AAB ou alteração de chave. Evidência em
 `docs/production/RELEASE_PREPARATION_2026-10-13.md`.
 

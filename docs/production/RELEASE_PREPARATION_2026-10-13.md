@@ -116,3 +116,21 @@ coincide com o PEM, porém foi validado historicamente contra certificado local,
 **não reconfirmado diretamente na Play Console**. Esses dados não satisfazem
 os respectivos gates. O alias SSH `tutor-tds-vps` no LARGeo retornou 255 em
 duas consultas somente leitura, sem diagnóstico útil; sem alterações no VPS.
+
+
+## Validação Flutter no LARGeo concluída
+
+Checkout `34186ae` do PR #198, Flutter 3.44.9: `pub get --enforce-lockfile`
+PASS; `analyze --no-pub` PASS; `test --no-pub --reporter expanded` **625 passed**,
+exit 0, 94s reportados pela suíte. `pubspec.lock` preservado por comparação
+SHA-256; `git status --short` vazio ao final. A primeira tentativa de testes
+parou antes da suíte por `ProgramFiles(x86)` ausente no ambiente remoto. Na
+repetição, a variável foi preenchida apenas no processo com a pasta existente
+do Windows; nenhuma configuração global foi alterada. Logs locais:
+`C:\Temp\tds-release-198-validation-20261013.log` e
+`C:\Temp\tds-release-198-tests-20261013.log`.
+
+Configuração produtiva foi gerada no checkout isolado por `tds_env.py` e
+validada por `validate_production_config.dart`: PASS, sem credenciais,
+checkout limpo. As alterações posteriores do PR são documentação; não mudam
+a árvore do app testada. Não houve build AAB, migração ou publicação.
