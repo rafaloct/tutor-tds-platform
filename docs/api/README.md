@@ -1,8 +1,8 @@
 # Documentação da API Tutor TDS
 
 Esta documentação cobre **todas as operações HTTP do candidato** que usa a
-árvore da API de `dd928ff6b58788af930aa6722557728d74dfe97c` (PR #194,
-integrado em staging). Os dados de exemplo são sintéticos. A existência de uma
+árvore da API registrada em [coverage.json](coverage.json). Os dados de exemplo
+são sintéticos. A existência de uma
 rota no código não comprova implantação nem autorização para usá-la no ambiente
 produtivo.
 

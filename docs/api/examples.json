@@ -2021,6 +2021,20 @@
       "status": 200
     }
   },
+  "GET /support/config": {
+    "request": {
+      "body": null,
+      "path": "/support/config"
+    },
+    "response": {
+      "body": {
+        "base_url": "https://chat.example.org",
+        "website_token": "qa_widget_token_A"
+      },
+      "note": "Exemplo inteiramente sintético de identificadores públicos; o token mostrado não acessa um inbox real. Exige CHATWOOT_BASE_URL/CHATWOOT_WEBSITE_TOKEN válidos no servidor. Resposta no-store; não contém credenciais administrativas ou segredo HMAC.",
+      "status": 200
+    }
+  },
   "GET /support/identity": {
     "request": {
       "body": null,

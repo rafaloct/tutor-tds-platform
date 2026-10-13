@@ -1,5 +1,13 @@
 # Traceability matrix
 
+## Configuração remota de suporte — Issue #205
+
+| Feature | Flutter / domínio / repository | API / persistência | Permissão / offline | Evidência | Estado |
+| --- | --- | --- | --- | --- | --- |
+| Suporte Chatwoot com rotação de token sem AAB | ChatwootScreen → ChatwootConfig / HttpChatwootConfigRepository → host WebView/iframe | GET /support/config; duas variáveis públicas, sem tabela nova | Público; consentimento/identidade existentes; online com retry, sem cache do token | test_support_config100PASS; testes Flutter focais e smoke novo com recibos próprios | IMPLEMENTED/TESTED-LOCAL API; promoção/AAB/Play ainda pendentes |
+
+Procedimento: [CHATWOOT_RUNTIME_CONFIGURATION.md](CHATWOOT_RUNTIME_CONFIGURATION.md).
+
 Base `fb50a57`, auditoria 2026-09-23. IDs/títulos Stitch informados pelo usuário;
 screenshot e HTML Classroom inspecionados e armazenados com hashes. Nenhuma
 equivalência visual foi aprovada. Composição 9731628404551462355 também inspecionada; outras telas não auditadas.

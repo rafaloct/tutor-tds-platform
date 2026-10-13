@@ -621,5 +621,13 @@
       "token_version": 1
     },
     "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Encontro open mais recente da turma, nesta fixture recém-criada. A projeção pública omite token/código; sem encontro aberto autorizado a rota retorna 404."
+  },
+  "GET /support/config": {
+    "status": 200,
+    "body": {
+      "base_url": "https://chat.example.org",
+      "website_token": "qa_widget_token_A"
+    },
+    "note": "Exemplo inteiramente sintético de identificadores públicos; o token mostrado não acessa um inbox real. Exige CHATWOOT_BASE_URL/CHATWOOT_WEBSITE_TOKEN válidos no servidor. Resposta no-store; não contém credenciais administrativas ou segredo HMAC."
   }
 }

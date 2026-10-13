@@ -252,3 +252,13 @@
     preservados. Escopo institucional/programático, rejeição de novo vínculo em
     turma fechada, sessão aberta como bloqueio ao encerramento e auditoria
     permanecem. Esta decisão ainda não constitui aceite de staging ou produção.
+
+33. 2026-10-13: operador autorizou corrigir a configuração Chatwoot para permitir
+    troca do token público sem reconstruir o app e publicar a nova versão na
+    Google Play. Reusar API, permissões, consentimento e identidade existentes;
+    GET `/support/config` retorna somente origem HTTPS/token público, sem credenciais
+    administrativas. Recriação da API aplica alterações de configuração. Tablet
+    Samsung físico foi aceito explicitamente no lugar do Xiaomi para o smoke
+    curto pré-AAB; demais gates e evidências permanecem necessários. MCP#200 e
+    Firebase#196 continuam separados. Esta autorização não comprova execução de
+    deploy, assinatura, upload ou aprovação da loja.

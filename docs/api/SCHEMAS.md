@@ -6703,6 +6703,38 @@ Schema exato:
 }
 ```
 
+<a id="schema-SupportWidgetConfig"></a>
+
+## SupportWidgetConfig
+
+| Campo | Obrigatório | Tipo | Default / limites |
+| --- | --- | --- | --- |
+| `base_url` | sim | string | — |
+| `website_token` | sim | string | — |
+
+Schema exato:
+```json
+{
+  "properties": {
+    "base_url": {
+      "type": "string",
+      "title": "Base Url"
+    },
+    "website_token": {
+      "type": "string",
+      "title": "Website Token"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "base_url",
+    "website_token"
+  ],
+  "title": "SupportWidgetConfig"
+}
+```
+
 <a id="schema-SyncQueueStatus"></a>
 
 ## SyncQueueStatus

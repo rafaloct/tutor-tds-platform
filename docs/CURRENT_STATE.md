@@ -1,5 +1,23 @@
 # CURRENT STATE
 
+## 2026-10-13 — configuração remota de suporte, Issue #205
+
+IMPLEMENTED/TESTED-LOCAL: API oferece GET `/support/config` público, somente URL
+HTTPS e token público WebWidget, com no-store; configuração inválida retorna503
+sem derrubar outras rotas. 100 testes focais PASS; OpenAPI aditivo sem alteração
+dos contratos comuns. Referência regenerada: 134 operações, 121 paths, 108schemas,
+52 requests, 98 responses e 564 links; três testes documentais/5subtests PASS.
+Troca das duas variáveis e recriação da API permite novo token sem rebuild nos
+clientes desta candidata. Procedimento em
+`production/CHATWOOT_RUNTIME_CONFIGURATION.md`.
+OBSERVED: PR#198 consolidado foi integrado em207e212 e tagv1.4.0 criada;
+AAB1.4.0+13 assinado/target36/Bundletool/16KB conferidos, entregue em release
+GitHub draft, sem upload Play. Serviço Chatwoot4.17 web saudável/worker executando;
+token legado aceito em consulta pública, sem prova de resposta humana.
+DECISION: operador autorizou correção e publicação Play e aceitou tablet Samsung
+físico no lugar do Xiaomi. UNKNOWN: máximo de códigos Play, promoção da nova API,
+smoke da fonte alterada, novo AAB e estado final Play ainda em verificação.
+
 ## 2026-10-13 — fonte consolidada para a release
 
 IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e

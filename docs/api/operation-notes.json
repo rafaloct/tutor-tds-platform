@@ -763,5 +763,10 @@
     "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco. Admin global ou coordinator/admin com participação ativa em TODOS os programas que ofertam o curso.",
     "behavior": "Transição published→archived na expected_revision, desativa catálogo público. Snapshot arquivado permanece acessível a turmas que o fixaram; não migra seus dados/progresso.",
     "flags": []
+  },
+  "GET /support/config": {
+    "permission": "Público, sem token Bearer. Não recebe parâmetros nem permite escolher configuração pelo pedido.",
+    "behavior": "Retorna somente base_url HTTPS e website_token público do widget Chatwoot. Não expõe credenciais administrativas, JWT, CPF pepper ou segredo/namespace HMAC. Configuração ausente/inválida retorna 503 genérico; respostas 200 e 503 usam Cache-Control: no-store e Pragma: no-cache. Alterar CHATWOOT_BASE_URL/CHATWOOT_WEBSITE_TOKEN e recriar a API aplica a mudança sem rebuild do aplicativo.",
+    "flags": []
   }
 }
