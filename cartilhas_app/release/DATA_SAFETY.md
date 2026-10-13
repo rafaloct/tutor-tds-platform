@@ -1,5 +1,19 @@
 # Inventário para Segurança dos dados — Play Console
 
+## Delta da candidata 1.4.1+14 — Issue #205
+
+GET `/support/config` recebe somente a URL HTTPS e o identificador público do
+widget, sem login, perfil ou token administrativo. A mudança não acrescenta SDK,
+permissão Android, dado pessoal de cadastro, destino de suporte ou telemetria.
+O widget mantém os campos e controles de consentimento descritos no inventário
+abaixo; a configuração não concede autorização acadêmica. Auth/HMAC privados
+não são retornados. As respostas da API usam no-store; o cliente busca novamente
+ao abrir/recarregar, sem persistir essa configuração.
+
+O inventário abaixo é a base histórica. As respostas atualmente registradas na
+Play e sua correspondência com a candidata ainda precisam ser observadas na
+Console; não foi feita alteração de declaração nesta preparação.
+
 Escopo: Tutor TDS 1.4.0+13. Este documento é um inventário técnico; a resposta
 final na Play Console deve ser validada pelo responsável jurídico/operacional e
 pelos contratos dos provedores.

@@ -23,6 +23,13 @@ candidata permanece congelada até recuperação/smoke frescos; artefato e prova
 anteriores preservados no histórico. Testes Chrome canônicos entram no workflow
 Linux: runner Flutter web no Windows encontrou erro de path CanvasKit404,
 sem alteração de SDK ou alegação de PASS desse runner.
+OBSERVED: CI do SHA7293a2a passou API, Flutter completo incluindo os nove casos
+Chrome canônicos no Linux, documentação e scanner de segredos. Revisão adicional
+identificou preflight CORS400 causado por Cache-Control na request; correção do
+cliente está em preparação, sem ampliar a política da API. Candidata preparada
+1.4.1+14/target36; código11 é o informado pelo operador, máximo em todos os tracks
+ainda UNKNOWN. Desktop da Play offline; LARGeo possui acesso SSH já existente e
+validado à VPS, sem cópia de chave, para continuar operações isoladas.
 
 ## 2026-10-13 — fonte consolidada para a release
 

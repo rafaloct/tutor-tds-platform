@@ -1,6 +1,24 @@
 # Artefatos de release
 
-## Atual
+## Candidata atual — 1.4.1+14, Issue #205
+
+A configuração pública do Chatwoot passa a vir da API em cada abertura/recarga;
+trocar URL/token e recriar a API permite corrigir essa configuração sem outro AAB
+nos clientes desta candidata. [Procedimento](../../docs/production/CHATWOOT_RUNTIME_CONFIGURATION.md)
+e [referência completa da API](../../docs/api/README.md).
+
+Esta candidata mantém minSdk24/targetSdk36 e o certificado de upload aprovado.
+Build e upload permanecem congelados até os comprovantes atuais de recuperação,
+fonte, API e smoke físico. O AAB1.4.1+14 ainda não foi gerado; não existe hash
+aprovado para ele. Inventário completo e estado da Play ainda pendentes.
+
+O AAB anterior, da tagv1.4.0/fonte207e212, foi gerado e verificado em13/10:
+SHA256 `1665ee362eebdad4d299579508e8a57c5b36c55f2adff89c1eed8930cc2af3e0`,
+68.240.658bytes, entregue em [release GitHub draft](https://github.com/rafaloct/tutor-tds-platform/releases/tag/untagged-70d3219a3cd2f307627e).
+Ele não foi enviado à Play e não representa a nova configuração remota.
+Seus bytes, tag, manifestos e custódia foram preservados.
+
+## Histórico da auditoria anterior — artefato superseded
 
 **Não há AAB atual liberado para upload.**
 

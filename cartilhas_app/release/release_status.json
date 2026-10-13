@@ -2,8 +2,8 @@
   "schema_version": 1,
   "release": {
     "application_id": "com.tutortds_cartilhas",
-    "version_name": "1.4.0",
-    "version_code": 13,
+    "version_name": "1.4.1",
+    "version_code": 14,
     "min_sdk": 24,
     "target_sdk": 36,
     "compile_sdk": 36,
@@ -124,5 +124,13 @@
       "evidence_sha256": "df3c783408160b85f0e53f6a790a8d0728ebd60aa16318480ade4214de445747",
       "scope": "Fresh Xiaomi ZT6HPRHQHATSEQPR (Android15/API35 arm64) isolated debug/staging QA package; cold launch and relaunch in new PID, responsive UI, no crash/ANR, existing production-namespace and DEV packages preserved. App/API runtime trees match d3b1331 candidate; later release metadata/documentation only. This is hardware smoke, not production AAB integration or Play inventory."
     }
-  ]
+  ],
+  "play_inventory": {
+    "production_version_code_reported_by_operator": 11,
+    "production_version_name_reported_by_operator": "1.2.0",
+    "maximum_across_tracks_and_drafts": null,
+    "status": "pending_live_console",
+    "candidate_version_code": 14,
+    "reason": "Código14 excede produção11 informada pelo operador e artefato13 anterior não enviado; inventário completo/aceitação Play ainda não comprovados."
+  }
 }
