@@ -3,11 +3,19 @@ on:
   pull_request:
     paths:
       - 'tooling/backup_automation/**'
+      - 'tooling/rehearse_scheduled_postgres_*.py'
+      - 'tooling/test_rehearse_scheduled_postgres_*.py'
+      - 'tooling/verify_production_recovery_evidence.py'
+      - 'tooling/test_verify_production_recovery_evidence.py'
       - '.github/workflows/backup-automation.yml'
   push:
     branches: ['codex/onda-0-consolidacao']
     paths:
       - 'tooling/backup_automation/**'
+      - 'tooling/rehearse_scheduled_postgres_*.py'
+      - 'tooling/test_rehearse_scheduled_postgres_*.py'
+      - 'tooling/verify_production_recovery_evidence.py'
+      - 'tooling/test_verify_production_recovery_evidence.py'
       - '.github/workflows/backup-automation.yml'
 permissions:
   contents: read
@@ -27,3 +35,6 @@ jobs:
           node --version
           node --check tooling/backup_automation/backup.mjs
           node --test tooling/backup_automation/backup.test.mjs
+          python3 -m unittest tooling.test_rehearse_scheduled_postgres_upgrade \
+            tooling.test_rehearse_scheduled_postgres_backup \
+            tooling.test_verify_production_recovery_evidence -q

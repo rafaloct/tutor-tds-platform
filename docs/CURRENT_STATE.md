@@ -1,5 +1,20 @@
 # CURRENT STATE
 
+## 2026-10-13 — Issue #202, ensaio ligado ao dump agendado offsite
+
+IMPLEMENTED/TESTED-LOCAL: companheiro opt-in
+`tooling/rehearse_scheduled_postgres_upgrade.py` reutiliza recibo/arquivo/age do
+runner existente e liga restore, migration, rollback, catálogo e OpenAPI ao
+mesmo dump e à árvore Git da API candidata. Inspeção de produção não lê env;
+SQL produtivo é read-only. Clone/migrator/APIs usam recursos próprios de Docker,
+rede interna, tmpfs e secrets sintéticos. Verificador de aceite permanece
+inalterado; manifesto exige revisão separada de schemas/custódia/volume crítico.
+Suíte focal: 42 passed/1 skipped opt-in; contratos do produtor Node: 29 passed.
+Árvores `api/` e Flutter preservadas.
+UNKNOWN: nenhuma chave age real, R2, VPS ou produção foi acessada nesta
+implementação; a execução operacional e o aceite final continuam pendentes.
+Procedimento: `production/SCHEDULED_POSTGRES_RESTORE_DRILL.md`.
+
 ## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
 
 OBSERVED: `tooling/class_lifecycle_e2e/harness.py --execute` em checkout isolado
