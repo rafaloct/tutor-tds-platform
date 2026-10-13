@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import textwrap
@@ -166,6 +167,16 @@ def authentication(route):
     return "Sem Bearer."
 
 
+def curl_example(method, url, route, body):
+    """Anonymous examples must not send an empty optional Authorization header."""
+    curl = f'curl --request {method} "${{TDS_API_BASE}}{url}"'
+    if authentication(route).startswith("Bearer obrigatório"):
+        curl += ' \\\n  --header "Authorization: Bearer ${TDS_ACCESS_TOKEN}"'
+    if body is not None:
+        curl += " \\\n  --header 'Content-Type: application/json' \\\n  --data " + shlex.quote(json.dumps(body, ensure_ascii=False))
+    return curl
+
+
 def source_link(function):
     path = Path(inspect.getsourcefile(function)).relative_to(ROOT).as_posix()
     return path, inspect.getsourcelines(function)[1]
@@ -279,6 +290,7 @@ def generate():
     api_tree = subprocess.check_output(["git", "rev-parse", "HEAD:api"], cwd=ROOT, text=True).strip()
     notes = json.loads((DOCS / "operation-notes.json").read_text())
     overrides = json.loads((DOCS / "response-overrides.json").read_text())
+    typed_overrides = json.loads((DOCS / "typed-response-overrides.json").read_text())
     body_overrides_path = DOCS / "request-overrides.json"
     body_overrides = json.loads(body_overrides_path.read_text()) if body_overrides_path.exists() else {}
     by_key = {f"{method} {route.path}": route for route in routes(app.routes) for method in route.methods}
@@ -289,6 +301,9 @@ def generate():
                if route.response_model is None or str(route.response_model).startswith("dict")}
     if set(overrides) != untyped:
         raise ValueError(f"Untyped response coverage mismatch: missing={sorted(untyped-set(overrides))} extra={sorted(set(overrides)-untyped)}")
+    if not set(typed_overrides) <= expected - untyped:
+        raise ValueError(f"Typed response overrides must target structured response models: {sorted(set(typed_overrides)-(expected-untyped))}")
+    overrides.update(typed_overrides)
     artifacts, examples = {}, {}
     reference = ["# Referência completa de endpoints\n", "Gerada pelo contrato candidato. Leia primeiro [o guia](README.md). Exemplos são sintéticos; IDs devem apontar para fixtures do mesmo ambiente. A validação Pydantic confirma tipos/validadores dos exemplos tipados, sem executar comandos ou comprovar autorização relacional.\n", f"Árvore Git da fonte: `{api_tree}`. Operações: **{len(expected)}**.\n", "## Índice\n"]
     for index, key in enumerate(sorted(expected), 1):
@@ -322,11 +337,7 @@ def generate():
                 url = url.replace("{" + parameter["name"] + "}", str(sample(parameter["schema"], spec, parameter["name"])))
         if query:
             url += "?" + urlencode(query)
-        curl = f"curl --request {method} \"${{TDS_API_BASE}}{url}\""
-        if "Bearer" in authentication(route) and not authentication(route).startswith("Sem"):
-            curl += " \\\n  --header \"Authorization: Bearer ${TDS_ACCESS_TOKEN}\""
-        if body is not None:
-            curl += " \\\n  --header 'Content-Type: application/json' \\\n  --data '" + json.dumps(body, ensure_ascii=False) + "'"
+        curl = curl_example(method, url, route, body)
         reference.extend(["\n### Exemplo de requisição\n", "```bash\n" + curl + "\n```\n"])
         response = overrides.get(key)
         if response is None:
@@ -377,7 +388,7 @@ def generate():
     artifacts["SCHEMAS.md"] = "\n".join(schemas).rstrip() + "\n"
     artifacts["openapi.json"] = json.dumps(spec, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     artifacts["examples.json"] = json.dumps(examples, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
-    evidence = {"source_tree": api_tree, "operation_count": len(expected), "path_count": len(spec["paths"]), "schema_count": len(spec["components"]["schemas"]), "validated_request_examples": request_count, "validated_response_examples": response_count, "validated_model_response_examples": model_response_count, "validated_mapping_response_examples": mapping_response_count, "source_reviewed_untyped_responses": len(untyped), "example_operation_count": len(examples), "runtime_mutations": False, "production_requests": False}
+    evidence = {"source_tree": api_tree, "operation_count": len(expected), "path_count": len(spec["paths"]), "schema_count": len(spec["components"]["schemas"]), "validated_request_examples": request_count, "validated_response_examples": response_count, "validated_model_response_examples": model_response_count, "validated_mapping_response_examples": mapping_response_count, "source_reviewed_untyped_responses": len(untyped), "source_reviewed_typed_response_overrides": len(typed_overrides), "example_operation_count": len(examples), "runtime_mutations": False, "production_requests": False}
     evidence["validated_documentation_links"] = validate_links(artifacts)
     artifacts["coverage.json"] = json.dumps(evidence, indent=2, sort_keys=True) + "\n"
     return artifacts, evidence

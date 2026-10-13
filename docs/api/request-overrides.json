@@ -162,7 +162,7 @@
         "occurred_at": "2026-10-01T12:00:00Z"
       }
     ],
-    "retention_until": "2026-10-01T12:00:00Z",
+    "retention_until": "2030-10-01T12:00:00Z",
     "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "source_type": "whatsapp_export"
   },

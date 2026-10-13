@@ -4,14 +4,10 @@ on:
   pull_request:
     paths:
       - "api/**"
-      - "docs/api/**"
-      - "tooling/generate_api_reference.py"
       - ".github/workflows/tutor-api.yml"
   push:
     paths:
       - "api/**"
-      - "docs/api/**"
-      - "tooling/generate_api_reference.py"
       - ".github/workflows/tutor-api.yml"
 
 permissions:
@@ -51,8 +47,6 @@ jobs:
           "$python" -m compileall -q app tests ops
           bash -n ops/*.sh
           "$python" -m pytest tests -q
-      - name: Check generated API documentation and examples
-        run: '"$UV_PROJECT_ENVIRONMENT/bin/python" tooling/generate_api_reference.py --check'
       - name: Test existing Worker with the candidate protocol consumer
         working-directory: cartilhas_app/cloudflare/tutor-tds-gateway
         run: |

@@ -305,7 +305,7 @@ curl --request GET "${TDS_API_BASE}/admin/ledger?program_id=00000000-0000-4000-8
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exige COMMERCIAL_SIMULATION_ENABLED=true, PAYMENT_ADAPTER=disabled, escopo financeiro autorizado e source_event_id da mídia do score. Exemplo de simulação; o evento-fonte da fixture pode estar fora da janela do score. Nunca representa pagamento/payout real.
 
 ```json
 [
@@ -316,14 +316,19 @@ HTTP **200**. Exemplo sintético do modelo de resposta.
     "creator_user_id": "00000000-0000-4000-8000-000000000001",
     "media_id": "00000000-0000-4000-8000-000000000001",
     "source_event_id": "00000000-0000-4000-8000-000000000001",
-    "rule_version": "qa-example",
-    "entry_type": "qa-example",
-    "amount_minor": 0,
-    "currency": "qa-example",
+    "rule_version": "creator-score-v2",
+    "entry_type": "accrual",
+    "amount_minor": 100,
+    "currency": "BRL",
     "status": "simulated",
     "idempotency_key": "qa-command-20261013-0001",
-    "calculation_snapshot": {},
-    "created_at": "2026-10-01T12:00:00Z"
+    "calculation_snapshot": {
+      "creator_score_id": "00000000-0000-4000-8000-000000000001",
+      "score_basis_points": 0,
+      "mode": "simulated",
+      "payment_adapter": "disabled"
+    },
+    "created_at": "2026-10-13T12:00:00Z"
   }
 ]
 ```
@@ -375,19 +380,19 @@ curl --request GET "${TDS_API_BASE}/admin/media/00000000-0000-4000-8000-00000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Histórico da fixture após criação por creator com vínculo ativo: transição inicial null → draft e motivo fixado pela rota. Publicação/bloqueio/arquivamento acrescentam novas transições em vez de reescrever este histórico.
 
 ```json
 [
   {
-    "id": "00000000-0000-4000-8000-000000000001",
+    "id": "00000000-0000-4000-8000-000000000021",
     "media_id": "00000000-0000-4000-8000-000000000001",
     "from_status": null,
     "to_status": "draft",
     "actor_user_id": "00000000-0000-4000-8000-000000000001",
-    "actor_role": "qa-example",
-    "reason": null,
-    "occurred_at": "2026-10-01T12:00:00Z"
+    "actor_role": "creator",
+    "reason": "Mídia criada como rascunho.",
+    "occurred_at": "2026-10-13T12:00:00Z"
   }
 ]
 ```
@@ -780,12 +785,12 @@ curl --request GET "${TDS_API_BASE}/assessment-contents/00000000-0000-4000-8000-
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Prévia de prática do próprio aluno sempre retorna answer_key null e questions sem correct_index/explanation. Gabarito possui fluxo próprio separado.
 
 ```json
 {
   "assessment_content_id": "00000000-0000-4000-8000-000000000001",
-  "course_id": "curso-qa",
+  "course_id": "curso-exemplo",
   "topic": "Tema sintético",
   "mode": "quiz",
   "title": "Curso Sintético QA",
@@ -794,13 +799,14 @@ HTTP **200**. Exemplo sintético do modelo de resposta.
     {
       "question": "Questão sintética?",
       "options": [
+        "qa-example",
         "qa-example"
       ],
       "topic": "Tema sintético"
     }
   ],
   "answer_key": null,
-  "created_at": "2026-10-01T12:00:00Z"
+  "created_at": "2026-10-13T12:00:00Z"
 }
 ```
 
@@ -1999,18 +2005,18 @@ curl --request GET "${TDS_API_BASE}/classes/00000000-0000-4000-8000-000000000003
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Consulta da mesma importação sintética criada: source_type whatsapp_export, status pending_review e evidências pendentes de revisão humana. A leitura não realiza integração externa nem muda o status.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "class_id": "00000000-0000-4000-8000-000000000003",
-  "source_type": "manual",
-  "status": "active",
-  "retention_until": "2026-10-01T12:00:00Z",
+  "source_type": "whatsapp_export",
+  "status": "pending_review",
+  "retention_until": "2030-10-01T12:00:00Z",
   "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "evidence_ids": [
-    "00000000-0000-4000-8000-000000000001"
+    "00000000-0000-4000-8000-000000000010"
   ]
 }
 ```
@@ -2665,16 +2671,32 @@ curl --request GET "${TDS_API_BASE}/classes/00000000-0000-4000-8000-000000000003
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Retorna o relatório persistido pelo fechamento, preservando resumo e report_digest. A fixture possui participante confirmado, sem evidências/presenças pendentes, e external_integrations disabled.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "class_id": "00000000-0000-4000-8000-000000000003",
   "session_id": "00000000-0000-4000-8000-000000000009",
-  "generated_at": "2026-10-01T12:00:00Z",
-  "report_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "summary": {}
+  "generated_at": "2026-10-13T12:00:00Z",
+  "report_digest": "b997d3e91db08f65ceb64a9e9638ea5feb8692686003f65217f920f156c1f310",
+  "summary": {
+    "checkin_count": 1,
+    "pending_evidence_ids": [],
+    "pending_explicitly_confirmed": false,
+    "presence": {
+      "total": 1,
+      "counts": {
+        "pending": 0,
+        "suggested_present": 0,
+        "confirmed_present": 1,
+        "justified_absence": 0,
+        "absent": 0
+      },
+      "pending_count": 0
+    },
+    "external_integrations": "disabled"
+  }
 }
 ```
 
@@ -2729,23 +2751,23 @@ curl --request GET "${TDS_API_BASE}/classes/00000000-0000-4000-8000-000000000003
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Página da fixture recém-criada antes de rotação/fechamento: status open e token_version 1. Sem parâmetros de paginação a rota usa limit=50/offset=0. A projeção pública de sessão omite token e código de check-in.
 
 ```json
 {
   "sessions": [
     {
-      "id": "00000000-0000-4000-8000-000000000001",
+      "id": "00000000-0000-4000-8000-000000000009",
       "class_id": "00000000-0000-4000-8000-000000000003",
       "starts_at": "2026-10-13T12:00:00Z",
       "ends_at": "2026-10-13T13:00:00Z",
       "status": "open",
-      "token_expires_at": "2026-10-01T12:00:00Z",
-      "token_version": 0
+      "token_expires_at": "2026-10-13T12:10:00Z",
+      "token_version": 1
     }
   ],
   "total": 1,
-  "limit": 20,
+  "limit": 50,
   "offset": 0
 }
 ```
@@ -2797,17 +2819,17 @@ curl --request GET "${TDS_API_BASE}/classes/00000000-0000-4000-8000-000000000003
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Encontro open mais recente da turma, nesta fixture recém-criada. A projeção pública omite token/código; sem encontro aberto autorizado a rota retorna 404.
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
+  "id": "00000000-0000-4000-8000-000000000009",
   "class_id": "00000000-0000-4000-8000-000000000003",
   "starts_at": "2026-10-13T12:00:00Z",
   "ends_at": "2026-10-13T13:00:00Z",
   "status": "open",
-  "token_expires_at": "2026-10-01T12:00:00Z",
-  "token_version": 0
+  "token_expires_at": "2026-10-13T12:10:00Z",
+  "token_version": 1
 }
 ```
 
@@ -2860,17 +2882,17 @@ curl --request GET "${TDS_API_BASE}/classes/00000000-0000-4000-8000-000000000003
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Detalhe da fixture recém-criada antes de rotação/fechamento, com o mesmo ID do parâmetro de caminho. A projeção pública omite token e código de check-in; leitura não renova a expiração.
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
+  "id": "00000000-0000-4000-8000-000000000009",
   "class_id": "00000000-0000-4000-8000-000000000003",
   "starts_at": "2026-10-13T12:00:00Z",
   "ends_at": "2026-10-13T13:00:00Z",
   "status": "open",
-  "token_expires_at": "2026-10-01T12:00:00Z",
-  "token_version": 0
+  "token_expires_at": "2026-10-13T12:10:00Z",
+  "token_version": 1
 }
 ```
 
@@ -3778,7 +3800,7 @@ curl --request GET "${TDS_API_BASE}/creators/me/media" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Lista mídias do creator autenticado, incluindo rascunhos. O exemplo preserva a fixture de criação: status draft, captions [], duração 1s e playback_url/published_at null; as respostas não contêm credenciais ou IDs do asset no provedor.
 
 ```json
 {
@@ -3787,18 +3809,16 @@ HTTP **200**. Exemplo sintético do modelo de resposta.
       "id": "00000000-0000-4000-8000-000000000001",
       "institution_id": "00000000-0000-4000-8000-000000000001",
       "program_id": "00000000-0000-4000-8000-000000000002",
-      "course_id": "curso-qa",
+      "course_id": "curso-exemplo",
       "module_id": "modulo-qa",
       "creator_user_id": "00000000-0000-4000-8000-000000000001",
       "title": "Curso Sintético QA",
-      "description": "qa-example",
+      "description": "",
       "competency_id": "00000000-0000-4000-8000-000000000001",
       "provider": "youtube",
-      "duration_seconds": 0,
+      "duration_seconds": 1,
       "thumbnail_url": null,
-      "captions": [
-        {}
-      ],
+      "captions": [],
       "visibility": "public",
       "offline_policy": "forbidden",
       "status": "draft",
@@ -3854,7 +3874,7 @@ curl --request GET "${TDS_API_BASE}/creators/me/scores" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Lista somente scores pertencentes ao creator autenticado. O snapshot deste exemplo corresponde à janela sintética sem sinais.
 
 ```json
 [
@@ -3863,12 +3883,31 @@ HTTP **200**. Exemplo sintético do modelo de resposta.
     "creator_user_id": "00000000-0000-4000-8000-000000000001",
     "media_id": "00000000-0000-4000-8000-000000000001",
     "program_id": "00000000-0000-4000-8000-000000000002",
-    "rule_version": "qa-example",
+    "rule_version": "creator-score-v2",
     "window_start": "2026-10-01T00:00:00Z",
     "window_end": "2026-10-02T00:00:00Z",
     "score_basis_points": 0,
-    "calculation_snapshot": {},
-    "created_at": "2026-10-01T12:00:00Z"
+    "calculation_snapshot": {
+      "participants_started": 0,
+      "qualified_completions": 0,
+      "qualified_followups": 0,
+      "saves": 0,
+      "explicit_rating": {
+        "weight_basis_points": 1500,
+        "ratings": 0,
+        "rating_sum": 0,
+        "awarded_basis_points": 0
+      },
+      "operational_quality": false,
+      "weights_basis_points": {
+        "completion": 3500,
+        "followup": 3500,
+        "explicit_rating": 1500,
+        "save": 1000,
+        "operational": 500
+      }
+    },
+    "created_at": "2026-10-13T12:00:00Z"
   }
 ]
 ```
@@ -4332,8 +4371,7 @@ Published Media. Fonte: [api/app/media.py:351](../../api/app/media.py).
 ### Exemplo de requisição
 
 ```bash
-curl --request GET "${TDS_API_BASE}/media" \
-  --header "Authorization: Bearer ${TDS_ACCESS_TOKEN}"
+curl --request GET "${TDS_API_BASE}/media"
 ```
 
 ### Contrato de resposta
@@ -4344,7 +4382,7 @@ curl --request GET "${TDS_API_BASE}/media" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Esta rota lista somente mídias published visíveis para o solicitante; não retorna draft/blocked/archived.
 
 ```json
 {
@@ -4353,24 +4391,22 @@ HTTP **200**. Exemplo sintético do modelo de resposta.
       "id": "00000000-0000-4000-8000-000000000001",
       "institution_id": "00000000-0000-4000-8000-000000000001",
       "program_id": "00000000-0000-4000-8000-000000000002",
-      "course_id": "curso-qa",
+      "course_id": "curso-exemplo",
       "module_id": "modulo-qa",
       "creator_user_id": "00000000-0000-4000-8000-000000000001",
       "title": "Curso Sintético QA",
-      "description": "qa-example",
+      "description": "",
       "competency_id": "00000000-0000-4000-8000-000000000001",
       "provider": "youtube",
-      "duration_seconds": 0,
+      "duration_seconds": 1,
       "thumbnail_url": null,
-      "captions": [
-        {}
-      ],
+      "captions": [],
       "visibility": "public",
       "offline_policy": "forbidden",
-      "status": "draft",
+      "status": "published",
       "followup_activity_id": "00000000-0000-4000-8000-000000000001",
-      "playback_url": null,
-      "published_at": null
+      "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+      "published_at": "2026-10-13T12:00:00Z"
     }
   ]
 }
@@ -4409,8 +4445,7 @@ Published Media Detail. Fonte: [api/app/media.py:374](../../api/app/media.py).
 ### Exemplo de requisição
 
 ```bash
-curl --request GET "${TDS_API_BASE}/media/00000000-0000-4000-8000-000000000001" \
-  --header "Authorization: Bearer ${TDS_ACCESS_TOKEN}"
+curl --request GET "${TDS_API_BASE}/media/00000000-0000-4000-8000-000000000001"
 ```
 
 ### Contrato de resposta
@@ -4421,31 +4456,29 @@ curl --request GET "${TDS_API_BASE}/media/00000000-0000-4000-8000-000000000001" 
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. O detalhe exige status published e visibilidade autorizada; estados editoriais não publicados recebem 404.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "institution_id": "00000000-0000-4000-8000-000000000001",
   "program_id": "00000000-0000-4000-8000-000000000002",
-  "course_id": "curso-qa",
+  "course_id": "curso-exemplo",
   "module_id": "modulo-qa",
   "creator_user_id": "00000000-0000-4000-8000-000000000001",
   "title": "Curso Sintético QA",
-  "description": "qa-example",
+  "description": "",
   "competency_id": "00000000-0000-4000-8000-000000000001",
   "provider": "youtube",
-  "duration_seconds": 0,
+  "duration_seconds": 1,
   "thumbnail_url": null,
-  "captions": [
-    {}
-  ],
+  "captions": [],
   "visibility": "public",
   "offline_policy": "forbidden",
-  "status": "draft",
+  "status": "published",
   "followup_activity_id": "00000000-0000-4000-8000-000000000001",
-  "playback_url": null,
-  "published_at": null
+  "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+  "published_at": "2026-10-13T12:00:00Z"
 }
 ```
 
@@ -5339,25 +5372,23 @@ curl --request PATCH "${TDS_API_BASE}/admin/media/00000000-0000-4000-8000-000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Somente draft pode ser editado. Com patch vazio a fixture permanece inalterada; a duração válida de criação é preservada.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "institution_id": "00000000-0000-4000-8000-000000000001",
   "program_id": "00000000-0000-4000-8000-000000000002",
-  "course_id": "curso-qa",
+  "course_id": "curso-exemplo",
   "module_id": "modulo-qa",
   "creator_user_id": "00000000-0000-4000-8000-000000000001",
   "title": "Curso Sintético QA",
-  "description": "qa-example",
+  "description": "",
   "competency_id": "00000000-0000-4000-8000-000000000001",
   "provider": "youtube",
-  "duration_seconds": 0,
+  "duration_seconds": 1,
   "thumbnail_url": null,
-  "captions": [
-    {}
-  ],
+  "captions": [],
   "visibility": "public",
   "offline_policy": "forbidden",
   "status": "draft",
@@ -5611,7 +5642,7 @@ curl --request POST "${TDS_API_BASE}/admin/accounts" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Conta e vínculo no programa são criados atomicamente; membership_status do novo vínculo é active. O papel depende do payload autorizado.
 
 ```json
 {
@@ -5619,7 +5650,7 @@ HTTP **201**. Exemplo sintético do modelo de resposta.
   "name": "Pessoa Sintética QA",
   "role": "student",
   "program_id": "00000000-0000-4000-8000-000000000002",
-  "membership_status": "qa-example"
+  "membership_status": "active"
 }
 ```
 
@@ -5828,17 +5859,19 @@ curl --request POST "${TDS_API_BASE}/admin/classes/00000000-0000-4000-8000-00000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Nova sessão exige turma active e retorna status open/token_version=1. Expiração é min(ends_at, agora+10min). Token/código são demonstrativos e não concedem acesso real.
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
+  "id": "00000000-0000-4000-8000-000000000009",
   "class_id": "00000000-0000-4000-8000-000000000003",
   "starts_at": "2026-10-13T12:00:00Z",
   "ends_at": "2026-10-13T13:00:00Z",
-  "status": "active",
-  "token_expires_at": "2026-10-01T12:00:00Z",
-  "token_version": 0
+  "status": "open",
+  "token_expires_at": "2026-10-13T12:10:00Z",
+  "token_version": 1,
+  "checkin_token": "TOKEN_SINTETICO_DO_ENCONTRO",
+  "checkin_code": "000000"
 }
 ```
 
@@ -5962,7 +5995,7 @@ curl --request POST "${TDS_API_BASE}/admin/creator-scores/calculate" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Novo cálculo sempre grava rule_version=creator-score-v2 e o snapshot dos pesos/sinais. Exemplo de janela sem eventos/ratings: score zero com snapshot completo. Repetição da mesma mídia/creator/regra/janela retorna 200 e o cálculo existente.
 
 ```json
 {
@@ -5970,12 +6003,31 @@ HTTP **201**. Exemplo sintético do modelo de resposta.
   "creator_user_id": "00000000-0000-4000-8000-000000000001",
   "media_id": "00000000-0000-4000-8000-000000000001",
   "program_id": "00000000-0000-4000-8000-000000000002",
-  "rule_version": "qa-example",
+  "rule_version": "creator-score-v2",
   "window_start": "2026-10-01T00:00:00Z",
   "window_end": "2026-10-02T00:00:00Z",
   "score_basis_points": 0,
-  "calculation_snapshot": {},
-  "created_at": "2026-10-01T12:00:00Z"
+  "calculation_snapshot": {
+    "participants_started": 0,
+    "qualified_completions": 0,
+    "qualified_followups": 0,
+    "saves": 0,
+    "explicit_rating": {
+      "weight_basis_points": 1500,
+      "ratings": 0,
+      "rating_sum": 0,
+      "awarded_basis_points": 0
+    },
+    "operational_quality": false,
+    "weights_basis_points": {
+      "completion": 3500,
+      "followup": 3500,
+      "explicit_rating": 1500,
+      "save": 1000,
+      "operational": 500
+    }
+  },
+  "created_at": "2026-10-13T12:00:00Z"
 }
 ```
 
@@ -6156,7 +6208,7 @@ curl --request POST "${TDS_API_BASE}/admin/ledger/simulate" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exige COMMERCIAL_SIMULATION_ENABLED=true, PAYMENT_ADAPTER=disabled, escopo financeiro autorizado e source_event_id da mídia do score. Exemplo de simulação; o evento-fonte da fixture pode estar fora da janela do score. Nunca representa pagamento/payout real. Novo lançamento tem status simulated e snapshot com mode simulated/payment_adapter disabled. Replay idêntico retorna 200; payload divergente na mesma chave retorna 409.
 
 ```json
 {
@@ -6166,14 +6218,19 @@ HTTP **201**. Exemplo sintético do modelo de resposta.
   "creator_user_id": "00000000-0000-4000-8000-000000000001",
   "media_id": "00000000-0000-4000-8000-000000000001",
   "source_event_id": "00000000-0000-4000-8000-000000000001",
-  "rule_version": "qa-example",
+  "rule_version": "creator-score-v2",
   "entry_type": "accrual",
   "amount_minor": 100,
   "currency": "BRL",
   "status": "simulated",
   "idempotency_key": "qa-command-20261013-0001",
-  "calculation_snapshot": {},
-  "created_at": "2026-10-01T12:00:00Z"
+  "calculation_snapshot": {
+    "creator_score_id": "00000000-0000-4000-8000-000000000001",
+    "score_basis_points": 0,
+    "mode": "simulated",
+    "payment_adapter": "disabled"
+  },
+  "created_at": "2026-10-13T12:00:00Z"
 }
 ```
 
@@ -6233,7 +6290,7 @@ curl --request POST "${TDS_API_BASE}/admin/media" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Criação sempre começa em draft, com playback_url/published_at null. captions contém objetos com language/label/format/url quando fornecidas; este request não possui legendas, então retorna [].
 
 ```json
 {
@@ -6249,9 +6306,7 @@ HTTP **201**. Exemplo sintético do modelo de resposta.
   "provider": "youtube",
   "duration_seconds": 1,
   "thumbnail_url": null,
-  "captions": [
-    {}
-  ],
+  "captions": [],
   "visibility": "public",
   "offline_policy": "forbidden",
   "status": "draft",
@@ -6317,31 +6372,29 @@ curl --request POST "${TDS_API_BASE}/admin/media/00000000-0000-4000-8000-0000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo de blocked → archived: conserva published_at histórico e playback_url null. Qualquer estado exceto archived pode ser arquivado; uma mídia nunca publicada pode conservar published_at null.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "institution_id": "00000000-0000-4000-8000-000000000001",
   "program_id": "00000000-0000-4000-8000-000000000002",
-  "course_id": "curso-qa",
+  "course_id": "curso-exemplo",
   "module_id": "modulo-qa",
   "creator_user_id": "00000000-0000-4000-8000-000000000001",
   "title": "Curso Sintético QA",
-  "description": "qa-example",
+  "description": "",
   "competency_id": "00000000-0000-4000-8000-000000000001",
   "provider": "youtube",
-  "duration_seconds": 0,
+  "duration_seconds": 1,
   "thumbnail_url": null,
-  "captions": [
-    {}
-  ],
+  "captions": [],
   "visibility": "public",
   "offline_policy": "forbidden",
-  "status": "draft",
+  "status": "archived",
   "followup_activity_id": "00000000-0000-4000-8000-000000000001",
   "playback_url": null,
-  "published_at": null
+  "published_at": "2026-10-13T12:00:00Z"
 }
 ```
 
@@ -6398,31 +6451,29 @@ curl --request POST "${TDS_API_BASE}/admin/media/00000000-0000-4000-8000-0000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo de published → blocked: conserva published_at histórico e remove playback_url da resposta. Também admite processing → blocked, quando published_at pode continuar null. Exige motivo e autoridade editorial.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "institution_id": "00000000-0000-4000-8000-000000000001",
   "program_id": "00000000-0000-4000-8000-000000000002",
-  "course_id": "curso-qa",
+  "course_id": "curso-exemplo",
   "module_id": "modulo-qa",
   "creator_user_id": "00000000-0000-4000-8000-000000000001",
   "title": "Curso Sintético QA",
-  "description": "qa-example",
+  "description": "",
   "competency_id": "00000000-0000-4000-8000-000000000001",
   "provider": "youtube",
-  "duration_seconds": 0,
+  "duration_seconds": 1,
   "thumbnail_url": null,
-  "captions": [
-    {}
-  ],
+  "captions": [],
   "visibility": "public",
   "offline_policy": "forbidden",
-  "status": "draft",
+  "status": "blocked",
   "followup_activity_id": "00000000-0000-4000-8000-000000000001",
   "playback_url": null,
-  "published_at": null
+  "published_at": "2026-10-13T12:00:00Z"
 }
 ```
 
@@ -6474,31 +6525,29 @@ curl --request POST "${TDS_API_BASE}/admin/media/00000000-0000-4000-8000-0000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Sucesso exige estado inicial draft/processing, autoridade editorial e rights_confirmed=true na fixture. Retorna status published e published_at não nulo; em visibilidade public/unlisted, playback_url vem do provedor. A criação ilustrada tem rights_confirmed=false e requer atualização explícita antes de publicar.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "institution_id": "00000000-0000-4000-8000-000000000001",
   "program_id": "00000000-0000-4000-8000-000000000002",
-  "course_id": "curso-qa",
+  "course_id": "curso-exemplo",
   "module_id": "modulo-qa",
   "creator_user_id": "00000000-0000-4000-8000-000000000001",
   "title": "Curso Sintético QA",
-  "description": "qa-example",
+  "description": "",
   "competency_id": "00000000-0000-4000-8000-000000000001",
   "provider": "youtube",
-  "duration_seconds": 0,
+  "duration_seconds": 1,
   "thumbnail_url": null,
-  "captions": [
-    {}
-  ],
+  "captions": [],
   "visibility": "public",
   "offline_policy": "forbidden",
-  "status": "draft",
+  "status": "published",
   "followup_activity_id": "00000000-0000-4000-8000-000000000001",
-  "playback_url": null,
-  "published_at": null
+  "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+  "published_at": "2026-10-13T12:00:00Z"
 }
 ```
 
@@ -7824,7 +7873,7 @@ curl --request POST "${TDS_API_BASE}/certificates/references" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo hipotético de referência oficial previamente emitida e validada no provedor autorizado. Novo registro preenche holder_name/course_title/institution_name/planned_hours do contexto autorizado; não emite certificado. Exige matrícula/elegibilidade e verificação pública de nome/curso/hash; approval_required acrescenta aprovação humana. Nenhum provedor foi consultado para este exemplo.
 
 ```json
 {
@@ -7833,10 +7882,10 @@ HTTP **201**. Exemplo sintético do modelo de resposta.
   "program_id": "00000000-0000-4000-8000-000000000002",
   "course_id": "curso-exemplo",
   "class_id": null,
-  "holder_name": null,
-  "course_title": null,
-  "institution_name": null,
-  "planned_hours": null,
+  "holder_name": "Pessoa Sintética QA",
+  "course_title": "Curso Sintético QA",
+  "institution_name": "Instituição Sintética QA",
+  "planned_hours": 80.0,
   "issued_at": "2026-10-01T12:00:00Z",
   "verification_url": "https://example.org/verify/qa-certificate",
   "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -7916,7 +7965,7 @@ curl --request POST "${TDS_API_BASE}/checkins/code" \
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Método do exemplo: code. O endpoint por turma usa qr com token, ou manual para equipe informando alvo; o endpoint por código sempre grava code. A evidência de check-in começa pendente e não concede presença formal. Replay idêntico retorna 200.
 
 ```json
 {
@@ -7924,9 +7973,9 @@ HTTP **201**. Exemplo sintético do modelo de resposta.
   "session_id": "00000000-0000-4000-8000-000000000009",
   "user_id": "00000000-0000-4000-8000-000000000004",
   "kind": "checkin",
-  "occurred_at": "2026-10-01T12:00:00Z",
-  "method": "qa-example",
-  "evidence_id": "00000000-0000-4000-8000-000000000001"
+  "occurred_at": "2026-10-13T12:00:00Z",
+  "method": "code",
+  "evidence_id": "00000000-0000-4000-8000-000000000010"
 }
 ```
 
@@ -7979,7 +8028,7 @@ Import Evidence. Fonte: [api/app/evidence.py:279](../../api/app/evidence.py).
 curl --request POST "${TDS_API_BASE}/classes/00000000-0000-4000-8000-000000000003/evidence-imports" \
   --header "Authorization: Bearer ${TDS_ACCESS_TOKEN}" \
   --header 'Content-Type: application/json' \
-  --data '{"idempotency_key": "qa-command-20261013-0001", "items": [{"evidence_type": "observation", "item_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "occurred_at": "2026-10-01T12:00:00Z"}], "retention_until": "2026-10-01T12:00:00Z", "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "source_type": "whatsapp_export"}'
+  --data '{"idempotency_key": "qa-command-20261013-0001", "items": [{"evidence_type": "observation", "item_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "occurred_at": "2026-10-01T12:00:00Z"}], "retention_until": "2030-10-01T12:00:00Z", "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "source_type": "whatsapp_export"}'
 ```
 
 ### Contrato de resposta
@@ -7990,18 +8039,18 @@ curl --request POST "${TDS_API_BASE}/classes/00000000-0000-4000-8000-00000000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Nova importação tem status pending_review; cada evidência começa pending e aguarda revisão humana. A retenção da fixture é 2030-10-01T12:00:00Z e precisa continuar futura ao executar o exemplo. Replay idêntico retorna 200.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "class_id": "00000000-0000-4000-8000-000000000003",
   "source_type": "whatsapp_export",
-  "status": "active",
-  "retention_until": "2026-10-01T12:00:00Z",
+  "status": "pending_review",
+  "retention_until": "2030-10-01T12:00:00Z",
   "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "evidence_ids": [
-    "00000000-0000-4000-8000-000000000001"
+    "00000000-0000-4000-8000-000000000010"
   ]
 }
 ```
@@ -8296,7 +8345,7 @@ curl --request POST "${TDS_API_BASE}/classes/00000000-0000-4000-8000-00000000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Método do exemplo: qr. O endpoint por turma usa qr com token, ou manual para equipe informando alvo; o endpoint por código sempre grava code. A evidência de check-in começa pendente e não concede presença formal. Replay idêntico retorna 200.
 
 ```json
 {
@@ -8304,9 +8353,9 @@ HTTP **201**. Exemplo sintético do modelo de resposta.
   "session_id": "00000000-0000-4000-8000-000000000009",
   "user_id": "00000000-0000-4000-8000-000000000004",
   "kind": "checkin",
-  "occurred_at": "2026-10-01T12:00:00Z",
-  "method": "qa-example",
-  "evidence_id": "00000000-0000-4000-8000-000000000001"
+  "occurred_at": "2026-10-13T12:00:00Z",
+  "method": "qr",
+  "evidence_id": "00000000-0000-4000-8000-000000000010"
 }
 ```
 
@@ -8367,16 +8416,32 @@ curl --request POST "${TDS_API_BASE}/classes/00000000-0000-4000-8000-00000000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo sem pendências de evidência/presença, com participante já confirmado. O relatório inclui resumo/presença e marca external_integrations disabled; a sessão passa a closed. Relatório existente é replay; pendências exigem confirm_pending=true.
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "class_id": "00000000-0000-4000-8000-000000000003",
   "session_id": "00000000-0000-4000-8000-000000000009",
-  "generated_at": "2026-10-01T12:00:00Z",
-  "report_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "summary": {}
+  "generated_at": "2026-10-13T12:00:00Z",
+  "report_digest": "b997d3e91db08f65ceb64a9e9638ea5feb8692686003f65217f920f156c1f310",
+  "summary": {
+    "checkin_count": 1,
+    "pending_evidence_ids": [],
+    "pending_explicitly_confirmed": false,
+    "presence": {
+      "total": 1,
+      "counts": {
+        "pending": 0,
+        "suggested_present": 0,
+        "confirmed_present": 1,
+        "justified_absence": 0,
+        "absent": 0
+      },
+      "pending_count": 0
+    },
+    "external_integrations": "disabled"
+  }
 }
 ```
 
@@ -8512,17 +8577,19 @@ curl --request POST "${TDS_API_BASE}/classes/00000000-0000-4000-8000-00000000000
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **200**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Somente sessão open pode rotacionar. O exemplo parte da versão 1 e retorna versão 2 com novo token/código e janela de até 10 minutos.
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
+  "id": "00000000-0000-4000-8000-000000000009",
   "class_id": "00000000-0000-4000-8000-000000000003",
   "starts_at": "2026-10-13T12:00:00Z",
   "ends_at": "2026-10-13T13:00:00Z",
-  "status": "active",
-  "token_expires_at": "2026-10-01T12:00:00Z",
-  "token_version": 0
+  "status": "open",
+  "token_expires_at": "2026-10-13T12:10:00Z",
+  "token_version": 2,
+  "checkin_token": "TOKEN_SINTETICO_ROTACIONADO",
+  "checkin_code": "111111"
 }
 ```
 
@@ -9182,13 +9249,13 @@ curl --request POST "${TDS_API_BASE}/media/00000000-0000-4000-8000-000000000001/
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **201**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Grant criado somente após mídia published, entrega configurada e acesso vigente. expires_at é agora+300s; playback_url aponta para o endpoint autenticado do grant, não diretamente para o provedor. URL/token demonstrativos não funcionam em ambiente real.
 
 ```json
 {
   "media_id": "00000000-0000-4000-8000-000000000001",
-  "playback_url": "qa-example",
-  "expires_at": "2026-10-01T12:00:00Z",
+  "playback_url": "https://example.org/tutor-api/media/00000000-0000-4000-8000-000000000001/playback/TOKEN_DE_PLAYBACK_SINTETICO_NAO_UTILIZAVEL",
+  "expires_at": "2026-10-13T12:05:00Z",
   "token_type": "media_playback"
 }
 ```
@@ -10251,7 +10318,7 @@ curl --request PUT "${TDS_API_BASE}/assessment-contents/00000000-0000-4000-8000-
 | 422 | Validation Error | [HTTPValidationError](SCHEMAS.md#schema-HTTPValidationError) |
 ### Exemplo de resposta
 
-HTTP **200**. Exemplo sintético do modelo de resposta.
+HTTP **201**. Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Conteúdo de prática novo retorna 201; replay idêntico retorna 200. questions contém apenas question/options/topic e answer_key é null; correct_index/explanation enviados no request não vazam na resposta.
 
 ```json
 {
@@ -10263,18 +10330,16 @@ HTTP **200**. Exemplo sintético do modelo de resposta.
   "duration_seconds": 0,
   "questions": [
     {
-      "correct_index": 0,
-      "explanation": "",
+      "question": "Questão sintética?",
       "options": [
         "qa-example",
         "qa-example"
       ],
-      "question": "Questão sintética?",
       "topic": "Tema sintético"
     }
   ],
   "answer_key": null,
-  "created_at": "2026-10-01T12:00:00Z"
+  "created_at": "2026-10-13T12:00:00Z"
 }
 ```
 

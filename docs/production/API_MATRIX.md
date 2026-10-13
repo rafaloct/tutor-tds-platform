@@ -12,6 +12,9 @@ nenhum schema adicional foi inventado no runtime. Autorização por Header/Depen
 papéis globais, vínculos de programa/turma, flags e erros condicionais são
 explicitados. Status: IMPLEMENTED/TESTED-LOCAL da documentação. Não promove os
 status de implantação/aceite das features abaixo nem fecha gates da release.
+Revisão documental: workflow independente somente leitura; exemplos públicos sem
+Bearer vazio; 29 respostas tipadas curadas e transições de mídia conferidas com
+handlers reais em SQLite sintético descartável.
 
 | Issue #5 candidate (2026-10-03) | Authorization / behavior | Evidence / limit |
 | --- | --- | --- |

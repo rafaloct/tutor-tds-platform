@@ -14,6 +14,10 @@ autenticação via Header/Depends sem security scheme. Guia distingue schema
 produtivo histórico 0028/compatibility false da fonte candidata 0030, sem afirmar
 deploy. Somente documentação/tooling; nenhuma mudança no contrato, migração,
 produção, secrets ou dados. Cobertura, exemplos e links verificados offline.
+Revisão do PR #204: check documental isolado em workflow somente leitura;
+exemplos anônimos omitem Bearer opcional; 29 respostas tipadas curadas com estados
+e projeções dos serializers. Testes em SQLite sintético verificam acesso público
+sem token e publicação/bloqueio/arquivo de mídia contra os exemplos gerados.
 
 ## 2026-10-12 — Android E2E #140 PASS no Windows (candidato b2784ba)
 

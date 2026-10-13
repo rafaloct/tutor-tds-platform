@@ -286,18 +286,26 @@ cd api
 uv sync --frozen --extra test
 uv run --frozen --extra test python ../tooling/generate_api_reference.py
 uv run --frozen --extra test python ../tooling/generate_api_reference.py --check
+uv run --frozen --extra test python -m unittest discover -s ../tooling -p test_api_reference.py -v
 ```
 
 `--check` compara a cobertura entre rotas reais, OpenAPI e notas de operação,
 exige resposta explícita para cada operação sem modelo JSON preciso, valida os
 52 exemplos de body com os modelos reais e todas as respostas tipadas, e detecta
 artefatos desatualizados e verifica os links locais. `coverage.json` registra
-quantidades exatas. A CI da API executa esse check em mudanças de código,
-documentação ou gerador. Os exemplos
+quantidades exatas. O workflow independente [API reference validation](../../.github/workflows/api-reference.yml)
+executa esse check em mudanças de código, documentação ou gerador, com permissão
+somente de leitura e sem publicar imagem ou implantar staging. Os exemplos
 sem response_model são revisados contra serializers, não contra schemas
-inexistentes. Nenhuma verificação local equivale a smoke/deploy produtivo.
+inexistentes. `typed-response-overrides.json` cura respostas cujos estados,
+metadados ou projeções não podem ser deduzidos só do schema. Os testes focados
+conferem exemplos anônimos e transições de mídia contra a API em SQLite sintético
+descartável. Nenhuma verificação local equivale a smoke/deploy produtivo.
 
 Ao alterar uma rota, atualize `operation-notes.json`, os exemplos curados em
-`request-overrides.json`/`response-overrides.json`, rode o gerador e revise o diff.
+`request-overrides.json`, `response-overrides.json` e
+`typed-response-overrides.json`, rode os testes e o gerador e revise o diff.
+Datas de retenção em importações precisam estar no futuro ao executar o exemplo;
+a data sintética fixa evita alterar os artefatos todos os dias.
 Não acrescente dados reais ou chaves. A documentação deve mudar junto com o
 contrato e manter explícito o estado da implantação.
