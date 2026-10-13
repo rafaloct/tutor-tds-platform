@@ -115,7 +115,7 @@ class Rehearsal:
                     continue
                 record = self.inspect(kind, name)
                 labels = record.get("Labels", {}) if kind == "network" else record["Config"]["Labels"]
-                restore.require(labels.get("tds.purpose") == PURPOSE and
+                restore.require(isinstance(labels, dict) and labels.get("tds.purpose") == PURPOSE and
                                 labels.get("tds.run") == self.run_id, "disposable_ownership_unverified")
                 self.docker(kind, "rm", *(["--force"] if kind == "container" else []), name)
             except (restore.DrillError, ValueError, KeyError, TypeError):
@@ -176,7 +176,7 @@ class Rehearsal:
                                     "tutor-tds-api-db-1"))
         for record, service in ((api, "api"), (db, "db")):
             labels = record["Config"].get("Labels", {})
-            restore.require(record["State"]["Running"] is True and
+            restore.require(isinstance(labels, dict) and record["State"]["Running"] is True and
                             labels.get("com.docker.compose.project") == "tutor-tds-api" and
                             labels.get("com.docker.compose.service") == service,
                             "production_container_identity_invalid")

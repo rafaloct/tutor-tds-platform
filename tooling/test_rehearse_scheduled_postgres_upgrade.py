@@ -169,14 +169,16 @@ class ScheduledUpgradeTests(unittest.TestCase):
             self.assertNotIn(".Config.Env", " ".join(call.args))
 
     def test_cleanup_rejects_foreign_resources(self):
-        run = upgrade.Rehearsal("my-run")
-        run.resources = [("container", "foreign")]
-        with patch.object(run, "inspect", return_value={"Config": {"Labels": {"tds.run": "foreign"}}}), \
-                patch.object(run, "docker", return_value=b"foreign\n") as docker:
-            with self.assertRaisesRegex(restore.DrillError, "cleanup_failed"):
-                run.cleanup()
-            self.assertEqual(len(docker.call_args_list), 1)
-            self.assertEqual(docker.call_args.args[:2], ("container", "ls"))
+        for labels in ({"tds.run": "foreign"}, None):
+            with self.subTest(labels=labels):
+                run = upgrade.Rehearsal("my-run")
+                run.resources = [("container", "foreign")]
+                with patch.object(run, "inspect", return_value={"Config": {"Labels": labels}}), \
+                        patch.object(run, "docker", return_value=b"foreign\n") as docker:
+                    with self.assertRaisesRegex(restore.DrillError, "cleanup_failed"):
+                        run.cleanup()
+                    self.assertEqual(len(docker.call_args_list), 1)
+                    self.assertEqual(docker.call_args.args[:2], ("container", "ls"))
 
     def test_cleanup_skips_confirmed_absence_and_still_removes_database_and_network(self):
         run = upgrade.Rehearsal("my-run")
