@@ -1,5 +1,21 @@
 # CURRENT STATE
 
+## 2026-10-13 — fonte consolidada para a release
+
+IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e
+#204 (referência da API) foram integrados por merges no PR #198, preservando
+seus históricos. Conflitos de CURRENT_STATE reconciliados com os recibos da
+promoção e restauração efetivamente executadas; runtime API e fonte Flutter
+permanecem idênticos. Referência: 133 operações, 120 paths, 107 schemas,
+52 requests, 97 responses e 560 links conferidos. Contratos de recuperação:
+49 passed/1 skipped opt-in; produtor Node: 29 passed. No LARGeo, o verificador
+original, configuração e assinatura passaram; checkout limpo após restaurar
+um comprovante cujos bytes tinham sido convertidos para CRLF pelo Git antes
+da política de preservação. Nenhum hash de recibo ou gate foi alterado.
+UNKNOWN/BLOCKED: landing do SHA consolidado aguarda aprovação; tag e novo AAB
+não executados. ADB às 16:22UTC não encontrou o Xiaomi; smoke QA das15:15
+continua registrado, sem alegação de teste do futuro AAB.
+
 ## 2026-10-13 — API promovida e HTTPS verificado
 
 OBSERVED: API produtiva migrou0028→0029→0030 e usa imagem4ed8a189… da fonte
