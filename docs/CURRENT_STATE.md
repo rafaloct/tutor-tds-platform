@@ -1,5 +1,30 @@
 # CURRENT STATE
 
+## 2026-10-14 — promoção da API com configuração Chatwoot
+
+OBSERVED: promoção iniciada por agente paralelo às 12:48–12:50Z no srv1533541
+recriou `api` com a imagem `tutor-tds-candidate:6e3cd5f31bb4`
+(`sha256:575681b5…`, árvore `ae0d777f`) e acrescentou `CHATWOOT_BASE_URL`/
+`CHATWOOT_WEBSITE_TOKEN` ao `.env` produtivo — mas o compose implantado não
+mapeava as variáveis; o container ficou sem elas e `/support/config` respondeu
+503. Correção às 13:02–13:04Z: compose sincronizado com a versão revisada
+(`+3` linhas: as duas `CHATWOOT_*` e `DYNAMIC_ACTIVITY_ENABLED:-false`), backup
+protegido em `/opt/tutor-tds-api/.promotion-20261014T130238Z-chatwoot-env`
+(0700), `.env` inalterado nesta etapa, somente o serviço `api` recriado; IDs de
+`db`/`policy-web` preservados. Verificação interna e HTTPS externa:
+`/health` ok, `/version` schema `20261007_0030`/production/mínimo11/
+compatibilidade true, `/support/config` **200** com exatamente
+`{base_url, website_token}`, `base_url` HTTPS
+(`https://chat.ipexdesenvolvimento.cloud`), token não vazio,
+`Cache-Control: no-store` e `Pragma: no-cache`; `/courses` 200. Sondas Python
+receberam Cloudflare 403/1010 por assinatura de bot; verificação externa usou
+curl com UA de navegador. Recibo sanitizado:
+`production/evidence/chatwoot-runtime-config-promotion-20261014.json`.
+PENDING: entrega real do widget no app e recebimento de conversa sintética
+não comprovados nesta operação; AAB14 não gerado, upload/envio Play não
+realizados. A resposta 200 da rota não é aceite de atendimento nem prova de
+resposta humana.
+
 ## 2026-10-14 — ensaio offsite/upgrade PASS da candidata 1.4.1+14
 
 OBSERVED: primeira operação do fluxo de lançamento executada no srv1533541.
