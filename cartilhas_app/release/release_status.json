@@ -25,7 +25,13 @@
     "status": "not_built",
     "upload_allowed": false,
     "matches_current_source": false,
-    "reason": "Configuração Chatwoot implementada e promovida na API produtiva em 2026-10-14 (GET /support/config 200 com controles do contrato); imagem isolada, smoke físico e ensaio offsite/upgrade PostgreSQL verificados (aceite de restauração ainda pendente de revisão humana); integração/tag e inventário Play ainda pendentes. Nenhum AAB14 gerado."
+    "reason": "Configuração Chatwoot promovida em produção (GET /support/config 200); smoke físico SM-T835 com FAQ+logo e widget Chatwoot ativo evidenciado; ensaio offsite/upgrade PostgreSQL verificado e ACEITO pelo operador em 2026-10-14; tag v1.4.1 criada e pushed em 9bf44e9 com proveniência remota alinhada. Único item pendente: operador reportar o maior versionCode do Play Console (todos os tracks + rascunhos) para o parâmetro -PublishedVersionCode. Nenhum AAB14 gerado.",
+    "restore_acceptance": {
+      "status": "accepted_by_operator",
+      "accepted_at": "2026-10-14",
+      "evidence": "docs/production/evidence/production-restore-acceptance.json",
+      "note": "Operador revisou e aceitou o ensaio de restauração (backup offsite, restore PostgreSQL, volumes críticos, compatibilidade de schema 20261007_0030)."
+    }
   },
   "required_physical_evidence": [
     {
