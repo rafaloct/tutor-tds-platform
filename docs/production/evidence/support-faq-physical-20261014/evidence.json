@@ -1,0 +1,66 @@
+{
+  "id": "support_faq_branding_physical_smoke",
+  "schema_version": 1,
+  "captured_at": "2026-10-14T16:45:00Z",
+  "source": {
+    "branch": "codex/chatwoot-runtime-release-20261013",
+    "commit": "9f6063b",
+    "feature_commit": "3715601",
+    "merge_commit": "8fdc5fb"
+  },
+  "build": {
+    "type": "debug",
+    "package": "com.tutortds_cartilhas.dev",
+    "dart_defines": {
+      "TUTOR_ENVIRONMENT": "staging",
+      "TUTOR_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+      "TUTOR_STAGING_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api"
+    },
+    "builder": "LARGeo Windows 11, Flutter 3.44.9 / Dart 3.12.2",
+    "note": "APK debug/staging isolado; NAO e o AAB de release. Assinado com a chave de debug/release-config local conforme Gradle."
+  },
+  "device": {
+    "model": "Samsung SM-T835",
+    "android": "10 (API 29)",
+    "serial": "ce11182bc340760e017e",
+    "network": "WiFi via Windows Mobile Hotspot (LARGEO 0767) — upstream SEM internet no momento da captura"
+  },
+  "executed": [
+    "flutter analyze: no issues found (VPS /opt/flutter 3.44.9 e LARGeo)",
+    "flutter test recorte afetado: 14/14 (3 novos FAQ + 11 ciclo de vida Chatwoot existentes)",
+    "flutter build apk --debug --dart-define-from-file=staging defines: sucesso",
+    "adb install no SM-T835 fisico: sucesso",
+    "onboarding com dados sinteticos QA -> home -> menu -> Suporte TDS"
+  ],
+  "screenshots": [
+    {
+      "file": "support-screen-appbar.png",
+      "observed": "Tela Suporte TDS com AppBar exibindo acao de FAQ (help_outline) ao lado de refresh; corpo em estado de erro 'Nao foi possivel conectar ao suporte' porque o aparelho estava sem internet (hotspot do host sem upstream). Botoes Tentar novamente e WhatsApp presentes."
+    },
+    {
+      "file": "faq-sheet-logo-faq.png",
+      "observed": "Bottom sheet aberto pela acao do AppBar: drag handle, logo container (card branco com logo TDS fundo branco, linha de logos parceiros UFT/IPEX/FAPTO/CDR, legenda 'Central de Ajuda') e lista 'Perguntas frequentes' com 5 itens colapsados."
+    },
+    {
+      "file": "faq-item-expanded.png",
+      "observed": "Primeiro item 'Preciso de internet para usar o suporte?' expandido, resposta visivel: chat/WhatsApp precisam de conexao; cartilhas baixadas e a lista de duvidas continuam offline."
+    }
+  ],
+  "api_evidence": {
+    "endpoint": "https://ead.ipexdesenvolvimento.cloud/tutor-api/support/config",
+    "method": "GET",
+    "status": 200,
+    "time_total_s": 0.897,
+    "captured_at": "2026-10-14T16:45:45Z",
+    "response": {
+      "base_url": "https://chat.ipexdesenvolvimento.cloud",
+      "website_token": "CJ73BWnNovnZezSPgDEfuNQv"
+    },
+    "note": "website_token e publico por contrato (exposto a clientes). Fetch feito a partir da VPS; o aparelho fisico nao alcancou a API por falta de upstream do hotspot."
+  },
+  "not_proven": [
+    "WebView Chatwoot no aparelho fisico (sem internet no dispositivo no momento do teste)",
+    "Execucao de emulador Android no LARGeo: QEMU registra emulator-5554 mas guest estagna sob WHPX (CPU ~18-27s acumulada, adb offline); investigacao aberta",
+    "AAB assinado de release — gates de release ainda fechados (release_build_allowed=false, tag e production.json ausentes, inventario Play pendente)"
+  ]
+}
