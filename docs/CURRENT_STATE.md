@@ -1079,3 +1079,34 @@ OBSERVED (Pixel_8_Pro / emulator-5554 no LARGEO via Tailscale+SSH, APK debug des
 - ATENCAO (relatado ao operador): clipboard do emulador exibia fragmento de
   chave OpenRouter — recomendado rotacionar se a chave foi transitada por ele.
 REMAINING: PR push/review, deploy CI staging no ref, gates de producao.
+
+## 2026-10-14 — suporte FAQ+logo validado em SM-T835 fisico com internet; emulador LARGeo ainda bloqueado
+
+OBSERVED (branch `codex/chatwoot-runtime-release-20261013`, HEAD `83f877a`,
+evidencia `docs/production/evidence/support-faq-physical-20261014/`):
+- Pacote QA/debug isolado no Samsung SM-T835 (API 29): onboarding -> home ->
+  "Suporte TDS" -> botao FAQ no AppBar (`Perguntas frequentes`) -> bottom
+  sheet com logo container (TDS + UFT/IPEX/FAPTO/CDR + "Central de Ajuda")
+  e 5 itens FAQ expansivos (commits `e0307af`, `f713560`).
+- Internet do tablet restabelecida (ping ead.ipexdesenvolvimento.cloud e
+  8.8.8.8 0% loss). Com rede real: GET `/support/config` (staging) OK no
+  aparelho e WebView Chatwoot renderizado — "Suporte / Normalmente responde
+  em alguns minutos / Estamos ausentes / Iniciar Conversa" (screenshot
+  `chatwoot-widget-loaded.png`). FAQ sheet abre SOBRE o widget ativo —
+  coexistencia provada (`faq-sheet-over-live-widget.png`).
+- Producao `/tutor-api/support/config`: 200 em ~0.9s, payload do contrato
+  (verificado da VPS).
+- AVD `tdsAab` (LARGeo): `hw.ramSize=4096` confirmado, 4 vCPU, data 10G.
+
+BLOCKED (emulador LARGeo, boundary = hipervisor/imagem do host, nao o app):
+- Guest nunca completa boot: `emulator-5554` fica `offline` ~150s e QEMU sai
+  sem FATAL; framebuffer nunca recebe post ("no last posted color buffer").
+  Retestado com `-no-snapshot -gpu swiftshader_indirect`: identico.
+  Suspeita: WHPX/ANGLE no host com imagem API>35 (emulador avisa "Guest
+  Angle is still unstable for API > 35"). Tablet fisico supre a validacao.
+
+PENDING (release AAB 1.4.1/code 14 — `tooling/build_production.ps1`):
+`release_build_allowed=false` (human gate), tag `v1.4.1` ausente,
+inventario Play Console pendente (producao informada = code 11),
+aceite humano do ensaio de restore pendente. `config/production.json`
+ja existe localmente no LARGeo (gitignored). Nenhum AAB oficial gerado.
