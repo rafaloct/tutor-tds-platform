@@ -26,7 +26,13 @@ attachments/emoji_picker/end_conversation) e renderizou a tela inicial
 ("Iniciar Conversa") em Chrome headless real — screenshot
 `production/evidence/chatwoot-widget-render-20261014T1312Z.png`. Nenhuma
 mensagem enviada. Execução remota em desktop Windows da tailnet indisponível
-(sem SSH/WinRM/conector); teste equivalente executado no host.
+nesta sessão; teste equivalente executado no host.
+OBSERVED (relatado pela sessão Devin em desktop-8t5drbs): verificação idêntica
+executada no próprio desktop — `/support/config` retornou base_url
+`chat.ipexdesenvolvimento.cloud` e token, página do widget 200 com
+`chatwootWebChannel` populado e mesmo render headless do Chrome local
+("Suporte/Iniciar Conversa"). Somente leitura; artefatos locais no desktop
+(%TEMP% screenshot/DOM). Resultado consistente host×desktop.
 PENDING: entrega real do widget no app e recebimento de conversa sintética
 não comprovados nesta operação; AAB14 não gerado, upload/envio Play não
 realizados. A resposta 200 da rota não é aceite de atendimento nem prova de
