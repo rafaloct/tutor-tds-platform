@@ -12,6 +12,7 @@ import '../config/app_config.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/support/chatwoot_config_repository.dart';
 import '../features/support/chatwoot_mobile_host.dart';
+import '../features/support/support_help_sections.dart';
 import '../services/privacy_preferences.dart';
 import '../services/chatwoot_web_impl.dart'
     if (dart.library.io) '../services/chatwoot_web_stub.dart';
@@ -246,6 +247,11 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'Perguntas frequentes',
+            onPressed: () => _showFaqSheet(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Recarregar',
             onPressed: _loadSupport,
@@ -278,87 +284,106 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
     }
 
     return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(16),
+      child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SupportBrandHeader(),
+                const SizedBox(height: 24),
+                Text(
+                  _webOpened ? 'Chat de suporte aberto!' : 'Suporte TDS',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                child: const Icon(
-                  Icons.chat_bubble_outline,
-                  size: 52,
-                  color: Color(0xFF093AF4),
+                const SizedBox(height: 10),
+                Text(
+                  _webOpened
+                      ? 'O chat do suporte TDS foi aberto no canto inferior direito da tela. '
+                            'Procure o ícone de balão de conversa.'
+                      : 'Escolha como prefere falar com a equipe TDS.',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                _webOpened ? 'Chat de suporte aberto!' : 'Suporte TDS',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _webOpened
-                    ? 'O chat do suporte TDS foi aberto no canto inferior direito da tela. '
-                          'Procure o ícone de balão de conversa.'
-                    : 'Escolha como prefere falar com a equipe TDS.',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  height: 1.6,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-              // Reabrir chat
-              FilledButton.icon(
-                icon: const Icon(Icons.chat_bubble),
-                label: const Text('Reabrir chat'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF093AF4),
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                // Reabrir chat
+                FilledButton.icon(
+                  icon: const Icon(Icons.chat_bubble),
+                  label: const Text('Reabrir chat'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF093AF4),
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: _loadSupport,
+                ),
+
+                const SizedBox(height: 12),
+
+                // WhatsApp fallback
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.phone_in_talk, color: Color(0xFF25D366)),
+                  label: const Text(
+                    'WhatsApp +55 63 9301-0823',
+                    style: TextStyle(color: Color(0xFF25D366)),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF25D366)),
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => launchUrl(
+                    Uri.parse(
+                      'https://wa.me/$_whatsappSuporte?text=${Uri.encodeComponent("Olá! Preciso de ajuda com o App Cartilhas TDS.")}',
+                    ),
+                    mode: LaunchMode.externalApplication,
                   ),
                 ),
-                onPressed: _loadSupport,
-              ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 32),
+                const SupportFaqSection(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              // WhatsApp fallback
-              OutlinedButton.icon(
-                icon: const Icon(Icons.phone_in_talk, color: Color(0xFF25D366)),
-                label: const Text(
-                  'WhatsApp +55 63 9301-0823',
-                  style: TextStyle(color: Color(0xFF25D366)),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF25D366)),
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () => launchUrl(
-                  Uri.parse(
-                    'https://wa.me/$_whatsappSuporte?text=${Uri.encodeComponent("Olá! Preciso de ajuda com o App Cartilhas TDS.")}',
-                  ),
-                  mode: LaunchMode.externalApplication,
-                ),
-              ),
-            ],
+  void _showFaqSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SupportBrandHeader(),
+                SizedBox(height: 24),
+                SupportFaqSection(),
+              ],
+            ),
           ),
         ),
       ),
