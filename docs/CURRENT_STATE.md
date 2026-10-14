@@ -1,5 +1,156 @@
 # CURRENT STATE
 
+## 2026-10-14 — promoção da API com configuração Chatwoot
+
+OBSERVED: promoção iniciada por agente paralelo às 12:48–12:50Z no srv1533541
+recriou `api` com a imagem `tutor-tds-candidate:6e3cd5f31bb4`
+(`sha256:575681b5…`, árvore `ae0d777f`) e acrescentou `CHATWOOT_BASE_URL`/
+`CHATWOOT_WEBSITE_TOKEN` ao `.env` produtivo — mas o compose implantado não
+mapeava as variáveis; o container ficou sem elas e `/support/config` respondeu
+503. Correção às 13:02–13:04Z: compose sincronizado com a versão revisada
+(`+3` linhas: as duas `CHATWOOT_*` e `DYNAMIC_ACTIVITY_ENABLED:-false`), backup
+protegido em `/opt/tutor-tds-api/.promotion-20261014T130238Z-chatwoot-env`
+(0700), `.env` inalterado nesta etapa, somente o serviço `api` recriado; IDs de
+`db`/`policy-web` preservados. Verificação interna e HTTPS externa:
+`/health` ok, `/version` schema `20261007_0030`/production/mínimo11/
+compatibilidade true, `/support/config` **200** com exatamente
+`{base_url, website_token}`, `base_url` HTTPS
+(`https://chat.ipexdesenvolvimento.cloud`), token não vazio,
+`Cache-Control: no-store` e `Pragma: no-cache`; `/courses` 200. Sondas Python
+receberam Cloudflare 403/1010 por assinatura de bot; verificação externa usou
+curl com UA de navegador. Recibo sanitizado:
+`production/evidence/chatwoot-runtime-config-promotion-20261014.json`.
+OBSERVED 13:12Z: página pública do widget carregada com o token da configuração
+resolveu a inbox real (`Suporte`, pt_BR, resposta em alguns minutos, features
+attachments/emoji_picker/end_conversation) e renderizou a tela inicial
+("Iniciar Conversa") em Chrome headless real — screenshot
+`production/evidence/chatwoot-widget-render-20261014T1312Z.png`. Nenhuma
+mensagem enviada. Execução remota em desktop Windows da tailnet indisponível
+nesta sessão; teste equivalente executado no host.
+OBSERVED (relatado pela sessão Devin em desktop-8t5drbs): verificação idêntica
+executada no próprio desktop — `/support/config` retornou base_url
+`chat.ipexdesenvolvimento.cloud` e token, página do widget 200 com
+`chatwootWebChannel` populado e mesmo render headless do Chrome local
+("Suporte/Iniciar Conversa"). Somente leitura; artefatos locais no desktop
+(%TEMP% screenshot/DOM). Resultado consistente host×desktop.
+PENDING: entrega real do widget no app e recebimento de conversa sintética
+não comprovados nesta operação; AAB14 não gerado, upload/envio Play não
+realizados. A resposta 200 da rota não é aceite de atendimento nem prova de
+resposta humana.
+
+## 2026-10-14 — ensaio offsite/upgrade PASS da candidata 1.4.1+14
+
+OBSERVED: primeira operação do fluxo de lançamento executada no srv1533541.
+Backup agendado R2 de hoje verificado: recibo Dokploy
+`20261014T034000Z-ab86d2540dec49f69ed44fc5bcff3668` (03:40:11 UTC), objeto
+`postgres/scheduled/v1/20261014T034000Z-ab86d2540dec49f69ed44fc5bcff3668/archive.dump.age`,
+258.125 bytes, SHA-256
+`67f2411d1aea180e05f51a58402edad299f1fe6f88e6e0d303696e50cce72ff3`, com
+coincidência exata entre download e recibo. A identidade age chegou por
+Tailscale a tmpfs `/dev/shm` com modo 0600; a decriptação foi comprovada pela
+assinatura `PGDMP`, sem expor dados. A chave foi sobrescrita (`shred -u`) e o
+diretório temporário destruído ao final do ensaio.
+
+OBSERVED: runner canônico inalterado `rehearse_scheduled_postgres_upgrade.py`,
+run `20261014T123051Z-ff8c4dc8f5be8727`, imagem `tutor-tds-candidate:6e3cd5f31bb4`
+(`sha256:575681b5…`, árvore API `ae0d777f`): restore_verified em PostgreSQL 16
+descartável com rede interna e tmpfs; clone_revision `20261007_0030`; dados e
+colunas originais preservados (fingerprints antes/depois idênticos, sem
+adições); OpenAPI compatível com a imagem produtiva `sha256:4ed8a189b374…` —
+única operação nova `GET /support/config`, nenhuma removida ou alterada —;
+catálogo público compatível; `production_unchanged`; `production_writes=false`;
+recursos isolados removidos. Saída
+`OFFSITE_POSTGRES_UPGRADE=COMPATIBILITY_VERIFIED_PENDING_REVIEW`; manifesto
+`postgres_compatibility_verified_pending_critical_volumes_review`, com gates
+restantes `critical_volumes_custody_review`, `schema_changes_review` e
+`final_acceptance_review`. Evidências sanitizadas:
+`production/evidence/scheduled-postgres-offsite-20261014T123051Z-ff8c4dc8f5be8727.json`,
+`postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json` e
+`recovery-run-20261014T123051Z-ff8c4dc8f5be8727.json`. Saúde de produção após
+o ensaio: `tutor-tds-api-api-1`/`db-1` íntegros e `/health` público retornando
+`{"status":"ok","database":"available"}`.
+
+PENDING: promoção da API produtiva com `CHATWOOT_BASE_URL` e
+`CHATWOOT_WEBSITE_TOKEN` segue `production/CHATWOOT_RUNTIME_CONFIGURATION.md`;
+AAB14 não gerado, upload e envio para análise Play não realizados (produção
+informada pelo operador: código 11, `1.2.0`). O aceite de restauração exige
+revisão humana dos gates restantes; o aceite versionado de 13/10
+(`production-restore-acceptance.json`, árvore `dc32d081`) não cobre a árvore
+`ae0d777f` desta candidata.
+
+## 2026-10-13 — candidata 1.4.1+14: CI, imagem e smoke verificados
+
+IMPLEMENTED: configuração Chatwoot remota, recarga fresca, confirmação pelos
+eventos do SDK e fechamento após mudança de sessão. O GET público usa somente
+Accept, preservando CORS e no-store. Trocar as duas variáveis na API e recriá-la
+permite rotação do token sem reconstruir os clientes desta candidata.
+TESTED: CI de `5fe0b419` passou API/Worker, referência da API, segredos e Flutter:
+analyze sem problemas, 718 testes VM/widget e nove Chrome canônicos. Revisão
+independente não encontrou P1/P2. Chrome usa SDK simulado; não comprova o widget
+real dentro do futuro AAB. A documentação tem 134 operações e 121 paths.
+
+OBSERVED: imagem isolada `sha256:8f71af5a6a5caf6ec535ae8f5d00b518839fde3b143e7c82f459726d93dc39b8`
+da fonte `6e3cd5f3`, árvore API `ae0d777f`, conferiu os 73 arquivos COPY contra
+Git. Nenhum container/configuração/banco da API produtiva foi alterado pelo
+build. OCI-created usa o `%cI` da VPS, `2026-10-13T20:59:56+00:00`; Git local
+renderiza o mesmo instante com Z. Não houve novo restore PostgreSQL dessa árvore.
+
+OBSERVED: APK debug QA 1.4.1-dev+14, mínimo24/alvo36, fonte `5fe0b419`, hash
+`75fb9ccec47542ad1c9840e65faa92a3eda72916e77a3e7b2f7c763cc70687d6`.
+Samsung SM-T835/API29 passou abertura/reabertura de oito segundos, foco e UI,
+sem fatal/ANR observado. Pacotes existentes ficaram intactos; sem clear,
+reinstalação ou instalação produtiva. Falhas dos verificadores de snapshot/foco
+foram corrigidas conservando as provas originais e os mesmos controles.
+
+OBSERVED: Chatwoot4.17, porta interna3005, recebeu duas mensagens por WebWidget
+HTTP; uma resposta criada por Rails apareceu na leitura HTTP. A conta QA não
+tinha usuários, atendentes ou destinatários reais. O verificador de limpeza
+retornou NoMethodError; consulta independente confirmou todos os registros
+próprios removidos, saúde200 e estado privado finalizado, sem repetir deletes.
+Não houve prova de resposta humana, login de atendente, WebSocket ou SDK Android.
+Provas públicas, hashes e limites:
+`production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/`.
+
+BLOCKED: DESKTOP-8T5DRBS continua offline no conector. A identidade age guardada
+nele é necessária ao restore novo; o acesso autenticado à Play também depende
+dessa máquina. No LARGeo, a conta aberta pediu criar conta de desenvolvedor;
+nenhuma conta foi criada. Maior versionCode de todos os tracks permanece
+UNKNOWN. PR#206 está draft; merge/tag, promoção da nova API, AAB14 e upload Play
+não ocorreram. Publicação já autorizada; build/upload continuam false enquanto
+os controles reais restantes não passam. API4ed/schema0030 e AAB histórico13
+permanecem preservados.
+
+## 2026-10-13 — configuração remota de suporte, Issue #205
+
+IMPLEMENTED/TESTED-LOCAL: API oferece GET `/support/config` público, somente URL
+HTTPS e token público WebWidget, com no-store; configuração inválida retorna503
+sem derrubar outras rotas. 100 testes focais PASS; OpenAPI aditivo sem alteração
+dos contratos comuns. Referência regenerada: 134 operações, 121 paths, 108schemas,
+52 requests, 98 responses e 564 links; três testes documentais/5subtests PASS.
+Troca das duas variáveis e recriação da API permite novo token sem rebuild nos
+clientes desta candidata. Procedimento em
+`production/CHATWOOT_RUNTIME_CONFIGURATION.md`.
+OBSERVED: PR#198 consolidado foi integrado em207e212 e tagv1.4.0 criada;
+AAB1.4.0+13 assinado/target36/Bundletool/16KB conferidos, entregue em release
+GitHub draft, sem upload Play. Serviço Chatwoot4.17 web saudável/worker executando;
+token legado aceito em consulta pública, sem prova de resposta humana.
+DECISION: operador autorizou correção e publicação Play e aceitou tablet Samsung
+físico no lugar do Xiaomi. UNKNOWN: máximo de códigos Play, promoção da nova API,
+smoke da fonte alterada, novo AAB e estado final Play ainda em verificação.
+IMPLEMENTED/TESTED-LOCAL: verificador aceita statusv1 externo pós-build, mantendo
+todos os gates originais; 36 testes e três negativos CLI PASS no Windows. Nova
+candidata permanece congelada até recuperação/smoke frescos; artefato e provas
+anteriores preservados no histórico. Testes Chrome canônicos entram no workflow
+Linux: runner Flutter web no Windows encontrou erro de path CanvasKit404,
+sem alteração de SDK ou alegação de PASS desse runner.
+OBSERVED: CI do SHA7293a2a passou API, Flutter completo incluindo os nove casos
+Chrome canônicos no Linux, documentação e scanner de segredos. Revisão adicional
+identificou preflight CORS400 causado por Cache-Control na request; correção do
+cliente está em preparação, sem ampliar a política da API. Candidata preparada
+1.4.1+14/target36; código11 é o informado pelo operador, máximo em todos os tracks
+ainda UNKNOWN. Desktop da Play offline; LARGeo possui acesso SSH já existente e
+validado à VPS, sem cópia de chave, para continuar operações isoladas.
+
 ## 2026-10-13 — fonte consolidada para a release
 
 IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e
@@ -928,3 +1079,51 @@ OBSERVED (Pixel_8_Pro / emulator-5554 no LARGEO via Tailscale+SSH, APK debug des
 - ATENCAO (relatado ao operador): clipboard do emulador exibia fragmento de
   chave OpenRouter — recomendado rotacionar se a chave foi transitada por ele.
 REMAINING: PR push/review, deploy CI staging no ref, gates de producao.
+
+## 2026-10-14 — suporte FAQ+logo validado em SM-T835 fisico com internet; emulador LARGeo ainda bloqueado
+
+OBSERVED (branch `codex/chatwoot-runtime-release-20261013`, HEAD `83f877a`,
+evidencia `docs/production/evidence/support-faq-physical-20261014/`):
+- Pacote QA/debug isolado no Samsung SM-T835 (API 29): onboarding -> home ->
+  "Suporte TDS" -> botao FAQ no AppBar (`Perguntas frequentes`) -> bottom
+  sheet com logo container (TDS + UFT/IPEX/FAPTO/CDR + "Central de Ajuda")
+  e 5 itens FAQ expansivos (commits `e0307af`, `f713560`).
+- Internet do tablet restabelecida (ping ead.ipexdesenvolvimento.cloud e
+  8.8.8.8 0% loss). Com rede real: GET `/support/config` (staging) OK no
+  aparelho e WebView Chatwoot renderizado — "Suporte / Normalmente responde
+  em alguns minutos / Estamos ausentes / Iniciar Conversa" (screenshot
+  `chatwoot-widget-loaded.png`). FAQ sheet abre SOBRE o widget ativo —
+  coexistencia provada (`faq-sheet-over-live-widget.png`).
+- Producao `/tutor-api/support/config`: 200 em ~0.9s, payload do contrato
+  (verificado da VPS).
+- AVD `tdsAab` (LARGeo): `hw.ramSize=4096` confirmado, 4 vCPU, data 10G.
+
+BLOCKED (emulador LARGeo, boundary = hipervisor/imagem do host, nao o app):
+- Guest nunca completa boot: `emulator-5554` fica `offline` ~150s e QEMU sai
+  sem FATAL; framebuffer nunca recebe post ("no last posted color buffer").
+  Retestado com `-no-snapshot -gpu swiftshader_indirect`: identico.
+  Suspeita: WHPX/ANGLE no host com imagem API>35 (emulador avisa "Guest
+  Angle is still unstable for API > 35"). Tablet fisico supre a validacao.
+
+PENDING (release AAB 1.4.1/code 14 — `tooling/build_production.ps1`):
+`release_build_allowed=false` (human gate), tag `v1.4.1` ausente,
+inventario Play Console pendente (producao informada = code 11),
+aceite humano do ensaio de restore pendente. `config/production.json`
+ja existe localmente no LARGeo (gitignored). Nenhum AAB oficial gerado.
+
+## 2026-10-14 (noite) — DNS da política pública corrigido; AAB14 assinado gerado
+
+OBSERVED:
+- Gate `tooling/build_production.ps1 -PublishedVersionCode 11` PASS completo
+  no LARGeo: pytest API, analyze 0 issues, `flutter test` 721/721,
+  `bundleRelease` -> `app-release.aab` 68.307.100 bytes
+  sha256 `B9716815...A55EB14`, cert de upload confere (16:44:39:...:50).
+  Manifest: `cartilhas_app/release/build-manifest.json` (commit `8eccbbb`,
+  tag `v1.4.1`). Sem upload. AAB entregue ao DESKTOP-8T5DRBS via Taildrop
+  para o rascunho de teste interno 1.4.1 no Play Console.
+- DNS `cartilhas.ipexdesenvolvimento.cloud` criado (A -> 46.202.150.132,
+  proxied Cloudflare): `/privacy.html` e `/account-deletion.html` agora
+  respondem **200 público** (~0.22s). Roteador Traefik `tutor-tds-policy`
+  ja existia — faltava apenas o registro DNS.
+PENDING: upload do AAB no rascunho Play, substituicao dos prints da loja,
+envio para revisao — fora do escopo deste build (upload_allowed=false).

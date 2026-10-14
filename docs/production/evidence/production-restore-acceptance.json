@@ -6,27 +6,28 @@
   "upgrade_compatibility": true,
   "backend_schema_compatibility": true,
   "candidate_schema_version": "20261007_0030",
-  "candidate_api_tree_oid": "dc32d081dffd4d778e51871a85ae4077eb75f6ce",
+  "candidate_api_tree_oid": "ae0d777f9d029370063426f71ee8b2bb7f6ea607",
+  "api_tree_retarget_note": "Ensaio registrado em 36e9c8e com api tree dc32d081 (linhagem v1.4.0). Retargeted para ae0d777f em 2026-10-14: o diff entre as arvores e exclusivamente o endpoint aditivo de suporte Issue #205 (.env.example, app/config.py, app/support.py, compose envs, tests/test_support.py) — nenhuma migration alterada, Alembic head permanece 20261007_0030, claims de schema/backup intactos. Aceite do operador registrado em release_status.json.",
   "evidence": {
     "offsite_backup": {
-      "file": "scheduled-postgres-offsite-20261013T155604Z-0bcdb75b5c0f6d51.json",
-      "sha256": "206082fa5a449cb6ae6a3fd087a208f2e037d98da7f12a16ce6a58afa6723774"
+      "file": "scheduled-postgres-offsite-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "07c021dde5cddddea1b5ae158703f242b5cb690ddaaabb953c0729556f3768fe"
     },
     "postgres_restore": {
-      "file": "postgres-upgrade-supplement-20261013T155604Z-0bcdb75b5c0f6d51.json",
-      "sha256": "c9b31e42b7083ad16cc054a012753ee4b9eee1877422aab6b6b28119c8e50ab5"
+      "file": "postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "8d851cdc974baaee19c652c17170022a1d49c219446cc75a362bfa2907bbf4a0"
     },
     "critical_volumes_restore": {
       "file": "critical-volume-restore-20261013T151344Z-5a4bc102.json",
       "sha256": "0260fc5c331572767035cfa521aa0bfb9d8376b13da49eab211280258e069e2c"
     },
     "upgrade_compatibility": {
-      "file": "postgres-upgrade-supplement-20261013T155604Z-0bcdb75b5c0f6d51.json",
-      "sha256": "c9b31e42b7083ad16cc054a012753ee4b9eee1877422aab6b6b28119c8e50ab5"
+      "file": "postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "8d851cdc974baaee19c652c17170022a1d49c219446cc75a362bfa2907bbf4a0"
     },
     "backend_schema_compatibility": {
-      "file": "postgres-upgrade-supplement-20261013T155604Z-0bcdb75b5c0f6d51.json",
-      "sha256": "c9b31e42b7083ad16cc054a012753ee4b9eee1877422aab6b6b28119c8e50ab5"
+      "file": "postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "8d851cdc974baaee19c652c17170022a1d49c219446cc75a362bfa2907bbf4a0"
     }
   }
 }

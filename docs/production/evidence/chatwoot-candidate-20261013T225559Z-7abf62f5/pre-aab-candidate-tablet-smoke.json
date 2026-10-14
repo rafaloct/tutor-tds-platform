@@ -1,0 +1,139 @@
+{
+  "gate": "pre_aab_physical_device_smoke",
+  "historical_gate_id": "pre_aab_xiaomi_smoke",
+  "run_id": "20261013T225559Z-7abf62f5",
+  "started_at_utc": "2026-10-13T23:18:59.168131+00:00",
+  "execution_host": "LARGeo",
+  "result": "blocked",
+  "user_executor_override": {
+    "allowed": true,
+    "decision": "docs/DECISIONS.md decision 33: Samsung physical tablet accepted instead of Xiaomi."
+  },
+  "qa_smoke": {
+    "initial_force_stop_confirmed": true,
+    "cleanup_force_stop": true
+  },
+  "scope_limitations": [
+    "Fresh candidate short physical Samsung cold launch/relaunch only; no emulator functional matrix repeated.",
+    "Debug isolated staging QA APK, not a production APK or AAB.",
+    "No authentication, accounts, academic data, messages, API writes, gateway, production installation or Play upload.",
+    "Chatwoot SDK opening and real message exchange were not exercised; new runtime endpoint promotion is a separate gate.",
+    "No claim of production validation, release readiness, or AAB integration."
+  ],
+  "evidence_privacy": {
+    "raw_capture_windows_private_directory": "C:\\Users\\Rafael\\Documents\\TutorTDS-QA-private-20261013\\candidate-tablet-20261013T225559Z-7abf62f5",
+    "raw_screenshots_public": false,
+    "raw_ui_xml_public": false,
+    "public_ui_scope": "QA package nodes only; system overlays excluded"
+  },
+  "source": {
+    "qa_build_sha": "5fe0b4194d6f7fe4501fedc4a7eb12cab006e973",
+    "qa_build_app_tree": "9389aca0f54d12a56f29340f2f70c3fb06addcd8",
+    "source_tree_bindings": {
+      "cartilhas_app": "9389aca0f54d12a56f29340f2f70c3fb06addcd8",
+      "cartilhas_app/lib": "2dfc689463eeb9069d9c95b20fd2abc9888b7386",
+      "cartilhas_app/android": "5c5ceab6a3c3932f8e419706a5afad1a195df481",
+      "cartilhas_app/pubspec.yaml": "2e3608712191fea50132ae930dd3ca119ad9e1eb",
+      "cartilhas_app/pubspec.lock": "62359f412a0f638995e68d59601b5f4f49d1b550",
+      "api": "ae0d777f9d029370063426f71ee8b2bb7f6ea607"
+    },
+    "tracked_source_diff_paths": [],
+    "same_flutter_lib_android_pubspec_publock": true,
+    "qa_overlay": {
+      "tracked_source_changes": [],
+      "gradle_configuration_only": true,
+      "application_id_suffix": ".dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6",
+      "version_name_suffix": "-dev",
+      "label": "Tutor TDS QA",
+      "candidate_version_code_preserved": 14
+    }
+  },
+  "qa_apk": {
+    "path": "C:\\Temp\\tds-chatwoot-physical-206-20261013T225559Z-7abf62f5\\source\\cartilhas_app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+    "sha256": "75fb9ccec47542ad1c9840e65faa92a3eda72916e77a3e7b2f7c763cc70687d6",
+    "package": "com.tutortds_cartilhas.dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6",
+    "versionCode": 14,
+    "versionName": "1.4.1-dev",
+    "build_mode": "debug",
+    "signature_verified": true,
+    "signer_sha256": "6af6c35e5ede92952c97861129900eabd297d006ca50db952cb60880deddc4f8",
+    "configuration": {
+      "TUTOR_ENVIRONMENT": "staging",
+      "TUTOR_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+      "TUTOR_STAGING_API_URL": "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+      "TUTOR_GATEWAY_URL": "",
+      "REMOTE_CATALOG_ENABLED": "false",
+      "LEARNING_CONTEXT_ENABLED": "false",
+      "DURABLE_LEARNING_OUTBOX_ENABLED": "false",
+      "JOURNEY_TRACEABILITY_ENABLED": "false",
+      "DYNAMIC_ACTIVITY_ENABLED": "false",
+      "CLASS_LIFECYCLE_FAKE_ENABLED": "false",
+      "SIGNED_SUPPORT_IDENTITY": "false",
+      "PUSH_NOTIFICATIONS_ENABLED": "false",
+      "DYNAMIC_QA_ISOLATED_PACKAGE": "true",
+      "DYNAMIC_QA_RUN_ID": "7abf62f53fc74f59bed8a156cfac36a6"
+    },
+    "installation": "Fresh isolated namespace installation; no replacement/reinstall/data clear.",
+    "installed_metadata": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/com.tutortds_cartilhas.dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6-1zSYBoCd3wG7q_tfvYUahA==/base.apk"
+      ],
+      "versionCode": "14",
+      "versionName": "1.4.1-dev",
+      "firstInstallTime": "2026-10-13 20:19:13",
+      "lastUpdateTime": "2026-10-13 20:19:13",
+      "installed_apk_sha256": {
+        "/data/app/com.tutortds_cartilhas.dev.dynamicqa.r7abf62f53fc74f59bed8a156cfac36a6-1zSYBoCd3wG7q_tfvYUahA==/base.apk": "75fb9ccec47542ad1c9840e65faa92a3eda72916e77a3e7b2f7c763cc70687d6"
+      }
+    },
+    "installed_bytes_bound_by_exact_sha256": true
+  },
+  "debug_build_evidence_sha256": "4551d6c583bd612966b9ed596da61f355c03f2d7fd851b85a9a6be4009de726a",
+  "device": {
+    "serial": "ce11182bc340760e017e",
+    "model": "SM-T835",
+    "characteristics": "tablet",
+    "manufacturer": "samsung",
+    "product": "gts4llteub",
+    "build_fingerprint": "samsung/gts4llteub/gts4llte:10/QP1A.190711.020/T835UBU5CVG4:user/release-keys",
+    "android_version": "10",
+    "api_level": "29",
+    "abis": "arm64-v8a,armeabi-v7a,armeabi",
+    "ro_kernel_qemu": "0"
+  },
+  "baseline_packages": {
+    "com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57-MiXPeKaQ20z6TyngxYoBjA==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-13 14:32:04",
+      "lastUpdateTime": "2026-10-13 14:32:04",
+      "installed_apk_sha256": {
+        "/data/app/com.tutortds_cartilhas.dev.dynamicqa.r342ccb9374bc46dba63533ed465dbf57-MiXPeKaQ20z6TyngxYoBjA==/base.apk": "85ab6261519abf62fbde4f71fbefeb2a63ee28037a6c6ba7eaea8d19be2d1ea5"
+      }
+    },
+    "com.tutortds_cartilhas.dev.dynamicqa.r7c4d1a9b3e6f82a5c0d7e4b1f9a3c6d0": {
+      "package": "com.tutortds_cartilhas.dev.dynamicqa.r7c4d1a9b3e6f82a5c0d7e4b1f9a3c6d0",
+      "installed": true,
+      "apk_paths": [
+        "/data/app/com.tutortds_cartilhas.dev.dynamicqa.r7c4d1a9b3e6f82a5c0d7e4b1f9a3c6d0-1APSkK2keF3Q0Arr6Vg7Vw==/base.apk"
+      ],
+      "versionCode": "13",
+      "versionName": "1.4.0-dev",
+      "firstInstallTime": "2026-10-08 14:51:17",
+      "lastUpdateTime": "2026-10-08 14:54:32",
+      "installed_apk_sha256": {
+        "/data/app/com.tutortds_cartilhas.dev.dynamicqa.r7c4d1a9b3e6f82a5c0d7e4b1f9a3c6d0-1APSkK2keF3Q0Arr6Vg7Vw==/base.apk": "6e6d341d7a394ba840b45db191bc24f3f5f51e8206cba9cbcb5edd47ae467ae3"
+      }
+    }
+  },
+  "production_package_present_before": false,
+  "error": "QA package not foreground",
+  "completed_at_utc": "2026-10-13T23:19:35.213484+00:00"
+}

@@ -38,6 +38,13 @@ regexTarget = "match"
 regexes = ['''^candidate_api_tree_oid"\s*:\s*"[0-9a-f]{40}"$''']
 
 [[rules.allowlists]]
+description = "Reviewed Chatwoot candidate evidence exact public Git API tree identity"
+condition = "AND"
+paths = ['''^docs/production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/(?:candidate-api-build|candidate-debug-build(?:-finalized)?|pre-aab-candidate-tablet-smoke(?:-retry)?)\.json$''']
+regexTarget = "match"
+regexes = ['''^(?:api|api_tree_oid|candidate_api_tree_oid)"\s*:\s*"ae0d777f9d029370063426f71ee8b2bb7f6ea607"$''']
+
+[[rules.allowlists]]
 description = "Explicit TDS synthetic API-key fixtures in API/Flutter tests"
 condition = "AND"
 paths = ['''^api/tests/''', '''^cartilhas_app/(test|integration_test)/''']

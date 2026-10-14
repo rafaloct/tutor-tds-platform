@@ -2,8 +2,8 @@
   "schema_version": 1,
   "release": {
     "application_id": "com.tutortds_cartilhas",
-    "version_name": "1.4.0",
-    "version_code": 13,
+    "version_name": "1.4.1",
+    "version_code": 14,
     "min_sdk": 24,
     "target_sdk": 36,
     "compile_sdk": 36,
@@ -11,19 +11,35 @@
   },
   "release_build_allowed": true,
   "source_verification": {
-    "flutter_tests": "625/625",
-    "api_tests": "601 passed, 30 PostgreSQL opt-in skipped, 5 subtests passed",
-    "observability_tests": "17/17",
-    "dart_analyze": "passed",
-    "verified_at": "2026-10-13"
+    "api_support_focal_tests": "100 passed",
+    "api_documentation_tests": "3 passed, 5 subtests passed",
+    "full_candidate_api_and_flutter_tests": "pending final release gate",
+    "dart_analyze": "passed on CI source5fe0b419; final production runner pending",
+    "verified_at": "2026-10-13",
+    "ci_source_commit": "5fe0b4194d6f7fe4501fedc4a7eb12cab006e973",
+    "ci_api_worker_and_flutter": "passed; Flutter718 VM/widget +9 canonical Chrome; final production runner pending"
   },
   "artifact": {
-    "path": "release/Tutor-TDS-1.4.0+13-signed.aab",
-    "sha256": "B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66",
-    "status": "superseded",
+    "path": "build/app/outputs/bundle/release/app-release.aab",
+    "sha256": "B9716815118794883008A3F9B567C527D5F5BB0317773E2F9377E30B7A55EB14",
+    "bytes": 68307100,
+    "status": "built_signed_local",
     "upload_allowed": false,
-    "matches_current_source": false,
-    "reason": "Antecede a retomada offline segura do Evidence/check-in."
+    "matches_current_source": true,
+    "built_at": "2026-10-14T18:47:15Z",
+    "source_commit": "8eccbbbf9041bf229314c18922c25a71cd7ed861",
+    "git_tag": "v1.4.1",
+    "signing_cert_sha256": "16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50",
+    "signing_verified": "jarsigner jar verified; keytool -printcert SHA256 confere com upload_certificate_sha256",
+    "gate_result": "tooling/build_production.ps1 -PublishedVersionCode 11: PASS completo no LARGeo — pytest API, flutter analyze (0 issues), flutter test 721/721, bundleRelease 409s",
+    "manifest": "cartilhas_app/release/build-manifest.json",
+    "reason": "AAB 1.4.1+14 gerado e assinado no LARGeo em 2026-10-14 apos gate completo PASS. Configuração Chatwoot em produção, FAQ+logo validado em SM-T835 físico, restore aceito pelo operador, inventário Play verificado (máximo code 11). Artefato NUNCA enviado ao Play — upload_allowed permanece false até autorização explícita de publicação.",
+    "restore_acceptance": {
+      "status": "accepted_by_operator",
+      "accepted_at": "2026-10-14",
+      "evidence": "docs/production/evidence/production-restore-acceptance.json",
+      "note": "Operador revisou e aceitou o ensaio de restauração (backup offsite, restore PostgreSQL, volumes críticos, compatibilidade de schema 20261007_0030)."
+    }
   },
   "required_physical_evidence": [
     {
@@ -70,11 +86,11 @@
       "id": "pre_aab_xiaomi_smoke",
       "status": "passed",
       "required_for_release_build": true,
-      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador.",
-      "verified_at": "2026-10-13T15:15:17.229588+00:00",
-      "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-13.json",
-      "evidence_sha256": "df3c783408160b85f0e53f6a790a8d0728ebd60aa16318480ade4214de445747",
-      "scope": "Fresh Xiaomi ZT6HPRHQHATSEQPR (Android15/API35 arm64) isolated debug/staging QA package; cold launch and relaunch in new PID, responsive UI, no crash/ANR, existing production-namespace and DEV packages preserved. App/API runtime trees match d3b1331 candidate; later release metadata/documentation only. This is hardware smoke, not production AAB integration or Play inventory."
+      "description": "Smoke curto em dispositivo Android físico imediatamente antes do AAB; operador aceitou tablet Samsung no lugar do Xiaomi.",
+      "scope": "Samsung SM-T835 físico autorizado; fonte5fe0b419/Flutter lib2dfc6894/android5c5ceab6/pubspec2e360871/lock62359f41. APK QA isolado 1.4.1-dev+14; cold/relaunch8s, foco/UI e ausência observada de fatal/ANR. Não é prova de Chatwoot SDK, AAB ou produção.",
+      "verified_at": "2026-10-13T23:26:38.624053+00:00",
+      "evidence": "docs/production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/pre-aab-candidate-tablet-smoke-retry.json",
+      "evidence_sha256": "ae0bedd7990d9cdf424595a089c9558e61880694df760372b134fe7a5d234d34"
     },
     {
       "id": "dynamic_activity_contextual_android_e2e",
@@ -83,5 +99,59 @@
       "description": "Validar atividade publicada contextual, marcação, offline/reinício/replay e observação pedagógica em Android antes de habilitar DYNAMIC_ACTIVITY_ENABLED.",
       "scope": "Obrigatório para ativar a feature; não bloqueia build de produção enquanto DYNAMIC_ACTIVITY_ENABLED=false. Candidato local sobre fbb4b6a/migration 0030; duas abordagens de harness encerradas sem aceite, a última por display do emulador apagado antes do gesto; sem aceite de staging ou produção."
     }
-  ]
+  ],
+  "artifact_history": [
+    {
+      "path": "release/Tutor-TDS-1.4.0+13-signed.aab",
+      "sha256": "B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66",
+      "status": "superseded",
+      "upload_allowed": false,
+      "matches_current_source": false,
+      "reason": "Antecede a retomada offline segura do Evidence/check-in."
+    },
+    {
+      "version_name": "1.4.0",
+      "version_code": 13,
+      "source_commit": "207e2128dcbcedec70bf5132b05a7081501480ed",
+      "git_tag": "v1.4.0",
+      "sha256": "1665ee362eebdad4d299579508e8a57c5b36c55f2adff89c1eed8930cc2af3e0",
+      "bytes": 68240658,
+      "status": "historical_verified",
+      "upload_allowed": false,
+      "matches_current_source": false,
+      "delivery": "https://github.com/rafaloct/tutor-tds-platform/releases/tag/untagged-70d3219a3cd2f307627e",
+      "reason": "AAB anterior preservado; configuração Chatwoot ainda compilada; nova fonte exige outro artefato."
+    }
+  ],
+  "source_verification_history": [
+    {
+      "flutter_tests": "625/625",
+      "api_tests": "601 passed, 30 PostgreSQL opt-in skipped, 5 subtests passed",
+      "observability_tests": "17/17",
+      "dart_analyze": "passed",
+      "verified_at": "2026-10-13"
+    }
+  ],
+  "physical_evidence_history": [
+    {
+      "id": "pre_aab_xiaomi_smoke",
+      "status": "passed",
+      "required_for_release_build": true,
+      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador.",
+      "verified_at": "2026-10-13T15:15:17.229588+00:00",
+      "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-13.json",
+      "evidence_sha256": "df3c783408160b85f0e53f6a790a8d0728ebd60aa16318480ade4214de445747",
+      "scope": "Fresh Xiaomi ZT6HPRHQHATSEQPR (Android15/API35 arm64) isolated debug/staging QA package; cold launch and relaunch in new PID, responsive UI, no crash/ANR, existing production-namespace and DEV packages preserved. App/API runtime trees match d3b1331 candidate; later release metadata/documentation only. This is hardware smoke, not production AAB integration or Play inventory."
+    }
+  ],
+  "play_inventory": {
+    "production_version_code_reported_by_operator": 11,
+    "production_version_name_reported_by_operator": "1.2.0",
+    "maximum_across_tracks_and_drafts": 11,
+    "status": "verified_by_operator",
+    "verified_at": "2026-10-14",
+    "verification_source": "Play Console > Release > App bundle explorer: unico artefato ativo 11.aab (1.2.0), upload 14-ago; AAB 1.4.0+13 historico nunca enviado ao Play.",
+    "candidate_version_code": 14,
+    "reason": "Código14 excede o máximo11 reportado pelo operador no bundle explorer (todos os tracks/rascunhos). Se existir artefato superior não visível, o upload do Play rejeitará — build local é seguro."
+  }
 }

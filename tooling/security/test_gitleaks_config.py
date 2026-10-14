@@ -192,7 +192,7 @@ def api_tree_context_cases(
     tmp_root: Path, gitleaks: Path, config: Path, default_config: Path
 ) -> None:
     """Only the public Git identity finding is exempt, even in compact JSON."""
-    oid = "c09a47de258fb13680b23ea5d749f016af6382dc"
+    default_oid = "c09a47de258fb13680b23ea5d749f016af6382dc"
     secret = secrets.token_hex(32)
     secret_field = "secret_access_key"
     contexts = (
@@ -220,8 +220,23 @@ def api_tree_context_cases(
             "api_tree_oid",
             "api_tree",
         ),
+        (
+            "chatwoot_candidate_build",
+            "docs/production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/candidate-api-build.json",
+            "candidate_api_tree_oid",
+            "api_tree",
+            "ae0d777f9d029370063426f71ee8b2bb7f6ea607",
+        ),
+        (
+            "chatwoot_candidate_debug",
+            "docs/production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/candidate-debug-build-finalized.json",
+            "api",
+            "api_secret",
+            "ae0d777f9d029370063426f71ee8b2bb7f6ea607",
+        ),
     )
-    for context, path, field, wrong_context_field in contexts:
+    for context, path, field, wrong_context_field, *pinned_oid in contexts:
+        oid = pinned_oid[0] if pinned_oid else default_oid
         clean_case(
             tmp_root,
             f"{context}_public_api_tree",
@@ -249,6 +264,8 @@ def api_tree_context_cases(
             ("outside_evidence", field, oid, "api/tests/api-tree.json"),
         ):
             cases.append((name, protected_path, json.dumps({protected_field: value}), protected_field))
+        if pinned_oid:
+            cases.append(("wrong_40_hex_value", path, json.dumps({field: default_oid}), field))
         for name, protected_path, payload, detected_field in cases:
             name = f"{context}_api_tree_{name}"
             with tempfile.TemporaryDirectory(prefix=f"{name}-", dir=tmp_root) as temp:
@@ -448,7 +465,9 @@ def main() -> int:
             gitleaks,
             config,
         )
-        fixture_value = f"tds_gitleaks_fixture_{random_alnum(24)}"
+        # A fixed synthetic canary guarantees this baseline exercises the
+        # default rule; random values can hit its entropy/stop-word filters.
+        fixture_value = "tds_gitleaks_fixture_7zQ1pM9rX4wN8bY2jK6tC3vL"
         clean_case(
             tmp_root,
             "approved_api_fixture",
@@ -457,7 +476,7 @@ def main() -> int:
             config,
             default_config,
         )
-        fixture_value = f"tds_gitleaks_fixture_{random_alnum(24)}"
+        fixture_value = "tds_gitleaks_fixture_7zQ1pM9rX4wN8bY2jK6tC3vL"
         clean_case(
             tmp_root,
             "approved_flutter_fixture",

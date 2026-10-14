@@ -11,3 +11,5 @@ tooling/ai_qa/curricular_source_map.json -text
 # Keep them stable when a Windows checkout enables newline conversion.
 docs/production/evidence/*.json -text whitespace=cr-at-eol
 docs/production/evidence/pre-aab-xiaomi-smoke-20261013-*-ui-sanitized.xml -text
+# Nested candidate proofs retain the exact Windows JSON/XML bytes and hashes.
+docs/production/evidence/chatwoot-candidate-20261013T225559Z-7abf62f5/* -text whitespace=cr-at-eol

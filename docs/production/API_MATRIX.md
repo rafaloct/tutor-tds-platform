@@ -1,5 +1,16 @@
 # API matrix — Wave 1 aceita e Wave 2 ativa
 
+## Configuração pública do suporte — Issue #205, 13/10/2026
+
+| Method | Path | Authentication | Permission / response | Consumer | Test | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | /support/config | Público, sem Bearer | Somente base_url HTTPS/website_token público; sem parâmetros; 200/503 no-store; configuração inválida isolada das demais rotas | ChatwootScreen via HttpChatwootConfigRepository | test_support_config; suporte Flutter focal | IMPLEMENTED/TESTED-LOCAL API, 100 testes; promoção e cliente real com recibos próprios |
+
+A referência atual tem134 operações/121paths/108schemas da árvore
+`ae0d777f9d029370063426f71ee8b2bb7f6ea607`; mudança aditiva, sem migration ou
+alteração de contratos comuns. Operação e rotação em
+[CHATWOOT_RUNTIME_CONFIGURATION.md](CHATWOOT_RUNTIME_CONFIGURATION.md).
+
 ## Referência exaustiva do candidato — Issue #201, 13/10/2026
 
 [Guia completo](../api/README.md), [133 operações](../api/ENDPOINTS.md),

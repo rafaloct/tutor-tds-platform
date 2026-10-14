@@ -1,0 +1,55 @@
+{
+  "recorded_from_completed_public_tool_receipt": true,
+  "original_failure": {
+    "safe_error_class": "Errno::ECONNREFUSED",
+    "safe_error_code": "loopback_port_3000_connection_refused",
+    "error_class_sha256": "4cc41a1289d140f5e742d644de55e533f3e88bb6e9f02f09cb38b03c951d8e01",
+    "error_code_sha256": "0a9c4600dc8d4269d75e3804bbee9b18d60a69e12577d2f8fca79f02ad36f445",
+    "diagnosed_from_matching_public_literals": true
+  },
+  "topology_probe": {
+    "remote_pid": 47948,
+    "completed": true,
+    "exit_code": 0,
+    "runtime_seconds": 3.29,
+    "health_loopback_port": 3005,
+    "listening_port_3005": true,
+    "docker_exposed_port_metadata": 3000
+  },
+  "guarded_readonly_preflight": {
+    "remote_pid": 43552,
+    "completed": true,
+    "exit_code": 0,
+    "runtime_seconds": 40.51,
+    "ssh_exit_code": 0,
+    "ssh_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "public_result": {
+      "preflight_passed": true,
+      "fixtures_created": false,
+      "fixture_write_attempted": false,
+      "qa_script_binding_sha256": "9f1ad70eb1bf3bbc7bb0dca9d705ece8e775b166ce41f9be4f5022ef930f1696",
+      "public_source_binding_sha256": "d3fe296091ed480e5f5b5245f20f00c8e6d42bd2ddc16a823b9ab94795613a52",
+      "redis_all_queues_and_workers_idle_twice": true,
+      "reserved_scope_absent": true,
+      "http_loopback_port": 3005,
+      "global_webhook_nil_or_false": true,
+      "external_search_disabled": true,
+      "package_version_4170": true,
+      "no_runner_staff_actor": true,
+      "local_api_http200": true,
+      "required_associations_present": true,
+      "guard_code": "all_required_preflight_guards_passed",
+      "image_pins_match": true,
+      "source_pins_match": true,
+      "original_source_pin_count": 43,
+      "total_source_pin_count": 53,
+      "ruby_syntax_pass": true,
+      "bounded_runner_exit_code": 0
+    }
+  },
+  "original_protected_artifacts_unchanged": true,
+  "mutation_scope_ack_received": false,
+  "fixture_executor_invoked": false,
+  "message_write_attempted": false,
+  "cleanup_attempted": false
+}

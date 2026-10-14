@@ -491,7 +491,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Tutor TDS 1.4.0',
+              'Tutor TDS 1.4.1',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
             ),

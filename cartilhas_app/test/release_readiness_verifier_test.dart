@@ -255,6 +255,205 @@ void main() {
       );
     });
   }
+
+  group('status externo absoluto', () {
+    late Directory evidenceDirectory;
+    late File externalStatus;
+
+    setUp(() {
+      evidenceDirectory = Directory.systemTemp.createTempSync(
+        'release-observed-status-',
+      );
+      final artifact = File('${root.path}/release/candidate.aab')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(const [1, 2, 3, 4]);
+      _writeStatus(
+        root,
+        buildAllowed: true,
+        physicalStatus: 'passed',
+        artifactStatus: 'candidate',
+        uploadAllowed: true,
+        artifactPath: 'release/candidate.aab',
+        artifactSha: sha256.convert(artifact.readAsBytesSync()).toString(),
+      );
+      externalStatus = File(
+        '${root.path}/release/release_status.json',
+      ).copySync('${evidenceDirectory.path}/observed release.json');
+      _writeStatus(
+        root,
+        buildAllowed: false,
+        physicalStatus: 'pending',
+        artifactStatus: 'superseded',
+        uploadAllowed: false,
+      );
+    });
+
+    tearDown(() => evidenceDirectory.deleteSync(recursive: true));
+
+    ReleaseVerificationResult verify({File? input}) => ReleaseReadinessVerifier(
+      root: root,
+      statusFile: input ?? externalStatus,
+      verifySigningIdentity: false,
+    ).verify(ReleaseIntent.upload);
+
+    void mutate(void Function(Map<String, dynamic>) change) {
+      final status =
+          jsonDecode(externalStatus.readAsStringSync()) as Map<String, dynamic>;
+      change(status);
+      externalStatus.writeAsStringSync(jsonEncode(status));
+    }
+
+    test('usa o overlay sem alterar o checkout ou o default', () {
+      final checkoutStatus = File('${root.path}/release/release_status.json');
+      final original = checkoutStatus.readAsStringSync();
+      for (final intent in ReleaseIntent.values) {
+        final result = ReleaseReadinessVerifier(
+          root: root,
+          statusFile: externalStatus,
+          verifySigningIdentity: false,
+        ).verify(intent);
+        expect(result.issues, isEmpty, reason: intent.name);
+      }
+      expect(checkoutStatus.readAsStringSync(), original);
+      final defaultResult = ReleaseReadinessVerifier(
+        root: root,
+        verifySigningIdentity: false,
+      ).verify(ReleaseIntent.upload);
+      expect(
+        defaultResult.issues.map((issue) => issue.code),
+        containsAll({
+          'release_evidence_pending',
+          'release_build_frozen',
+          'artifact_superseded',
+        }),
+      );
+    });
+
+    test('rejeita caminho relativo em vez de resolvê-lo contra o root', () {
+      final result = verify(input: File('release/release_status.json'));
+      expect(
+        result.issues.map((issue) => issue.code),
+        contains('invalid_status_file'),
+      );
+    });
+
+    test('arquivo ausente bloqueia sem fallback para o checkout', () {
+      File(
+        '${root.path}/release/release_status.json',
+      ).writeAsStringSync(externalStatus.readAsStringSync());
+      expect(
+        ReleaseReadinessVerifier(
+          root: root,
+          verifySigningIdentity: false,
+        ).verify(ReleaseIntent.upload).isReady,
+        isTrue,
+      );
+      externalStatus.deleteSync();
+      final result = verify();
+      expect(
+        result.issues.map((issue) => issue.code),
+        contains('required_file_missing'),
+      );
+    });
+
+    for (final invalid in ['{not-json', '[]']) {
+      test('rejeita JSON inválido ou sem objeto: $invalid', () {
+        externalStatus.writeAsStringSync(invalid);
+        final result = verify();
+        expect(
+          result.issues.map((issue) => issue.code),
+          contains('invalid_json'),
+        );
+      });
+    }
+
+    for (final invalid in [
+      <String, dynamic>{},
+      <String, dynamic>{'schema_version': 1, 'release': {}},
+    ]) {
+      test('rejeita status incompleto: ${invalid.keys.join(',')}', () {
+        externalStatus.writeAsStringSync(jsonEncode(invalid));
+        final result = verify();
+        expect(
+          result.issues.map((issue) => issue.code),
+          contains('invalid_release_status'),
+        );
+      });
+    }
+
+    final mutations =
+        <String, ({String code, void Function(Map<String, dynamic>) change})>{
+          'schema incompatível': (
+            code: 'invalid_release_status',
+            change: (status) => status['schema_version'] = 2,
+          ),
+          'evidência física incompleta': (
+            code: 'invalid_release_evidence',
+            change: (status) =>
+                (status['required_physical_evidence'] as List).removeLast(),
+          ),
+          'evidência física pendente': (
+            code: 'release_evidence_pending',
+            change: (status) =>
+                status['required_physical_evidence'][0]['status'] = 'pending',
+          ),
+          'freeze ativo': (
+            code: 'release_build_frozen',
+            change: (status) => status['release_build_allowed'] = false,
+          ),
+          'artefato de outra fonte': (
+            code: 'artifact_superseded',
+            change: (status) =>
+                status['artifact']['matches_current_source'] = false,
+          ),
+          'upload não autorizado': (
+            code: 'artifact_superseded',
+            change: (status) => status['artifact']['upload_allowed'] = false,
+          ),
+          'hash divergente': (
+            code: 'artifact_hash_mismatch',
+            change: (status) => status['artifact']['sha256'] = '00',
+          ),
+          'versão diferente da fonte': (
+            code: 'version_mismatch',
+            change: (status) => status['release']['version_name'] = '9.9.9',
+          ),
+        };
+    for (final mutation in mutations.entries) {
+      test('mantém o gate de ${mutation.key}', () {
+        mutate(mutation.value.change);
+        final result = verify();
+        expect(result.isReady, isFalse);
+        expect(
+          result.issues.map((issue) => issue.code),
+          contains(mutation.value.code),
+        );
+      });
+    }
+
+    test('mantém os arquivos de assinatura obrigatórios', () {
+      File('${root.path}/android/key.properties').deleteSync();
+      final result = verify();
+      expect(result.isReady, isFalse);
+      expect(
+        result.issues.map((issue) => issue.code),
+        contains('missing_signing_properties'),
+      );
+    });
+
+    test('mantém a configuração de produção exata', () {
+      final config = File('${root.path}/config/production.json');
+      final value =
+          jsonDecode(config.readAsStringSync()) as Map<String, dynamic>;
+      value['TUTOR_API_URL'] = 'http://127.0.0.1:8000';
+      config.writeAsStringSync(jsonEncode(value));
+      final result = verify();
+      expect(
+        result.issues.map((issue) => issue.code),
+        contains('production_config_mismatch'),
+      );
+    });
+  });
 }
 
 void _writeFixture(Directory root) {

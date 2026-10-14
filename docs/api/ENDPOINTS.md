@@ -2,7 +2,7 @@
 
 Gerada pelo contrato candidato. Leia primeiro [o guia](README.md). Exemplos são sintéticos; IDs devem apontar para fixtures do mesmo ambiente. A validação Pydantic confirma tipos/validadores dos exemplos tipados, sem executar comandos ou comprovar autorização relacional.
 
-Árvore Git da fonte: `dc32d081dffd4d778e51871a85ae4077eb75f6ce`. Operações: **133**.
+Árvore Git da fonte: `ae0d777f9d029370063426f71ee8b2bb7f6ea607`. Operações: **134**.
 
 ## Índice
 
@@ -73,72 +73,73 @@ Gerada pelo contrato candidato. Leia primeiro [o guia](README.md). Exemplos são
 - [GET /operations/scopes](#operacao-065)
 - [GET /public/courses](#operacao-066)
 - [GET /public/courses/{slug}](#operacao-067)
-- [GET /support/identity](#operacao-068)
-- [GET /users/{user_id}/hours](#operacao-069)
-- [GET /version](#operacao-070)
-- [PATCH /admin/media/{media_id}](#operacao-071)
-- [PATCH /classes/{class_id}/mentorship-cases/{case_id}](#operacao-072)
-- [PATCH /courses/{course_id}](#operacao-073)
-- [POST /admin/accounts](#operacao-074)
-- [POST /admin/classes](#operacao-075)
-- [POST /admin/classes/{class_id}/monitors/{user_id}](#operacao-076)
-- [POST /admin/classes/{class_id}/sessions](#operacao-077)
-- [POST /admin/classes/{class_id}/students/{user_id}](#operacao-078)
-- [POST /admin/creator-scores/calculate](#operacao-079)
-- [POST /admin/enrollments](#operacao-080)
-- [POST /admin/institutions](#operacao-081)
-- [POST /admin/ledger/simulate](#operacao-082)
-- [POST /admin/media](#operacao-083)
-- [POST /admin/media/{media_id}/archive](#operacao-084)
-- [POST /admin/media/{media_id}/block](#operacao-085)
-- [POST /admin/media/{media_id}/publish](#operacao-086)
-- [POST /admin/programs](#operacao-087)
-- [POST /admin/programs/{program_id}/courses/{course_id}](#operacao-088)
-- [POST /admin/programs/{program_id}/memberships](#operacao-089)
-- [POST /auth/activation-invites](#operacao-090)
-- [POST /auth/login](#operacao-091)
-- [POST /auth/refresh](#operacao-092)
-- [POST /auth/register](#operacao-093)
-- [POST /certificate-requests](#operacao-094)
-- [POST /certificate-requests/{request_id}/candidate-checkpoints/{checkpoint_id}](#operacao-095)
-- [POST /certificate-requests/{request_id}/candidate-evidence](#operacao-096)
-- [POST /certificate-requests/{request_id}/candidate-lifecycle](#operacao-097)
-- [POST /certificate-requests/{request_id}/emission-candidate](#operacao-098)
-- [POST /certificate-requests/{request_id}/emit](#operacao-099)
-- [POST /certificate-requests/{request_id}/reconcile-candidate](#operacao-100)
-- [POST /certificate-requests/{request_id}/resubmit](#operacao-101)
-- [POST /certificate-requests/{request_id}/review](#operacao-102)
-- [POST /certificates/references](#operacao-103)
-- [POST /checkins/code](#operacao-104)
-- [POST /classes/{class_id}/evidence-imports](#operacao-105)
-- [POST /classes/{class_id}/evidence/{evidence_id}/review](#operacao-106)
-- [POST /classes/{class_id}/mentorship-cases](#operacao-107)
-- [POST /classes/{class_id}/sessions/{session_id}/attendance/{user_id}](#operacao-108)
-- [POST /classes/{class_id}/sessions/{session_id}/checkins](#operacao-109)
-- [POST /classes/{class_id}/sessions/{session_id}/close](#operacao-110)
-- [POST /classes/{class_id}/sessions/{session_id}/presence/{user_id}](#operacao-111)
-- [POST /classes/{class_id}/sessions/{session_id}/token](#operacao-112)
-- [POST /courses](#operacao-113)
-- [POST /courses/{course_id}/archive](#operacao-114)
-- [POST /courses/{course_id}/publish](#operacao-115)
-- [POST /courses/{course_id}/submit](#operacao-116)
-- [POST /courses/{course_id}/versions](#operacao-117)
-- [POST /events](#operacao-118)
-- [POST /media/{media_id}/playback-authorizations](#operacao-119)
-- [POST /operations/classes](#operacao-120)
-- [POST /operations/classes/{class_id}/plan](#operacao-121)
-- [POST /operations/classes/{class_id}/team](#operacao-122)
-- [POST /operations/classes/{class_id}/transition](#operacao-123)
-- [POST /operations/{class_id}/commands](#operacao-124)
-- [POST /operations/{class_id}/inspect](#operacao-125)
-- [POST /operations/{class_id}/search](#operacao-126)
-- [PUT /admin/programs/{program_id}/courses/{course_id}/workload](#operacao-127)
-- [PUT /assessment-attempts/{attempt_id}](#operacao-128)
-- [PUT /assessment-contents/{content_id}](#operacao-129)
-- [PUT /classes/{class_id}/certificate-policy-candidate](#operacao-130)
-- [PUT /classes/{class_id}/students/{user_id}](#operacao-131)
-- [PUT /classes/{class_id}/students/{user_id}/baseline](#operacao-132)
-- [PUT /media/{media_id}/rating](#operacao-133)
+- [GET /support/config](#operacao-068)
+- [GET /support/identity](#operacao-069)
+- [GET /users/{user_id}/hours](#operacao-070)
+- [GET /version](#operacao-071)
+- [PATCH /admin/media/{media_id}](#operacao-072)
+- [PATCH /classes/{class_id}/mentorship-cases/{case_id}](#operacao-073)
+- [PATCH /courses/{course_id}](#operacao-074)
+- [POST /admin/accounts](#operacao-075)
+- [POST /admin/classes](#operacao-076)
+- [POST /admin/classes/{class_id}/monitors/{user_id}](#operacao-077)
+- [POST /admin/classes/{class_id}/sessions](#operacao-078)
+- [POST /admin/classes/{class_id}/students/{user_id}](#operacao-079)
+- [POST /admin/creator-scores/calculate](#operacao-080)
+- [POST /admin/enrollments](#operacao-081)
+- [POST /admin/institutions](#operacao-082)
+- [POST /admin/ledger/simulate](#operacao-083)
+- [POST /admin/media](#operacao-084)
+- [POST /admin/media/{media_id}/archive](#operacao-085)
+- [POST /admin/media/{media_id}/block](#operacao-086)
+- [POST /admin/media/{media_id}/publish](#operacao-087)
+- [POST /admin/programs](#operacao-088)
+- [POST /admin/programs/{program_id}/courses/{course_id}](#operacao-089)
+- [POST /admin/programs/{program_id}/memberships](#operacao-090)
+- [POST /auth/activation-invites](#operacao-091)
+- [POST /auth/login](#operacao-092)
+- [POST /auth/refresh](#operacao-093)
+- [POST /auth/register](#operacao-094)
+- [POST /certificate-requests](#operacao-095)
+- [POST /certificate-requests/{request_id}/candidate-checkpoints/{checkpoint_id}](#operacao-096)
+- [POST /certificate-requests/{request_id}/candidate-evidence](#operacao-097)
+- [POST /certificate-requests/{request_id}/candidate-lifecycle](#operacao-098)
+- [POST /certificate-requests/{request_id}/emission-candidate](#operacao-099)
+- [POST /certificate-requests/{request_id}/emit](#operacao-100)
+- [POST /certificate-requests/{request_id}/reconcile-candidate](#operacao-101)
+- [POST /certificate-requests/{request_id}/resubmit](#operacao-102)
+- [POST /certificate-requests/{request_id}/review](#operacao-103)
+- [POST /certificates/references](#operacao-104)
+- [POST /checkins/code](#operacao-105)
+- [POST /classes/{class_id}/evidence-imports](#operacao-106)
+- [POST /classes/{class_id}/evidence/{evidence_id}/review](#operacao-107)
+- [POST /classes/{class_id}/mentorship-cases](#operacao-108)
+- [POST /classes/{class_id}/sessions/{session_id}/attendance/{user_id}](#operacao-109)
+- [POST /classes/{class_id}/sessions/{session_id}/checkins](#operacao-110)
+- [POST /classes/{class_id}/sessions/{session_id}/close](#operacao-111)
+- [POST /classes/{class_id}/sessions/{session_id}/presence/{user_id}](#operacao-112)
+- [POST /classes/{class_id}/sessions/{session_id}/token](#operacao-113)
+- [POST /courses](#operacao-114)
+- [POST /courses/{course_id}/archive](#operacao-115)
+- [POST /courses/{course_id}/publish](#operacao-116)
+- [POST /courses/{course_id}/submit](#operacao-117)
+- [POST /courses/{course_id}/versions](#operacao-118)
+- [POST /events](#operacao-119)
+- [POST /media/{media_id}/playback-authorizations](#operacao-120)
+- [POST /operations/classes](#operacao-121)
+- [POST /operations/classes/{class_id}/plan](#operacao-122)
+- [POST /operations/classes/{class_id}/team](#operacao-123)
+- [POST /operations/classes/{class_id}/transition](#operacao-124)
+- [POST /operations/{class_id}/commands](#operacao-125)
+- [POST /operations/{class_id}/inspect](#operacao-126)
+- [POST /operations/{class_id}/search](#operacao-127)
+- [PUT /admin/programs/{program_id}/courses/{course_id}/workload](#operacao-128)
+- [PUT /assessment-attempts/{attempt_id}](#operacao-129)
+- [PUT /assessment-contents/{content_id}](#operacao-130)
+- [PUT /classes/{class_id}/certificate-policy-candidate](#operacao-131)
+- [PUT /classes/{class_id}/students/{user_id}](#operacao-132)
+- [PUT /classes/{class_id}/students/{user_id}/baseline](#operacao-133)
+- [PUT /media/{media_id}/rating](#operacao-134)
 
 <a id="operacao-001"></a>
 
@@ -5156,9 +5157,60 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 
 <a id="operacao-068"></a>
 
+## `GET /support/config`
+
+Support Config. Fonte: [api/app/support.py:21](../../api/app/support.py).
+
+**Autenticação:** Sem Bearer.
+
+**Permissão:** Público, sem token Bearer. Não recebe parâmetros nem permite escolher configuração pelo pedido.
+
+**Comportamento:** Retorna somente base_url HTTPS e website_token público do widget Chatwoot. Não expõe credenciais administrativas, JWT, CPF pepper ou segredo/namespace HMAC. Configuração ausente/inválida retorna 503 genérico; respostas 200 e 503 usam Cache-Control: no-store e Pragma: no-cache. Alterar CHATWOOT_BASE_URL/CHATWOOT_WEBSITE_TOKEN e recriar a API aplica a mudança sem rebuild do aplicativo.
+
+**Flags/gates:** Nenhuma flag adicional.
+
+### Parâmetros
+
+| Nome | Local | Obrigatório | Tipo | Default / limites |
+| --- | --- | --- | --- | --- |
+| — | — | — | — | — |
+
+### Exemplo de requisição
+
+```bash
+curl --request GET "${TDS_API_BASE}/support/config"
+```
+
+### Contrato de resposta
+
+| HTTP declarado | Descrição | Schema |
+| --- | --- | --- |
+| 200 | Successful Response | [SupportWidgetConfig](SCHEMAS.md#schema-SupportWidgetConfig) |
+| 503 | Configuração pública do suporte ausente ou inválida. | Sem schema JSON declarado. |
+### Exemplo de resposta
+
+HTTP **200**. Exemplo inteiramente sintético de identificadores públicos; o token mostrado não acessa um inbox real. Exige CHATWOOT_BASE_URL/CHATWOOT_WEBSITE_TOKEN válidos no servidor. Resposta no-store; não contém credenciais administrativas ou segredo HMAC.
+
+```json
+{
+  "base_url": "https://chat.example.org",
+  "website_token": "qa_widget_token_A"
+}
+```
+
+### Status e erros
+
+Status declarados no OpenAPI: 200, 503. As exceções abaixo vêm da operação/helpers referenciados e são condicionais; a ordem de autenticação/flags/estado pode determinar qual aparece.
+
+| HTTP | `detail` / condição |
+| --- | --- |
+| 503 | Configuração do suporte indisponível. |
+
+<a id="operacao-069"></a>
+
 ## `GET /support/identity`
 
-Support Identity. Fonte: [api/app/support.py:13](../../api/app/support.py).
+Support Identity. Fonte: [api/app/support.py:40](../../api/app/support.py).
 
 **Autenticação:** Bearer obrigatório; vínculos e permissões adicionais abaixo.
 
@@ -5211,7 +5263,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 503 | Identificação do suporte indisponível. |
 
-<a id="operacao-069"></a>
+<a id="operacao-070"></a>
 
 ## `GET /users/{user_id}/hours`
 
@@ -5275,7 +5327,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Oferta de curso inconsistente. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-070"></a>
+<a id="operacao-071"></a>
 
 ## `GET /version`
 
@@ -5331,7 +5383,7 @@ Status declarados no OpenAPI: 200. As exceções abaixo vêm da operação/helpe
 | --- | --- |
 | 503 | Schema version unavailable. |
 
-<a id="operacao-071"></a>
+<a id="operacao-072"></a>
 
 ## `PATCH /admin/media/{media_id}`
 
@@ -5411,7 +5463,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Expressão: str(exc) |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-072"></a>
+<a id="operacao-073"></a>
 
 ## `PATCH /classes/{class_id}/mentorship-cases/{case_id}`
 
@@ -5495,7 +5547,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Mentor deve ser outra pessoa da equipe ativa vinculada à turma. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-073"></a>
+<a id="operacao-074"></a>
 
 ## `PATCH /courses/{course_id}`
 
@@ -5602,7 +5654,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 422 | sections deve ser uma lista. |
 
-<a id="operacao-074"></a>
+<a id="operacao-075"></a>
 
 ## `POST /admin/accounts`
 
@@ -5672,7 +5724,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Telefone inválido. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-075"></a>
+<a id="operacao-076"></a>
 
 ## `POST /admin/classes`
 
@@ -5754,7 +5806,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 422 | sections deve ser uma lista. |
 
-<a id="operacao-076"></a>
+<a id="operacao-077"></a>
 
 ## `POST /admin/classes/{class_id}/monitors/{user_id}`
 
@@ -5818,7 +5870,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Monitor não possui vínculo ativo neste programa. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-077"></a>
+<a id="operacao-078"></a>
 
 ## `POST /admin/classes/{class_id}/sessions`
 
@@ -5888,7 +5940,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 503 | Não foi possível gerar o código do encontro. |
 
-<a id="operacao-078"></a>
+<a id="operacao-079"></a>
 
 ## `POST /admin/classes/{class_id}/students/{user_id}`
 
@@ -5955,7 +6007,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Estudante não possui matrícula ativa para esta turma. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-079"></a>
+<a id="operacao-080"></a>
 
 ## `POST /admin/creator-scores/calculate`
 
@@ -6043,7 +6095,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 409 | Expressão: detail |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-080"></a>
+<a id="operacao-081"></a>
 
 ## `POST /admin/enrollments`
 
@@ -6108,7 +6160,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Usuário não participa ativamente do programa. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-081"></a>
+<a id="operacao-082"></a>
 
 ## `POST /admin/institutions`
 
@@ -6168,7 +6220,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 409 | Instituição já cadastrada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-082"></a>
+<a id="operacao-083"></a>
 
 ## `POST /admin/ledger/simulate`
 
@@ -6250,7 +6302,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 503 | Somente adapter disabled é permitido nesta fase. |
 
-<a id="operacao-083"></a>
+<a id="operacao-084"></a>
 
 ## `POST /admin/media`
 
@@ -6331,7 +6383,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Programa fora da instituição. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-084"></a>
+<a id="operacao-085"></a>
 
 ## `POST /admin/media/{media_id}/archive`
 
@@ -6410,7 +6462,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Mídia já está arquivada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-085"></a>
+<a id="operacao-086"></a>
 
 ## `POST /admin/media/{media_id}/block`
 
@@ -6489,7 +6541,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Mídia não pode ser bloqueada neste estado. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-086"></a>
+<a id="operacao-087"></a>
 
 ## `POST /admin/media/{media_id}/publish`
 
@@ -6564,7 +6616,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Direitos da mídia não confirmados. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-087"></a>
+<a id="operacao-088"></a>
 
 ## `POST /admin/programs`
 
@@ -6626,7 +6678,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 409 | Programa já cadastrado. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-088"></a>
+<a id="operacao-089"></a>
 
 ## `POST /admin/programs/{program_id}/courses/{course_id}`
 
@@ -6687,7 +6739,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 409 | Expressão: detail |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-089"></a>
+<a id="operacao-090"></a>
 
 ## `POST /admin/programs/{program_id}/memberships`
 
@@ -6751,7 +6803,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 409 | Participação já cadastrada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-090"></a>
+<a id="operacao-091"></a>
 
 ## `POST /auth/activation-invites`
 
@@ -6814,7 +6866,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | CPF inválido. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-091"></a>
+<a id="operacao-092"></a>
 
 ## `POST /auth/login`
 
@@ -6882,7 +6934,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 429 | Muitas tentativas. Tente novamente mais tarde. |
 | 503 | Rate limit temporariamente indisponível. |
 
-<a id="operacao-092"></a>
+<a id="operacao-093"></a>
 
 ## `POST /auth/refresh`
 
@@ -6946,7 +6998,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 401 | Expressão: detail |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-093"></a>
+<a id="operacao-094"></a>
 
 ## `POST /auth/register`
 
@@ -7016,7 +7068,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Telefone inválido. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-094"></a>
+<a id="operacao-095"></a>
 
 ## `POST /certificate-requests`
 
@@ -7105,7 +7157,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Turma, matrícula e edição não correspondem a um vínculo ativo. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-095"></a>
+<a id="operacao-096"></a>
 
 ## `POST /certificate-requests/{request_id}/candidate-checkpoints/{checkpoint_id}`
 
@@ -7194,7 +7246,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 503 | Contrato candidato desativado neste ambiente. |
 | 503 | Oferta sem política institucional configurada. |
 
-<a id="operacao-096"></a>
+<a id="operacao-097"></a>
 
 ## `POST /certificate-requests/{request_id}/candidate-evidence`
 
@@ -7275,7 +7327,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 503 | Contrato candidato desativado neste ambiente. |
 | 503 | Oferta sem política institucional configurada. |
 
-<a id="operacao-097"></a>
+<a id="operacao-098"></a>
 
 ## `POST /certificate-requests/{request_id}/candidate-lifecycle`
 
@@ -7367,7 +7419,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 503 | Contrato candidato desativado neste ambiente. |
 | 503 | Oferta sem política institucional configurada. |
 
-<a id="operacao-098"></a>
+<a id="operacao-099"></a>
 
 ## `POST /certificate-requests/{request_id}/emission-candidate`
 
@@ -7464,7 +7516,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 503 | Transporte autenticado do candidato não configurado. |
 | 503 | URL do transporte do candidato inválida. |
 
-<a id="operacao-099"></a>
+<a id="operacao-100"></a>
 
 ## `POST /certificate-requests/{request_id}/emit`
 
@@ -7550,7 +7602,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 503 | Emissão final bloqueada pelo gate de ativação institucional: candidato sintético não homologa provedor instalado, assinatura institucional nem liberação em ambiente real. |
 | 503 | Oferta sem política institucional configurada. |
 
-<a id="operacao-100"></a>
+<a id="operacao-101"></a>
 
 ## `POST /certificate-requests/{request_id}/reconcile-candidate`
 
@@ -7647,7 +7699,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 503 | Transporte autenticado do candidato não configurado. |
 | 503 | URL do transporte do candidato inválida. |
 
-<a id="operacao-101"></a>
+<a id="operacao-102"></a>
 
 ## `POST /certificate-requests/{request_id}/resubmit`
 
@@ -7739,7 +7791,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Turma, matrícula e edição não correspondem a um vínculo ativo. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-102"></a>
+<a id="operacao-103"></a>
 
 ## `POST /certificate-requests/{request_id}/review`
 
@@ -7833,7 +7885,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Turma, matrícula e edição não correspondem a um vínculo ativo. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-103"></a>
+<a id="operacao-104"></a>
 
 ## `POST /certificates/references`
 
@@ -7925,7 +7977,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 503 | Origem de verificação de certificados não configurada. |
 | 503 | Verificação pública indisponível. |
 
-<a id="operacao-104"></a>
+<a id="operacao-105"></a>
 
 ## `POST /checkins/code`
 
@@ -7998,7 +8050,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 429 | Muitas tentativas. Tente novamente mais tarde. |
 | 503 | Rate limit temporariamente indisponível. |
 
-<a id="operacao-105"></a>
+<a id="operacao-106"></a>
 
 ## `POST /classes/{class_id}/evidence-imports`
 
@@ -8071,7 +8123,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Usuário fora da turma ou matrícula inativa. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-106"></a>
+<a id="operacao-107"></a>
 
 ## `POST /classes/{class_id}/evidence/{evidence_id}/review`
 
@@ -8139,7 +8191,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 404 | Turma não encontrada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-107"></a>
+<a id="operacao-108"></a>
 
 ## `POST /classes/{class_id}/mentorship-cases`
 
@@ -8219,7 +8271,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Mentor deve ser outra pessoa da equipe ativa vinculada à turma. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-108"></a>
+<a id="operacao-109"></a>
 
 ## `POST /classes/{class_id}/sessions/{session_id}/attendance/{user_id}`
 
@@ -8303,7 +8355,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Reposição pendente exige encontro de reposição. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-109"></a>
+<a id="operacao-110"></a>
 
 ## `POST /classes/{class_id}/sessions/{session_id}/checkins`
 
@@ -8378,7 +8430,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 409 | Sessão encerrada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-110"></a>
+<a id="operacao-111"></a>
 
 ## `POST /classes/{class_id}/sessions/{session_id}/close`
 
@@ -8458,7 +8510,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Há evidências/presenças pendentes; confirme o fechamento explicitamente. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-111"></a>
+<a id="operacao-112"></a>
 
 ## `POST /classes/{class_id}/sessions/{session_id}/presence/{user_id}`
 
@@ -8540,7 +8592,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Sessão encerrada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-112"></a>
+<a id="operacao-113"></a>
 
 ## `POST /classes/{class_id}/sessions/{session_id}/token`
 
@@ -8607,7 +8659,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 503 | Não foi possível gerar o código do encontro. |
 
-<a id="operacao-113"></a>
+<a id="operacao-114"></a>
 
 ## `POST /courses`
 
@@ -8699,7 +8751,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 422 | sections deve ser uma lista. |
 
-<a id="operacao-114"></a>
+<a id="operacao-115"></a>
 
 ## `POST /courses/{course_id}/archive`
 
@@ -8812,7 +8864,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 422 | Vídeo deve estar publicado e pertencer ao programa, curso e módulo desta edição. |
 
-<a id="operacao-115"></a>
+<a id="operacao-116"></a>
 
 ## `POST /courses/{course_id}/publish`
 
@@ -8925,7 +8977,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 422 | Vídeo deve estar publicado e pertencer ao programa, curso e módulo desta edição. |
 
-<a id="operacao-116"></a>
+<a id="operacao-117"></a>
 
 ## `POST /courses/{course_id}/submit`
 
@@ -9038,7 +9090,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 422 | Vídeo deve estar publicado e pertencer ao programa, curso e módulo desta edição. |
 
-<a id="operacao-117"></a>
+<a id="operacao-118"></a>
 
 ## `POST /courses/{course_id}/versions`
 
@@ -9133,7 +9185,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 409 | Outra versão foi criada. Recarregue. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-118"></a>
+<a id="operacao-119"></a>
 
 ## `POST /events`
 
@@ -9213,7 +9265,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Sequência de checkpoint inválida. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-119"></a>
+<a id="operacao-120"></a>
 
 ## `POST /media/{media_id}/playback-authorizations`
 
@@ -9272,7 +9324,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 503 | Entrega da mídia não configurada. |
 
-<a id="operacao-120"></a>
+<a id="operacao-121"></a>
 
 ## `POST /operations/classes`
 
@@ -9414,7 +9466,7 @@ Status declarados no OpenAPI: 201, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 422 | sections deve ser uma lista. |
 
-<a id="operacao-121"></a>
+<a id="operacao-122"></a>
 
 ## `POST /operations/classes/{class_id}/plan`
 
@@ -9549,7 +9601,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Replay de lifecycle divergente. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-122"></a>
+<a id="operacao-123"></a>
 
 ## `POST /operations/classes/{class_id}/team`
 
@@ -9686,7 +9738,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Expressão: f'{role} não possui vínculo ativo neste programa.' |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-123"></a>
+<a id="operacao-124"></a>
 
 ## `POST /operations/classes/{class_id}/transition`
 
@@ -9825,7 +9877,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Replay de lifecycle divergente. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-124"></a>
+<a id="operacao-125"></a>
 
 ## `POST /operations/{class_id}/commands`
 
@@ -9942,7 +9994,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Telefone inválido. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-125"></a>
+<a id="operacao-126"></a>
 
 ## `POST /operations/{class_id}/inspect`
 
@@ -10031,7 +10083,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Turma sem edição fixada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-126"></a>
+<a id="operacao-127"></a>
 
 ## `POST /operations/{class_id}/search`
 
@@ -10103,7 +10155,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | CPF inválido. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-127"></a>
+<a id="operacao-128"></a>
 
 ## `PUT /admin/programs/{program_id}/courses/{course_id}/workload`
 
@@ -10168,7 +10220,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 404 | Oferta de curso não encontrada. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-128"></a>
+<a id="operacao-129"></a>
 
 ## `PUT /assessment-attempts/{attempt_id}`
 
@@ -10277,7 +10329,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | remaining_seconds excede a duração versionada. |
 | 422 | score é calculado pelo servidor; envie zero. |
 
-<a id="operacao-129"></a>
+<a id="operacao-130"></a>
 
 ## `PUT /assessment-contents/{content_id}`
 
@@ -10356,7 +10408,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Expressão: {'code': 'assessment_content_namespace_reserved'} |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-130"></a>
+<a id="operacao-131"></a>
 
 ## `PUT /classes/{class_id}/certificate-policy-candidate`
 
@@ -10427,7 +10479,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 | 503 | Contrato candidato desativado neste ambiente. |
 
-<a id="operacao-131"></a>
+<a id="operacao-132"></a>
 
 ## `PUT /classes/{class_id}/students/{user_id}`
 
@@ -10494,7 +10546,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 422 | Estudante não possui matrícula ativa para esta turma. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-132"></a>
+<a id="operacao-133"></a>
 
 ## `PUT /classes/{class_id}/students/{user_id}/baseline`
 
@@ -10578,7 +10630,7 @@ Status declarados no OpenAPI: 200, 422. As exceções abaixo vêm da operação/
 | 409 | Vínculo alterado; recarregue. |
 | 422 | Validação de path/query/body; envelope detail sanitizado. |
 
-<a id="operacao-133"></a>
+<a id="operacao-134"></a>
 
 ## `PUT /media/{media_id}/rating`
 

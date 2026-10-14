@@ -1,0 +1,28 @@
+{
+  "candidate_api_tree_oid": "ae0d777f9d029370063426f71ee8b2bb7f6ea607",
+  "candidate_schema_version": "20261007_0030",
+  "evidence": {
+    "backend_schema_compatibility": {
+      "file": "postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "8d851cdc974baaee19c652c17170022a1d49c219446cc75a362bfa2907bbf4a0"
+    },
+    "offsite_backup": {
+      "file": "scheduled-postgres-offsite-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "07c021dde5cddddea1b5ae158703f242b5cb690ddaaabb953c0729556f3768fe"
+    },
+    "postgres_restore": {
+      "file": "postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "8d851cdc974baaee19c652c17170022a1d49c219446cc75a362bfa2907bbf4a0"
+    },
+    "upgrade_compatibility": {
+      "file": "postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json",
+      "sha256": "8d851cdc974baaee19c652c17170022a1d49c219446cc75a362bfa2907bbf4a0"
+    }
+  },
+  "remaining_gates": [
+    "critical_volumes_custody_review",
+    "schema_changes_review",
+    "final_acceptance_review"
+  ],
+  "status": "postgres_compatibility_verified_pending_critical_volumes_review"
+}

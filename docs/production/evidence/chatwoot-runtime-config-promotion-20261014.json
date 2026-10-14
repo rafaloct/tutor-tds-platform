@@ -1,0 +1,109 @@
+{
+  "run_id": "chatwoot-runtime-config-promotion-20261014T130238Z",
+  "executed_at": "2026-10-14T13:02:38Z",
+  "host": "srv1533541",
+  "scope": "chatwoot-runtime-config-production-api",
+  "status": "passed",
+  "observed_prior_state": {
+    "candidate_image_deployed_at": "2026-10-14T12:49:49Z",
+    "container_name": "dd72cd13c14e_tutor-tds-api-api-1",
+    "image_id": "sha256:575681b52f19328bfd26bb25344ca857b0b19c1bb21a8c4c02bd971e63ece794",
+    "dotenv_updated_at": "2026-10-14T12:48Z",
+    "dotenv_keys_added": ["CHATWOOT_BASE_URL", "CHATWOOT_WEBSITE_TOKEN"],
+    "compose_mapping_missing": true,
+    "support_config_internal_status": 503,
+    "note": "A recriacao das 12:49Z promoveu a imagem candidata e o .env, mas o docker-compose.production.yml implantado nao mapeava as novas variaveis; o container nao as recebeu."
+  },
+  "action": {
+    "backup_dir": "/opt/tutor-tds-api/.promotion-20261014T130238Z-chatwoot-env",
+    "backup_mode": "0700",
+    "compose_before_sha256": "85e30ed3b5dd4aebc9d97abe0751d0b75ad3238617ea66014f887c01a54d3282",
+    "compose_after_sha256": "988ffc0f80e6bc86f45008bc5d3fc5f2bc87f7151f4899e488acd144a7f8c067",
+    "compose_synced_to_reviewed_source": "api/docker-compose.production.yml @ 6e3cd5f31bb40cab4415e6aec7b90a5373220a76",
+    "compose_delta_lines": [
+      "CHATWOOT_BASE_URL: ${CHATWOOT_BASE_URL:-}",
+      "CHATWOOT_WEBSITE_TOKEN: ${CHATWOOT_WEBSITE_TOKEN:-}",
+      "DYNAMIC_ACTIVITY_ENABLED: ${DYNAMIC_ACTIVITY_ENABLED:-false}"
+    ],
+    "dotenv_modified_by_this_run": false,
+    "dotenv_sha256_before_after": "2f0440d70f8696f59dde86ca0262f1e1f3d8f4d47ccbd22c6ab2b9602535e3f0",
+    "recreated_service_only": "api",
+    "preserved_container_ids": {
+      "tutor-tds-api-db-1": "eea0c10b6773",
+      "tutor-tds-api-policy-web-1": "274a629a483a"
+    }
+  },
+  "result": {
+    "container_name": "tutor-tds-api-api-1",
+    "container_id": "3bfd52375671",
+    "image_id": "sha256:575681b52f19328bfd26bb25344ca857b0b19c1bb21a8c4c02bd971e63ece794",
+    "image_tag": "tutor-tds-candidate:6e3cd5f31bb4",
+    "api_tree_oid": "ae0d777f9d029370063426f71ee8b2bb7f6ea607",
+    "container_env_keys_present": [
+      "CHATWOOT_BASE_URL",
+      "CHATWOOT_WEBSITE_TOKEN",
+      "DYNAMIC_ACTIVITY_ENABLED"
+    ],
+    "flags_effective": {
+      "DYNAMIC_ACTIVITY_ENABLED": false,
+      "LEARNING_CONTEXT_ENABLED": false,
+      "JOURNEY_TRACEABILITY_ENABLED": false,
+      "COMMERCIAL_SIMULATION_ENABLED": false,
+      "CERTIFICATE_CANDIDATE_ENABLED": false,
+      "OPERATOR_OPERATIONS_ENABLED": false,
+      "CLASS_LIFECYCLE_ENABLED": false,
+      "CPF_ACTIVATION_REQUIRED": false
+    }
+  },
+  "verification": {
+    "internal": {
+      "health": {"status": 200, "body": {"status": "ok", "database": "available"}},
+      "version": {"status": 200, "schema_version": "20261007_0030", "environment": "production", "minimum_supported_app_version": "1.2.0+11", "compatibility_verified": true},
+      "support_config": {
+        "status": 200,
+        "keys_exact": true,
+        "base_url_https": true,
+        "base_url": "https://chat.ipexdesenvolvimento.cloud",
+        "website_token_nonempty": true,
+        "cache_control": "no-store",
+        "pragma": "no-cache"
+      },
+      "courses": {"status": 200, "body_sha256": "81d3ad9ef12e9fadeb320a7e7a339c8588a20f04cd57649fc89c57ffb85a60d7"}
+    },
+    "external_https": {
+      "url_base": "https://ead.ipexdesenvolvimento.cloud/tutor-api",
+      "health": {"status": 200, "database": "available"},
+      "version": {"status": 200, "schema_version": "20261007_0030", "compatibility_verified": true},
+      "support_config": {
+        "status": 200,
+        "keys_exact": true,
+        "base_url_https": true,
+        "website_token_nonempty": true,
+        "cache_control": "no-store",
+        "pragma": "no-cache"
+      },
+      "courses": {"status": 200},
+      "probe_note": "Cliente python urllib recebeu Cloudflare 403/1010 por assinatura de bot; verificacao externa usou curl com UA de navegador. Nao e falha da aplicacao."
+    },
+    "widget_render": {
+      "executed_at": "2026-10-14T13:12Z",
+      "browser": "Chrome 144 headless (CDP), viewport movel 430x800",
+      "widget_url": "https://chat.ipexdesenvolvimento.cloud/widget?website_token=<token da configuracao>",
+      "page_status": 200,
+      "chatwootWebChannel_present": true,
+      "inbox_resolved": {"websiteName": "Suporte", "locale": "pt_BR", "replyTime": "in_a_few_minutes", "features": ["attachments", "emoji_picker", "end_conversation"], "workingHours_weekday_9_17_utc": true},
+      "session_issued": true,
+      "rendered_text_sample": "Suporte | Normalmente responde em alguns minutos | Estamos ausentes no momento | Iniciar Conversa | Desenvolvido por Chatwoot",
+      "screenshot": "chatwoot-widget-render-20261014T1312Z.png",
+      "screenshot_sha256": "1c669842b170f15677d58cb554b6bd11573c7b9da31adc78fb1445dfa0d25a1a",
+      "note": "Nenhuma mensagem foi enviada; renderizacao somente leitura da tela inicial do widget."
+    }
+  },
+  "limits": [
+    "Resposta 200 e token nao vazio nao comprovam entrega do widget no app, resposta humana nem cobertura de atendimento.",
+    "O valor do website_token nao e registrado neste arquivo; e identificador publico por contrato, mas permanece fora dos artefatos versionados.",
+    "Nenhuma prova de conversa sintetica recebida nesta operacao; gate de QA do widget no app continua pendente.",
+    "Sem alteracao de banco, migrations, JWT/CPF/DATABASE_URL, Chatwoot ou outros servicos; apenas o servico api foi recriado.",
+    "O container foi recriado com o nome padrao do compose (tutor-tds-api-api-1), sem o prefixo estilo Dokploy da recriacao anterior; labels Traefik inalterados e roteamento preservado."
+  ]
+}

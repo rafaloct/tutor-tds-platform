@@ -1,220 +1,236 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:provider/provider.dart';
+
 import '../config/app_config.dart';
 import '../features/auth/data/auth_repository.dart';
+import '../features/support/chatwoot_config_repository.dart';
+import '../features/support/chatwoot_mobile_host.dart';
+import '../features/support/support_help_sections.dart';
 import '../services/privacy_preferences.dart';
-import '../services/chatwoot_script_value.dart';
-
-// Import condicional: usa JS no web, stub no mobile
 import '../services/chatwoot_web_impl.dart'
     if (dart.library.io) '../services/chatwoot_web_stub.dart';
 
-// webview_flutter compila em todas as plataformas (no-op no web)
-import 'package:webview_flutter/webview_flutter.dart';
-
-const _chatwootBase = 'https://chat.ipexdesenvolvimento.cloud';
-const _websiteToken = 'twnJ2K7tWtP2Fqey97p4hcwV';
 const _whatsappSuporte = '5563993010823';
 
 class ChatwootScreen extends StatefulWidget {
-  const ChatwootScreen({super.key});
+  const ChatwootScreen({
+    super.key,
+    this.configurationRepository,
+    this.mobileHostFactory,
+    this.widgetReadyTimeout = const Duration(seconds: 20),
+  });
+
+  final ChatwootConfigRepository? configurationRepository;
+  final ChatwootMobileHost Function()? mobileHostFactory;
+  final Duration widgetReadyTimeout;
 
   @override
   State<ChatwootScreen> createState() => _ChatwootScreenState();
 }
 
 class _ChatwootScreenState extends State<ChatwootScreen> {
-  // Campos usados apenas no mobile (WebView)
-  WebViewController? _controller;
+  late final ChatwootConfigRepository _repository;
+  ChatwootMobileHost? _mobileHost;
+  Timer? _readyTimer;
+  Timer? _authGuardTimer;
+  int _generation = 0;
+  int? _webLease;
+  Future<void> _closing = Future<void>.value();
   bool _loading = true;
   bool _error = false;
-
-  // Campos usados no web
   bool _webOpened = false;
-  String _userName = '';
-  String _supportContactId = '';
-  String? _identifierHash;
-
-  Future<String?> _resolveSupportId(SharedPreferences preferences) async {
-    if (!AppConfig.signedSupportIdentity) {
-      return _getSupportContactId(preferences);
-    }
-    try {
-      if (!mounted) return null;
-      final identity = await context.read<AuthRepository>().supportIdentity();
-      if (!mounted) return null;
-      _identifierHash = identity['identifier_hash'];
-      return identity['identifier'];
-    } on Object {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = true;
-        });
-      }
-      return null;
-    }
-  }
-
-  Future<String> _getSupportContactId(SharedPreferences preferences) async {
-    const key = 'support_contact_id_v1';
-    final existing = preferences.getString(key);
-    if (existing != null && existing.isNotEmpty) return existing;
-    final bytes = List<int>.generate(18, (_) => Random.secure().nextInt(256));
-    final generated = base64UrlEncode(bytes).replaceAll('=', '');
-    await preferences.setString(key, generated);
-    return generated;
-  }
 
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) {
-      _initWeb();
-    } else {
-      _initWebView();
+    _repository =
+        widget.configurationRepository ?? HttpChatwootConfigRepository();
+    _loadSupport();
+  }
+
+  Future<void> _closeHost() {
+    _readyTimer?.cancel();
+    _readyTimer = null;
+    _authGuardTimer?.cancel();
+    _authGuardTimer = null;
+    final host = _mobileHost;
+    _mobileHost = null;
+    if (host != null) {
+      _closing = _closing.then((_) => host.close());
     }
+    if (_webLease != null) chatwootClose(_webLease);
+    _webLease = null;
+    _webOpened = false;
+    return _closing;
   }
 
   @override
   void dispose() {
-    if (kIsWeb && _webOpened) chatwootClose();
+    _generation++;
+    unawaited(_closeHost());
+    if (widget.configurationRepository == null) {
+      (_repository as HttpChatwootConfigRepository).dispose();
+    }
     super.dispose();
   }
 
-  // ── WEB ────────────────────────────────────────────────────────────
-  Future<void> _initWeb() async {
-    final prefs = await SharedPreferences.getInstance();
-    final canIdentifyUser = await PrivacyPreferences.hasConsent();
-    final name = canIdentifyUser ? prefs.getString('user_name') ?? '' : '';
-    final phone = canIdentifyUser ? prefs.getString('user_phone') ?? '' : '';
-    final supportContactId = await _resolveSupportId(prefs);
-    if (!mounted || supportContactId == null) return;
+  bool _current(int generation, AuthRepository? auth, int? authGeneration) =>
+      mounted &&
+      generation == _generation &&
+      auth?.sessionGeneration == authGeneration;
 
+  void _fail(int generation) {
+    if (!mounted || generation != _generation) return;
+    _generation++;
+    unawaited(_closeHost());
     setState(() {
-      _userName = name;
-      _supportContactId = supportContactId;
       _loading = false;
+      _error = true;
     });
-
-    chatwootOpen(
-      _chatwootBase,
-      _websiteToken,
-      supportContactId,
-      name,
-      phone,
-      identifierHash: _identifierHash,
-    );
-    setState(() => _webOpened = true);
   }
 
-  // ── MOBILE (WebView) ───────────────────────────────────────────────
-  Future<void> _initWebView() async {
-    final prefs = await SharedPreferences.getInstance();
-    final canIdentifyUser = await PrivacyPreferences.hasConsent();
-    final name = canIdentifyUser
-        ? prefs.getString('user_name') ?? 'Aluno TDS'
-        : 'Aluno TDS';
-    final phone = canIdentifyUser ? prefs.getString('user_phone') ?? '' : '';
-    final supportContactId = await _resolveSupportId(prefs);
-    if (!mounted || supportContactId == null) return;
-    final signedField = _identifierHash == null
-        ? ''
-        : 'identifier_hash: ${chatwootScriptValue(_identifierHash!)},';
-    final encodedSupportId = chatwootScriptValue(supportContactId);
-    final encodedName = chatwootScriptValue(name);
-    final encodedPhone = chatwootScriptValue(phone);
-
-    final html =
-        '''
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; width: 100%; overflow: hidden; background: #f5f5f5; }
-    #loading {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; height: 100vh;
-      font-family: Arial, sans-serif; color: #666; gap: 12px;
+  Future<_SupportIdentity> _resolveSupportId(
+    SharedPreferences preferences,
+    AuthRepository? auth,
+  ) async {
+    if (AppConfig.signedSupportIdentity) {
+      if (auth == null) throw const ChatwootConfigUnavailable();
+      final identity = await auth.supportIdentity();
+      return _SupportIdentity(
+        identity['identifier']!,
+        identity['identifier_hash'],
+      );
     }
-    .dot { width: 10px; height: 10px; border-radius: 50%;
-           background: #093AF4; animation: pulse 1s infinite alternate; }
-    .dot:nth-child(2) { animation-delay: .3s; }
-    .dot:nth-child(3) { animation-delay: .6s; }
-    .dots { display: flex; gap: 8px; }
-    @keyframes pulse { to { opacity: .2; transform: scale(.8); } }
-  </style>
-</head>
-<body>
-  <div id="loading">
-    <div class="dots">
-      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    </div>
-    <p>Conectando ao suporte TDS...</p>
-  </div>
-  <script>
-    window.chatwootSettings = {
-      hideMessageBubble: false,
-      position: "right",
-      locale: "pt_BR",
-      type: "standard",
-      darkMode: "auto",
-    };
-    (function(d,t){
-      var BASE_URL = "$_chatwootBase";
-      var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
-      g.src = BASE_URL + "/packs/js/sdk.js";
-      g.defer = true; g.async = true;
-      s.parentNode.insertBefore(g,s);
-      g.onload = function() {
-        window.chatwootSDK.run({ websiteToken: "$_websiteToken", baseUrl: BASE_URL });
-        window.addEventListener("chatwoot:ready", function() {
-          document.getElementById("loading").style.display = "none";
-          window.\$chatwoot.toggle("open");
-          window.\$chatwoot.setUser($encodedSupportId, {
-            name: $encodedName,
-            phone_number: $encodedPhone,
-            $signedField
-          });
-          window.\$chatwoot.setCustomAttributes({ origem: "App Cartilhas TDS" });
-        });
-      };
-    })(document,"script");
-  </script>
-</body>
-</html>
-''';
+    const key = 'support_contact_id_v1';
+    final existing = preferences.getString(key);
+    if (existing != null && existing.isNotEmpty) {
+      return _SupportIdentity(existing, null);
+    }
+    final bytes = List<int>.generate(18, (_) => Random.secure().nextInt(256));
+    final generated = base64UrlEncode(bytes).replaceAll('=', '');
+    await preferences.setString(key, generated);
+    return _SupportIdentity(generated, null);
+  }
 
-    final controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) {
-            if (mounted) setState(() => _loading = false);
-          },
-          onWebResourceError: (_) {
-            if (mounted) {
-              setState(() {
-                _loading = false;
-                _error = true;
-              });
+  Future<void> _loadSupport() async {
+    final generation = ++_generation;
+    final closing = _closeHost();
+    if (kIsWeb) _webLease = chatwootReserve();
+    setState(() {
+      _loading = true;
+      _error = false;
+    });
+    final auth = context.read<AuthRepository?>();
+    final authGeneration = auth?.sessionGeneration;
+    // AuthRepository exposes a generation rather than a notification stream.
+    // Keep an open SDK context from surviving an account change in silence.
+    if (auth != null) {
+      _authGuardTimer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+        if (!_current(generation, auth, authGeneration)) _fail(generation);
+      });
+    }
+    try {
+      await closing;
+      if (!_current(generation, auth, authGeneration)) {
+        _fail(generation);
+        return;
+      }
+      final config = await _repository.fetch();
+      if (!_current(generation, auth, authGeneration)) {
+        _fail(generation);
+        return;
+      }
+      final prefs = await SharedPreferences.getInstance();
+      if (!_current(generation, auth, authGeneration)) {
+        _fail(generation);
+        return;
+      }
+      final consent = await PrivacyPreferences.hasConsent();
+      if (!_current(generation, auth, authGeneration)) {
+        _fail(generation);
+        return;
+      }
+      final identity = await _resolveSupportId(prefs, auth);
+      if (!_current(generation, auth, authGeneration)) {
+        _fail(generation);
+        return;
+      }
+      final name = consent
+          ? prefs.getString('user_name') ?? 'Aluno TDS'
+          : 'Aluno TDS';
+      final phone = consent ? prefs.getString('user_phone') ?? '' : '';
+      _readyTimer = Timer(widget.widgetReadyTimeout, () => _fail(generation));
+      void opened() {
+        if (!_current(generation, auth, authGeneration)) {
+          _fail(generation);
+          return;
+        }
+        _readyTimer?.cancel();
+        setState(() {
+          _loading = false;
+          _webOpened = kIsWeb;
+        });
+      }
+
+      if (kIsWeb) {
+        final lease = _webLease!;
+        if (!chatwootSessionCurrent(lease)) {
+          _fail(generation);
+          return;
+        }
+        chatwootOpen(
+          config.baseUrl,
+          config.websiteToken,
+          identity.id,
+          name,
+          phone,
+          identifierHash: identity.hash,
+          lease: lease,
+          canIdentify: () => _current(generation, auth, authGeneration),
+          onOpened: opened,
+          onError: () => _fail(generation),
+          onClosed: () {
+            if (_current(generation, auth, authGeneration)) {
+              setState(() => _webOpened = false);
             }
           },
-        ),
-      )
-      ..loadHtmlString(html, baseUrl: _chatwootBase);
-
-    if (mounted) setState(() => _controller = controller);
+          loadTimeout: widget.widgetReadyTimeout,
+        );
+      } else {
+        final host = widget.mobileHostFactory?.call() ?? WebViewChatwootHost();
+        setState(() => _mobileHost = host);
+        await host.load(
+          config,
+          onReady: () {
+            if (!_current(generation, auth, authGeneration)) {
+              _fail(generation);
+              return;
+            }
+            unawaited(
+              host
+                  .identify(
+                    id: identity.id,
+                    name: name,
+                    phone: phone,
+                    identifierHash: identity.hash,
+                  )
+                  .catchError((Object _) => _fail(generation)),
+            );
+          },
+          onOpened: opened,
+          onError: () => _fail(generation),
+        );
+      }
+    } on Object {
+      _fail(generation);
+    }
   }
 
   // ── BUILD ──────────────────────────────────────────────────────────
@@ -230,18 +246,16 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
           ],
         ),
         actions: [
-          if (!kIsWeb)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Recarregar',
-              onPressed: () {
-                setState(() {
-                  _loading = true;
-                  _error = false;
-                });
-                _controller?.reload();
-              },
-            ),
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: 'Perguntas frequentes',
+            onPressed: () => _showFaqSheet(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Recarregar',
+            onPressed: _loadSupport,
+          ),
         ],
       ),
       body: kIsWeb ? _buildWebBody() : _buildMobileBody(),
@@ -251,15 +265,7 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
   // ── CORPO WEB ──────────────────────────────────────────────────────
   Widget _buildWebBody() {
     if (_error) {
-      return _ErrorView(
-        onRetry: () {
-          setState(() {
-            _error = false;
-            _loading = true;
-          });
-          _initWeb();
-        },
-      );
+      return _ErrorView(onRetry: _loadSupport);
     }
     if (_loading) {
       return const Center(
@@ -278,51 +284,40 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
     }
 
     return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(16),
+      child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SupportBrandHeader(),
+                const SizedBox(height: 24),
+                Text(
+                  _webOpened ? 'Chat de suporte aberto!' : 'Suporte TDS',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                child: const Icon(
-                  Icons.chat_bubble_outline,
-                  size: 52,
-                  color: Color(0xFF093AF4),
+                const SizedBox(height: 10),
+                Text(
+                  _webOpened
+                      ? 'O chat do suporte TDS foi aberto no canto inferior direito da tela. '
+                            'Procure o ícone de balão de conversa.'
+                      : 'Escolha como prefere falar com a equipe TDS.',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                _webOpened ? 'Chat de suporte aberto!' : 'Suporte TDS',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _webOpened
-                    ? 'O chat do suporte TDS foi aberto no canto inferior direito da tela. '
-                          'Procure o ícone de balão de conversa.'
-                    : 'Escolha como prefere falar com a equipe TDS.',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  height: 1.6,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-              // Reabrir chat
-              if (_webOpened)
+                // Reabrir chat
                 FilledButton.icon(
                   icon: const Icon(Icons.chat_bubble),
                   label: const Text('Reabrir chat'),
@@ -333,40 +328,62 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () => chatwootOpen(
-                    _chatwootBase,
-                    _websiteToken,
-                    _supportContactId,
-                    _userName,
-                    '',
-                    identifierHash: _identifierHash,
+                  onPressed: _loadSupport,
+                ),
+
+                const SizedBox(height: 12),
+
+                // WhatsApp fallback
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.phone_in_talk, color: Color(0xFF25D366)),
+                  label: const Text(
+                    'WhatsApp +55 63 9301-0823',
+                    style: TextStyle(color: Color(0xFF25D366)),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF25D366)),
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => launchUrl(
+                    Uri.parse(
+                      'https://wa.me/$_whatsappSuporte?text=${Uri.encodeComponent("Olá! Preciso de ajuda com o App Cartilhas TDS.")}',
+                    ),
+                    mode: LaunchMode.externalApplication,
                   ),
                 ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 32),
+                const SupportFaqSection(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              // WhatsApp fallback
-              OutlinedButton.icon(
-                icon: const Icon(Icons.phone_in_talk, color: Color(0xFF25D366)),
-                label: const Text(
-                  'WhatsApp +55 63 9301-0823',
-                  style: TextStyle(color: Color(0xFF25D366)),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF25D366)),
-                  minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () => launchUrl(
-                  Uri.parse(
-                    'https://wa.me/$_whatsappSuporte?text=${Uri.encodeComponent("Olá! Preciso de ajuda com o App Cartilhas TDS.")}',
-                  ),
-                  mode: LaunchMode.externalApplication,
-                ),
-              ),
-            ],
+  void _showFaqSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SupportBrandHeader(),
+                SizedBox(height: 24),
+                SupportFaqSection(),
+              ],
+            ),
           ),
         ),
       ),
@@ -376,20 +393,12 @@ class _ChatwootScreenState extends State<ChatwootScreen> {
   // ── CORPO MOBILE (WebView) ─────────────────────────────────────────
   Widget _buildMobileBody() {
     if (_error) {
-      return _ErrorView(
-        onRetry: () {
-          setState(() {
-            _loading = true;
-            _error = false;
-          });
-          _initWebView();
-        },
-      );
+      return _ErrorView(onRetry: _loadSupport);
     }
 
     return Stack(
       children: [
-        if (_controller != null) WebViewWidget(controller: _controller!),
+        if (_mobileHost != null) _mobileHost!.build(),
         if (_loading)
           const Center(
             child: Column(
@@ -440,9 +449,26 @@ class _ErrorView extends StatelessWidget {
               label: const Text('Tentar novamente'),
               onPressed: onRetry,
             ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.phone_in_talk),
+              label: const Text('WhatsApp +55 63 9301-0823'),
+              onPressed: () => launchUrl(
+                Uri.parse(
+                  'https://wa.me/$_whatsappSuporte?text=${Uri.encodeComponent("Olá! Preciso de ajuda com o App Cartilhas TDS.")}',
+                ),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+class _SupportIdentity {
+  const _SupportIdentity(this.id, this.hash);
+  final String id;
+  final String? hash;
 }
