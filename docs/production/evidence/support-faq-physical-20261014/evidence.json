@@ -67,7 +67,7 @@
     "note": "website_token e publico por contrato (exposto a clientes). Fetch de producao feito da VPS; alem disso o aparelho fisico alcancou /support/config de staging com sucesso e renderizou o widget (ver chatwoot-widget-loaded.png)."
   },
   "not_proven": [
-    "Execucao de emulador Android no LARGeo: QEMU registra emulator-5554 mas guest estagna sob WHPX (CPU ~18-27s acumulada, adb offline); AVD tdsAab ajustado para 4096MB RAM, reteste pendente",
+    "Execucao de emulador Android no LARGeo: AVD tdsAab confirmado com hw.ramSize=4096, mas o guest nunca completa boot — emulator-5554 permanece 'offline' por 150s e o QEMU encerra silenciosamente (sem FATAL). Retestado com -no-snapshot -gpu swiftshader_indirect: mesmo resultado. Framebuffer nunca recebe post do guest ('no last posted color buffer'). Suspeita: WHPX/ANGLE no host LARGeo com imagem API>35; boundary = hipervisor/imagem do host, nao o app nem o gate de release.",
     "AAB assinado de release — gates de release ainda fechados (release_build_allowed=false, tag v1.4.1 e inventario Play pendentes; config/production.json ja criada localmente no LARGeo)"
   ]
 }
