@@ -1,5 +1,45 @@
 # CURRENT STATE
 
+## 2026-10-14 — ensaio offsite/upgrade PASS da candidata 1.4.1+14
+
+OBSERVED: primeira operação do fluxo de lançamento executada no srv1533541.
+Backup agendado R2 de hoje verificado: recibo Dokploy
+`20261014T034000Z-ab86d2540dec49f69ed44fc5bcff3668` (03:40:11 UTC), objeto
+`postgres/scheduled/v1/20261014T034000Z-ab86d2540dec49f69ed44fc5bcff3668/archive.dump.age`,
+258.125 bytes, SHA-256
+`67f2411d1aea180e05f51a58402edad299f1fe6f88e6e0d303696e50cce72ff3`, com
+coincidência exata entre download e recibo. A identidade age chegou por
+Tailscale a tmpfs `/dev/shm` com modo 0600; a decriptação foi comprovada pela
+assinatura `PGDMP`, sem expor dados. A chave foi sobrescrita (`shred -u`) e o
+diretório temporário destruído ao final do ensaio.
+
+OBSERVED: runner canônico inalterado `rehearse_scheduled_postgres_upgrade.py`,
+run `20261014T123051Z-ff8c4dc8f5be8727`, imagem `tutor-tds-candidate:6e3cd5f31bb4`
+(`sha256:575681b5…`, árvore API `ae0d777f`): restore_verified em PostgreSQL 16
+descartável com rede interna e tmpfs; clone_revision `20261007_0030`; dados e
+colunas originais preservados (fingerprints antes/depois idênticos, sem
+adições); OpenAPI compatível com a imagem produtiva `sha256:4ed8a189b374…` —
+única operação nova `GET /support/config`, nenhuma removida ou alterada —;
+catálogo público compatível; `production_unchanged`; `production_writes=false`;
+recursos isolados removidos. Saída
+`OFFSITE_POSTGRES_UPGRADE=COMPATIBILITY_VERIFIED_PENDING_REVIEW`; manifesto
+`postgres_compatibility_verified_pending_critical_volumes_review`, com gates
+restantes `critical_volumes_custody_review`, `schema_changes_review` e
+`final_acceptance_review`. Evidências sanitizadas:
+`production/evidence/scheduled-postgres-offsite-20261014T123051Z-ff8c4dc8f5be8727.json`,
+`postgres-upgrade-20261014T123051Z-ff8c4dc8f5be8727.json` e
+`recovery-run-20261014T123051Z-ff8c4dc8f5be8727.json`. Saúde de produção após
+o ensaio: `tutor-tds-api-api-1`/`db-1` íntegros e `/health` público retornando
+`{"status":"ok","database":"available"}`.
+
+PENDING: promoção da API produtiva com `CHATWOOT_BASE_URL` e
+`CHATWOOT_WEBSITE_TOKEN` segue `production/CHATWOOT_RUNTIME_CONFIGURATION.md`;
+AAB14 não gerado, upload e envio para análise Play não realizados (produção
+informada pelo operador: código 11, `1.2.0`). O aceite de restauração exige
+revisão humana dos gates restantes; o aceite versionado de 13/10
+(`production-restore-acceptance.json`, árvore `dc32d081`) não cobre a árvore
+`ae0d777f` desta candidata.
+
 ## 2026-10-13 — candidata 1.4.1+14: CI, imagem e smoke verificados
 
 IMPLEMENTED: configuração Chatwoot remota, recarga fresca, confirmação pelos

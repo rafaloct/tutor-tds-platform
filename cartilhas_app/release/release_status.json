@@ -25,7 +25,7 @@
     "status": "not_built",
     "upload_allowed": false,
     "matches_current_source": false,
-    "reason": "Configuração Chatwoot implementada, imagem isolada e smoke físico verificados; restore novo, integração/tag e inventário Play ainda pendentes. Nenhum AAB14 gerado."
+    "reason": "Configuração Chatwoot implementada, imagem isolada e smoke físico verificados; ensaio offsite/upgrade PostgreSQL PASS em 2026-10-14 (run ff8c4dc8, pendente de revisão humana dos gates restantes); promoção da API, integração/tag e inventário Play ainda pendentes. Nenhum AAB14 gerado."
   },
   "required_physical_evidence": [
     {
