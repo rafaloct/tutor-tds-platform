@@ -1,0 +1,15 @@
+{
+  "versionName": "1.4.1",
+  "versionCode": 14,
+  "git_commit": "8eccbbbf9041bf229314c18922c25a71cd7ed861",
+  "git_tag": "v1.4.1",
+  "build_timestamp": "2026-10-14T18:47:15.7713202Z",
+  "environment": "production",
+  "api_base_url": "https://ead.ipexdesenvolvimento.cloud/tutor-api",
+  "remote_catalog_enabled": false,
+  "learning_context_enabled": false,
+  "journey_enabled": false,
+  "backend_api_version": "0.1.0",
+  "backend_schema_version": "20261007_0030",
+  "aab_sha256": "B9716815118794883008A3F9B567C527D5F5BB0317773E2F9377E30B7A55EB14"
+}
