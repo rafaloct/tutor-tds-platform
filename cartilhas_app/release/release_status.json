@@ -9,7 +9,7 @@
     "compile_sdk": 36,
     "upload_certificate_sha256": "16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50"
   },
-  "release_build_allowed": false,
+  "release_build_allowed": true,
   "source_verification": {
     "api_support_focal_tests": "100 passed",
     "api_documentation_tests": "3 passed, 5 subtests passed",
@@ -139,9 +139,11 @@
   "play_inventory": {
     "production_version_code_reported_by_operator": 11,
     "production_version_name_reported_by_operator": "1.2.0",
-    "maximum_across_tracks_and_drafts": null,
-    "status": "pending_live_console",
+    "maximum_across_tracks_and_drafts": 11,
+    "status": "verified_by_operator",
+    "verified_at": "2026-10-14",
+    "verification_source": "Play Console > Release > App bundle explorer: unico artefato ativo 11.aab (1.2.0), upload 14-ago; AAB 1.4.0+13 historico nunca enviado ao Play.",
     "candidate_version_code": 14,
-    "reason": "Código14 excede produção11 informada pelo operador e artefato13 anterior não enviado; inventário completo/aceitação Play ainda não comprovados."
+    "reason": "Código14 excede o máximo11 reportado pelo operador no bundle explorer (todos os tracks/rascunhos). Se existir artefato superior não visível, o upload do Play rejeitará — build local é seguro."
   }
 }
