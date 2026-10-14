@@ -1110,3 +1110,20 @@ PENDING (release AAB 1.4.1/code 14 — `tooling/build_production.ps1`):
 inventario Play Console pendente (producao informada = code 11),
 aceite humano do ensaio de restore pendente. `config/production.json`
 ja existe localmente no LARGeo (gitignored). Nenhum AAB oficial gerado.
+
+## 2026-10-14 (noite) — DNS da política pública corrigido; AAB14 assinado gerado
+
+OBSERVED:
+- Gate `tooling/build_production.ps1 -PublishedVersionCode 11` PASS completo
+  no LARGeo: pytest API, analyze 0 issues, `flutter test` 721/721,
+  `bundleRelease` -> `app-release.aab` 68.307.100 bytes
+  sha256 `B9716815...A55EB14`, cert de upload confere (16:44:39:...:50).
+  Manifest: `cartilhas_app/release/build-manifest.json` (commit `8eccbbb`,
+  tag `v1.4.1`). Sem upload. AAB entregue ao DESKTOP-8T5DRBS via Taildrop
+  para o rascunho de teste interno 1.4.1 no Play Console.
+- DNS `cartilhas.ipexdesenvolvimento.cloud` criado (A -> 46.202.150.132,
+  proxied Cloudflare): `/privacy.html` e `/account-deletion.html` agora
+  respondem **200 público** (~0.22s). Roteador Traefik `tutor-tds-policy`
+  ja existia — faltava apenas o registro DNS.
+PENDING: upload do AAB no rascunho Play, substituicao dos prints da loja,
+envio para revisao — fora do escopo deste build (upload_allowed=false).
