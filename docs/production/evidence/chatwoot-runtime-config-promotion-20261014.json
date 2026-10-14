@@ -84,6 +84,19 @@
       },
       "courses": {"status": 200},
       "probe_note": "Cliente python urllib recebeu Cloudflare 403/1010 por assinatura de bot; verificacao externa usou curl com UA de navegador. Nao e falha da aplicacao."
+    },
+    "widget_render": {
+      "executed_at": "2026-10-14T13:12Z",
+      "browser": "Chrome 144 headless (CDP), viewport movel 430x800",
+      "widget_url": "https://chat.ipexdesenvolvimento.cloud/widget?website_token=<token da configuracao>",
+      "page_status": 200,
+      "chatwootWebChannel_present": true,
+      "inbox_resolved": {"websiteName": "Suporte", "locale": "pt_BR", "replyTime": "in_a_few_minutes", "features": ["attachments", "emoji_picker", "end_conversation"], "workingHours_weekday_9_17_utc": true},
+      "session_issued": true,
+      "rendered_text_sample": "Suporte | Normalmente responde em alguns minutos | Estamos ausentes no momento | Iniciar Conversa | Desenvolvido por Chatwoot",
+      "screenshot": "chatwoot-widget-render-20261014T1312Z.png",
+      "screenshot_sha256": "1c669842b170f15677d58cb554b6bd11573c7b9da31adc78fb1445dfa0d25a1a",
+      "note": "Nenhuma mensagem foi enviada; renderizacao somente leitura da tela inicial do widget."
     }
   },
   "limits": [

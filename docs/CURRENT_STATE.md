@@ -20,6 +20,13 @@ compatibilidade true, `/support/config` **200** com exatamente
 receberam Cloudflare 403/1010 por assinatura de bot; verificação externa usou
 curl com UA de navegador. Recibo sanitizado:
 `production/evidence/chatwoot-runtime-config-promotion-20261014.json`.
+OBSERVED 13:12Z: página pública do widget carregada com o token da configuração
+resolveu a inbox real (`Suporte`, pt_BR, resposta em alguns minutos, features
+attachments/emoji_picker/end_conversation) e renderizou a tela inicial
+("Iniciar Conversa") em Chrome headless real — screenshot
+`production/evidence/chatwoot-widget-render-20261014T1312Z.png`. Nenhuma
+mensagem enviada. Execução remota em desktop Windows da tailnet indisponível
+(sem SSH/WinRM/conector); teste equivalente executado no host.
 PENDING: entrega real do widget no app e recebimento de conversa sintética
 não comprovados nesta operação; AAB14 não gerado, upload/envio Play não
 realizados. A resposta 200 da rota não é aceite de atendimento nem prova de
