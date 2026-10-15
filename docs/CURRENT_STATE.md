@@ -17,10 +17,13 @@ concorrentes + 5 HTTP + 11 de regeneração/logout nativo Drupal PASS, incluindo
 replay do cookie regenerado revogado (401). API e contas sintéticas.
 IMPLEMENTED candidato posterior: login/logout TDS rotaciona ID com destruição do
 antigo e preserva sessão editorial; 32 testes gateway/115 assertions PASS.
-Os 21 checks HTTP específicos TDS ainda aguardam execução (não são os 11 core).
-BLOCKED: validação HTTP de rotação/fixação no login TDS,
-integração #180/#181, suporte customizado/BigPipe, sinalização imediata entre abas
-e SDK Chatwoot real. O
+TESTED-LOCAL no descendente integrado `72e97d6` (PR #212): 112 testes/467
+assertions, 69 checks settings, 15 concorrentes MariaDB, 5 HTTP refresh, 11 core
+e 21 TDS login/logout PASS. Fixture VPS isolada sem rede, PHP 8.3.35/Drupal
+11.4.10/MariaDB 11.8.9, módulos participante/operador/suporte habilitados apenas
+na fixture. Não atribuir esses resultados à revisão isolada `0cfa05c` (32/115).
+BLOCKED: bootstrap anônimo sem CMS, suporte customizado/BigPipe, prova real de
+sinalização entre abas e SDK Chatwoot; implantação autenticada e aceite #170. O
 bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.
 
 ## 2026-10-15 — Drupal DR-7 / #168, candidato local

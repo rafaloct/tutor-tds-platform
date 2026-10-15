@@ -118,10 +118,13 @@ não são ecoadas nem encadeadas em exceções que possam reter bearer.
    O lock interno deste adapter continua sem fornecer essa garantia sozinho.
    Complemento `1c26451`: MariaDB 11.8.9/Drupal 11.4.10, 15 checks concorrentes,
    5 HTTP e 11 de rotação/logout core PASS em fixture isolada com API fake.
-   **BLOCKED:** rotação/fixação no login TDS (não coberta pela rotação core),
-   integração #180/#181, custom backends/BigPipe, deployment e aceite #170. Logout em outra aba ainda
-   pode levar até heartbeat + timeout para remover o widget; padronizar evento
-   de encerramento continua necessário para aceite E2E.
+   Descendente integrado `72e97d6` (PR #212, concilia #180/#181): 112 testes/467
+   assertions, 69 settings, 15 concorrentes + 5 HTTP + 11 core + 21 TDS login/logout
+   PASS na fixture VPS PHP 8.3.35/Drupal 11.4.10/MariaDB 11.8.9 sem rede, com
+   participante/operador/suporte habilitados apenas para QA. Evidência integrada,
+   distinta dos 32 testes/115 assertions locais do candidato isolado `0cfa05c`.
+   **BLOCKED:** bootstrap anônimo sem CMS, custom backends/BigPipe, deployment
+   e aceite #170. Sinalização entre abas e SDK real ainda exigem prova E2E.
 3. **BLOCKED: G3/verificador nativo.** Teste real válido/inválido/Worker
    indisponível pertence ao handoff oficial até contrato público aprovado.
 4. **UNKNOWN: navegação #166, CSP do deployment, accessibility/performance e
