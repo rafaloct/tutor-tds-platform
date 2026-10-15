@@ -7,7 +7,7 @@ branding book e colaboração ACP/A2A. Decisão34 substitui Drupal como estraté
 alvo, preservando código, recibos e serviços Drupal. Não houve deploy, ativação
 de tema, alteração de API/Flutter, conteúdo/banco produtivo ou credenciais.
 
-Base `b0c39b2`; tema canônico `wordpress/tds-child-theme`, versão0.3.0 candidata.
+Base `b0c39b2`; tema canônico `wordpress/tds-child-theme`, versão0.3.1 candidata.
 Plugin/adapters existentes preservados. Os 14 slots, filtros, links configurados,
 proveniência das estatísticas e estados indisponíveis continuam operacionais.
 Apenas texto e apresentação mudam; não se cria login acadêmico WordPress ou
@@ -42,10 +42,29 @@ foi reconfirmada pelo coordenador. Não há nova homologação Stitch inferida.
 Proveniência dos logos conferida por hash. Node syntax PASS; verificador da
 quarentena PASS56 arquivos. Lint completo PASS35 arquivos (PHP, CSS, JS e
 varredura de conteúdo); Node executado localmente e em CLI QA efêmera. Preview
-isolado e smoke WordPress real ainda pendentes.
+isolado e smoke WordPress reais: PASS180 verificações em WordPress7.1.2,
+PHP8.4.26 e Astra4.13.1, antes do refinamento posterior abaixo.
 
 Revisão ACP real coordenada via acpx/Codex no desktop: conferência proposta de
 paleta/ink, quatro pesos locais, logo original e respiro, responsividade,
 consistência dos CTAs, teclado/contraste e estado de catálogo vazio. A faixa de
 quatro cores ficou discreta (4px); a revisão não equivale a aceite visual renderizado.
 Não há aceite visual ou WCAG/performance completo por inspeção de código.
+
+
+## Revisão visual do preview e refinamento posterior
+
+Preview descartável:180 checks PASS, WordPress7.1.2/PHP8.4.26/Astra4.13.1.
+Browser em1440/390/360px sem overflow horizontal, erros JS ou imagens quebradas;
+quatro fontes carregadas e menu toggle/Escape PASS. Isso difere da produção
+observada pelo coordenador (WordPress6.7.2/PHP8.2.28); não inferir equivalência
+integral sem o gate de compatibilidade/deploy.
+
+A captura completa revelou página desktop de7310px com avisos amarelos
+repetidos em slots vazios. Corrigido no candidato0.3.1: indisponível/desabilitado/
+vazio usam superfícies neutras, ícones e texto menores. Seções sem cards ou
+conteúdo têm padding proporcional e cabeçalho/status lado a lado em desktop;
+mobile mantém coluna única. Slots/estados/fallbacks não são removidos. Erros
+acionáveis conservam destaque. Texto do catálogo passa a orientar nova tentativa,
+sem expor conexão ou implementação. Preview preenchido e rerender deste ajuste
+aguardam o coordenador. Issue213 acompanha o refinamento; nenhum deploy.

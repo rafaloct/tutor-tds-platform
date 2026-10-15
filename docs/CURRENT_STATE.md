@@ -8,7 +8,10 @@ Drupal permanecem preservados; não há remoção ou troca de serviços nesta fa
 IMPLEMENTED candidato: tema canônico com fundo claro, hierarquia de entrada,
 Poppins local, logos oficiais, 14 slots e fallbacks existentes. Plugin/adapters
 preservados; nenhuma identidade acadêmica inferida de login WordPress.
-UNKNOWN: preview/aceite visual e equivalência com produção antes de ativação.
+TESTED: preview isolado180 checks PASS (WP7.1.2/PHP8.4.26/Astra4.13.1),
+1440/390/360px sem overflow/erros JS/imagens quebradas; fontes e menu PASS.
+IMPLEMENTED posterior: estados vazios neutros/compactos, sem remover slots.
+UNKNOWN: rerender desse ajuste, aceite visual e equivalência produtiva antes de ativação.
 Quarentena aplica-se ao snapshot legado, não impede evoluir tema/core canônicos.
 Contrato: `portal/WP_BRAND_REFRESH_2026-10-15.md`.
 

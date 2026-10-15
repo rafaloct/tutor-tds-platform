@@ -186,7 +186,7 @@ function tds_theme_catalog( $per_page = 6 ) {
 	} elseif ( 'error' === $state ) {
 		tds_theme_state_notice( 'error', array( 'title' => __( 'Não foi possível carregar o catálogo', 'tds-portal' ) ) );
 	} else {
-		tds_theme_state_notice( $state, array( 'title' => __( 'Catálogo indisponível temporariamente', 'tds-portal' ), 'text' => __( 'O catálogo de cursos é publicado pela plataforma Tutor TDS e ainda não está conectado a este portal.', 'tds-portal' ) ) );
+		tds_theme_state_notice( $state, array( 'title' => __( 'Catálogo indisponível temporariamente', 'tds-portal' ), 'text' => __( 'Não foi possível consultar os cursos agora. Tente novamente mais tarde.', 'tds-portal' ) ) );
 	}
 	echo '</div>';
 }
