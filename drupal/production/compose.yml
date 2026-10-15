@@ -4,6 +4,8 @@ services:
   web:
     image: ${DRUPAL_IMAGE_REF:?immutable image ID or registry digest required}
     pull_policy: never
+    labels:
+      traefik.enable: 'false'
     restart: unless-stopped
     mem_limit: 1536m
     cpus: 2
