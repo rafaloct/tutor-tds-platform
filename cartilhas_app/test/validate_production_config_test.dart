@@ -30,6 +30,14 @@ void main() {
     expect(result.exitCode, 1);
   });
 
+  test('rejeita Dynamic Learning 2B antes do gate de produção', () {
+    final config = _canonicalConfig()..['DYNAMIC_ACTIVITY_ENABLED'] = true;
+
+    final result = _run(root, config);
+
+    expect(result.exitCode, 1);
+  });
+
   test('rejeita ausência da flag push obrigatória', () {
     final config = _canonicalConfig()..remove('PUSH_NOTIFICATIONS_ENABLED');
 
@@ -50,10 +58,29 @@ void main() {
 ProcessResult _run(Directory root, Map<String, Object> config) {
   final file = File('${root.path}/production.json')
     ..writeAsStringSync(jsonEncode(config));
-  return Process.runSync('dart', [
-    'tool/validate_production_config.dart',
-    file.path,
-  ], workingDirectory: Directory.current.path);
+  return Process.runSync(
+    _dartExecutable(),
+    ['tool/validate_production_config.dart', file.path],
+    workingDirectory: Directory.current.path,
+    stdoutEncoding: utf8,
+    stderrEncoding: utf8,
+  );
+}
+
+String _dartExecutable() {
+  final resolved = File(Platform.resolvedExecutable);
+  if (resolved.uri.pathSegments.last.startsWith('dart')) {
+    return resolved.path;
+  }
+  var directory = resolved.parent;
+  while (directory.parent.path != directory.path) {
+    for (final name in const ['dart.exe', 'dart']) {
+      final candidate = File('${directory.path}/dart-sdk/bin/$name');
+      if (candidate.existsSync()) return candidate.path;
+    }
+    directory = directory.parent;
+  }
+  return 'dart';
 }
 
 Map<String, Object> _canonicalConfig() => {
@@ -68,6 +95,7 @@ Map<String, Object> _canonicalConfig() => {
   'LEARNING_CONTEXT_ENABLED': false,
   'DURABLE_LEARNING_OUTBOX_ENABLED': false,
   'JOURNEY_TRACEABILITY_ENABLED': false,
+  'DYNAMIC_ACTIVITY_ENABLED': false,
   'SIGNED_SUPPORT_IDENTITY': false,
   'PUSH_NOTIFICATIONS_ENABLED': false,
 };

@@ -15,6 +15,7 @@ class LearnerOfflineRepository implements LearnerClassroomGateway {
     required this.remote,
     required this.auth,
     required String apiUrl,
+    this.dynamicActivityEnabled = false,
     DateTime Function()? clock,
   }) : _scope = sha256
            .convert(utf8.encode(apiUrl.replaceFirst(RegExp(r'/+$'), '')))
@@ -24,6 +25,7 @@ class LearnerOfflineRepository implements LearnerClassroomGateway {
   static const maxAge = Duration(days: 7);
   final LearnerClassroomGateway remote;
   final AuthRepository auth;
+  final bool dynamicActivityEnabled;
   final String _scope;
   final DateTime Function() _clock;
   String? _owner;
@@ -31,7 +33,8 @@ class LearnerOfflineRepository implements LearnerClassroomGateway {
   DateTime? savedAt;
 
   String _key(String owner) =>
-      'classroom_private:v1:$_scope:${Uri.encodeComponent(owner)}';
+      'classroom_private:${dynamicActivityEnabled ? 'v2' : 'v1'}:'
+      '$_scope:${Uri.encodeComponent(owner)}';
 
   Future<String> _requireOwner() async {
     final current = await auth.localUserId();
@@ -207,8 +210,24 @@ class LearnerOfflineRepository implements LearnerClassroomGateway {
       course.courseVersionId != null &&
       course.courseVersionId == row.courseVersionId &&
       !course.legacyProgressCompatible &&
+      (!dynamicActivityEnabled || _hasProtectedAssessmentContent(course)) &&
       course.sections.isNotEmpty &&
       course.sections.every((section) => section.messages.isNotEmpty);
+
+  bool _hasProtectedAssessmentContent(Cartilha course) => course.sections.every(
+    (section) => section.messages.every((message) {
+      if (!message.isAssessmentQuestion) return true;
+      final options = message.options ?? const <Option>[];
+      return message.feedback == null &&
+          message.explanation == null &&
+          options.every(
+            (option) =>
+                option.value == null &&
+                option.isCorrect == null &&
+                option.feedback == null,
+          );
+    }),
+  );
 
   @override
   Future<Cartilha> course(String classId) async {

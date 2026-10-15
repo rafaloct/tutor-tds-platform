@@ -1,0 +1,31 @@
+{
+  "schema_version": "wave2b-staging-fixture-v1",
+  "fixture_id": "replace-with-preprovisioned-wave2b-fixture",
+  "student_user_id": "replace-with-synthetic-student-id",
+  "course_id": "replace-with-published-course-id",
+  "topic": "Replace with the exact published section title",
+  "lineage": {
+    "organization_id": "replace-with-organization-id",
+    "program_id": "replace-with-program-id",
+    "class_id": "replace-with-class-id",
+    "membership_id": "replace-with-membership-id",
+    "enrollment_id": "replace-with-context-enrollment-id",
+    "legacy_enrollment_id": "replace-with-legacy-enrollment-id",
+    "course_version_id": "replace-with-course-version-id",
+    "section_id": "replace-with-section-id",
+    "section_version_id": "replace-with-section-version-id"
+  },
+  "blocks": {
+    "question": {
+      "block_id": "replace-with-question-block-id",
+      "block_version_id": "replace-with-question-block-version-id",
+      "selected_index": 0
+    },
+    "multi_correct_quiz": {
+      "block_id": "replace-with-multi-correct-quiz-block-id",
+      "block_version_id": "replace-with-quiz-block-version-id",
+      "selected_index": 1,
+      "minimum_correct_options": 2
+    }
+  }
+}

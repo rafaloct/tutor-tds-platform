@@ -1,0 +1,4100 @@
+{
+  "DELETE /auth/me": {
+    "request": {
+      "body": null,
+      "path": "/auth/me"
+    },
+    "response": {
+      "body": null,
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Sem corpo de resposta após exclusão autorizada. Há proteção contra autoexclusão de contas de equipe.",
+      "status": 204
+    }
+  },
+  "GET /admin/hierarchy": {
+    "request": {
+      "body": null,
+      "path": "/admin/hierarchy"
+    },
+    "response": {
+      "body": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "name": "Pessoa Sintética QA",
+          "programs": [
+            {
+              "course_ids": [
+                "curso-qa"
+              ],
+              "id": "00000000-0000-4000-8000-000000000001",
+              "institution_id": "00000000-0000-4000-8000-000000000001",
+              "memberships": [
+                {
+                  "program_id": "00000000-0000-4000-8000-000000000002",
+                  "role": "student",
+                  "status": "active",
+                  "user_id": "00000000-0000-4000-8000-000000000004"
+                }
+              ],
+              "name": "Pessoa Sintética QA"
+            }
+          ]
+        }
+      ],
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /admin/ledger": {
+    "request": {
+      "body": null,
+      "path": "/admin/ledger?program_id=00000000-0000-4000-8000-000000000002"
+    },
+    "response": {
+      "body": [
+        {
+          "amount_minor": 100,
+          "calculation_snapshot": {
+            "creator_score_id": "00000000-0000-4000-8000-000000000001",
+            "mode": "simulated",
+            "payment_adapter": "disabled",
+            "score_basis_points": 0
+          },
+          "created_at": "2026-10-13T12:00:00Z",
+          "creator_user_id": "00000000-0000-4000-8000-000000000001",
+          "currency": "BRL",
+          "entry_type": "accrual",
+          "id": "00000000-0000-4000-8000-000000000001",
+          "idempotency_key": "qa-command-20261013-0001",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "media_id": "00000000-0000-4000-8000-000000000001",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "rule_version": "creator-score-v2",
+          "source_event_id": "00000000-0000-4000-8000-000000000001",
+          "status": "simulated"
+        }
+      ],
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exige COMMERCIAL_SIMULATION_ENABLED=true, PAYMENT_ADAPTER=disabled, escopo financeiro autorizado e source_event_id da mídia do score. Exemplo de simulação; o evento-fonte da fixture pode estar fora da janela do score. Nunca representa pagamento/payout real.",
+      "status": 200
+    }
+  },
+  "GET /admin/media/{media_id}/history": {
+    "request": {
+      "body": null,
+      "path": "/admin/media/00000000-0000-4000-8000-000000000001/history"
+    },
+    "response": {
+      "body": [
+        {
+          "actor_role": "creator",
+          "actor_user_id": "00000000-0000-4000-8000-000000000001",
+          "from_status": null,
+          "id": "00000000-0000-4000-8000-000000000021",
+          "media_id": "00000000-0000-4000-8000-000000000001",
+          "occurred_at": "2026-10-13T12:00:00Z",
+          "reason": "Mídia criada como rascunho.",
+          "to_status": "draft"
+        }
+      ],
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Histórico da fixture após criação por creator com vínculo ativo: transição inicial null → draft e motivo fixado pela rota. Publicação/bloqueio/arquivamento acrescentam novas transições em vez de reescrever este histórico.",
+      "status": 200
+    }
+  },
+  "GET /admin/sync/status": {
+    "request": {
+      "body": null,
+      "path": "/admin/sync/status"
+    },
+    "response": {
+      "body": {
+        "exhausted": 0,
+        "failed": 0,
+        "last_failure_at": null,
+        "last_success_at": null,
+        "pending": 0,
+        "processing": 0,
+        "synced": 0
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /analytics/usage": {
+    "request": {
+      "body": null,
+      "path": "/analytics/usage"
+    },
+    "response": {
+      "body": {
+        "items": [
+          {
+            "count": 1,
+            "course_id": "curso-qa",
+            "event_type": "page_viewed",
+            "last_occurred_at": "2026-10-01T12:00:00Z",
+            "target_id": "00000000-0000-4000-8000-000000000001",
+            "unique_users": 1
+          }
+        ],
+        "period_end": "2026-10-02T00:00:00Z",
+        "period_start": "2026-10-01T00:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /assessment-attempts": {
+    "request": {
+      "body": null,
+      "path": "/assessment-attempts"
+    },
+    "response": {
+      "body": {
+        "attempts": [
+          {
+            "attempt_id": "00000000-0000-4000-8000-000000000001",
+            "completed": false,
+            "course_id": "curso-qa",
+            "current_index": 0,
+            "mode": "quiz",
+            "origin": "practice",
+            "remaining_seconds": 0,
+            "revision": 1,
+            "score": 0,
+            "topic": "Tema sintético",
+            "updated_at": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "limit": 20,
+        "offset": 0,
+        "total": 1
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /assessment-attempts/{attempt_id}": {
+    "request": {
+      "body": null,
+      "path": "/assessment-attempts/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "attempt_id": "00000000-0000-4000-8000-000000000001",
+        "completed": false,
+        "course_id": "curso-qa",
+        "current_index": 0,
+        "mode": "quiz",
+        "origin": "practice",
+        "remaining_seconds": 0,
+        "revision": 1,
+        "score": 0,
+        "topic": "Tema sintético",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /assessment-attempts/{attempt_id}/content": {
+    "request": {
+      "body": null,
+      "path": "/assessment-attempts/00000000-0000-4000-8000-000000000001/content"
+    },
+    "response": {
+      "body": {
+        "answer_key": null,
+        "assessment_content_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-qa",
+        "created_at": "2026-10-01T12:00:00Z",
+        "duration_seconds": 0,
+        "mode": "quiz",
+        "questions": [
+          {
+            "options": [
+              "qa-example"
+            ],
+            "question": "Questão sintética?",
+            "topic": "Tema sintético"
+          }
+        ],
+        "title": "Curso Sintético QA",
+        "topic": "Tema sintético"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /assessment-contents/{content_id}": {
+    "request": {
+      "body": null,
+      "path": "/assessment-contents/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "answer_key": null,
+        "assessment_content_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "duration_seconds": 0,
+        "mode": "quiz",
+        "questions": [
+          {
+            "options": [
+              "qa-example",
+              "qa-example"
+            ],
+            "question": "Questão sintética?",
+            "topic": "Tema sintético"
+          }
+        ],
+        "title": "Curso Sintético QA",
+        "topic": "Tema sintético"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Prévia de prática do próprio aluno sempre retorna answer_key null e questions sem correct_index/explanation. Gabarito possui fluxo próprio separado.",
+      "status": 200
+    }
+  },
+  "GET /auth/me": {
+    "request": {
+      "body": null,
+      "path": "/auth/me"
+    },
+    "response": {
+      "body": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Pessoa Sintética QA",
+        "role": "student"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /certificate-requests": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests"
+    },
+    "response": {
+      "body": {
+        "requests": [
+          {
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "class_name": "Turma Exemplo",
+            "course_id": "curso-exemplo",
+            "course_title": "Curso Exemplo",
+            "course_version_id": "00000000-0000-4000-8000-000000000008",
+            "eligibility": {
+              "completed": false,
+              "eligible": false,
+              "required_seconds": 288000,
+              "validated_seconds": 0
+            },
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "holder_name": "Pessoa Exemplo",
+            "id": "00000000-0000-4000-8000-000000000019",
+            "institution_name": "Instituição Exemplo",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "program_name": "Programa Exemplo",
+            "requested_at": "2026-10-13T12:00:00Z",
+            "review_reason": null,
+            "reviewed_at": null,
+            "revision": 1,
+            "status": "pending"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Visibilidade do autor ou revisor autorizado; aprovação/rejeição são decisões humanas e não emissão.",
+      "status": 200
+    }
+  },
+  "GET /certificate-requests/contexts": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests/contexts?course_id=curso-qa&course_version_id=00000000-0000-4000-8000-000000000008"
+    },
+    "response": {
+      "body": {
+        "contexts": [
+          {
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "class_name": "Turma Exemplo",
+            "course_title": "Curso Exemplo",
+            "course_version_id": "00000000-0000-4000-8000-000000000008",
+            "eligibility": {
+              "completed": false,
+              "eligible": false,
+              "required_seconds": 288000,
+              "validated_seconds": 0
+            },
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "program_name": "Programa Exemplo"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /certificate-requests/review-queue": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests/review-queue"
+    },
+    "response": {
+      "body": {
+        "requests": [
+          {
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "class_name": "Turma Exemplo",
+            "course_id": "curso-exemplo",
+            "course_title": "Curso Exemplo",
+            "course_version_id": "00000000-0000-4000-8000-000000000008",
+            "eligibility": {
+              "completed": false,
+              "eligible": false,
+              "required_seconds": 288000,
+              "validated_seconds": 0
+            },
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "holder_name": "Pessoa Exemplo",
+            "id": "00000000-0000-4000-8000-000000000019",
+            "institution_name": "Instituição Exemplo",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "program_name": "Programa Exemplo",
+            "requested_at": "2026-10-13T12:00:00Z",
+            "review_reason": null,
+            "reviewed_at": null,
+            "revision": 1,
+            "status": "pending"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Visibilidade do autor ou revisor autorizado; aprovação/rejeição são decisões humanas e não emissão.",
+      "status": 200
+    }
+  },
+  "GET /certificate-requests/{request_id}": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "class_name": "Turma Exemplo",
+        "course_id": "curso-exemplo",
+        "course_title": "Curso Exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "eligibility": {
+          "completed": false,
+          "eligible": false,
+          "required_seconds": 288000,
+          "validated_seconds": 0
+        },
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "holder_name": "Pessoa Exemplo",
+        "id": "00000000-0000-4000-8000-000000000019",
+        "institution_name": "Instituição Exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "program_name": "Programa Exemplo",
+        "requested_at": "2026-10-13T12:00:00Z",
+        "review_reason": null,
+        "reviewed_at": null,
+        "revision": 1,
+        "status": "pending"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /certificate-requests/{request_id}/candidate-status": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/candidate-status"
+    },
+    "response": {
+      "body": {
+        "detail": "Contrato candidato desativado neste ambiente."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final.",
+      "status": 503
+    }
+  },
+  "GET /certificates": {
+    "request": {
+      "body": null,
+      "path": "/certificates"
+    },
+    "response": {
+      "body": {
+        "certificates": [
+          {
+            "class_id": null,
+            "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "course_id": "curso-qa",
+            "course_title": null,
+            "holder_name": null,
+            "id": "00000000-0000-4000-8000-000000000001",
+            "institution_name": null,
+            "issued_at": "2026-10-01T12:00:00Z",
+            "planned_hours": null,
+            "program_id": null,
+            "user_id": "00000000-0000-4000-8000-000000000004",
+            "verification_url": "https://example.org/verify/qa-certificate"
+          }
+        ]
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes": {
+    "request": {
+      "body": null,
+      "path": "/classes"
+    },
+    "response": {
+      "body": {
+        "classes": [
+          {
+            "course_id": "curso-qa",
+            "end_date": "2026-10-14",
+            "id": "00000000-0000-4000-8000-000000000001",
+            "name": "Pessoa Sintética QA",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "start_date": "2026-10-13",
+            "status": "planned",
+            "teacher_id": "00000000-0000-4000-8000-000000000005"
+          }
+        ]
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003"
+    },
+    "response": {
+      "body": {
+        "course_id": "curso-qa",
+        "end_date": "2026-10-14",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "monitor_ids": [
+          "00000000-0000-4000-8000-000000000001"
+        ],
+        "name": "Pessoa Sintética QA",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "start_date": "2026-10-13",
+        "status": "planned",
+        "student_ids": [
+          "00000000-0000-4000-8000-000000000001"
+        ],
+        "teacher_id": "00000000-0000-4000-8000-000000000005"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/assessment-attempts": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/assessment-attempts"
+    },
+    "response": {
+      "body": {
+        "attempts": [
+          {
+            "attempt_id": "00000000-0000-4000-8000-000000000001",
+            "completed": false,
+            "course_id": "curso-qa",
+            "current_index": 0,
+            "mode": "quiz",
+            "origin": "practice",
+            "remaining_seconds": 0,
+            "revision": 1,
+            "score": 0,
+            "topic": "Tema sintético",
+            "updated_at": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "limit": 20,
+        "offset": 0,
+        "total": 1
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/assessment-attempts/{attempt_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/assessment-attempts/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "attempt_id": "00000000-0000-4000-8000-000000000001",
+        "completed": false,
+        "course_id": "curso-qa",
+        "current_index": 0,
+        "mode": "quiz",
+        "origin": "practice",
+        "remaining_seconds": 0,
+        "revision": 1,
+        "score": 0,
+        "topic": "Tema sintético",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/assessment-attempts/{attempt_id}/content": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/assessment-attempts/00000000-0000-4000-8000-000000000001/content"
+    },
+    "response": {
+      "body": {
+        "answer_key": null,
+        "assessment_content_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-qa",
+        "created_at": "2026-10-01T12:00:00Z",
+        "duration_seconds": 0,
+        "mode": "quiz",
+        "questions": [
+          {
+            "options": [
+              "qa-example"
+            ],
+            "question": "Questão sintética?",
+            "topic": "Tema sintético"
+          }
+        ],
+        "title": "Curso Sintético QA",
+        "topic": "Tema sintético"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/course": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/course"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "id": "curso-exemplo",
+        "legacy_progress_compatible": false,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "title": "Curso Exemplo",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Snapshot da edição fixada na turma; inclui campos de conteúdo editorial. Sem edição consistente retorna 409. A projeção de aluno protege gabaritos quando as flags contextuais/dinâmicas estão ativas.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/dashboard": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/dashboard"
+    },
+    "response": {
+      "body": {
+        "classroom": {
+          "course_id": "curso-qa",
+          "end_date": "2026-10-14",
+          "id": "00000000-0000-4000-8000-000000000001",
+          "name": "Pessoa Sintética QA",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "start_date": "2026-10-13",
+          "status": "planned",
+          "teacher_id": "00000000-0000-4000-8000-000000000005"
+        },
+        "expected_progress_percent": 0,
+        "generated_at": "2026-10-01T12:00:00Z",
+        "students": [
+          {
+            "alerts": [
+              {
+                "code": "inactive_7_days"
+              }
+            ],
+            "baseline_linked": false,
+            "confirmed_sessions": 0,
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "inactive_days": 0,
+            "last_activity_at": null,
+            "name": "Pessoa Sintética QA",
+            "open_mentorship_cases": 0,
+            "planned_hours": 0,
+            "progress_percent": 0,
+            "status": "active",
+            "user_id": "00000000-0000-4000-8000-000000000004",
+            "validated_hours": 0
+          }
+        ],
+        "summary": {
+          "baseline_linked_students": 0,
+          "below_expected_students": 0,
+          "confirmed_participations": 0,
+          "inactive_students": 0,
+          "open_mentorship_cases": 0,
+          "pending_students": 0,
+          "total_students": 0
+        }
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/eligible-students": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/eligible-students"
+    },
+    "response": {
+      "body": {
+        "capacity_reference": 30,
+        "capacity_warning": false,
+        "next_offset": null,
+        "occupancy": 0,
+        "students": [
+          {
+            "name": "Pessoa Sintética QA",
+            "user_id": "00000000-0000-4000-8000-000000000004"
+          }
+        ]
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/evidence-imports/{import_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/evidence-imports/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "evidence_ids": [
+          "00000000-0000-4000-8000-000000000010"
+        ],
+        "id": "00000000-0000-4000-8000-000000000001",
+        "retention_until": "2030-10-01T12:00:00Z",
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source_type": "whatsapp_export",
+        "status": "pending_review"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Consulta da mesma importação sintética criada: source_type whatsapp_export, status pending_review e evidências pendentes de revisão humana. A leitura não realiza integração externa nem muda o status.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/exceptions": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/exceptions"
+    },
+    "response": {
+      "body": {
+        "exceptions": [
+          {
+            "code": "evidence_needs_review",
+            "evidence_id": "00000000-0000-4000-8000-000000000010",
+            "user_id": "00000000-0000-4000-8000-000000000004"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. A visibilidade depende do vínculo; um item ainda sem pessoa associada pode ter user_id null e ser visível somente à equipe.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/journey-activity": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/journey-activity"
+    },
+    "response": {
+      "body": {
+        "contract": "tds-activity-v1",
+        "items": [
+          {
+            "alvo_id": "home",
+            "alvo_tipo": "page_id",
+            "atribuicao_turma": null,
+            "escopo": "conta_autenticada",
+            "event_id": "00000000-0000-4000-8000-000000000018",
+            "evento": "page_viewed",
+            "ocorreu_em": "2026-10-13T12:00:00Z",
+            "pessoa_id": "pseudonimo-sintetico-exemplo",
+            "segundos_tela": null
+          }
+        ],
+        "limit": 100,
+        "offset": 0,
+        "total": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige JOURNEY_TRACEABILITY_ENABLED=true e SHEETS_PSEUDONYM_SECRET com pelo menos 32 caracteres; flag desligada retorna 404: Exportação de rastreio ainda não habilitada. Somente projeção analítica; null preserva resultados desconhecidos. O consumidor deduplica por event_id entre turmas; telemetria de conta não atribui atividade acadêmica à turma.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/journey-export": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/journey-export"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "contract": "tds-journey-v1",
+        "generated_at": "2026-10-13T12:00:00Z",
+        "items": [
+          {
+            "acompanhamento_30d": null,
+            "acompanhamento_60d": null,
+            "acompanhamento_90d": null,
+            "aplicacao_iniciada_flag": null,
+            "atualizado_em": "2026-10-13T12:00:00Z",
+            "carga_horaria_prevista": 80.0,
+            "certificado_cobertura": "api_class_references_only",
+            "certificado_emitido_em": null,
+            "certificado_flag": null,
+            "concluiu_frequencia_flag": null,
+            "curso": "Curso Exemplo",
+            "curso_id": "curso-exemplo",
+            "curso_versao_id": "00000000-0000-4000-8000-000000000008",
+            "data_proxima_acao": null,
+            "data_ultima_interacao": "2026-10-13T12:00:00Z",
+            "elegivel_mentoria": null,
+            "encaminhamentos_qtd": null,
+            "estagio_jornada": null,
+            "evidencia_validada_flag": null,
+            "frequencia_percentual": null,
+            "horas_estudo_validadas": 1.0,
+            "interacoes_qtd": 1,
+            "matricula_contextual_id": "00000000-0000-4000-8000-000000000017",
+            "mentor_id": null,
+            "pessoa_id": "pseudonimo-sintetico-exemplo",
+            "plano_aplicacao_status": null,
+            "programa_id": "00000000-0000-4000-8000-000000000002",
+            "progresso_estudo_percentual": 1.25,
+            "registro_id": "inscricao-exemplo-001",
+            "status_baseline": "Vínculo conferido",
+            "status_convite_mentoria": null,
+            "status_mentoria": null,
+            "status_qualidade": "confirmed_identity_partial_outcomes",
+            "turma_id": "00000000-0000-4000-8000-000000000003",
+            "vinculo_conferido_em": "2026-10-13T12:00:00Z",
+            "vinculo_revisao": 1
+          }
+        ],
+        "limit": 100,
+        "offset": 0,
+        "pending": [],
+        "total": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige JOURNEY_TRACEABILITY_ENABLED=true e SHEETS_PSEUDONYM_SECRET com pelo menos 32 caracteres; flag desligada retorna 404: Exportação de rastreio ainda não habilitada. Somente projeção analítica; null preserva resultados desconhecidos. items exige baseline reconciliada à inscrição fabric:tds-inscription-v1; demais participantes aparecem em pending.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/learning-context": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/learning-context"
+    },
+    "response": {
+      "body": {
+        "context": {
+          "cohort_id": "00000000-0000-4000-8000-000000000003",
+          "course_id": "curso-qa",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "legacy_enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "membership_id": "00000000-0000-4000-8000-000000000001",
+          "organization_id": "00000000-0000-4000-8000-000000000001",
+          "permissions": [
+            "qa-example"
+          ],
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "role": "student",
+          "user_id": "00000000-0000-4000-8000-000000000004"
+        },
+        "contract_version": "cohort-enrollment-v2",
+        "progress": {
+          "alerts": [
+            {
+              "code": "inactive_7_days"
+            }
+          ],
+          "baseline_linked": false,
+          "confirmed_sessions": 0,
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "inactive_days": 0,
+          "last_activity_at": null,
+          "name": "Pessoa Sintética QA",
+          "open_mentorship_cases": 0,
+          "planned_hours": 0,
+          "progress_percent": 0,
+          "status": "active",
+          "user_id": "00000000-0000-4000-8000-000000000004",
+          "validated_hours": 0
+        },
+        "resolved_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/mentorship-cases": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/mentorship-cases"
+    },
+    "response": {
+      "body": {
+        "items": [
+          {
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "closed_at": null,
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "id": "00000000-0000-4000-8000-000000000013",
+            "mentor_id": "00000000-0000-4000-8000-000000000005",
+            "mentor_name": "Instrutora Exemplo",
+            "next_action": "Agendar revisão com a mentora.",
+            "objective": "Revisar o conteúdo da aula de exemplo.",
+            "opened_at": "2026-10-13T12:00:00Z",
+            "revision": 1,
+            "status": "open",
+            "updated_at": "2026-10-13T12:00:00Z",
+            "user_id": "00000000-0000-4000-8000-000000000004"
+          }
+        ],
+        "limit": 50,
+        "offset": 0,
+        "total": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/mentorship-cases/{case_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/mentorship-cases/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "closed_at": null,
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "history": [
+          {
+            "actor_role": "teacher",
+            "actor_user_id": "00000000-0000-4000-8000-000000000005",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Acompanhamento solicitado.",
+            "revision": 1,
+            "snapshot": {
+              "class_id": "00000000-0000-4000-8000-000000000003",
+              "closed_at": null,
+              "enrollment_id": "00000000-0000-4000-8000-000000000007",
+              "id": "00000000-0000-4000-8000-000000000013",
+              "mentor_id": "00000000-0000-4000-8000-000000000005",
+              "mentor_name": "Instrutora Exemplo",
+              "next_action": "Agendar revisão com a mentora.",
+              "objective": "Revisar o conteúdo da aula de exemplo.",
+              "opened_at": "2026-10-13T12:00:00Z",
+              "revision": 1,
+              "status": "open",
+              "updated_at": "2026-10-13T12:00:00Z",
+              "user_id": "00000000-0000-4000-8000-000000000004"
+            }
+          }
+        ],
+        "id": "00000000-0000-4000-8000-000000000013",
+        "mentor_id": "00000000-0000-4000-8000-000000000005",
+        "mentor_name": "Instrutora Exemplo",
+        "next_action": "Agendar revisão com a mentora.",
+        "objective": "Revisar o conteúdo da aula de exemplo.",
+        "opened_at": "2026-10-13T12:00:00Z",
+        "revision": 1,
+        "status": "open",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/monitor-exceptions": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/monitor-exceptions"
+    },
+    "response": {
+      "body": {
+        "attention_students": 0,
+        "generated_at": "2026-10-01T12:00:00Z",
+        "students": [
+          {
+            "alerts": [
+              {
+                "code": "inactive_7_days"
+              }
+            ],
+            "name": "Pessoa Sintética QA",
+            "user_id": "00000000-0000-4000-8000-000000000004"
+          }
+        ],
+        "total_students": 0
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/reports/{report_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/reports/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "generated_at": "2026-10-13T12:00:00Z",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "report_digest": "b997d3e91db08f65ceb64a9e9638ea5feb8692686003f65217f920f156c1f310",
+        "session_id": "00000000-0000-4000-8000-000000000009",
+        "summary": {
+          "checkin_count": 1,
+          "external_integrations": "disabled",
+          "pending_evidence_ids": [],
+          "pending_explicitly_confirmed": false,
+          "presence": {
+            "counts": {
+              "absent": 0,
+              "confirmed_present": 1,
+              "justified_absence": 0,
+              "pending": 0,
+              "suggested_present": 0
+            },
+            "pending_count": 0,
+            "total": 1
+          }
+        }
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Retorna o relatório persistido pelo fechamento, preservando resumo e report_digest. A fixture possui participante confirmado, sem evidências/presenças pendentes, e external_integrations disabled.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/sessions": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions"
+    },
+    "response": {
+      "body": {
+        "limit": 50,
+        "offset": 0,
+        "sessions": [
+          {
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "ends_at": "2026-10-13T13:00:00Z",
+            "id": "00000000-0000-4000-8000-000000000009",
+            "starts_at": "2026-10-13T12:00:00Z",
+            "status": "open",
+            "token_expires_at": "2026-10-13T12:10:00Z",
+            "token_version": 1
+          }
+        ],
+        "total": 1
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Página da fixture recém-criada antes de rotação/fechamento: status open e token_version 1. Sem parâmetros de paginação a rota usa limit=50/offset=0. A projeção pública de sessão omite token e código de check-in.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/sessions/open": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/open"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "ends_at": "2026-10-13T13:00:00Z",
+        "id": "00000000-0000-4000-8000-000000000009",
+        "starts_at": "2026-10-13T12:00:00Z",
+        "status": "open",
+        "token_expires_at": "2026-10-13T12:10:00Z",
+        "token_version": 1
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Encontro open mais recente da turma, nesta fixture recém-criada. A projeção pública omite token/código; sem encontro aberto autorizado a rota retorna 404.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/sessions/{session_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "ends_at": "2026-10-13T13:00:00Z",
+        "id": "00000000-0000-4000-8000-000000000009",
+        "starts_at": "2026-10-13T12:00:00Z",
+        "status": "open",
+        "token_expires_at": "2026-10-13T12:10:00Z",
+        "token_version": 1
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Detalhe da fixture recém-criada antes de rotação/fechamento, com o mesmo ID do parâmetro de caminho. A projeção pública omite token e código de check-in; leitura não renova a expiração.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/sessions/{session_id}/attendance/{user_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009/attendance/00000000-0000-4000-8000-000000000004"
+    },
+    "response": {
+      "body": {
+        "can_decide": true,
+        "items": [
+          {
+            "actor_user_id": "00000000-0000-4000-8000-000000000005",
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "decided_at": "2026-10-13T12:00:00Z",
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "id": "00000000-0000-4000-8000-000000000011",
+            "makeup_session_id": null,
+            "original_session_id": "00000000-0000-4000-8000-000000000009",
+            "reason": "Presença conferida pelo instrutor.",
+            "revision": 1,
+            "status": "VALID",
+            "user_id": "00000000-0000-4000-8000-000000000004"
+          }
+        ],
+        "limit": 50,
+        "offset": 0,
+        "total": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/sessions/{session_id}/presence": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009/presence"
+    },
+    "response": {
+      "body": {
+        "items": [
+          {
+            "activity_count": 0,
+            "checkin_count": 1,
+            "checkout_count": 0,
+            "decided_at": "2026-10-13T12:00:00Z",
+            "enrollment_id": "00000000-0000-4000-8000-000000000007",
+            "reason": "Presença conferida pelo instrutor.",
+            "revision": 1,
+            "status": "confirmed_present",
+            "user_id": "00000000-0000-4000-8000-000000000004",
+            "user_name": "Pessoa Exemplo"
+          }
+        ],
+        "limit": 50,
+        "offset": 0,
+        "session_status": "open",
+        "total": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/students/{owner_id}/assessment-attempts": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004/assessment-attempts"
+    },
+    "response": {
+      "body": {
+        "attempts": [
+          {
+            "attempt_id": "00000000-0000-4000-8000-000000000001",
+            "completed": false,
+            "course_id": "curso-qa",
+            "current_index": 0,
+            "mode": "quiz",
+            "origin": "practice",
+            "remaining_seconds": 0,
+            "revision": 1,
+            "score": 0,
+            "topic": "Tema sintético",
+            "updated_at": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "limit": 20,
+        "offset": 0,
+        "total": 1
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004/assessment-attempts/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "attempt_id": "00000000-0000-4000-8000-000000000001",
+        "completed": false,
+        "course_id": "curso-qa",
+        "current_index": 0,
+        "mode": "quiz",
+        "origin": "practice",
+        "remaining_seconds": 0,
+        "revision": 1,
+        "score": 0,
+        "topic": "Tema sintético",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/students/{owner_id}/assessment-attempts/{attempt_id}/content": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004/assessment-attempts/00000000-0000-4000-8000-000000000001/content"
+    },
+    "response": {
+      "body": {
+        "answer_key": null,
+        "assessment_content_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-qa",
+        "created_at": "2026-10-01T12:00:00Z",
+        "duration_seconds": 0,
+        "mode": "quiz",
+        "questions": [
+          {
+            "options": [
+              "qa-example"
+            ],
+            "question": "Questão sintética?",
+            "topic": "Tema sintético"
+          }
+        ],
+        "title": "Curso Sintético QA",
+        "topic": "Tema sintético"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/students/{user_id}/baseline": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004/baseline"
+    },
+    "response": {
+      "body": {
+        "baseline": {
+          "baseline_date": "2026-10-13",
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "id": "00000000-0000-4000-8000-000000000012",
+          "record_id": "baseline-exemplo-001",
+          "reviewed_at": "2026-10-13T12:00:00Z",
+          "reviewed_by": "00000000-0000-4000-8000-000000000005",
+          "revision": 1,
+          "source": "forms:exemplo",
+          "territory_id": "territorio-exemplo",
+          "user_id": "00000000-0000-4000-8000-000000000004"
+        },
+        "history": [
+          {
+            "actor_role": "teacher",
+            "actor_user_id": "00000000-0000-4000-8000-000000000005",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Referência conferida no ambiente de exemplo.",
+            "revision": 1,
+            "snapshot": {
+              "baseline_date": "2026-10-13",
+              "class_id": "00000000-0000-4000-8000-000000000003",
+              "enrollment_id": "00000000-0000-4000-8000-000000000007",
+              "id": "00000000-0000-4000-8000-000000000012",
+              "record_id": "baseline-exemplo-001",
+              "reviewed_at": "2026-10-13T12:00:00Z",
+              "revision": 1,
+              "source": "forms:exemplo",
+              "territory_id": "territorio-exemplo",
+              "user_id": "00000000-0000-4000-8000-000000000004"
+            }
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Sem baseline a resposta é {\"baseline\":null,\"history\":[]}. Com JOURNEY_TRACEABILITY_ENABLED e SHEETS_PSEUDONYM_SECRET válido, acrescenta pessoa_id pseudonimizado.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/students/{user_id}/learning-context": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004/learning-context"
+    },
+    "response": {
+      "body": {
+        "context": {
+          "cohort_id": "00000000-0000-4000-8000-000000000003",
+          "course_id": "curso-qa",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "legacy_enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "membership_id": "00000000-0000-4000-8000-000000000001",
+          "organization_id": "00000000-0000-4000-8000-000000000001",
+          "permissions": [
+            "qa-example"
+          ],
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "role": "student",
+          "user_id": "00000000-0000-4000-8000-000000000004"
+        },
+        "contract_version": "cohort-enrollment-v2",
+        "progress": {
+          "alerts": [
+            {
+              "code": "inactive_7_days"
+            }
+          ],
+          "baseline_linked": false,
+          "confirmed_sessions": 0,
+          "enrollment_id": "00000000-0000-4000-8000-000000000007",
+          "inactive_days": 0,
+          "last_activity_at": null,
+          "name": "Pessoa Sintética QA",
+          "open_mentorship_cases": 0,
+          "planned_hours": 0,
+          "progress_percent": 0,
+          "status": "active",
+          "user_id": "00000000-0000-4000-8000-000000000004",
+          "validated_hours": 0
+        },
+        "resolved_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /classes/{class_id}/students/{user_id}/mentors": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004/mentors"
+    },
+    "response": {
+      "body": {
+        "mentors": [
+          {
+            "name": "Instrutora Exemplo",
+            "user_id": "00000000-0000-4000-8000-000000000005"
+          },
+          {
+            "name": "Monitor Exemplo",
+            "user_id": "00000000-0000-4000-8000-000000000006"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /courses": {
+    "request": {
+      "body": null,
+      "path": "/courses"
+    },
+    "response": {
+      "body": {
+        "courses": [
+          {
+            "author": "Autoria Exemplo",
+            "course_version_id": "00000000-0000-4000-8000-000000000008",
+            "id": "curso-exemplo",
+            "legacy_progress_compatible": false,
+            "sections": [
+              {
+                "id": "modulo-1",
+                "messages": [
+                  {
+                    "content": "Bem-vindo ao curso de exemplo.",
+                    "id": "mensagem-1",
+                    "type": "bot",
+                    "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+                  }
+                ],
+                "title": "Introdução",
+                "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+              }
+            ],
+            "title": "Curso Exemplo",
+            "version_id": "00000000-0000-4000-8000-000000000008",
+            "version_number": 1
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente Course.active=true. Conteúdo editorial preserva campos legados; campos de versão são adicionados quando há edição published. Gabaritos protegidos quando flags contextuais/dinâmicas estão ativas.",
+      "status": 200
+    }
+  },
+  "GET /courses/{course_id}": {
+    "request": {
+      "body": null,
+      "path": "/courses/curso-qa"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "id": "curso-exemplo",
+        "legacy_progress_compatible": false,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "title": "Curso Exemplo",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Curso inexistente/inativo retorna 404. Os campos além de id/title/author provêm do snapshot editorial e podem variar entre cursos.",
+      "status": 200
+    }
+  },
+  "GET /creators/me/analytics": {
+    "request": {
+      "body": null,
+      "path": "/creators/me/analytics"
+    },
+    "response": {
+      "body": [
+        {
+          "average_rating": null,
+          "followups": 0,
+          "media_id": "00000000-0000-4000-8000-000000000001",
+          "qualified_completions": 0,
+          "ratings": 0,
+          "saves": 0,
+          "started": 0,
+          "unique_participants": 0
+        }
+      ],
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /creators/me/media": {
+    "request": {
+      "body": null,
+      "path": "/creators/me/media"
+    },
+    "response": {
+      "body": {
+        "media": [
+          {
+            "captions": [],
+            "competency_id": "00000000-0000-4000-8000-000000000001",
+            "course_id": "curso-exemplo",
+            "creator_user_id": "00000000-0000-4000-8000-000000000001",
+            "description": "",
+            "duration_seconds": 1,
+            "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+            "id": "00000000-0000-4000-8000-000000000001",
+            "institution_id": "00000000-0000-4000-8000-000000000001",
+            "module_id": "modulo-qa",
+            "offline_policy": "forbidden",
+            "playback_url": null,
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "provider": "youtube",
+            "published_at": null,
+            "status": "draft",
+            "thumbnail_url": null,
+            "title": "Curso Sintético QA",
+            "visibility": "public"
+          }
+        ]
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Lista mídias do creator autenticado, incluindo rascunhos. O exemplo preserva a fixture de criação: status draft, captions [], duração 1s e playback_url/published_at null; as respostas não contêm credenciais ou IDs do asset no provedor.",
+      "status": 200
+    }
+  },
+  "GET /creators/me/scores": {
+    "request": {
+      "body": null,
+      "path": "/creators/me/scores"
+    },
+    "response": {
+      "body": [
+        {
+          "calculation_snapshot": {
+            "explicit_rating": {
+              "awarded_basis_points": 0,
+              "rating_sum": 0,
+              "ratings": 0,
+              "weight_basis_points": 1500
+            },
+            "operational_quality": false,
+            "participants_started": 0,
+            "qualified_completions": 0,
+            "qualified_followups": 0,
+            "saves": 0,
+            "weights_basis_points": {
+              "completion": 3500,
+              "explicit_rating": 1500,
+              "followup": 3500,
+              "operational": 500,
+              "save": 1000
+            }
+          },
+          "created_at": "2026-10-13T12:00:00Z",
+          "creator_user_id": "00000000-0000-4000-8000-000000000001",
+          "id": "00000000-0000-4000-8000-000000000001",
+          "media_id": "00000000-0000-4000-8000-000000000001",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "rule_version": "creator-score-v2",
+          "score_basis_points": 0,
+          "window_end": "2026-10-02T00:00:00Z",
+          "window_start": "2026-10-01T00:00:00Z"
+        }
+      ],
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Lista somente scores pertencentes ao creator autenticado. O snapshot deste exemplo corresponde à janela sintética sem sinais.",
+      "status": 200
+    }
+  },
+  "GET /editor/context": {
+    "request": {
+      "body": null,
+      "path": "/editor/context"
+    },
+    "response": {
+      "body": {
+        "programs": [
+          {
+            "can_create": true,
+            "can_publish": true,
+            "id": "00000000-0000-4000-8000-000000000002",
+            "name": "Programa Exemplo",
+            "role": "coordinator"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /editor/courses": {
+    "request": {
+      "body": null,
+      "path": "/editor/courses?program_id=00000000-0000-4000-8000-000000000002"
+    },
+    "response": {
+      "body": {
+        "courses": [
+          {
+            "author": "Autoria Exemplo",
+            "can_archive": false,
+            "can_edit": true,
+            "can_fork": false,
+            "can_publish": false,
+            "can_submit": true,
+            "course_id": "curso-exemplo",
+            "created_at": "2026-10-13T12:00:00Z",
+            "id": "curso-exemplo",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "revision": 1,
+            "sections": [
+              {
+                "id": "modulo-1",
+                "messages": [
+                  {
+                    "content": "Bem-vindo ao curso de exemplo.",
+                    "id": "mensagem-1",
+                    "type": "bot",
+                    "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+                  }
+                ],
+                "title": "Introdução",
+                "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+              }
+            ],
+            "status": "draft",
+            "title": "Curso Exemplo",
+            "updated_at": "2026-10-13T12:00:00Z",
+            "version_id": "00000000-0000-4000-8000-000000000008",
+            "version_number": 1
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Lista apenas versões editoriais visíveis no programa solicitado.",
+      "status": 200
+    }
+  },
+  "GET /editor/courses/{course_id}": {
+    "request": {
+      "body": null,
+      "path": "/editor/courses/curso-qa"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "can_archive": false,
+        "can_edit": true,
+        "can_fork": false,
+        "can_publish": false,
+        "can_submit": true,
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "revision": 1,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "status": "draft",
+        "title": "Curso Exemplo",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1,
+        "versions": [
+          {
+            "revision": 1,
+            "status": "draft",
+            "version_id": "00000000-0000-4000-8000-000000000008",
+            "version_number": 1
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "GET /events": {
+    "request": {
+      "body": null,
+      "path": "/events"
+    },
+    "response": {
+      "body": {
+        "events": [
+          {
+            "active_seconds": null,
+            "course_id": "curso-qa",
+            "event_id": "00000000-0000-4000-8000-000000000001",
+            "event_type": "lesson_started",
+            "occurred_at": "2026-10-01T12:00:00Z",
+            "payload": {},
+            "session_id": "00000000-0000-4000-8000-000000000009",
+            "sync_status": "pending",
+            "validated_seconds": 0
+          }
+        ],
+        "limit": 20,
+        "offset": 0
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /health": {
+    "request": {
+      "body": null,
+      "path": "/health"
+    },
+    "response": {
+      "body": {
+        "database": "available",
+        "status": "ok"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo de SELECT 1 bem-sucedido no banco; não declara prontidão de release.",
+      "status": 200
+    }
+  },
+  "GET /live": {
+    "request": {
+      "body": null,
+      "path": "/live"
+    },
+    "response": {
+      "body": {
+        "status": "ok"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Liveness do processo sem depender do banco.",
+      "status": 200
+    }
+  },
+  "GET /media": {
+    "request": {
+      "body": null,
+      "path": "/media"
+    },
+    "response": {
+      "body": {
+        "media": [
+          {
+            "captions": [],
+            "competency_id": "00000000-0000-4000-8000-000000000001",
+            "course_id": "curso-exemplo",
+            "creator_user_id": "00000000-0000-4000-8000-000000000001",
+            "description": "",
+            "duration_seconds": 1,
+            "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+            "id": "00000000-0000-4000-8000-000000000001",
+            "institution_id": "00000000-0000-4000-8000-000000000001",
+            "module_id": "modulo-qa",
+            "offline_policy": "forbidden",
+            "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "provider": "youtube",
+            "published_at": "2026-10-13T12:00:00Z",
+            "status": "published",
+            "thumbnail_url": null,
+            "title": "Curso Sintético QA",
+            "visibility": "public"
+          }
+        ]
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Esta rota lista somente mídias published visíveis para o solicitante; não retorna draft/blocked/archived.",
+      "status": 200
+    }
+  },
+  "GET /media/{media_id}": {
+    "request": {
+      "body": null,
+      "path": "/media/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "captions": [],
+        "competency_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "description": "",
+        "duration_seconds": 1,
+        "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "module_id": "modulo-qa",
+        "offline_policy": "forbidden",
+        "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "provider": "youtube",
+        "published_at": "2026-10-13T12:00:00Z",
+        "status": "published",
+        "thumbnail_url": null,
+        "title": "Curso Sintético QA",
+        "visibility": "public"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. O detalhe exige status published e visibilidade autorizada; estados editoriais não publicados recebem 404.",
+      "status": 200
+    }
+  },
+  "GET /media/{media_id}/playback/{token}": {
+    "request": {
+      "body": null,
+      "path": "/media/00000000-0000-4000-8000-000000000001/playback/TOKEN_SINTETICO"
+    },
+    "response": {
+      "body": null,
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta de redirecionamento, corpo vazio; cabeçalho Location aponta para URL do provedor configurado, por exemplo https://video.example.com/playback-sintetico. Exige grant válido, mídia publicada e autorização ainda ativa; URL demonstrativa não é um playback real.",
+      "status": 307
+    }
+  },
+  "GET /media/{media_id}/rating": {
+    "request": {
+      "body": null,
+      "path": "/media/00000000-0000-4000-8000-000000000001/rating"
+    },
+    "response": {
+      "body": {
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "rating": 0,
+        "submitted_at": "2026-10-01T12:00:00Z",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /operations/classes": {
+    "request": {
+      "body": null,
+      "path": "/operations/classes"
+    },
+    "response": {
+      "body": {
+        "classes": [
+          {
+            "capabilities": {
+              "can_activate": true,
+              "can_change_team": true,
+              "can_close": false,
+              "can_override_capacity": false,
+              "can_prepare": true,
+              "role": "coordinator"
+            },
+            "capacity": {
+              "exception": null,
+              "limit": 30,
+              "occupancy": 0,
+              "over_capacity": false,
+              "policy": "soft_alert",
+              "remaining": 30,
+              "warning": false
+            },
+            "classroom": {
+              "course_id": "curso-exemplo",
+              "course_version_id": "00000000-0000-4000-8000-000000000008",
+              "end_date": "2026-11-30",
+              "id": "00000000-0000-4000-8000-000000000003",
+              "institution_id": "00000000-0000-4000-8000-000000000001",
+              "monitor_ids": [
+                "00000000-0000-4000-8000-000000000006"
+              ],
+              "name": "Turma Exemplo",
+              "offer_location": "Sala Exemplo",
+              "offer_municipality": "Município Exemplo",
+              "program_id": "00000000-0000-4000-8000-000000000002",
+              "revision": 1,
+              "start_date": "2026-11-01",
+              "status": "planned",
+              "teacher_id": "00000000-0000-4000-8000-000000000005"
+            },
+            "readiness": {
+              "activation_blockers": [],
+              "can_activate": true,
+              "can_close": false,
+              "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION",
+              "closure_blockers": [],
+              "closure_warnings": {
+                "open_sessions": 0,
+                "pending_certificate_requests": 0,
+                "pending_evidence": 0,
+                "pending_makeup": 0
+              },
+              "closure_warnings_block_close": false
+            }
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível.",
+      "status": 200
+    }
+  },
+  "GET /operations/classes/options": {
+    "request": {
+      "body": null,
+      "path": "/operations/classes/options"
+    },
+    "response": {
+      "body": {
+        "options": [
+          {
+            "can_activate": true,
+            "can_close": true,
+            "can_override_capacity": false,
+            "can_prepare": true,
+            "course_id": "curso-exemplo",
+            "course_title": "Curso Exemplo",
+            "course_version_id": "00000000-0000-4000-8000-000000000008",
+            "institution_id": "00000000-0000-4000-8000-000000000001",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "program_name": "Programa Exemplo",
+            "role": "coordinator",
+            "version_number": 1
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível.",
+      "status": 200
+    }
+  },
+  "GET /operations/classes/team-candidates": {
+    "request": {
+      "body": null,
+      "path": "/operations/classes/team-candidates?program_id=00000000-0000-4000-8000-000000000002"
+    },
+    "response": {
+      "body": {
+        "candidates": [
+          {
+            "display_name": "Instrutora Exemplo",
+            "role": "teacher",
+            "user_id": "00000000-0000-4000-8000-000000000005"
+          },
+          {
+            "display_name": "Monitor Exemplo",
+            "role": "monitor",
+            "user_id": "00000000-0000-4000-8000-000000000006"
+          }
+        ],
+        "program_id": "00000000-0000-4000-8000-000000000002"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível.",
+      "status": 200
+    }
+  },
+  "GET /operations/classes/{class_id}/readiness": {
+    "request": {
+      "body": null,
+      "path": "/operations/classes/00000000-0000-4000-8000-000000000003/readiness"
+    },
+    "response": {
+      "body": {
+        "capabilities": {
+          "can_activate": true,
+          "can_change_team": true,
+          "can_close": false,
+          "can_override_capacity": false,
+          "can_prepare": true,
+          "role": "coordinator"
+        },
+        "capacity": {
+          "exception": null,
+          "limit": 30,
+          "occupancy": 0,
+          "over_capacity": false,
+          "policy": "soft_alert",
+          "remaining": 30,
+          "warning": false
+        },
+        "classroom": {
+          "course_id": "curso-exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "end_date": "2026-11-30",
+          "id": "00000000-0000-4000-8000-000000000003",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "monitor_ids": [
+            "00000000-0000-4000-8000-000000000006"
+          ],
+          "name": "Turma Exemplo",
+          "offer_location": "Sala Exemplo",
+          "offer_municipality": "Município Exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "revision": 1,
+          "start_date": "2026-11-01",
+          "status": "planned",
+          "teacher_id": "00000000-0000-4000-8000-000000000005"
+        },
+        "history": [
+          {
+            "action": "prepare",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000015",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Preparação da turma de exemplo.",
+            "revision": 1
+          }
+        ],
+        "readiness": {
+          "activation_blockers": [],
+          "can_activate": true,
+          "can_close": false,
+          "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION",
+          "closure_blockers": [],
+          "closure_warnings": {
+            "open_sessions": 0,
+            "pending_certificate_requests": 0,
+            "pending_evidence": 0,
+            "pending_makeup": 0
+          },
+          "closure_warnings_block_close": false
+        }
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível.",
+      "status": 200
+    }
+  },
+  "GET /operations/scopes": {
+    "request": {
+      "body": null,
+      "path": "/operations/scopes"
+    },
+    "response": {
+      "body": {
+        "scopes": [
+          {
+            "class_id": "00000000-0000-4000-8000-000000000003",
+            "course_id": "curso-exemplo",
+            "institution_id": "00000000-0000-4000-8000-000000000001",
+            "label": "Programa Exemplo / Turma Exemplo",
+            "program_id": "00000000-0000-4000-8000-000000000002",
+            "version_id": "00000000-0000-4000-8000-000000000008"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível.",
+      "status": 200
+    }
+  },
+  "GET /public/courses": {
+    "request": {
+      "body": null,
+      "path": "/public/courses"
+    },
+    "response": {
+      "body": {
+        "courses": [
+          {
+            "published_version_label": "qa-example",
+            "slug": "curso-qa",
+            "status": "published",
+            "title": "Curso Sintético QA",
+            "updated_at": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "limit": 20,
+        "offset": 0,
+        "total": 1
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /public/courses/{slug}": {
+    "request": {
+      "body": null,
+      "path": "/public/courses/curso-qa"
+    },
+    "response": {
+      "body": {
+        "published_version_label": "qa-example",
+        "slug": "curso-qa",
+        "status": "published",
+        "title": "Curso Sintético QA",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /support/identity": {
+    "request": {
+      "body": null,
+      "path": "/support/identity"
+    },
+    "response": {
+      "body": {
+        "identifier": "tds-exemplo:00000000-0000-4000-8000-000000000004",
+        "identifier_hash": "86c8cab63067f9c6325631e2ae6a51ed70e9479a2ac03d71d26b7af5e48fb37d"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CHATWOOT_IDENTITY_SECRET e CHATWOOT_IDENTITY_NAMESPACE. O hash mostrado foi calculado apenas com segredo sintético e não autentica nenhum ambiente; resposta Cache-Control: no-store.",
+      "status": 200
+    }
+  },
+  "GET /users/{user_id}/hours": {
+    "request": {
+      "body": null,
+      "path": "/users/00000000-0000-4000-8000-000000000004/hours?course_id=curso-qa"
+    },
+    "response": {
+      "body": {
+        "active_usage": 0,
+        "course_id": "curso-qa",
+        "planned_hours": 0,
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "user_id": "00000000-0000-4000-8000-000000000004",
+        "validated_hours": 0
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "GET /version": {
+    "request": {
+      "body": null,
+      "path": "/version"
+    },
+    "response": {
+      "body": {
+        "api_version": "0.1.0",
+        "compatibility_verified": false,
+        "environment": "production",
+        "minimum_supported_app_version": "1.2.0+11",
+        "schema_version": "20261007_0030"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo hipotético de deployment após migração; não é observação da produção atual. compatibility_verified depende de COMPATIBILITY_VERIFIED e não é calculado por esta rota. Falta de revisão Alembic única retorna 503.",
+      "status": 200
+    }
+  },
+  "PATCH /admin/media/{media_id}": {
+    "request": {
+      "body": {},
+      "path": "/admin/media/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "captions": [],
+        "competency_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "description": "",
+        "duration_seconds": 1,
+        "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "module_id": "modulo-qa",
+        "offline_policy": "forbidden",
+        "playback_url": null,
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "provider": "youtube",
+        "published_at": null,
+        "status": "draft",
+        "thumbnail_url": null,
+        "title": "Curso Sintético QA",
+        "visibility": "public"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Somente draft pode ser editado. Com patch vazio a fixture permanece inalterada; a duração válida de criação é preservada.",
+      "status": 200
+    }
+  },
+  "PATCH /classes/{class_id}/mentorship-cases/{case_id}": {
+    "request": {
+      "body": {
+        "expected_revision": 1,
+        "idempotency_key": "qa-command-20261013-0001",
+        "next_action": "Registrar acompanhamento sintético",
+        "reason": "Validação com dados sintéticos"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/mentorship-cases/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "closed_at": null,
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "id": "00000000-0000-4000-8000-000000000013",
+        "mentor_id": "00000000-0000-4000-8000-000000000005",
+        "mentor_name": "Instrutora Exemplo",
+        "next_action": "Agendar revisão com a mentora.",
+        "objective": "Revisar o conteúdo da aula de exemplo.",
+        "opened_at": "2026-10-13T12:00:00Z",
+        "revision": 2,
+        "status": "in_progress",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. expected_revision precisa coincidir com a revisão atual; replay retorna o snapshot da revisão original.",
+      "status": 200
+    }
+  },
+  "PATCH /courses/{course_id}": {
+    "request": {
+      "body": {
+        "author": "Equipe Sintética QA",
+        "expected_revision": 1,
+        "sections": [
+          {
+            "id": "modulo-qa",
+            "messages": [
+              {
+                "content": "Conteúdo sintético para validar o contrato.",
+                "id": "mensagem-qa",
+                "type": "bot"
+              }
+            ],
+            "title": "Módulo sintético"
+          }
+        ],
+        "title": "Curso Sintético QA",
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/courses/curso-qa"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "can_archive": false,
+        "can_edit": true,
+        "can_fork": false,
+        "can_publish": false,
+        "can_submit": true,
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "revision": 2,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "status": "draft",
+        "title": "Curso Exemplo",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente draft autorizado; version_id e expected_revision controlam concorrência. IDs/version_id dos componentes pertencem ao snapshot do conteúdo.",
+      "status": 200
+    }
+  },
+  "POST /admin/accounts": {
+    "request": {
+      "body": {
+        "cpf": "12345678909",
+        "name": "Pessoa Sintética QA",
+        "password": "Apenas-exemplo-nao-utilizar-2026",
+        "phone": "00000000000",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "role": "student"
+      },
+      "path": "/admin/accounts"
+    },
+    "response": {
+      "body": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "membership_status": "active",
+        "name": "Pessoa Sintética QA",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "role": "student"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Conta e vínculo no programa são criados atomicamente; membership_status do novo vínculo é active. O papel depende do payload autorizado.",
+      "status": 201
+    }
+  },
+  "POST /admin/classes": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "end_date": "2026-10-14",
+        "name": "Pessoa Sintética QA",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "start_date": "2026-10-13",
+        "status": "planned",
+        "teacher_id": "00000000-0000-4000-8000-000000000005"
+      },
+      "path": "/admin/classes"
+    },
+    "response": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "end_date": "2026-10-14",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Pessoa Sintética QA",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "start_date": "2026-10-13",
+        "status": "planned",
+        "teacher_id": "00000000-0000-4000-8000-000000000005"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 201
+    }
+  },
+  "POST /admin/classes/{class_id}/monitors/{user_id}": {
+    "request": {
+      "body": null,
+      "path": "/admin/classes/00000000-0000-4000-8000-000000000003/monitors/00000000-0000-4000-8000-000000000004"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "user_id": "00000000-0000-4000-8000-000000000006"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 201
+    }
+  },
+  "POST /admin/classes/{class_id}/sessions": {
+    "request": {
+      "body": {
+        "ends_at": "2026-10-13T13:00:00Z",
+        "starts_at": "2026-10-13T12:00:00Z"
+      },
+      "path": "/admin/classes/00000000-0000-4000-8000-000000000003/sessions"
+    },
+    "response": {
+      "body": {
+        "checkin_code": "000000",
+        "checkin_token": "TOKEN_SINTETICO_DO_ENCONTRO",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "ends_at": "2026-10-13T13:00:00Z",
+        "id": "00000000-0000-4000-8000-000000000009",
+        "starts_at": "2026-10-13T12:00:00Z",
+        "status": "open",
+        "token_expires_at": "2026-10-13T12:10:00Z",
+        "token_version": 1
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Nova sessão exige turma active e retorna status open/token_version=1. Expiração é min(ends_at, agora+10min). Token/código são demonstrativos e não concedem acesso real.",
+      "status": 201
+    }
+  },
+  "POST /admin/classes/{class_id}/students/{user_id}": {
+    "request": {
+      "body": null,
+      "path": "/admin/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004"
+    },
+    "response": {
+      "body": {
+        "capacity_warning": false,
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "occupancy": 1,
+        "status": "active",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 201
+    }
+  },
+  "POST /admin/creator-scores/calculate": {
+    "request": {
+      "body": {
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "window_end": "2026-10-02T00:00:00Z",
+        "window_start": "2026-10-01T00:00:00Z"
+      },
+      "path": "/admin/creator-scores/calculate"
+    },
+    "response": {
+      "body": {
+        "calculation_snapshot": {
+          "explicit_rating": {
+            "awarded_basis_points": 0,
+            "rating_sum": 0,
+            "ratings": 0,
+            "weight_basis_points": 1500
+          },
+          "operational_quality": false,
+          "participants_started": 0,
+          "qualified_completions": 0,
+          "qualified_followups": 0,
+          "saves": 0,
+          "weights_basis_points": {
+            "completion": 3500,
+            "explicit_rating": 1500,
+            "followup": 3500,
+            "operational": 500,
+            "save": 1000
+          }
+        },
+        "created_at": "2026-10-13T12:00:00Z",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "rule_version": "creator-score-v2",
+        "score_basis_points": 0,
+        "window_end": "2026-10-02T00:00:00Z",
+        "window_start": "2026-10-01T00:00:00Z"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Novo cálculo sempre grava rule_version=creator-score-v2 e o snapshot dos pesos/sinais. Exemplo de janela sem eventos/ratings: score zero com snapshot completo. Repetição da mesma mídia/creator/regra/janela retorna 200 e o cálculo existente.",
+      "status": 201
+    }
+  },
+  "POST /admin/enrollments": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "path": "/admin/enrollments"
+    },
+    "response": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "status": "active",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 201
+    }
+  },
+  "POST /admin/institutions": {
+    "request": {
+      "body": {
+        "name": "Pessoa Sintética QA"
+      },
+      "path": "/admin/institutions"
+    },
+    "response": {
+      "body": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Pessoa Sintética QA"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 201
+    }
+  },
+  "POST /admin/ledger/simulate": {
+    "request": {
+      "body": {
+        "amount_minor": 100,
+        "creator_score_id": "00000000-0000-4000-8000-000000000001",
+        "currency": "BRL",
+        "entry_type": "accrual",
+        "idempotency_key": "qa-command-20261013-0001",
+        "source_event_id": "00000000-0000-4000-8000-000000000001"
+      },
+      "path": "/admin/ledger/simulate"
+    },
+    "response": {
+      "body": {
+        "amount_minor": 100,
+        "calculation_snapshot": {
+          "creator_score_id": "00000000-0000-4000-8000-000000000001",
+          "mode": "simulated",
+          "payment_adapter": "disabled",
+          "score_basis_points": 0
+        },
+        "created_at": "2026-10-13T12:00:00Z",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "currency": "BRL",
+        "entry_type": "accrual",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "idempotency_key": "qa-command-20261013-0001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "rule_version": "creator-score-v2",
+        "source_event_id": "00000000-0000-4000-8000-000000000001",
+        "status": "simulated"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exige COMMERCIAL_SIMULATION_ENABLED=true, PAYMENT_ADAPTER=disabled, escopo financeiro autorizado e source_event_id da mídia do score. Exemplo de simulação; o evento-fonte da fixture pode estar fora da janela do score. Nunca representa pagamento/payout real. Novo lançamento tem status simulated e snapshot com mode simulated/payment_adapter disabled. Replay idêntico retorna 200; payload divergente na mesma chave retorna 409.",
+      "status": 201
+    }
+  },
+  "POST /admin/media": {
+    "request": {
+      "body": {
+        "competency_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "description": "",
+        "duration_seconds": 1,
+        "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "module_id": "modulo-qa",
+        "offline_policy": "forbidden",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "provider": "youtube",
+        "provider_asset_id": "dQw4w9WgXcQ",
+        "rights_confirmed": false,
+        "title": "Curso Sintético QA",
+        "visibility": "public"
+      },
+      "path": "/admin/media"
+    },
+    "response": {
+      "body": {
+        "captions": [],
+        "competency_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "description": "",
+        "duration_seconds": 1,
+        "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "module_id": "modulo-qa",
+        "offline_policy": "forbidden",
+        "playback_url": null,
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "provider": "youtube",
+        "published_at": null,
+        "status": "draft",
+        "thumbnail_url": null,
+        "title": "Curso Sintético QA",
+        "visibility": "public"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Criação sempre começa em draft, com playback_url/published_at null. captions contém objetos com language/label/format/url quando fornecidas; este request não possui legendas, então retorna [].",
+      "status": 201
+    }
+  },
+  "POST /admin/media/{media_id}/archive": {
+    "request": {
+      "body": {
+        "reason": "Validação com dados sintéticos"
+      },
+      "path": "/admin/media/00000000-0000-4000-8000-000000000001/archive"
+    },
+    "response": {
+      "body": {
+        "captions": [],
+        "competency_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "description": "",
+        "duration_seconds": 1,
+        "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "module_id": "modulo-qa",
+        "offline_policy": "forbidden",
+        "playback_url": null,
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "provider": "youtube",
+        "published_at": "2026-10-13T12:00:00Z",
+        "status": "archived",
+        "thumbnail_url": null,
+        "title": "Curso Sintético QA",
+        "visibility": "public"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo de blocked → archived: conserva published_at histórico e playback_url null. Qualquer estado exceto archived pode ser arquivado; uma mídia nunca publicada pode conservar published_at null.",
+      "status": 200
+    }
+  },
+  "POST /admin/media/{media_id}/block": {
+    "request": {
+      "body": {
+        "reason": "Validação com dados sintéticos"
+      },
+      "path": "/admin/media/00000000-0000-4000-8000-000000000001/block"
+    },
+    "response": {
+      "body": {
+        "captions": [],
+        "competency_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "description": "",
+        "duration_seconds": 1,
+        "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "module_id": "modulo-qa",
+        "offline_policy": "forbidden",
+        "playback_url": null,
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "provider": "youtube",
+        "published_at": "2026-10-13T12:00:00Z",
+        "status": "blocked",
+        "thumbnail_url": null,
+        "title": "Curso Sintético QA",
+        "visibility": "public"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo de published → blocked: conserva published_at histórico e remove playback_url da resposta. Também admite processing → blocked, quando published_at pode continuar null. Exige motivo e autoridade editorial.",
+      "status": 200
+    }
+  },
+  "POST /admin/media/{media_id}/publish": {
+    "request": {
+      "body": null,
+      "path": "/admin/media/00000000-0000-4000-8000-000000000001/publish"
+    },
+    "response": {
+      "body": {
+        "captions": [],
+        "competency_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "description": "",
+        "duration_seconds": 1,
+        "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "module_id": "modulo-qa",
+        "offline_policy": "forbidden",
+        "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "provider": "youtube",
+        "published_at": "2026-10-13T12:00:00Z",
+        "status": "published",
+        "thumbnail_url": null,
+        "title": "Curso Sintético QA",
+        "visibility": "public"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Sucesso exige estado inicial draft/processing, autoridade editorial e rights_confirmed=true na fixture. Retorna status published e published_at não nulo; em visibilidade public/unlisted, playback_url vem do provedor. A criação ilustrada tem rights_confirmed=false e requer atualização explícita antes de publicar.",
+      "status": 200
+    }
+  },
+  "POST /admin/programs": {
+    "request": {
+      "body": {
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "name": "Pessoa Sintética QA"
+      },
+      "path": "/admin/programs"
+    },
+    "response": {
+      "body": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "name": "Pessoa Sintética QA"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 201
+    }
+  },
+  "POST /admin/programs/{program_id}/courses/{course_id}": {
+    "request": {
+      "body": null,
+      "path": "/admin/programs/00000000-0000-4000-8000-000000000002/courses/curso-qa"
+    },
+    "response": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 201
+    }
+  },
+  "POST /admin/programs/{program_id}/memberships": {
+    "request": {
+      "body": {
+        "role": "student",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "path": "/admin/programs/00000000-0000-4000-8000-000000000002/memberships"
+    },
+    "response": {
+      "body": {
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "role": "student",
+        "status": "active",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 201
+    }
+  },
+  "POST /auth/activation-invites": {
+    "request": {
+      "body": {
+        "cpf": "12345678909",
+        "expires_in_hours": 24
+      },
+      "path": "/auth/activation-invites"
+    },
+    "response": {
+      "body": {
+        "activation_token": "TOKEN_DE_ATIVACAO_SINTETICO_NAO_UTILIZAVEL",
+        "expires_in_hours": 24
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente admin. O token retornado é secreto; o texto aqui não é um token real.",
+      "status": 201
+    }
+  },
+  "POST /auth/login": {
+    "request": {
+      "body": {
+        "cpf": "12345678909",
+        "password": "Apenas-exemplo-nao-utilizar-2026"
+      },
+      "path": "/auth/login"
+    },
+    "response": {
+      "body": {
+        "access_token": "ACCESS_TOKEN_SINTETICO",
+        "expires_in": 900,
+        "refresh_token": "REFRESH_TOKEN_SINTETICO",
+        "token_type": "bearer",
+        "user": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "name": "Pessoa Sintética QA",
+          "role": "student"
+        }
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "POST /auth/refresh": {
+    "request": {
+      "body": {
+        "refresh_token": "REFRESH_TOKEN_SINTETICO"
+      },
+      "path": "/auth/refresh"
+    },
+    "response": {
+      "body": {
+        "access_token": "ACCESS_TOKEN_SINTETICO",
+        "expires_in": 900,
+        "refresh_token": "REFRESH_TOKEN_SINTETICO",
+        "token_type": "bearer",
+        "user": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "name": "Pessoa Sintética QA",
+          "role": "student"
+        }
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "POST /auth/register": {
+    "request": {
+      "body": {
+        "cpf": "12345678909",
+        "name": "Pessoa Sintética QA",
+        "password": "Apenas-exemplo-nao-utilizar-2026",
+        "phone": "00000000000"
+      },
+      "path": "/auth/register"
+    },
+    "response": {
+      "body": {
+        "access_token": "ACCESS_TOKEN_SINTETICO",
+        "expires_in": 900,
+        "refresh_token": "REFRESH_TOKEN_SINTETICO",
+        "token_type": "bearer",
+        "user": {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "name": "Pessoa Sintética QA",
+          "role": "student"
+        }
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 201
+    }
+  },
+  "POST /certificate-requests": {
+    "request": {
+      "body": {
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "enrollment_id": "00000000-0000-4000-8000-000000000007"
+      },
+      "path": "/certificate-requests"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "class_name": "Turma Exemplo",
+        "course_id": "curso-exemplo",
+        "course_title": "Curso Exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "eligibility": {
+          "completed": false,
+          "eligible": false,
+          "required_seconds": 288000,
+          "validated_seconds": 0
+        },
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "holder_name": "Pessoa Exemplo",
+        "id": "00000000-0000-4000-8000-000000000019",
+        "institution_name": "Instituição Exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "program_name": "Programa Exemplo",
+        "requested_at": "2026-10-13T12:00:00Z",
+        "review_reason": null,
+        "reviewed_at": null,
+        "revision": 1,
+        "status": "pending"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Pedido novo é pending. Replay da mesma matrícula/edição e contexto retorna 200; contexto de turma divergente retorna 409. Criação não emite certificado.",
+      "status": 201
+    }
+  },
+  "POST /certificate-requests/{request_id}/candidate-checkpoints/{checkpoint_id}": {
+    "request": {
+      "body": {
+        "answers": {}
+      },
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/candidate-checkpoints/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "detail": "Contrato candidato desativado neste ambiente."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final.",
+      "status": 503
+    }
+  },
+  "POST /certificate-requests/{request_id}/candidate-evidence": {
+    "request": {
+      "body": {
+        "document_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "document_reference": "qa-example",
+        "kind": "baseline",
+        "origin": "qa-example",
+        "reason": "Validação com dados sintéticos"
+      },
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/candidate-evidence"
+    },
+    "response": {
+      "body": {
+        "detail": "Contrato candidato desativado neste ambiente."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final.",
+      "status": 503
+    }
+  },
+  "POST /certificate-requests/{request_id}/candidate-lifecycle": {
+    "request": {
+      "body": {
+        "action": "submit",
+        "expected_state": "GENERATED"
+      },
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/candidate-lifecycle"
+    },
+    "response": {
+      "body": {
+        "detail": "Contrato candidato desativado neste ambiente."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final.",
+      "status": 503
+    }
+  },
+  "POST /certificate-requests/{request_id}/emission-candidate": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/emission-candidate"
+    },
+    "response": {
+      "body": {
+        "detail": "Candidato sintético desativado neste ambiente."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta com candidato desativado ou em produção. Ativação de ensaio exige CERTIFICATE_CANDIDATE_ENABLED=true, ambiente development ou staging, CERTIFICATE_CANDIDATE_SECRET com pelo menos 32 caracteres e URL específica isolada. Development: HTTP loopback; staging: HTTPS em tutor-tds-cert-staging.tdsipex.workers.dev, sem transporte injetado. Pedido/vínculos, elegibilidade e provas continuam autorizados no backend. Referência candidata não integra carteira oficial.",
+      "status": 503
+    }
+  },
+  "POST /certificate-requests/{request_id}/emit": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/emit"
+    },
+    "response": {
+      "body": {
+        "detail": "Emissão final bloqueada pelo gate de ativação institucional: candidato sintético não homologa provedor instalado, assinatura institucional nem liberação em ambiente real."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Mesmo um pedido autorizado e elegível alcança este bloqueio permanente. Nenhuma flag ou payload abre a emissão institucional final; autenticação e _authorized podem falhar antes deste gate.",
+      "status": 503
+    }
+  },
+  "POST /certificate-requests/{request_id}/reconcile-candidate": {
+    "request": {
+      "body": null,
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/reconcile-candidate"
+    },
+    "response": {
+      "body": {
+        "detail": "Candidato sintético desativado neste ambiente."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta com candidato desativado ou em produção. Ativação de ensaio exige CERTIFICATE_CANDIDATE_ENABLED=true, ambiente development ou staging, CERTIFICATE_CANDIDATE_SECRET com pelo menos 32 caracteres e URL específica isolada. Development: HTTP loopback; staging: HTTPS em tutor-tds-cert-staging.tdsipex.workers.dev, sem transporte injetado. Pedido/vínculos, elegibilidade e provas continuam autorizados no backend. Referência candidata não integra carteira oficial.",
+      "status": 503
+    }
+  },
+  "POST /certificate-requests/{request_id}/resubmit": {
+    "request": {
+      "body": {
+        "expected_revision": 1
+      },
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/resubmit"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "class_name": "Turma Exemplo",
+        "course_id": "curso-exemplo",
+        "course_title": "Curso Exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "eligibility": {
+          "completed": false,
+          "eligible": false,
+          "required_seconds": 288000,
+          "validated_seconds": 0
+        },
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "holder_name": "Pessoa Exemplo",
+        "id": "00000000-0000-4000-8000-000000000019",
+        "institution_name": "Instituição Exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "program_name": "Programa Exemplo",
+        "requested_at": "2026-10-13T12:00:00Z",
+        "review_reason": null,
+        "reviewed_at": null,
+        "revision": 3,
+        "status": "pending"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo após rejeição na revisão 2. Somente autor; deve fornecer expected_revision atual.",
+      "status": 200
+    }
+  },
+  "POST /certificate-requests/{request_id}/review": {
+    "request": {
+      "body": {
+        "decision": "approve",
+        "expected_revision": 1,
+        "reason": "Validação com dados sintéticos"
+      },
+      "path": "/certificate-requests/00000000-0000-4000-8000-000000000001/review"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "class_name": "Turma Exemplo",
+        "course_id": "curso-exemplo",
+        "course_title": "Curso Exemplo",
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "eligibility": {
+          "completed": true,
+          "eligible": true,
+          "required_seconds": 288000,
+          "validated_seconds": 288000
+        },
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "holder_name": "Pessoa Exemplo",
+        "id": "00000000-0000-4000-8000-000000000019",
+        "institution_name": "Instituição Exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "program_name": "Programa Exemplo",
+        "requested_at": "2026-10-13T12:00:00Z",
+        "review_reason": "Conclusão e carga horária conferidas.",
+        "reviewed_at": "2026-10-13T12:00:00Z",
+        "revision": 2,
+        "status": "approved"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exemplo de decision=approve com elegibilidade comprovada na fixture. Exige outra pessoa autorizada no programa/turma. Aprovação não emite certificado.",
+      "status": 200
+    }
+  },
+  "POST /certificates/references": {
+    "request": {
+      "body": {
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "course_id": "curso-exemplo",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "issued_at": "2026-10-01T12:00:00Z",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "verification_url": "https://example.org/verify/qa-certificate"
+      },
+      "path": "/certificates/references"
+    },
+    "response": {
+      "body": {
+        "class_id": null,
+        "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "course_id": "curso-exemplo",
+        "course_title": "Curso Sintético QA",
+        "holder_name": "Pessoa Sintética QA",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_name": "Instituição Sintética QA",
+        "issued_at": "2026-10-01T12:00:00Z",
+        "planned_hours": 80.0,
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "user_id": "00000000-0000-4000-8000-000000000004",
+        "verification_url": "https://example.org/verify/qa-certificate"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo hipotético de referência oficial previamente emitida e validada no provedor autorizado. Novo registro preenche holder_name/course_title/institution_name/planned_hours do contexto autorizado; não emite certificado. Exige matrícula/elegibilidade e verificação pública de nome/curso/hash; approval_required acrescenta aprovação humana. Nenhum provedor foi consultado para este exemplo.",
+      "status": 201
+    }
+  },
+  "POST /checkins/code": {
+    "request": {
+      "body": {
+        "code": "000000",
+        "idempotency_key": "qa-command-20261013-0001",
+        "kind": "checkin"
+      },
+      "path": "/checkins/code"
+    },
+    "response": {
+      "body": {
+        "evidence_id": "00000000-0000-4000-8000-000000000010",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "kind": "checkin",
+        "method": "code",
+        "occurred_at": "2026-10-13T12:00:00Z",
+        "session_id": "00000000-0000-4000-8000-000000000009",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Método do exemplo: code. O endpoint por turma usa qr com token, ou manual para equipe informando alvo; o endpoint por código sempre grava code. A evidência de check-in começa pendente e não concede presença formal. Replay idêntico retorna 200.",
+      "status": 201
+    }
+  },
+  "POST /classes/{class_id}/evidence-imports": {
+    "request": {
+      "body": {
+        "idempotency_key": "qa-command-20261013-0001",
+        "items": [
+          {
+            "evidence_type": "observation",
+            "item_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "occurred_at": "2026-10-01T12:00:00Z"
+          }
+        ],
+        "retention_until": "2030-10-01T12:00:00Z",
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source_type": "whatsapp_export"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/evidence-imports"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "evidence_ids": [
+          "00000000-0000-4000-8000-000000000010"
+        ],
+        "id": "00000000-0000-4000-8000-000000000001",
+        "retention_until": "2030-10-01T12:00:00Z",
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source_type": "whatsapp_export",
+        "status": "pending_review"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Nova importação tem status pending_review; cada evidência começa pending e aguarda revisão humana. A retenção da fixture é 2030-10-01T12:00:00Z e precisa continuar futura ao executar o exemplo. Replay idêntico retorna 200.",
+      "status": 201
+    }
+  },
+  "POST /classes/{class_id}/evidence/{evidence_id}/review": {
+    "request": {
+      "body": {
+        "decision": "accepted",
+        "reason_code": "verified"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/evidence/00000000-0000-4000-8000-000000000001/review"
+    },
+    "response": {
+      "body": {
+        "decided_at": "2026-10-13T12:00:00Z",
+        "decision": "accepted",
+        "evidence_id": "00000000-0000-4000-8000-000000000010",
+        "reason_code": "verified"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "POST /classes/{class_id}/mentorship-cases": {
+    "request": {
+      "body": {
+        "idempotency_key": "qa-command-20261013-0001",
+        "mentor_id": "00000000-0000-4000-8000-000000000005",
+        "next_action": "qa-example",
+        "objective": "qa-example",
+        "reason": "Validação com dados sintéticos",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/mentorship-cases"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "closed_at": null,
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "id": "00000000-0000-4000-8000-000000000013",
+        "mentor_id": "00000000-0000-4000-8000-000000000005",
+        "mentor_name": "Instrutora Exemplo",
+        "next_action": "Agendar revisão com a mentora.",
+        "objective": "Revisar o conteúdo da aula de exemplo.",
+        "opened_at": "2026-10-13T12:00:00Z",
+        "revision": 1,
+        "status": "open",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Replay idêntico de idempotency_key retorna 200 e o snapshot previamente gravado.",
+      "status": 201
+    }
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/attendance/{user_id}": {
+    "request": {
+      "body": {
+        "expected_revision": 0,
+        "idempotency_key": "qa-command-20261013-0001",
+        "reason": "Validação com dados sintéticos",
+        "status": "VALID"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009/attendance/00000000-0000-4000-8000-000000000004"
+    },
+    "response": {
+      "body": {
+        "actor_user_id": "00000000-0000-4000-8000-000000000005",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "decided_at": "2026-10-13T12:00:00Z",
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "id": "00000000-0000-4000-8000-000000000011",
+        "makeup_session_id": null,
+        "original_session_id": "00000000-0000-4000-8000-000000000009",
+        "reason": "Presença conferida pelo instrutor.",
+        "revision": 1,
+        "status": "VALID",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Somente o instrutor da turma pode decidir sobre outra pessoa. required expected_revision controla concorrência e idempotency_key preserva replay.",
+      "status": 200
+    }
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/checkins": {
+    "request": {
+      "body": {
+        "idempotency_key": "qa-command-20261013-0001",
+        "kind": "checkin",
+        "token": "TOKEN_SINTETICO_DO_ENCONTRO"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009/checkins"
+    },
+    "response": {
+      "body": {
+        "evidence_id": "00000000-0000-4000-8000-000000000010",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "kind": "checkin",
+        "method": "qr",
+        "occurred_at": "2026-10-13T12:00:00Z",
+        "session_id": "00000000-0000-4000-8000-000000000009",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Método do exemplo: qr. O endpoint por turma usa qr com token, ou manual para equipe informando alvo; o endpoint por código sempre grava code. A evidência de check-in começa pendente e não concede presença formal. Replay idêntico retorna 200.",
+      "status": 201
+    }
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/close": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009/close"
+    },
+    "response": {
+      "body": {
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "generated_at": "2026-10-13T12:00:00Z",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "report_digest": "b997d3e91db08f65ceb64a9e9638ea5feb8692686003f65217f920f156c1f310",
+        "session_id": "00000000-0000-4000-8000-000000000009",
+        "summary": {
+          "checkin_count": 1,
+          "external_integrations": "disabled",
+          "pending_evidence_ids": [],
+          "pending_explicitly_confirmed": false,
+          "presence": {
+            "counts": {
+              "absent": 0,
+              "confirmed_present": 1,
+              "justified_absence": 0,
+              "pending": 0,
+              "suggested_present": 0
+            },
+            "pending_count": 0,
+            "total": 1
+          }
+        }
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo sem pendências de evidência/presença, com participante já confirmado. O relatório inclui resumo/presença e marca external_integrations disabled; a sessão passa a closed. Relatório existente é replay; pendências exigem confirm_pending=true.",
+      "status": 200
+    }
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/presence/{user_id}": {
+    "request": {
+      "body": {
+        "expected_revision": 0,
+        "idempotency_key": "qa-command-20261013-0001",
+        "reason": "Validação com dados sintéticos",
+        "status": "confirmed_present"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009/presence/00000000-0000-4000-8000-000000000004"
+    },
+    "response": {
+      "body": {
+        "activity_count": 0,
+        "checkin_count": 1,
+        "checkout_count": 0,
+        "decided_at": "2026-10-13T12:00:00Z",
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "reason": "Presença conferida pelo instrutor.",
+        "revision": 1,
+        "status": "confirmed_present",
+        "user_id": "00000000-0000-4000-8000-000000000004",
+        "user_name": "Pessoa Exemplo"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Check-in e atividade são sugestões, não presença formal; a resposta mostra uma decisão humana autorizada.",
+      "status": 200
+    }
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/token": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/sessions/00000000-0000-4000-8000-000000000009/token"
+    },
+    "response": {
+      "body": {
+        "checkin_code": "111111",
+        "checkin_token": "TOKEN_SINTETICO_ROTACIONADO",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "ends_at": "2026-10-13T13:00:00Z",
+        "id": "00000000-0000-4000-8000-000000000009",
+        "starts_at": "2026-10-13T12:00:00Z",
+        "status": "open",
+        "token_expires_at": "2026-10-13T12:10:00Z",
+        "token_version": 2
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Somente sessão open pode rotacionar. O exemplo parte da versão 1 e retorna versão 2 com novo token/código e janela de até 10 minutos.",
+      "status": 200
+    }
+  },
+  "POST /courses": {
+    "request": {
+      "body": {
+        "author": "Equipe Sintética QA",
+        "course_id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "title": "Curso Sintético QA"
+      },
+      "path": "/courses"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "can_archive": false,
+        "can_edit": true,
+        "can_fork": false,
+        "can_publish": false,
+        "can_submit": true,
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "revision": 1,
+        "sections": [],
+        "status": "draft",
+        "title": "Curso Exemplo",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Curso novo começa em draft, com sections vazias, e ainda não entra no catálogo público.",
+      "status": 201
+    }
+  },
+  "POST /courses/{course_id}/archive": {
+    "request": {
+      "body": {
+        "expected_revision": 1,
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/courses/curso-qa/archive"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "can_archive": false,
+        "can_edit": false,
+        "can_fork": true,
+        "can_publish": false,
+        "can_submit": false,
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "revision": 5,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "status": "archived",
+        "title": "Curso Exemplo",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige published e autoridade de publicação; desativa a projeção pública. Snapshot já fixado em turma permanece histórico.",
+      "status": 200
+    }
+  },
+  "POST /courses/{course_id}/publish": {
+    "request": {
+      "body": {
+        "expected_revision": 1,
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/courses/curso-qa/publish"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "can_archive": true,
+        "can_edit": false,
+        "can_fork": true,
+        "can_publish": false,
+        "can_submit": false,
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "revision": 4,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "status": "published",
+        "title": "Curso Exemplo",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige in_review e autoridade de publicação em todos os programas que ofertam o curso. Atualiza a projeção pública do Course e arquiva a edição anterior.",
+      "status": 200
+    }
+  },
+  "POST /courses/{course_id}/submit": {
+    "request": {
+      "body": {
+        "expected_revision": 1,
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/courses/curso-qa/submit"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "can_archive": false,
+        "can_edit": false,
+        "can_fork": false,
+        "can_publish": true,
+        "can_submit": false,
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "revision": 3,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "status": "in_review",
+        "title": "Curso Exemplo",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 1
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige draft autorizado e conteúdo publicável. A mudança de estado não publica no catálogo.",
+      "status": 200
+    }
+  },
+  "POST /courses/{course_id}/versions": {
+    "request": {
+      "body": {
+        "source_version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/courses/curso-qa/versions"
+    },
+    "response": {
+      "body": {
+        "author": "Autoria Exemplo",
+        "can_archive": false,
+        "can_edit": true,
+        "can_fork": false,
+        "can_publish": false,
+        "can_submit": true,
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "id": "curso-exemplo",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "revision": 1,
+        "sections": [
+          {
+            "id": "modulo-1",
+            "messages": [
+              {
+                "content": "Bem-vindo ao curso de exemplo.",
+                "id": "mensagem-1",
+                "type": "bot",
+                "version_id": "d4e2d145-d35b-5d37-a62e-415008018a8d"
+              }
+            ],
+            "title": "Introdução",
+            "version_id": "4ee7532d-fe21-5972-9720-2e3e863a53c4"
+          }
+        ],
+        "status": "draft",
+        "title": "Curso Exemplo",
+        "updated_at": "2026-10-13T12:00:00Z",
+        "version_id": "00000000-0000-4000-8000-000000000008",
+        "version_number": 2
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Cria novo draft a partir de edição published/archived. O exemplo pressupõe a edição 1 publicada na fixture.",
+      "status": 201
+    }
+  },
+  "POST /events": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "event_id": "00000000-0000-4000-8000-000000000001",
+        "event_type": "page_viewed",
+        "occurred_at": "2026-10-01T12:00:00Z",
+        "payload": {
+          "page_id": "classroom"
+        },
+        "session_id": "00000000-0000-4000-8000-000000000009"
+      },
+      "path": "/events"
+    },
+    "response": {
+      "body": {
+        "active_seconds": null,
+        "course_id": "curso-exemplo",
+        "event_id": "00000000-0000-4000-8000-000000000001",
+        "event_type": "page_viewed",
+        "occurred_at": "2026-10-01T12:00:00Z",
+        "payload": {
+          "page_id": "classroom"
+        },
+        "session_id": "00000000-0000-4000-8000-000000000009",
+        "sync_status": "pending",
+        "validated_seconds": 0
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 201
+    }
+  },
+  "POST /media/{media_id}/playback-authorizations": {
+    "request": {
+      "body": null,
+      "path": "/media/00000000-0000-4000-8000-000000000001/playback-authorizations"
+    },
+    "response": {
+      "body": {
+        "expires_at": "2026-10-13T12:05:00Z",
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "playback_url": "https://example.org/tutor-api/media/00000000-0000-4000-8000-000000000001/playback/TOKEN_DE_PLAYBACK_SINTETICO_NAO_UTILIZAVEL",
+        "token_type": "media_playback"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Grant criado somente após mídia published, entrega configurada e acesso vigente. expires_at é agora+300s; playback_url aponta para o endpoint autenticado do grant, não diretamente para o provedor. URL/token demonstrativos não funcionam em ambiente real.",
+      "status": 201
+    }
+  },
+  "POST /operations/classes": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "end_date": "2026-10-14",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "name": "Pessoa Sintética QA",
+        "offer_location": "qa-example",
+        "offer_municipality": "qa-example",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "reason": "Validação com dados sintéticos",
+        "start_date": "2026-10-13",
+        "teacher_id": "00000000-0000-4000-8000-000000000005",
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/operations/classes"
+    },
+    "response": {
+      "body": {
+        "capabilities": {
+          "can_activate": true,
+          "can_change_team": true,
+          "can_close": false,
+          "can_override_capacity": false,
+          "can_prepare": true,
+          "role": "coordinator"
+        },
+        "capacity": {
+          "exception": null,
+          "limit": 30,
+          "occupancy": 0,
+          "over_capacity": false,
+          "policy": "soft_alert",
+          "remaining": 30,
+          "warning": false
+        },
+        "classroom": {
+          "course_id": "curso-exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "end_date": "2026-11-30",
+          "id": "00000000-0000-4000-8000-000000000003",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "monitor_ids": [
+            "00000000-0000-4000-8000-000000000006"
+          ],
+          "name": "Turma Exemplo",
+          "offer_location": "Sala Exemplo",
+          "offer_municipality": "Município Exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "revision": 1,
+          "start_date": "2026-11-01",
+          "status": "planned",
+          "teacher_id": "00000000-0000-4000-8000-000000000005"
+        },
+        "history": [
+          {
+            "action": "prepare",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000015",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Preparação da turma de exemplo.",
+            "revision": 1
+          }
+        ],
+        "readiness": {
+          "activation_blockers": [],
+          "can_activate": true,
+          "can_close": false,
+          "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION",
+          "closure_blockers": [],
+          "closure_warnings": {
+            "open_sessions": 0,
+            "pending_certificate_requests": 0,
+            "pending_evidence": 0,
+            "pending_makeup": 0
+          },
+          "closure_warnings_block_close": false
+        }
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível. Replay idêntico retorna o snapshot original. Permissão de preparação exige program_operator ou coordinator.",
+      "status": 201
+    }
+  },
+  "POST /operations/classes/{class_id}/plan": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "end_date": "2026-10-14",
+        "expected_revision": 0,
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "name": "Pessoa Sintética QA",
+        "offer_location": "qa-example",
+        "offer_municipality": "qa-example",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "reason": "Validação com dados sintéticos",
+        "start_date": "2026-10-13",
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/operations/classes/00000000-0000-4000-8000-000000000003/plan"
+    },
+    "response": {
+      "body": {
+        "capabilities": {
+          "can_activate": true,
+          "can_change_team": true,
+          "can_close": false,
+          "can_override_capacity": false,
+          "can_prepare": true,
+          "role": "coordinator"
+        },
+        "capacity": {
+          "exception": null,
+          "limit": 30,
+          "occupancy": 0,
+          "over_capacity": false,
+          "policy": "soft_alert",
+          "remaining": 30,
+          "warning": false
+        },
+        "classroom": {
+          "course_id": "curso-exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "end_date": "2026-11-30",
+          "id": "00000000-0000-4000-8000-000000000003",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "monitor_ids": [
+            "00000000-0000-4000-8000-000000000006"
+          ],
+          "name": "Turma Exemplo",
+          "offer_location": "Sala Exemplo",
+          "offer_municipality": "Município Exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "revision": 2,
+          "start_date": "2026-11-01",
+          "status": "planned",
+          "teacher_id": "00000000-0000-4000-8000-000000000005"
+        },
+        "history": [
+          {
+            "action": "prepare",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000015",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Preparação da turma de exemplo.",
+            "revision": 1
+          },
+          {
+            "action": "plan",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000016",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Ajuste autorizado de exemplo.",
+            "revision": 2
+          }
+        ],
+        "readiness": {
+          "activation_blockers": [],
+          "can_activate": true,
+          "can_close": false,
+          "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION",
+          "closure_blockers": [],
+          "closure_warnings": {
+            "open_sessions": 0,
+            "pending_certificate_requests": 0,
+            "pending_evidence": 0,
+            "pending_makeup": 0
+          },
+          "closure_warnings_block_close": false
+        }
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível.",
+      "status": 200
+    }
+  },
+  "POST /operations/classes/{class_id}/team": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "expected_revision": 0,
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "reason": "Validação com dados sintéticos",
+        "teacher_id": "00000000-0000-4000-8000-000000000005",
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/operations/classes/00000000-0000-4000-8000-000000000003/team"
+    },
+    "response": {
+      "body": {
+        "capabilities": {
+          "can_activate": true,
+          "can_change_team": true,
+          "can_close": false,
+          "can_override_capacity": false,
+          "can_prepare": true,
+          "role": "coordinator"
+        },
+        "capacity": {
+          "exception": null,
+          "limit": 30,
+          "occupancy": 0,
+          "over_capacity": false,
+          "policy": "soft_alert",
+          "remaining": 30,
+          "warning": false
+        },
+        "classroom": {
+          "course_id": "curso-exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "end_date": "2026-11-30",
+          "id": "00000000-0000-4000-8000-000000000003",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "monitor_ids": [
+            "00000000-0000-4000-8000-000000000006"
+          ],
+          "name": "Turma Exemplo",
+          "offer_location": "Sala Exemplo",
+          "offer_municipality": "Município Exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "revision": 2,
+          "start_date": "2026-11-01",
+          "status": "planned",
+          "teacher_id": "00000000-0000-4000-8000-000000000005"
+        },
+        "history": [
+          {
+            "action": "prepare",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000015",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Preparação da turma de exemplo.",
+            "revision": 1
+          },
+          {
+            "action": "team",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000016",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Ajuste autorizado de exemplo.",
+            "revision": 2
+          }
+        ],
+        "readiness": {
+          "activation_blockers": [],
+          "can_activate": true,
+          "can_close": false,
+          "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION",
+          "closure_blockers": [],
+          "closure_warnings": {
+            "open_sessions": 0,
+            "pending_certificate_requests": 0,
+            "pending_evidence": 0,
+            "pending_makeup": 0
+          },
+          "closure_warnings_block_close": false
+        }
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível.",
+      "status": 200
+    }
+  },
+  "POST /operations/classes/{class_id}/transition": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "expected_revision": 0,
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "reason": "Validação com dados sintéticos",
+        "target_status": "active",
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/operations/classes/00000000-0000-4000-8000-000000000003/transition"
+    },
+    "response": {
+      "body": {
+        "capabilities": {
+          "can_activate": false,
+          "can_change_team": true,
+          "can_close": true,
+          "can_override_capacity": false,
+          "can_prepare": false,
+          "role": "coordinator"
+        },
+        "capacity": {
+          "exception": null,
+          "limit": 30,
+          "occupancy": 0,
+          "over_capacity": false,
+          "policy": "soft_alert",
+          "remaining": 30,
+          "warning": false
+        },
+        "classroom": {
+          "course_id": "curso-exemplo",
+          "course_version_id": "00000000-0000-4000-8000-000000000008",
+          "end_date": "2026-11-30",
+          "id": "00000000-0000-4000-8000-000000000003",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "monitor_ids": [
+            "00000000-0000-4000-8000-000000000006"
+          ],
+          "name": "Turma Exemplo",
+          "offer_location": "Sala Exemplo",
+          "offer_municipality": "Município Exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "revision": 2,
+          "start_date": "2026-11-01",
+          "status": "active",
+          "teacher_id": "00000000-0000-4000-8000-000000000005"
+        },
+        "history": [
+          {
+            "action": "prepare",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000015",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Preparação da turma de exemplo.",
+            "revision": 1
+          },
+          {
+            "action": "transition_active",
+            "actor_id": "00000000-0000-4000-8000-000000000014",
+            "id": "00000000-0000-4000-8000-000000000016",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Ativação autorizada da turma.",
+            "revision": 2
+          }
+        ],
+        "readiness": {
+          "activation_blockers": [],
+          "can_activate": false,
+          "can_close": true,
+          "close_open_session_policy": "BLOCK_CLOSE_WITH_OPEN_SESSION",
+          "closure_blockers": [],
+          "closure_warnings": {
+            "open_sessions": 0,
+            "pending_certificate_requests": 0,
+            "pending_evidence": 0,
+            "pending_makeup": 0
+          },
+          "closure_warnings_block_close": false
+        }
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige CLASS_LIFECYCLE_ENABLED=true e escopo de programa autorizado. Com a flag desligada responde 404: Ciclo de turma indisponível. Exemplo de transição planned → active com blockers vazios. Encerramento é bloqueado quando há encontro aberto.",
+      "status": 200
+    }
+  },
+  "POST /operations/{class_id}/commands": {
+    "request": {
+      "body": {
+        "action": "register",
+        "course_id": "curso-exemplo",
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "reason": "Validação com dados sintéticos",
+        "registration": {
+          "cpf": "12345678909",
+          "name": "Pessoa Sintética QA",
+          "password": "Apenas-exemplo-nao-utilizar-2026",
+          "phone": "00000000000"
+        },
+        "version_id": "00000000-0000-4000-8000-000000000008"
+      },
+      "path": "/operations/00000000-0000-4000-8000-000000000003/commands"
+    },
+    "response": {
+      "body": {
+        "assigned": false,
+        "baseline_linked": false,
+        "capacity": {
+          "limit": 30,
+          "occupancy": 0,
+          "policy": "soft_alert",
+          "warning": false
+        },
+        "enrolled": true,
+        "history": [
+          {
+            "action": "enroll",
+            "actor_label": "00000000-0000-4000-8000-000000000014",
+            "occurred_at": "2026-10-13T12:00:00Z",
+            "reason": "Matrícula solicitada pelo operador."
+          }
+        ],
+        "person": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "name": "Pessoa Exemplo"
+        },
+        "revision": 1,
+        "scope": {
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "course_id": "curso-exemplo",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "label": "Programa Exemplo / Turma Exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "version_id": "00000000-0000-4000-8000-000000000008"
+        }
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível. Exemplo de resultado de action=enroll; outras ações mudam enrolled/assigned/history. Não cria resultado acadêmico.",
+      "status": 200
+    }
+  },
+  "POST /operations/{class_id}/inspect": {
+    "request": {
+      "body": {
+        "person_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "path": "/operations/00000000-0000-4000-8000-000000000003/inspect"
+    },
+    "response": {
+      "body": {
+        "assigned": false,
+        "baseline_linked": false,
+        "capacity": {
+          "limit": 30,
+          "occupancy": 0,
+          "policy": "soft_alert",
+          "warning": false
+        },
+        "enrolled": false,
+        "history": [],
+        "person": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "name": "Pessoa Exemplo"
+        },
+        "revision": 0,
+        "scope": {
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "course_id": "curso-exemplo",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "label": "Programa Exemplo / Turma Exemplo",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "version_id": "00000000-0000-4000-8000-000000000008"
+        }
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível.",
+      "status": 200
+    }
+  },
+  "POST /operations/{class_id}/search": {
+    "request": {
+      "body": {
+        "query": "qa-example"
+      },
+      "path": "/operations/00000000-0000-4000-8000-000000000003/search"
+    },
+    "response": {
+      "body": {
+        "people": [
+          {
+            "id": "00000000-0000-4000-8000-000000000004",
+            "identity_proof": "PROVA_SINTETICA_NAO_UTILIZAVEL",
+            "name": "Pessoa Exemplo"
+          }
+        ]
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige OPERATOR_OPERATIONS_ENABLED=true e vínculo ativo autorizado no programa. Com a flag desligada responde 404: Operação indisponível. identity_proof real é um JWT de dez minutos vinculado a pessoa, operador e programa; o texto de exemplo não é uma prova válida.",
+      "status": 200
+    }
+  },
+  "PUT /admin/programs/{program_id}/courses/{course_id}/workload": {
+    "request": {
+      "body": {
+        "planned_hours": 1.0
+      },
+      "path": "/admin/programs/00000000-0000-4000-8000-000000000002/courses/curso-qa/workload"
+    },
+    "response": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "planned_hours": 80.0,
+        "program_id": "00000000-0000-4000-8000-000000000002"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado.",
+      "status": 200
+    }
+  },
+  "PUT /assessment-attempts/{attempt_id}": {
+    "request": {
+      "body": {
+        "assessment_content_id": "qa-assessment-content",
+        "completed": false,
+        "course_id": "curso-exemplo",
+        "current_index": 0,
+        "mode": "quiz",
+        "origin": "practice",
+        "remaining_seconds": 0,
+        "revision": 1,
+        "score": 0,
+        "topic": "Tema sintético",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "path": "/assessment-attempts/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "attempt_id": "00000000-0000-4000-8000-000000000001",
+        "completed": false,
+        "course_id": "curso-exemplo",
+        "current_index": 0,
+        "mode": "quiz",
+        "origin": "practice",
+        "remaining_seconds": 0,
+        "revision": 1,
+        "score": 0,
+        "topic": "Tema sintético",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
+  "PUT /assessment-contents/{content_id}": {
+    "request": {
+      "body": {
+        "course_id": "curso-exemplo",
+        "duration_seconds": 0,
+        "mode": "quiz",
+        "questions": [
+          {
+            "correct_index": 0,
+            "explanation": "",
+            "options": [
+              "qa-example",
+              "qa-example"
+            ],
+            "question": "Questão sintética?",
+            "topic": "Tema sintético"
+          }
+        ],
+        "title": "Curso Sintético QA",
+        "topic": "Tema sintético"
+      },
+      "path": "/assessment-contents/00000000-0000-4000-8000-000000000001"
+    },
+    "response": {
+      "body": {
+        "answer_key": null,
+        "assessment_content_id": "00000000-0000-4000-8000-000000000001",
+        "course_id": "curso-exemplo",
+        "created_at": "2026-10-13T12:00:00Z",
+        "duration_seconds": 0,
+        "mode": "quiz",
+        "questions": [
+          {
+            "options": [
+              "qa-example",
+              "qa-example"
+            ],
+            "question": "Questão sintética?",
+            "topic": "Tema sintético"
+          }
+        ],
+        "title": "Curso Sintético QA",
+        "topic": "Tema sintético"
+      },
+      "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Conteúdo de prática novo retorna 201; replay idêntico retorna 200. questions contém apenas question/options/topic e answer_key é null; correct_index/explanation enviados no request não vazam na resposta.",
+      "status": 201
+    }
+  },
+  "PUT /classes/{class_id}/certificate-policy-candidate": {
+    "request": {
+      "body": {
+        "checkpoints": [
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "kind": "assessment",
+            "source_id": "00000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "course_version_id": "00000000-0000-4000-8000-000000000008",
+        "formal_hours": 80,
+        "operational_owner_id": "00000000-0000-4000-8000-000000000001",
+        "session_ids": [
+          "00000000-0000-4000-8000-000000000001"
+        ]
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/certificate-policy-candidate"
+    },
+    "response": {
+      "body": {
+        "detail": "Contrato candidato desativado neste ambiente."
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Resposta padrão e em staging/produção. Contrato institucional candidato exige TUTOR_ENVIRONMENT=development e CERTIFICATE_CANDIDATE_ENABLED=true, autorização contextual e política imutável reconciliada. A conclusão de todos os checkpoints também depende do transporte candidato. Provas sintéticas não liberam emissão institucional final.",
+      "status": 503
+    }
+  },
+  "PUT /classes/{class_id}/students/{user_id}": {
+    "request": {
+      "body": null,
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004"
+    },
+    "response": {
+      "body": {
+        "capacity_warning": false,
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "occupancy": 1,
+        "status": "active",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Operação idempotente para inclusão autorizada em turma aberta; preserva vínculo contextual e alertas de capacidade.",
+      "status": 200
+    }
+  },
+  "PUT /classes/{class_id}/students/{user_id}/baseline": {
+    "request": {
+      "body": {
+        "baseline_date": "2026-10-01",
+        "expected_revision": 0,
+        "idempotency_key": "qa-command-20261013-0001",
+        "reason": "Validação com dados sintéticos",
+        "record_id": "00000000-0000-4000-8000-000000000001",
+        "source": "app"
+      },
+      "path": "/classes/00000000-0000-4000-8000-000000000003/students/00000000-0000-4000-8000-000000000004/baseline"
+    },
+    "response": {
+      "body": {
+        "baseline_date": "2026-10-13",
+        "class_id": "00000000-0000-4000-8000-000000000003",
+        "enrollment_id": "00000000-0000-4000-8000-000000000007",
+        "id": "00000000-0000-4000-8000-000000000012",
+        "record_id": "baseline-exemplo-001",
+        "reviewed_at": "2026-10-13T12:00:00Z",
+        "reviewed_by": "00000000-0000-4000-8000-000000000005",
+        "revision": 1,
+        "source": "forms:exemplo",
+        "territory_id": "territorio-exemplo",
+        "user_id": "00000000-0000-4000-8000-000000000004"
+      },
+      "note": "Exemplo ilustrativo derivado do serializer no código; dados inteiramente sintéticos. Os IDs representam fixtures que precisam existir em ambiente autorizado. Exige JOURNEY_TRACEABILITY_ENABLED=true; em estado desligado responde 404: Vínculo de rastreio ainda não habilitado. Não consulta a fonte externa; registra referência humana auditável.",
+      "status": 200
+    }
+  },
+  "PUT /media/{media_id}/rating": {
+    "request": {
+      "body": {
+        "rating": 1
+      },
+      "path": "/media/00000000-0000-4000-8000-000000000001/rating"
+    },
+    "response": {
+      "body": {
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "rating": 1,
+        "submitted_at": "2026-10-01T12:00:00Z",
+        "updated_at": "2026-10-01T12:00:00Z"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  }
+}

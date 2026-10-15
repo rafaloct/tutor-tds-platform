@@ -1,0 +1,51 @@
+{
+  "acceptance_sha256": "5d1691d91fea82953f88c42aef05e6a7e254b3720da20029b479594f5225a233",
+  "after_legacy_projection_sha256": "212c860f04d95d87e48f39d7cd0326a6b12a2cc0cd581a1f957459c632389e42",
+  "before_catalog_count": 9,
+  "before_catalog_sha256": "212c860f04d95d87e48f39d7cd0326a6b12a2cc0cd581a1f957459c632389e42",
+  "before_schema": "20261005_0028",
+  "candidate_image_id": "sha256:4ed8a189b3741d8b8f536a0b790cc0215f997f05c4254ea65d9e67826b1a858b",
+  "candidate_revision": "d3b1331a14ec77b37a8b05e9f5f19e2ccfe57c2e",
+  "compatibility_verified": true,
+  "completed_at": "2026-10-13T15:37:20.063600+00:00",
+  "compose_file_preserved": true,
+  "db_policy_web_container_ids_preserved": true,
+  "external_public_smoke": "pending separate LARGeo check; VPS public HTTP may be WAF403",
+  "jwt_cpf_database_values_preserved": true,
+  "legacy_catalog_compatible": true,
+  "migration": {
+    "bounded_timeout_seconds": 180,
+    "captured_output_sha256": "0c32bb472ae16800ea73bcb5ce3d44408d5c55348a7d8d7aeb123f61587fb9fc",
+    "completed": true,
+    "sanitized_alembic_lines": [
+      "Context impl PostgresqlImpl.",
+      "Will assume transactional DDL.",
+      "Running upgrade 20261005_0028 -> 20261006_0029",
+      "Running upgrade 20261006_0029 -> 20261007_0030"
+    ]
+  },
+  "minimum_supported_app_version": "1.2.0+11",
+  "old_image_id": "sha256:d6701c77b8a48b84fa4b9cea7bbc1c2858bf69aa75dd2367c9a3a4f6fb30666c",
+  "private_data_or_secrets_in_receipt": false,
+  "production_mutations": true,
+  "recovery_provenance_verified": true,
+  "reviewed_verifier_sha256": "7bd410c8bc3e1124b6f1f801f3d49bff15f3989d674edf6d75a8201865558a45",
+  "runtime_public_env": {
+    "CERTIFICATE_CANDIDATE_ENABLED": "<absent; source default false>",
+    "CLASS_LIFECYCLE_ENABLED": "<absent; source default false>",
+    "COMMERCIAL_SIMULATION_ENABLED": "false",
+    "COMPATIBILITY_VERIFIED": "true",
+    "CPF_ACTIVATION_REQUIRED": "<absent; source default false>",
+    "DYNAMIC_ACTIVITY_ENABLED": "<absent; source default false>",
+    "JOURNEY_TRACEABILITY_ENABLED": "false",
+    "LEARNING_CONTEXT_ENABLED": "false",
+    "MINIMUM_SUPPORTED_APP_VERSION": "1.2.0+11",
+    "OPERATOR_OPERATIONS_ENABLED": "<absent; source default false>",
+    "PAYMENT_ADAPTER": "disabled",
+    "TUTOR_ENVIRONMENT": "production"
+  },
+  "schema_version": "20261007_0030",
+  "source_tree": "dc32d081dffd4d778e51871a85ae4077eb75f6ce",
+  "started_at": "2026-10-13T15:34:49.769633+00:00",
+  "status": "DEPLOYED_INTERNAL_VERIFIED"
+}

@@ -1,5 +1,9 @@
 # QA sintético contextual do RAG do Tutor IA
 
+O preflight **offline** das nove fontes curriculares está descrito em
+[CURRICULAR_RAG_PREFLIGHT.md](CURRICULAR_RAG_PREFLIGHT.md). Ele não executa a
+sentinela de staging descrita abaixo.
+
 Este diretório contém tooling **staging-only** para provar isolamento contextual
 A/B sem credenciais, PII ou persistência de perguntas/respostas. Ele não executa
 automaticamente e não altera Worker, AnythingLLM, workspace, provider ou billing.

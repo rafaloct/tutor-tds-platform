@@ -1,23 +1,30 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
 import '../../auth/data/auth_repository.dart';
 import '../models/class_lifecycle_models.dart';
 import 'class_lifecycle_gateway.dart';
+import 'pending_class_prepare_store.dart';
 
 class ClassLifecycleRepository implements ClassLifecycleGateway {
   ClassLifecycleRepository({
     required this.apiUrl,
     required this.authRepository,
     http.Client? client,
-  }) : _client = client ?? http.Client();
+    PendingClassPrepareStore? pendingPrepareStore,
+  }) : _client = client ?? http.Client(),
+       _pendingPrepareStore =
+           pendingPrepareStore ?? SecurePendingClassPrepareStore();
 
   final String apiUrl;
   final AuthRepository authRepository;
   final http.Client _client;
+  final PendingClassPrepareStore _pendingPrepareStore;
   final Random _random = Random.secure();
+  static Future<void> _prepareQueue = Future<void>.value();
 
   List<_LifecycleOption> _options = const [];
   final Map<String, _LifecycleSnapshot> _snapshots = {};
@@ -176,33 +183,223 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
       requiresOverrideReason: false,
       deferredToParticipants: true,
       message:
-          'O limite de 30 e eventual exceção são validados pelo servidor ao adicionar participantes.',
+          '30 participantes é uma referência de planejamento. Inclusões adicionais são permitidas e geram aviso no fluxo de participantes.',
     );
   }
 
   @override
   Future<PreparedClassroomResult> prepare(
     PrepareClassroomCommand command,
+  ) => _serializedPrepare(() => _prepare(command));
+
+  Future<PreparedClassroomResult> _prepare(
+    PrepareClassroomCommand command,
   ) async {
-    final response = await _request('POST', '/operations/classes', {
-      'id': _commandId(),
+    final requested = <String, dynamic>{
       'reason': 'Preparação territorial pelo app Tutor TDS',
       'institution_id': command.institutionId,
       'program_id': command.programId,
       'course_id': command.courseId,
+      'version_id': command.courseVersionId,
       'teacher_id': command.teacherId,
-      'monitor_ids': command.monitorIds,
+      'monitor_ids': List<String>.of(command.monitorIds),
       'name': command.className,
       'offer_municipality': command.offerMunicipality,
       'offer_location': command.offerLocation,
       'start_date': _date(command.startDate),
       'end_date': _date(command.endDate),
-    });
+    };
+    final scope = await _prepareScope();
+    final pending = await _readPending(scope);
+    if (pending != null) {
+      // The previous POST may have committed. Reconcile its exact receipt first,
+      // even when a new wizard supplied different fields after screen re-entry.
+      return _submitPending(scope, pending);
+    }
+    final body = <String, dynamic>{'id': _commandId(), ...requested};
+    await _writePending(scope, body);
+    return _submitPending(scope, body, firstAttempt: true);
+  }
+
+  @override
+  Future<PreparedClassroomResult?> reconcilePendingPreparation() =>
+      _serializedPrepare(_reconcilePendingPreparation);
+
+  Future<PreparedClassroomResult?> _reconcilePendingPreparation() async {
+    final scope = await _prepareScope();
+    final pending = await _readPending(scope);
+    if (pending == null) return null;
+    return _submitPending(scope, pending);
+  }
+
+  Future<T> _serializedPrepare<T>(Future<T> Function() action) {
+    final result = _prepareQueue.then((_) => action());
+    _prepareQueue = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return result;
+  }
+
+  Future<PreparedClassroomResult> _submitPending(
+    String scope,
+    Map<String, dynamic> body, {
+    bool firstAttempt = false,
+  }) async {
+    if (await _prepareScope() != scope) {
+      throw const ClassLifecycleException(
+        'A conta mudou. Entre novamente para conferir a preparação pendente.',
+      );
+    }
+    late final Map<String, dynamic> response;
+    try {
+      response = await _request('POST', '/operations/classes', body, scope);
+    } on ClassVersionChangedException {
+      _options = const [];
+      await _clearPending(scope);
+      rethrow;
+    } on ClassLifecycleRejectedException catch (error) {
+      // The API rejects 403/404/422 before creating a class or receipt. On replay,
+      // any response may instead precede lookup of an existing receipt.
+      if (firstAttempt &&
+          (error.statusCode == 403 ||
+              error.statusCode == 404 ||
+              error.statusCode == 422)) {
+        await _clearPending(scope);
+      }
+      rethrow;
+    }
     final snapshot = _LifecycleSnapshot.fromJson(response);
+    await _clearPending(scope);
     _snapshots[snapshot.classroomId] = snapshot;
     return PreparedClassroomResult(
       opaqueId: snapshot.classroomId,
       name: snapshot.classroomName,
+      statusLabel: _statusLabel(snapshot.status),
+    );
+  }
+
+  Future<String> _prepareScope() async {
+    try {
+      final ownerId = await authRepository.localUserId();
+      if (ownerId == null) {
+        throw const ClassLifecycleException(
+          'Entre novamente para conferir preparações pendentes desta conta.',
+        );
+      }
+      final base = apiUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+      return '$base\u0000$ownerId';
+    } on ClassLifecycleException {
+      rethrow;
+    } on Object {
+      throw const ClassLifecycleException(
+        'Não foi possível identificar a conta para conferir a preparação pendente.',
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>?> _readPending(String scope) async {
+    try {
+      final raw = await _pendingPrepareStore.read(scope);
+      if (raw == null) return null;
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic> || decoded['schema'] != 1) {
+        throw const FormatException();
+      }
+      final body = Map<String, dynamic>.from(decoded['body'] as Map);
+      final id = body['id'];
+      final digest = sha256.convert(utf8.encode(jsonEncode(body))).toString();
+      if (id is! String || id.isEmpty || decoded['digest'] != digest) {
+        throw const FormatException();
+      }
+      return body;
+    } on Object {
+      // A missing or damaged receipt must not be replaced by a fresh ID.
+      throw const ClassLifecycleException(
+        'Não foi possível ler a preparação pendente. Tente novamente antes de criar outra turma.',
+      );
+    }
+  }
+
+  Future<void> _writePending(String scope, Map<String, dynamic> body) async {
+    try {
+      await _pendingPrepareStore.write(
+        scope,
+        jsonEncode({
+          'schema': 1,
+          'body': body,
+          'digest': sha256.convert(utf8.encode(jsonEncode(body))).toString(),
+        }),
+      );
+    } on Object {
+      throw const ClassLifecycleException(
+        'Não foi possível guardar a preparação antes de enviá-la. Tente novamente.',
+      );
+    }
+  }
+
+  Future<void> _clearPending(String scope) async {
+    try {
+      await _pendingPrepareStore.clear(scope);
+    } on Object {
+      throw const ClassLifecycleException(
+        'A turma respondeu, mas a preparação pendente não pôde ser liberada. '
+        'Tente recuperar a turma antes de outra preparação.',
+      );
+    }
+  }
+
+  @override
+  Future<ClassActivationReadiness> activationReadiness(String classroomId) async {
+    final snapshot = await _readSnapshot(classroomId);
+    _snapshots[classroomId] = snapshot;
+    final blockers = snapshot.activationBlockers
+        .map((blocker) => switch (blocker) {
+              'offer_municipality_missing' => 'Informe o município da oferta.',
+              'offer_location_missing' => 'Informe o local físico da oferta.',
+              'course_version_invalid' => 'Confira a edição publicada do curso.',
+              'teacher_membership_invalid' => 'Confira o vínculo do professor.',
+              'monitor_membership_invalid' => 'Confira os vínculos dos monitores.',
+              _ => 'O servidor ainda não liberou a ativação desta turma.',
+            })
+        .toList(growable: false);
+    final canActivate = snapshot.canActivate && snapshot.capabilityCanActivate;
+    return ClassActivationReadiness(
+      classroomId: classroomId,
+      classroomName: snapshot.classroomName,
+      canActivate: canActivate,
+      blockers: canActivate
+          ? const []
+          : blockers.isNotEmpty
+              ? blockers
+              : const ['O servidor ainda não liberou a ativação desta turma.'],
+    );
+  }
+
+  @override
+  Future<ActivatedClassroomResult> activateClassroom({
+    required String classroomId,
+    required String reason,
+  }) async {
+    final current = _snapshots[classroomId] ?? await _readSnapshot(classroomId);
+    final response = await _request(
+      'POST',
+      '/operations/classes/${Uri.encodeComponent(classroomId)}/transition',
+      {
+        'id': _commandId(),
+        'reason': reason,
+        'institution_id': current.institutionId,
+        'program_id': current.programId,
+        'course_id': current.courseId,
+        'version_id': current.courseVersionId,
+        'expected_revision': current.revision,
+        'target_status': 'active',
+      },
+    );
+    final snapshot = _LifecycleSnapshot.fromJson(response);
+    _snapshots[classroomId] = snapshot;
+    return ActivatedClassroomResult(
+      classroomId: classroomId,
       statusLabel: _statusLabel(snapshot.status),
     );
   }
@@ -320,6 +517,7 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
             id: snapshot.classroomId,
             name: snapshot.classroomName,
             statusLabel: _statusLabel(snapshot.status),
+            status: snapshot.status,
           );
         })
         .toList(growable: false);
@@ -329,11 +527,19 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
     String method,
     String path, [
     Map<String, dynamic>? body,
+    String? expectedPrepareScope,
   ]) async {
     try {
-      final base = apiUrl.replaceFirst(RegExp(r'/+$'), '');
+      final base = apiUrl.trim().replaceFirst(RegExp(r'/+$'), '');
       final uri = Uri.parse('$base$path');
       final response = await authRepository.authorized((token) {
+        if (expectedPrepareScope != null &&
+            '$base\u0000${AuthRepository.unverifiedSubject(token)}' !=
+                expectedPrepareScope) {
+          throw const ClassLifecycleException(
+            'A conta mudou. Entre novamente para conferir a preparação pendente.',
+          );
+        }
         final headers = {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -350,14 +556,35 @@ class ClassLifecycleRepository implements ClassLifecycleGateway {
         };
       });
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw ClassLifecycleException(switch (response.statusCode) {
+        if (response.statusCode == 409) {
+          try {
+            final body = jsonDecode(response.body);
+            if (body is Map &&
+                body['detail'] is Map &&
+                (body['detail'] as Map)['code'] == 'course_version_changed') {
+              throw const ClassVersionChangedException();
+            }
+          } on FormatException {
+            // A malformed error body still receives the generic rejection.
+          } on ClassVersionChangedException {
+            rethrow;
+          }
+        }
+        final message = switch (response.statusCode) {
           403 => 'Você não tem autorização para esta ação nesta turma.',
           404 => 'O ciclo de turma ainda não está habilitado neste ambiente.',
           409 =>
             'A turma mudou ou ainda não está pronta. Atualize os dados antes de continuar.',
           422 => 'Confira território, período e equipe antes de continuar.',
           _ => 'Não foi possível confirmar a operação de turma no servidor.',
-        });
+        };
+        if (response.statusCode >= 400 && response.statusCode < 500) {
+          throw ClassLifecycleRejectedException(
+            message,
+            statusCode: response.statusCode,
+          );
+        }
+        throw ClassLifecycleException(message);
       }
       final decoded = jsonDecode(response.body);
       if (decoded is! Map<String, dynamic>) throw const FormatException();
@@ -461,6 +688,9 @@ class _LifecycleSnapshot {
     required this.status,
     required this.revision,
     required this.occupancy,
+    required this.canActivate,
+    required this.capabilityCanActivate,
+    required this.activationBlockers,
     required this.canClose,
     required this.capabilityCanClose,
     required this.closureBlockers,
@@ -496,6 +726,7 @@ class _LifecycleSnapshot {
       return value;
     }
 
+    final rawActivationBlockers = ready['activation_blockers'];
     final rawBlockers = ready['closure_blockers'];
     final warnings = ready['closure_warnings'];
     return _LifecycleSnapshot(
@@ -508,6 +739,11 @@ class _LifecycleSnapshot {
       status: requiredString('status'),
       revision: _int(c['revision']),
       occupancy: _int(cap['occupancy']),
+      canActivate: ready['can_activate'] == true,
+      capabilityCanActivate: abilities['can_activate'] == true,
+      activationBlockers: rawActivationBlockers is List
+          ? rawActivationBlockers.whereType<String>().toList(growable: false)
+          : const [],
       canClose: ready['can_close'] == true,
       capabilityCanClose: abilities['can_close'] == true,
       closureBlockers: rawBlockers is List
@@ -528,6 +764,9 @@ class _LifecycleSnapshot {
   final String status;
   final int revision;
   final int occupancy;
+  final bool canActivate;
+  final bool capabilityCanActivate;
+  final List<String> activationBlockers;
   final bool canClose;
   final bool capabilityCanClose;
   final List<String> closureBlockers;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'linkify_text.dart';
+import 'tutor_message_text.dart';
 
 enum TutorResponseFeedback { useful, notUseful, report }
 
@@ -18,6 +18,7 @@ class TutorResponseCard extends StatefulWidget {
     required this.onFeedback,
     this.contextLabel,
     this.child,
+    this.onOpenLink,
   });
 
   final String text;
@@ -29,6 +30,7 @@ class TutorResponseCard extends StatefulWidget {
   final ValueChanged<String> onFollowUp;
   final ValueChanged<TutorResponseFeedback> onFeedback;
   final Widget? child;
+  final ValueChanged<String>? onOpenLink;
 
   @override
   State<TutorResponseCard> createState() => _TutorResponseCardState();
@@ -70,7 +72,7 @@ class _TutorResponseCardState extends State<TutorResponseCard> {
             ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
-          LinkifyText(directAnswer),
+          TutorMessageText(directAnswer, onLinkTap: widget.onOpenLink),
           if (details.isNotEmpty)
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
@@ -79,7 +81,10 @@ class _TutorResponseCardState extends State<TutorResponseCard> {
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: LinkifyText(details),
+                  child: TutorMessageText(
+                    details,
+                    onLinkTap: widget.onOpenLink,
+                  ),
                 ),
               ],
             ),

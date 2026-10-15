@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "owner": "tutor-tds-release-config-recovery-v1",
+  "run_id": "20261013T144355Z-05aaf1d1",
+  "scope": "api-prod-config-and-anythingllm-provider",
+  "status": "passed",
+  "executed_at": "2026-10-13T14:44:02Z",
+  "object_key": "config/recovery/v1/20261013T144355Z-05aaf1d1/api-config.tar.age",
+  "cipher_sha256": "cb05b8c68db13a0bff973fe56ad16e8ad6b198f6e4d76532e3f490c98fcde31d",
+  "cipher_bytes": 20680,
+  "plaintext_sha256": "2867a90f8d7b3f96db7997657f6b26b11adacf74463f6eef58618b40a5ce30bf",
+  "recipient_public": "age149wxfjmq7su0ykejc6fu8wpmqndy06uv3wn622mvvrq7sxwgdyxsa98vss",
+  "files": [
+    "anythingllm/server.env",
+    "api/.env",
+    "api/docker-compose.production.yml",
+    "backup/runtime.json"
+  ],
+  "roundtrip_verified": true,
+  "decryption_verified": true,
+  "isolated_file_restore_verified": true,
+  "temporary_plaintext_removed": true,
+  "source_unchanged": true,
+  "private_values_emitted": false
+}

@@ -176,8 +176,8 @@ void main() {
 
         final bootstrap = await operator.lifecycle.bootstrap();
         expect(bootstrap.capabilities.canPrepare, isTrue);
-        expect(bootstrap.capabilities.canActivate, isFalse);
-        expect(bootstrap.capabilities.canClose, isFalse);
+        expect(bootstrap.capabilities.canActivate, isTrue);
+        expect(bootstrap.capabilities.canClose, isTrue);
         expect(bootstrap.programs, hasLength(1));
         final program = bootstrap.programs.single;
         expect(program.id, _program);
@@ -273,13 +273,11 @@ void main() {
         expect(foreign.statusCode, 403);
         observed['cross_scope_denied'] = true;
 
-        coordinator = _Actor(baseUri);
-        await coordinator.login(_coordinatorCpf, 'qa-coordinator');
         final beforeActivation = _jsonMap(
-          await coordinator.get('/operations/classes/$classId/readiness'),
+          await operator.get('/operations/classes/$classId/readiness'),
         );
         final activateClassroom = _classroom(beforeActivation);
-        final activated = await coordinator
+        final activated = await operator
             .post('/operations/classes/$classId/transition', {
               'id': _commandId('qa-activate', run),
               'reason': 'Ativação E2E autorizada',
@@ -292,6 +290,9 @@ void main() {
             });
         expect(activated.statusCode, 200);
         expect(_classroom(_jsonMap(activated))['status'], 'active');
+
+        coordinator = _Actor(baseUri);
+        await coordinator.login(_coordinatorCpf, 'qa-coordinator');
 
         teacher = _Actor(baseUri);
         await teacher.login(_teacherCpf, 'qa-teacher');
@@ -453,7 +454,7 @@ void main() {
           'institutional_release': 'blocked',
         };
 
-        final closeReadiness = await coordinator.lifecycle.closeReadiness(
+        final closeReadiness = await operator.lifecycle.closeReadiness(
           classId,
         );
         expect(closeReadiness.openSessions, 0);
@@ -461,7 +462,7 @@ void main() {
         expect(closeReadiness.canClose, isTrue);
         observed['close_class_readiness'] = true;
 
-        final closed = await coordinator.lifecycle.closeClassroom(
+        final closed = await operator.lifecycle.closeClassroom(
           classroomId: classId,
           reason: 'Jornada E2E concluída',
         );

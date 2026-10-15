@@ -3,3 +3,11 @@
 # Other source files retain their existing policy. See CI_REPRODUCIBILITY_ISSUE10.md.
 docs/production/evidence/cloud-context-isolation.json -text whitespace=cr-at-eol
 docs/production/evidence/context-android-gate.json -text whitespace=cr-at-eol
+# The curricular RAG preflight pins exact file-byte SHA-256 values.
+docs/production/evidence/course-pdf-hosting-2026-10-01.json -text
+cartilhas_app/assets/data/lessons/*.json -text
+tooling/ai_qa/curricular_source_map.json -text
+# Recovery receipts and their references are hashed as captured bytes.
+# Keep them stable when a Windows checkout enables newline conversion.
+docs/production/evidence/*.json -text whitespace=cr-at-eol
+docs/production/evidence/pre-aab-xiaomi-smoke-20261013-*-ui-sanitized.xml -text

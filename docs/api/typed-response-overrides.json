@@ -1,0 +1,625 @@
+{
+  "POST /admin/media": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "institution_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "module_id": "modulo-qa",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "title": "Curso Sintético QA",
+      "description": "",
+      "competency_id": "00000000-0000-4000-8000-000000000001",
+      "provider": "youtube",
+      "duration_seconds": 1,
+      "thumbnail_url": null,
+      "captions": [],
+      "visibility": "public",
+      "offline_policy": "forbidden",
+      "status": "draft",
+      "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+      "playback_url": null,
+      "published_at": null
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Criação sempre começa em draft, com playback_url/published_at null. captions contém objetos com language/label/format/url quando fornecidas; este request não possui legendas, então retorna []."
+  },
+  "PATCH /admin/media/{media_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "institution_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "module_id": "modulo-qa",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "title": "Curso Sintético QA",
+      "description": "",
+      "competency_id": "00000000-0000-4000-8000-000000000001",
+      "provider": "youtube",
+      "duration_seconds": 1,
+      "thumbnail_url": null,
+      "captions": [],
+      "visibility": "public",
+      "offline_policy": "forbidden",
+      "status": "draft",
+      "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+      "playback_url": null,
+      "published_at": null
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Somente draft pode ser editado. Com patch vazio a fixture permanece inalterada; a duração válida de criação é preservada."
+  },
+  "POST /admin/media/{media_id}/publish": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "institution_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "module_id": "modulo-qa",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "title": "Curso Sintético QA",
+      "description": "",
+      "competency_id": "00000000-0000-4000-8000-000000000001",
+      "provider": "youtube",
+      "duration_seconds": 1,
+      "thumbnail_url": null,
+      "captions": [],
+      "visibility": "public",
+      "offline_policy": "forbidden",
+      "status": "published",
+      "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+      "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+      "published_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Sucesso exige estado inicial draft/processing, autoridade editorial e rights_confirmed=true na fixture. Retorna status published e published_at não nulo; em visibilidade public/unlisted, playback_url vem do provedor. A criação ilustrada tem rights_confirmed=false e requer atualização explícita antes de publicar."
+  },
+  "GET /media": {
+    "status": 200,
+    "body": {
+      "media": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "course_id": "curso-exemplo",
+          "module_id": "modulo-qa",
+          "creator_user_id": "00000000-0000-4000-8000-000000000001",
+          "title": "Curso Sintético QA",
+          "description": "",
+          "competency_id": "00000000-0000-4000-8000-000000000001",
+          "provider": "youtube",
+          "duration_seconds": 1,
+          "thumbnail_url": null,
+          "captions": [],
+          "visibility": "public",
+          "offline_policy": "forbidden",
+          "status": "published",
+          "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+          "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+          "published_at": "2026-10-13T12:00:00Z"
+        }
+      ]
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Esta rota lista somente mídias published visíveis para o solicitante; não retorna draft/blocked/archived."
+  },
+  "GET /media/{media_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "institution_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "module_id": "modulo-qa",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "title": "Curso Sintético QA",
+      "description": "",
+      "competency_id": "00000000-0000-4000-8000-000000000001",
+      "provider": "youtube",
+      "duration_seconds": 1,
+      "thumbnail_url": null,
+      "captions": [],
+      "visibility": "public",
+      "offline_policy": "forbidden",
+      "status": "published",
+      "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+      "playback_url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+      "published_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. O detalhe exige status published e visibilidade autorizada; estados editoriais não publicados recebem 404."
+  },
+  "POST /admin/media/{media_id}/block": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "institution_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "module_id": "modulo-qa",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "title": "Curso Sintético QA",
+      "description": "",
+      "competency_id": "00000000-0000-4000-8000-000000000001",
+      "provider": "youtube",
+      "duration_seconds": 1,
+      "thumbnail_url": null,
+      "captions": [],
+      "visibility": "public",
+      "offline_policy": "forbidden",
+      "status": "blocked",
+      "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+      "playback_url": null,
+      "published_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo de published → blocked: conserva published_at histórico e remove playback_url da resposta. Também admite processing → blocked, quando published_at pode continuar null. Exige motivo e autoridade editorial."
+  },
+  "POST /admin/media/{media_id}/archive": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "institution_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "module_id": "modulo-qa",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "title": "Curso Sintético QA",
+      "description": "",
+      "competency_id": "00000000-0000-4000-8000-000000000001",
+      "provider": "youtube",
+      "duration_seconds": 1,
+      "thumbnail_url": null,
+      "captions": [],
+      "visibility": "public",
+      "offline_policy": "forbidden",
+      "status": "archived",
+      "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+      "playback_url": null,
+      "published_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo de blocked → archived: conserva published_at histórico e playback_url null. Qualquer estado exceto archived pode ser arquivado; uma mídia nunca publicada pode conservar published_at null."
+  },
+  "POST /admin/creator-scores/calculate": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "media_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "rule_version": "creator-score-v2",
+      "window_start": "2026-10-01T00:00:00Z",
+      "window_end": "2026-10-02T00:00:00Z",
+      "score_basis_points": 0,
+      "calculation_snapshot": {
+        "participants_started": 0,
+        "qualified_completions": 0,
+        "qualified_followups": 0,
+        "saves": 0,
+        "explicit_rating": {
+          "weight_basis_points": 1500,
+          "ratings": 0,
+          "rating_sum": 0,
+          "awarded_basis_points": 0
+        },
+        "operational_quality": false,
+        "weights_basis_points": {
+          "completion": 3500,
+          "followup": 3500,
+          "explicit_rating": 1500,
+          "save": 1000,
+          "operational": 500
+        }
+      },
+      "created_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Novo cálculo sempre grava rule_version=creator-score-v2 e o snapshot dos pesos/sinais. Exemplo de janela sem eventos/ratings: score zero com snapshot completo. Repetição da mesma mídia/creator/regra/janela retorna 200 e o cálculo existente."
+  },
+  "GET /creators/me/scores": {
+    "status": 200,
+    "body": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "rule_version": "creator-score-v2",
+        "window_start": "2026-10-01T00:00:00Z",
+        "window_end": "2026-10-02T00:00:00Z",
+        "score_basis_points": 0,
+        "calculation_snapshot": {
+          "participants_started": 0,
+          "qualified_completions": 0,
+          "qualified_followups": 0,
+          "saves": 0,
+          "explicit_rating": {
+            "weight_basis_points": 1500,
+            "ratings": 0,
+            "rating_sum": 0,
+            "awarded_basis_points": 0
+          },
+          "operational_quality": false,
+          "weights_basis_points": {
+            "completion": 3500,
+            "followup": 3500,
+            "explicit_rating": 1500,
+            "save": 1000,
+            "operational": 500
+          }
+        },
+        "created_at": "2026-10-13T12:00:00Z"
+      }
+    ],
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Lista somente scores pertencentes ao creator autenticado. O snapshot deste exemplo corresponde à janela sintética sem sinais."
+  },
+  "POST /admin/ledger/simulate": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "institution_id": "00000000-0000-4000-8000-000000000001",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "creator_user_id": "00000000-0000-4000-8000-000000000001",
+      "media_id": "00000000-0000-4000-8000-000000000001",
+      "source_event_id": "00000000-0000-4000-8000-000000000001",
+      "rule_version": "creator-score-v2",
+      "entry_type": "accrual",
+      "amount_minor": 100,
+      "currency": "BRL",
+      "status": "simulated",
+      "idempotency_key": "qa-command-20261013-0001",
+      "calculation_snapshot": {
+        "creator_score_id": "00000000-0000-4000-8000-000000000001",
+        "score_basis_points": 0,
+        "mode": "simulated",
+        "payment_adapter": "disabled"
+      },
+      "created_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exige COMMERCIAL_SIMULATION_ENABLED=true, PAYMENT_ADAPTER=disabled, escopo financeiro autorizado e source_event_id da mídia do score. Exemplo de simulação; o evento-fonte da fixture pode estar fora da janela do score. Nunca representa pagamento/payout real. Novo lançamento tem status simulated e snapshot com mode simulated/payment_adapter disabled. Replay idêntico retorna 200; payload divergente na mesma chave retorna 409."
+  },
+  "GET /admin/ledger": {
+    "status": 200,
+    "body": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "institution_id": "00000000-0000-4000-8000-000000000001",
+        "program_id": "00000000-0000-4000-8000-000000000002",
+        "creator_user_id": "00000000-0000-4000-8000-000000000001",
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "source_event_id": "00000000-0000-4000-8000-000000000001",
+        "rule_version": "creator-score-v2",
+        "entry_type": "accrual",
+        "amount_minor": 100,
+        "currency": "BRL",
+        "status": "simulated",
+        "idempotency_key": "qa-command-20261013-0001",
+        "calculation_snapshot": {
+          "creator_score_id": "00000000-0000-4000-8000-000000000001",
+          "score_basis_points": 0,
+          "mode": "simulated",
+          "payment_adapter": "disabled"
+        },
+        "created_at": "2026-10-13T12:00:00Z"
+      }
+    ],
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exige COMMERCIAL_SIMULATION_ENABLED=true, PAYMENT_ADAPTER=disabled, escopo financeiro autorizado e source_event_id da mídia do score. Exemplo de simulação; o evento-fonte da fixture pode estar fora da janela do score. Nunca representa pagamento/payout real."
+  },
+  "POST /admin/classes/{class_id}/sessions": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000009",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "starts_at": "2026-10-13T12:00:00Z",
+      "ends_at": "2026-10-13T13:00:00Z",
+      "status": "open",
+      "token_expires_at": "2026-10-13T12:10:00Z",
+      "token_version": 1,
+      "checkin_token": "TOKEN_SINTETICO_DO_ENCONTRO",
+      "checkin_code": "000000"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Nova sessão exige turma active e retorna status open/token_version=1. Expiração é min(ends_at, agora+10min). Token/código são demonstrativos e não concedem acesso real."
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/token": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000009",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "starts_at": "2026-10-13T12:00:00Z",
+      "ends_at": "2026-10-13T13:00:00Z",
+      "status": "open",
+      "token_expires_at": "2026-10-13T12:10:00Z",
+      "token_version": 2,
+      "checkin_token": "TOKEN_SINTETICO_ROTACIONADO",
+      "checkin_code": "111111"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Somente sessão open pode rotacionar. O exemplo parte da versão 1 e retorna versão 2 com novo token/código e janela de até 10 minutos."
+  },
+  "POST /admin/accounts": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Pessoa Sintética QA",
+      "role": "student",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "membership_status": "active"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Conta e vínculo no programa são criados atomicamente; membership_status do novo vínculo é active. O papel depende do payload autorizado."
+  },
+  "POST /classes/{class_id}/evidence-imports": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "source_type": "whatsapp_export",
+      "status": "pending_review",
+      "retention_until": "2030-10-01T12:00:00Z",
+      "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evidence_ids": [
+        "00000000-0000-4000-8000-000000000010"
+      ]
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Nova importação tem status pending_review; cada evidência começa pending e aguarda revisão humana. A retenção da fixture é 2030-10-01T12:00:00Z e precisa continuar futura ao executar o exemplo. Replay idêntico retorna 200."
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/checkins": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "session_id": "00000000-0000-4000-8000-000000000009",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "kind": "checkin",
+      "occurred_at": "2026-10-13T12:00:00Z",
+      "method": "qr",
+      "evidence_id": "00000000-0000-4000-8000-000000000010"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Método do exemplo: qr. O endpoint por turma usa qr com token, ou manual para equipe informando alvo; o endpoint por código sempre grava code. A evidência de check-in começa pendente e não concede presença formal. Replay idêntico retorna 200."
+  },
+  "POST /checkins/code": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "session_id": "00000000-0000-4000-8000-000000000009",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "kind": "checkin",
+      "occurred_at": "2026-10-13T12:00:00Z",
+      "method": "code",
+      "evidence_id": "00000000-0000-4000-8000-000000000010"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Método do exemplo: code. O endpoint por turma usa qr com token, ou manual para equipe informando alvo; o endpoint por código sempre grava code. A evidência de check-in começa pendente e não concede presença formal. Replay idêntico retorna 200."
+  },
+  "POST /classes/{class_id}/sessions/{session_id}/close": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "session_id": "00000000-0000-4000-8000-000000000009",
+      "generated_at": "2026-10-13T12:00:00Z",
+      "report_digest": "b997d3e91db08f65ceb64a9e9638ea5feb8692686003f65217f920f156c1f310",
+      "summary": {
+        "checkin_count": 1,
+        "pending_evidence_ids": [],
+        "pending_explicitly_confirmed": false,
+        "presence": {
+          "total": 1,
+          "counts": {
+            "pending": 0,
+            "suggested_present": 0,
+            "confirmed_present": 1,
+            "justified_absence": 0,
+            "absent": 0
+          },
+          "pending_count": 0
+        },
+        "external_integrations": "disabled"
+      }
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo sem pendências de evidência/presença, com participante já confirmado. O relatório inclui resumo/presença e marca external_integrations disabled; a sessão passa a closed. Relatório existente é replay; pendências exigem confirm_pending=true."
+  },
+  "PUT /assessment-contents/{content_id}": {
+    "status": 201,
+    "body": {
+      "assessment_content_id": "00000000-0000-4000-8000-000000000001",
+      "course_id": "curso-exemplo",
+      "topic": "Tema sintético",
+      "mode": "quiz",
+      "title": "Curso Sintético QA",
+      "duration_seconds": 0,
+      "questions": [
+        {
+          "question": "Questão sintética?",
+          "options": [
+            "qa-example",
+            "qa-example"
+          ],
+          "topic": "Tema sintético"
+        }
+      ],
+      "answer_key": null,
+      "created_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Conteúdo de prática novo retorna 201; replay idêntico retorna 200. questions contém apenas question/options/topic e answer_key é null; correct_index/explanation enviados no request não vazam na resposta."
+  },
+  "GET /assessment-contents/{content_id}": {
+    "status": 200,
+    "body": {
+      "assessment_content_id": "00000000-0000-4000-8000-000000000001",
+      "course_id": "curso-exemplo",
+      "topic": "Tema sintético",
+      "mode": "quiz",
+      "title": "Curso Sintético QA",
+      "duration_seconds": 0,
+      "questions": [
+        {
+          "question": "Questão sintética?",
+          "options": [
+            "qa-example",
+            "qa-example"
+          ],
+          "topic": "Tema sintético"
+        }
+      ],
+      "answer_key": null,
+      "created_at": "2026-10-13T12:00:00Z"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Prévia de prática do próprio aluno sempre retorna answer_key null e questions sem correct_index/explanation. Gabarito possui fluxo próprio separado."
+  },
+  "POST /certificates/references": {
+    "status": 201,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "user_id": "00000000-0000-4000-8000-000000000004",
+      "program_id": "00000000-0000-4000-8000-000000000002",
+      "course_id": "curso-exemplo",
+      "class_id": null,
+      "holder_name": "Pessoa Sintética QA",
+      "course_title": "Curso Sintético QA",
+      "institution_name": "Instituição Sintética QA",
+      "planned_hours": 80.0,
+      "issued_at": "2026-10-01T12:00:00Z",
+      "verification_url": "https://example.org/verify/qa-certificate",
+      "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Exemplo hipotético de referência oficial previamente emitida e validada no provedor autorizado. Novo registro preenche holder_name/course_title/institution_name/planned_hours do contexto autorizado; não emite certificado. Exige matrícula/elegibilidade e verificação pública de nome/curso/hash; approval_required acrescenta aprovação humana. Nenhum provedor foi consultado para este exemplo."
+  },
+  "POST /media/{media_id}/playback-authorizations": {
+    "status": 201,
+    "body": {
+      "media_id": "00000000-0000-4000-8000-000000000001",
+      "playback_url": "https://example.org/tutor-api/media/00000000-0000-4000-8000-000000000001/playback/TOKEN_DE_PLAYBACK_SINTETICO_NAO_UTILIZAVEL",
+      "expires_at": "2026-10-13T12:05:00Z",
+      "token_type": "media_playback"
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Grant criado somente após mídia published, entrega configurada e acesso vigente. expires_at é agora+300s; playback_url aponta para o endpoint autenticado do grant, não diretamente para o provedor. URL/token demonstrativos não funcionam em ambiente real."
+  },
+  "GET /creators/me/media": {
+    "status": 200,
+    "body": {
+      "media": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "institution_id": "00000000-0000-4000-8000-000000000001",
+          "program_id": "00000000-0000-4000-8000-000000000002",
+          "course_id": "curso-exemplo",
+          "module_id": "modulo-qa",
+          "creator_user_id": "00000000-0000-4000-8000-000000000001",
+          "title": "Curso Sintético QA",
+          "description": "",
+          "competency_id": "00000000-0000-4000-8000-000000000001",
+          "provider": "youtube",
+          "duration_seconds": 1,
+          "thumbnail_url": null,
+          "captions": [],
+          "visibility": "public",
+          "offline_policy": "forbidden",
+          "status": "draft",
+          "followup_activity_id": "00000000-0000-4000-8000-000000000001",
+          "playback_url": null,
+          "published_at": null
+        }
+      ]
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Lista mídias do creator autenticado, incluindo rascunhos. O exemplo preserva a fixture de criação: status draft, captions [], duração 1s e playback_url/published_at null; as respostas não contêm credenciais ou IDs do asset no provedor."
+  },
+  "GET /classes/{class_id}/evidence-imports/{import_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "source_type": "whatsapp_export",
+      "status": "pending_review",
+      "retention_until": "2030-10-01T12:00:00Z",
+      "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evidence_ids": [
+        "00000000-0000-4000-8000-000000000010"
+      ]
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Consulta da mesma importação sintética criada: source_type whatsapp_export, status pending_review e evidências pendentes de revisão humana. A leitura não realiza integração externa nem muda o status."
+  },
+  "GET /classes/{class_id}/reports/{report_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "session_id": "00000000-0000-4000-8000-000000000009",
+      "generated_at": "2026-10-13T12:00:00Z",
+      "report_digest": "b997d3e91db08f65ceb64a9e9638ea5feb8692686003f65217f920f156c1f310",
+      "summary": {
+        "checkin_count": 1,
+        "pending_evidence_ids": [],
+        "pending_explicitly_confirmed": false,
+        "presence": {
+          "total": 1,
+          "counts": {
+            "pending": 0,
+            "suggested_present": 0,
+            "confirmed_present": 1,
+            "justified_absence": 0,
+            "absent": 0
+          },
+          "pending_count": 0
+        },
+        "external_integrations": "disabled"
+      }
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Retorna o relatório persistido pelo fechamento, preservando resumo e report_digest. A fixture possui participante confirmado, sem evidências/presenças pendentes, e external_integrations disabled."
+  },
+  "GET /admin/media/{media_id}/history": {
+    "status": 200,
+    "body": [
+      {
+        "id": "00000000-0000-4000-8000-000000000021",
+        "media_id": "00000000-0000-4000-8000-000000000001",
+        "from_status": null,
+        "to_status": "draft",
+        "actor_user_id": "00000000-0000-4000-8000-000000000001",
+        "actor_role": "creator",
+        "reason": "Mídia criada como rascunho.",
+        "occurred_at": "2026-10-13T12:00:00Z"
+      }
+    ],
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Histórico da fixture após criação por creator com vínculo ativo: transição inicial null → draft e motivo fixado pela rota. Publicação/bloqueio/arquivamento acrescentam novas transições em vez de reescrever este histórico."
+  },
+  "GET /classes/{class_id}/sessions": {
+    "status": 200,
+    "body": {
+      "sessions": [
+        {
+          "id": "00000000-0000-4000-8000-000000000009",
+          "class_id": "00000000-0000-4000-8000-000000000003",
+          "starts_at": "2026-10-13T12:00:00Z",
+          "ends_at": "2026-10-13T13:00:00Z",
+          "status": "open",
+          "token_expires_at": "2026-10-13T12:10:00Z",
+          "token_version": 1
+        }
+      ],
+      "total": 1,
+      "limit": 50,
+      "offset": 0
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Página da fixture recém-criada antes de rotação/fechamento: status open e token_version 1. Sem parâmetros de paginação a rota usa limit=50/offset=0. A projeção pública de sessão omite token e código de check-in."
+  },
+  "GET /classes/{class_id}/sessions/{session_id}": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000009",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "starts_at": "2026-10-13T12:00:00Z",
+      "ends_at": "2026-10-13T13:00:00Z",
+      "status": "open",
+      "token_expires_at": "2026-10-13T12:10:00Z",
+      "token_version": 1
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Detalhe da fixture recém-criada antes de rotação/fechamento, com o mesmo ID do parâmetro de caminho. A projeção pública omite token e código de check-in; leitura não renova a expiração."
+  },
+  "GET /classes/{class_id}/sessions/open": {
+    "status": 200,
+    "body": {
+      "id": "00000000-0000-4000-8000-000000000009",
+      "class_id": "00000000-0000-4000-8000-000000000003",
+      "starts_at": "2026-10-13T12:00:00Z",
+      "ends_at": "2026-10-13T13:00:00Z",
+      "status": "open",
+      "token_expires_at": "2026-10-13T12:10:00Z",
+      "token_version": 1
+    },
+    "note": "Exemplo sintético derivado do comportamento da rota e do serializer, sem chamada à API. IDs e pré-condições representam fixtures próprias em ambiente autorizado; não demonstram estado real de produção. Encontro open mais recente da turma, nesta fixture recém-criada. A projeção pública omite token/código; sem encontro aberto autorizado a rota retorna 404."
+  }
+}

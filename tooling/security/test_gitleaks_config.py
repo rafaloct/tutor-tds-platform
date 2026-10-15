@@ -188,6 +188,96 @@ def sha256_context_cases(tmp_root: Path, gitleaks: Path, config: Path) -> None:
             print(f"PASS {name} count=1 rules=generic-api-key paths={path}")
 
 
+def api_tree_context_cases(
+    tmp_root: Path, gitleaks: Path, config: Path, default_config: Path
+) -> None:
+    """Only the public Git identity finding is exempt, even in compact JSON."""
+    oid = "c09a47de258fb13680b23ea5d749f016af6382dc"
+    secret = secrets.token_hex(32)
+    secret_field = "secret_access_key"
+    contexts = (
+        (
+            "postgres_upgrade",
+            "docs/production/evidence/postgres-upgrade-20261013T141953Z-f5948745ff6593fe.json",
+            "api_tree_oid",
+            "api_tree",
+        ),
+        (
+            "xiaomi_smoke",
+            "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-13.json",
+            "api_tree",
+            "api_tree_oid",
+        ),
+        (
+            "production_restore_acceptance",
+            "docs/production/evidence/production-restore-acceptance.json",
+            "candidate_api_tree_oid",
+            "api_tree_oid",
+        ),
+        (
+            "postgres_upgrade_supplement",
+            "docs/production/evidence/postgres-upgrade-supplement-20261013T155604Z-0bcdb75b5c0f6d51.json",
+            "api_tree_oid",
+            "api_tree",
+        ),
+    )
+    for context, path, field, wrong_context_field in contexts:
+        clean_case(
+            tmp_root,
+            f"{context}_public_api_tree",
+            {path: json.dumps({field: oid}) + "\n"},
+            gitleaks,
+            config,
+            default_config,
+        )
+        cases = []
+        for order, payload, indent in (
+            ("before_secret", {field: oid, secret_field: secret}, None),
+            ("after_secret", {secret_field: secret, field: oid}, None),
+            ("multiline_secret", {field: oid, secret_field: secret}, 2),
+        ):
+            cases.append((order, path, json.dumps(payload, indent=indent), secret_field))
+        for name, protected_field, value, protected_path in (
+            ("wrong_context_field", wrong_context_field, oid, path),
+            ("wrong_field_suffix", field + "_extra", oid, path),
+            ("39_hex", field, oid[:-1], path),
+            ("41_hex", field, oid + "a", path),
+            ("nonhex", field, oid[:-1] + "g", path),
+            ("uppercase", field, oid.upper(), path),
+            ("wrong_filename", field, oid, "docs/production/evidence/other.json"),
+            ("nested_evidence", field, oid, path.replace("evidence/", "evidence/nested/")),
+            ("outside_evidence", field, oid, "api/tests/api-tree.json"),
+        ):
+            cases.append((name, protected_path, json.dumps({protected_field: value}), protected_field))
+        for name, protected_path, payload, detected_field in cases:
+            name = f"{context}_api_tree_{name}"
+            with tempfile.TemporaryDirectory(prefix=f"{name}-", dir=tmp_root) as temp:
+                repo = init_repo(Path(temp), {protected_path: payload + "\n"})
+                code, findings = findings_for(gitleaks, config, repo)
+                actual = [(f["rule"], f["path"], f["json_field"]) for f in findings]
+                expected = [("generic-api-key", protected_path, detected_field)]
+                if code != 1 or actual != expected:
+                    raise AssertionError(f"{name}: expected only the exact protected field; got {actual}")
+                print(f"PASS {name} count=1 rules=generic-api-key paths={protected_path}")
+        detected_case(
+            tmp_root,
+            f"{context}_api_tree_pat_not_exempt",
+            {path: json.dumps({field: f"ghp_{random_alnum(36)}"}) + "\n"},
+            "github-pat",
+            gitleaks,
+            config,
+        )
+        private_key = "-----BEGIN " + "PRIVATE KEY-----\n" + random_alnum(80) + "\n-----END " + "PRIVATE KEY-----"
+        detected_case(
+            tmp_root,
+            f"{context}_api_tree_private_key_not_exempt",
+            {path: json.dumps({field: private_key}) + "\n"},
+            "private-key",
+            gitleaks,
+            config,
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--gitleaks", required=True)
@@ -320,6 +410,36 @@ def main() -> int:
             config,
             default_config,
         )
+        checkin_evidence = "docs/production/evidence/checkin-auth-domain-401-2026-10-07.json"
+        source_key = "cartilhas_app/lib/features/auth/data/auth_repository.dart"
+        historical_source_digest = "203ba204f85026e6d602b029de30ca3c02daaa8598790326b9e139fbf842c2f3"
+        clean_case(
+            tmp_root,
+            "historical_checkin_source_digest",
+            {checkin_evidence: json.dumps({source_key: historical_source_digest}, indent=2) + "\n"},
+            gitleaks,
+            config,
+            default_config,
+        )
+        detected_case(
+            tmp_root,
+            "different_digest_in_historical_checkin_field",
+            {checkin_evidence: json.dumps({source_key: secrets.token_hex(32)}, indent=2) + "\n"},
+            "generic-api-key",
+            gitleaks,
+            config,
+        )
+        detected_case(
+            tmp_root,
+            "historical_checkin_digest_does_not_hide_secret",
+            {checkin_evidence: json.dumps({
+                source_key: historical_source_digest,
+                "secret_access_key": secrets.token_hex(32),
+            }, indent=2) + "\n"},
+            "generic-api-key",
+            gitleaks,
+            config,
+        )
         detected_case(
             tmp_root,
             "issue_140_git_sha_outside_allowlisted_path",
@@ -346,7 +466,7 @@ def main() -> int:
             config,
             default_config,
         )
-        fixture_like = f"tds_gitleaks_fixture_{random_alnum(24)}"
+        fixture_like = "tds_gitleaks_fixture_7zQ1pM9rX4wN8bY2jK6tC3vL"
         detected_case(
             tmp_root,
             "fixture_like_without_context",
@@ -367,6 +487,7 @@ def main() -> int:
             print("PASS invalid_scan_range count=0 rules=none paths=none status=failed_as_required")
 
         sha256_context_cases(tmp_root, gitleaks, config)
+        api_tree_context_cases(tmp_root, gitleaks, config, default_config)
         print("PASS all_gitleaks_policy_regressions")
         return 0
     finally:

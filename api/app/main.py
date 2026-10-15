@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from .analytics import router as analytics_router
 from .assessment_sync import router as assessment_sync_router
 from .assessment_sync import content_router as assessment_content_router
+from .assessment_sync import context_router as dynamic_activity_router
 from .auth import router as auth_router
 from .class_lifecycle import router as class_lifecycle_router
 from .classrooms import admin_router as classroom_admin_router
@@ -23,7 +24,12 @@ from .certificate_emission import router as certificate_emission_router
 from .certificate_policy import router as certificate_policy_router
 from .commercial import router as commercial_router
 from .config import Settings
-from .course_editor import router as course_editor_router, latest_published_version, legacy_version_id
+from .course_editor import (
+    latest_published_version,
+    learner_course_projection,
+    legacy_version_id,
+    router as course_editor_router,
+)
 from .database import Database
 from .events import router as events_router
 from .evidence import router as evidence_router
@@ -73,6 +79,7 @@ def create_app(
     application.include_router(support_router)
     application.include_router(assessment_content_router)
     application.include_router(assessment_sync_router)
+    application.include_router(dynamic_activity_router)
     application.include_router(events_router)
     application.include_router(evidence_router)
     application.include_router(presence_router)
@@ -164,26 +171,56 @@ def create_app(
     @application.get("/courses")
     def courses(request: Request) -> dict[str, list[dict[str, object]]]:
         db: Database = request.app.state.database
+        settings: Settings = request.app.state.settings
+        protect_answers = (
+            settings.learning_context_enabled and settings.dynamic_activity_enabled
+        )
         with Session(db.engine) as session:
             records = session.scalars(
                 select(Course).where(Course.active.is_(True)).order_by(Course.title)
             ).all()
-            return {"courses": [_serialize_course(record, session) for record in records]}
+            return {
+                "courses": [
+                    _serialize_course(
+                        record,
+                        session,
+                        protect_assessment_answers=protect_answers,
+                    )
+                    for record in records
+                ]
+            }
 
     @application.get("/courses/{course_id}")
     def course(course_id: str, request: Request) -> dict[str, object]:
         db: Database = request.app.state.database
+        settings: Settings = request.app.state.settings
         with Session(db.engine) as session:
             record = session.get(Course, course_id)
             if record is None or not record.active:
                 raise HTTPException(status_code=404, detail="Curso não encontrado.")
-            return _serialize_course(record, session)
+            return _serialize_course(
+                record,
+                session,
+                protect_assessment_answers=(
+                    settings.learning_context_enabled
+                    and settings.dynamic_activity_enabled
+                ),
+            )
 
     return application
 
 
-def _serialize_course(record: Course, session: Session) -> dict[str, object]:
-    item = dict(record.content)
+def _serialize_course(
+    record: Course,
+    session: Session,
+    *,
+    protect_assessment_answers: bool = False,
+) -> dict[str, object]:
+    item = (
+        learner_course_projection(record.content)
+        if protect_assessment_answers
+        else dict(record.content)
+    )
     item.update(id=record.id, title=record.title, author=record.author)
     version = latest_published_version(session, record.id)
     if version is not None:

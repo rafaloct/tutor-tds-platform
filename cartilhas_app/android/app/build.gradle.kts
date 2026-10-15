@@ -34,13 +34,22 @@ fun httpsUri(variable: String, value: String): URI {
     return uri.normalize()
 }
 
+val approvedStagingApiUrls = setOf(
+    "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+    "https://tutor-tds-staging.fastapicloud.dev",
+)
+
+val approvedStagingGatewayUrls = setOf(
+    "https://tutor-tds-gateway-staging.tdsipex.workers.dev",
+)
+
 fun validateDebugStagingDefines(defines: Map<String, String>) {
     val isolatedQa = defines["DYNAMIC_QA_ISOLATED_PACKAGE"]
     if (isolatedQa != null && isolatedQa !in setOf("true", "false")) {
         throw GradleException("DYNAMIC_QA_ISOLATED_PACKAGE deve ser true ou false.")
     }
     if (isolatedQa == "true" &&
-        (defines["TUTOR_API_URL"] != "https://tutor-tds-staging.fastapicloud.dev" ||
+        (defines["TUTOR_API_URL"] !in approvedStagingApiUrls ||
             !defines["DYNAMIC_QA_RUN_ID"].orEmpty().matches(Regex("^[a-f0-9]{32}$")))) {
         throw GradleException("QA isolado exige staging Cloud e identificador de execucao valido.")
     }
@@ -55,10 +64,8 @@ fun validateDebugStagingDefines(defines: Map<String, String>) {
         "TUTOR_STAGING_API_URL",
         defines["TUTOR_STAGING_API_URL"].orEmpty(),
     )
-    val approvedApiUris = setOf(
-        "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
-        "https://tutor-tds-staging.fastapicloud.dev",
-    ).map { URI(it).normalize() }.toSet()
+    val approvedApiUris =
+        approvedStagingApiUrls.map { URI(it).normalize() }.toSet()
     if (
         apiUri != allowedApiUri ||
         apiUri !in approvedApiUris
@@ -75,9 +82,13 @@ fun validateDebugStagingDefines(defines: Map<String, String>) {
             "TUTOR_STAGING_GATEWAY_URL",
             defines["TUTOR_STAGING_GATEWAY_URL"].orEmpty(),
         )
+        val approvedGatewayUris =
+            approvedStagingGatewayUrls.map { URI(it).normalize() }.toSet()
         if (
             gatewayUri != allowedGatewayUri ||
-            !gatewayUri.path.lowercase().contains("staging")
+            gatewayUri !in approvedGatewayUris ||
+            (!gatewayUri.host.lowercase().contains("staging") &&
+                !gatewayUri.path.lowercase().contains("staging"))
         ) {
             throw GradleException(
                 "Build debug bloqueado: gateway deve ser de staging ou ficar vazio.",
@@ -106,6 +117,7 @@ fun validateReleaseProductionDefines(defines: Map<String, String>) {
     val inactiveFlags = setOf(
         "REMOTE_CATALOG_ENABLED", "LEARNING_CONTEXT_ENABLED",
         "DURABLE_LEARNING_OUTBOX_ENABLED", "JOURNEY_TRACEABILITY_ENABLED",
+        "DYNAMIC_ACTIVITY_ENABLED",
         "SIGNED_SUPPORT_IDENTITY", "PUSH_NOTIFICATIONS_ENABLED",
     )
     // Metadados que o Flutter tool sempre injeta em -Pdart-defines; não são

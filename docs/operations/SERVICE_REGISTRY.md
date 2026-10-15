@@ -23,6 +23,15 @@ parte de **cada registro**, salvo substituição explícita na linha:
 - `monitor`: **UNKNOWN** quanto a execução atual, destino e recebimento de alerta.
   As verificações listadas na tabela são TARGET, salvo evidência datada explícita.
 
+Atualização de custódia declarada por Rafael em 12/10/2026: ele é o
+responsável operacional principal por `backup`/R2, `vps`, `dokploy`, túnel
+Cloudflare, `gateway` Worker, `anythingllm`, `ai-provider` OpenRouter e
+release. A declaração não verifica acesso, contrato, quota ou runtime; não
+designa owner funcional/editorial dos dados. `secondary_admin` e substituto
+seguem **UNKNOWN**, aguardando indicação e teste de recuperação. O túnel não
+tem registro próprio nas tabelas legadas deste inventário; permanece como
+dependência explícita do gateway e do AnythingLLM.
+
 `status` classifica existência/atividade atual: `observed` exige evidência
 atual explícita; `target` identifica implantação futura; `unknown` preserva
 histórico sem promovê-lo. UNKNOWN não significa ausente nem autorização para

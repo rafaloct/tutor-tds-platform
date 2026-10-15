@@ -27,7 +27,7 @@ from app.models import (
 from test_class_lifecycle import (
     lifecycle_api,
     requests_api,
-    test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited as _capacity,
+    test_capacity_30_warns_without_blocking_scoped_assignments as _capacity,
     test_plan_team_and_strict_lifecycle_authority as _lifecycle_authority,
     test_prepare_pins_published_version_separates_territory_and_replays as _prepare,
 )
@@ -68,7 +68,7 @@ def test_postgres_prepare_receipt_and_territory(lifecycle_api):
     _prepare(lifecycle_api)
 
 
-def test_postgres_capacity_and_coordinator_override(lifecycle_api):
+def test_postgres_soft_capacity_and_scoped_assignments(lifecycle_api):
     _capacity(lifecycle_api)
 
 

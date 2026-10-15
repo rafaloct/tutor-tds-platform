@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-10-12T15:49:29Z",
+  "method": "Google Drive connector raw-file fetch of nine PDFs in folder; materialized bytes hashed locally",
+  "folder_name": "Cartilhas (Versão Chatbot)",
+  "folder_drive_id": "1c9M9mlfWkSLDclxFvDjvi8K-I2GdXu6u",
+  "source_map_sha256": "20ff11bfbeb53dcb3ebfead7efe9975ea6ae3d32dd3db97fdad6ebe44a4a8da0",
+  "sources": [
+    {
+      "course_id": "agricultura-sustentavel",
+      "drive_file_id": "1-0ad2hB0C_Y9hZjCPwIC_bD7Q7A4Rbb2",
+      "bytes": 15456861,
+      "sha256": "2ff77f94a5e14e695cfa11b9e51cae1dbf2f840ee12bacb7c7821555eb4ee0fc",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "atendimento-cliente",
+      "drive_file_id": "19X4xDcWo9UpI-hpd4ZEZSFDbVb0ddvkT",
+      "bytes": 12884363,
+      "sha256": "1fcae9c36debe6e6d88c2ecf30ef8c1bea8b7c601d072884a25064fea06e475f",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "audiovisual",
+      "drive_file_id": "1FMrHGvbUAwsalrXE3RXagSPyuG0vYRWq",
+      "bytes": 7952948,
+      "sha256": "c09f5e9e6bdcc92cda535b742b40bb37b433f3cff75336e82e2d34981667812e",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "cooperativismo",
+      "drive_file_id": "1hbAX_pTbY5zPSiYMhtkwXUGIKUP63kKl",
+      "bytes": 15405631,
+      "sha256": "86a79c14afc613e335cb662b5228a8cd79df3c8cd0ca1e8f58a31399224f2af4",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "economia-lar",
+      "drive_file_id": "1fxNZZXq-HJp68-0RqZ8GYUR6ubsiHKSh",
+      "bytes": 18218144,
+      "sha256": "fae2ad89a4a2c48aa9fd8bcd3136a07b69e18a988e27e930c289727e5fd3b6f0",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "educacao-financeira",
+      "drive_file_id": "1_50rc1lz0Bg2Sp8-yGsGy7edy6g_OYXi",
+      "bytes": 6581296,
+      "sha256": "c3d90ed88919191f6ae5c4d1f7c18f182651415a60eebc1b2563a3f975ff3c02",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "ia-cartilha",
+      "drive_file_id": "1X9kyaW0_MY0sDnmryD1HXYpqEmVRAVW3",
+      "bytes": 9472927,
+      "sha256": "1f2a545931899de821d3c734acf840d8b06a04b1ed6c3eda029576c89d3ef3af",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "saf",
+      "drive_file_id": "1RVhxU5yL5r5vvq-GbEQ8NmgyJGm3c_zj",
+      "bytes": 15457007,
+      "sha256": "e6ea47cd96e60723e0898cb6baee24077b7101b9939b1330b05fcd12ad1f68e5",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    },
+    {
+      "course_id": "sim-sima",
+      "drive_file_id": "1MD4sz5qNxYveVRT5jZSn8Utk2vK2V2jp",
+      "bytes": 7102374,
+      "sha256": "1f804b761aa8212856294080ece632872c3b9e280cc0f411cc064908a541f8e1",
+      "matches_historical_original": true,
+      "pdf_signature_checked": true
+    }
+  ],
+  "validation_scope": "The nine PDFs in this folder match historical originals byte for byte; current published CourseVersion exports, editorial approval, RAG indexing and live citations remain unverified"
+}

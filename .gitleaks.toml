@@ -17,6 +17,27 @@ regexTarget = "match"
 regexes = ['''(?i)^[a-z0-9_]+_sha256"\s*:\s*"[0-9a-f]{64}"$''']
 
 [[rules.allowlists]]
+description = "Postgres upgrade evidence Git API tree identity"
+condition = "AND"
+paths = ['''^docs/production/evidence/postgres-upgrade-(?:supplement-)?[0-9]{8}T[0-9]{6}Z-[0-9a-f]{16}\.json$''']
+regexTarget = "match"
+regexes = ['''^api_tree_oid"\s*:\s*"[0-9a-f]{40}"$''']
+
+[[rules.allowlists]]
+description = "Pre-AAB Xiaomi smoke evidence Git API tree identity"
+condition = "AND"
+paths = ['''^docs/production/evidence/pre-aab-xiaomi-smoke-[0-9]{4}-[0-9]{2}-[0-9]{2}\.json$''']
+regexTarget = "match"
+regexes = ['''^api_tree"\s*:\s*"[0-9a-f]{40}"$''']
+
+[[rules.allowlists]]
+description = "Production restore acceptance candidate Git API tree identity"
+condition = "AND"
+paths = ['''^docs/production/evidence/production-restore-acceptance\.json$''']
+regexTarget = "match"
+regexes = ['''^candidate_api_tree_oid"\s*:\s*"[0-9a-f]{40}"$''']
+
+[[rules.allowlists]]
 description = "Explicit TDS synthetic API-key fixtures in API/Flutter tests"
 condition = "AND"
 paths = ['''^api/tests/''', '''^cartilhas_app/(test|integration_test)/''']
@@ -36,3 +57,10 @@ condition = "AND"
 paths = ['''^docs/production/CLASS_LIFECYCLE_E2E_RUNBOOK\.md$''']
 regexTarget = "line"
 regexes = ['''(?i)^\s*(?:API_HEAD|APP_HEAD|COMPOSE_HEAD)=[0-9a-f]{40}\s*$''']
+
+[[rules.allowlists]]
+description = "Historical check-in evidence SHA-256 for the auth repository source file"
+condition = "AND"
+paths = ['''^docs/production/evidence/checkin-auth-domain-401-2026-10-07\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"cartilhas_app/lib/features/auth/data/auth_repository\.dart"\s*:\s*"203ba204f85026e6d602b029de30ca3c02daaa8598790326b9e139fbf842c2f3",?\s*$''']

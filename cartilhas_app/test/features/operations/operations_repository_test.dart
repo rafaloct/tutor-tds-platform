@@ -66,6 +66,12 @@ void main() {
               'enrolled': true,
               'assigned': false,
               'baseline_linked': false,
+              'capacity': {
+                'limit': 30,
+                'occupancy': 30,
+                'warning': true,
+                'policy': 'soft_alert',
+              },
               'history': [],
             }),
             200,
@@ -75,7 +81,9 @@ void main() {
       addTearDown(repository.close);
       final key = repository.sessionKey;
       await repository.search(key, scopeA, '12345678909');
-      await repository.inspect(key, scopeA, 'person');
+      final preview = await repository.inspect(key, scopeA, 'person');
+      expect(preview.capacityOccupancy, 30);
+      expect(preview.capacityWarning, isTrue);
       final command = OperationCommand(
         id: 'synthetic-command',
         sessionKey: key,

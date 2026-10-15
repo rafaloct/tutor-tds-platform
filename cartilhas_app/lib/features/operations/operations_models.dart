@@ -37,12 +37,18 @@ class OperationSnapshot {
     required this.assigned,
     required this.baselineLinked,
     required List<OperationHistory> history,
+    this.capacityOccupancy,
+    this.capacityReference = 30,
+    this.capacityWarning = false,
   }) : history = List.unmodifiable(history);
   final OperationPerson person;
   final OperationScope scope;
   final int revision;
   final bool enrolled, assigned;
   final bool? baselineLinked;
+  final int? capacityOccupancy;
+  final int capacityReference;
+  final bool capacityWarning;
   final List<OperationHistory> history;
 }
 

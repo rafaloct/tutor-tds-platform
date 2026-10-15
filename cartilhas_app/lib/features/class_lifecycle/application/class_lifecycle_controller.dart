@@ -30,7 +30,6 @@ class PrepareClassroomController extends ChangeNotifier {
   DateTime? endDate;
   String? teacherId;
   final Set<String> monitorIds = <String>{};
-  String capacityOverrideReason = '';
 
   bool get isReady => bootstrap != null && !loading && error == null;
   bool get canPrepare => bootstrap?.capabilities.canPrepare ?? false;
@@ -75,6 +74,9 @@ class PrepareClassroomController extends ChangeNotifier {
     notifyListeners();
     try {
       bootstrap = await gateway.bootstrap();
+      if (bootstrap!.capabilities.canPrepare) {
+        result = await gateway.reconcilePendingPreparation();
+      }
     } on Object catch (caught) {
       error = caught.toString();
       bootstrap = null;
@@ -181,11 +183,6 @@ class PrepareClassroomController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setCapacityOverrideReason(String value) {
-    capacityOverrideReason = value;
-    notifyListeners();
-  }
-
   String? get stepValidationMessage {
     switch (currentStep) {
       case 0:
@@ -236,10 +233,6 @@ class PrepareClassroomController extends ChangeNotifier {
         if (snapshot == null || !snapshot.canProceed) {
           return snapshot?.message ??
               'A capacidade ainda não foi confirmada pelo servidor.';
-        }
-        if (snapshot.requiresOverrideReason &&
-            capacityOverrideReason.trim().isEmpty) {
-          return 'Informe a justificativa da exceção de capacidade.';
         }
         return null;
       default:
@@ -298,10 +291,107 @@ class PrepareClassroomController extends ChangeNotifier {
           endDate: end,
           teacherId: teacher,
           monitorIds: monitorIds.toList(growable: false),
-          capacityOverrideReason: capacity?.requiresOverrideReason == true
-              ? capacityOverrideReason.trim()
-              : null,
         ),
+      );
+    } on ClassVersionChangedException catch (caught) {
+      currentStep = 1;
+      courseId = null;
+      publishedVersion = null;
+      capacity = null;
+      error = caught.message;
+    } on Object catch (caught) {
+      error = caught.toString();
+    } finally {
+      busy = false;
+      notifyListeners();
+    }
+  }
+}
+
+class ActivateClassroomController extends ChangeNotifier {
+  ActivateClassroomController(this.gateway);
+
+  final ClassLifecycleGateway gateway;
+  ClassLifecycleBootstrap? bootstrap;
+  ClassActivationReadiness? readiness;
+  ActivatedClassroomResult? result;
+  String? selectedClassId;
+  String reason = '';
+  bool loading = false;
+  bool busy = false;
+  String? error;
+
+  List<LifecycleClassSummary> get plannedClasses =>
+      bootstrap?.manageableClasses
+          .where((item) => item.status == 'planned')
+          .toList(growable: false) ??
+      const [];
+
+  Future<void> load() async {
+    loading = true;
+    error = null;
+    notifyListeners();
+    try {
+      bootstrap = await gateway.bootstrap();
+      if (plannedClasses.isNotEmpty) {
+        selectedClassId = plannedClasses.first.id;
+        readiness = await gateway.activationReadiness(selectedClassId!);
+      }
+    } on Object catch (caught) {
+      error = caught.toString();
+      readiness = null;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> selectClass(String? value) async {
+    if (value == null || value == selectedClassId || busy) return;
+    selectedClassId = value;
+    reason = '';
+    await refreshReadiness();
+  }
+
+  Future<void> refreshReadiness() async {
+    final classId = selectedClassId;
+    if (classId == null || busy) return;
+    readiness = null;
+    busy = true;
+    error = null;
+    notifyListeners();
+    try {
+      readiness = await gateway.activationReadiness(classId);
+    } on Object catch (caught) {
+      error = caught.toString();
+    } finally {
+      busy = false;
+      notifyListeners();
+    }
+  }
+
+  void setReason(String value) {
+    reason = value;
+    notifyListeners();
+  }
+
+  bool get canSubmit =>
+      !busy &&
+      result == null &&
+      (bootstrap?.capabilities.canActivate ?? false) &&
+      (readiness?.canActivate ?? false) &&
+      selectedClassId != null &&
+      reason.trim().length >= 3;
+
+  Future<void> submit() async {
+    if (!canSubmit) return;
+    busy = true;
+    error = null;
+    notifyListeners();
+    try {
+      result = await gateway.activateClassroom(
+        classroomId: selectedClassId!,
+        reason: reason.trim(),
       );
     } on Object catch (caught) {
       error = caught.toString();
@@ -360,12 +450,20 @@ class CloseClassroomController extends ChangeNotifier {
   Future<void> selectClass(String? value) async {
     if (value == null || value == selectedClassId || busy) return;
     selectedClassId = value;
+    closeReason = '';
+    certificateNoticeConfirmed = false;
+    await refreshReadiness();
+  }
+
+  Future<void> refreshReadiness() async {
+    final classId = selectedClassId;
+    if (classId == null || busy) return;
     readiness = null;
     busy = true;
     error = null;
     notifyListeners();
     try {
-      readiness = await gateway.closeReadiness(value);
+      readiness = await gateway.closeReadiness(classId);
     } on Object catch (caught) {
       error = caught.toString();
     } finally {

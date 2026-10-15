@@ -55,6 +55,7 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
         remote: _ownedRemote!,
         auth: auth,
         apiUrl: AppConfig.tutorApiUrl,
+        dynamicActivityEnabled: AppConfig.dynamicActivityEnabled,
       );
     }
     if (widget.contextRepository != null) {

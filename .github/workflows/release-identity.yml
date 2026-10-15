@@ -8,6 +8,11 @@ on:
       - "tooling/test_production_backend_identity.ps1"
       - "tooling/Test-ProductionRecoveryEvidence.ps1"
       - "tooling/test_production_recovery_evidence.ps1"
+      - "tooling/verify_production_recovery_evidence.py"
+      - "tooling/test_verify_production_recovery_evidence.py"
+      - "tooling/rehearse_scheduled_postgres_backup.py"
+      - "tooling/test_rehearse_scheduled_postgres_backup.py"
+      - "docs/production/evidence/**"
       - ".github/workflows/release-identity.yml"
   push:
     branches: [codex/onda-0-consolidacao]
@@ -17,6 +22,11 @@ on:
       - "tooling/test_production_backend_identity.ps1"
       - "tooling/Test-ProductionRecoveryEvidence.ps1"
       - "tooling/test_production_recovery_evidence.ps1"
+      - "tooling/verify_production_recovery_evidence.py"
+      - "tooling/test_verify_production_recovery_evidence.py"
+      - "tooling/rehearse_scheduled_postgres_backup.py"
+      - "tooling/test_rehearse_scheduled_postgres_backup.py"
+      - "docs/production/evidence/**"
       - ".github/workflows/release-identity.yml"
   workflow_dispatch:
 
@@ -28,6 +38,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  offline-postgres-drill-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - name: Run synthetic, offline PostgreSQL restore runner tests
+        run: python -m unittest tooling/test_rehearse_scheduled_postgres_backup.py -v
+
   offline-test:
     runs-on: windows-2022
     timeout-minutes: 5
@@ -35,6 +58,12 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+      - name: Run offline recovery provenance tests
+        shell: pwsh
+        run: python -m unittest tooling/test_verify_production_recovery_evidence.py -v
       - name: Run offline identity test with Windows PowerShell 5.1
         shell: powershell
         run: .\tooling\test_production_backend_identity.ps1

@@ -11,6 +11,75 @@ from sqlalchemy.exc import IntegrityError
 from app.models import Base
 
 
+@pytest.mark.parametrize("starting_revision", ["20261003_0024", "20261006_0029"])
+def test_dynamic_activity_upgrade_from_supported_staging_checkpoints(
+    tmp_path: Path, starting_revision: str
+) -> None:
+    database_path = tmp_path / f"dynamic-{starting_revision}.db"
+    database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", database_url)
+    engine = create_engine(database_url)
+
+    command.upgrade(config, starting_revision)
+    command.upgrade(config, "head")
+
+    with engine.connect() as connection:
+        assert connection.scalar(
+            text("SELECT version_num FROM alembic_version")
+        ) == "20261007_0030"
+    columns = {
+        column["name"] for column in inspect(engine).get_columns("assessment_attempts")
+    }
+    assert {"origin", "enrollment_id", "block_version_id"} <= columns
+    engine.dispose()
+
+
+def test_dynamic_activity_upgrade_refuses_reserved_content_namespace_collision(
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "reserved-content-collision.db"
+    database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", database_url)
+    command.upgrade(config, "20261006_0029")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.execute(text(
+            "INSERT INTO users "
+            "(id, name, cpf_digest, phone, password_digest, role) VALUES "
+            "('reserved-owner', 'Reserved owner', :cpf, '61999990000', "
+            "'digest', 'student')"
+        ), {"cpf": "9" * 64})
+        connection.execute(text(
+            "INSERT INTO courses (id, title, author, content, active) VALUES "
+            "('reserved-course', 'Curso', 'TDS', '{}', 1)"
+        ))
+        connection.execute(text(
+            "INSERT INTO assessment_contents "
+            "(id, owner_id, course_id, topic, mode, title, duration_seconds, "
+            "questions, answer_key, content_digest) VALUES "
+            "('published-block:legacy-practice', 'reserved-owner', "
+            "'reserved-course', 'Prática', 'quiz', 'Quiz', 0, '[]', '[]', :digest)"
+        ), {"digest": "8" * 64})
+
+    with pytest.raises(RuntimeError, match="namespace reservado"):
+        command.upgrade(config, "head")
+    assert "origin" not in {
+        column["name"]
+        for column in inspect(engine).get_columns("assessment_contents")
+    }
+    with engine.connect() as connection:
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == (
+            "20261006_0029"
+        )
+        assert connection.scalar(text(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'trigger' "
+            "AND name = 'assessment_contents_immutable'"
+        )) == 1
+    engine.dispose()
+
+
 def test_migration_up_and_down(tmp_path: Path) -> None:
     database_path = tmp_path / "migration.db"
     database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
@@ -50,6 +119,13 @@ def test_migration_up_and_down(tmp_path: Path) -> None:
     assert attempt_columns["revision"] is False
     assert attempt_columns["updated_at"] is False
     assert attempt_columns["assessment_content_id"] is True
+    assert attempt_columns["origin"] is False
+    for contextual_column in (
+        "organization_id", "program_id", "class_id", "membership_id",
+        "enrollment_id", "legacy_enrollment_id", "course_version_id",
+        "section_id", "section_version_id", "block_id", "block_version_id",
+    ):
+        assert attempt_columns[contextual_column] is True
     attempt_fks = {
         tuple(item["constrained_columns"])
         for item in inspect(engine).get_foreign_keys("assessment_attempts")
@@ -57,20 +133,42 @@ def test_migration_up_and_down(tmp_path: Path) -> None:
     assert ("owner_id",) in attempt_fks
     assert ("course_id",) in attempt_fks
     assert ("assessment_content_id",) in attempt_fks
+    assert ("organization_id",) in attempt_fks
+    assert ("program_id",) in attempt_fks
+    assert ("class_id",) in attempt_fks
+    assert ("membership_id",) in attempt_fks
+    assert ("enrollment_id",) in attempt_fks
+    assert ("legacy_enrollment_id",) in attempt_fks
+    assert ("course_version_id", "course_id") in attempt_fks
     attempt_indexes = {
         item["name"] for item in inspect(engine).get_indexes("assessment_attempts")
     }
     assert "ix_assessment_attempts_owner_updated" in attempt_indexes
     assert "ix_assessment_attempts_content" in attempt_indexes
+    assert "ix_assessment_attempts_context_owner" in attempt_indexes
+    assert "uq_assessment_attempts_published_block" in attempt_indexes
+    attempt_checks = {
+        item["name"]
+        for item in inspect(engine).get_check_constraints("assessment_attempts")
+    }
+    assert {
+        "ck_assessment_attempt_origin",
+        "ck_assessment_attempt_context_complete",
+    } <= attempt_checks
     content_columns = {
         column["name"]
         for column in inspect(engine).get_columns("assessment_contents")
     }
     assert content_columns == {
-        "id", "owner_id", "course_id", "topic", "mode", "title",
+        "id", "origin", "owner_id", "course_id", "topic", "mode", "title",
         "duration_seconds", "questions", "answer_key", "content_digest",
         "created_at",
     }
+    content_checks = {
+        item["name"]
+        for item in inspect(engine).get_check_constraints("assessment_contents")
+    }
+    assert "ck_assessment_content_origin" in content_checks
     transition_columns = {
         column["name"] for column in inspect(engine).get_columns("media_status_transitions")
     }
@@ -216,6 +314,12 @@ def test_existing_enrollment_is_backfilled_into_complete_hierarchy(
             "VALUES ('class-ledger', :program_id, 'course-1', 'user-1', 'Turma', '2026-01-01', '2026-12-01', 'active')"
         ), {"program_id": enrollment.program_id})
         connection.execute(text(
+            "INSERT INTO class_enrollments "
+            "(class_id, user_id, enrollment_id, program_id, course_id, status) "
+            "VALUES ('class-ledger', 'user-1', 'enrollment-1', :program_id, "
+            "'course-1', 'active')"
+        ), {"program_id": enrollment.program_id})
+        connection.execute(text(
             "INSERT INTO media_assets (id, institution_id, program_id, course_id, module_id, creator_user_id, title, description, competency_id, provider, provider_asset_id, duration_seconds, captions, visibility, offline_policy, status, rights_confirmed, followup_activity_id) "
             "VALUES ('media-1', 'legacy-institution', :program_id, 'course-1', 'module-1', 'user-1', 'Video', '', 'competency-1', 'youtube', 'abcDEF12345', 60, '[]', 'enrolled', 'forbidden', 'published', 1, 'quiz-1')"
         ), {"program_id": enrollment.program_id})
@@ -267,6 +371,14 @@ def test_existing_enrollment_is_backfilled_into_complete_hierarchy(
             "WHERE attempt_id = 'attempt-1'"
         )).scalar_one_or_none()
         assert legacy_content_id is None
+        origin_and_context = connection.execute(text(
+            "SELECT origin, organization_id, program_id, class_id, membership_id, "
+            "enrollment_id, legacy_enrollment_id, course_version_id, section_id, "
+            "section_version_id, block_id, block_version_id "
+            "FROM assessment_attempts WHERE attempt_id = 'attempt-1'"
+        )).one()
+        assert origin_and_context[0] == "practice"
+        assert all(value is None for value in origin_and_context[1:])
         connection.execute(text(
             "INSERT INTO assessment_contents "
             "(id, owner_id, course_id, topic, mode, title, duration_seconds, "
@@ -303,6 +415,14 @@ def test_existing_enrollment_is_backfilled_into_complete_hierarchy(
         ))
     with pytest.raises(IntegrityError), engine.begin() as connection:
         connection.execute(text(
+            "INSERT INTO assessment_contents "
+            "(id, origin, owner_id, course_id, topic, mode, title, "
+            "duration_seconds, questions, answer_key, content_digest) VALUES "
+            "('content-invalid-origin', 'laundered', 'user-1', 'course-1', "
+            "'Tópico', 'quiz', 'Quiz', 0, '[]', '[]', :digest)"
+        ), {"digest": "d" * 64})
+    with pytest.raises(IntegrityError), engine.begin() as connection:
+        connection.execute(text(
             "UPDATE media_status_transitions SET reason = 'rewritten' "
             "WHERE id = 'transition-1'"
         ))
@@ -330,4 +450,81 @@ def test_existing_enrollment_is_backfilled_into_complete_hierarchy(
             "INSERT INTO assessment_attempts (attempt_id, owner_id, course_id, topic, mode, revision, answers, marked, current_index, remaining_seconds, completed, score, updated_at) "
             "VALUES ('attempt-invalid-score', 'user-1', 'course-1', 'Tópico', 'quiz', 1, '{}', '[]', 0, 0, 0, 1, '2026-09-20 12:00:00')"
         ))
+    with pytest.raises(IntegrityError), engine.begin() as connection:
+        connection.execute(text(
+            "UPDATE assessment_attempts SET origin='published_block', class_id='class-ledger' "
+            "WHERE attempt_id='attempt-1'"
+        ))
+    with engine.begin() as connection:
+        contextual = connection.execute(text(
+            "SELECT ce.context_id, ce.membership_id, ce.enrollment_id, "
+            "ce.program_id, ce.course_version_id, p.institution_id "
+            "FROM class_enrollments ce JOIN programs p ON p.id=ce.program_id "
+            "WHERE ce.class_id='class-ledger' AND ce.user_id='user-1'"
+        )).one()
+        connection.execute(text(
+            "UPDATE assessment_attempts SET origin='published_block', "
+            "organization_id=:organization_id, program_id=:program_id, "
+            "class_id='class-ledger', membership_id=:membership_id, "
+            "enrollment_id=:context_id, legacy_enrollment_id=:legacy_enrollment_id, "
+            "course_version_id=:course_version_id, section_id='section', "
+            "section_version_id='11111111-1111-1111-1111-111111111111', "
+            "block_id='block', "
+            "block_version_id='22222222-2222-2222-2222-222222222222' "
+            "WHERE attempt_id='attempt-1'"
+        ), {
+            "organization_id": contextual.institution_id,
+            "program_id": contextual.program_id,
+            "membership_id": contextual.membership_id,
+            "context_id": contextual.context_id,
+            "legacy_enrollment_id": contextual.enrollment_id,
+            "course_version_id": contextual.course_version_id,
+        })
+    with pytest.raises(RuntimeError, match="forward recovery"):
+        command.downgrade(config, "20261006_0029")
+    with engine.connect() as connection:
+        assert connection.execute(text(
+            "SELECT origin FROM assessment_attempts WHERE attempt_id='attempt-1'"
+        )).scalar_one() == "published_block"
+        assert connection.execute(text(
+            "SELECT version_num FROM alembic_version"
+        )).scalar_one() == "20261007_0030"
+    engine.dispose()
+
+
+def test_dynamic_activity_downgrade_refuses_published_content_without_attempt(
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "published-content-guard.db"
+    database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", database_url)
+    command.upgrade(config, "head")
+    engine = create_engine(database_url)
+    with engine.begin() as connection:
+        connection.execute(text(
+            "INSERT INTO users "
+            "(id, name, cpf_digest, phone, password_digest, role) VALUES "
+            "('published-owner', 'Published owner', :cpf, '61999990000', "
+            "'digest', 'student')"
+        ), {"cpf": "a" * 64})
+        connection.execute(text(
+            "INSERT INTO courses (id, title, author, content, active) VALUES "
+            "('published-course', 'Curso', 'TDS', '{}', 1)"
+        ))
+        connection.execute(text(
+            "INSERT INTO assessment_contents "
+            "(id, origin, owner_id, course_id, topic, mode, title, "
+            "duration_seconds, questions, answer_key, content_digest) VALUES "
+            "('published-block:orphan', 'published_block', 'published-owner', "
+            "'published-course', 'Módulo', 'quiz', 'Pergunta', 0, '[]', "
+            "'[]', :digest)"
+        ), {"digest": "b" * 64})
+
+    with pytest.raises(RuntimeError, match="forward recovery"):
+        command.downgrade(config, "20261006_0029")
+    with engine.connect() as connection:
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == (
+            "20261007_0030"
+        )
     engine.dispose()

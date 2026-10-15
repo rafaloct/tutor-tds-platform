@@ -1,5 +1,7 @@
 import argparse
 import json
+import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -98,6 +100,9 @@ class HarnessTests(unittest.TestCase):
             item.update(status="PASS", evidence=["synthetic-evidence.json"])
         for item in data["invariants"].values():
             item.update(status="PASS", evidence=["synthetic-evidence.json"])
+        data["invariants"]["capacity_policy_enforced"]["evidence"].append(
+            "backend-contract:test_capacity_30_warns_without_blocking_scoped_assignments"
+        )
         data["certificate_boundary"] = {
             "request_status": "approved",
             "emitted": False,
@@ -106,6 +111,38 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(
             harness.validate_manifest(data, require_complete=True),
             [],
+        )
+
+    def test_old_blocking_capacity_evidence_cannot_validate_current_policy(self):
+        data = harness.empty_manifest(args())
+        for item in (*data["stages"].values(), *data["invariants"].values()):
+            item.update(status="PASS", evidence=["synthetic-evidence.json"])
+        data["invariants"]["capacity_policy_enforced"]["evidence"] = [
+            "backend-contract:test_capacity_30_blocks_operator_without_override"
+        ]
+        data["certificate_boundary"] = {
+            "request_status": "approved",
+            "emitted": False,
+            "institutional_release": "blocked",
+        }
+        self.assertIn(
+            "current soft-capacity contract evidence missing",
+            harness.validate_manifest(data, require_complete=True),
+        )
+
+    def test_manifest_heads_must_match_requested_candidate(self):
+        data = harness.empty_manifest(args())
+        self.assertIn(
+            "api_head does not match the requested candidate",
+            harness.validate_manifest(
+                data,
+                require_complete=False,
+                expected_heads={
+                    "api_head": SHA_B,
+                    "app_head": SHA_B,
+                    "compose_head": SHA_C,
+                },
+            ),
         )
 
     def test_certificate_cannot_be_claimed_emitted(self):
@@ -185,7 +222,7 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertIn(
             "backend-contract:"
-            "test_capacity_30_blocks_operator_and_only_coordinator_override_is_audited",
+            "test_capacity_30_warns_without_blocking_scoped_assignments",
             manifest["invariants"]["capacity_policy_enforced"]["evidence"],
         )
 
@@ -263,6 +300,84 @@ class HarnessTests(unittest.TestCase):
                 ),
                 3,
             )
+
+    def test_cleanup_temp_dir_retries_locked_log_and_recovers(self):
+        temp = Path(tempfile.mkdtemp(prefix="tds-cleanup-e2e-"))
+        try:
+            log = temp / "qa-server.log"
+            log.write_text("tail")
+            if os.name == "nt":
+                handle = log.open("r")
+                try:
+                    error = harness._cleanup_temp_dir(
+                        temp, attempts=2, delay=0.01
+                    )
+                    self.assertIsNotNone(error)
+                    self.assertTrue(temp.exists())
+                finally:
+                    handle.close()
+            self.assertIsNone(
+                harness._cleanup_temp_dir(temp, attempts=2, delay=0.01)
+            )
+            self.assertFalse(temp.exists())
+        finally:
+            shutil.rmtree(temp, ignore_errors=True)
+
+    def test_cleanup_temp_dir_missing_is_noop(self):
+        missing = Path(tempfile.gettempdir()) / "tds-cleanup-e2e-absent"
+        self.assertIsNone(
+            harness._cleanup_temp_dir(missing, attempts=2, delay=0.01)
+        )
+
+    def test_package_inventory_parses_pm_output(self):
+        import subprocess
+        from unittest.mock import patch
+
+        fake = subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout=(
+                "package:com.tutortds_cartilhas.dev.dynamicqa.r" + "a1" * 16 + "\n"
+                "package:com.tutortds_cartilhas.dev.dynamicqa.r" + "b2" * 16 + "\n"
+            ),
+            stderr="",
+        )
+        with patch.object(harness.subprocess, "run", return_value=fake):
+            packages, error = harness._package_inventory("emulator-5554")
+        self.assertIsNone(error)
+        self.assertEqual(len(packages), 2)
+        self.assertTrue(
+            all(p.startswith("com.tutortds_cartilhas") for p in packages)
+        )
+
+    def test_collateral_removed_excludes_own_package(self):
+        before = {"com.x.raaa", "com.x.rbbb"}
+        after = {"com.x.raaa"}
+        self.assertEqual(
+            harness._collateral_removed(before, after, "com.x.rbbb"),
+            [],
+        )
+        self.assertEqual(
+            harness._collateral_removed(before, set(), "com.x.rzzz"),
+            ["com.x.raaa", "com.x.rbbb"],
+        )
+
+    def test_stop_server_tree_exits_sleeping_process(self):
+        import subprocess
+
+        command = (
+            ["powershell", "-NoProfile", "-Command", "Start-Sleep -Seconds 60"]
+            if os.name == "nt"
+            else ["sleep", "60"]
+        )
+        process = subprocess.Popen(command)
+        try:
+            harness._stop_server_tree(process)
+            self.assertIsNotNone(process.poll())
+        finally:
+            if process.poll() is None:
+                process.kill()
+                process.wait()
 
 
 if __name__ == "__main__":

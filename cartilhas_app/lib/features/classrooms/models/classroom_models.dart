@@ -11,9 +11,18 @@ class EligibleStudent {
 }
 
 class EligibleStudentPage {
-  const EligibleStudentPage({required this.students, this.nextOffset});
+  const EligibleStudentPage({
+    required this.students,
+    this.nextOffset,
+    this.occupancy = 0,
+    this.capacityReference = 30,
+    this.capacityWarning = false,
+  });
   final List<EligibleStudent> students;
   final int? nextOffset;
+  final int occupancy;
+  final int capacityReference;
+  final bool capacityWarning;
 
   factory EligibleStudentPage.fromJson(Map<String, dynamic> json) {
     final students = json['students'];
@@ -27,6 +36,9 @@ class EligibleStudentPage {
           .map(EligibleStudent.fromJson)
           .toList(growable: false),
       nextOffset: _nullableInt(json['next_offset']),
+      occupancy: _nullableInt(json['occupancy']) ?? 0,
+      capacityReference: _nullableInt(json['capacity_reference']) ?? 30,
+      capacityWarning: json['capacity_warning'] == true,
     );
   }
 }

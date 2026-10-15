@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "evidence": "trackb_anythingllm_data_recovery_drill",
+  "classification": "OBSERVED",
+  "track": "TRACK_B",
+  "run_id": "20261013T151344Z-5a4bc102",
+  "status": "passed",
+  "TRACK_B_DRILL": "PASS",
+  "CRITICAL_VOLUMES_RESTORE": "PASS",
+  "executed_at": "2026-10-13T15:15:24Z",
+  "source": {
+    "volume": "anythingllm_data",
+    "mount": "read-only (:ro), hot copy, no docker pause",
+    "active_vector_db": "lancedb",
+    "embedder": "native",
+    "llm_provider": "openrouter",
+    "file_fingerprint_before": "0bda9665f67d2b27357fcd131989dd4790df960c94a9fb7c01d2a430fbb92a56",
+    "file_fingerprint_after": "0bda9665f67d2b27357fcd131989dd4790df960c94a9fb7c01d2a430fbb92a56",
+    "anythingllm_db_sha256_before": "9a468424ee0053e48f434fbb0426876671123bc41f92be8c559f9c34e16702e9",
+    "anythingllm_db_sha256_after": "9a468424ee0053e48f434fbb0426876671123bc41f92be8c559f9c34e16702e9",
+    "SOURCE_VOLUME_WRITES": "NO",
+    "HOT_COPY_CONSISTENCY": "PASS"
+  },
+  "snapshot": {
+    "sha256": "54532b12c3bbb70740ebd802c3da331e22827e94e12772bbd15d88dead9ff22a",
+    "bytes": 36986880,
+    "format": "tar --numeric-owner"
+  },
+  "offsite": {
+    "object": "r2:tds-backups/anythingllm/drill/20261013T151344Z-5a4bc102/anythingllm_data.tar.age",
+    "receipt": "r2:tds-backups/anythingllm/drill/20261013T151344Z-5a4bc102/receipt.json",
+    "sha256": "ec7092a79c59f0b7eef722483213378b662ec7770e48e1c0b2406fa4b25e7958",
+    "bytes": 36996104,
+    "uploaded_at": "2026-10-13T15:14:25Z",
+    "recipient_sha256_16": "5ef40d8dcb3f7e62",
+    "encryption": "age X25519 custodied new recipient only",
+    "retained": true,
+    "roundtrip_verified": true
+  },
+  "restore": {
+    "decrypted_sha256_equals_snapshot": true,
+    "image": "mintplexlabs/anythingllm@sha256:652666b766e5e2474b8018e8850f166a9869c1a1aed23435c48c99cd94b74f4a",
+    "network": "Docker --internal; no egress",
+    "llm_inference": false
+  },
+  "checks": {
+    "SQLITE_INTEGRITY": "PASS",
+    "baseline_before_equals_after": true,
+    "clone_equals_current_baseline": true,
+    "sql_workspaces_match_clone": true,
+    "WORKSPACE_COUNT": 13,
+    "DOCUMENT_COUNT": 21,
+    "VECTOR_COUNT": 1255,
+    "CARTILHAS_SCOPE": "PASS",
+    "CARTILHAS_SCOPE_DETAIL": {
+      "http": 200,
+      "results": 4,
+      "sources_in_own_workspace": true,
+      "sources_sha256": "1a0af82696628d9d189c837b64093af0715af28b29aab2945fd6e0c83491ddd1"
+    },
+    "CTX_A_SCOPE": "PASS",
+    "CTX_A_SCOPE_DETAIL": {
+      "http": 200,
+      "results": 1,
+      "sources_in_own_workspace": true,
+      "sources_sha256": "242cc5fa7ad712a8bebfa61ff8eb3fecde550dc1c9a8e2e679a4f8d8cf15137e"
+    },
+    "CTX_B_SCOPE": "PASS",
+    "CTX_B_SCOPE_DETAIL": {
+      "http": 200,
+      "results": 1,
+      "sources_in_own_workspace": true,
+      "sources_sha256": "14f8eaa60011e184666a846e079cdcaff7b0f69249ea425d68926763a6614ebf"
+    },
+    "ALL_PASS": true
+  },
+  "isolated_resources_removed": true,
+  "scope_exclusions": [
+    "legacy standalone Weaviate",
+    "Cloudflare certificates KV",
+    "Dokploy ZIP/configuration recovery",
+    "Drive/Sheets",
+    "WordPress/Chatwoot"
+  ]
+}

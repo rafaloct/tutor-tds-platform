@@ -1,0 +1,55 @@
+Assunto: Tutor TDS — plano de execução #138/#139/#140 (ciclo de vida da turma) — para o próximo agente
+
+AVISO 12/10/2026: texto histórico de handoff. Não enviar como status atual.
+Os gates humanos já foram decididos: operador prepara/ativa/encerra; acima de
+30 participantes, avisar sem bloquear. Ver docs/DECISIONS.md item 32 e a
+auditoria de prontidão de 12/10 antes de preparar qualquer comunicação nova.
+
+Olá,
+
+Segue o plano consolidado da trilha de ciclo de vida de turmas (#138 → #139 → #140),
+preparado para o próximo agente. O documento canônico está no repo:
+
+  docs/program/PLAN-138-139-140-class-lifecycle.md
+  (branch codex/rc-reconverged-20261009 — PR #194 aberto para staging)
+
+## Resumo executivo
+
+1. PRÉ-REQUISITO — dois gates humanos antes de codificar autorização:
+   - CLASS_AUTHORITY: quem pode criar/ativar/encerrar turma no app?
+     (program_operator? coordinator? teacher? combinação?)
+   - CAPACITY_POLICY: limite rígido de 30 ou alerta suave?
+
+2. #138 (API): campos aditivos em Classroom (município da oferta + local físico,
+   separados do município de residência), lifecycle planned→active→closed com
+   ator/motivo/idempotência/auditoria, cross-program/institution = denied,
+   CourseVersion travada após início, encerrar não fabrica certificado.
+
+3. #139 (App): wizard de 6 passos (onde → formação → quando → equipe →
+   participantes → revisão), capability-driven via gateway + fake gateway;
+   pode avançar ANTES do backend ficar pronto; nunca presumir papel local;
+   reusar ManagementWorkspaceScreen/ClassroomDashboard/Operations.
+
+4. #140 (E2E): worktree isolado, TARGET_MACHINE=avellaria, dados sintéticos,
+   sem mutação em staging/produção. Provas: oferta≠residência, cross=denied,
+   version pin, QR≠presença, offline/reconnect sem duplicar, certificado
+   bloqueado sem gate institucional.
+
+## Notas operacionais desta rodada (staging live)
+
+- Cadeia staging verificada ponta-a-ponta: app → tutor-tds-gateway-staging →
+  túnel → AnythingLLM isolado → OpenRouter dedicado (gemini-2.5-flash-lite).
+- Contas sintéticas prontas (student/teacher/monitor em staging-qa-program;
+  credenciais no ledger privado do VPS, run 54a5b5f81dfd112ca1cb08bdff35a4a6).
+- E2E autenticado PASS no Pixel_8_Pro (LARGEO). ANR de digitação em AVD =
+  serviço de autofill do emulador; workaround:
+  `adb shell settings put secure autofill_service null` — documentar no harness.
+- MCP de contas QA exige run-id aprovado + confirmação explícita por run.
+
+## Próximo passo imediato do agente
+
+Ler AGENTS.md + docs/CURRENT_STATE.md + as 3 issues; coletar as respostas dos
+HUMAN_GATES com o titular e registrar como DECISION antes de codificar.
+
+Abraços,
+— via Devin (a pedido do titular)

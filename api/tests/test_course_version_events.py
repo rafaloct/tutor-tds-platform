@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import Database
 from app.auth import access_claims
+from app.config import Settings
 from app.events import router, student_claims
 from app.models import Base, ClassEnrollment, Classroom, Course, CourseVersion, CourseVersionTransition, Enrollment, Institution, LearningEventRecord, Program, ProgramCourse, ProgramMembership, User
 
@@ -17,6 +18,10 @@ def version_events():
     Base.metadata.create_all(database.engine)
     app = FastAPI()
     app.state.database = database
+    app.state.settings = Settings(
+        database_url=str(database.engine.url),
+        allowed_origins=(),
+    )
     app.include_router(router)
 
     def claims(x_user: str = Header(default="student")):
