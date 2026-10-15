@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-15 — preparação do piloto editorial IA / #208
+
+DECISION: reutilizar provedor do Tutor se compatível. OpenRouter/modelo Gemini
+Flash Lite documentados são candidatos; gateway acadêmico não é OpenAI-compatible.
+IMPLEMENTED/TESTED-LOCAL: receita opt-in core CKEditor5, formato HTML restrito e
+papel não atribuído sem publicação; 25 checks Drupal e 9 testes Python PASS.
+Plano desativado e preflight offline nunca aprovam ativação.
+BLOCKED: download oficial contrib HTTP403 neste ambiente; Composer AI/CKEditor/Key/
+OpenRouter não resolvido nem instalado. Provider requer revisão; limites de uso,
+restrição de conteúdo, credencial editorial e teste real permanecem pendentes.
+Sem alteração de produção, composer.lock ou config/sync. Evidência e continuação:
+`../drupal/pilots/editorial-ai/README.md`. Issue permanece aberta.
+
 ## 2026-10-13 — fonte consolidada para a release
 
 IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e

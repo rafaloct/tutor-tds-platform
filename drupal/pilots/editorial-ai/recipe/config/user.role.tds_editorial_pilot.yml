@@ -1,0 +1,13 @@
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - filter.format.tds_editorial_pilot
+  module:
+    - filter
+id: tds_editorial_pilot
+label: 'Piloto editorial TDS — acesso ao formato'
+weight: 5
+is_admin: false
+permissions:
+  - 'use text format tds_editorial_pilot'

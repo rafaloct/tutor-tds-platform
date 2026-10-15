@@ -1,0 +1,7 @@
+name: 'TDS editorial pilot preparation'
+description: 'Opt-in core editor format and unassigned role; no AI provider or outbound requests.'
+type: 'Editorial preparation'
+install:
+  - ckeditor5
+config:
+  strict: true
