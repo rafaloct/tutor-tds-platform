@@ -16,3 +16,9 @@ services:
     arguments: ['@tds_tutor_gateway.client', '@tds_tutor_gateway.token_store', '@datetime.time', '@event_dispatcher']
   Drupal\tds_tutor_gateway\Session\TutorSessionManagerInterface:
     alias: tds_tutor_gateway.session_manager
+
+  tds_tutor_gateway.production_session_gate:
+    class: Drupal\tds_tutor_gateway\EventSubscriber\ProductionSessionGateSubscriber
+    arguments: ['@settings']
+    tags:
+      - { name: event_subscriber }
