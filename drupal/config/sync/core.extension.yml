@@ -19,6 +19,7 @@ module:
   tds_health: 0
   tds_participant_portal: 0
   tds_public_portal: 0
+  tds_operator_portal: 0
   tds_tutor_gateway: 0
   text: 0
   update: 0

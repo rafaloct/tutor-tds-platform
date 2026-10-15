@@ -44,34 +44,36 @@ final class TutorSessionManager implements TutorSessionManagerInterface {
    * {@inheritdoc}
    */
   public function context(): array {
-    $tokens = $this->tokens();
-    try {
-      return $this->client->me($tokens->accessToken);
-    }
-    catch (GatewayException $error) {
-      if ($error->httpStatus() !== 401) {
-        throw $error;
-      }
-      $tokens = $this->rotate($tokens->refreshToken);
-      return $this->client->me($tokens->accessToken);
-    }
+    return $this->authenticatedRequest(
+      fn (string $accessToken): array => $this->client->me($accessToken),
+    );
   }
 
   /**
    * {@inheritdoc}
    */
   public function get(string $path, array $query = []): array {
-    $tokens = $this->tokens();
-    try {
-      return $this->client->get($path, $query, $tokens->accessToken);
-    }
-    catch (GatewayException $error) {
-      if ($error->httpStatus() !== 401) {
-        throw $error;
-      }
-      $tokens = $this->rotate($tokens->refreshToken);
-      return $this->client->get($path, $query, $tokens->accessToken);
-    }
+    return $this->authenticatedRequest(
+      fn (string $accessToken): array => $this->client->get($path, $query, $accessToken),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsGet(string $path): array {
+    return $this->authenticatedRequest(
+      fn (string $accessToken): array => $this->client->operationsGet($path, $accessToken),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsPost(string $path, array $payload): array {
+    return $this->authenticatedRequest(
+      fn (string $accessToken): array => $this->client->operationsPost($path, $payload, $accessToken),
+    );
   }
 
   /**
@@ -106,6 +108,37 @@ final class TutorSessionManager implements TutorSessionManagerInterface {
       new TutorSessionClearedEvent(),
       TutorSessionClearedEvent::NAME,
     );
+  }
+
+  /**
+   * Executa uma chamada autenticada e renova uma unica vez por 401.
+   *
+   * @param callable(string): array<string, mixed> $request
+   *   Chamada que recebe o access token.
+   *
+   * @return array<string, mixed>
+   *   Resposta.
+   */
+  private function authenticatedRequest(callable $request): array {
+    $tokens = $this->tokens();
+    try {
+      return $request($tokens->accessToken);
+    }
+    catch (GatewayException $error) {
+      if ($error->httpStatus() !== 401) {
+        throw $error;
+      }
+      $tokens = $this->rotate($tokens->refreshToken);
+      try {
+        return $request($tokens->accessToken);
+      }
+      catch (GatewayException $retryError) {
+        if (in_array($retryError->httpStatus(), [401, 403], TRUE)) {
+          $this->clear();
+        }
+        throw $retryError;
+      }
+    }
   }
 
   /**

@@ -206,12 +206,75 @@ final class TutorSessionManagerTest extends UnitTestCase {
   }
 
   /**
+   * POST operacional repete uma unica vez apos 401 com payload identico.
+   */
+  public function testOperationsPostRefreshesOnceWithIdenticalPayload(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 2000));
+    $fresh = new TutorTokenSet('fresh', 'refresh-fresh', 3000);
+    $payload = ['id' => 'fixed-command-0001', 'action' => 'assign'];
+    $calls = 0;
+    $client->expects(self::exactly(2))->method('operationsPost')
+      ->with('/operations/class-1/commands', $payload, self::callback(function (string $token) use (&$calls): bool {
+        self::assertSame($calls === 0 ? 'old' : 'fresh', $token);
+        $calls++;
+        return TRUE;
+      }))
+      ->willReturnCallback(function () use (&$calls): array {
+        if ($calls === 1) {
+          throw new GatewayException('invalid_or_expired_session', 401);
+        }
+        return ['revision' => 2];
+      });
+    $client->expects(self::once())->method('refresh')->with('refresh-old')->willReturn($fresh);
+
+    $manager = $this->manager($client, $store, 1000);
+    self::assertSame(['revision' => 2], $manager->operationsPost('/operations/class-1/commands', $payload));
+  }
+
+  /**
    * Mock de relogio.
    */
   private function time(int $requestTime): TimeInterface {
     $time = $this->createMock(TimeInterface::class);
     $time->method('getRequestTime')->willReturn($requestTime);
     return $time;
+  }
+
+  /**
+   * A rejected replay clears tokens and private consumers across all surfaces.
+   */
+  public function testRejectedReplayClearsEveryAuthenticatedSurface(): void {
+    foreach (['me', 'get', 'operationsGet', 'operationsPost'] as $method) {
+      foreach ([401, 403] as $status) {
+        $client = $this->createMock(TutorApiClientInterface::class);
+        $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh', 2000));
+        $calls = 0;
+        $client->expects(self::exactly(2))->method($method)
+          ->willReturnCallback(function () use (&$calls, $status): array {
+            throw new GatewayException('denied', $calls++ === 0 ? 401 : $status);
+          });
+        $client->expects(self::once())->method('refresh')
+          ->willReturn(new TutorTokenSet('new', 'new-refresh', 3000));
+        $dispatcher = $this->createMock(EventDispatcherInterface::class);
+        $dispatcher->expects(self::once())->method('dispatch')
+          ->with(self::isInstanceOf(TutorSessionClearedEvent::class), TutorSessionClearedEvent::NAME);
+        $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher);
+        try {
+          match ($method) {
+            'me' => $manager->context(),
+            'get' => $manager->get('/classes', ['enrolled_only' => 'true']),
+            'operationsGet' => $manager->operationsGet('/operations/scopes'),
+            'operationsPost' => $manager->operationsPost('/operations/class-1/commands', ['id' => 'fixed']),
+          };
+          self::fail('Rejected replay must fail closed.');
+        }
+        catch (GatewayException $error) {
+          self::assertSame($status, $error->httpStatus());
+          self::assertNull($store->load());
+        }
+      }
+    }
   }
 
 }

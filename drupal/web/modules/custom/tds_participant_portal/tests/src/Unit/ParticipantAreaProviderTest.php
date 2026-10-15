@@ -261,6 +261,20 @@ final class FakeParticipantSessionManager implements TutorSessionManagerInterfac
    */
   public function logout(): void {}
 
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsGet(string $path): array {
+    throw new \LogicException('Nao usado.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsPost(string $path, array $payload): array {
+    throw new \LogicException('Nao usado.');
+  }
+
 }
 
 /**
