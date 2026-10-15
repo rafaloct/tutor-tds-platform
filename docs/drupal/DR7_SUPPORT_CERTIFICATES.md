@@ -116,8 +116,10 @@ não são ecoadas nem encadeadas em exceções que possam reter bearer.
    conexão primária MySQL pinada e sem lease. Provas concorrentes com processos
    independentes e HTTP Drupal real fecharam a corrida no ambiente local.
    O lock interno deste adapter continua sem fornecer essa garantia sozinho.
-   **BLOCKED:** homologação MariaDB do deployment, rotação de cookie, integração
-   #180/#181, custom backends/BigPipe e aceite #170. Logout em outra aba ainda
+   Complemento `1c26451`: MariaDB 11.8.9/Drupal 11.4.10, 15 checks concorrentes,
+   5 HTTP e 11 de rotação/logout core PASS em fixture isolada com API fake.
+   **BLOCKED:** rotação/fixação no login TDS (não coberta pela rotação core),
+   integração #180/#181, custom backends/BigPipe, deployment e aceite #170. Logout em outra aba ainda
    pode levar até heartbeat + timeout para remover o widget; padronizar evento
    de encerramento continua necessário para aceite E2E.
 3. **BLOCKED: G3/verificador nativo.** Teste real válido/inválido/Worker

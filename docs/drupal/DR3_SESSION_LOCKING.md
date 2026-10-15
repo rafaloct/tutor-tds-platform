@@ -54,14 +54,16 @@ construção/conexão ocorrem dentro da fronteira sanitizada de erro.
   BigPipe nessa configuração sem desenhar outra fronteira e testar sua segurança.
 - Login que regenera ID começa sob lock do cookie de entrada; a nova identidade
   só chega ao browser depois do save. Requests ainda usando o cookie antigo devem
-  ler a sessão antiga removida, não copiar seu snapshot. Prova explícita de rotação
-  de ID e reconciliação com #180/#181 permanecem no gate integrado.
+  ler a sessão antiga removida, não copiar seu snapshot. A prova de rotação nativa
+  core passou no complemento abaixo; rotação do login TDS e reconciliação com
+  #180/#181 permanecem no gate integrado.
 
 ## TESTED-LOCAL
 
 Ambiente descartável: PHP 8.3.29, Drupal 11.4.8, MySQL **8.4.11**, banco
 `tds_lock_qa`, Unix socket e rede Docker desabilitada. API e contas sintéticas.
-Isso não comprova MariaDB 11.8, serviços reais ou produção.
+Esse ensaio inicial não comprova MariaDB, serviços reais ou produção. A prova
+MariaDB posterior está registrada no complemento abaixo.
 
 Após reconciliar staging `b0c39b2` (PR #211), o candidato `5a76db5` passou
 novamente em fixture isolada no VPS, sem rede e sem volumes de produção:
@@ -132,7 +134,7 @@ fixture e seus settings locais. Não deixar serviços ou volumes permanentes.
 ## Gates e rollback
 
 IMPLEMENTED/TESTED-LOCAL fecha a lacuna de ordering no recorte comprovado. Ainda
-BLOCKED: aceite MariaDB do deployment, custom backends/BigPipe, rotação de cookie,
+BLOCKED: implantação autenticada, custom backends/BigPipe, rotação no login TDS,
 integração #180/#181, sinalização imediata de logout entre abas, SDK Chatwoot real e
 aceite #170. Nenhum deploy, API, Worker, Flutter, secret ou conta real foi alterado.
 
@@ -140,7 +142,7 @@ Reverter middleware restaura a corrida conhecida; portanto rollback exige manter
 as superfícies TDS autenticadas indisponíveis até outra correção. Não remover o
 mutex e declarar a sessão segura. Mudança não cria schema persistente nem migração.
 
-## Continuação — MariaDB e candidato de rotação nativa
+## Continuação — MariaDB e rotação nativa comprovadas em fixture
 
 TESTED-LOCAL em fixture isolada no VPS (sem serviço produtivo): 15 verificações
 concorrentes passaram em **MariaDB 11.8.9**, usando a mesma imagem do banco do
@@ -151,12 +153,13 @@ socket ausente porque o ping havia atingido o servidor temporário de init.
 Readiness corrigido: exigir PID1 final `mariadbd` e `SELECT 1` no banco QA, antes
 de iniciar PHP. Não foi falha do mutex nem houve alteração no banco produtivo.
 
-IMPLEMENTED, execução HTTP desta ampliação ainda UNKNOWN: modo `http-rotation`
-com 11 verificações propostas. A fixture transforma a única sessão sintética em
+TESTED-LOCAL: candidato `1c26451` executado na mesma fixture isolada no VPS,
+Drupal 11.4.10/PHP 8.3.35/MariaDB 11.8.9, quatro workers PHP e API fake loopback.
+**5 checks HTTP + 11 checks de rotação/logout PASS** (exit 0). A fixture transforma a única sessão sintética em
 anônima editorial preservando tokens acadêmicos sintéticos; refresh concorrente
-bloqueia login core; retry do login core regenera ID. O cookie antigo deve receber
-401, o novo deve manter contexto, e o logout core deve invalidar tanto o cookie
-antigo quanto uma **cópia imutável do cookie regenerado**, além de limpar o browser.
+bloqueou login core; retry do login core regenerou ID. O cookie antigo recebeu
+401, o novo manteve contexto, e o logout core invalidou tanto o cookie antigo
+quanto uma **cópia imutável do cookie regenerado**, além de limpar o browser.
 
 **Esta prova é do login/logout editorial Drupal e SessionHandler nativo. O login
 TDS atual não chama regenerate/invalidate; portanto sua proteção específica contra
@@ -181,3 +184,7 @@ processos e restaura settings. Não cria containers; o chamador garante rede
 `none`, tmpfs e cleanup dos containers/cópia. Em falha registra a etapa e preserva
 somente logs sintéticos em `.tds-session-http-failure` dentro da própria cópia.
 Cookie jars e respostas de login não são impressos nem mantidos nesse recibo.
+
+Revisão independente do candidato `1c26451`: preflight de portas, filhos vivos,
+timeouts e replay do cookie revogado conferidos, sem bloqueador adicional nesse
+recorte. Não houve alteração de serviço produtivo nem aceite E2E #170.

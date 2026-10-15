@@ -11,8 +11,13 @@ ressurreição. Sem alteração em produção. Contrato: `drupal/DR3_SESSION_LOC
 Reconciliado com staging `b0c39b2` (#211): candidato `5a76db5` validado em fixture
 isolada no VPS com Drupal 11.4.10/PHP 8.3.35, 68 testes/250 assertions e 43 checks
 de configuração PASS; gate acadêmico de produção preservado.
-BLOCKED: homologação MariaDB/rotação do cookie, integração #180/#181, suporte
-customizado/BigPipe, sinalização imediata entre abas e SDK Chatwoot real. O
+TESTED-LOCAL posterior (`1c26451`): MariaDB 11.8.9 na imagem do banco do portal,
+fixture sem rede/sem portas públicas, PHP 8.3.35/Drupal 11.4.10. 15 checks
+concorrentes + 5 HTTP + 11 de regeneração/logout nativo Drupal PASS, incluindo
+replay do cookie regenerado revogado (401). API e contas sintéticas.
+BLOCKED: rotação/fixação no login TDS (distinta do login editorial testado),
+integração #180/#181, suporte customizado/BigPipe, sinalização imediata entre abas
+e SDK Chatwoot real. O
 bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.
 
 ## 2026-10-15 — Drupal DR-7 / #168, candidato local
