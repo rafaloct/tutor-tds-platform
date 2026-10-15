@@ -252,3 +252,11 @@
     preservados. Escopo institucional/programático, rejeição de novo vínculo em
     turma fechada, sessão aberta como bloqueio ao encerramento e auditoria
     permanecem. Esta decisão ainda não constitui aceite de staging ou produção.
+
+33. 2026-10-15: usuário autoriza configurar o portal Drupal em produção no VPS
+    existente usando Tailscale e Dokploy, construir a imagem no VPS e gerar
+    credenciais sob custódia do Dokploy sem hardcoding/exposição. Host confirmado
+    portal.ipexdesenvolvimento.cloud. Escopo público/editorial isolado da API e
+    WordPress; funcionalidades autenticadas/IA dependem de suas verificações.
+    Não rotacionar chaves JWT/CPF nem modificar bancos acadêmicos. Autorização
+    não constitui aceite E2E nem permissão de merge. Issue210/PR211.

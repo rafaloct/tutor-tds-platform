@@ -7,9 +7,17 @@ namespace Drupal\Tests\tds_public_portal\Unit;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Uuid\Php;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Cache\Context\SiteCacheContext;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Tests\UnitTestCase;
 use Drupal\tds_public_portal\Client\PublicCatalogClient;
+use Drupal\tds_public_portal\Client\PublicCatalogClientInterface;
+use Drupal\tds_public_portal\Controller\PublicPortalController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Drupal\tds_public_portal\ValueObject\CatalogResult;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -23,8 +31,44 @@ use PHPUnit\Framework\Attributes\Group;
  * Cobre allowlist, isolamento de cache e degradacao do catalogo.
  */
 #[CoversClass(PublicCatalogClient::class)]
+#[CoversClass(PublicPortalController::class)]
 #[Group('tds_public_portal')]
 final class PublicCatalogClientTest extends UnitTestCase {
+
+  /**
+   * An HTTP warmup must not supply canonical metadata to an HTTPS request.
+   */
+  public function testCanonicalMetadataHasSeparateCacheVariantsPerOrigin(): void {
+    $query = $this->createMock(QueryInterface::class);
+    foreach (['accessCheck', 'condition', 'sort', 'range'] as $method) {
+      $query->method($method)->willReturnSelf();
+    }
+    $query->method('execute')->willReturn([]);
+    $storage = $this->createMock(EntityStorageInterface::class);
+    $storage->method('getQuery')->willReturn($query);
+    $entities = $this->createMock(EntityTypeManagerInterface::class);
+    $entities->method('getStorage')->with('node')->willReturn($storage);
+    $requests = new RequestStack();
+    $controller = new PublicPortalController(
+      $this->createMock(PublicCatalogClientInterface::class), $entities, $requests,
+    );
+    $controller->setStringTranslation($this->getStringTranslationStub());
+    $siteContext = new SiteCacheContext($requests);
+    $variants = [];
+    foreach (['http://portal.example', 'https://portal.example', 'https://portal.example:8443'] as $origin) {
+      $requests->push(Request::create($origin . '/programa'));
+      $build = $controller->institutional('program');
+      self::assertContains('url.site', $build['#cache']['contexts']);
+      self::assertContains('url.path', $build['#cache']['contexts']);
+      $canonical = $build['#attached']['html_head_link'][0][0]['href'];
+      self::assertSame($origin . '/programa', $canonical);
+      $og = array_values(array_filter($build['#attached']['html_head'], static fn (array $head): bool => $head[1] === 'tds_public_og_url'));
+      self::assertSame($canonical, $og[0][0]['#attributes']['content']);
+      $variants[] = $siteContext->getContext();
+      $requests->pop();
+    }
+    self::assertCount(3, array_unique($variants), 'Drupal url.site separates HTTP, HTTPS and alternate ports.');
+  }
 
   /**
    * Draft/private e campos fora do contrato nunca chegam ao render.
