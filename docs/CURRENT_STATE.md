@@ -1,5 +1,19 @@
 # CURRENT STATE
 
+## 2026-10-15 — implantação isolada Drupal / #210
+
+DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
+VPS e custódia de novas credenciais sem exposição; host confirmado
+portal.ipexdesenvolvimento.cloud. OBSERVED: Drupal11.4.10 instalado no Dokploy,
+imagem215689c construída no VPS após patch de segurança crítica; API preservada.
+TESTED:43 verificações runtime +17 checks HTTP da origem PASS; navegador carregou
+9 cursos reais. Backup criptografado R2 conferido; cron diário04:40UTC instalado.
+Login acadêmico bloqueado server-side, IA/Chatwoot inativos. DNS/HTTPS público
+BLOCKED: Wrangler desktop sem DNS Edit; rota Traefik ainda desativada.
+Restore isolado PASS:55 tabelas/961 registros/35 arquivos; descriptografia offsite
+ainda UNKNOWN. PR211 draft; merge não autorizado.
+Evidências e limitações: `production/DRUPAL_DOKPLOY_2026-10-15.md`.
+
 ## 2026-10-13 — fonte consolidada para a release
 
 IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e
