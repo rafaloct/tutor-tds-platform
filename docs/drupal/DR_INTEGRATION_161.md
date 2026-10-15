@@ -6,6 +6,7 @@ DECISION: usuário aceitou continuar a rotação TDS e a integração dos fluxos
 Esta branch combina os candidatos, sem promover staging ou produção:
 
 - #207: `7dc395e`, suporte/certificados, mutex e provas MariaDB/core cookie.
+- Lifecycle TDS: #207 `0cfa05c`, incorporado ao candidato integrado `72e97d6`.
 - #180: `40901a1`, área do participante e evento de limpeza da sessão.
 - #181: `f70c8d9`, operações, confirmação humana e comandos idempotentes.
 - Base publicada: staging `b0c39b2`, Drupal 11.4.10.
@@ -44,11 +45,35 @@ nenhuma mudança de dependências ou de código de negócio decorreu dessa falha
 
 ## Limites e continuidade
 
-Ainda não é aceite #170 nem liberação da autenticação em produção. Resta executar
-o conjunto com lifecycle TDS integrado no runtime11.4.10/MariaDB11.8.9 e registrar
-o SHA exato. Provas sintéticas não equivalem a jornada real de usuário no browser,
+Ainda não é aceite #170 nem liberação da autenticação em produção. Primeiro login
+do participante sem sessão CMS e obtenção de cookie/CSRF ainda não comprovados.
+Os checks TDS abaixo começam com uma sessão editorial. Provas sintéticas não
+equivalem a jornada real de usuário no browser,
 validação de autorização na API produtiva, SDK Chatwoot real, verificador Worker,
 WCAG ou performance. Não usar esta branch como prova de IA: #209 é separado.
 
 Rollback operacional: manter flag produtiva desativada; não remover o mutex como
 suposta correção. Não há migração de dados ou criação de entidade acadêmica.
+
+## Ensaio integrado no VPS — 15/10/2026
+
+OBSERVED no código `72e97d6389edcec2379c912f17bb008fe36758aa`, PR #212:
+Drupal 11.4.10, PHP8.3.35, MariaDB11.8.9; mesmas imagens PHP/DB do portal.
+Banco temporário tmpfs, sem rede Docker, sem portas publicadas, sem volumes ou
+credenciais de produção. Cópia isolada das dependências, módulos customizados
+substituídos pelo snapshot exato do commit; API e contas sintéticas.
+
+- 112 testes / 467 assertions PASS, incluindo kernel/Form API em SQLite.
+- 69 verificações de configuração produtiva PASS.
+- 15 verificações concorrentes com processos e MariaDB reais PASS.
+- 5 verificações HTTP de refresh concorrente PASS.
+- 11 verificações de regeneração/logout nativos Drupal PASS.
+- 21 verificações de login/troca de conta/logout TDS PASS: CSRF obrigatório,
+  destruição do ID anterior, rejeição dos cookies antigos, falha de login sem
+  contexto anterior e preservação da conta editorial.
+
+Runner `test-dr3-http-fixture.sh` com `TDS_SESSION_MUTEX_INTEGRATION=1` habilitou
+participante, operador e suporte/certificados na fixture. Isso comprova wiring
+e lifecycle integrados; não prova as jornadas acadêmicas reais desses módulos.
+Review independente: sem regressão identificada na reconciliação dos contratos.
+Consulta CI via watcher bloqueada por GraphQL HTTP403; CI verde não confirmado.

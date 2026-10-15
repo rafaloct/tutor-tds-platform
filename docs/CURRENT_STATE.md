@@ -1,5 +1,16 @@
 # CURRENT STATE
 
+## 2026-10-15 — candidato integrado Drupal / PR #212
+
+IMPLEMENTED/TESTED-ISOLATED: #180 (40901a1), #181 (f70c8d9) e #207
+(0cfa05c) reconciliados em72e97d6, incluindo lifecycle de login/logout TDS,
+limpeza dos dois consumidores e gate de todas as rotas acadêmicas privadas.
+VPS isolado PHP8.3.35/Drupal11.4.10/MariaDB11.8.9:112 testes/467 assertions,
+69 checks de configuração e52 verificações concorrentes/HTTP PASS; API sintética.
+Nenhum deploy, merge em staging ou ativação. Primeiro login sem sessão CMS,
+browser E2E real, Chatwoot/Worker e aceite#170 pendentes. CI watcher403.
+Contrato/limites: `drupal/DR_INTEGRATION_161.md`.
+
 ## 2026-10-15 — #168: mutex da sessão candidato local
 
 IMPLEMENTED/TESTED-LOCAL: gateway envolve leitura→refresh→persistência com mutex
