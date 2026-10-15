@@ -198,19 +198,19 @@ function tds_theme_home_journey() {
 	$steps = array(
 		array(
 			'title' => __( 'Conheça as formações publicadas', 'tds-portal' ),
-			'text'  => __( 'O portal apresenta informações públicas; a plataforma acadêmica continua separada.', 'tds-portal' ),
+			'text'  => __( 'Explore o catálogo e conheça os objetivos de cada formação.', 'tds-portal' ),
 		),
 		array(
 			'title' => __( 'Acesse pelo canal oficial', 'tds-portal' ),
-			'text'  => __( 'Participantes entram no Tutor TDS pelo acesso configurado oficialmente pelo programa.', 'tds-portal' ),
+			'text'  => __( 'Abra o aplicativo Tutor TDS para continuar seus estudos.', 'tds-portal' ),
 		),
 		array(
 			'title' => __( 'Estude e acompanhe sua jornada', 'tds-portal' ),
-			'text'  => __( 'Atividades, conteúdos e informações pessoais permanecem no aplicativo e na API autorizada.', 'tds-portal' ),
+			'text'  => __( 'Encontre suas atividades e acompanhe seu progresso no aplicativo.', 'tds-portal' ),
 		),
 		array(
-			'title' => __( 'Use os registros oficiais', 'tds-portal' ),
-			'text'  => __( 'Matrícula, frequência e certificados não são calculados nem alterados por este portal público.', 'tds-portal' ),
+			'title' => __( 'Consulte seu certificado', 'tds-portal' ),
+			'text'  => __( 'Use o canal de verificação para conferir a autenticidade do seu certificado.', 'tds-portal' ),
 		),
 	);
 
@@ -254,8 +254,8 @@ function tds_theme_certificate_cta() {
 		tds_theme_state_notice(
 			'unavailable',
 			array(
-				'title' => __( 'Verificação oficial ainda não conectada', 'tds-portal' ),
-				'text'  => __( 'O portal não emite nem aprova certificados. A consulta será exibida apenas quando o verificador oficial estiver configurado.', 'tds-portal' ),
+				'title' => __( 'Consulta de certificados indisponível no momento', 'tds-portal' ),
+				'text'  => __( 'O acesso à verificação será publicado aqui quando estiver disponível.', 'tds-portal' ),
 			)
 		);
 	} else {
@@ -292,8 +292,8 @@ function tds_theme_support_cta() {
 		tds_theme_state_notice(
 			'disabled' === $state ? 'unavailable' : $state,
 			array(
-				'title' => __( 'Suporte público ainda não conectado', 'tds-portal' ),
-				'text'  => __( 'Nenhuma conversa ou dado de contato é enviado enquanto o adapter oficial de suporte não estiver habilitado.', 'tds-portal' ),
+				'title' => __( 'Atendimento indisponível no momento', 'tds-portal' ),
+				'text'  => __( 'O canal de atendimento será publicado aqui quando estiver disponível.', 'tds-portal' ),
 			)
 		);
 	}

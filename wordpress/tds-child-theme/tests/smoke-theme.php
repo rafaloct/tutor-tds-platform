@@ -246,7 +246,7 @@ try {
 	}
 	tds_assert( 13 === substr_count( $html, 'data-tds-home-block=' ), 'home: 13 blocos visíveis sem stats não comprovados' );
 	tds_assert( false === strpos( $html, 'data-tds-home-block="stats"' ), 'home: stats ocultos sem fonte' );
-	tds_assert( false !== strpos( $html, 'data-tds-component="certificate-verify"' ) && false !== strpos( $html, 'Verificação oficial ainda não conectada' ), 'home: certificado fail-closed' );
+	tds_assert( false !== strpos( $html, 'data-tds-component="certificate-verify"' ) && false !== strpos( $html, 'Consulta de certificados indisponível no momento' ), 'home: certificado fail-closed' );
 	tds_assert( false !== strpos( $html, 'data-tds-component="support" data-tds-state="disabled"' ), 'home: suporte fail-closed' );
 
 	foreach ( $pages as $tpl => $id ) {
