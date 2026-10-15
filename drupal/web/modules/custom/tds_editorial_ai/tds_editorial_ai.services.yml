@@ -1,0 +1,10 @@
+services:
+  tds_editorial_ai.policy:
+    class: Drupal\tds_editorial_ai\Policy\EditorialAiPolicy
+    arguments: ['@config.factory']
+  tds_editorial_ai.client:
+    class: Drupal\tds_editorial_ai\Client\OpenRouterClient
+    arguments: ['@http_client']
+  tds_editorial_ai.quota:
+    class: Drupal\tds_editorial_ai\Quota\EditorialAiQuota
+    arguments: ['@lock', '@flood']

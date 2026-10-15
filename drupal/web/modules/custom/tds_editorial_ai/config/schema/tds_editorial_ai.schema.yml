@@ -1,0 +1,7 @@
+tds_editorial_ai.settings:
+  type: config_object
+  label: 'TDS editorial AI pilot'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Enable bounded editorial requests'

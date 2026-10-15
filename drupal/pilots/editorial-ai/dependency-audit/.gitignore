@@ -1,0 +1,6 @@
+/vendor/
+/web/
+/recipes/
+/.editorconfig
+/.gitattributes
+/.gitignore.generated

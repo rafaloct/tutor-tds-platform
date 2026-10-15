@@ -1,0 +1,14 @@
+tds_editorial_ai.suggest:
+  path: '/tds/editorial-ai/suggest/{node}'
+  defaults:
+    _controller: '\Drupal\tds_editorial_ai\Controller\EditorialAiController::suggest'
+  methods: [POST]
+  requirements:
+    _permission: 'request tds editorial suggestions'
+    _csrf_request_header_token: 'TRUE'
+    _entity_access: 'node.update'
+  options:
+    no_cache: TRUE
+    parameters:
+      node:
+        type: entity:node

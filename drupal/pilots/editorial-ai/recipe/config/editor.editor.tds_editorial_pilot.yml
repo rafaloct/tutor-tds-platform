@@ -1,0 +1,18 @@
+langcode: pt-br
+status: true
+dependencies:
+  config:
+    - filter.format.tds_editorial_pilot
+  module:
+    - ckeditor5
+format: tds_editorial_pilot
+editor: ckeditor5
+settings:
+  toolbar:
+    items:
+      - bold
+      - italic
+      - link
+  plugins: {  }
+image_upload:
+  status: false

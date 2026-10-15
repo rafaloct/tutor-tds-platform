@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "enabled": false,
+  "environment": "local",
+  "provider": {
+    "id": "openrouter",
+    "base_url": "https://openrouter.ai/api/v1",
+    "model": "google/gemini-2.5-flash-lite",
+    "key_env": "TDS_EDITORIAL_OPENROUTER_API_KEY"
+  },
+  "actions": [
+    "summarize",
+    "spell_fix",
+    "tone"
+  ],
+  "allowed_bundles": [
+    "tds_news",
+    "tds_faq"
+  ],
+  "limits": {
+    "input_characters": 4000,
+    "output_tokens": 512,
+    "requests_per_user_per_hour": 10,
+    "concurrency": 1
+  },
+  "behavior": {
+    "manual_only": true,
+    "auto_publish": false,
+    "tools": false,
+    "academic_context": false,
+    "log_payloads": false
+  },
+  "packages": {
+    "drupal/ai": "1.5.1",
+    "drupal/ai_ckeditor": "1.4.3",
+    "drupal/key": "1.22",
+    "drupal/ai_provider_openrouter": "1.1.6"
+  },
+  "readiness": {
+    "dependency_resolution": false,
+    "provider_code_review": false,
+    "quota_enforcement": false,
+    "privacy_browser_test": false,
+    "real_staging_test": false
+  }
+}
