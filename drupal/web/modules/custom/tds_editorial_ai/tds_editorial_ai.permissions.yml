@@ -1,0 +1,4 @@
+request tds editorial suggestions:
+  title: 'Request TDS editorial suggestions'
+  description: 'Send selected editorial text to the configured provider when the pilot is enabled.'
+  restrict access: true

@@ -1,0 +1,8 @@
+name: TDS Editorial AI
+type: module
+description: 'Disabled by default, bounded editorial suggestions; never saves content.'
+package: Tutor TDS
+core_version_requirement: ^11
+dependencies:
+  - drupal:node
+  - drupal:filter
