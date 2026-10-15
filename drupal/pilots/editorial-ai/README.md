@@ -1,13 +1,18 @@
 # Piloto editorial de IA — preparação (#208)
 
-Status: **IMPLEMENTED / TESTED-LOCAL preparação; dependências auditadas em fixture**. IA desativada;
+Status: **IMPLEMENTED / TESTED-LOCAL preparação e backend desativado; dependências auditadas em fixture**. IA desativada;
 `pilot-plan.json` é plano validável, **não configuração lida pelo Drupal**.
-Não há chamada de modelo, quota efetiva, provider instalado no portal ou botão de IA.
+Não há chamada de modelo, provider instalado no portal ou botão de IA.
+Quota e transporte estão implementados no módulo candidato desativado, não ativos no portal.
 
 Atualização15/10: resolução/instalação oficial em fixture11.4.10 concluídas;
 manifest/lock preservados em [dependency-audit](dependency-audit/README.md).
 Revisão encontrou incompatibilidades de logging/transporte/controle de acesso
-com o piloto. Contrib continua desabilitado; próximo passo é adapter TDS mínimo.
+com o piloto. Contrib continua desabilitado; adapter TDS mínimo implementado em
+[tds_editorial_ai](../../web/modules/custom/tds_editorial_ai/README.md), commit03dec58.
+12 testes/249 assertions Unit+Kernel PASS em PHP8.3.35/Drupal11.4.10 na fixtureVPS
+networknone/SQLite, além da fixture local11.4.8. Sem UI ou ativação; próximos gates
+são browser/privacidade, quota multiprocesso/lease, handler/deadline e custódia/custo.
 O histórico de bloqueio de rede abaixo foi superado somente na fixture do VPS.
 
 ## Auditoria e escolha
@@ -42,7 +47,8 @@ Aplicação **manual** em fixture/staging previamente autorizado:
 - não habilita AI/Agents/Search/Automators, não cria credencial, não usa rede.
 
 O formato pode ser usado onde uma conta tenha permissão para editar texto.
-A restrição futura de IA a notícias/FAQ **ainda não é fiscalização em runtime**.
+O módulo candidato fiscaliza notícias/FAQ no servidor; como está desabilitado,
+não há fiscalização de IA ativa no portal. A receita continua somente preparatória.
 Não atribuir acesso ao piloto com IA ativa até implementar/testar esse recorte.
 
 ```sh
@@ -56,15 +62,15 @@ A receita usa `strict: true`: reaplicação idêntica funciona; configuração
 incompatível existente causa falha, não sobrescrita silenciosa.
 A receita não é executada por instalação normal/CI/deploy deste PR.
 
-## Plano de integração (TARGET, não proteção ativa)
+## Plano original de integração (não proteção ativa no portal)
 
 - Apenas ações manuais de resumo, revisão ortográfica e tom em português.
 - Seleção explícita de texto editorial; sem anexos, históricos, ferramentas,
   sessão TDS, LearningContext, certificados, mensagens de atendimento ou PII.
 - Modelo único; sem descoberta aberta de catálogo ou fallback de modelo.
 - Proposta inicial: até 4.000 caracteres de entrada, 512 tokens de saída,
-  10 chamadas por editor/hora e concorrência 1. **Não implementado:** validar
-  aplicação server-side desses limites e orçamento monetário antes de ativar.
+  10 chamadas por editor/hora e concorrência 1. **Implementação candidata testada com fakes:** limites server-side e quota.
+  Validar concorrência multiprocesso/lease, handler HTTP e orçamento antes de ativar.
 - Credencial via Key com provider Environment/gerenciador externo e referência
   `TDS_EDITORIAL_OPENROUTER_API_KEY`. Não criar Key com valor em configuração,
   não copiar segredo do Tutor e não exportar valores ao Git/browser.
@@ -131,7 +137,8 @@ python -m unittest discover -s scripts/tests -p 'test_editorial_ai_preflight.py'
 - **9 testes Python PASS**, incluindo 17 variações de política insegura, entrada
   malformada, versões conflitantes e impossibilidade de promover readiness por flags.
 - PHPCS do teste PHP e `git diff --check`: PASS.
-- Revisão independente local: sem achados substantivos; plano não implementa quotas.
+- Revisão independente da preparação original: sem achados substantivos; aquele
+  plano não implementava quotas. O backend candidato posterior está descrito acima.
 
 ## Histórico do bloqueio de rede e próximo passo atual
 
@@ -146,16 +153,17 @@ python -m unittest discover -s scripts/tests -p 'test_editorial_ai_preflight.py'
 validar e trazer o lock/código revisado. Nenhuma mudança de infra de produção.
 
 Resolução/instalação isolada e revisão focal provider/CKEditor foram concluídas.
-Permanecem BLOCKED: enforcement por bundle/entrada/saída/quota; transporte
-controlado e logs sanitizados; revisão dos caminhos AI Framework/SDK caso usados;
-provar seleção-only e ausência de PII/logs no browser; credencial editorial,
-orçamento/política de retenção e teste real em staging.
+Backend de bundle/entrada/saída/quota e transporte sanitizado implementado e
+testado com fakes no módulo desativado. Permanecem BLOCKED para ativação:
+quota multiprocesso/perda de lease, handler HTTP/deadline total, revisão dos
+caminhos AI Framework/SDK caso usados, seleção-only e ausência de PII/logs no
+browser, credencial editorial, orçamento/retenção e teste real em staging.
 
 Reason para intervenção futura: provider/credencial/custo reais não disponíveis
 nesta preparação. Exact human action: custodiar credencial editorial por ambiente
 no gerenciador autorizado e definir teto monetário quando houver candidato
-instalado/revisado. What remains unblocked: receita core, testes, revisão do plano
- e implementação/testes do adapter mínimo. Não pedir/colar chave no chat.
+instalado/revisado. What remains unblocked: UI/seleção com fake, testes isolados
+de concorrência e revisão do handler. Não pedir/colar chave no chat.
 
 Rollback do fixture: retirar papel dos usuários (nenhum é atribuído pela receita).
 Antes de remover formato/editor, migrar qualquer conteúdo que passe a referenciá-lo;

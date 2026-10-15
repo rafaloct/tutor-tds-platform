@@ -32,6 +32,15 @@ final class EditorialAiWiringTest extends KernelTestBase {
   ];
 
   /**
+   * Uses in-memory SQLite regardless of the suite's mysql default.
+   */
+  protected function setUp(): void {
+    // Each test runs in its own PHP process; no other suite loses its DB URL.
+    putenv('SIMPLETEST_DB=sqlite://localhost/:memory:');
+    parent::setUp();
+  }
+
+  /**
    * Service construction and a disabled request never invoke HTTP or quota.
    */
   public function testWiringAndDisabledDefault(): void {

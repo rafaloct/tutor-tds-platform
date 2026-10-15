@@ -1,18 +1,29 @@
 # CURRENT STATE
 
-## 2026-10-15 — auditoria do piloto editorial IA / #208
+## 2026-10-15 — adapter editorial IA desativado / #208
 
-DECISION: reutilizar fornecedor do Tutor se compatível. OBSERVED: branch209
-atualizada com staging b0c39b2(core11.4.10); resolução/instalação oficial dos4
-candidatos em fixtureisolada PASS,23 pacotes adicionais e0 versões existentes
-alteradas, validate strict/audit PASS. Manifests ficam em dependency-audit;
-composer principal/produção inalterados.10 testes Python e guardas audit/runtime PASS.
-Revisão OpenRouter/CKEditor encontrou logging bruto e limites de transporte/acesso
-insuficientes para o piloto; recomendação é adapter TDS mínimo, contrib desativado.
-TARGET: enforcement server-side, quota atômica e fake sem rede. BLOCKED: esses
-controles, credencial editorial, orçamento/retenção e teste real. Nenhuma chave
-lida/gerada, chamada de modelo ou ativação nesta etapa. Receita core anterior:
-25 checksDrupalPASS. PR209 aberto; detalhes em ../drupal/pilots/editorial-ai/README.md.
+DECISION: reutilizar fornecedor do Tutor se compatível. OBSERVED: PR209 incorpora
+staging b0c39b2 (core11.4.10); resolução oficial dos quatro candidatos em fixture
+isolada PASS, 23 pacotes adicionais e nenhuma versão existente alterada.
+Composer validate strict/audit/install PASS; manifests somente em dependency-audit.
+Revisão de contrib encontrou logging/transporte/acesso incompatíveis com o piloto.
+IMPLEMENTED candidato03dec58: módulo tds_editorial_ai, não habilitado e flagfalse,
+POST com CSRF/permissão/acesso ao node/body, ações e seleção limitadas, transporte
+OpenRouter injetável/fixo sem retries, proposta no-store sem salvar/publicar.
+Quota10 tentativas/editor/hora com check/register sob lock global e lease60s;
+falhas contam. Não há UI/CKEditor integrado ou alteração de config/sync.
+TESTED-LOCAL: 12 testes/249 assertions Unit+Kernel PASS, PHPCS12 arquivos PASS em
+PHP8.3.29/Drupal11.4.8. Mesmo SHA03dec58 PASS12/249 em fixtureVPS isolada,
+PHP8.3.35/Drupal11.4.10, SQLite em memória e networknone. Kernel comprova wiring,
+defaultoff e checks compilados CSRF/acesso com contas/nodes sintéticos, não E2E
+browser ou ownership real. Teste Kernel força SQLite somente no processo isolado,
+sem depender do defaultmysql da suíte. Preparação anterior:25 checksDrupal +10Python.
+Revisão independente: sem bloqueadores para incorporar desativado. BLOCKED para
+ativação: browser seleção/privacidade, quota multiprocesso e perda/expiração lease,
+handler HTTP e deadline total15s, credencial editorial, orçamento/retenção e teste
+real autorizado. Nenhuma chave real lida/gerada, inferência ou ativação de produção.
+Lease não garante exclusão absoluta após pausa longa/perda de lock. PR209 aberto;
+detalhes em `../drupal/web/modules/custom/tds_editorial_ai/README.md`.
 
 ## 2026-10-15 — implantação isolada Drupal / #210
 

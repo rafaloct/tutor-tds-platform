@@ -73,7 +73,7 @@ Unit tests use mocks/fakes for HTTP, entities, config, account, quota, lock and
 Flood. They cover fixed transport payload, Unicode limits, authorization,
 missing credential, direct request constraints, quota ordering/contention,
 11th attempt, exception privacy and lock release failure. They never call AI.
-Kernel/browser route and CSRF checks, multi-process quota, existing body
+Browser route and CSRF checks, multi-process quota, existing body
 selection-only UX and upstream retention/spending configuration are separate
 gates. Disabled flag does not itself constitute an activation review.
 
@@ -82,15 +82,19 @@ in-memory kernel database: **12 tests /249 assertions PASS**, PHPCS12 files PASS
 Two kernel tests verify real container wiring/defaultoff and compiled route
 access checks (valid/missing/invalid CSRF, permission and entity denial).
 They use synthetic account/entity doubles; they do not prove browser login,
-real saved-node ownership or multi-process concurrency. Re-run on11.4.10 before
-claiming compatibility with the current portal. No academic gateway is enabled
+real saved-node ownership or multi-process concurrency. The same03dec58 candidate
+also passed12 tests/249 assertions on the isolated VPS fixture with
+Drupal11.4.10/PHP8.3.35, SQLite and network disabled. No academic gateway is enabled
 in this fixture. Test command from drupal directory:
 
 ```sh
-SIMPLETEST_DB=sqlite://localhost/:memory: vendor/bin/phpunit \
+vendor/bin/phpunit \
   -c phpunit.xml.dist web/modules/custom/tds_editorial_ai/tests
 vendor/bin/phpcs web/modules/custom/tds_editorial_ai
 ```
 
 Rollback: leave module disabled, or set `tds_editorial_ai.settings:enabled=false`
 and remove assigned permission. No content/schema migration or academic changes.
+
+The kernel class forces SQLite memory in its separate PHP process, so the
+suite mysql default does not require an external database for these tests.

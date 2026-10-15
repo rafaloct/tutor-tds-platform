@@ -63,5 +63,8 @@ retry automático. Não registrar mensagem de exceção upstream nem payload.
 Resposta não salva/publica: usuário aceita sugestão manualmente. Quota precisa
 reserva atômica, não apenas Flood isAllowed seguido de register sem exclusão.
 
-Essa implementação ainda é TARGET. Provar tudo com fake e rede bloqueada antes
-de chave editorial, orçamento, política de retenção e teste real autorizado.
+Atualização: candidato03dec58 implementa esse backend em tds_editorial_ai,
+desabilitado e sem UI; 12 testes/249 assertions Unit+Kernel PASS na fixtureVPS
+Drupal11.4.10/PHP8.3.35, networknone/SQLite. Isso não ativa contrib ou IA.
+Ainda exigidos: browser/seleção, quota multiprocesso e perda/expiração do lease,
+handler/deadline total, chave editorial, orçamento, retenção e teste real autorizado.
