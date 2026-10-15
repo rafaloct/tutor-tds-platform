@@ -56,3 +56,42 @@ universalmente indisponível. O harness medirá especificamente Guzzle real.
 Nenhuma flag ou dado foi alterado para contornar bloqueios. Produção permanece
 com sessões acadêmicas desabilitadas; API/Worker/Chatwoot reais e aceite#170
 não são aprovados por este ensaio limitado.
+
+## Recibo real do cliente — 15/10/2026
+
+`9e799c9` via Guzzle/HTTPS público: primeira execução autenticou, listou3 turmas,
+leu3 cursos e certificates com lista vazia, renovou refresh;3 learning-context404
+mantiveram `BLOCKED`/exit2. O coordenador comprovou separadamente3 contextos200
+via ASGI em memória com flag habilitada contra o banco de staging.
+
+Depois, o coordenador habilitou somente learning_context de staging, persistiu
+`.env`, fixou a imagem existente `6e3cd5f31bb4` e reiniciou somente a API staging,
+com backup privado. IDs dos serviços protegidos permaneceram iguais; portal e
+API produtivos responderam HTTPS200/TLS válido. Nenhuma alteração de banco ou
+flag produtiva nesta ação.
+
+Segunda execução do mesmo harness: **`PASS_SAMPLED_HTTP`, exit0,11 etapas200**:
+login/me, listagem com3 turmas,3 contextos,3 cursos, certificates com0 retornados
+e refresh. Esta é prova do cliente HTTP real com amostragem, não projeção do
+dashboard, cookie Drupal ou browser E2E.
+
+## Candidato de prova browser com API real
+
+`scripts/test-staging-browser-login.cjs` usa somente `http://127.0.0.1:18872`,
+entrada local do túnel SSH para uma fixture Drupal descartável apontando à API
+staging. Exige `TDS_STAGING_BROWSER_QA=1` e JSON privado `cpf`/`password` no stdin
+(não TTY, máximo8192 bytes); não aceita argumentos de credenciais nem env secrets.
+Requests browser para outras origens são bloqueadas, service workers desativados
+e a origem final é conferida antes de preencher credenciais. Requests HTTP do
+teste não seguem redirects. O coordenador deve comprovar o túnel e a configuração
+da fixture/API staging antes da execução; o script não atesta essa configuração.
+Runtime: `TDS_STAGING_PLAYWRIGHT_MODULE` aponta ao módulo Playwright instalado
+(ou usa `require('playwright')`); `TDS_STAGING_CHROMIUM_PATH` é o executável
+opcional, sem download automático.
+
+Fluxo preparado: navegador vazio→bootstrap anônimo→login UI→turmas/progresso
+visíveis→contexto200/uidCMS0→cookie antigo401→logout UI→cookie revogado401→voltar
+e atualizar sem contexto. Não imprime HTML, nomes, IDs, tokens, credenciais,
+URL de classes ou screenshots. Saída somente enums/contagens e código de rede
+allowlisted em falha. Guardas locais negativas3 PASS e sintaxe Node PASS, sem
+rede. Runtime browser real ainda UNKNOWN; produção permanece com gate desligado.

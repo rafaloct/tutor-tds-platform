@@ -1,6 +1,17 @@
 # CURRENT STATE
 
 
+## 2026-10-15 — cliente Drupal contra API real staging
+
+TESTED: harness `9e799c9` retornou PASS_SAMPLED_HTTP/exit0,11 etapas200, com3
+contextos e3 cursos após habilitação restrita de learning_context em staging.
+Flag persistida pelo coordenador, imagem existente fixada, somente API staging
+reiniciada; produção e banco preservados. Não é prova de dashboard/browser.
+Candidato de browser real preparado em fixture via túnel local18872, credenciais
+somente stdin privado; execução ainda UNKNOWN. Recibo e limites em
+`drupal/STAGING_PARTICIPANT_CONTRACT_PROBE.md`. Gate produtivo permanece off.
+
+
 ## 2026-10-15 — candidato de primeiro acesso participante sem CMS
 
 IMPLEMENTED/TESTED-ISOLATED: página `/entrar`, bootstrap anônimo same-origin, CSRF Drupal e
