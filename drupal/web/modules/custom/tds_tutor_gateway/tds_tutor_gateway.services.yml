@@ -11,9 +11,13 @@ services:
   Drupal\tds_tutor_gateway\Storage\TutorTokenStoreInterface:
     alias: tds_tutor_gateway.token_store
 
+  tds_tutor_gateway.session_lifecycle:
+    class: Drupal\tds_tutor_gateway\Session\DrupalTutorSessionLifecycle
+    arguments: ['@request_stack']
+
   tds_tutor_gateway.session_manager:
     class: Drupal\tds_tutor_gateway\Session\TutorSessionManager
-    arguments: ['@tds_tutor_gateway.client', '@tds_tutor_gateway.token_store', '@datetime.time']
+    arguments: ['@tds_tutor_gateway.client', '@tds_tutor_gateway.token_store', '@datetime.time', '@tds_tutor_gateway.session_lifecycle']
   Drupal\tds_tutor_gateway\Session\TutorSessionManagerInterface:
     alias: tds_tutor_gateway.session_manager
 

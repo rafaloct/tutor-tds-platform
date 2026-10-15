@@ -188,3 +188,29 @@ Cookie jars e respostas de login não são impressos nem mantidos nesse recibo.
 Revisão independente do candidato `1c26451`: preflight de portas, filhos vivos,
 timeouts e replay do cookie revogado conferidos, sem bloqueador adicional nesse
 recorte. Não houve alteração de serviço produtivo nem aceite E2E #170.
+
+
+## Candidato — rotação no login e logout TDS
+
+IMPLEMENTED, HTTP pendente: `DrupalTutorSessionLifecycle` usa
+`migrate(TRUE)` para destruir o ID anterior mantendo os atributos editoriais.
+Login descarta primeiro os tokens TDS anteriores, autentica na API, rotaciona o
+ID e só então salva novos tokens. Credenciais recusadas deixam contexto TDS vazio.
+Falha de migração retorna 503 sanitizado e nunca salva novos tokens no ID antigo.
+Logout remove tokens e rotaciona o ID, preservando o login CMS independente.
+
+A fixture acrescenta 21 checks específicos via rotas TDS reais: CSRF obrigatório,
+login, troca de conta, replay do cookie anterior, tentativa inválida, recuperação,
+logout/replay revogado e preservação editorial. A API é exclusivamente sintética.
+O helper CSRF lê apenas o banco QA fixo e captura o token em memória; não altera a
+política CSRF das rotas nem imprime cookies ou tokens. Prova HTTP deste candidato
+ainda UNKNOWN; a evidência de 11 checks acima continua exclusivamente core.
+Integração #180/#181 e gate de produção permanecem pendentes.
+
+Validação focal deste candidato: 32 testes gateway/115 assertions em PHP 8.3.29,
+PHPCS (21 arquivos) e sintaxe dos scripts PHP/shell PASS; CLI efêmera sem rede.
+
+Revisão independente sem bloqueador para ensaio: os 21 checks iniciam com sessão
+editorial existente. NÃO comprovam bootstrap/primeiro login de participante sem
+conta CMS: sessão lazy sem cookie não permite regenerate; obtenção de cookie e
+CSRF anônimo exige prova integrada própria antes de ativação.

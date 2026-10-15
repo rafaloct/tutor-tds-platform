@@ -45,6 +45,10 @@ $options = [
 Database::addConnectionInfo('default', 'default', $options);
 $db = Database::getConnection();
 $mode = $argv[1] ?? 'coordinator';
+if ($mode === 'http-tds') {
+  runTutorCookieProof();
+  exit;
+}
 if ($mode === 'http-rotation') {
   runCookieRotationProof($db);
   exit;
@@ -354,4 +358,86 @@ function cookieIdentity(string $path): string {
     }
   }
   throw new RuntimeException('Synthetic session cookie missing.');
+}
+
+/**
+ * Proves TDS login/logout fixation protection, distinct from core account login.
+ */
+function runTutorCookieProof(): void {
+  $jars = [];
+  foreach (['current', 'before', 'account_a', 'before_logout'] as $name) {
+    $jars[$name] = tempnam(sys_get_temp_dir(), 'tds-auth-');
+    if (!$jars[$name]) {
+      throw new RuntimeException('Cannot prepare synthetic session jars.');
+    }
+  }
+  try {
+    $current = $jars['current'];
+    $context = '/tds/session/context';
+    $credentials = json_encode(['name' => 'qa-session-lock', 'pass' => 'qa-session-lock-not-a-secret'], JSON_THROW_ON_ERROR);
+    check(finishHttp(beginHttp('/user/login?_format=json', $current, $credentials, $current))['status'] === 200, 'TDS fixture starts with a separate editorial session');
+    copy($current, $jars['before']);
+    $payload = json_encode(['cpf' => 'qa-person-a', 'password' => 'synthetic-valid-password'], JSON_THROW_ON_ERROR);
+    check(finishHttp(beginHttp('/tds/session/login', $current, $payload))['status'] === 403, 'TDS login rejects missing route-specific CSRF');
+    $login = finishHttp(beginHttp(csrfPath('login', $current), $current, $payload, $current));
+    check($login['status'] === 200 && (json_decode($login['body'], TRUE)['user']['id'] ?? '') === 'qa-person-a', 'TDS login returns the newly authenticated account');
+    check(cookieIdentity($jars['before']) !== cookieIdentity($current), 'TDS login destroys the pre-authentication cookie ID');
+    check(finishHttp(beginHttp($context, $jars['before']))['status'] === 401, 'pre-login cookie cannot obtain new Tutor tokens');
+    $a = finishHttp(beginHttp($context, $current));
+    check($a['status'] === 200 && (json_decode($a['body'], TRUE)['user']['id'] ?? '') === 'qa-person-a', 'new cookie loads account A from persisted session');
+    check(editorialActive($current), 'TDS login preserves editorial authentication');
+    copy($current, $jars['account_a']);
+    $payloadB = json_encode(['cpf' => 'qa-person-b', 'password' => 'synthetic-valid-password'], JSON_THROW_ON_ERROR);
+    $b = finishHttp(beginHttp(csrfPath('login', $current), $current, $payloadB, $current));
+    check($b['status'] === 200 && (json_decode($b['body'], TRUE)['user']['id'] ?? '') === 'qa-person-b', 'TDS account switch authenticates account B');
+    check(cookieIdentity($jars['account_a']) !== cookieIdentity($current), 'account switch rotates and destroys account A cookie');
+    check(finishHttp(beginHttp($context, $jars['account_a']))['status'] === 401, 'retained account A cookie cannot read account B');
+    $b = finishHttp(beginHttp($context, $current));
+    check($b['status'] === 200 && (json_decode($b['body'], TRUE)['user']['id'] ?? '') === 'qa-person-b', 'current browser reads only account B');
+    $invalid = json_encode(['cpf' => 'qa-person-a', 'password' => 'invalid'], JSON_THROW_ON_ERROR);
+    check(finishHttp(beginHttp(csrfPath('login', $current), $current, $invalid, $current))['status'] === 401, 'invalid TDS login is rejected');
+    check(finishHttp(beginHttp($context, $current))['status'] === 401, 'failed login leaves no prior account B context');
+    check(editorialActive($current), 'failed TDS login does not log out the editor');
+    check(finishHttp(beginHttp(csrfPath('login', $current), $current, $payload, $current))['status'] === 200, 'valid login can recover after failed account switch');
+    copy($current, $jars['before_logout']);
+    check(finishHttp(beginHttp('/tds/session/logout', $current, ''))['status'] === 403, 'TDS logout rejects missing route-specific CSRF');
+    $logout = finishHttp(beginHttp(csrfPath('logout', $current), $current, '', $current));
+    check($logout['status'] === 200 && (json_decode($logout['body'], TRUE)['authenticated'] ?? NULL) === FALSE, 'TDS logout confirms local academic session ended');
+    check(cookieIdentity($jars['before_logout']) !== cookieIdentity($current), 'TDS logout destroys the authenticated cookie ID');
+    check(finishHttp(beginHttp($context, $jars['before_logout']))['status'] === 401, 'retained pre-logout cookie cannot resurrect Tutor tokens');
+    check(finishHttp(beginHttp($context, $current))['status'] === 401, 'new post-logout cookie has no academic context');
+    check(editorialActive($current), 'TDS logout preserves the independent editorial account');
+    echo "21 TDS login/account-switch/logout checks PASS; API synthetic.\n";
+  }
+  finally {
+    foreach ($jars as $jar) {
+      unlink($jar);
+    }
+  }
+}
+
+/**
+ * Obtains fixture-only CSRF from the real stored session without logging it.
+ */
+function csrfPath(string $operation, string $cookie): string {
+  $path = 'tds/session/' . $operation;
+  $pipes = [];
+  $process = proc_open([PHP_BINARY, dirname(__FILE__) . '/fixtures/session-lock-api.php', 'csrf', $path, $cookie], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+  fclose($pipes[0]);
+  $token = stream_get_contents($pipes[1]);
+  $error = stream_get_contents($pipes[2]);
+  fclose($pipes[1]);
+  fclose($pipes[2]);
+  if (proc_close($process) !== 0 || $error !== '' || !preg_match('/^[A-Za-z0-9_-]{43}$/D', $token)) {
+    throw new RuntimeException('Synthetic route CSRF generation failed.');
+  }
+  return '/' . $path . '?token=' . rawurlencode($token);
+}
+
+/**
+ * Checks the core editorial account independently of academic API authority.
+ */
+function editorialActive(string $cookie): bool {
+  $response = finishHttp(beginHttp('/user/login_status?_format=json', $cookie));
+  return $response['status'] === 200 && (int) json_decode($response['body'], TRUE) === 1;
 }

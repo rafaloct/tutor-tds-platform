@@ -109,4 +109,6 @@ php scripts/test-dr3-session-concurrency.php http
 stage=core-cookie-rotation
 php scripts/fixtures/session-lock-api.php seed-anonymous
 php scripts/test-dr3-session-concurrency.php http-rotation
+stage=tds-cookie-rotation
+php scripts/test-dr3-session-concurrency.php http-tds
 echo 'Disposable HTTP fixture passed. Remove its database/container and checkout.'
