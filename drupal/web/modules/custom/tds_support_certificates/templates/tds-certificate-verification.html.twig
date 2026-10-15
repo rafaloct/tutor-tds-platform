@@ -1,0 +1,10 @@
+<section aria-labelledby="certificate-verification-title">
+  <h2 id="certificate-verification-title">{{ 'Consulta pública de certificado'|t }}</h2>
+  <p>{{ 'A autenticidade e a situação do certificado são informadas exclusivamente pelo verificador oficial.'|t }}</p>
+  {% if verifier %}
+    <a href="{{ verifier }}" rel="noopener noreferrer" referrerpolicy="no-referrer">{{ 'Abrir verificador oficial'|t }}</a>
+  {% else %}
+    <p role="status">{{ 'O verificador não está disponível neste portal. Use o endereço impresso no seu certificado e tente novamente mais tarde se o serviço estiver indisponível.'|t }}</p>
+  {% endif %}
+  <p>{{ 'Se o código não existir ou os dados forem diferentes, procure o suporte. Este portal não emite, altera nem valida certificados.'|t }}</p>
+</section>

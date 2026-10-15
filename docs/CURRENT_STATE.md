@@ -1,5 +1,19 @@
 # CURRENT STATE
 
+## 2026-10-15 — Drupal DR-7 / #168, candidato local
+
+IMPLEMENTED/TESTED-LOCAL: módulo opt-in `tds_support_certificates` sobre staging
+`207e2128dcbcedec70bf5132b05a7081501480ed`: referências privadas via FastAPI,
+handoff oficial de verificação e suporte com identidade efêmera em sandbox.
+60 testes PHP/201 assertions (35/107 novos), lint completo e 20 verificações
+Chromium com Drupal/SQLite reais e SDK/identidade sintéticos PASS. Correções
+observadas no browser: no-store preservado após resposta Drupal e heartbeat
+reiniciado ao reabrir atendimento. Nenhuma alteração Flutter/API/Worker/produção.
+BLOCKED: ativação autenticada depende de lock no ciclo compartilhado de leitura
+à persistência da sessão (inclusive concorrência dentro deste módulo), integração
+#166/#180 e prova do SDK Chatwoot real. #168 permanece aberta; não é aceite #170.
+Contrato, comandos, limites e rollback: `drupal/DR7_SUPPORT_CERTIFICATES.md`.
+
 ## 2026-10-13 — fonte consolidada para a release
 
 IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e

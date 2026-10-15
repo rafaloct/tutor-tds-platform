@@ -1,0 +1,7 @@
+name: TDS Support and Certificates
+type: module
+description: 'Consulta privada e handoff oficial; suporte efemero isolado.'
+core_version_requirement: ^11
+package: TDS
+dependencies:
+  - tds_tutor_gateway:tds_tutor_gateway

@@ -1,0 +1,5 @@
+[data-support-frame] iframe {
+  width: 100%;
+  min-height: 32rem;
+  border: 0;
+}

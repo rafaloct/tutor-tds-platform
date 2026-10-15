@@ -1,0 +1,28 @@
+<section data-private-certificates aria-labelledby="my-certificates-title">
+  <h2 id="my-certificates-title">{{ 'Meus certificados'|t }}</h2>
+  {% if state == 'available' %}
+    <p>{{ 'Estas são referências da sua conta. Consulte a situação no verificador oficial.'|t }}</p>
+    <ul>
+    {% for certificate in certificates %}
+      <li>
+        <h3>{{ certificate.title }}</h3>
+        <p>{{ 'Emitido em:'|t }} {{ certificate.issued_at }}</p>
+        {% if certificate.verification_url %}
+          <a href="{{ certificate.verification_url }}" rel="noopener noreferrer" referrerpolicy="no-referrer">{{ 'Consultar no verificador oficial'|t }}</a>
+        {% else %}
+          <p>{{ 'Endereço de verificação indisponível. Procure o suporte.'|t }}</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% elseif state == 'empty' %}
+    <p role="status">{{ 'Nenhum certificado encontrado para esta conta.'|t }}</p>
+  {% elseif state == 'session_required' %}
+    <p role="status">{{ 'Entre novamente na sua conta TDS para consultar certificados.'|t }}</p>
+  {% elseif state == 'access_denied' %}
+    <p role="status">{{ 'A API não autorizou esta consulta para a conta atual.'|t }}</p>
+  {% else %}
+    <p role="status">{{ 'Não foi possível consultar os certificados. Tente novamente mais tarde; nenhum resultado anterior será exibido.'|t }}</p>
+  {% endif %}
+  <a href="{{ path('tds_support_certificates.support') }}">{{ 'Procurar suporte'|t }}</a>
+</section>
