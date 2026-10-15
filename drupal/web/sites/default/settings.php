@@ -35,15 +35,15 @@ if ($tds_environment !== 'local') {
       ));
     }
   }
-  // Rereview ACP PR #177: a imagem da aplicacao declarada pelo ambiente deve
-  // ser ref imutavel pinnada por digest (repo@sha256:<64-hex>); tag mutavel
-  // nao pode subir em staging.
-  $tds_image_ref = getenv('DRUPAL_STAGING_IMAGE_REF');
-  if (!is_string($tds_image_ref) || preg_match('/^[^\s@]+@sha256:[0-9a-f]{64}$/', $tds_image_ref) !== 1) {
-    throw new \RuntimeException(sprintf(
-      'settings.php: DRUPAL_STAGING_IMAGE_REF deve ser referencia imutavel repo@sha256:<64-hex> quando DRUPAL_ENVIRONMENT="%s".',
-      $tds_environment
-    ));
+  // Production can use the actual local image ID when built on the VPS.
+  // Staging retains its registry digest contract.
+  $tds_image_var = $tds_environment === 'production' ? 'DRUPAL_IMAGE_REF' : 'DRUPAL_STAGING_IMAGE_REF';
+  $tds_image_ref = getenv($tds_image_var);
+  $tds_image_pattern = $tds_environment === 'production'
+    ? '/^(?:[^\s@]+@)?sha256:[0-9a-f]{64}$/'
+    : '/^[^\s@]+@sha256:[0-9a-f]{64}$/';
+  if (!is_string($tds_image_ref) || preg_match($tds_image_pattern, $tds_image_ref) !== 1) {
+    throw new \RuntimeException('settings.php: immutable image reference required in ' . $tds_image_var);
   }
 }
 
@@ -69,10 +69,45 @@ $settings['entity_update_backup'] = TRUE;
 
 $settings['config_sync_directory'] = '../config/sync';
 $settings['file_public_path'] = 'sites/default/files';
-$settings['file_private_path'] = 'sites/default/files/private';
+$tds_private_path = getenv('DRUPAL_PRIVATE_PATH') ?: ($tds_environment === 'production' ? '/var/www/private' : 'sites/default/files/private');
+if ($tds_environment === 'production') {
+  // Require an absolute, normalized path outside the public document root.
+  $tds_public_root = rtrim(realpath($app_root) ?: $app_root, '/');
+  $tds_resolved_private = realpath($tds_private_path) ?: $tds_private_path;
+  if (!str_starts_with($tds_private_path, '/') || str_contains($tds_private_path, "\0")
+    || preg_match('~(?:^|/)\.\.?(?:/|$)|//~', $tds_private_path)
+    || $tds_resolved_private === $tds_public_root
+    || str_starts_with($tds_resolved_private, $tds_public_root . '/')) {
+    throw new \RuntimeException('settings.php: DRUPAL_PRIVATE_PATH must be outside the webroot.');
+  }
+}
+$settings['file_private_path'] = $tds_private_path;
 
 // Identificador de ambiente lido pelo endpoint /health (tds_health).
 $settings['tds_environment'] = $tds_environment;
+// Explicit opt-in only after the authenticated-production acceptance gate.
+$settings['tds_production_sessions_enabled'] = getenv('TDS_ACADEMIC_SESSION_ENABLED') === 'true';
+
+$tds_proxies = getenv('DRUPAL_REVERSE_PROXY_ADDRESSES');
+if ($tds_proxies !== FALSE && $tds_proxies !== '') {
+  $tds_proxy_addresses = array_map('trim', explode(',', $tds_proxies));
+  foreach ($tds_proxy_addresses as $tds_proxy) {
+    $tds_parts = explode('/', $tds_proxy);
+    $tds_ip = $tds_parts[0];
+    $tds_max_prefix = filter_var($tds_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? 32 : 128;
+    if (!filter_var($tds_ip, FILTER_VALIDATE_IP) || count($tds_parts) > 2
+      || in_array($tds_ip, ['0.0.0.0', '::'], TRUE)
+      || (isset($tds_parts[1]) && (!ctype_digit($tds_parts[1]) || (int) $tds_parts[1] < 1 || (int) $tds_parts[1] > $tds_max_prefix))) {
+      throw new \RuntimeException('settings.php: explicit proxy IP addresses or restricted CIDRs required.');
+    }
+  }
+  $settings['reverse_proxy'] = TRUE;
+  $settings['reverse_proxy_addresses'] = $tds_proxy_addresses;
+  // Trust only the headers supplied by our configured Traefik proxy.
+  $settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_FOR
+    | \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_PROTO
+    | \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_PORT;
+}
 
 // URL base da API Tutor TDS (BFF). Vazia = integracao ainda nao configurada.
 $settings['tutor_api_base_url'] = getenv('TUTOR_API_BASE_URL') ?: '';

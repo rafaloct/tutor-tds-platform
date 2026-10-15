@@ -179,4 +179,5 @@ node scripts/test-dr7-browser.cjs
 O script aceita apenas destinos locais predefinidos e usa exclusivamente
 `*.example.test` para interceptações; não aponta ao atendimento real.
 Revisão independente local: sem bypass identificado em URL/postMessage;
-gate P1 de sessão compartilhada registrado acima, ainda **não resolvido**.
+gate P1 histórico recebeu correção local posterior em DR3_SESSION_LOCKING.md;
+a homologação produtiva e integração autenticada permanecem pendentes.

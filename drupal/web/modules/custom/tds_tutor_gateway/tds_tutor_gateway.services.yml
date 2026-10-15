@@ -27,3 +27,9 @@ services:
     arguments: ['@session_configuration', !service_closure '@tds_tutor_gateway.session_mutex']
     tags:
       - { name: http_middleware, priority: 60 }
+
+  tds_tutor_gateway.production_session_gate:
+    class: Drupal\tds_tutor_gateway\EventSubscriber\ProductionSessionGateSubscriber
+    arguments: ['@settings']
+    tags:
+      - { name: event_subscriber }
