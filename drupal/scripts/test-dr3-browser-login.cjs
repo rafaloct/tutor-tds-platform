@@ -81,6 +81,7 @@ const check = (value, message) => { stage = message; assert.ok(value, message); 
   }
 })().catch((error) => {
   const kind = ['Error', 'TimeoutError', 'AssertionError'].includes(error.name) ? error.name : 'Error';
-  console.error(`Anonymous browser proof failed: stage=${stage}; type=${kind}; sensitive details withheld.`);
+  const networkCode = String(error.message || '').match(/net::ERR_[A-Z_]+/)?.[0] || 'none';
+  console.error(`Anonymous browser proof failed: stage=${stage}; type=${kind}; network=${networkCode}; sensitive details withheld.`);
   process.exitCode = 1;
 });
