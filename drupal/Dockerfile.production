@@ -63,4 +63,6 @@ ENV PATH=/var/www/html/vendor/bin:$PATH
 # No PHP execution in uploaded files; private data is outside DocumentRoot.
 COPY production/apache-hardening.conf /etc/apache2/conf-available/tds-production.conf
 RUN a2enconf tds-production \
+ && chmod -R a+rX,go-w /var/www/html \
+ && chmod 0755 /var/www/html \
  && chmod 0444 web/sites/default/settings.php
