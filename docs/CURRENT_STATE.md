@@ -1,5 +1,17 @@
 # CURRENT STATE
 
+## 2026-10-15 — #168: mutex da sessão candidato local
+
+IMPLEMENTED/TESTED-LOCAL: gateway envolve leitura→refresh→persistência com mutex
+MySQL sem lease na mesma conexão primária do SessionHandler padrão. Construção
+lazy; contenção e backend incompatível falham antes do snapshot. 7 testes novos/
+33 assertions; 15 verificações concorrentes com processos MySQL 8.4.11 e 5 HTTP
+Drupal real (API fake) PASS. Inclui perda da conexão, crash do dono e logout sem
+ressurreição. Sem alteração em produção. Contrato: `drupal/DR3_SESSION_LOCKING.md`.
+BLOCKED: homologação MariaDB/rotação do cookie, integração #180/#181, suporte
+customizado/BigPipe, sinalização imediata entre abas e SDK Chatwoot real. O
+bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.
+
 ## 2026-10-15 — Drupal DR-7 / #168, candidato local
 
 IMPLEMENTED/TESTED-LOCAL: módulo opt-in `tds_support_certificates` sobre staging

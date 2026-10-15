@@ -111,18 +111,15 @@ não são ecoadas nem encadeadas em exceções que possam reter bearer.
    para "fazer funcionar". É necessário comprovar inbox/HMAC e ausência de
    persistência no navegador em staging ou definir adapter compatível mantendo
    ADR12. Fake não prova SDK externo.
-2. **BLOCKED: implantação de todas as integrações autenticadas, inclusive
-   certificados, até correção da concorrência de sessão.** O middleware Drupal
-   lê a sessão antes do acquire do adapter e grava depois do release. Duas
-   requests deste mesmo módulo podem carregar o mesmo refresh, então a segunda
-   pode fazer replay de token rotacionado mesmo sem overlap dentro do adapter.
-   O gateway também não publica evento de logout nem compartilha lock com
-   #166/#167/login/logout. A correção pertence ao gateway/middleware reservado:
-   coordenar o lifecycle completo leitura→refresh→persistência, com prova
-   concorrente, antes de qualquer deployment autenticado. Lock local não fecha
-   esse gate. Logout em outra aba pode levar até heartbeat + timeout para remover
-   o widget; sair desta página/ocultar a aba remove imediatamente. Padronizar
-   sinalização de sessão também é necessário para aceite E2E.
+2. **IMPLEMENTED/TESTED-LOCAL: mutex antes da leitura e após persistência.**
+   A correção posterior está em `DR3_SESSION_LOCKING.md`: middleware do gateway,
+   conexão primária MySQL pinada e sem lease. Provas concorrentes com processos
+   independentes e HTTP Drupal real fecharam a corrida no ambiente local.
+   O lock interno deste adapter continua sem fornecer essa garantia sozinho.
+   **BLOCKED:** homologação MariaDB do deployment, rotação de cookie, integração
+   #180/#181, custom backends/BigPipe e aceite #170. Logout em outra aba ainda
+   pode levar até heartbeat + timeout para remover o widget; padronizar evento
+   de encerramento continua necessário para aceite E2E.
 3. **BLOCKED: G3/verificador nativo.** Teste real válido/inválido/Worker
    indisponível pertence ao handoff oficial até contrato público aprovado.
 4. **UNKNOWN: navegação #166, CSP do deployment, accessibility/performance e

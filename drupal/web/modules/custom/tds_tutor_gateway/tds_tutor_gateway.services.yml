@@ -16,3 +16,14 @@ services:
     arguments: ['@tds_tutor_gateway.client', '@tds_tutor_gateway.token_store', '@datetime.time']
   Drupal\tds_tutor_gateway\Session\TutorSessionManagerInterface:
     alias: tds_tutor_gateway.session_manager
+
+  tds_tutor_gateway.session_mutex:
+    class: Drupal\tds_tutor_gateway\Lock\DatabaseSessionMutex
+    factory: ['Drupal\tds_tutor_gateway\Lock\DatabaseSessionMutex', create]
+    arguments: ['@database', '@session_handler.storage']
+
+  http_middleware.tds_tutor_session_lock:
+    class: Drupal\tds_tutor_gateway\StackMiddleware\TutorSessionLock
+    arguments: ['@session_configuration', !service_closure '@tds_tutor_gateway.session_mutex']
+    tags:
+      - { name: http_middleware, priority: 60 }
