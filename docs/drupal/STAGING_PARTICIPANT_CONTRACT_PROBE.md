@@ -5,7 +5,9 @@
 Candidato `scripts/probe-staging-participant.php`: CLI usa `TutorApiClient` e
 `TutorSessionManager` reais, Guzzle TLS verificado e redirects desativados.
 Store somente em memória e lifecycle falso: **não comprova sessão/cookie Drupal,
-CSRF, interface, mutex ou E2E browser**. Nenhuma chamada operacional ou escrita
+CSRF, interface, mutex ou E2E browser**. Gate `PASS_SAMPLED_HTTP` e scope
+`staging_client_http_only` significam somente transporte/JSON aceito pelo cliente,
+**não compatibilidade da projeção do dashboard**. Nenhuma chamada operacional ou escrita
 acadêmica. Login cria sessão upstream; refresh opcional rotaciona credenciais.
 Limpeza ao terminar é apenas local, sem alegar revogação do refresh na API.
 
@@ -27,7 +29,8 @@ variáveis acima e stdin privado. Não executar com settings/credenciais produti
 
 Fluxo: login→`/auth/me`→`/classes?enrolled_only=true`→learning-context/course de
 **até5 turmas retornadas**→certificates; refresh opcional→auth/me. Limite é
-amostragem, não cobertura completa. IDs permanecem somente em memória e URLs
+amostragem, não cobertura completa. O refresh opcional também compara internamente
+a identidade retornada com a do login, sem emitir identificadores. IDs permanecem somente em memória e URLs
 internas da chamada; nunca saem no resultado. Saída JSON contém enums de etapa,
 status normalizado pelo cliente, contagens e gate. Contagem `null` significa
 não obtida; zero indica apenas a lista recebida naquela resposta, não ausência

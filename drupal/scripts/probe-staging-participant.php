@@ -199,11 +199,12 @@ try {
       });
       $counts['certificates_returned'] = $certificates === NULL ? NULL : count($certificates);
       if ($config['refresh'] && $store->load() !== NULL) {
-        $run('refresh_and_auth_me', static function () use ($store, $manager): array {
+        $run('refresh_and_auth_me', static function () use ($store, $manager, $login): array {
           $previous = $store->load();
           $store->save(new TutorTokenSet($previous->accessToken, $previous->refreshToken, 0));
           $user = $manager->context();
-          if ($store->load() === NULL || hash_equals($previous->refreshToken, $store->load()->refreshToken)) {
+          if ($user['id'] !== $login['id'] || $store->load() === NULL
+            || hash_equals($previous->refreshToken, $store->load()->refreshToken)) {
             throw new GatewayException('invalid_api_response', 502);
           }
           return $user;
@@ -217,8 +218,8 @@ try {
     unset($login, $identity, $classes, $class, $certificates);
   }
   echo json_encode([
-    'scope' => 'staging_client_contract_only',
-    'gate' => $blocked ? 'BLOCKED' : 'PASS_SAMPLED_CONTRACT',
+    'scope' => 'staging_client_http_only',
+    'gate' => $blocked ? 'BLOCKED' : 'PASS_SAMPLED_HTTP',
     'sample_limit' => PROBE_SAMPLE_LIMIT,
     'counts' => $counts,
     'results' => $results,
@@ -227,6 +228,6 @@ try {
 }
 catch (Throwable) {
   // Never print exception messages, request URIs, bodies, identities or traces.
-  echo "{\"scope\":\"staging_client_contract_only\",\"gate\":\"BLOCKED\",\"stage\":\"runner_configuration_or_runtime\"}\n";
+  echo "{\"scope\":\"staging_client_http_only\",\"gate\":\"BLOCKED\",\"stage\":\"runner_configuration_or_runtime\"}\n";
   exit(2);
 }
