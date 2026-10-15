@@ -8,6 +8,9 @@ lazy; contenção e backend incompatível falham antes do snapshot. 7 testes nov
 33 assertions; 15 verificações concorrentes com processos MySQL 8.4.11 e 5 HTTP
 Drupal real (API fake) PASS. Inclui perda da conexão, crash do dono e logout sem
 ressurreição. Sem alteração em produção. Contrato: `drupal/DR3_SESSION_LOCKING.md`.
+Reconciliado com staging `b0c39b2` (#211): candidato `5a76db5` validado em fixture
+isolada no VPS com Drupal 11.4.10/PHP 8.3.35, 68 testes/250 assertions e 43 checks
+de configuração PASS; gate acadêmico de produção preservado.
 BLOCKED: homologação MariaDB/rotação do cookie, integração #180/#181, suporte
 customizado/BigPipe, sinalização imediata entre abas e SDK Chatwoot real. O
 bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.

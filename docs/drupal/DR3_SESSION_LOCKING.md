@@ -63,6 +63,13 @@ Ambiente descartável: PHP 8.3.29, Drupal 11.4.8, MySQL **8.4.11**, banco
 `tds_lock_qa`, Unix socket e rede Docker desabilitada. API e contas sintéticas.
 Isso não comprova MariaDB 11.8, serviços reais ou produção.
 
+Após reconciliar staging `b0c39b2` (PR #211), o candidato `5a76db5` passou
+novamente em fixture isolada no VPS, sem rede e sem volumes de produção:
+**Drupal 11.4.10 / PHP 8.3.35, 68 testes / 250 assertions e 43 verificações
+de configuração de produção PASS**. A imagem PHP foi a mesma usada no portal;
+nenhum serviço publicado foi alterado. Essa execução unitária não substitui a
+homologação concorrente em MariaDB.
+
 - Suíte unitária Drupal: **67 testes / 234 assertions PASS**. Lint completo:
   PHP syntax, PHPCS, 121 YAML e 6 Twig PASS.
 - 7 testes unitários novos / 33 assertions: exclusão antes do snapshot,
