@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/includes/class-tds-public-config.php';
 require_once __DIR__ . '/includes/interface-tds-courses-adapter.php';
 require_once __DIR__ . '/includes/class-tds-fake-courses-adapter.php';
+require_once __DIR__ . '/includes/class-tds-http-courses-adapter.php';
 require_once __DIR__ . '/includes/class-tds-courses-service.php';
 require_once __DIR__ . '/includes/class-tds-public-courses-controller.php';
 require_once __DIR__ . '/includes/class-tds-editorial-content.php';
@@ -23,7 +24,7 @@ add_action(
 add_action(
 	'rest_api_init',
 	static function () {
-		( new TDS_Public_Courses_Controller( new TDS_Courses_Service( new TDS_Fake_Courses_Adapter() ) ) )->register_routes();
+		( new TDS_Public_Courses_Controller( new TDS_Courses_Service( new TDS_HTTP_Courses_Adapter() ) ) )->register_routes();
 	}
 );
 
