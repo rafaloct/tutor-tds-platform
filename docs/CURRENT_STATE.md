@@ -1,5 +1,27 @@
 # CURRENT STATE
 
+## 2026-10-15 — decisão posterior: aprimorar WordPress existente
+
+DECISION: manter WordPress como portal e lapidar a experiência com a identidade
+TDS, substituindo a estratégia Drupal (decisão34). A implantação e os ensaios
+Drupal permanecem preservados; não há remoção ou troca de serviços nesta fatia.
+IMPLEMENTED candidato: tema canônico com fundo claro, hierarquia de entrada,
+Poppins local, logos oficiais, 14 slots e fallbacks existentes. Adapter HTTP
+público opt-in; nenhuma identidade acadêmica inferida de login WordPress.
+TESTED: preview isolado180 checks PASS (WP7.1.2/PHP8.4.26/Astra4.13.1),
+1440/390/360px sem overflow/erros JS/imagens quebradas; fontes e menu PASS.
+IMPLEMENTED posterior: estados vazios neutros/compactos, sem remover slots.
+TESTED: rerender final0.3.1 PASS nas três larguras; catálogo real WP/cURL ready,
+6 cards e total9. Evidências no PR214 / issue213.
+DECISION: usuário aprovou o visual e solicitou conferência.
+TESTED:242 checks em WP6.7.2/PHP8.2.28/MySQL8.0.45/Astra4.13.1 com
+LearnPress4.3.6 ativo, dados sintéticos e imagens produtivas isoladas.
+BLOCKED promoção: páginas com conteúdo só no tema antigo, menus e opções precisam
+de transição preservando IDs/URLs; issue215. Backup/restore da promoção pendente.
+Quarentena aplica-se ao snapshot legado, não impede evoluir tema/core canônicos.
+Contrato: `portal/WP_BRAND_REFRESH_2026-10-15.md`.
+
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no

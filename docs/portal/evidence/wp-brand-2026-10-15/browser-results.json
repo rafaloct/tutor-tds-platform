@@ -1,0 +1,111 @@
+[
+  {
+    "label": "desktop",
+    "errors": [],
+    "catalogState": "ready",
+    "courseCards": 6,
+    "title": "TDS – Formação, desenvolvimento social e inclusão produtiva no Tocantins.",
+    "overflow": false,
+    "headings": [
+      "Formação para transformar o seu território."
+    ],
+    "font": "Poppins, system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+    "fonts": [
+      {
+        "family": "Poppins",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "500",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "800",
+        "status": "loaded"
+      }
+    ],
+    "brokenImages": []
+  },
+  {
+    "label": "mobile",
+    "errors": [],
+    "catalogState": "ready",
+    "courseCards": 6,
+    "title": "TDS – Formação, desenvolvimento social e inclusão produtiva no Tocantins.",
+    "overflow": false,
+    "headings": [
+      "Formação para transformar o seu território."
+    ],
+    "font": "Poppins, system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+    "fonts": [
+      {
+        "family": "Poppins",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "500",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "800",
+        "status": "loaded"
+      }
+    ],
+    "brokenImages": [],
+    "menuExpanded": "true",
+    "menuAfterEscape": "false"
+  },
+  {
+    "label": "small",
+    "errors": [],
+    "catalogState": "ready",
+    "courseCards": 6,
+    "title": "TDS – Formação, desenvolvimento social e inclusão produtiva no Tocantins.",
+    "overflow": false,
+    "headings": [
+      "Formação para transformar o seu território."
+    ],
+    "font": "Poppins, system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+    "fonts": [
+      {
+        "family": "Poppins",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "500",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "700",
+        "status": "loaded"
+      },
+      {
+        "family": "Poppins",
+        "weight": "800",
+        "status": "loaded"
+      }
+    ],
+    "brokenImages": [],
+    "menuExpanded": "true",
+    "menuAfterEscape": "false"
+  }
+]

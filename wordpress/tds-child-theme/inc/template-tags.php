@@ -14,7 +14,7 @@ function tds_theme_brand() {
 		$logo = wp_get_attachment_image( get_theme_mod( 'custom_logo' ), 'medium', false, array( 'class' => 'tds-brand__logo', 'alt' => $name, 'loading' => 'eager' ) );
 		echo wp_kses_post( $logo );
 	} else {
-		echo '<img class="tds-brand__logo" src="' . esc_url( tds_theme_logo_url() ) . '" width="96" height="40" alt="' . esc_attr__( 'TDS — Territórios de Desenvolvimento Social e Inclusão Produtiva', 'tds-portal' ) . '" decoding="async">';
+		echo '<img class="tds-brand__logo" src="' . esc_url( tds_theme_logo_url() ) . '" width="180" height="75" alt="' . esc_attr__( 'TDS — Territórios de Desenvolvimento Social e Inclusão Produtiva', 'tds-portal' ) . '" decoding="async">';
 	}
 	echo '<span class="tds-brand__text">' . esc_html( $name ) . '<span class="tds-brand__tagline">' . esc_html__( 'Portal público', 'tds-portal' ) . '</span></span>';
 	echo '</a>';
@@ -91,8 +91,8 @@ function tds_theme_state_notice( $state, $args = array() ) {
 		'empty'       => array( '0', __( 'Nada por aqui ainda', 'tds-portal' ), __( 'Quando houver conteúdo publicado, ele aparecerá nesta área.', 'tds-portal' ) ),
 		'error'       => array( '!', __( 'Não foi possível carregar', 'tds-portal' ), __( 'Ocorreu uma falha temporária. Tente novamente mais tarde.', 'tds-portal' ) ),
 		'unavailable' => array( 'i', __( 'Indisponível temporariamente', 'tds-portal' ), __( 'Esta informação ainda não está disponível no portal.', 'tds-portal' ) ),
-		'stale'       => array( '↻', __( 'Última versão disponível', 'tds-portal' ), __( 'A fonte está temporariamente indisponível; este conteúdo pode estar desatualizado.', 'tds-portal' ) ),
-		'disabled'    => array( 'i', __( 'Recurso não habilitado', 'tds-portal' ), __( 'Este recurso ainda não foi ativado para o portal público.', 'tds-portal' ) ),
+		'stale'       => array( '↻', __( 'Última versão disponível', 'tds-portal' ), __( 'Não foi possível atualizar agora. Este conteúdo pode estar desatualizado.', 'tds-portal' ) ),
+		'disabled'    => array( 'i', __( 'Ainda não disponível', 'tds-portal' ), __( 'Assim que estiver disponível, você poderá acessar por aqui.', 'tds-portal' ) ),
 		'success'     => array( '✓', __( 'Tudo certo', 'tds-portal' ), '' ),
 	);
 	if ( ! isset( $states[ $state ] ) ) {
@@ -124,13 +124,13 @@ function tds_theme_app_access( $args = array() ) {
 	if ( '' !== $url ) {
 		echo '<div class="tds-cluster">';
 		echo tds_theme_button( isset( $args['label'] ) ? $args['label'] : __( 'Acessar o app TDS', 'tds-portal' ), $url, isset( $args['variant'] ) ? $args['variant'] : 'accent', array( 'rel' => 'noopener', 'data-tds-action' => 'app-access', 'data-tds-event' => 'app_access_click' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in tds_theme_button
-		echo '<span class="tds-footer__note">' . esc_html__( 'Canal oficial configurado pela equipe do programa.', 'tds-portal' ) . '</span>';
+		echo '<span class="tds-footer__note">' . esc_html__( 'Continue sua formação no aplicativo Tutor TDS.', 'tds-portal' ) . '</span>';
 		echo '</div>';
 	} else {
 		tds_theme_state_notice(
 			$state,
 			array(
-				'title' => __( 'Acesso ao app em configuração', 'tds-portal' ),
+				'title' => __( 'Acesso ao app indisponível no momento', 'tds-portal' ),
 				'text'  => __( 'O link oficial de acesso será publicado aqui quando estiver disponível. Desconfie de links recebidos por outros canais.', 'tds-portal' ),
 			)
 		);
@@ -186,7 +186,7 @@ function tds_theme_catalog( $per_page = 6 ) {
 	} elseif ( 'error' === $state ) {
 		tds_theme_state_notice( 'error', array( 'title' => __( 'Não foi possível carregar o catálogo', 'tds-portal' ) ) );
 	} else {
-		tds_theme_state_notice( $state, array( 'title' => __( 'Catálogo indisponível temporariamente', 'tds-portal' ), 'text' => __( 'O catálogo de cursos é publicado pela plataforma Tutor TDS e ainda não está conectado a este portal.', 'tds-portal' ) ) );
+		tds_theme_state_notice( $state, array( 'title' => __( 'Catálogo indisponível temporariamente', 'tds-portal' ), 'text' => __( 'Não foi possível consultar os cursos agora. Tente novamente mais tarde.', 'tds-portal' ) ) );
 	}
 	echo '</div>';
 }

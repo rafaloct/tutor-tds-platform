@@ -199,7 +199,13 @@ update_option( 'blogdescription', 'Portal público sintético para QA do tema' )
 update_option( TDS_Public_Config::APP_URL_OPTION, '' );
 
 // Servidor loopback.
-$php_cmd = escapeshellarg( PHP_BINARY ) . ' -n -d extension_dir=' . escapeshellarg( dirname( PHP_BINARY ) . '/ext' ) . ' -d extension=pdo_sqlite -d extension=sqlite3 -d extension=openssl -d extension=mbstring -S ' . escapeshellarg( $server_host . ':' . $server_port ) . ' -t ' . escapeshellarg( $qa );
+$php_cmd = escapeshellarg( PHP_BINARY );
+if ( 'WIN' === strtoupper( substr( PHP_OS, 0, 3 ) ) ) {
+	// The disposable Windows runner loads extensions explicitly. Linux inherits
+	// its installed PHP configuration (including mysqli for the MySQL rehearsal).
+	$php_cmd .= ' -n -d extension_dir=' . escapeshellarg( dirname( PHP_BINARY ) . '/ext' ) . ' -d extension=pdo_sqlite -d extension=sqlite3 -d extension=openssl -d extension=mbstring';
+}
+$php_cmd .= ' -S ' . escapeshellarg( $server_host . ':' . $server_port ) . ' -t ' . escapeshellarg( $qa );
 $server = proc_open( $php_cmd, array( 0 => array( 'pipe', 'r' ), 1 => array( 'file', dirname( $qa ) . '/theme-http-out.log', 'a' ), 2 => array( 'file', dirname( $qa ) . '/theme-http-error.log', 'a' ) ), $pipes );
 try {
 	$ready = false;
@@ -246,7 +252,7 @@ try {
 	}
 	tds_assert( 13 === substr_count( $html, 'data-tds-home-block=' ), 'home: 13 blocos visíveis sem stats não comprovados' );
 	tds_assert( false === strpos( $html, 'data-tds-home-block="stats"' ), 'home: stats ocultos sem fonte' );
-	tds_assert( false !== strpos( $html, 'data-tds-component="certificate-verify"' ) && false !== strpos( $html, 'Verificação oficial ainda não conectada' ), 'home: certificado fail-closed' );
+	tds_assert( false !== strpos( $html, 'data-tds-component="certificate-verify"' ) && false !== strpos( $html, 'Consulta de certificados indisponível no momento' ), 'home: certificado fail-closed' );
 	tds_assert( false !== strpos( $html, 'data-tds-component="support" data-tds-state="disabled"' ), 'home: suporte fail-closed' );
 
 	foreach ( $pages as $tpl => $id ) {

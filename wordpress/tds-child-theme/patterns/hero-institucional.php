@@ -6,8 +6,8 @@
  * Description: Bloco de abertura com chamada, texto curto e botões.
  */
 ?>
-<!-- wp:group {"align":"full","backgroundColor":"tds-dark","textColor":"tds-surface","className":"tds-hero","layout":{"type":"constrained","contentSize":"760px"}} -->
-<div class="wp-block-group alignfull tds-hero has-tds-surface-color has-tds-dark-background-color has-text-color has-background">
+<!-- wp:group {"align":"full","backgroundColor":"tds-surface","textColor":"tds-ink","className":"tds-hero","layout":{"type":"constrained","contentSize":"760px"}} -->
+<div class="wp-block-group alignfull tds-hero has-tds-ink-color has-tds-surface-background-color has-text-color has-background">
 <!-- wp:paragraph {"className":"tds-eyebrow"} -->
 <p class="tds-eyebrow"><?php esc_html_e( 'Programa TDS', 'tds-portal' ); ?></p>
 <!-- /wp:paragraph -->

@@ -260,3 +260,15 @@
     WordPress; funcionalidades autenticadas/IA dependem de suas verificações.
     Não rotacionar chaves JWT/CPF nem modificar bancos acadêmicos. Autorização
     não constitui aceite E2E nem permissão de merge. Issue210/PR211.
+
+
+34. 2026-10-15: decisão posterior do usuário: manter e aprimorar o WordPress
+    existente, com o branding book TDS e colaboração ACP/A2A, em vez de prosseguir
+    com Drupal como estratégia de portal. Esta decisão substitui a direção de
+    plataforma do item33; não apaga o histórico de implantação/ensaios Drupal nem
+    autoriza remoção de serviços. A fatia atual evolui somente o tema canônico
+    `wordpress/tds-child-theme`, reaproveitando plugin/adapters existentes.
+    Snapshot `wordpress/legacy-runtime` continua em quarentena e sem deploy
+    autorizado; login WordPress não concede identidade ou autoridade acadêmica.
+    Sem ativar tema, migrar banco, alterar API/Flutter ou alegar paridade dos
+    fluxos autenticados comprovados separadamente no candidato Drupal.
