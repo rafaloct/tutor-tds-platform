@@ -1,0 +1,75 @@
+# Dokploy raw Compose. Values are editable in its Environment panel.
+# An image ID pins a build made on this VPS; no pull or build on redeploy.
+services:
+  web:
+    image: ${DRUPAL_IMAGE_REF:?immutable image ID or registry digest required}
+    pull_policy: never
+    restart: unless-stopped
+    mem_limit: 1536m
+    cpus: 2
+    pids_limit: 256
+    environment:
+      DRUPAL_ENVIRONMENT: production
+      DRUPAL_IMAGE_REF: ${DRUPAL_IMAGE_REF:?required}
+      DRUPAL_DB_HOST: db
+      DRUPAL_DB_NAME: ${DRUPAL_DB_NAME:?required}
+      DRUPAL_DB_USER: ${DRUPAL_DB_USER:?required}
+      DRUPAL_DB_PASSWORD: ${DRUPAL_DB_PASSWORD:?required}
+      DRUPAL_HASH_SALT: ${DRUPAL_HASH_SALT:?required}
+      DRUPAL_TRUSTED_HOSTS: ${DRUPAL_TRUSTED_HOSTS:?required}
+      DRUPAL_REVERSE_PROXY_ADDRESSES: ${DRUPAL_REVERSE_PROXY_ADDRESSES:?required}
+      DRUPAL_PRIVATE_PATH: /var/www/private
+      TUTOR_API_BASE_URL: ${TUTOR_API_BASE_URL:?required}
+      TDS_ACADEMIC_SESSION_ENABLED: 'false'
+      PORTAL_HOST: ${PORTAL_HOST:?required}
+    volumes:
+      - public_files:/var/www/html/web/sites/default/files
+      - private_files:/var/www/private
+    ports:
+      - '127.0.0.1:18088:80'
+    networks:
+      - database
+      - dokploy-network
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS --max-time 5 -H "Host: $$PORTAL_HOST" http://127.0.0.1/health | grep -q ''"database":"up"''']
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: json-file
+      options: {max-size: '10m', max-file: '3'}
+  db:
+    image: mariadb:11.8@sha256:6422478cb8e159f080fb1d8ccf65101e26fe51385787fde7d16c3b165a331f15
+    restart: unless-stopped
+    mem_limit: 1024m
+    cpus: 1
+    pids_limit: 128
+    environment:
+      MARIADB_DATABASE: ${DRUPAL_DB_NAME:?required}
+      MARIADB_USER: ${DRUPAL_DB_USER:?required}
+      MARIADB_PASSWORD: ${DRUPAL_DB_PASSWORD:?required}
+      MARIADB_ROOT_PASSWORD: ${DRUPAL_DB_ROOT_PASSWORD:?required}
+    volumes:
+      - database:/var/lib/mysql
+    networks: [database]
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: json-file
+      options: {max-size: '10m', max-file: '3'}
+networks:
+  database:
+    internal: true
+  dokploy-network:
+    external: true
+volumes:
+  database:
+  public_files:
+  private_files:
