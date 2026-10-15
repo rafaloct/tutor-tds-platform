@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Hooks de tema da area do participante TDS.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function tds_participant_portal_theme(): array {
+  return [
+    'tds_participant_area' => [
+      'variables' => [
+        'state' => 'unavailable',
+        'message' => NULL,
+        'user' => NULL,
+        'classes' => [],
+        'certificates' => [],
+      ],
+      'template' => 'tds-participant-area',
+    ],
+  ];
+}

@@ -1,0 +1,18 @@
+services:
+  tds_participant_portal.session_cache:
+    class: Drupal\tds_participant_portal\Cache\ParticipantSessionCache
+    arguments: ['@request_stack', '@settings', '@datetime.time']
+  Drupal\tds_participant_portal\Cache\ParticipantSessionCacheInterface:
+    alias: tds_participant_portal.session_cache
+
+  tds_participant_portal.provider:
+    class: Drupal\tds_participant_portal\Service\ParticipantAreaProvider
+    arguments: ['@tds_tutor_gateway.session_manager', '@tds_participant_portal.session_cache']
+  Drupal\tds_participant_portal\Service\ParticipantAreaProviderInterface:
+    alias: tds_participant_portal.provider
+
+  tds_participant_portal.session_clear_subscriber:
+    class: Drupal\tds_participant_portal\EventSubscriber\ParticipantSessionClearSubscriber
+    arguments: ['@tds_participant_portal.session_cache']
+    tags:
+      - { name: event_subscriber }

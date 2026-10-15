@@ -26,6 +26,19 @@ interface TutorSessionManagerInterface {
   public function context(): array;
 
   /**
+   * Executa uma leitura autenticada com refresh/replay no servidor.
+   *
+   * @param string $path
+   *   Path absoluto allowlisted pelo cliente.
+   * @param array<string, scalar> $query
+   *   Query allowlisted pelo cliente.
+   *
+   * @return array<string, mixed>
+   *   Objeto JSON sanitizado pelo cliente tipado.
+   */
+  public function get(string $path, array $query = []): array;
+
+  /**
    * Invalida imediatamente o contexto local.
    */
   public function logout(): void;
