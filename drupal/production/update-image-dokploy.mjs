@@ -1,0 +1,21 @@
+/** Update only the registered portal's immutable image; preserve its secrets. */
+import {readFileSync,writeFileSync,chmodSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {findComposeById,updateCompose} from '/app/node_modules/@dokploy/server/dist/services/compose.js';
+const [registrationPath,imageRef] = process.argv.slice(2);
+if(!/^sha256:[a-f0-9]{64}$/.test(imageRef ?? '')) throw Error('Immutable image ID required');
+const inspected = execFileSync('docker',['image','inspect',imageRef,'--format','{{.Id}}'],{encoding:'utf8'}).trim();
+if(inspected !== imageRef) throw Error('Image mismatch');
+const record=JSON.parse(readFileSync(registrationPath,'utf8'));
+const entry=await findComposeById(record.composeId);
+if(entry.appName!==record.appName || entry.name!=='Portal Drupal') throw Error('Service mismatch');
+const lines=entry.env.split('\n');
+if(lines.filter(l=>l.startsWith('DRUPAL_IMAGE_REF=')).length!==1) throw Error('Image environment ambiguity');
+const env=lines.map(l=>l.startsWith('DRUPAL_IMAGE_REF=')?`DRUPAL_IMAGE_REF='${imageRef}'`:l).join('\n');
+await updateCompose(entry.composeId,{env});
+const envPath=`/etc/dokploy/compose/${entry.appName}/code/.env`;
+writeFileSync(envPath,env,{mode:0o600});chmodSync(envPath,0o600);
+record.previousImageRef=record.imageRef;record.imageRef=imageRef;
+writeFileSync(registrationPath,JSON.stringify(record),{mode:0o600});
+console.log(JSON.stringify({status:'image_reference_updated',composeId:record.composeId,imageRef,secretsPreserved:true}));
+process.exit(0);

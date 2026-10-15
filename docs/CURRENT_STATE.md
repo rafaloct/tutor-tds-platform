@@ -1,5 +1,22 @@
 # CURRENT STATE
 
+## 2026-10-15 — implantação isolada Drupal / #210
+
+DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
+VPS e custódia de novas credenciais sem exposição; host confirmado
+portal.ipexdesenvolvimento.cloud. OBSERVED: Drupal11.4.10 instalado no Dokploy,
+imagem3858607 construída no VPS após patch de segurança crítica e correção de
+cache canonical/OG; API preservada.
+TESTED:43 verificações runtime +17 checks HTTP da origem PASS; navegador carregou
+9 cursos reais. Backup criptografado R2 conferido; cron diário04:40UTC instalado.
+Login acadêmico bloqueado server-side, IA/Chatwoot inativos. Usuário criou DNS;
+rota pública ativada, certificado Let's Encrypt válido e18 checks HTTPS PASS
+via VPS e desktop externo com DNS normal. Correção de cache3858607 promovida;
+sequência HTTP interno → HTTPS público PASS sem canonical inseguro.
+Restore isolado PASS:55 tabelas/961 registros/35 arquivos; descriptografia offsite
+ainda UNKNOWN. PR211 draft; merge não autorizado.
+Evidências e limitações: `production/DRUPAL_DOKPLOY_2026-10-15.md`.
+
 ## 2026-10-13 — fonte consolidada para a release
 
 IMPLEMENTED/TESTED-LOCAL: os commits dos PRs #203 (ensaio de recuperação) e

@@ -304,6 +304,8 @@ final class PublicPortalController extends ControllerBase {
       ],
       'tds_public_og_type',
     ];
+    // Canonical and og:url vary by scheme, host, port and base path.
+    $build['#cache']['contexts'][] = 'url.site';
     $build['#cache']['contexts'][] = 'url.path';
     $build['#cache']['contexts'][] = 'languages:language_interface';
     return $build;
