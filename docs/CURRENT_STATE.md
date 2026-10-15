@@ -1,17 +1,18 @@
 # CURRENT STATE
 
-## 2026-10-15 — preparação do piloto editorial IA / #208
+## 2026-10-15 — auditoria do piloto editorial IA / #208
 
-DECISION: reutilizar provedor do Tutor se compatível. OpenRouter/modelo Gemini
-Flash Lite documentados são candidatos; gateway acadêmico não é OpenAI-compatible.
-IMPLEMENTED/TESTED-LOCAL: receita opt-in core CKEditor5, formato HTML restrito e
-papel não atribuído sem publicação; 25 checks Drupal e 9 testes Python PASS.
-Plano desativado e preflight offline nunca aprovam ativação.
-BLOCKED: download oficial contrib HTTP403 neste ambiente; Composer AI/CKEditor/Key/
-OpenRouter não resolvido nem instalado. Provider requer revisão; limites de uso,
-restrição de conteúdo, credencial editorial e teste real permanecem pendentes.
-Sem alteração de produção, composer.lock ou config/sync. Evidência e continuação:
-`../drupal/pilots/editorial-ai/README.md`. Issue permanece aberta.
+DECISION: reutilizar fornecedor do Tutor se compatível. OBSERVED: branch209
+atualizada com staging b0c39b2(core11.4.10); resolução/instalação oficial dos4
+candidatos em fixtureisolada PASS,23 pacotes adicionais e0 versões existentes
+alteradas, validate strict/audit PASS. Manifests ficam em dependency-audit;
+composer principal/produção inalterados.10 testes Python e guardas audit/runtime PASS.
+Revisão OpenRouter/CKEditor encontrou logging bruto e limites de transporte/acesso
+insuficientes para o piloto; recomendação é adapter TDS mínimo, contrib desativado.
+TARGET: enforcement server-side, quota atômica e fake sem rede. BLOCKED: esses
+controles, credencial editorial, orçamento/retenção e teste real. Nenhuma chave
+lida/gerada, chamada de modelo ou ativação nesta etapa. Receita core anterior:
+25 checksDrupalPASS. PR209 aberto; detalhes em ../drupal/pilots/editorial-ai/README.md.
 
 ## 2026-10-15 — implantação isolada Drupal / #210
 

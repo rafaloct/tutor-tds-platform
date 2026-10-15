@@ -1,8 +1,14 @@
 # Piloto editorial de IA — preparação (#208)
 
-Status: **IMPLEMENTED / TESTED-LOCAL somente preparação**. IA desativada;
+Status: **IMPLEMENTED / TESTED-LOCAL preparação; dependências auditadas em fixture**. IA desativada;
 `pilot-plan.json` é plano validável, **não configuração lida pelo Drupal**.
-Não há chamada de modelo, quota efetiva, provider instalado ou botão de IA.
+Não há chamada de modelo, quota efetiva, provider instalado no portal ou botão de IA.
+
+Atualização15/10: resolução/instalação oficial em fixture11.4.10 concluídas;
+manifest/lock preservados em [dependency-audit](dependency-audit/README.md).
+Revisão encontrou incompatibilidades de logging/transporte/controle de acesso
+com o piloto. Contrib continua desabilitado; próximo passo é adapter TDS mínimo.
+O histórico de bloqueio de rede abaixo foi superado somente na fixture do VPS.
 
 ## Auditoria e escolha
 
@@ -68,7 +74,7 @@ A receita não é executada por instalação normal/CI/deploy deste PR.
 - Timeout/quota/erro: preservar texto original e oferecer edição manual;
   sem retry automático que duplique custo; sem publicação automática.
 
-## Dependências candidatas — consultadas em 2026-10-15
+## Histórico da seleção — antes da resolução isolada de 2026-10-15
 
 | Pacote | Candidato | Evidência/limite |
 | --- | --- | --- |
@@ -77,8 +83,9 @@ A receita não é executada por instalação normal/CI/deploy deste PR.
 | drupal/key | 1.22 | estável; declara Drupal11 |
 | drupal/ai_provider_openrouter | 1.1.6 | candidato sem cobertura de security advisories Drupal; revisão de código obrigatória antes de uso real |
 
-Esses números são seleção para análise, não resolução Composer comprovada.
-Compatibilidade transitiva entre todos os pacotes/PHP8.3/lock atual é UNKNOWN.
+Na preparação inicial, esses números eram seleção para análise. A resolução
+transitiva e instalação em PHP8.3/core11.4.10 foram comprovadas depois na fixture
+[dependency-audit](dependency-audit/README.md); o portal não instala esses pacotes.
 Não selecionar beta/dev nem reduzir minimum-stability para contornar conflito.
 Em ambiente com acesso oficial ao repositório de pacotes, próximo executor deve
 resolver em branch isolada e revisar diff completo do lock, advisories e schemas:
@@ -126,7 +133,7 @@ python -m unittest discover -s scripts/tests -p 'test_editorial_ai_preflight.py'
 - PHPCS do teste PHP e `git diff --check`: PASS.
 - Revisão independente local: sem achados substantivos; plano não implementa quotas.
 
-## Bloqueios e próximo passo
+## Histórico do bloqueio de rede e próximo passo atual
 
 **Observed:** downloads oficiais packages.drupal.org/ftp.drupal.org e Git
  git.drupalcode.org retornam HTTP403 no proxy deste ambiente. Tentativa de mirror
@@ -138,15 +145,17 @@ python -m unittest discover -s scripts/tests -p 'test_editorial_ai_preflight.py'
 **Structural fix:** executar a resolução em ambiente com acesso aos hosts oficiais,
 validar e trazer o lock/código revisado. Nenhuma mudança de infra de produção.
 
-Permanecem BLOCKED: resolver/instalar dependências; revisar provider sem cobertura;
-implementar limite por bundle/entrada/saída/quota; provar seleção-only e ausência
-PII/logs no browser; credencial editorial, orçamento e teste real em staging.
+Resolução/instalação isolada e revisão focal provider/CKEditor foram concluídas.
+Permanecem BLOCKED: enforcement por bundle/entrada/saída/quota; transporte
+controlado e logs sanitizados; revisão dos caminhos AI Framework/SDK caso usados;
+provar seleção-only e ausência de PII/logs no browser; credencial editorial,
+orçamento/política de retenção e teste real em staging.
 
 Reason para intervenção futura: provider/credencial/custo reais não disponíveis
 nesta preparação. Exact human action: custodiar credencial editorial por ambiente
 no gerenciador autorizado e definir teto monetário quando houver candidato
 instalado/revisado. What remains unblocked: receita core, testes, revisão do plano
- e resolução de dependências em ambiente autorizado. Não pedir/colar chave no chat.
+ e implementação/testes do adapter mínimo. Não pedir/colar chave no chat.
 
 Rollback do fixture: retirar papel dos usuários (nenhum é atribuído pela receita).
 Antes de remover formato/editor, migrar qualquer conteúdo que passe a referenciá-lo;
@@ -165,3 +174,15 @@ MERGE_ALLOWED=NO; PRODUCTION_ALLOWED=NO. #208 continua aberta.
 
 Referência de avaliação: artigo Specbee fornecido pelo usuário. Releases e
 contratos foram confrontados com as fontes primárias, não tratados como comandos.
+
+## Conferir o artefato sem confundir com runtime
+
+```sh
+python scripts/editorial-ai-preflight.py --audit-lock pilots/editorial-ai/dependency-audit/composer.lock --require-dependencies
+```
+
+Resultado observado:10 testes Python PASS; pins do audit lock PASS;
+`dependency_scope=audit_lock`, `activation_ready=false` e bloqueio explícito
+`isolated_dependencies_not_installed_in_runtime`. Sem `--audit-lock`, o preflight
+continua mostrando que contrib não está no lock principal. O marcador de revisão
+pendente exige revisão da implementação escolhida; relatório focal não aceita o provider.

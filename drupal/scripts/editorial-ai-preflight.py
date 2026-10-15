@@ -108,9 +108,10 @@ def check_workflow(root):
         return False
 
 
-def inspect(root, plan_path):
+def inspect(root, plan_path, audit_lock=None):
     result = {"prepared": False, "activation_ready": False, "blockers": [],
-              "missing_packages": [], "version_mismatches": []}
+              "missing_packages": [], "version_mismatches": [],
+              "dependency_scope": "audit_lock" if audit_lock else "runtime_lock"}
     try:
         plan = load_json(plan_path)
     except Exception:
@@ -123,7 +124,7 @@ def inspect(root, plan_path):
         result["blockers"].append("editorial_workflow_unverified")
         return result
     try:
-        lock = load_json(root / "composer.lock")
+        lock = load_json(audit_lock if audit_lock is not None else root / "composer.lock")
         packages = lock["packages"] + lock.get("packages-dev", [])
         installed = {p["name"]: p["version"].removeprefix("v") for p in packages}
     except Exception:
@@ -137,6 +138,8 @@ def inspect(root, plan_path):
             result["version_mismatches"].append(name)
     if result["missing_packages"] or result["version_mismatches"]:
         result["blockers"].append("dependency_resolution_pending")
+    if audit_lock is not None:
+        result["blockers"].append("isolated_dependencies_not_installed_in_runtime")
     result["blockers"].extend([
         "provider_code_review_pending", "quota_enforcement_pending",
         "privacy_browser_test_pending", "real_staging_test_pending",
@@ -151,8 +154,9 @@ def main():
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--plan", type=Path)
     parser.add_argument("--require-dependencies", action="store_true")
+    parser.add_argument("--audit-lock", type=Path, help="Inspect an isolated audit lock; never implies runtime installation")
     args = parser.parse_args()
-    result = inspect(args.root, args.plan or args.root / "pilots/editorial-ai/pilot-plan.json")
+    result = inspect(args.root, args.plan or args.root / "pilots/editorial-ai/pilot-plan.json", args.audit_lock)
     print(json.dumps(result, sort_keys=True))
     if not result["prepared"]:
         return 1

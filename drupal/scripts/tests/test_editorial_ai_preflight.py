@@ -58,6 +58,18 @@ class PreparationTests(unittest.TestCase):
         self.assertEqual(result["missing_packages"], [])
         self.assertIn("real_staging_test_pending", result["blockers"])
 
+    def test_audit_lock_cannot_claim_runtime_installation_or_activation(self):
+        audit = self.root / "audit.lock"
+        audit.write_text(json.dumps({"packages": [
+            {"name": name, "version": version} for name, version in preflight.PACKAGES.items()
+        ]}))
+        result = preflight.inspect(self.root, self.plan, audit)
+        self.assertEqual(result["dependency_scope"], "audit_lock")
+        self.assertEqual(result["missing_packages"], [])
+        self.assertIn("isolated_dependencies_not_installed_in_runtime", result["blockers"])
+        self.assertFalse(result["activation_ready"])
+        self.assertEqual(set(self.inspect()["missing_packages"]), set(preflight.PACKAGES))
+
     def test_mismatched_versions_do_not_echo_lock_values(self):
         (self.root / "composer.lock").write_text(json.dumps({"packages": [
             {"name": "drupal/ai", "version": "sensitive-unexpected-value"}
