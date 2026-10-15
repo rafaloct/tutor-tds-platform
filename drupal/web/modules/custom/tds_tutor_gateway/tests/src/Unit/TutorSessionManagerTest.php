@@ -7,12 +7,14 @@ namespace Drupal\Tests\tds_tutor_gateway\Unit;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\tds_tutor_gateway\Client\TutorApiClientInterface;
+use Drupal\tds_tutor_gateway\Event\TutorSessionClearedEvent;
 use Drupal\tds_tutor_gateway\Exception\GatewayException;
 use Drupal\tds_tutor_gateway\Session\TutorSessionManager;
 use Drupal\tds_tutor_gateway\Storage\TutorTokenStoreInterface;
 use Drupal\tds_tutor_gateway\ValueObject\TutorTokenSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Testa a orquestracao da sessao TDS server-side.
@@ -34,7 +36,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
       'user' => $user,
     ]);
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     self::assertSame($user, $manager->login('11111111111', 'synthetic-password'));
     self::assertSame(1, $store->clearCount);
     self::assertSame($fresh, $store->load());
@@ -49,7 +51,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
     $client->method('login')
       ->willThrowException(new GatewayException('invalid_credentials', 401));
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     try {
       $manager->login('11111111111', 'invalid-password');
       self::fail('Era esperado login invalido.');
@@ -75,7 +77,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
       'role' => 'student',
     ]);
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     self::assertSame('user-1', $manager->context()['id']);
     self::assertSame($fresh, $store->load());
   }
@@ -97,7 +99,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
       });
     $client->expects(self::once())->method('refresh')->with('refresh-old')->willReturn($fresh);
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     self::assertSame('user-1', $manager->context()['id']);
   }
 
@@ -110,7 +112,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
     $store = new MemoryTutorTokenStore($tokens);
     $client->method('me')->willThrowException(new GatewayException('api_unavailable', 503));
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     try {
       $manager->context();
       self::fail('Era esperado offline.');
@@ -128,7 +130,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
     $client = $this->createMock(TutorApiClientInterface::class);
     $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 1000));
     $client->method('refresh')->willThrowException(new GatewayException('invalid_or_expired_session', 401));
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
 
     try {
       $manager->context();
@@ -141,6 +143,66 @@ final class TutorSessionManagerTest extends UnitTestCase {
     $store->save(new TutorTokenSet('other', 'other-r', 2000));
     $manager->logout();
     self::assertNull($store->load());
+  }
+
+  /**
+   * GET autenticado recebe refresh unico depois de 401 e repete com novo token.
+   */
+  public function testAuthorizedGetRefreshesOnce(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 2000));
+    $fresh = new TutorTokenSet('fresh', 'refresh-fresh', 3000);
+    $calls = 0;
+    $client->expects(self::exactly(2))->method('get')
+      ->with('/classes', ['enrolled_only' => 'true'], self::anything())
+      ->willReturnCallback(function (string $path, array $query, string $token) use (&$calls): array {
+        if ($calls++ === 0) {
+          self::assertSame('old', $token);
+          throw new GatewayException('invalid_or_expired_session', 401);
+        }
+        self::assertSame('fresh', $token);
+        return ['classes' => []];
+      });
+    $client->expects(self::once())->method('refresh')->with('refresh-old')->willReturn($fresh);
+
+    $manager = $this->manager($client, $store, 1000);
+    self::assertSame(['classes' => []], $manager->get('/classes', ['enrolled_only' => 'true']));
+  }
+
+  /**
+   * Logout publica limpeza para caches privados consumidores.
+   */
+  public function testLogoutDispatchesSessionClearedEvent(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 2000));
+    $dispatcher = $this->createMock(EventDispatcherInterface::class);
+    $dispatcher->expects(self::once())
+      ->method('dispatch')
+      ->with(
+        self::isInstanceOf(TutorSessionClearedEvent::class),
+        TutorSessionClearedEvent::NAME,
+      );
+    $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher);
+
+    $manager->logout();
+
+    self::assertNull($store->load());
+  }
+
+  /**
+   * Cria manager com dispatcher sem efeitos externos.
+   */
+  private function manager(
+    TutorApiClientInterface $client,
+    TutorTokenStoreInterface $store,
+    int $requestTime,
+  ): TutorSessionManager {
+    return new TutorSessionManager(
+      $client,
+      $store,
+      $this->time($requestTime),
+      $this->createMock(EventDispatcherInterface::class),
+    );
   }
 
   /**
