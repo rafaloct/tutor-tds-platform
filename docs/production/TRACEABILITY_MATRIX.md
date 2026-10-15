@@ -160,4 +160,8 @@ Details: `ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md`; no gate promoted.
 | Automatic generation + four lifecycle states + audit institutional flow | Last checkpoint→_run, candidate ref lifecycle, pending_dispatch evidence | No real SMTP/VPS; gate blocked, official wallet segregated |
 | Additive policy/lifecycle schema | 20261003_0022 | Populated upgrade/empty rollback + populated downgrade refusal; SQLite only |
 
+## WordPress — retomada em 2026-10-15
+
+| Fatia | Implementação | Evidência | Limite |
+| --- | --- | --- | --- |
 | WP branding / #213 / PR214 | Tema0.3.1 + adapter público opt-in | Browser1440/390/360 PASS; WP/cURL público6 de9 cursos | Produção6.7.2/8.2.28 e promoção pendentes; sem paridade privada |

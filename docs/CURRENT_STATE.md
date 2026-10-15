@@ -6,12 +6,14 @@ DECISION: manter WordPress como portal e lapidar a experiência com a identidade
 TDS, substituindo a estratégia Drupal (decisão34). A implantação e os ensaios
 Drupal permanecem preservados; não há remoção ou troca de serviços nesta fatia.
 IMPLEMENTED candidato: tema canônico com fundo claro, hierarquia de entrada,
-Poppins local, logos oficiais, 14 slots e fallbacks existentes. Plugin/adapters
-preservados; nenhuma identidade acadêmica inferida de login WordPress.
+Poppins local, logos oficiais, 14 slots e fallbacks existentes. Adapter HTTP
+público opt-in; nenhuma identidade acadêmica inferida de login WordPress.
 TESTED: preview isolado180 checks PASS (WP7.1.2/PHP8.4.26/Astra4.13.1),
 1440/390/360px sem overflow/erros JS/imagens quebradas; fontes e menu PASS.
 IMPLEMENTED posterior: estados vazios neutros/compactos, sem remover slots.
-UNKNOWN: rerender desse ajuste, aceite visual e equivalência produtiva antes de ativação.
+TESTED: rerender final0.3.1 PASS nas três larguras; catálogo real WP/cURL ready,
+6 cards e total9. Evidências no PR214 / issue213.
+UNKNOWN: aceite visual e equivalência produtiva antes de ativação.
 Quarentena aplica-se ao snapshot legado, não impede evoluir tema/core canônicos.
 Contrato: `portal/WP_BRAND_REFRESH_2026-10-15.md`.
 
