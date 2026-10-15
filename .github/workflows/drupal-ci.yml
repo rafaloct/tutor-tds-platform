@@ -1,0 +1,66 @@
+name: Drupal portal CI
+
+# Gate de reproducibilidade/operacao do portal Drupal (Issue #169):
+# composer validate+audit, lint PHP/YAML/Twig, unit, build de container,
+# install a partir de config/sync, smoke sem dependencias reais, drift de
+# config e ensaio de backup+restore descartavel — tudo em projeto Compose
+# isolado, sem registry/DNS/staging/producao (HUMAN-GATE).
+# Secret scan de todo commit novo: .github/workflows/secret-scan.yml (ja cobre
+# todo PR; nao duplicado aqui).
+
+on:
+  pull_request:
+    paths:
+      - 'drupal/**'
+      - '.github/workflows/drupal-ci.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'drupal/**'
+      - '.github/workflows/drupal-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: drupal-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  archive-validation:
+    name: archive validation — negative tests (sem docker)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Testes negativos deterministicos de tarball malicioso
+        run: bash drupal/scripts/ops/tests/restore-rehearsal-archive-test.sh
+
+  composer:
+    name: composer validate + audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: composer validate --strict + composer audit (imagem pinnada do Dockerfile)
+        run: bash drupal/scripts/ci/composer-validate.sh
+
+  stack:
+    name: build + lint + unit + install + smoke + drift + restore rehearsal
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Verificacao isolada da stack (projeto Compose efemero)
+        env:
+          DRUPAL_CI_PROJECT: tds-drupal-ci-${{ github.run_id }}
+          DRUPAL_HTTP_PORT: '18080'
+          DRUPAL_RESTORE_PORT: '18081'
+        run: bash drupal/scripts/ci/verify-stack.sh
