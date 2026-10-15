@@ -15,7 +15,10 @@ TESTED-LOCAL posterior (`1c26451`): MariaDB 11.8.9 na imagem do banco do portal,
 fixture sem rede/sem portas públicas, PHP 8.3.35/Drupal 11.4.10. 15 checks
 concorrentes + 5 HTTP + 11 de regeneração/logout nativo Drupal PASS, incluindo
 replay do cookie regenerado revogado (401). API e contas sintéticas.
-BLOCKED: rotação/fixação no login TDS (distinta do login editorial testado),
+IMPLEMENTED candidato posterior: login/logout TDS rotaciona ID com destruição do
+antigo e preserva sessão editorial; 32 testes gateway/115 assertions PASS.
+Os 21 checks HTTP específicos TDS ainda aguardam execução (não são os 11 core).
+BLOCKED: validação HTTP de rotação/fixação no login TDS,
 integração #180/#181, suporte customizado/BigPipe, sinalização imediata entre abas
 e SDK Chatwoot real. O
 bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.

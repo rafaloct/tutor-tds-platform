@@ -6,6 +6,7 @@ namespace Drupal\Tests\tds_tutor_gateway\Unit;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\tds_tutor_gateway\Controller\TutorSessionController;
+use Drupal\tds_tutor_gateway\Exception\GatewayException;
 use Drupal\tds_tutor_gateway\Session\TutorSessionManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -46,6 +47,18 @@ final class TutorSessionControllerTest extends UnitTestCase {
     self::assertStringNotContainsString('access_token', $body);
     self::assertStringNotContainsString('refresh_token', $body);
     self::assertStringNotContainsString('synthetic-password', $body);
+    self::assertStringContainsString('no-store', $response->headers->get('Cache-Control', ''));
+  }
+
+  /**
+   * Logout rotation failure remains a sanitized, non-cacheable failure.
+   */
+  public function testLogoutRotationFailure(): void {
+    $manager = $this->createMock(TutorSessionManagerInterface::class);
+    $manager->method('logout')->willThrowException(new GatewayException('session_rotation_failed', 503));
+    $response = (new TutorSessionController($manager))->logout();
+    self::assertSame(503, $response->getStatusCode());
+    self::assertSame(['error' => 'session_rotation_failed'], json_decode($response->getContent(), TRUE));
     self::assertStringContainsString('no-store', $response->headers->get('Cache-Control', ''));
   }
 

@@ -10,6 +10,7 @@ use Drupal\tds_tutor_gateway\Client\TutorApiClientInterface;
 use Drupal\tds_tutor_gateway\Event\TutorSessionClearedEvent;
 use Drupal\tds_tutor_gateway\Exception\GatewayException;
 use Drupal\tds_tutor_gateway\Session\TutorSessionManager;
+use Drupal\tds_tutor_gateway\Session\TutorSessionLifecycleInterface;
 use Drupal\tds_tutor_gateway\Storage\TutorTokenStoreInterface;
 use Drupal\tds_tutor_gateway\ValueObject\TutorTokenSet;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -36,7 +37,11 @@ final class TutorSessionManagerTest extends UnitTestCase {
       'user' => $user,
     ]);
 
-    $manager = $this->manager($client, $store, 1000);
+    $lifecycle = $this->createMock(TutorSessionLifecycleInterface::class);
+    $lifecycle->expects(self::once())->method('rotateId')->willReturnCallback(function () use ($store): void {
+      self::assertNull($store->load(), 'New tokens must not be persisted before rotation.');
+    });
+    $manager = new TutorSessionManager($client, $store, $this->time(1000), $this->createMock(EventDispatcherInterface::class), $lifecycle);
     self::assertSame($user, $manager->login('11111111111', 'synthetic-password'));
     self::assertSame(1, $store->clearCount);
     self::assertSame($fresh, $store->load());
@@ -182,7 +187,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
         self::isInstanceOf(TutorSessionClearedEvent::class),
         TutorSessionClearedEvent::NAME,
       );
-    $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher);
+    $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher, $this->createMock(TutorSessionLifecycleInterface::class));
 
     $manager->logout();
 
@@ -202,6 +207,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
       $store,
       $this->time($requestTime),
       $this->createMock(EventDispatcherInterface::class),
+      $this->createMock(TutorSessionLifecycleInterface::class),
     );
   }
 
@@ -233,6 +239,43 @@ final class TutorSessionManagerTest extends UnitTestCase {
   }
 
   /**
+   * Rotation failure never leaves newly issued tokens in the old session.
+   */
+  public function testFailedRotationDoesNotPersistNewTokens(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'old-r', 9999));
+    $client->method('login')->willReturn([
+      'tokens' => new TutorTokenSet('new', 'new-r', 9999),
+      'user' => ['id' => 'new-user'],
+    ]);
+    $lifecycle = $this->createMock(TutorSessionLifecycleInterface::class);
+    $lifecycle->method('rotateId')->willThrowException(new GatewayException('session_rotation_failed', 503));
+    $manager = new TutorSessionManager($client, $store, $this->time(1000), $this->createMock(EventDispatcherInterface::class), $lifecycle);
+    try {
+      $manager->login('synthetic-cpf', 'synthetic-password');
+      self::fail('Rotation failure must fail the login.');
+    }
+    catch (GatewayException $error) {
+      self::assertSame(503, $error->httpStatus());
+      self::assertNull($store->load());
+    }
+  }
+
+  /**
+   * Logout clears Tutor credentials before destroying the old cookie ID.
+   */
+  public function testLogoutClearsBeforeRotation(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'old-r', 9999));
+    $lifecycle = $this->createMock(TutorSessionLifecycleInterface::class);
+    $lifecycle->expects(self::once())->method('rotateId')->willReturnCallback(function () use ($store): void {
+      self::assertNull($store->load());
+    });
+    (new TutorSessionManager($client, $store, $this->time(1000), $this->createMock(EventDispatcherInterface::class), $lifecycle))->logout();
+    self::assertNull($store->load());
+  }
+
+  /**
    * Mock de relogio.
    */
   private function time(int $requestTime): TimeInterface {
@@ -259,7 +302,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
         $dispatcher->expects(self::once())->method('dispatch')
           ->with(self::isInstanceOf(TutorSessionClearedEvent::class), TutorSessionClearedEvent::NAME);
-        $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher);
+        $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher, $this->createMock(TutorSessionLifecycleInterface::class));
         try {
           match ($method) {
             'me' => $manager->context(),

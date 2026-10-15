@@ -88,6 +88,10 @@ vendor/bin/drush site:install minimal --account-name=qa-session-lock --account-p
 cp -p "$scratch/settings.php" web/sites/default/settings.php
 stage=enable-gateway
 vendor/bin/drush en tds_tutor_gateway -y
+if [[ "${TDS_SESSION_MUTEX_INTEGRATION:-}" == 1 ]]; then
+  stage=enable-integrated-portals
+  vendor/bin/drush en tds_participant_portal tds_operator_portal tds_support_certificates -y
+fi
 stage=start-listeners
 (cd "$root/web" && exec env PHP_CLI_SERVER_WORKERS=4 setsid php -S 127.0.0.1:8871 .ht.router.php) > "$scratch/web.log" 2>&1 &
 web_pid=$!
@@ -109,4 +113,6 @@ php scripts/test-dr3-session-concurrency.php http
 stage=core-cookie-rotation
 php scripts/fixtures/session-lock-api.php seed-anonymous
 php scripts/test-dr3-session-concurrency.php http-rotation
+stage=tds-cookie-rotation
+php scripts/test-dr3-session-concurrency.php http-tds
 echo 'Disposable HTTP fixture passed. Remove its database/container and checkout.'
