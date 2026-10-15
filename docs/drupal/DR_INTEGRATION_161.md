@@ -45,10 +45,11 @@ nenhuma mudança de dependências ou de código de negócio decorreu dessa falha
 
 ## Limites e continuidade
 
-Ainda não é aceite #170 nem liberação da autenticação em produção. Primeiro login
-do participante sem sessão CMS e obtenção de cookie/CSRF ainda não comprovados.
-Os checks TDS abaixo começam com uma sessão editorial. Provas sintéticas não
-equivalem a jornada real de usuário no browser,
+Ainda não é aceite #170 nem liberação da autenticação em produção. O primeiro
+login sem CMS foi comprovado com API sintética no recibo Chromium posterior.
+Os 21 checks TDS abaixo começam com sessão editorial; os 24 Chromium começam
+sem cookies e sem conta CMS. Provas sintéticas não equivalem a jornada com
+serviços acadêmicos reais,
 validação de autorização na API produtiva, SDK Chatwoot real, verificador Worker,
 WCAG ou performance. Não usar esta branch como prova de IA: #209 é separado.
 
@@ -76,4 +77,25 @@ Runner `test-dr3-http-fixture.sh` com `TDS_SESSION_MUTEX_INTEGRATION=1` habilito
 participante, operador e suporte/certificados na fixture. Isso comprova wiring
 e lifecycle integrados; não prova as jornadas acadêmicas reais desses módulos.
 Review independente: sem regressão identificada na reconciliação dos contratos.
-Consulta CI via watcher bloqueada por GraphQL HTTP403; CI verde não confirmado.
+Consulta inicial via watcher retornou GraphQL HTTP403. Consulta REST posterior
+para `146e67c` confirmou Secret scan (run38786755201) e WordPress legacy
+quarantine (run38786755110) success; não comprova todo o CI.
+
+
+## Primeiro acesso sem CMS — continuação comprovada
+
+Código funcional `146e67c`: entrada `/entrar`, bootstrap same-origin com header
+não simples e marcador anônimo, CSRF Drupal mantido, login/logout rotacionando
+ID e controle de saída também em erros403/503. Gate produtivo permanece off.
+
+- VPS PHP8.3.35/Drupal11.4.10/MariaDB11.8.9: **127 testes/488 assertions +69
+  settings +15 concorrentes +5 HTTP refresh +11 core +21 TDS PASS**, cleanup0.
+- Chromium local `7279bed` (mudanças posteriores apenas no script browser, sem código de produto):
+  **24 checks PASS**, PHP8.3.29/Drupal11.4.8/MySQL8.4.11, rede interna com
+  forwarder loopback. Navegador vazio→bootstrap→login UI→área com conta sintética,
+  uid editorial0→logout UI. Proteções origem/CSRF, cookies antigos401, storage
+  vazio e ausência de CSRF no HTML comprovadas. Cleanup0.
+
+Recibo detalhado e diferença entre ambientes: `DR3_SESSION_LOCKING.md`. Sem
+Chromium no VPS ou serviços reais nessa prova. API/Worker/Chatwoot reais,
+WCAG/performance e aceite #170 continuam pendentes, sem ativação de produção.

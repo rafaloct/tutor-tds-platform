@@ -3,12 +3,19 @@
 
 ## 2026-10-15 — candidato de primeiro acesso participante sem CMS
 
-IMPLEMENTED: página `/entrar`, bootstrap anônimo same-origin, CSRF Drupal e
+IMPLEMENTED/TESTED-ISOLATED: página `/entrar`, bootstrap anônimo same-origin, CSRF Drupal e
 entrada/saída na área do participante; cookie anônimo persistido por marcador
 booleano, sem conta Drupal criada. Gate de produção preservado. Validação focal
 64 testes/252 assertions; gate completo 127 testes/488 assertions, lint completo
-e 69 checks de settings PASS (PHP 8.3.29). Prova Chromium começa
-sem cookies e sem autenticação editorial; execução runtime ainda UNKNOWN.
+e 69 checks de settings PASS (PHP 8.3.29). Chromium `7279bed`: 24 checks PASS
+começando sem cookies, uid editorial zero; bootstrap, CSRF/origem, entrada/saída
+pela UI e rejeição dos cookies antigos. Fixture Drupal 11.4.8/MySQL 8.4.11,
+API sintética, rede interna e forwarder loopback; cleanup exit 0.
+VPS `146e67c`: PHP 8.3.35/Drupal 11.4.10/MariaDB 11.8.9, 127 testes/488
+assertions + 69 settings + 15 concorrentes + 5 HTTP + 11 core + 21 TDS PASS.
+Os commits posteriores mudaram apenas o script browser, sem código de produto; não houve
+prova Chromium no VPS. API/Worker/Chatwoot reais, WCAG/performance e aceite #170
+seguem pendentes; flag produtiva permanece desligada.
 Contrato e limites: `drupal/DR3_SESSION_LOCKING.md`.
 
 ## 2026-10-15 — candidato integrado Drupal / PR #212
@@ -18,8 +25,10 @@ IMPLEMENTED/TESTED-ISOLATED: #180 (40901a1), #181 (f70c8d9) e #207
 limpeza dos dois consumidores e gate de todas as rotas acadêmicas privadas.
 VPS isolado PHP8.3.35/Drupal11.4.10/MariaDB11.8.9:112 testes/467 assertions,
 69 checks de configuração e52 verificações concorrentes/HTTP PASS; API sintética.
-Nenhum deploy, merge em staging ou ativação. Primeiro login sem sessão CMS,
-browser E2E real, Chatwoot/Worker e aceite#170 pendentes. CI watcher403.
+Nenhum deploy, merge em staging ou ativação. Primeiro login sintético sem CMS
+foi comprovado no recibo posterior acima; serviços reais e aceite #170 pendentes.
+CI `146e67c`: Secret scan e WordPress legacy quarantine success via REST;
+watcher GraphQL retornou 403, sem conclusão sobre CI completo.
 Contrato/limites: `drupal/DR_INTEGRATION_161.md`.
 
 ## 2026-10-15 — #168: mutex da sessão candidato local
@@ -44,7 +53,7 @@ assertions, 69 checks settings, 15 concorrentes MariaDB, 5 HTTP refresh, 11 core
 e 21 TDS login/logout PASS. Fixture VPS isolada sem rede, PHP 8.3.35/Drupal
 11.4.10/MariaDB 11.8.9, módulos participante/operador/suporte habilitados apenas
 na fixture. Não atribuir esses resultados à revisão isolada `0cfa05c` (32/115).
-BLOCKED: bootstrap anônimo sem CMS, suporte customizado/BigPipe, prova real de
+BLOCKED: serviços acadêmicos reais, suporte customizado/BigPipe, prova real de
 sinalização entre abas e SDK Chatwoot; implantação autenticada e aceite #170. O
 bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.
 

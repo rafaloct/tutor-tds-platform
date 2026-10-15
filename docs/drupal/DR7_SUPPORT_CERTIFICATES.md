@@ -123,7 +123,9 @@ não são ecoadas nem encadeadas em exceções que possam reter bearer.
    PASS na fixture VPS PHP 8.3.35/Drupal 11.4.10/MariaDB 11.8.9 sem rede, com
    participante/operador/suporte habilitados apenas para QA. Evidência integrada,
    distinta dos 32 testes/115 assertions locais do candidato isolado `0cfa05c`.
-   **BLOCKED:** bootstrap anônimo sem CMS, custom backends/BigPipe, deployment
+   Bootstrap anônimo sintético: 24 checks Chromium PASS em `7279bed`, conforme
+   `DR3_SESSION_LOCKING.md`; não comprova SDK Chatwoot real.
+   **BLOCKED:** serviços reais, custom backends/BigPipe, deployment
    e aceite #170. Sinalização entre abas e SDK real ainda exigem prova E2E.
 3. **BLOCKED: G3/verificador nativo.** Teste real válido/inválido/Worker
    indisponível pertence ao handoff oficial até contrato público aprovado.

@@ -134,8 +134,8 @@ fixture e seus settings locais. Não deixar serviços ou volumes permanentes.
 ## Gates e rollback
 
 IMPLEMENTED/TESTED-LOCAL fecha a lacuna de ordering no recorte comprovado. Ainda
-BLOCKED: implantação autenticada, custom backends/BigPipe, bootstrap anônimo sem
-CMS, prova real de sinalização de logout entre abas, SDK Chatwoot real e
+BLOCKED: implantação autenticada, custom backends/BigPipe, serviços acadêmicos
+reais, prova real de sinalização de logout entre abas, SDK Chatwoot real e
 aceite #170. Nenhum deploy, API, Worker, Flutter, secret ou conta real foi alterado.
 
 Reverter middleware restaura a corrida conhecida; portanto rollback exige manter
@@ -225,11 +225,12 @@ participante, operador e suporte exclusivamente na fixture; API/contas sintétic
 
 Esse recibo pertence ao descendente integrado, não ao SHA isolado `0cfa05c`, cuja
 prova focal foi 32 testes/115 assertions em PHP 8.3.29. Bootstrap anônimo sem conta
-CMS continua pendente; não houve deploy nem aceite de produção a partir da prova.
+CMS continuava pendente nesse recibo; a prova posterior abaixo fecha o recorte
+sintético. Não houve deploy nem aceite de produção a partir da prova.
 
 ## Candidato — primeiro acesso sem conta editorial
 
-IMPLEMENTED, runtime pendente: `/entrar` entrega formulário sem credenciais nem
+IMPLEMENTED/TESTED-ISOLATED: `/entrar` entrega formulário sem credenciais nem
 CSRF no HTML. JS externo solicita `POST /tds/session/bootstrap`, restrito à mesma
 origem e ao header não simples `X-TDS-Bootstrap: 1`. O bootstrap grava somente
 um marcador booleano na sessão anônima: metadata CSRF isolada não garante que o
@@ -248,10 +249,35 @@ Prova preparada em `scripts/test-dr3-browser-login.cjs`: Chromium com contexto
 vazio, cookie anônimo, Origin/CSRF ausente/incorreto/de outra sessão, login pela
 UI, contexto acadêmico com uid editorial zero, cookie antigo inutilizável e
 logout pela UI com replay revogado. API e contas somente sintéticas; execução
-runtime ainda UNKNOWN. O runner HTTP aceita bind QA allowlisted e hold de até
+runtime comprovada no recibo abaixo. O runner HTTP aceita bind QA allowlisted e hold de até
 120 segundos com sentinelas `.tds-browser-ready`/`.tds-browser-done`, para o
 coordenador testar via porta local 18871 em rede isolada. Nenhum container é
 criado pelo script. Sem TLS nessa fixture: `Secure` permanece gate do deployment.
 
 Validação estática/unitária do candidato: 127 testes/488 assertions em PHP 8.3.29,
 lint PHP65/PHPCS64/YAML130/Twig8 e 69 checks de settings PASS.
+
+
+### Recibo de primeiro acesso anônimo — 15/10/2026
+
+**24 checks Chromium 151.0.7922.173 PASS em `7279bed`**, PHP 8.3.29/Drupal 11.4.8/MySQL 8.4.11.
+Browser começa sem cookies, entra pelo formulário e permanece com uid editorial
+zero. Foram observados: bootstrap `no-store`, ausência de CORS e CSRF no HTML,
+HttpOnly/SameSite=Lax, recusas de CSRF ausente/incorreto/de outra sessão e origem
+estrangeira, senha limpa após falha, contexto persistido, storage vazio, rotação
+com cookie antigo401, logout pela UI e replay do cookie autenticado401. O mesmo
+runner passou 5 HTTP refresh + 11 core + 21 TDS. API e identidades sintéticas.
+
+A primeira execução não atingiu o produto: Docker em rede interna não publicou
+a porta solicitada. Investigação confirmou conexão recusada; o coordenador
+validou transporte com PHP sintético e usou forwarder restrito ao loopback para
+IP privado da fixture, mantendo isolamento. Não houve correção de produto por
+esse erro. Recibos locais: `/tmp/tds-browser-bootstrap.eosimM/browser.log` e
+`web-runner.log`; cleanup exit 0.
+
+**VPS `146e67c` PASS:** PHP 8.3.35/Drupal 11.4.10/MariaDB 11.8.9, 127 testes/488
+assertions + 69 settings + 15 concorrentes + 5 HTTP + 11 core + 21 TDS. Rede
+`none`, API sintética, cleanup exit 0. `e53905a`/`7279bed` alteraram apenas o
+script browser, sem código de produto; a prova anônima Chromium ocorreu localmente, não no VPS.
+O gap sintético anônimo dos recibos anteriores está fechado. Serviços reais,
+TLS/Secure de deployment, WCAG/performance e aceite de produção seguem pendentes.
