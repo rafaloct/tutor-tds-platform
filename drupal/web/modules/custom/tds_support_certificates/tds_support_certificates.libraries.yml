@@ -1,0 +1,15 @@
+support:
+  js:
+    js/support.js: {}
+  css:
+    component:
+      css/support.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+private_page:
+  js:
+    js/private-page.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

@@ -1,0 +1,11 @@
+services:
+  tds_support_certificates.urls:
+    class: Drupal\tds_support_certificates\Security\ExternalUrlPolicy
+    arguments: ['@settings']
+  tds_support_certificates.client:
+    class: Drupal\tds_support_certificates\Client\SupportCertificatesClient
+    arguments: ['@http_client', '@settings', '@tds_tutor_gateway.session_manager', '@tds_tutor_gateway.token_store', '@tds_support_certificates.urls', '@lock', '@request_stack']
+  tds_support_certificates.private_response:
+    class: Drupal\tds_support_certificates\EventSubscriber\PrivateResponseSubscriber
+    tags:
+      - { name: event_subscriber }

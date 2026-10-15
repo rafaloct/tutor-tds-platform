@@ -1,0 +1,52 @@
+tds_support_certificates.public:
+  path: '/verificar-certificado'
+  defaults:
+    _controller: '\Drupal\tds_support_certificates\Controller\SupportCertificatesController::verification'
+    _title: 'Verificar certificado'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+tds_support_certificates.certificates:
+  path: '/meus-certificados'
+  defaults:
+    _controller: '\Drupal\tds_support_certificates\Controller\SupportCertificatesController::certificates'
+    _title: 'Meus certificados'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+tds_support_certificates.support:
+  path: '/suporte'
+  defaults:
+    _controller: '\Drupal\tds_support_certificates\Controller\SupportCertificatesController::support'
+    _title: 'Suporte'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+tds_support_certificates.identity:
+  path: '/tds/support/identity'
+  defaults:
+    _controller: '\Drupal\tds_support_certificates\Controller\SupportCertificatesController::identity'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+  options:
+    no_cache: TRUE
+
+tds_support_certificates.frame:
+  path: '/tds/support/frame'
+  defaults:
+    _controller: '\Drupal\tds_support_certificates\Controller\SupportCertificatesController::frame'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+  options:
+    no_cache: TRUE

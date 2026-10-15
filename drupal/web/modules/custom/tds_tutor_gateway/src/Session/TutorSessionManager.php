@@ -24,6 +24,7 @@ final class TutorSessionManager implements TutorSessionManagerInterface {
     private readonly TutorApiClientInterface $client,
     private readonly TutorTokenStoreInterface $store,
     private readonly TimeInterface $time,
+    private readonly TutorSessionLifecycleInterface $lifecycle,
   ) {}
 
   /**
@@ -33,6 +34,8 @@ final class TutorSessionManager implements TutorSessionManagerInterface {
     // Falha de novo login nunca preserva tokens do usuario anterior.
     $this->store->clear();
     $result = $this->client->login($cpf, $password);
+    // Never persist new credentials under an ID known before authentication.
+    $this->lifecycle->rotateId();
     $this->store->save($result['tokens']);
     return $result['user'];
   }
@@ -67,6 +70,7 @@ final class TutorSessionManager implements TutorSessionManagerInterface {
     // A API ainda nao possui /auth/logout; a invalidacao garantida desta
     // fatia e local e imediata. A ausencia upstream permanece documentada.
     $this->store->clear();
+    $this->lifecycle->rotateId();
   }
 
   /**

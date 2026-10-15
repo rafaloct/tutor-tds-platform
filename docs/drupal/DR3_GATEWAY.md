@@ -42,6 +42,16 @@ Sessões concorrentes entre browsers têm namespaces distintos no backend de
 sessão Drupal. Dentro da mesma sessão, um novo login substitui o contexto
 anterior antes de autenticar, evitando reassociação acidental.
 
+## 2026-10-15 — correção local da concorrência de sessão
+
+IMPLEMENTED/TESTED-LOCAL: middleware externo ao ciclo de sessão Drupal, mutex
+MySQL sem lease na mesma conexão primária do handler padrão; lazy sem cookie,
+503 sem snapshot na contenção, persistência antes de release e falhas sanitizadas.
+7 testes/33 assertions novos; 15 verificações concorrentes MySQL 8.4.11 e 5 HTTP
+Drupal real com API fake passaram. Contrato, reprodução e limites de implantação
+(MariaDB, cookie rotation, custom sessions, BigPipe e #180/#181):
+`DR3_SESSION_LOCKING.md`. Nenhum deployment inferido.
+
 ## BLOCKED / fora de escopo
 
 - revogação upstream no logout depende de nova rota/Issue FastAPI;
