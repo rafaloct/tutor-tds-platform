@@ -13,7 +13,11 @@ TESTED: preview isolado180 checks PASS (WP7.1.2/PHP8.4.26/Astra4.13.1),
 IMPLEMENTED posterior: estados vazios neutros/compactos, sem remover slots.
 TESTED: rerender final0.3.1 PASS nas três larguras; catálogo real WP/cURL ready,
 6 cards e total9. Evidências no PR214 / issue213.
-UNKNOWN: aceite visual e equivalência produtiva antes de ativação.
+DECISION: usuário aprovou o visual e solicitou conferência.
+TESTED:242 checks em WP6.7.2/PHP8.2.28/MySQL8.0.45/Astra4.13.1 com
+LearnPress4.3.6 ativo, dados sintéticos e imagens produtivas isoladas.
+BLOCKED promoção: páginas com conteúdo só no tema antigo, menus e opções precisam
+de transição preservando IDs/URLs; issue215. Backup/restore da promoção pendente.
 Quarentena aplica-se ao snapshot legado, não impede evoluir tema/core canônicos.
 Contrato: `portal/WP_BRAND_REFRESH_2026-10-15.md`.
 

@@ -106,3 +106,46 @@ Retorno seguro: candidato ainda não ativado em produção. Na promoção futura
 guardar o tema ativo e opções atuais; voltar a esses arquivos/opções e desligar
 `TDS_PUBLIC_CATALOG_ENABLED` em caso de regressão. Não remover volumes/serviços.
 Área privada e IA não foram adaptadas nesta fatia. A fonte acadêmica continua API.
+
+
+## Conferência aprovada pelo usuário — versões produtivas
+
+O usuário aprovou a direção visual e pediu a conferência. Candidato `f91e68b`
+ensaiado no VPS em dois containers temporários, rede interna sem portas públicas,
+com limites de memória/CPU e imagens já existentes. Somente código WordPress,
+Astra e plugins foi copiado; wp-config, uploads e banco produtivos não foram
+copiados. Credencial sintética gerada e guardada em arquivo0600, sem saída em logs.
+
+- WordPress6.7.2/PHP8.2.28/Astra4.13.1/MySQL8.0.45.
+- LearnPress4.3.6, Akismet5.3.6 e Hello1.7.2 ativos junto ao core candidato.
+- **242 verificações PASS**, incluindo páginas, busca,404, conteúdo protegido,
+  estados, reativação do plugin e ausência de novos avisos do tema.
+- [Recibo](evidence/wp-brand-2026-10-15/compatibility-results.json).
+- Imagem PHP/WP: `sha256:85c7d25eaf9726eeff21adad930aa43d2894bd73e9253ab250737b6d994a1181`.
+- Imagem MySQL: `sha256:4af1f8815716546f5b12410f7621f37f93db8dd11a184706ef59111930b8c2ff`.
+
+Preparação do ensaio: o primeiro bootstrap ocorreu antes de MySQL estar pronto;
+foi descartado e a conexão confirmada antes da instalação. O smoke anterior
+pressupunha tema já carregado; na instalação nova, switch_theme só passa a carregar
+as funções no request seguinte. Foi iniciado novo processo após ativação. Resultado
+antigo removido antes do teste; somente o recibo novo242/6.7.2/8.2.28 conta.
+O harness agora herda o PHP Linux instalado, preservando extensões MySQL.
+Não foi testado fluxo completo de matrícula/pagamento LearnPress.
+
+### Bloqueio concreto de promoção — issue #215
+
+| Página/estrutura existente | Evidência | Preparação necessária |
+| --- | --- | --- |
+| Sobre680, Metodologia681, Contato682 | post_content vazio; texto nos templates pages/*.php | Transferir conteúdo público ao editor/templates novos mantendo IDs e URLs |
+| Home679 | pages/home.php, conteúdo vazio | Aplicar home nova e configurar entradas reais |
+| Menus primary/mobile_menu | posições diferentes do tema novo e links repetidos | Mapear para tds-primary/tds-footer e revisar links |
+| App/API/suporte | opções novas vazias | Configurar valores fora do código, suporte somente após validar destino |
+| LearnPress cursos668/perfil667/checkout671/candidatura672 | referências ainda ativas | Preservar rotas e testar transição; não substituir autorização por login WP |
+
+Não trocar o tema diretamente: isso perderia a apresentação do conteúdo que
+existe só no PHP antigo. Conteúdo, menus, opções e arquivos exigem backup privado
+com restore ensaiado antes da promoção. A conferência técnica passou; preservação
+editorial/rotas e rollback são o próximo trabalho verificável (#215).
+
+CLEANUP observado: os dois containers QA, seus volumes anônimos e a rede interna
+foram removidos após guardar o recibo. Serviços produtivos não foram alterados.

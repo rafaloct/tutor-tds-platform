@@ -164,4 +164,4 @@ Details: `ISSUE5_AUTHENTICATED_EMISSION_CANDIDATE.md`; no gate promoted.
 
 | Fatia | Implementação | Evidência | Limite |
 | --- | --- | --- | --- |
-| WP branding / #213 / PR214 | Tema0.3.1 + adapter público opt-in | Browser1440/390/360 PASS; WP/cURL público6 de9 cursos | Produção6.7.2/8.2.28 e promoção pendentes; sem paridade privada |
+| WP branding / #213 / PR214 | Tema0.3.1 + adapter público opt-in | Browser1440/390/360 PASS; WP/cURL público6 de9 cursos | Compatibilidade6.7.2/8.2.28/MySQL8.0.45:242PASS; transição editorial/rotas e rollback #215 pendentes; sem paridade privada |

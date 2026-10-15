@@ -1,0 +1,26 @@
+{
+  "candidate": "f91e68b",
+  "assertions": 242,
+  "failures": [],
+  "pages": {
+    "home": 200,
+    "templates/programa.php": 200,
+    "templates/acessar.php": 200,
+    "templates/privacidade.php": 200,
+    "templates/direitos.php": 200,
+    "templates/acessibilidade.php": 200,
+    "templates/contato.php": 200,
+    "estados": 200,
+    "single": 200,
+    "protected": 200,
+    "search": 200,
+    "404": 404
+  },
+  "php": "8.2.28",
+  "wordpress": "6.7.2",
+  "astra": "4.13.1",
+  "mysql": "8.0.45",
+  "learnpress": "4.3.6",
+  "database": "synthetic isolated MySQL; no production records copied",
+  "scope": "HTTP/theme contracts with production plugin versions; not full LearnPress enrollment/payment QA"
+}
