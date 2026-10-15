@@ -139,3 +139,45 @@ aceite #170. Nenhum deploy, API, Worker, Flutter, secret ou conta real foi alter
 Reverter middleware restaura a corrida conhecida; portanto rollback exige manter
 as superfícies TDS autenticadas indisponíveis até outra correção. Não remover o
 mutex e declarar a sessão segura. Mudança não cria schema persistente nem migração.
+
+## Continuação — MariaDB e candidato de rotação nativa
+
+TESTED-LOCAL em fixture isolada no VPS (sem serviço produtivo): 15 verificações
+concorrentes passaram em **MariaDB 11.8.9**, usando a mesma imagem do banco do
+portal (`sha256:6422478cb8e159f080fb1d8ccf65101e26fe51385787fde7d16c3b165a331f15`),
+PHP 8.3.35 e Drupal 11.4.10. Banco `tds_lock_qa` em tmpfs, containers sem rede e
+sem portas publicadas; removidos após execução. A primeira preparação detectou
+socket ausente porque o ping havia atingido o servidor temporário de init.
+Readiness corrigido: exigir PID1 final `mariadbd` e `SELECT 1` no banco QA, antes
+de iniciar PHP. Não foi falha do mutex nem houve alteração no banco produtivo.
+
+IMPLEMENTED, execução HTTP desta ampliação ainda UNKNOWN: modo `http-rotation`
+com 11 verificações propostas. A fixture transforma a única sessão sintética em
+anônima editorial preservando tokens acadêmicos sintéticos; refresh concorrente
+bloqueia login core; retry do login core regenera ID. O cookie antigo deve receber
+401, o novo deve manter contexto, e o logout core deve invalidar tanto o cookie
+antigo quanto uma **cópia imutável do cookie regenerado**, além de limpar o browser.
+
+**Esta prova é do login/logout editorial Drupal e SessionHandler nativo. O login
+TDS atual não chama regenerate/invalidate; portanto sua proteção específica contra
+fixação e rotação obrigatória continua BLOCKED em #164/#166. Não considerar a
+prova editorial como aceite desse contrato.**
+
+Runner repetível, somente em cópia descartável de código/vendor e banco QA vazio:
+
+```sh
+TDS_SESSION_MUTEX_QA=1 \
+TDS_SESSION_MUTEX_FIXTURE_ROOT=/copia/descartavel/drupal \
+TDS_SESSION_MUTEX_SOCKET=/socket/mysqld.sock \
+bash scripts/test-dr3-http-fixture.sh
+```
+
+O root deve corresponder exatamente ao diretório Drupal real da cópia. O runner
+recusa settings locais existentes, banco não vazio e portas 8871/8872 ocupadas;
+instala Drupal minimal e conta editorial sintética fixa, inicia workers somente
+em loopback e verifica que ambos os listeners continuam vivos antes do login.
+Executa os 5 checks HTTP existentes e os 11 checks novos, encerra grupos dos
+processos e restaura settings. Não cria containers; o chamador garante rede
+`none`, tmpfs e cleanup dos containers/cópia. Em falha registra a etapa e preserva
+somente logs sintéticos em `.tds-session-http-failure` dentro da própria cópia.
+Cookie jars e respostas de login não são impressos nem mantidos nesse recibo.

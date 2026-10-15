@@ -45,6 +45,10 @@ $options = [
 Database::addConnectionInfo('default', 'default', $options);
 $db = Database::getConnection();
 $mode = $argv[1] ?? 'coordinator';
+if ($mode === 'http-rotation') {
+  runCookieRotationProof($db);
+  exit;
+}
 if ($mode === 'http') {
   runHttpProof($db);
   exit;
@@ -239,4 +243,115 @@ function runHttpProof($db): void {
   check(str_ends_with($outRetry, "\n200") && str_contains($outRetry, '"authenticated":true'), 'real HTTP B retry loaded newly persisted token without replay');
   check((int) $db->query('SELECT used FROM qa_http_refresh')->fetchField() === 1, 'real HTTP upstream refresh used exactly once');
   echo "5 real Drupal HTTP/session checks PASS; API synthetic.\n";
+}
+
+/**
+ * Exercises core cookie regeneration with real Drupal session persistence.
+ *
+ * This does not claim that the TDS gateway itself regenerates session IDs.
+ */
+function runCookieRotationProof($db): void {
+  $source = getenv('TDS_SESSION_MUTEX_COOKIE_JAR') ?: '/tmp/tds168-session-cookie';
+  $old = tempnam(sys_get_temp_dir(), 'tds-lock-old-');
+  $current = tempnam(sys_get_temp_dir(), 'tds-lock-new-');
+  $regenerated = tempnam(sys_get_temp_dir(), 'tds-lock-retained-');
+  if (!$old || !$current || !$regenerated || !copy($source, $old) || !copy($source, $current)) {
+    throw new RuntimeException('Cannot prepare synthetic cookie fixture.');
+  }
+  try {
+    $context = '/tds/session/context';
+    $a = beginHttp($context, $old);
+    $deadline = microtime(TRUE) + 5;
+    do {
+      $used = (int) $db->query('SELECT used FROM qa_http_refresh')->fetchField();
+      if ($used === 1) {
+        break;
+      }
+      usleep(10000);
+    } while (microtime(TRUE) < $deadline);
+    check($used === 1, 'rotation fixture reached refresh before concurrent core login');
+    $credentials = json_encode(['name' => 'qa-session-lock', 'pass' => 'qa-session-lock-not-a-secret'], JSON_THROW_ON_ERROR);
+    $login = '/user/login?_format=json';
+    $blocked = finishHttp(beginHttp($login, $old, $credentials));
+    check($blocked['status'] === 503, 'core login cannot regenerate while old-cookie request persists');
+    check(finishHttp($a)['status'] === 200, 'old-cookie request finishes before regeneration');
+    $loggedIn = finishHttp(beginHttp($login, $old, $credentials, $current));
+    check($loggedIn['status'] === 200, 'core login succeeds after the old-cookie mutex releases');
+    check(cookieIdentity($old) !== cookieIdentity($current), 'core login changes the session ID');
+    if (!copy($current, $regenerated)) {
+      throw new RuntimeException('Cannot retain synthetic regenerated cookie.');
+    }
+    check(finishHttp(beginHttp($context, $old))['status'] === 401, 'old cookie cannot read academic tokens after regeneration');
+    check(finishHttp(beginHttp($context, $current))['status'] === 200, 'new cookie retains its own persisted academic context');
+    $payload = json_decode($loggedIn['body'], TRUE, 16, JSON_THROW_ON_ERROR);
+    $logoutToken = $payload['logout_token'] ?? NULL;
+    if (!is_string($logoutToken) || $logoutToken === '') {
+      throw new RuntimeException('Missing synthetic core logout token.');
+    }
+    $logout = '/user/logout?_format=json&token=' . rawurlencode($logoutToken);
+    $loggedOut = finishHttp(beginHttp($logout, $current, '', $current));
+    check($loggedOut['status'] === 204, 'core logout destroys the regenerated session');
+    check(finishHttp(beginHttp($context, $old))['status'] === 401, 'old cookie cannot resurrect tokens after logout');
+    check(finishHttp(beginHttp($context, $regenerated))['status'] === 401, 'retained regenerated cookie cannot recover tokens after logout');
+    check(finishHttp(beginHttp($context, $current))['status'] === 401, 'logged-out browser cannot reuse academic context');
+    echo "11 core cookie rotation/logout checks PASS; TDS login rotation is not covered.\n";
+  }
+  finally {
+    unlink($old);
+    unlink($current);
+    unlink($regenerated);
+  }
+}
+
+/**
+ * Starts a bounded request to the fixed, disposable loopback Drupal instance.
+ */
+function beginHttp(string $path, string $cookie, ?string $post = NULL, ?string $saveCookie = NULL): array {
+  $command = ['curl', '-sS', '--max-time', '10', '-b', $cookie, '-w', "\n%{http_code}"];
+  if ($saveCookie !== NULL) {
+    array_push($command, '-c', $saveCookie);
+  }
+  if ($post !== NULL) {
+    array_push($command, '-H', 'Content-Type: application/json', '--data', $post);
+  }
+  $command[] = 'http://127.0.0.1:8871' . $path;
+  $pipes = [];
+  $process = proc_open($command, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+  fclose($pipes[0]);
+  return [$process, $pipes];
+}
+
+/**
+ * Parses only HTTP result; never emits a cookie or CSRF token in test output.
+ */
+function finishHttp(array $worker): array {
+  [$process, $pipes] = $worker;
+  $output = stream_get_contents($pipes[1]);
+  $error = stream_get_contents($pipes[2]);
+  fclose($pipes[1]);
+  fclose($pipes[2]);
+  $exit = proc_close($process);
+  if ($exit !== 0 || $error !== '' || !preg_match('/\n([0-9]{3})$/D', $output, $match)) {
+    throw new RuntimeException('Synthetic loopback HTTP request failed.');
+  }
+  return ['status' => (int) $match[1], 'body' => substr($output, 0, -4)];
+}
+
+/**
+ * Compares opaque cookie values without logging them or treating CSRF as ID.
+ */
+function cookieIdentity(string $path): string {
+  foreach (file($path, FILE_IGNORE_NEW_LINES) as $line) {
+    if (str_starts_with($line, '#HttpOnly_')) {
+      $line = substr($line, strlen('#HttpOnly_'));
+    }
+    elseif (str_starts_with($line, '#')) {
+      continue;
+    }
+    $fields = explode("\t", $line);
+    if (count($fields) === 7 && preg_match('/^S?SESS/', $fields[5])) {
+      return $fields[5] . ':' . $fields[6];
+    }
+  }
+  throw new RuntimeException('Synthetic session cookie missing.');
 }

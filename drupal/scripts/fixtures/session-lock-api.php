@@ -14,7 +14,7 @@ if (getenv('TDS_SESSION_MUTEX_QA') !== '1' || !getenv('TDS_SESSION_MUTEX_SOCKET'
 }
 $db = new PDO('mysql:unix_socket=' . getenv('TDS_SESSION_MUTEX_SOCKET') . ';dbname=tds_lock_qa', 'root', '');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-if (PHP_SAPI === 'cli' && ($argv[1] ?? '') === 'seed') {
+if (PHP_SAPI === 'cli' && in_array($argv[1] ?? '', ['seed', 'seed-anonymous'], TRUE)) {
   $db->exec('CREATE TABLE IF NOT EXISTS qa_http_refresh (used INT NOT NULL)');
   $db->exec('DELETE FROM qa_http_refresh');
   $db->exec('INSERT INTO qa_http_refresh VALUES (0)');
@@ -26,6 +26,11 @@ if (PHP_SAPI === 'cli' && ($argv[1] ?? '') === 'seed') {
   session_cache_limiter('');
   session_start();
   session_decode($rows[0]['session']);
+  if (($argv[1] ?? '') === 'seed-anonymous') {
+    // Keep the academic fixture but make core editorial login possible.
+    $_SESSION['_sf2_attributes']['uid'] = 0;
+    unset($_SESSION['_sf2_attributes']['check_logged_in']);
+  }
   $_SESSION['_sf2_attributes']['tds_tutor_gateway.tokens'] = [
     'access_token' => 'synthetic-expired',
     'refresh_token' => 'synthetic-refresh-old',
