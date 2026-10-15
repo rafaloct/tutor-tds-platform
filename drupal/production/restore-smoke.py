@@ -9,13 +9,11 @@ from pathlib import Path
 import re
 import secrets
 import shutil
-import socket
 import stat
 import subprocess
 import tarfile
 import tempfile
 import time
-import urllib.request
 import uuid
 
 REG = Path('/etc/dokploy/tds-drupal-ops/source/registration.json')
@@ -123,11 +121,21 @@ def file_hashes(payload):
     return hashes
 
 
-def request(path):
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-    req = urllib.request.Request('http://127.0.0.1:18089' + path, headers={'Host': HOST})
-    with opener.open(req, timeout=10) as response:
-        return response.status, response.read(1024 * 1024)
+def request(container, path):
+    # An internal-only Docker bridge need not support a published host port.
+    # Probe Apache in the restored container, preserving network isolation.
+    if not re.fullmatch(r'tds-drupal-restore-210-[a-f0-9]{32}-web', container) or path not in ('/', '/health'):
+        raise Failure('http_probe_target')
+    raw = command([
+        'docker', 'exec', container, 'curl', '--silent', '--show-error',
+        '--noproxy', '*', '--connect-timeout', '3', '--max-time', '10',
+        '--header', 'Host: ' + HOST, '--write-out', '\n%{http_code}',
+        'http://127.0.0.1' + path,
+    ], 'http_probe_transport', limit=1024 * 1024, timeout=15)
+    body, separator, status = raw.rpartition(b'\n')
+    if not separator or not re.fullmatch(rb'[1-5][0-9]{2}', status):
+        raise Failure('http_probe_response')
+    return int(status), body
 
 
 def run():
@@ -136,8 +144,6 @@ def run():
     mounts = Path('/proc/mounts').read_text().splitlines()
     if not any(line.split()[1:3] == ['/dev/shm', 'tmpfs'] for line in mounts):
         raise Failure('tmpfs_required')
-    with socket.socket() as probe:
-        probe.bind(('127.0.0.1', 18089))
     r = json.loads(private_read(REG))
     project = r.get('appName', '')
     if not re.fullmatch('[a-z0-9][a-z0-9_-]{1,99}', project) or not re.fullmatch('sha256:[a-f0-9]{64}', r.get('imageRef', '')):
@@ -191,7 +197,7 @@ def run():
         restored = counts(db_name)
         if before != restored:
             raise Failure('database_counts_differ')
-        command(['docker', 'create', '--name', web_name, '--network', network, '--memory', '1g', '--cpus', '1', '--publish', '127.0.0.1:18089:80', '--env-file', str(web_env), '--tmpfs', '/var/www/html/web/sites/default/files:rw,size=64m,uid=33,gid=33', '--tmpfs', '/var/www/private:rw,size=64m,uid=33,gid=33', image], 'web_create'); created.append(('container', web_name))
+        command(['docker', 'create', '--name', web_name, '--network', network, '--memory', '1g', '--cpus', '1', '--env-file', str(web_env), '--tmpfs', '/var/www/html/web/sites/default/files:rw,size=64m,uid=33,gid=33', '--tmpfs', '/var/www/private:rw,size=64m,uid=33,gid=33', image], 'web_create'); created.append(('container', web_name))
         command(['docker', 'start', web_name], 'web_start')
         for target, (payload, hashes) in files.items():
             command(['docker', 'exec', '-i', web_name, 'tar', '-C', target, '-xf', '-'], 'restore_files', payload)
@@ -200,20 +206,25 @@ def run():
                 raise Failure('file_hashes_differ')
         # Discard copied render/catalog caches so home exercises disabled upstream.
         command(['docker', 'exec', '--user', 'www-data', '-w', '/var/www/html', web_name, 'vendor/bin/drush', 'cache:rebuild'], 'restore_cache_rebuild')
+        health_failure = 'health_unavailable'
         for attempt in range(30):
             try:
-                status, body = request('/health')
+                status, body = request(web_name, '/health')
+                health_failure = f'health_http_{status}' if status != 200 else 'health_contract'
                 health = json.loads(body)
                 if status == 200 and health.get('environment') == 'production' and health.get('database') == 'up':
                     break
-            except Exception:
-                pass
+            except Failure as error:
+                health_failure = str(error)
+            except (ValueError, AttributeError):
+                health_failure = 'health_invalid_json'
             if attempt == 29:
-                raise Failure('health')
+                raise Failure(health_failure)
             time.sleep(1)
-        if request('/')[0] != 200:
-            raise Failure('home')
-        return {'status': 'LIVE_COPY_RESTORE_VERIFIED', 'tables': len(restored), 'rows': sum(restored.values()), 'files': sum(len(v[1]) for v in files.values()), 'health': 'production/up', 'homeStatus': 200, 'upstreamDisabled': True, 'filesAtomic': False, 'offsiteDecryptVerified': False}
+        home_status, _ = request(web_name, '/')
+        if home_status != 200:
+            raise Failure(f'home_http_{home_status}')
+        return {'status': 'LIVE_COPY_RESTORE_VERIFIED', 'tables': len(restored), 'rows': sum(restored.values()), 'files': sum(len(v[1]) for v in files.values()), 'health': 'production/up', 'homeStatus': 200, 'httpProbe': 'container_loopback', 'hostPortsPublished': False, 'upstreamDisabled': True, 'filesAtomic': False, 'offsiteDecryptVerified': False}
     finally:
         cleanup_failed = False
         for kind, name in reversed(created):
