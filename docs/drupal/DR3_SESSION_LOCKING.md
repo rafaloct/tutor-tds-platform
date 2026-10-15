@@ -134,8 +134,8 @@ fixture e seus settings locais. Não deixar serviços ou volumes permanentes.
 ## Gates e rollback
 
 IMPLEMENTED/TESTED-LOCAL fecha a lacuna de ordering no recorte comprovado. Ainda
-BLOCKED: implantação autenticada, custom backends/BigPipe, rotação no login TDS,
-integração #180/#181, sinalização imediata de logout entre abas, SDK Chatwoot real e
+BLOCKED: implantação autenticada, custom backends/BigPipe, bootstrap anônimo sem
+CMS, prova real de sinalização de logout entre abas, SDK Chatwoot real e
 aceite #170. Nenhum deploy, API, Worker, Flutter, secret ou conta real foi alterado.
 
 Reverter middleware restaura a corrida conhecida; portanto rollback exige manter
@@ -192,7 +192,7 @@ recorte. Não houve alteração de serviço produtivo nem aceite E2E #170.
 
 ## Candidato — rotação no login e logout TDS
 
-IMPLEMENTED, HTTP pendente: `DrupalTutorSessionLifecycle` usa
+IMPLEMENTED/TESTED-LOCAL no descendente integrado abaixo: `DrupalTutorSessionLifecycle` usa
 `migrate(TRUE)` para destruir o ID anterior mantendo os atributos editoriais.
 Login descarta primeiro os tokens TDS anteriores, autentica na API, rotaciona o
 ID e só então salva novos tokens. Credenciais recusadas deixam contexto TDS vazio.
@@ -203,9 +203,9 @@ A fixture acrescenta 21 checks específicos via rotas TDS reais: CSRF obrigatór
 login, troca de conta, replay do cookie anterior, tentativa inválida, recuperação,
 logout/replay revogado e preservação editorial. A API é exclusivamente sintética.
 O helper CSRF lê apenas o banco QA fixo e captura o token em memória; não altera a
-política CSRF das rotas nem imprime cookies ou tokens. Prova HTTP deste candidato
-ainda UNKNOWN; a evidência de 11 checks acima continua exclusivamente core.
-Integração #180/#181 e gate de produção permanecem pendentes.
+política CSRF das rotas nem imprime cookies ou tokens. Os 11 checks anteriores
+continuam exclusivamente core; os 21 TDS passaram no descendente integrado
+`72e97d6` (PR #212), que concilia #180/#181. Gate de produção permanece pendente.
 
 Validação focal deste candidato: 32 testes gateway/115 assertions em PHP 8.3.29,
 PHPCS (21 arquivos) e sintaxe dos scripts PHP/shell PASS; CLI efêmera sem rede.
@@ -214,3 +214,15 @@ Revisão independente sem bloqueador para ensaio: os 21 checks iniciam com sess�
 editorial existente. NÃO comprovam bootstrap/primeiro login de participante sem
 conta CMS: sessão lazy sem cookie não permite regenerate; obtenção de cookie e
 CSRF anônimo exige prova integrada própria antes de ativação.
+
+## Recibo do descendente integrado — PR #212
+
+TESTED-LOCAL: `72e97d6`, executado pelo coordenador em fixture VPS isolada
+`network none`, PHP 8.3.35/Drupal 11.4.10/MariaDB 11.8.9. PASS: **112 testes/467
+assertions + 69 checks de settings + 15 concorrentes MariaDB + 5 HTTP refresh +
+11 core cookie + 21 TDS login/logout**. A flag de integração habilitou módulos
+participante, operador e suporte exclusivamente na fixture; API/contas sintéticas.
+
+Esse recibo pertence ao descendente integrado, não ao SHA isolado `0cfa05c`, cuja
+prova focal foi 32 testes/115 assertions em PHP 8.3.29. Bootstrap anônimo sem conta
+CMS continua pendente; não houve deploy nem aceite de produção a partir da prova.
