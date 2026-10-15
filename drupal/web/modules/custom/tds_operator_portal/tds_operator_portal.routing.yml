@@ -1,0 +1,9 @@
+tds_operator_portal.operations:
+  path: '/operacoes'
+  defaults:
+    _form: '\Drupal\tds_operator_portal\Form\OperationsForm'
+    _title: 'Operações acadêmicas'
+  requirements:
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE

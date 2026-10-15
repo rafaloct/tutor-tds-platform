@@ -1,0 +1,16 @@
+<section data-tds-support data-identity-url="{{ identity_url }}" data-frame-url="{{ frame_url }}" aria-labelledby="support-title">
+  <h2 id="support-title">{{ 'Suporte TDS'|t }}</h2>
+  <p>{{ 'O atendimento autenticado usa sua sessão TDS. Não envie CPF, senha ou códigos de certificado na conversa.'|t }}</p>
+  <button type="button" data-support-start>{{ 'Abrir atendimento autenticado'|t }}</button>
+  <button type="button" data-support-stop hidden>{{ 'Encerrar atendimento nesta página'|t }}</button>
+  <p data-support-status role="status" aria-live="polite"></p>
+  <div data-support-frame></div>
+  <h3>{{ 'Canal público'|t }}</h3>
+  <p>{{ 'Sem sessão ou com o atendimento indisponível, use o canal público. Se já iniciou uma conversa, retome o mesmo atendimento e evite abrir outra solicitação.'|t }}</p>
+  {% if fallback %}
+    <a href="{{ fallback }}" rel="noopener noreferrer" referrerpolicy="no-referrer">{{ 'Abrir canal público de atendimento'|t }}</a>
+  {% else %}
+    <p>{{ 'Canal público não configurado neste ambiente. Procure a equipe pelo contato institucional já informado.'|t }}</p>
+  {% endif %}
+  <noscript><p>{{ 'O atendimento autenticado precisa de JavaScript. O canal público acima continua disponível.'|t }}</p></noscript>
+</section>

@@ -1,5 +1,92 @@
 # CURRENT STATE
 
+
+## 2026-10-15 — cliente Drupal contra API real staging
+
+TESTED: harness `9e799c9` retornou PASS_SAMPLED_HTTP/exit0,11 etapas200, com3
+contextos e3 cursos após habilitação restrita de learning_context em staging.
+Flag persistida pelo coordenador, imagem existente fixada, somente API staging
+reiniciada; produção e banco preservados. Não é prova de dashboard/browser.
+TESTED-STAGING posterior: browser `3ff4d49` passou17 checks, exibiu3 turmas e3
+progressos com API real. Chrome no LARGeo, Playwright-core1.58.2, túnel SSH
+loopback18872 para fixture Drupal11.4.10/PHP8.3.35/MariaDB11.8.9 no VPS.
+Navegador sem sessão CMS: bootstrap/login/contexto/rotação/logout/replay e
+voltar+atualizar comprovados. Código funcional146e67c, fixturearchive9e799c9.
+Operador real, Chatwoot/Worker, WCAG/performance e aceite#170 completo pendentes.
+Cleanup confirmado: fixture exit0, containers QA e listener18872 ausentes. Recibo e limites em
+`drupal/STAGING_PARTICIPANT_CONTRACT_PROBE.md`. Gate produtivo permanece off.
+
+
+## 2026-10-15 — candidato de primeiro acesso participante sem CMS
+
+IMPLEMENTED/TESTED-ISOLATED: página `/entrar`, bootstrap anônimo same-origin, CSRF Drupal e
+entrada/saída na área do participante; cookie anônimo persistido por marcador
+booleano, sem conta Drupal criada. Gate de produção preservado. Validação focal
+64 testes/252 assertions; gate completo 127 testes/488 assertions, lint completo
+e 69 checks de settings PASS (PHP 8.3.29). Chromium `7279bed`: 24 checks PASS
+começando sem cookies, uid editorial zero; bootstrap, CSRF/origem, entrada/saída
+pela UI e rejeição dos cookies antigos. Fixture Drupal 11.4.8/MySQL 8.4.11,
+API sintética, rede interna e forwarder loopback; cleanup exit 0.
+VPS `146e67c`: PHP 8.3.35/Drupal 11.4.10/MariaDB 11.8.9, 127 testes/488
+assertions + 69 settings + 15 concorrentes + 5 HTTP + 11 core + 21 TDS PASS.
+Os commits posteriores mudaram apenas o script browser, sem código de produto; não houve
+browser executado dentro do VPS. A prova posterior de participante com API real
+está acima; Worker/Chatwoot reais, WCAG/performance e aceite #170 seguem pendentes; flag produtiva permanece desligada.
+Contrato e limites: `drupal/DR3_SESSION_LOCKING.md`.
+
+## 2026-10-15 — candidato integrado Drupal / PR #212
+
+IMPLEMENTED/TESTED-ISOLATED: #180 (40901a1), #181 (f70c8d9) e #207
+(0cfa05c) reconciliados em72e97d6, incluindo lifecycle de login/logout TDS,
+limpeza dos dois consumidores e gate de todas as rotas acadêmicas privadas.
+VPS isolado PHP8.3.35/Drupal11.4.10/MariaDB11.8.9:112 testes/467 assertions,
+69 checks de configuração e52 verificações concorrentes/HTTP PASS; API sintética.
+Nenhum deploy, merge em staging ou ativação. Primeiro login sintético sem CMS
+foi comprovado no recibo posterior acima; serviços reais e aceite #170 pendentes.
+CI `146e67c`: Secret scan e WordPress legacy quarantine success via REST;
+watcher GraphQL retornou 403, sem conclusão sobre CI completo.
+Contrato/limites: `drupal/DR_INTEGRATION_161.md`.
+
+## 2026-10-15 — #168: mutex da sessão candidato local
+
+IMPLEMENTED/TESTED-LOCAL: gateway envolve leitura→refresh→persistência com mutex
+MySQL sem lease na mesma conexão primária do SessionHandler padrão. Construção
+lazy; contenção e backend incompatível falham antes do snapshot. 7 testes novos/
+33 assertions; 15 verificações concorrentes com processos MySQL 8.4.11 e 5 HTTP
+Drupal real (API fake) PASS. Inclui perda da conexão, crash do dono e logout sem
+ressurreição. Sem alteração em produção. Contrato: `drupal/DR3_SESSION_LOCKING.md`.
+Reconciliado com staging `b0c39b2` (#211): candidato `5a76db5` validado em fixture
+isolada no VPS com Drupal 11.4.10/PHP 8.3.35, 68 testes/250 assertions e 43 checks
+de configuração PASS; gate acadêmico de produção preservado.
+TESTED-LOCAL posterior (`1c26451`): MariaDB 11.8.9 na imagem do banco do portal,
+fixture sem rede/sem portas públicas, PHP 8.3.35/Drupal 11.4.10. 15 checks
+concorrentes + 5 HTTP + 11 de regeneração/logout nativo Drupal PASS, incluindo
+replay do cookie regenerado revogado (401). API e contas sintéticas.
+IMPLEMENTED candidato posterior: login/logout TDS rotaciona ID com destruição do
+antigo e preserva sessão editorial; 32 testes gateway/115 assertions PASS.
+TESTED-LOCAL no descendente integrado `72e97d6` (PR #212): 112 testes/467
+assertions, 69 checks settings, 15 concorrentes MariaDB, 5 HTTP refresh, 11 core
+e 21 TDS login/logout PASS. Fixture VPS isolada sem rede, PHP 8.3.35/Drupal
+11.4.10/MariaDB 11.8.9, módulos participante/operador/suporte habilitados apenas
+na fixture. Não atribuir esses resultados à revisão isolada `0cfa05c` (32/115).
+BLOCKED: serviços acadêmicos reais, suporte customizado/BigPipe, prova real de
+sinalização entre abas e SDK Chatwoot; implantação autenticada e aceite #170. O
+bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.
+
+## 2026-10-15 — Drupal DR-7 / #168, candidato local
+
+IMPLEMENTED/TESTED-LOCAL: módulo opt-in `tds_support_certificates` sobre staging
+`207e2128dcbcedec70bf5132b05a7081501480ed`: referências privadas via FastAPI,
+handoff oficial de verificação e suporte com identidade efêmera em sandbox.
+60 testes PHP/201 assertions (35/107 novos), lint completo e 20 verificações
+Chromium com Drupal/SQLite reais e SDK/identidade sintéticos PASS. Correções
+observadas no browser: no-store preservado após resposta Drupal e heartbeat
+reiniciado ao reabrir atendimento. Nenhuma alteração Flutter/API/Worker/produção.
+BLOCKED: ativação autenticada depende de lock no ciclo compartilhado de leitura
+à persistência da sessão (inclusive concorrência dentro deste módulo), integração
+#166/#180 e prova do SDK Chatwoot real. #168 permanece aberta; não é aceite #170.
+Contrato, comandos, limites e rollback: `drupal/DR7_SUPPORT_CERTIFICATES.md`.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
@@ -14,7 +101,7 @@ rota pública ativada, certificado Let's Encrypt válido e18 checks HTTPS PASS
 via VPS e desktop externo com DNS normal. Correção de cache3858607 promovida;
 sequência HTTP interno → HTTPS público PASS sem canonical inseguro.
 Restore isolado PASS:55 tabelas/961 registros/35 arquivos; descriptografia offsite
-ainda UNKNOWN. PR211 draft; merge não autorizado.
+ainda UNKNOWN. PR211 integrado externamente em staging b0c39b2.
 Evidências e limitações: `production/DRUPAL_DOKPLOY_2026-10-15.md`.
 
 ## 2026-10-13 — fonte consolidada para a release

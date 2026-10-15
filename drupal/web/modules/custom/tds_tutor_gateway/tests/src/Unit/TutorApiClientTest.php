@@ -90,6 +90,26 @@ final class TutorApiClientTest extends UnitTestCase {
   }
 
   /**
+   * Leitura participante aceita apenas rota e query fechadas.
+   */
+  public function testAuthorizedReadAllowlist(): void {
+    $history = [];
+    $client = $this->client([
+      new Response(200, [], '{"classes":[]}'),
+    ], $history);
+
+    self::assertSame(
+      ['classes' => []],
+      $client->get('/classes', ['enrolled_only' => 'true'], 'access-value'),
+    );
+    self::assertSame('enrolled_only=true', $history[0]['request']->getUri()->getQuery());
+    self::assertSame('Bearer access-value', $history[0]['request']->getHeaderLine('Authorization'));
+
+    $this->expectException(\LogicException::class);
+    $client->get('/admin/classes', [], 'access-value');
+  }
+
+  /**
    * HTTP fora de loopback local e recusado antes da rede.
    */
   public function testNonLocalRequiresHttps(): void {
@@ -173,6 +193,57 @@ final class TutorApiClientTest extends UnitTestCase {
     catch (GatewayException $error) {
       self::assertSame('invalid_or_expired_session', $error->publicCode());
       self::assertStringNotContainsString('upstream', $error->getMessage());
+    }
+  }
+
+  /**
+   * Operacoes usam allowlist estrita, preservam 409 e nao repetem POST.
+   */
+  public function testOperationsPostIsAllowlistedWithoutTransportRetry(): void {
+    $history = [];
+    $client = $this->client([
+      new Response(409, [], '{"detail":"stale revision"}'),
+      new Response(200, [], '{}'),
+    ], $history);
+    try {
+      $client->operationsPost('/operations/class-1/commands', ['id' => 'command-00000001'], 'access');
+      self::fail('Era esperado conflito.');
+    }
+    catch (GatewayException $error) {
+      self::assertSame('operation_conflict', $error->publicCode());
+      self::assertSame(409, $error->httpStatus());
+      self::assertCount(1, $history);
+    }
+  }
+
+  /**
+   * Participant conflicts retain their public code after gateway integration.
+   */
+  public function testParticipantConflictKeepsItsOwnCode(): void {
+    $history = [];
+    $client = $this->client([new Response(409, [], '{}')], $history);
+    try {
+      $client->get('/classes/class-1/learning-context', [], 'access');
+      self::fail('Expected a context conflict.');
+    }
+    catch (GatewayException $error) {
+      self::assertSame('context_conflict', $error->publicCode());
+      self::assertCount(1, $history);
+    }
+  }
+
+  /**
+   * Paths externos ao contrato sao recusados antes da rede.
+   */
+  public function testOperationsPathCannotEscapeAllowlist(): void {
+    $history = [];
+    $client = $this->client([], $history);
+    $this->expectException(\LogicException::class);
+    try {
+      $client->operationsGet('/admin/users', 'access');
+    }
+    finally {
+      self::assertSame([], $history);
     }
   }
 

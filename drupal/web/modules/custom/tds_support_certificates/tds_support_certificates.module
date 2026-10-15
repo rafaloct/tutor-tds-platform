@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Temas do portal de suporte e certificados.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function tds_support_certificates_theme(): array {
+  return [
+    'tds_support_certificates' => [
+      'variables' => ['certificates' => [], 'state' => 'unavailable'],
+    ],
+    'tds_support' => [
+      'variables' => ['fallback' => NULL, 'identity_url' => '', 'frame_url' => ''],
+    ],
+    'tds_certificate_verification' => [
+      'variables' => ['verifier' => NULL],
+    ],
+  ];
+}

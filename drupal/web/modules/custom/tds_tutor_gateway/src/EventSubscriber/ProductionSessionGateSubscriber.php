@@ -42,8 +42,19 @@ final class ProductionSessionGateSubscriber implements EventSubscriberInterface 
     $request = $event->getRequest();
     $path = rawurldecode($request->getPathInfo());
     $route = (string) $request->attributes->get('_route', '');
+    $privatePaths = [
+      '/entrar', '/minha-area', '/operacoes', '/meus-certificados',
+      '/tds/support/identity', '/tds/support/frame',
+    ];
+    $privateRoutes = [
+      'tds_tutor_gateway.browser_login', 'tds_tutor_gateway.bootstrap', 'tds_tutor_gateway.login', 'tds_tutor_gateway.context', 'tds_tutor_gateway.logout',
+      'tds_participant_portal.dashboard', 'tds_operator_portal.operations',
+      'tds_support_certificates.certificates', 'tds_support_certificates.identity',
+      'tds_support_certificates.frame',
+    ];
     if ($path !== '/tds/session' && !str_starts_with($path, '/tds/session/')
-      && !in_array($route, ['tds_tutor_gateway.login', 'tds_tutor_gateway.context', 'tds_tutor_gateway.logout'], TRUE)) {
+      && !in_array(rtrim($path, '/'), $privatePaths, TRUE)
+      && !in_array($route, $privateRoutes, TRUE)) {
       return;
     }
     $request->attributes->set('_tds_production_session_blocked', TRUE);

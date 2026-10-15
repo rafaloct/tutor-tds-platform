@@ -1,0 +1,7 @@
+name: 'TDS Operator Portal'
+type: module
+description: 'Control plane web fino para operacoes academicas autorizadas pela FastAPI.'
+package: 'Tutor TDS'
+core_version_requirement: ^11
+dependencies:
+  - tds_tutor_gateway:tds_tutor_gateway
