@@ -218,7 +218,14 @@ def run():
         cleanup_failed = False
         for kind, name in reversed(created):
             try:
-                command(['docker', 'rm', '-f', name] if kind == 'container' else ['docker', 'network', 'rm', name], 'cleanup', timeout=30)
+                # Cleanup must still work when the rehearsal exhausted tmpfs.
+                result = subprocess.run(
+                    ['docker', 'rm', '-f', name] if kind == 'container' else ['docker', 'network', 'rm', name],
+                    stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL, timeout=30, check=False,
+                )
+                if result.returncode:
+                    raise Failure('cleanup')
             except Exception:
                 cleanup_failed = True
         shutil.rmtree(directory)
