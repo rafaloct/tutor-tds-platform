@@ -1,5 +1,16 @@
 # CURRENT STATE
 
+
+## 2026-10-15 — candidato de primeiro acesso participante sem CMS
+
+IMPLEMENTED: página `/entrar`, bootstrap anônimo same-origin, CSRF Drupal e
+entrada/saída na área do participante; cookie anônimo persistido por marcador
+booleano, sem conta Drupal criada. Gate de produção preservado. Validação focal
+64 testes/252 assertions; gate completo 127 testes/488 assertions, lint completo
+e 69 checks de settings PASS (PHP 8.3.29). Prova Chromium começa
+sem cookies e sem autenticação editorial; execução runtime ainda UNKNOWN.
+Contrato e limites: `drupal/DR3_SESSION_LOCKING.md`.
+
 ## 2026-10-15 — candidato integrado Drupal / PR #212
 
 IMPLEMENTED/TESTED-ISOLATED: #180 (40901a1), #181 (f70c8d9) e #207

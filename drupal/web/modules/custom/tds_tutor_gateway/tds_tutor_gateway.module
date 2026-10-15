@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Browser session presentation for participants without editorial accounts.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function tds_tutor_gateway_theme(): array {
+  return ['tds_session_login' => ['variables' => ['login_url' => '', 'destination' => '']]];
+}

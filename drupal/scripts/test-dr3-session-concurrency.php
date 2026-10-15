@@ -316,7 +316,7 @@ function beginHttp(string $path, string $cookie, ?string $post = NULL, ?string $
     array_push($command, '-c', $saveCookie);
   }
   if ($post !== NULL) {
-    array_push($command, '-H', 'Content-Type: application/json', '--data', $post);
+    array_push($command, '-H', 'Content-Type: application/json', '-H', 'Origin: http://127.0.0.1:8871', '--data', $post);
   }
   $command[] = 'http://127.0.0.1:8871' . $path;
   $pipes = [];

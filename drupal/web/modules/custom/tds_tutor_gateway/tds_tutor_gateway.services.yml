@@ -37,3 +37,8 @@ services:
     arguments: ['@settings']
     tags:
       - { name: event_subscriber }
+
+  tds_tutor_gateway.browser_session:
+    class: Drupal\tds_tutor_gateway\EventSubscriber\BrowserSessionSubscriber
+    tags:
+      - { name: event_subscriber }

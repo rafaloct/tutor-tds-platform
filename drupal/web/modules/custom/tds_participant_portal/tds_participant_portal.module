@@ -12,6 +12,7 @@ function tds_participant_portal_theme(): array {
   return [
     'tds_participant_area' => [
       'variables' => [
+        'logout_url' => '',
         'state' => 'unavailable',
         'message' => NULL,
         'user' => NULL,

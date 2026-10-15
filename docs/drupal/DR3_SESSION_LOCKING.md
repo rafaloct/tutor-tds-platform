@@ -226,3 +226,32 @@ participante, operador e suporte exclusivamente na fixture; API/contas sintétic
 Esse recibo pertence ao descendente integrado, não ao SHA isolado `0cfa05c`, cuja
 prova focal foi 32 testes/115 assertions em PHP 8.3.29. Bootstrap anônimo sem conta
 CMS continua pendente; não houve deploy nem aceite de produção a partir da prova.
+
+## Candidato — primeiro acesso sem conta editorial
+
+IMPLEMENTED, runtime pendente: `/entrar` entrega formulário sem credenciais nem
+CSRF no HTML. JS externo solicita `POST /tds/session/bootstrap`, restrito à mesma
+origem e ao header não simples `X-TDS-Bootstrap: 1`. O bootstrap grava somente
+um marcador booleano na sessão anônima: metadata CSRF isolada não garante que o
+Drupal persista a sessão. Retorna tokens Drupal específicos para login/logout,
+em JSON privado `no-store`, sem CORS. Login/logout mantêm `_csrf_token`, recebem
+verificação adicional de Origin (Referer somente se Origin ausente), e mantêm
+rotação destrutiva do ID. Nenhum usuário Drupal é criado. As URLs para POST são
+construídas sem o processador de rotas CSRF, para não antecipar tokens no HTML.
+
+A UI pede bootstrap antes de cada operação, não guarda tokens/credenciais em
+storage, envia CPF/senha apenas no POST e limpa senha após falha. A sessão CMS
+existente continua independente. `/entrar` e bootstrap seguem bloqueados pelo
+gate de produção; nenhuma ativação está implícita neste candidato.
+
+Prova preparada em `scripts/test-dr3-browser-login.cjs`: Chromium com contexto
+vazio, cookie anônimo, Origin/CSRF ausente/incorreto/de outra sessão, login pela
+UI, contexto acadêmico com uid editorial zero, cookie antigo inutilizável e
+logout pela UI com replay revogado. API e contas somente sintéticas; execução
+runtime ainda UNKNOWN. O runner HTTP aceita bind QA allowlisted e hold de até
+120 segundos com sentinelas `.tds-browser-ready`/`.tds-browser-done`, para o
+coordenador testar via porta local 18871 em rede isolada. Nenhum container é
+criado pelo script. Sem TLS nessa fixture: `Secure` permanece gate do deployment.
+
+Validação estática/unitária do candidato: 127 testes/488 assertions em PHP 8.3.29,
+lint PHP65/PHPCS64/YAML130/Twig8 e 69 checks de settings PASS.

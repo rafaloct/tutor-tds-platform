@@ -8,6 +8,11 @@ if [[ "${TDS_SESSION_MUTEX_QA:-}" != 1 || "${TDS_SESSION_MUTEX_FIXTURE_ROOT:-}" 
   exit 2
 fi
 cd "$root"
+web_bind="${TDS_SESSION_MUTEX_WEB_BIND:-127.0.0.1}"
+[[ "$web_bind" == 127.0.0.1 || "$web_bind" == 0.0.0.0 ]] || exit 2
+[[ "${TDS_SESSION_MUTEX_BROWSER_HOLD:-0}" == 0 || "${TDS_SESSION_MUTEX_BROWSER_HOLD:-0}" == 1 ]] || exit 2
+export TDS_SESSION_MUTEX_WEB_BIND="$web_bind"
+rm -f .tds-browser-ready .tds-browser-done
 if [[ -e web/sites/default/settings.local.php ]]; then
   echo 'Refusing to overwrite existing local settings.' >&2
   exit 2
@@ -19,7 +24,7 @@ export DRUPAL_ENVIRONMENT=local
 php -r '
 $listeners = [];
 foreach ([8871, 8872] as $port) {
-  $listener = @stream_socket_server("tcp://127.0.0.1:" . $port, $code, $message);
+  $listener = @stream_socket_server("tcp://" . ($port === 8871 ? getenv("TDS_SESSION_MUTEX_WEB_BIND") : "127.0.0.1") . ":" . $port, $code, $message);
   if (!$listener) { fwrite(STDERR, "Refusing: fixture loopback port occupied.\n"); exit(2); }
   $listeners[] = $listener;
 }
@@ -54,6 +59,7 @@ cleanup() {
     cp "$scratch"/*.log "$root/.tds-session-http-failure/" 2>/dev/null || true
     echo "Fixture failed at stage=$stage; synthetic logs retained in $root/.tds-session-http-failure" >&2
   fi
+  rm -f .tds-browser-ready .tds-browser-done
   rm -rf "$scratch"
   return "$result"
 }
@@ -93,7 +99,7 @@ if [[ "${TDS_SESSION_MUTEX_INTEGRATION:-}" == 1 ]]; then
   vendor/bin/drush en tds_participant_portal tds_operator_portal tds_support_certificates -y
 fi
 stage=start-listeners
-(cd "$root/web" && exec env PHP_CLI_SERVER_WORKERS=4 setsid php -S 127.0.0.1:8871 .ht.router.php) > "$scratch/web.log" 2>&1 &
+(cd "$root/web" && exec env PHP_CLI_SERVER_WORKERS=4 setsid php -S "$web_bind:8871" .ht.router.php) > "$scratch/web.log" 2>&1 &
 web_pid=$!
 setsid php -S 127.0.0.1:8872 scripts/fixtures/session-lock-api.php > "$scratch/api.log" 2>&1 &
 api_pid=$!
@@ -115,4 +121,14 @@ php scripts/fixtures/session-lock-api.php seed-anonymous
 php scripts/test-dr3-session-concurrency.php http-rotation
 stage=tds-cookie-rotation
 php scripts/test-dr3-session-concurrency.php http-tds
+if [[ "${TDS_SESSION_MUTEX_BROWSER_HOLD:-0}" == 1 ]]; then
+  stage=browser-proof
+  touch .tds-browser-ready
+  deadline=$((SECONDS + 120))
+  while [[ ! -f .tds-browser-done && "$SECONDS" -lt "$deadline" ]]; do
+    kill -0 "$web_pid" "$api_pid"
+    sleep 1
+  done
+  [[ -f .tds-browser-done ]] || { echo 'Browser fixture deadline exceeded.' >&2; exit 1; }
+fi
 echo 'Disposable HTTP fixture passed. Remove its database/container and checkout.'

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\tds_participant_portal\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Drupal\tds_participant_portal\Service\ParticipantAreaProviderInterface;
 use Drupal\tds_tutor_gateway\Exception\GatewayException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -57,13 +58,14 @@ final class ParticipantAreaController extends ControllerBase {
 
     return [
       '#theme' => 'tds_participant_area',
+      '#logout_url' => Url::fromUri('base:tds/session/logout')->toString(),
       '#state' => $variables['state'],
       '#message' => $variables['message'],
       '#user' => $variables['user'],
       '#classes' => $variables['classes'],
       '#certificates' => $variables['certificates'],
       '#attached' => [
-        'library' => ['tds_participant_portal/participant-area'],
+        'library' => ['tds_participant_portal/participant-area', 'tds_tutor_gateway/browser-session'],
       ],
       '#cache' => ['max-age' => 0],
     ];
@@ -86,7 +88,7 @@ final class ParticipantAreaController extends ControllerBase {
   private function message(GatewayException $error): string {
     return match ($error->httpStatus()) {
       401 => 'Entre novamente para acessar seus dados.',
-      403 => 'A FastAPI nao autorizou este acesso.',
+      403 => 'Você não tem acesso a esta área.',
       default => 'Sua area esta temporariamente indisponivel.',
     };
   }

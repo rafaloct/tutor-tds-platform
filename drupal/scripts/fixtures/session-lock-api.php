@@ -97,6 +97,10 @@ if (($_SERVER['REQUEST_URI'] ?? '') === '/auth/login') {
     'user' => ['id' => $person, 'name' => 'Synthetic QA', 'role' => 'student'],
   ], JSON_THROW_ON_ERROR);
 }
+elseif (in_array(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), ['/classes', '/certificates'], TRUE)
+  && in_array($_SERVER['HTTP_AUTHORIZATION'] ?? '', ['Bearer synthetic-qa-person-a', 'Bearer synthetic-qa-person-b'], TRUE)) {
+  echo json_encode([str_contains($_SERVER['REQUEST_URI'], '/classes') ? 'classes' : 'certificates' => []], JSON_THROW_ON_ERROR);
+}
 elseif (($_SERVER['REQUEST_URI'] ?? '') === '/auth/refresh') {
   $payload = json_decode(file_get_contents('php://input'), TRUE);
   if (($payload['refresh_token'] ?? '') !== 'synthetic-refresh-old' || $db->exec('UPDATE qa_http_refresh SET used=1 WHERE used=0') !== 1) {

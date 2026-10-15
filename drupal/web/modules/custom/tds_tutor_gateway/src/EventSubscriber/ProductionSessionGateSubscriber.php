@@ -42,9 +42,12 @@ final class ProductionSessionGateSubscriber implements EventSubscriberInterface 
     $request = $event->getRequest();
     $path = rawurldecode($request->getPathInfo());
     $route = (string) $request->attributes->get('_route', '');
-    $privatePaths = ['/minha-area', '/operacoes', '/meus-certificados', '/tds/support/identity', '/tds/support/frame'];
+    $privatePaths = [
+      '/entrar', '/minha-area', '/operacoes', '/meus-certificados',
+      '/tds/support/identity', '/tds/support/frame',
+    ];
     $privateRoutes = [
-      'tds_tutor_gateway.login', 'tds_tutor_gateway.context', 'tds_tutor_gateway.logout',
+      'tds_tutor_gateway.browser_login', 'tds_tutor_gateway.bootstrap', 'tds_tutor_gateway.login', 'tds_tutor_gateway.context', 'tds_tutor_gateway.logout',
       'tds_participant_portal.dashboard', 'tds_operator_portal.operations',
       'tds_support_certificates.certificates', 'tds_support_certificates.identity',
       'tds_support_certificates.frame',

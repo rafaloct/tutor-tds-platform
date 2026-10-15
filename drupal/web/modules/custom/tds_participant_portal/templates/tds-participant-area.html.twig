@@ -2,8 +2,16 @@
 <section class="tds-participant-area" aria-labelledby="tds-participant-title">
   <h1 id="tds-participant-title">Minha area</h1>
 
+  {% if state != 'session_required' %}
+    <button type="button" data-tds-logout data-bootstrap="{{ path('tds_tutor_gateway.bootstrap') }}" data-logout="{{ logout_url }}" data-destination="{{ path('tds_tutor_gateway.browser_login') }}">Sair da minha conta</button>
+    <p data-tds-logout-status role="status" aria-live="polite"></p>
+  {% endif %}
+
   {% if state in ['session_required', 'access_denied', 'unavailable'] %}
     <p class="tds-participant-status tds-participant-status--warning" role="alert">{{ message }}</p>
+    {% if state == 'session_required' %}
+      <p><a href="{{ path('tds_tutor_gateway.browser_login') }}">Entrar na minha conta</a></p>
+    {% endif %}
   {% else %}
     {% if state == 'stale' %}
       <p class="tds-participant-status tds-participant-status--warning" role="status">

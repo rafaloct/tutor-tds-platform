@@ -29,3 +29,24 @@ tds_tutor_gateway.logout:
     _csrf_token: 'TRUE'
   options:
     no_cache: TRUE
+
+tds_tutor_gateway.browser_login:
+  path: '/entrar'
+  defaults:
+    _controller: '\Drupal\tds_tutor_gateway\Controller\BrowserSessionController::page'
+    _title: 'Entrar no Tutor TDS'
+  methods: [GET]
+  requirements:
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
+
+tds_tutor_gateway.bootstrap:
+  path: '/tds/session/bootstrap'
+  defaults:
+    _controller: '\Drupal\tds_tutor_gateway\Controller\BrowserSessionController::bootstrap'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
