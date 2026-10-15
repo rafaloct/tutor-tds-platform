@@ -157,3 +157,61 @@ fronteira de rede: não atribuir a falha ao Drupal sem evidência. Correção14d
 consulta Apache por loopback dentro do próprio clone, mantém isolamento e
 acrescenta diagnóstico sanitizado;4 testes focais PASS. Segundo ensaio PASS.
 Isto comprova restauração de cópia viva; não descriptografia do objeto R2.
+
+## Publicação após confirmação DNS — 15/10, horário de Brasília
+
+Usuário confirmou registro criado. A observado46.202.150.132; resolver do VPS
+não retornouAAAA. Domínio ativado por `activate-domain-dokploy.mjs`: valida
+identidade, DNS e ausência de drift; usa labels gerados pela versão instalada
+do Dokploy; preserva env, volumes e demais serviços. Snapshot anterior em
+`/etc/dokploy/tds-drupal-ops/pre-domain-compose.yml`. Reconciliado somente web
+com `up -d --no-build --no-deps web`; banco não recriado.
+
+OBSERVED: certificado Let's Encrypt YR2 para hostname exato, válido de
+15/10/2026 12:37:13 até13/01/2027 12:37:12(Brasília). Primeira chamada imediatamente
+após ativação viu certificado padrão enquanto ACME emitia; depois TLS passou,
+sem bypass de certificado. HTTP /cursos redireciona301 para HTTPS.
+
+`smoke-public.mjs`:18 checks públicos HTTPS PASS via VPS,9 cursos reais,
+canonical sem HTTP após limpeza do cache. LARGeo externo com curl --resolve
+validou TLS/hostname e /,/cursos,/health200; session/context,install.php,update.php403;
+redirect301. Resolver padrão do LARGeo ainda retornavaENOTFOUND; não confundir
+resolução forçada com propagação DNS completa. DNS Google/1.1.1.1 indisponível
+nesse desktop; não repetir nem alterar DNS do sistema para mascarar a evidência.
+
+Encontrado cache de canonical/OG HTTP em páginas pré-aquecidas pela inspeção
+local. Fronteira: metadata dependia de scheme/host, mas só variava url.path.
+Correção3858607 acrescenta url.site e regressãoHTTP/HTTPS/porta:7 testes,
+40 assertions PASS nas dependências locais11.4.8. Implantação e smoke no runtime
+11.4.10 registrados abaixo. Publicação não ativa sessões acadêmicas/IA/Chatwoot.
+
+Backup após ativar domínio,13:39:22(Brasília):
+`drupal/portal-production/v1/6c2c1b28-6135-4172-a72a-c8f8a19df913/archive.tar.age`,
+4.629.800bytes, SHA256`b71400265f2e07fdac525fb2df2cc86a1392b874bf95de682feb21025c872128`.
+Cron04:40UTC corresponde a01:40(Brasília).
+
+Rollback da rota: restaurar snapshot no composeFile do painel e no arquivo
+materializado antes de reconciliar apenas web; retirar domínio no painel se a
+intenção for desativação permanente, pois deploy nativo regenera labels de
+listas. Falha parcial painel/arquivo exige reconciliação explícita; guardas
+recusam continuar sobre divergência. Não restaurar env ou banco para reverter rota.
+
+DESKTOP-8T5DRBS confirmou /health200 por HTTPS com DNS padrão, sem --resolve.
+A limitação do resolver LARGeo não bloqueou esse acesso externo independente.
+
+## Imagem final e regressão pública
+
+Fonte38586072f75f7727799578031b4ac69869bb752c, imagem
+`sha256:973db4541aa6753eabe1c1f1cd275f29bccdb38833875032593e84219352d63a`,
+Drupal11.4.10. Build único no VPS concluído com audit Composer obrigatório;
+43 checks runtime da própria imagem PASS antes da promoção. Referência imutável
+atualizada pelo helper do Dokploy; apenas web reconciliado, cache rebuild.
+17 checks HTTP internos PASS seguidos de18 HTTPS públicos PASS, confirmando
+separação de canonical/OG mesmo após aquecimento HTTP.9 cursos reais presentes.
+O teste público externo no DESKTOP-8T5DRBS também retornou18 PASS com DNS normal,
+A46.202.150.132, semAAAA, validaçãoTLS ativa. Não equivale a E2E autenticado.
+
+CI watcher reexecutado às13:43(Brasília): GraphQL403, estado BLOCKED. PR211
+permanece draft e merge reservado ao responsável. Gates DNS/HTTPS desta edição
+foram atendidos; SMTP, conteúdo editorial completo, IA/Chatwoot e sessões
+acadêmicas mantêm os limites registrados. Sem alteração na release Android.
