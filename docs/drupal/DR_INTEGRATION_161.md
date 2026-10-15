@@ -99,3 +99,19 @@ ID e controle de saída também em erros403/503. Gate produtivo permanece off.
 Recibo detalhado e diferença entre ambientes: `DR3_SESSION_LOCKING.md`. Sem
 Chromium no VPS ou serviços reais nessa prova. API/Worker/Chatwoot reais,
 WCAG/performance e aceite #170 continuam pendentes, sem ativação de produção.
+
+
+## Primeiro fluxo participante com API real — TESTED-STAGING limitado
+
+Browser script `3ff4d49` PASS17 checks (3 turmas/3 progressos), Chrome no LARGeo
+com Playwright-core1.58.2, túnel SSH/Tailscale loopback18872 para fixture VPS
+Drupal11.4.10/PHP8.3.35/MariaDB11.8.9 → API staging HTTPS real. Produto146e67c,
+fixturearchive9e799c9. Entrada sem CMS, bootstrap, login, contexto, rotação,
+replay de cookies revogados, logout e voltar+atualizar comprovados. Harness HTTP
+`9e799c9` também PASS_SAMPLED_HTTP após ativação somente do contexto staging.
+
+Produção mantém sessões acadêmicas off, IDs protegidos preservados. Cleanup
+confirmado: fixture exit0, containers QA e listener18872 ausentes. A aprovação é restrita ao fluxo participante
+exercitado: operador real, Chatwoot/Worker, WCAG/performance, deployment público
+e aceite#170 completo continuam pendentes. Recibo e rollback restrito de staging:
+`STAGING_PARTICIPANT_CONTRACT_PROBE.md`.

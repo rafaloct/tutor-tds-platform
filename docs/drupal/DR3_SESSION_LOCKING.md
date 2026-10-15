@@ -281,3 +281,16 @@ assertions + 69 settings + 15 concorrentes + 5 HTTP + 11 core + 21 TDS. Rede
 script browser, sem código de produto; a prova anônima Chromium ocorreu localmente, não no VPS.
 O gap sintético anônimo dos recibos anteriores está fechado. Serviços reais,
 TLS/Secure de deployment, WCAG/performance e aceite de produção seguem pendentes.
+
+
+### Participante com API real — TESTED-STAGING limitado
+
+Script browser `3ff4d49`: **17 checks PASS,3 turmas e3 progressos renderizados**,
+Chrome/Playwright-core1.58.2 no LARGeo via túnel SSH loopback18872 para Drupal
+isolado no VPS11.4.10/PHP8.3.35/MariaDB11.8.9, usando API staging HTTPS real.
+Fixturearchive9e799c9, produto146e67c. Bootstrap/login UI sem CMS, contexto200,
+rotação, cookies antigos401, logout UI e voltar+atualizar401 comprovados.
+Staging learning_context=true na imagem existente, produção desativada.
+Cleanup confirmado: fixture exit0, containers QA e listener18872 ausentes. Detalhes, rollback e limites
+em `STAGING_PARTICIPANT_CONTRACT_PROBE.md`. Operador real, Chatwoot/Worker,
+WCAG/performance, deployment TLS/Secure e aceite#170 completo continuam pendentes.

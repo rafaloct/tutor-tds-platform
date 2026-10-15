@@ -94,4 +94,34 @@ visíveis→contexto200/uidCMS0→cookie antigo401→logout UI→cookie revogado
 e atualizar sem contexto. Não imprime HTML, nomes, IDs, tokens, credenciais,
 URL de classes ou screenshots. Saída somente enums/contagens e código de rede
 allowlisted em falha. Guardas locais negativas3 PASS e sintaxe Node PASS, sem
-rede. Runtime browser real ainda UNKNOWN; produção permanece com gate desligado.
+rede. Runtime browser real comprovado no recibo abaixo; produção com gate desligado.
+
+
+## Recibo browser com API real — TESTED-STAGING limitado
+
+**Script `3ff4d49`: PASS,17 checks,3 turmas renderizadas e3 progressos, exit0.**
+Chrome no LARGeo com Playwright-core1.58.2 → túnel SSH sobre Tailscale em
+loopback18872 → fixture Drupal isolada no VPS (11.4.10/PHP8.3.35/MariaDB11.8.9)
+→ HTTPS da API staging real. Snapshot da fixture `9e799c9`; código de produto
+permanece `146e67c` (revisões posteriores somente testes/documentação).
+
+Comprovados: entrada/bootstrap privados, cookie HttpOnly/SameSite, login pela UI,
+três turmas/progressos reais, contexto200, uid editorial0, rotação do cookie,
+replay pré-login401, logout pela UI, cookie revogado401 e voltar+atualizar sem
+contexto/conteúdo acadêmico. Credenciais QA foram capturadas em memória pelo
+coordenador via SSH e enviadas ao stdin Node; sem argv, logs ou arquivo adicional
+de segredo. Nenhum screenshot, corpo ou identificador pessoal no recibo.
+
+A API staging ficou com learning_context=true, imagem existente `6e3cd5f31bb4`
+fixada; somente essa API foi reiniciada. IDs de produção e banco preservados.
+Backup privado de rollback: `/etc/dokploy/tds-drupal-ops/staging-context-170.env.before`.
+Como `STAGING_API_IMAGE` estava ausente no original, rollback deve fornecer
+explicitamente a imagem atual; não usar um default que troque imagem por acaso.
+
+Cleanup confirmado: parent fixture exit0, containers QA ausentes e listener
+LARGeo18872 ausente. Verificação final: flag acadêmica produtiva false, portal
+e API de produção HTTPS200 com TLS válido.
+Não é implantação acadêmica no portal produtivo nem aceite integral#170. Faltam
+operador real, Chatwoot, Worker, WCAG/performance e gates restantes. O trecho
+browser→fixture usa HTTP loopback pelo túnel; não comprova Secure/TLS do browser
+em um deployment público. Gate acadêmico produtivo permanece desativado.

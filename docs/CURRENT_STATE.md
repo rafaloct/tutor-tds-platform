@@ -7,8 +7,13 @@ TESTED: harness `9e799c9` retornou PASS_SAMPLED_HTTP/exit0,11 etapas200, com3
 contextos e3 cursos após habilitação restrita de learning_context em staging.
 Flag persistida pelo coordenador, imagem existente fixada, somente API staging
 reiniciada; produção e banco preservados. Não é prova de dashboard/browser.
-Candidato de browser real preparado em fixture via túnel local18872, credenciais
-somente stdin privado; execução ainda UNKNOWN. Recibo e limites em
+TESTED-STAGING posterior: browser `3ff4d49` passou17 checks, exibiu3 turmas e3
+progressos com API real. Chrome no LARGeo, Playwright-core1.58.2, túnel SSH
+loopback18872 para fixture Drupal11.4.10/PHP8.3.35/MariaDB11.8.9 no VPS.
+Navegador sem sessão CMS: bootstrap/login/contexto/rotação/logout/replay e
+voltar+atualizar comprovados. Código funcional146e67c, fixturearchive9e799c9.
+Operador real, Chatwoot/Worker, WCAG/performance e aceite#170 completo pendentes.
+Cleanup confirmado: fixture exit0, containers QA e listener18872 ausentes. Recibo e limites em
 `drupal/STAGING_PARTICIPANT_CONTRACT_PROBE.md`. Gate produtivo permanece off.
 
 
@@ -25,8 +30,8 @@ API sintética, rede interna e forwarder loopback; cleanup exit 0.
 VPS `146e67c`: PHP 8.3.35/Drupal 11.4.10/MariaDB 11.8.9, 127 testes/488
 assertions + 69 settings + 15 concorrentes + 5 HTTP + 11 core + 21 TDS PASS.
 Os commits posteriores mudaram apenas o script browser, sem código de produto; não houve
-prova Chromium no VPS. API/Worker/Chatwoot reais, WCAG/performance e aceite #170
-seguem pendentes; flag produtiva permanece desligada.
+browser executado dentro do VPS. A prova posterior de participante com API real
+está acima; Worker/Chatwoot reais, WCAG/performance e aceite #170 seguem pendentes; flag produtiva permanece desligada.
 Contrato e limites: `drupal/DR3_SESSION_LOCKING.md`.
 
 ## 2026-10-15 — candidato integrado Drupal / PR #212
