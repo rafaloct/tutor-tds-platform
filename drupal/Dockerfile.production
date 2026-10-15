@@ -48,11 +48,15 @@ COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 COPY . /var/www/html
+# Normalize only source files, before Composer creates its dependency tree.
+RUN chmod -R a+rX,go-w /var/www/html && chmod 0755 /var/www/html
 
 # composer.lock e obrigatorio (Issue #163): falha de lock = falha de build.
 # Diretorios gravaveis: dono www-data (usuario do Apache), sem permissao world.
-RUN test -f composer.lock \
+RUN umask 022 \
+ && test -f composer.lock \
  && COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader \
+ && composer audit --no-dev --locked \
  && mkdir -p web/sites/default/files /var/www/private config/sync \
  && chown -R www-data:www-data web/sites/default/files /var/www/private \
  && find web/sites/default/files config/sync -type d -exec chmod 2775 {} + \
@@ -63,6 +67,11 @@ ENV PATH=/var/www/html/vendor/bin:$PATH
 # No PHP execution in uploaded files; private data is outside DocumentRoot.
 COPY production/apache-hardening.conf /etc/apache2/conf-available/tds-production.conf
 RUN a2enconf tds-production \
- && chmod -R a+rX,go-w /var/www/html \
- && chmod 0755 /var/www/html \
  && chmod 0444 web/sites/default/settings.php
+
+USER www-data
+RUN test -r web/index.php \
+ && test -r vendor/autoload.php \
+ && test -r web/modules/custom/tds_health/tds_health.info.yml \
+ && test -r web/sites/default/settings.php
+USER root
