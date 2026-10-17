@@ -11,21 +11,21 @@ Status do código: candidato local, sem deploy e sem publicação editorial.
 - Dos 10 uploads, somente o piloto SAF 1425 tem competency_id e followup_activity_id preenchidos no mapa atual.
 - Vídeo piloto 1425: YouTube FG14ksTaMCE, mídia de staging d166f3b7-7f46-4e3e-bff5-8a340e87d1a9; playback em emulador aprovado em 16/10.
 - Banco produção auditado em 16/10: media_assets vazio, só instituição/programa QA e uma oferta QA. Nunca usar QA como linhagem real.
-- Em 17/10 o domínio ead.ipexdesenvolvimento.cloud não respondeu em três computadores. Disponibilidade HTTP atual não comprovada.
+- Em 17/10 o domínio ead.ipexdesenvolvimento.cloud sofreu timeout em três computadores; a integração WPVibe confirmou resposta Cloudflare HTTP 522 às 10:57:54Z. DNS e conexão TCP 443 existiam, mas a origem não respondeu. A causa interna permanece desconhecida.
 
 ## Contrato do candidato
 
 O script api/ops/sync_learnpress_media.py transforma snapshot LearnPress + mapa de entrega YouTube + revisão humana opcional em payloads compatíveis com POST /admin/media.
 
 - Modo padrão: dry-run local, sem chamadas à rede.
-- Rejeita lesson IDs duplicados, fonte imprevista, lição não publicada, upload ausente, videoId inválido e IDs pedagógicos vazios.
+- Rejeita lesson IDs duplicados, asset de provedor reutilizado entre lições, fonte imprevista, lição não publicada, upload ausente, videoId inválido e IDs pedagógicos vazios.
 - As 12 aulas IA exigem aprovação explícita do module_id; a sugestão module_id_proposed não aprova o currículo.
 - Preserva rights_confirmed=false, offline_policy=forbidden, visibility=enrolled salvo escolha explícita no mapa.
-- Modo --execute: uma lição por chamada, HTTPS fixo de staging, ambiente confirmado na rota /version, linhagem completa e credenciais privadas por variáveis de ambiente.
+- Modo --execute: uma lição por chamada, HTTPS fixo de staging, reconsulta estrutural read-only dos nove currículos LearnPress antes de qualquer POST, ambiente confirmado na rota /version, linhagem completa e credenciais privadas por variáveis de ambiente. HTTP 522, ausência, reordenação ou alteração da grade impedem o POST.
 - Não chama publish, não altera CourseVersion, WordPress, matrícula, frequência nem certificado.
 - Checkpoint atômico vinculado à URL e fingerprint do payload. HTTP 409 registra conflito, sem afirmar sucesso.
 
-O script não faz scraping automático e não equivale a um sincronizador contínuo. O próximo passo requer exportação incremental autenticada, diff por wp_lesson_id, revisão instrutor, draft, aprovação coordenador e inclusão em CourseVersion via fluxo editorial.
+O importador trabalha sobre o manifesto auditado e ainda não equivale a um sincronizador contínuo. O verificador `api/ops/verify_learnpress_curriculum.py` consulta apenas os endpoints públicos GET LearnPress de cada curso, compara IDs, seções, ordem e títulos das 33 aulas verificadas. Não acessa `post_content` privado, não comprova hashes/duração dos MP4 atuais nem alterações textuais dentro da mesma aula. O próximo passo para delta completo requer exportação incremental autenticada do conteúdo, revisão do instrutor, draft, aprovação coordenador e inclusão em CourseVersion via fluxo editorial.
 
 ## Conferência sem escrita no LARGeo
 
@@ -35,7 +35,11 @@ No PowerShell, execute cada linha:
     $audit = 'D:\AI-Shared\work\tds-wp-app-media-audit-20261016'
     py -3.13 "$repo\api\ops\sync_learnpress_media.py" --manifest "$audit\learnpress_to_tutor_tds_manifest_v2.json" --delivery "$audit\delivery_map.json"
 
-Este comando não precisa de CPF/senha nem conectividade. Com revisão pedagógica aprovada, o arquivo externo de review pode usar a estrutura abaixo:
+Este comando não precisa de CPF/senha nem conectividade. Para verificar a estrutura do LearnPress quando o HTTP voltar, use um GET auditado, somente leitura:
+
+    py -3.13 "$repo\api\ops\verify_learnpress_curriculum.py" --manifest "$audit\learnpress_to_tutor_tds_manifest_v2.json"
+
+O resultado precisa indicar status PASS e 9 cursos/45 lições. Caso o site responda 522, a conferência é BLOCKED e nenhuma importação deve ocorrer. Com revisão pedagógica aprovada, o arquivo externo de review pode usar a estrutura abaixo:
 
     {
       "1396": {
@@ -72,7 +76,8 @@ ATENÇÃO: #1425 já está publicado em staging; a linha mostra a interface, nã
 
     Set-Location 'D:\AI-Shared\work\tds-issue216-learnpress-media\api'
     py -3.13 -m unittest discover -s tests -p test_sync_learnpress_media.py -v
-    py -3.13 -m py_compile ops\sync_learnpress_media.py
+    py -3.13 -m unittest discover -s tests -p test_verify_learnpress_curriculum.py -v
+    py -3.13 -m py_compile ops\sync_learnpress_media.py ops\verify_learnpress_curriculum.py
     git diff --check
 
 Aceite em produção exige HTTPS real, revisão dos 9 cursos, avaliação das lições LearnPress atuais, reconciliação sem duplicata, smoke de app distribuído, backup/rollback.

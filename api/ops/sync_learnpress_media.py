@@ -19,6 +19,8 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from verify_learnpress_curriculum import AuditBlocked, audit_live
+
 PILOT_STAGING_URL = "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api"
 MODULE_RE = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,79}$")
 YT_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
@@ -70,6 +72,7 @@ def plan_media(manifest: dict, delivery: dict, review: dict, lineage: dict,
         raise SyncBlocked("Delivery e review devem ser objetos JSON.")
     rows = manifest["videos"]
     seen: set[str] = set()
+    seen_assets: dict[tuple[str, str], str] = {}
     planned: list[dict] = []
     blocked: list[tuple[str, str]] = []
     for row in rows:
@@ -81,6 +84,14 @@ def plan_media(manifest: dict, delivery: dict, review: dict, lineage: dict,
         if lid in seen:
             raise SyncBlocked(f"wp_lesson_id duplicado: {lid}")
         seen.add(lid)
+        source = delivery.get(lid)
+        if isinstance(source, dict):
+            asset_key = (str(source.get("provider", "")), str(source.get("provider_asset_id", "")))
+            if all(asset_key):
+                previous = seen_assets.get(asset_key)
+                if previous is not None:
+                    raise SyncBlocked(f"Mesmo asset do provedor nas lições {previous} e {lid}.")
+                seen_assets[asset_key] = lid
         if lesson_filter is not None and int(lid) != lesson_filter:
             continue
         try:
@@ -279,8 +290,9 @@ def main(argv: list[str] | None = None) -> int:
         for field in lineage:
             lineage[field] = lineage[field] or "dry-run-" + field
     review = read_object(args.review) if args.review else {}
+    manifest = read_object(args.manifest)
     planned, blocked = plan_media(
-        read_object(args.manifest), read_object(args.delivery), review,
+        manifest, read_object(args.delivery), review,
         lineage, args.lesson_id,
     )
     print(f"MODE={'STAGING_DRAFT' if args.execute else 'DRY_RUN'} "
@@ -294,6 +306,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.execute:
         if blocked or len(planned) != 1:
             raise SyncBlocked("Execução exige uma única lição elegível.")
+        # Do not import stale or moved lessons. Fail closed when WordPress is offline.
+        live = audit_live(manifest)
+        if live["status"] != "PASS":
+            raise SyncBlocked("Currículo LearnPress mudou; revisar novo manifesto antes do POST.")
         api = Api(args.target)
         token = preflight(api, os.environ)
         print(execute_one(planned[0], api, token, args.state))
@@ -303,6 +319,7 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (SyncBlocked, OSError, ValueError, urllib.error.URLError) as exc:
-        print(f"BLOCKED: {exc.__class__.__name__}: {exc if isinstance(exc, SyncBlocked) else 'verificar conexão e arquivos'}", file=sys.stderr)
+    except (SyncBlocked, AuditBlocked, OSError, ValueError, urllib.error.URLError) as exc:
+        printable = str(exc) if isinstance(exc, (SyncBlocked, AuditBlocked)) else 'verificar conexão e arquivos'
+        print(f"BLOCKED: {exc.__class__.__name__}: {printable}", file=sys.stderr)
         sys.exit(2)

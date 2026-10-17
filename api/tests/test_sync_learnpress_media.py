@@ -100,6 +100,12 @@ class SyncLearnPressMediaTests(unittest.TestCase):
         with self.assertRaisesRegex(sync.SyncBlocked, "duplicado"):
             plan(rows=[row(), row()])
 
+    def test_provider_asset_cannot_be_reused_in_another_lesson(self):
+        second = row(wp_lesson_id=1426, lesson_title="Aula nova")
+        delivery = {**DELIVERY, "1426": dict(DELIVERY["1425"])}
+        with self.assertRaisesRegex(sync.SyncBlocked, "Mesmo asset"):
+            plan(rows=[row(), second], delivery=delivery)
+
     def test_bogus_source_and_provider_are_rejected(self):
         eligible, blocked = plan(rows=[row(source_mp4_url="http://localhost/asset.mp4")])
         self.assertFalse(eligible)
@@ -193,6 +199,63 @@ class SyncLearnPressMediaTests(unittest.TestCase):
             with self.assertRaisesRegex(sync.SyncBlocked, "lesson-id"):
                 sync.main(["--manifest", str(manifest), "--delivery", str(delivery),
                            "--execute"])
+
+    def test_execute_refuses_stale_wordpress_before_login_or_post(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = root / "manifest.json"
+            delivery = root / "delivery.json"
+            state = root / "checkpoint.json"
+            manifest.write_text(json.dumps({"manifest_version": 2, "videos": [row()]}),
+                                encoding="utf-8")
+            delivery.write_text(json.dumps(DELIVERY), encoding="utf-8")
+            env = {"TDS_INSTITUTION_ID": "staging-qa-institution",
+                   "TDS_PROGRAM_ID": "staging-qa-program",
+                   "TDS_CREATOR_USER_ID": "staging-qa-admin"}
+            with patch.dict(sync.os.environ, env), patch.object(
+                    sync, "audit_live", side_effect=sync.AuditBlocked("WordPress HTTP 522")):
+                with patch.object(sync.Api, "request",
+                                  side_effect=AssertionError("staging API must not be contacted")):
+                    with self.assertRaisesRegex(sync.AuditBlocked, "522"):
+                        sync.main(["--manifest", str(manifest), "--delivery", str(delivery),
+                                   "--lesson-id", "1425", "--state", str(state),
+                                   "--execute"])
+            self.assertFalse(state.exists())
+
+    def test_execute_requires_verified_live_curriculum_before_draft(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = root / "manifest.json"
+            delivery = root / "delivery.json"
+            state = root / "checkpoint.json"
+            manifest.write_text(json.dumps({"manifest_version": 2, "videos": [row()]}),
+                                encoding="utf-8")
+            delivery.write_text(json.dumps(DELIVERY), encoding="utf-8")
+            env = {"TDS_INSTITUTION_ID": "staging-qa-institution",
+                   "TDS_PROGRAM_ID": "staging-qa-program",
+                   "TDS_CREATOR_USER_ID": "staging-qa-admin",
+                   "TDS_ADMIN_CPF": "synthetic",
+                   "TDS_ADMIN_PASSWORD": "synthetic"}
+            called = []
+            def request(_self, path, **kwargs):
+                called.append(path)
+                if path == "/version":
+                    return 200, {"environment": "staging"}
+                if path == "/auth/login":
+                    return 200, {"access_token": "fake"}
+                if path == "/admin/media":
+                    return 201, {"id": "draft-synthetic", "status": "draft"}
+                raise AssertionError(path)
+            with patch.dict(sync.os.environ, env), patch.object(
+                    sync, "audit_live", return_value={"status": "PASS"}) as check:
+                with patch.object(sync.Api, "request", request):
+                    self.assertEqual(sync.main([
+                        "--manifest", str(manifest), "--delivery", str(delivery),
+                        "--lesson-id", "1425", "--state", str(state), "--execute"
+                    ]), 0)
+            check.assert_called_once()
+            self.assertEqual(called, ["/version", "/auth/login", "/admin/media"])
+            self.assertTrue(state.exists())
 
 
 if __name__ == "__main__":
