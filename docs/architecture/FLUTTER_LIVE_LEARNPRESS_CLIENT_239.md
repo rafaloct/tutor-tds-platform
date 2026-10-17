@@ -38,3 +38,11 @@ Sem produção, alterações no WordPress real, certificados, Play Store, force-
 - `test/ead_editorial_real_wp_golden_test.dart` cria uma captura golden do conteúdo sintético na UI `AppTheme.light()`; arquivo `test/goldens/ead_wp_synthetic_real_http_blue.png`. **Imagem gerada por teste Flutter, não screenshot Android**. A fonte de Material Icons no runner de teste pode aparecer como quadrados; a legibilidade real precisa de AVD.
 - O próprio plugin WordPress descobriu um caso que os mocks não capturavam: `wp_kses()` remove tags `script` mas deixa conteúdo em texto. Isso foi corrigido no PR #238 antes da captura do JSON, e o teste WordPress real foi repetido com 27 condições aprovadas.
 - A instalação WordPress com SQLite **não confirma** compatibilidade MySQL/MariaDB, roles reais dos instrutores ou autenticação/autorização num servidor HTTPS de staging. Estes gates não foram ignorados.
+
+## Verificação cruzada adicional: contêiner MySQL sintético (outra sessão)
+
+- O PR #238 recebeu um ensaio independente com WordPress 6.7.2, LearnPress 4.3.6 e MySQL 8.0, em rede interna Docker da VPS. Os contêineres QA têm `PortBindings=map[]` e não expõem serviços públicos. Evidência: `docs/qa/ead-convergence-20261017/wordpress-mysql-synthetic-proof.md` na branch do plugin.
+- Comandos **read-only** inspecionaram o estado da rede interna e obtiveram `GET /wp-json/tds-learning/v1/courses/12/curriculum` dentro do contêiner WP sintético. A resposta foi salva em `test/fixtures/ead_editorial/curriculum-wp672-lp436-mysql-synthetic.json` sem dados reais, usuários ou segredos.
+- A fixture MySQL tem aula 13 marcada `mobile_content=false`, mídia `null` e quiz 15 visível apenas como metadado. O teste Flutter adicional comprova que o cliente não fabrica liberação de texto, vídeo ou gabarito nesse estado. Testes e `flutter analyze` PASS, exit 0.
+- A fixture SQLite anterior cobre o estado contrário: aula 12 explicitamente liberada com HTML seguro e ID YouTube aprovado. Juntas, ambas testam os dois estados editoriais com JSON produzidos por WordPress/LP real, sem alegar Android E2E.
+- **Pendência**: o ensaio MySQL ocorre em contêiner isolado e não comprova o conjunto completo de temas/plugins/roles/Cloudflare da instalação EAD. A versão pública permanece intacta.

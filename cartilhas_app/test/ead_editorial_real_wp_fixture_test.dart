@@ -106,4 +106,38 @@ void main() {
       expect(attempts, 2);
     },
   );
+
+  test(
+    'real MySQL WordPress sandbox keeps non-approved lessons private',
+    () async {
+      final wpPayload = await fixture(
+        'curriculum-wp672-lp436-mysql-synthetic.json',
+      );
+      final revision = wpPayload['revision'] as String;
+      const qaCourse = EadCourse(
+        id: 12,
+        slug: 'saf-qa-sintetico',
+        title: 'SAF QA Sintético',
+      );
+      final repo = EadEditorialBridgeRepository(
+        get: (_, headers) async => http.Response.bytes(
+          utf8.encode(jsonEncode(wpPayload)),
+          200,
+          headers: {'etag': '"$revision"'},
+        ),
+      );
+      final curriculum = await repo.fetch(qaCourse);
+      expect(curriculum.lessonCount, 2);
+      expect(curriculum.videoCount, 0);
+      final lesson = curriculum.sections.single.lessons.first;
+      expect(lesson.id, 13);
+      expect(lesson.mobileContent, false);
+      expect(lesson.youtubeId, isNull);
+      final quiz = curriculum.sections.single.lessons.last;
+      expect(quiz.id, 15);
+      expect(quiz.type, 'lp_quiz');
+      expect(quiz.youtubeId, isNull);
+      expect(wpPayload.toString(), isNot(contains('gabarito')));
+    },
+  );
 }

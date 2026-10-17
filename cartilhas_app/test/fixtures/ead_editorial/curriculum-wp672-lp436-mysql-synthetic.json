@@ -1,0 +1,31 @@
+{
+    "schema_version":  1,
+    "authority":  "learnpress",
+    "course_id":  12,
+    "title":  "SAF QA Sintético - Nunca publicar",
+    "course_url":  null,
+    "sections":  [
+                     {
+                         "id":  1,
+                         "title":  "Assista em vídeo (QA)",
+                         "items":  [
+                                       {
+                                           "id":  13,
+                                           "type":  "lp_lesson",
+                                           "title":  "Aula QA - Agroecologia",
+                                           "revision":  "2026-10-17 21:48:18",
+                                           "mobile_content":  false,
+                                           "media":  null
+                                       },
+                                       {
+                                           "id":  15,
+                                           "type":  "lp_quiz",
+                                           "title":  "Quiz QA de revisão",
+                                           "revision":  "2026-10-17 21:48:18",
+                                           "url":  null
+                                       }
+                                   ]
+                     }
+                 ],
+    "revision":  "a104452d1b38df626627ada1205c769f409929b1e18a7f3fca97dcf3cfd26dd0"
+}
