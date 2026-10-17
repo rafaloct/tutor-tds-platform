@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "tds-site-stt-qa",
+  "version": "0.1.0",
+  "description": "Testes offline de interface STT do WordPress Tutor TDS",
+  "scripts": {
+    "test": "node --test test-stt.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "puppeteer-core": "^24.14.0"
+  }
+}
