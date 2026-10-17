@@ -14,6 +14,7 @@ import '../features/learning_context/learning_home_card.dart';
 import '../features/courses/presentation/course_pdf_button.dart';
 import '../features/learning_context/learning_home_controller.dart';
 import '../features/courses/data/course_repository.dart';
+import '../features/ead_catalog/presentation/ead_catalog_screen.dart';
 import '../features/course_editor/data/course_editor_repository.dart';
 import '../features/course_editor/presentation/course_editor_screen.dart';
 import '../models/cartilha.dart';
@@ -50,6 +51,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     this.courseLoader,
+    this.eadCatalogLoader,
     this.learningHomeController,
     this.editorGatewayFactory,
     this.classLifecycleGatewayFactory,
@@ -59,6 +61,7 @@ class HomeScreen extends StatefulWidget {
   final LearningHomeController? learningHomeController;
 
   final Future<List<Cartilha>> Function()? courseLoader;
+  final EadCourseLoader? eadCatalogLoader;
   final CourseEditorGateway Function()? editorGatewayFactory;
   final ClassLifecycleGateway Function()? classLifecycleGatewayFactory;
   final Future<bool> Function()? sessionProbe;
@@ -538,6 +541,29 @@ class _HomeScreenState extends State<HomeScreen> {
         shrinkWrap: embedded,
         physics: embedded ? const NeverScrollableScrollPhysics() : null,
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Card(
+              child: ListTile(
+                leading: const Icon(Icons.school_outlined),
+                title: const Text('Cursos atualizados no EAD'),
+                subtitle: const Text(
+                  'Veja as ofertas do site, sem perder suas cartilhas e o Tutor TDS.',
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+                onTap: () => Navigator.push(
+                  context,
+                  trackedRoute(
+                    pageId: 'ead_courses',
+                    resourceId: 'ead_catalog',
+                    featureId: 'ead_course_discovery',
+                    builder: (_) =>
+                        EadCatalogScreen(courseLoader: widget.eadCatalogLoader),
+                  ),
+                ),
+              ),
+            ),
+          ),
           _LearningHeader(
             showLocalResume: !_useLearningHome,
             cartilhas: cartilhas,
