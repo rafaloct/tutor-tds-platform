@@ -71,10 +71,12 @@ function rest_do_request( $request ) {
 }
 function register_rest_route( $ns, $route, $args ) { global $registered; $registered[ $route ] = $args; }
 function __return_true() { return true; }
-function strip_shortcodes( $raw ) { return preg_replace( '/\[[^\]]+\]/', '', $raw ); }
+// The real WP strip_shortcodes removes only registered shortcode names.
+function strip_shortcodes( $raw ) { return $raw; }
 function wp_kses( $raw, $allowed, $protocols ) {
 	// Test stub: WordPress' actual wp_kses is stricter than this deterministic test.
-	$raw = preg_replace( '#<script\b[^>]*>.*?</script>#si', '', $raw );
+	// Real wp_kses removes tags, not necessarily the contents of script tags.
+	// Any remaining text must already have been removed by the plugin.
 	$allowed_tags = '<' . implode( '><', array_keys( $allowed ) ) . '>';
 	return strip_tags( $raw, $allowed_tags );
 }
@@ -138,7 +140,8 @@ verify( $lesson->get_status() === 200, 'Explicitly public lesson visible' );
 $body = $lesson->get_data()['content_html'];
 verify( strpos( $body, '<h2>Agroecologia</h2>' ) !== false, 'Allowed formatted content retained' );
 verify( strpos( $body, '<script' ) === false && strpos( $body, 'steal()' ) === false, 'Unsafe HTML stripped' );
-verify( strpos( $body, '[private' ) === false, 'Shortcodes stripped' );
+verify( strpos( $body, '[private' ) === false, 'Unknown shortcodes stripped' );
+verify( strpos( $body, 'steal()' ) === false, 'Script content stripped before wp_kses' );
 verify( request_lesson( 1426 )->code === 'tds_editorial_lesson_not_authorized', 'Draft lesson never exposed' );
 
 update_post_meta( 1425, '_tds_mobile_youtube_id', 'FG14ksTaMCE' );
@@ -194,5 +197,9 @@ verify( get_post_meta( 1425, '_tds_mobile_public' ) === '1', 'Malformed nonce ig
 $_POST = array( 'tds_mobile_lesson_nonce' => 'validnonce', 'tds_mobile_youtube_id' => array( 'malformed' ) );
 TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
 verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'Malformed video input cannot leave rights approved' );
+
+update_post_meta( 1425, '_tds_mobile_public', '1' );
+$posts[1425]->post_content = str_repeat( 'X', 250001 );
+verify( request_lesson()->code === 'tds_editorial_lesson_too_large', 'Oversized lesson is denied' );
 
 echo 'PHP_EDITORIAL_CONTRACT_TESTS_PASS=' . $checks . "\n";
