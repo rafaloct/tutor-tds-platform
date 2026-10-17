@@ -74,3 +74,15 @@ O harness sem banco simula WordPress/LP REST e valida autorização/nonce, quiz 
 Esta entrega são arquivos novos no Git, não há migração ou mutação no WP. Desativar o plugin no staging retorna os endpoints novos a 404 e preserva LearnPress, sem afetar o site. Dados de meta opt-in não são destruídos ao desativar; reativação só após nova inspeção editorial.
 
 **MERGE_ALLOWED=NO; WP_PRODUCTION_INSTALL=NO.**
+
+## Homologação adicional com WordPress e LearnPress reais, sem produção (17/10/2026)
+
+- Ambiente **isolado** na VM L4, servidor HTTP acessível somente por `127.0.0.1:18731`, WordPress **6.7.2**, LearnPress **4.3.6**, PHP 8.3 e SQLite Database Integration **3.1.0**. Conteúdo totalmente **sintético**: um curso SAF, duas aulas (uma privada) e um quiz sintético. Não se utilizou banco, credenciais ou matrículas da produção.
+- Plugin instalado/ativado neste WordPress sintético, e a API interna original `GET /learnpress/v1/courses/{id}` respondeu **HTTP 200** com seção e itens reais do LMS.
+- Um roteiro `wp-cli eval-file` verificou **27/27 condições PASS** no WP real: metadados e ordem, ocultação de draft, opt-in público, permissões de edição, confirmação/revogação de direitos, sanitização, ETag 304, atualização de texto sem recompilar, retirada de aula da grade e bloqueio de curso privado.
+- No servidor HTTP loopback: `GET /tds-learning/v1/courses/11/curriculum` **200**, mesmo ETag com `If-None-Match` **304**, aula 12 autorizada **200** e aula 13 privada **404**. A resposta de aula foi verificada sem script ou shortcode não registrado; continha apenas material sintético e YouTube ID previamente aprovado.
+- **Correção de segurança descoberta pela homologação real:** `wp_kses` retirava a tag `script` mas podia deixar seu texto. Commit de correção `5093b9b` retira o elemento ativo inteiro antes da sanitização e também elimina tags de shortcode não registradas. Os testes reais passaram após a correção.
+- O WordPress sintético exigiu conceder ao **administrador de QA** as capacidades próprias `edit_lp_lesson`, `edit_lp_lessons`, `edit_others_lp_lessons` e `edit_published_lp_lessons` para exercitar a metabox. Isso foi feito exclusivamente no SQLite sintético, sem mudar permissões de produção.
+- O projeto Flutter recebeu, no ramo do PR #240, fixtures JSON extraídas dessas respostas HTTP reais. Testes de contrato/frontend passaram para curso, texto e ETag; não se expuseram gabaritos.
+
+**Limites:** SQLite não representa a compatibilidade com MySQL/MariaDB e os demais plugins do EAD de produção. Ainda é necessária homologação de staging **com MariaDB e plugins correspondentes**, inspeção de roles de instrutor, CORS, mídia, HTTPS e restauração. O localhost foi encerrado ao terminar os testes e nunca recebeu acesso público. **Não instalar ou publicar o plugin em produção sem gate humano.**
