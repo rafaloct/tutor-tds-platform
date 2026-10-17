@@ -213,8 +213,23 @@ final class TDS_LearnPress_Editorial {
 			return self::failure( 'lesson_not_authorized' );
 		}
 		$post = get_post( $id );
+		// Bounded public projection: reject unexpectedly large editorial payloads.
+		if ( strlen( (string) $post->post_content ) > 250000 ) {
+			return self::failure( 'lesson_too_large', 413 );
+		}
 		// No the_content filter: it may execute shortcodes and private embeds.
-		$raw = strip_shortcodes( $post->post_content );
+		// WordPress wp_kses strips <script> tags but *retains their text*.
+		// Drop whole active/embed elements before allowing any public HTML.
+		$raw = preg_replace(
+			'#<\s*(script|style|iframe|object|embed|form|svg)\b[^>]*>.*?<\s*/\s*\1\s*>#is',
+			'',
+			$post->post_content
+		);
+		$raw = is_string( $raw ) ? strip_shortcodes( $raw ) : '';
+		// strip_shortcodes() only removes registered shortcodes. Do not leak
+		// custom/unregistered shortcode tags to visitors of public lessons.
+		$raw = preg_replace( '/\[(?:\/?)[a-z][^\]]*\]/iu', '', $raw );
+		$raw = is_string( $raw ) ? $raw : '';
 		$allowed = array(
 			'p' => array(), 'br' => array(), 'strong' => array(), 'em' => array(),
 			'ul' => array(), 'ol' => array(), 'li' => array(),
