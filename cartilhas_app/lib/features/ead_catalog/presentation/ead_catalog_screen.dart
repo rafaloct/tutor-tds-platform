@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/ead_catalog_repository.dart';
+import '../learning_path/ead_learning_path_screen.dart';
 
 typedef EadCourseLoader = Future<List<EadCourse>> Function();
 typedef EadCourseOpener = Future<bool> Function(Uri uri);
@@ -118,17 +119,40 @@ class _EadCatalogScreenState extends State<EadCatalogScreen> {
                     for (final course in snapshot.data!)
                       Card(
                         margin: const EdgeInsets.only(bottom: 10),
-                        child: ListTile(
-                          key: ValueKey('ead-course-${course.id}'),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 9,
-                          ),
-                          leading: const Icon(Icons.menu_book_outlined),
-                          title: Text(course.title),
-                          subtitle: const Text('Ver aulas e inscrição no EAD'),
-                          trailing: const Icon(Icons.open_in_new),
-                          onTap: () => _open(course),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              key: ValueKey('ead-course-${course.id}'),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 9,
+                              ),
+                              leading: const Icon(Icons.menu_book_outlined),
+                              title: Text(course.title),
+                              subtitle: const Text(
+                                'Ver aulas e inscrição no EAD',
+                              ),
+                              trailing: const Icon(Icons.open_in_new),
+                              onTap: () => _open(course),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                key: ValueKey('ead-path-${course.id}'),
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        EadLearningPathScreen(course: course),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.route_outlined),
+                                label: const Text(
+                                  'Ver percurso e prática no app',
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],
