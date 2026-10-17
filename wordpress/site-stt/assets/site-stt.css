@@ -1,0 +1,17 @@
+/* Tutor TDS: o botão não bloqueia digitação nem o envio dos formulários. */
+.tds-site-stt { display: inline-flex; align-items: center; gap: .35rem; flex-wrap: wrap; margin: .2rem .2rem .35rem; vertical-align: middle; }
+.tds-site-stt__button, .tds-site-stt__confirm, .tds-site-stt__cancel {
+  font: inherit; font-size: .875rem; border-radius: .5rem; cursor: pointer;
+  min-height: 2.75rem; padding: .4rem .7rem; border: 1px solid #295944;
+}
+.tds-site-stt__button { background: #fff; color: #184c37; }
+.tds-site-stt__button:hover, .tds-site-stt__button:focus-visible { background: #e7f1ea; outline-offset: 2px; }
+.tds-site-stt__button[aria-pressed="true"] { background: #184c37; color: #fff; }
+.tds-site-stt__status { font-size: .8rem; line-height: 1.4; color: #234636; }
+.tds-site-stt__choice:not([hidden]) { display: block; width: 100%; padding: .65rem; border: 1px solid #b8d0c2; background: #f4faf5; border-radius: .5rem; }
+.tds-site-stt__note { display: block; margin-bottom: .5rem; font-size: .875rem; line-height: 1.5; color: #183a2a; }
+.tds-site-stt__confirm, .tds-site-stt__cancel { margin-right: .35rem; margin-bottom: .2rem; }
+.tds-site-stt__confirm { color: white; background: #184c37; }
+.tds-site-stt__cancel { color: #184c37; background: white; }
+.tds-site-stt__choice[hidden] { display: none !important; }
+@media (max-width: 480px) { .tds-site-stt { display: flex; width: 100%; margin-left: 0; } }
