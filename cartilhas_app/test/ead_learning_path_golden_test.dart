@@ -1,6 +1,7 @@
 import 'package:cartilhas_app/features/ead_catalog/data/ead_catalog_repository.dart';
 import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_curriculum_repository.dart';
 import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_learning_path_screen.dart';
+import 'package:cartilhas_app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,11 +63,7 @@ void main() {
     )..addFont(rootBundle.load('assets/fonts/Poppins-Regular.ttf'))).load();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: Colors.green,
-          fontFamily: 'Poppins',
-        ),
+        theme: AppTheme.light(),
         home: EadLearningPathScreen(
           course: course,
           curriculumLoader: (_) async => data,
