@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "authority": "learnpress",
+  "course_id": 11,
+  "title": "SAF – Curso sintético para QA",
+  "course_url": null,
+  "sections": [
+    {
+      "id": 1,
+      "title": "Assista em vídeo: teste",
+      "items": [
+        {
+          "id": 12,
+          "type": "lp_lesson",
+          "title": "Aula 01 – Sistemas Agroflorestais (teste)",
+          "revision": "2026-10-17 21:46:31",
+          "mobile_content": true,
+          "media": {
+            "provider": "youtube",
+            "video_id": "FG14ksTaMCE"
+          }
+        },
+        {
+          "id": 14,
+          "type": "lp_quiz",
+          "title": "Quiz de revisão SAF sintético",
+          "revision": "2026-10-17 21:42:34",
+          "url": null
+        }
+      ]
+    }
+  ],
+  "revision": "1df324c1b0467f865dfef187beb0df5d14f81cd1d997673c5c54769eac50e4b0"
+}

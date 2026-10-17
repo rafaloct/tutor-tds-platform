@@ -6,6 +6,8 @@ import '../../../screens/chat_experience_screen.dart';
 import '../../courses/data/course_repository.dart';
 import '../data/ead_catalog_repository.dart';
 import 'ead_curriculum_repository.dart';
+import 'ead_editorial_bridge_repository.dart';
+import 'ead_mobile_lesson_screen.dart';
 import 'ead_quiz_link_repository.dart';
 
 typedef CurriculumLoader = Future<EadCurriculum> Function(EadCourse course);
@@ -20,6 +22,7 @@ class EadLearningPathScreen extends StatefulWidget {
     this.localCartilhaLoader,
     this.openCourse,
     this.quizUriLoader,
+    this.lessonLoader,
   });
 
   final EadCourse course;
@@ -27,6 +30,7 @@ class EadLearningPathScreen extends StatefulWidget {
   final LocalCartilhaLoader? localCartilhaLoader;
   final Future<bool> Function(Uri uri)? openCourse;
   final Future<Uri> Function(int quizId)? quizUriLoader;
+  final EadLessonLoader? lessonLoader;
 
   @override
   State<EadLearningPathScreen> createState() => _EadLearningPathScreenState();
@@ -34,6 +38,8 @@ class EadLearningPathScreen extends StatefulWidget {
 
 class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
   late Future<EadCurriculum> _curriculum;
+  final EadEditorialBridgeRepository _editorial =
+      EadEditorialBridgeRepository();
 
   static const _courseMapping = <int, String>{
     614: 'ia-cartilha',
@@ -56,9 +62,7 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
   }
 
   void _refresh() {
-    _curriculum = (widget.curriculumLoader ?? EadCurriculumRepository().fetch)(
-      widget.course,
-    );
+    _curriculum = (widget.curriculumLoader ?? _editorial.fetch)(widget.course);
   }
 
   void _retry() => setState(_refresh);
@@ -102,6 +106,21 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
         );
       }
     }
+  }
+
+  Future<void> _openMobileLesson(EadLesson lesson) async {
+    if (!lesson.mobileContent || lesson.type != 'lp_lesson') return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => EadMobileLessonScreen(
+          course: widget.course,
+          lessonId: lesson.id,
+          loader: widget.lessonLoader,
+          openExternal: widget.openCourse,
+        ),
+      ),
+    );
   }
 
   Future<void> _openNativeCartilha() async {
@@ -236,13 +255,19 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
                           title: Text(lesson.title),
                           onTap: lesson.type == 'lp_quiz'
                               ? () => _openQuiz(lesson)
+                              : lesson.mobileContent
+                              ? () => _openMobileLesson(lesson)
                               : null,
                           trailing: lesson.type == 'lp_quiz'
                               ? const Icon(Icons.open_in_new)
+                              : lesson.mobileContent
+                              ? const Icon(Icons.chevron_right)
                               : null,
                           subtitle: Text(
                             lesson.type == 'lp_quiz'
                                 ? 'Abrir quiz publicado no EAD (sem transferir nota)'
+                                : lesson.mobileContent
+                                ? 'Ler conteúdo autorizado no Tutor TDS'
                                 : lesson.isVideoCandidate
                                 ? 'Videoaula do EAD'
                                 : 'Leitura ou atividade do EAD',

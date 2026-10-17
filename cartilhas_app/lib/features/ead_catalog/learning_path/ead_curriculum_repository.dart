@@ -10,11 +10,19 @@ class EadLesson {
     required this.title,
     required this.type,
     required this.isVideoCandidate,
+    this.mobileContent = false,
+    this.youtubeId,
   });
   final int id;
   final String title;
   final String type;
   final bool isVideoCandidate;
+
+  /// Explicit public release by the LearnPress editor, never inferred.
+  final bool mobileContent;
+
+  /// Only present for rights-approved YouTube video IDs.
+  final String? youtubeId;
 }
 
 class EadSection {

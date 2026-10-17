@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "authority": "learnpress",
+  "course_id": 11,
+  "lesson_id": 12,
+  "title": "Aula 01 – Sistemas Agroflorestais (teste)",
+  "content_html": "<h2>Como cultivar</h2><p>Texto atualizado na fonte LearnPress.</p>",
+  "media": {
+    "provider": "youtube",
+    "video_id": "FG14ksTaMCE"
+  },
+  "revision": "c02ac3a1d884e2a75a30e0b043a57b31e313d54dc6b101e0ac3f5f3a4e9c064b"
+}

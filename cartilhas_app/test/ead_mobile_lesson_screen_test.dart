@@ -1,0 +1,90 @@
+import 'package:cartilhas_app/features/ead_catalog/data/ead_catalog_repository.dart';
+import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_editorial_bridge_repository.dart';
+import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_mobile_lesson_screen.dart';
+import 'package:cartilhas_app/theme/app_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+const course = EadCourse(id: 1356, slug: 'saf', title: 'SAF');
+const sha = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+
+void main() {
+  test(
+    'formatação limitada vira blocos nativos acessíveis, sem executar HTML',
+    () {
+      final blocks = EadSafeHtmlBlocks.parse(
+        '<h2>Agroecologia</h2><p>Uso &amp; prática.</p>'
+        '<ul><li>Plantio</li><li>Água &#225;</li></ul>',
+      );
+      expect(blocks.map((x) => x.kind), ['h2', 'p', 'li', 'li']);
+      expect(blocks.map((x) => x.text), [
+        'Agroecologia',
+        'Uso & prática.',
+        'Plantio',
+        'Água á',
+      ]);
+    },
+  );
+
+  testWidgets('exibe texto público, vídeo autorizado e mantém tema TDS', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 880);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    Uri? opened;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: EadMobileLessonScreen(
+          course: course,
+          lessonId: 1425,
+          loader: (_, _) async => const EadEditorialLesson(
+            courseId: 1356,
+            lessonId: 1425,
+            title: 'Aula agroecológica',
+            contentHtml: '<h2>Como plantar</h2><p>Material homologado.</p>',
+            revision: sha,
+            youtubeId: 'FG14ksTaMCE',
+          ),
+          openExternal: (url) async {
+            opened = url;
+            return true;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Aula agroecológica'), findsOneWidget);
+    expect(find.text('Como plantar'), findsOneWidget);
+    expect(find.text('Material homologado.'), findsOneWidget);
+    await tester.tap(find.text('Assistir vídeo aprovado'));
+    await tester.pump();
+    expect(opened?.host, 'www.youtube.com');
+    expect(opened?.queryParameters['v'], 'FG14ksTaMCE');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('aula sem autorização exibe bloqueio, não fabrica texto', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 880);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: EadMobileLessonScreen(
+          course: course,
+          lessonId: 1425,
+          loader: (_, _) async => throw Exception('403'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('não está disponível'), findsOneWidget);
+    expect(find.text('Material homologado.'), findsNothing);
+  });
+}
