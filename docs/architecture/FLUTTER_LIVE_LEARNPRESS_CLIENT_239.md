@@ -38,4 +38,3 @@ Sem produção, alterações no WordPress real, certificados, Play Store, force-
 - `test/ead_editorial_real_wp_golden_test.dart` cria uma captura golden do conteúdo sintético na UI `AppTheme.light()`; arquivo `test/goldens/ead_wp_synthetic_real_http_blue.png`. **Imagem gerada por teste Flutter, não screenshot Android**. A fonte de Material Icons no runner de teste pode aparecer como quadrados; a legibilidade real precisa de AVD.
 - O próprio plugin WordPress descobriu um caso que os mocks não capturavam: `wp_kses()` remove tags `script` mas deixa conteúdo em texto. Isso foi corrigido no PR #238 antes da captura do JSON, e o teste WordPress real foi repetido com 27 condições aprovadas.
 - A instalação WordPress com SQLite **não confirma** compatibilidade MySQL/MariaDB, roles reais dos instrutores ou autenticação/autorização num servidor HTTPS de staging. Estes gates não foram ignorados.
-
