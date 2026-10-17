@@ -1,0 +1,1816 @@
+{
+  "schema": "tds-ead-read-only-curriculum-audit-v1",
+  "source": "https://ead.ipexdesenvolvimento.cloud",
+  "course_count": 9,
+  "wordpress_published_course_count": 11,
+  "total_lp_lessons": 95,
+  "video_section_candidates": 48,
+  "local_formative_questions": 38,
+  "local_published_quizzes": 0,
+  "wordpress_quiz_posts_published": 29,
+  "linked_quizzes_to_current_nine": 0,
+  "unlinked_quiz_ids": [
+    35,
+    63,
+    85,
+    109,
+    134,
+    161,
+    183,
+    211,
+    235,
+    263,
+    285,
+    313,
+    336,
+    359,
+    394,
+    422,
+    447,
+    469,
+    495,
+    522,
+    545,
+    570,
+    619,
+    624,
+    629,
+    635,
+    636,
+    639,
+    640
+  ],
+  "validation": "PASS",
+  "courses": [
+    {
+      "wp_course_id": 614,
+      "api_course_id": "ia-cartilha",
+      "wp_title": "Inteligência Artificial e Inclusão Digital",
+      "sections": [
+        {
+          "id": 28,
+          "title": "Módulo 1 — Fundamentos e inclusão digital",
+          "position": 1,
+          "items": [
+            {
+              "id": 1295,
+              "type": "lp_lesson",
+              "name": "Aula 01 — Onde a inteligência artificial já aparece",
+              "section_id": 28,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1396,
+              "type": "lp_lesson",
+              "name": "Aula 02 — Como a inteligência artificial aprende e quais são seus limites",
+              "section_id": 28,
+              "section_order": 1,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1397,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Inclusão digital: por onde começar a usar IA",
+              "section_id": 28,
+              "section_order": 1,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 76,
+          "title": "Módulo 2 — IA na comunicação e no trabalho",
+          "position": 2,
+          "items": [
+            {
+              "id": 1398,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Criar textos e conteúdos de divulgação com IA",
+              "section_id": 76,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1296,
+              "type": "lp_lesson",
+              "name": "Aula 05 — Como fazer uma boa pergunta para a IA",
+              "section_id": 76,
+              "section_order": 2,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1399,
+              "type": "lp_lesson",
+              "name": "Aula 06 — Criar imagens e materiais visuais com IA",
+              "section_id": 76,
+              "section_order": 2,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1400,
+              "type": "lp_lesson",
+              "name": "Aula 07 — Atender clientes com WhatsApp Business e ajuda da IA",
+              "section_id": 76,
+              "section_order": 2,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 77,
+          "title": "Módulo 3 — Gestão e desenvolvimento territorial",
+          "position": 3,
+          "items": [
+            {
+              "id": 1401,
+              "type": "lp_lesson",
+              "name": "Aula 08 — Organizar as finanças do negócio com ajuda da IA",
+              "section_id": 77,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1297,
+              "type": "lp_lesson",
+              "name": "Aula 09 — Como pesquisar políticas públicas com ajuda da IA",
+              "section_id": 77,
+              "section_order": 3,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1402,
+              "type": "lp_lesson",
+              "name": "Aula 10 — Monitorar clima e condições para o plantio",
+              "section_id": 77,
+              "section_order": 3,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 78,
+          "title": "Módulo 4 — Uso responsável e aplicação prática",
+          "position": 4,
+          "items": [
+            {
+              "id": 1403,
+              "type": "lp_lesson",
+              "name": "Aula 11 — Cuidados importantes: privacidade, verificação e LGPD",
+              "section_id": 78,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1404,
+              "type": "lp_lesson",
+              "name": "Aula 12 — IA em funcionamento no Tocantins e próximos passos",
+              "section_id": 78,
+              "section_order": 4,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 67,
+          "title": "Material de referência — Cartilha",
+          "position": 5,
+          "items": [
+            {
+              "id": 1351,
+              "type": "lp_lesson",
+              "name": "O que é Inteligência Artificial?",
+              "section_id": 67,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1352,
+              "type": "lp_lesson",
+              "name": "Tipos de IA e como Funcionam",
+              "section_id": 67,
+              "section_order": 5,
+              "position_in_section": 2,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1353,
+              "type": "lp_lesson",
+              "name": "IA no Contexto Tocantinense",
+              "section_id": 67,
+              "section_order": 5,
+              "position_in_section": 3,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1354,
+              "type": "lp_lesson",
+              "name": "Usando IA no Seu Trabalho",
+              "section_id": 67,
+              "section_order": 5,
+              "position_in_section": 4,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1355,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 67,
+              "section_order": 5,
+              "position_in_section": 5,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 5,
+      "lesson_count": 17,
+      "video_candidate_count": 12,
+      "expected_video_count": 12,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 5,
+        "formative_question_blocks": 4,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "inteligencia-artificial-e-inclusao-digital"
+    },
+    {
+      "wp_course_id": 1298,
+      "api_course_id": "agricultura-sustentavel",
+      "wp_title": "Agricultura Sustentável",
+      "sections": [
+        {
+          "id": 29,
+          "title": "Boas-vindas",
+          "position": 1,
+          "items": [
+            {
+              "id": 1299,
+              "type": "lp_lesson",
+              "name": "Boas-vindas",
+              "section_id": 29,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 30,
+          "title": "Agroecologia no Cerrado",
+          "position": 2,
+          "items": [
+            {
+              "id": 1300,
+              "type": "lp_lesson",
+              "name": "Agroecologia no Cerrado",
+              "section_id": 30,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 31,
+          "title": "Práticas Agroecológicas",
+          "position": 3,
+          "items": [
+            {
+              "id": 1301,
+              "type": "lp_lesson",
+              "name": "Práticas Agroecológicas",
+              "section_id": 31,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 32,
+          "title": "Políticas Públicas e Comercialização",
+          "position": 4,
+          "items": [
+            {
+              "id": 1302,
+              "type": "lp_lesson",
+              "name": "Políticas Públicas e Comercialização",
+              "section_id": 32,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 33,
+          "title": "Sistemas Agroflorestais (SAFs)",
+          "position": 5,
+          "items": [
+            {
+              "id": 1303,
+              "type": "lp_lesson",
+              "name": "Sistemas Agroflorestais (SAFs)",
+              "section_id": 33,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 34,
+          "title": "Irrigação de Baixo Custo",
+          "position": 6,
+          "items": [
+            {
+              "id": 1304,
+              "type": "lp_lesson",
+              "name": "Irrigação de Baixo Custo",
+              "section_id": 34,
+              "section_order": 6,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 35,
+          "title": "Grupo e Suporte",
+          "position": 7,
+          "items": [
+            {
+              "id": 1305,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 35,
+              "section_order": 7,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 79,
+          "title": "Assista em vídeo",
+          "position": 8,
+          "items": [
+            {
+              "id": 1420,
+              "type": "lp_lesson",
+              "name": "Aula 01 — Agroecologia no Cerrado tocantinense",
+              "section_id": 79,
+              "section_order": 8,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1421,
+              "type": "lp_lesson",
+              "name": "Aula 02 — Práticas agroecológicas para a roça",
+              "section_id": 79,
+              "section_order": 8,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1422,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Políticas públicas e comercialização",
+              "section_id": 79,
+              "section_order": 8,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1423,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Sistemas Agroflorestais: os SAFs",
+              "section_id": 79,
+              "section_order": 8,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1424,
+              "type": "lp_lesson",
+              "name": "Aula 05 — Irrigação de baixo custo para a seca",
+              "section_id": 79,
+              "section_order": 8,
+              "position_in_section": 5,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1702,
+              "type": "lp_lesson",
+              "name": "Aula 06 — Perguntas de produtor, respostas da Embrapa",
+              "section_id": 79,
+              "section_order": 8,
+              "position_in_section": 6,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 8,
+      "lesson_count": 13,
+      "video_candidate_count": 6,
+      "expected_video_count": 6,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 7,
+        "formative_question_blocks": 6,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "agricultura-sustentavel"
+    },
+    {
+      "wp_course_id": 1307,
+      "api_course_id": "atendimento-cliente",
+      "wp_title": "Atendimento ao Cliente",
+      "sections": [
+        {
+          "id": 36,
+          "title": "Por que Atender Bem?",
+          "position": 1,
+          "items": [
+            {
+              "id": 1308,
+              "type": "lp_lesson",
+              "name": "Por que Atender Bem?",
+              "section_id": 36,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 37,
+          "title": "Os Pilares do Bom Atendimento",
+          "position": 2,
+          "items": [
+            {
+              "id": 1309,
+              "type": "lp_lesson",
+              "name": "Os Pilares do Bom Atendimento",
+              "section_id": 37,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 38,
+          "title": "Momentos Críticos do Atendimento",
+          "position": 3,
+          "items": [
+            {
+              "id": 1310,
+              "type": "lp_lesson",
+              "name": "Momentos Críticos do Atendimento",
+              "section_id": 38,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 39,
+          "title": "Compromisso com a Qualidade",
+          "position": 4,
+          "items": [
+            {
+              "id": 1311,
+              "type": "lp_lesson",
+              "name": "Compromisso com a Qualidade",
+              "section_id": 39,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 40,
+          "title": "Grupo e Suporte",
+          "position": 5,
+          "items": [
+            {
+              "id": 1312,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 40,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 81,
+          "title": "Assista em vídeo",
+          "position": 6,
+          "items": [
+            {
+              "id": 1428,
+              "type": "lp_lesson",
+              "name": "Aula 01 — Por que atender bem faz o negócio crescer",
+              "section_id": 81,
+              "section_order": 6,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1429,
+              "type": "lp_lesson",
+              "name": "Aula 02 — Os três pilares do bom atendimento",
+              "section_id": 81,
+              "section_order": 6,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1430,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Momentos críticos: primeiro contato, reclamação e cliente difícil",
+              "section_id": 81,
+              "section_order": 6,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1431,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Cliente fiel e os direitos do consumidor",
+              "section_id": 81,
+              "section_order": 6,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 6,
+      "lesson_count": 9,
+      "video_candidate_count": 4,
+      "expected_video_count": 4,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 5,
+        "formative_question_blocks": 4,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "atendimento-cliente"
+    },
+    {
+      "wp_course_id": 1314,
+      "api_course_id": "audiovisual",
+      "wp_title": "Audiovisual para o Dia a Dia",
+      "sections": [
+        {
+          "id": 41,
+          "title": "O Poder do Vídeo",
+          "position": 1,
+          "items": [
+            {
+              "id": 1315,
+              "type": "lp_lesson",
+              "name": "O Poder do Vídeo",
+              "section_id": 41,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 42,
+          "title": "Pré-produção: Planejando o Vídeo",
+          "position": 2,
+          "items": [
+            {
+              "id": 1316,
+              "type": "lp_lesson",
+              "name": "Pré-produção: Planejando o Vídeo",
+              "section_id": 42,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 43,
+          "title": "Conceitos Técnicos Essenciais",
+          "position": 3,
+          "items": [
+            {
+              "id": 1317,
+              "type": "lp_lesson",
+              "name": "Conceitos Técnicos Essenciais",
+              "section_id": 43,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 44,
+          "title": "Edição e Publicação",
+          "position": 4,
+          "items": [
+            {
+              "id": 1318,
+              "type": "lp_lesson",
+              "name": "Edição e Publicação",
+              "section_id": 44,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 45,
+          "title": "Grupo e Suporte",
+          "position": 5,
+          "items": [
+            {
+              "id": 1319,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 45,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 82,
+          "title": "Assista em vídeo",
+          "position": 6,
+          "items": [
+            {
+              "id": 1432,
+              "type": "lp_lesson",
+              "name": "Aula 01 — O poder do vídeo no dia a dia",
+              "section_id": 82,
+              "section_order": 6,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1433,
+              "type": "lp_lesson",
+              "name": "Aula 02 — Pré-produção: planejando o vídeo antes de gravar",
+              "section_id": 82,
+              "section_order": 6,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1434,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Conceitos técnicos: enquadramento, luz, som e movimento",
+              "section_id": 82,
+              "section_order": 6,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1435,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Edição e publicação: do corte à escolha da plataforma",
+              "section_id": 82,
+              "section_order": 6,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 6,
+      "lesson_count": 9,
+      "video_candidate_count": 4,
+      "expected_video_count": 4,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 5,
+        "formative_question_blocks": 4,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "audiovisual"
+    },
+    {
+      "wp_course_id": 1321,
+      "api_course_id": "cooperativismo",
+      "wp_title": "Cooperativismo e Crédito",
+      "sections": [
+        {
+          "id": 46,
+          "title": "Trabalhar Junto é mais Forte",
+          "position": 1,
+          "items": [
+            {
+              "id": 1322,
+              "type": "lp_lesson",
+              "name": "Trabalhar Junto é mais Forte",
+              "section_id": 46,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 47,
+          "title": "O que é uma Cooperativa",
+          "position": 2,
+          "items": [
+            {
+              "id": 1323,
+              "type": "lp_lesson",
+              "name": "O que é uma Cooperativa",
+              "section_id": 47,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 48,
+          "title": "Acesso a Mercados Públicos",
+          "position": 3,
+          "items": [
+            {
+              "id": 1324,
+              "type": "lp_lesson",
+              "name": "Acesso a Mercados Públicos",
+              "section_id": 48,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 49,
+          "title": "Como Montar uma Cooperativa",
+          "position": 4,
+          "items": [
+            {
+              "id": 1325,
+              "type": "lp_lesson",
+              "name": "Como Montar uma Cooperativa",
+              "section_id": 49,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 50,
+          "title": "Grupo e Suporte",
+          "position": 5,
+          "items": [
+            {
+              "id": 1326,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 50,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 84,
+          "title": "Assista em vídeo",
+          "position": 6,
+          "items": [
+            {
+              "id": 1440,
+              "type": "lp_lesson",
+              "name": "Aula 01 — Trabalhar junto é mais forte: associativismo e cooperativismo",
+              "section_id": 84,
+              "section_order": 6,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1441,
+              "type": "lp_lesson",
+              "name": "Aula 02 — O que é uma cooperativa e como ela funciona",
+              "section_id": 84,
+              "section_order": 6,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1442,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Acesso a mercados públicos: PAA e PNAE",
+              "section_id": 84,
+              "section_order": 6,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1443,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Como montar uma cooperativa, passo a passo",
+              "section_id": 84,
+              "section_order": 6,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1704,
+              "type": "lp_lesson",
+              "name": "Aula 05 — Vender junto: perguntas respondidas",
+              "section_id": 84,
+              "section_order": 6,
+              "position_in_section": 5,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 6,
+      "lesson_count": 10,
+      "video_candidate_count": 5,
+      "expected_video_count": 5,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 5,
+        "formative_question_blocks": 4,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "cooperativismo"
+    },
+    {
+      "wp_course_id": 1328,
+      "api_course_id": "economia-lar",
+      "wp_title": "Economia do Lar",
+      "sections": [
+        {
+          "id": 51,
+          "title": "Conforto e Organização em Casa",
+          "position": 1,
+          "items": [
+            {
+              "id": 1329,
+              "type": "lp_lesson",
+              "name": "Conforto e Organização em Casa",
+              "section_id": 51,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 52,
+          "title": "Orientação Solar e Ventilação",
+          "position": 2,
+          "items": [
+            {
+              "id": 1330,
+              "type": "lp_lesson",
+              "name": "Orientação Solar e Ventilação",
+              "section_id": 52,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 53,
+          "title": "Organização e Soluções Práticas",
+          "position": 3,
+          "items": [
+            {
+              "id": 1331,
+              "type": "lp_lesson",
+              "name": "Organização e Soluções Práticas",
+              "section_id": 53,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 54,
+          "title": "Economia de Energia e Água",
+          "position": 4,
+          "items": [
+            {
+              "id": 1332,
+              "type": "lp_lesson",
+              "name": "Economia de Energia e Água",
+              "section_id": 54,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 55,
+          "title": "Grupo e Suporte",
+          "position": 5,
+          "items": [
+            {
+              "id": 1333,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 55,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 86,
+          "title": "Assista em vídeo",
+          "position": 6,
+          "items": [
+            {
+              "id": 1449,
+              "type": "lp_lesson",
+              "name": "Aula 01 — Conforto e organização dentro de casa",
+              "section_id": 86,
+              "section_order": 6,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1450,
+              "type": "lp_lesson",
+              "name": "Aula 02 — Orientação solar e ventilação da casa",
+              "section_id": 86,
+              "section_order": 6,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1451,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Organização e soluções práticas para a casa",
+              "section_id": 86,
+              "section_order": 6,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1452,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Economia de energia e água no dia a dia",
+              "section_id": 86,
+              "section_order": 6,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 6,
+      "lesson_count": 9,
+      "video_candidate_count": 4,
+      "expected_video_count": 4,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 5,
+        "formative_question_blocks": 4,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "economia-lar"
+    },
+    {
+      "wp_course_id": 1335,
+      "api_course_id": "educacao-financeira",
+      "wp_title": "Educação Financeira",
+      "sections": [
+        {
+          "id": 56,
+          "title": "Por que cuidar do dinheiro?",
+          "position": 1,
+          "items": [
+            {
+              "id": 1336,
+              "type": "lp_lesson",
+              "name": "Por que cuidar do dinheiro?",
+              "section_id": 56,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 57,
+          "title": "Montando seu Orçamento",
+          "position": 2,
+          "items": [
+            {
+              "id": 1337,
+              "type": "lp_lesson",
+              "name": "Montando seu Orçamento",
+              "section_id": 57,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 58,
+          "title": "Crédito e Juros",
+          "position": 3,
+          "items": [
+            {
+              "id": 1338,
+              "type": "lp_lesson",
+              "name": "Crédito e Juros",
+              "section_id": 58,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 59,
+          "title": "Poupança e Metas",
+          "position": 4,
+          "items": [
+            {
+              "id": 1339,
+              "type": "lp_lesson",
+              "name": "Poupança e Metas",
+              "section_id": 59,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 60,
+          "title": "Precificação do seu Trabalho",
+          "position": 5,
+          "items": [
+            {
+              "id": 1340,
+              "type": "lp_lesson",
+              "name": "Precificação do seu Trabalho",
+              "section_id": 60,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 61,
+          "title": "Grupo e Suporte",
+          "position": 6,
+          "items": [
+            {
+              "id": 1341,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 61,
+              "section_order": 6,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 85,
+          "title": "Assista em vídeo",
+          "position": 7,
+          "items": [
+            {
+              "id": 1444,
+              "type": "lp_lesson",
+              "name": "Aula 01 — Por que cuidar do dinheiro que entra em casa",
+              "section_id": 85,
+              "section_order": 7,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1445,
+              "type": "lp_lesson",
+              "name": "Aula 02 — Montando o orçamento familiar, passo a passo",
+              "section_id": 85,
+              "section_order": 7,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1446,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Crédito e juros: usar com responsabilidade",
+              "section_id": 85,
+              "section_order": 7,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1447,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Poupança e metas: guardar primeiro",
+              "section_id": 85,
+              "section_order": 7,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1448,
+              "type": "lp_lesson",
+              "name": "Aula 05 — Precificação: o preço justo do seu trabalho",
+              "section_id": 85,
+              "section_order": 7,
+              "position_in_section": 5,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 7,
+      "lesson_count": 11,
+      "video_candidate_count": 5,
+      "expected_video_count": 5,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 6,
+        "formative_question_blocks": 5,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "educacao-financeira"
+    },
+    {
+      "wp_course_id": 1343,
+      "api_course_id": "sim-sima",
+      "wp_title": "Inspeção e Certificação (SIM/SIMA)",
+      "sections": [
+        {
+          "id": 62,
+          "title": "Por que regularizar sua produção?",
+          "position": 1,
+          "items": [
+            {
+              "id": 1344,
+              "type": "lp_lesson",
+              "name": "Por que regularizar sua produção?",
+              "section_id": 62,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 63,
+          "title": "O que é o SIM",
+          "position": 2,
+          "items": [
+            {
+              "id": 1345,
+              "type": "lp_lesson",
+              "name": "O que é o SIM",
+              "section_id": 63,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 64,
+          "title": "Boas Práticas de Fabricação",
+          "position": 3,
+          "items": [
+            {
+              "id": 1346,
+              "type": "lp_lesson",
+              "name": "Boas Práticas de Fabricação",
+              "section_id": 64,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 65,
+          "title": "Acessando Mercados Formais",
+          "position": 4,
+          "items": [
+            {
+              "id": 1347,
+              "type": "lp_lesson",
+              "name": "Acessando Mercados Formais",
+              "section_id": 65,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 66,
+          "title": "Grupo e Suporte",
+          "position": 5,
+          "items": [
+            {
+              "id": 1348,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 66,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 83,
+          "title": "Assista em vídeo",
+          "position": 6,
+          "items": [
+            {
+              "id": 1436,
+              "type": "lp_lesson",
+              "name": "Aula 01 — Por que regularizar a produção de alimentos",
+              "section_id": 83,
+              "section_order": 6,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1437,
+              "type": "lp_lesson",
+              "name": "Aula 02 — O que é o SIM, o SIMA e o SISBI",
+              "section_id": 83,
+              "section_order": 6,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1438,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Boas Práticas de Fabricação: higiene, temperatura e rótulo",
+              "section_id": 83,
+              "section_order": 6,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1439,
+              "type": "lp_lesson",
+              "name": "Aula 04 — Acessando mercados formais: PNAE, DAP e o passo a passo",
+              "section_id": 83,
+              "section_order": 6,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 6,
+      "lesson_count": 9,
+      "video_candidate_count": 4,
+      "expected_video_count": 4,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 5,
+        "formative_question_blocks": 4,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "sim-sima"
+    },
+    {
+      "wp_course_id": 1356,
+      "api_course_id": "saf",
+      "wp_title": "Sistemas Agroflorestais (SAF)",
+      "sections": [
+        {
+          "id": 72,
+          "title": "O que é um SAF?",
+          "position": 1,
+          "items": [
+            {
+              "id": 1357,
+              "type": "lp_lesson",
+              "name": "O que é um SAF?",
+              "section_id": 72,
+              "section_order": 1,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 73,
+          "title": "Benefícios do SAF",
+          "position": 2,
+          "items": [
+            {
+              "id": 1358,
+              "type": "lp_lesson",
+              "name": "Benefícios do SAF",
+              "section_id": 73,
+              "section_order": 2,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 74,
+          "title": "Como Implantar seu SAF",
+          "position": 3,
+          "items": [
+            {
+              "id": 1359,
+              "type": "lp_lesson",
+              "name": "Como Implantar seu SAF",
+              "section_id": 74,
+              "section_order": 3,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 75,
+          "title": "Grupo e Suporte",
+          "position": 4,
+          "items": [
+            {
+              "id": 1360,
+              "type": "lp_lesson",
+              "name": "Grupo e Suporte",
+              "section_id": 75,
+              "section_order": 4,
+              "position_in_section": 1,
+              "video_candidate": false,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        },
+        {
+          "id": 80,
+          "title": "Assista em vídeo",
+          "position": 5,
+          "items": [
+            {
+              "id": 1425,
+              "type": "lp_lesson",
+              "name": "Aula 01 — O que é um Sistema Agroflorestal",
+              "section_id": 80,
+              "section_order": 5,
+              "position_in_section": 1,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1426,
+              "type": "lp_lesson",
+              "name": "Aula 02 — Benefícios do SAF para a família",
+              "section_id": 80,
+              "section_order": 5,
+              "position_in_section": 2,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1427,
+              "type": "lp_lesson",
+              "name": "Aula 03 — Como implantar seu SAF",
+              "section_id": 80,
+              "section_order": 5,
+              "position_in_section": 3,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            },
+            {
+              "id": 1703,
+              "type": "lp_lesson",
+              "name": "Aula 04 — SAF na prática: dúvidas respondidas",
+              "section_id": 80,
+              "section_order": 5,
+              "position_in_section": 4,
+              "video_candidate": true,
+              "assessment_status": "NOT_AN_ASSESSMENT"
+            }
+          ]
+        }
+      ],
+      "count_sections": 5,
+      "lesson_count": 8,
+      "video_candidate_count": 4,
+      "expected_video_count": 4,
+      "linked_quiz_ids": [],
+      "local_cartilha": {
+        "sections": 4,
+        "formative_question_blocks": 3,
+        "published_quiz_blocks": 0,
+        "correct_markers_in_bundled_assets": 0,
+        "version_id_present": true
+      },
+      "validation": "PASS",
+      "editorial_gates": [
+        "VALIDATE_VIDEOS_MP4_YOUTUBE_HASH_RIGHTS",
+        "ASSIGN_QUIZ_WITH_TEACHER_NOT_BY_TITLE",
+        "REVIEW_GRADE_RULES_AND_ATTEMPTS",
+        "PUBLISH_COURSE_VERSION_WITHOUT_MUTATING_CURRENT",
+        "CONTEXT_BIND_TUTOR_TO_APPROVED_SOURCES"
+      ],
+      "wp_slug": "saf"
+    }
+  ],
+  "quiz_bank": [
+    {
+      "id": 35,
+      "slug": "quiz-1",
+      "title": "Quiz 1",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 63,
+      "slug": "quiz-2",
+      "title": "Quiz 2",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 85,
+      "slug": "quiz-3",
+      "title": "Quiz 3",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 109,
+      "slug": "quiz-4",
+      "title": "Quiz 4",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 134,
+      "slug": "quiz-5",
+      "title": "Quiz 5",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 161,
+      "slug": "quiz-6",
+      "title": "Quiz 6",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 183,
+      "slug": "quiz-7",
+      "title": "Quiz 7",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 211,
+      "slug": "quiz-1-2",
+      "title": "Quiz 1",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 235,
+      "slug": "quiz-2-2",
+      "title": "Quiz 2",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 263,
+      "slug": "quiz-3-2",
+      "title": "Quiz 3",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 285,
+      "slug": "quiz-4-2",
+      "title": "Quiz 4",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 313,
+      "slug": "quiz-5-2",
+      "title": "Quiz 5",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 336,
+      "slug": "quiz-6-2",
+      "title": "Quiz 6",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 359,
+      "slug": "quiz-7-2",
+      "title": "Quiz 7",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 394,
+      "slug": "quiz-1-3",
+      "title": "Quiz 1",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 422,
+      "slug": "quiz-2-3",
+      "title": "Quiz 2",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 447,
+      "slug": "quiz-3-3",
+      "title": "Quiz 3",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 469,
+      "slug": "quiz-4-3",
+      "title": "Quiz 4",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 495,
+      "slug": "quiz-5-3",
+      "title": "Quiz 5",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 522,
+      "slug": "quiz-6-3",
+      "title": "Quiz 6",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 545,
+      "slug": "quiz-7-3",
+      "title": "Quiz 7",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 570,
+      "slug": "quiz-8",
+      "title": "Quiz 8",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 619,
+      "slug": "primeiros-passos-com-ia",
+      "title": "Primeiros Passos com IA",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 624,
+      "slug": "comunicacao-inteligente-com-ia",
+      "title": "Comunicação Inteligente com IA",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 629,
+      "slug": "ia-segura-e-eficiente-para-negocios",
+      "title": "IA Segura e Eficiente para Negócios",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 635,
+      "slug": "quiz-entendendo-inteligencia-artificial",
+      "title": "Quiz: Entendendo Inteligência Artificial",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 636,
+      "slug": "quiz-conceitos-de-inclusao-digital",
+      "title": "Quiz: Conceitos de Inclusão Digital",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 639,
+      "slug": "quiz-ferramentas-de-inteligencia-artificial",
+      "title": "Quiz: Ferramentas de Inteligência Artificial",
+      "curriculum_association": "UNVERIFIED"
+    },
+    {
+      "id": 640,
+      "slug": "quiz-organizacao-digital-e-atendimento-ao-cliente",
+      "title": "Quiz: Organização Digital e Atendimento ao Cliente",
+      "curriculum_association": "UNVERIFIED"
+    }
+  ],
+  "warnings": [
+    "Quizzes publicados isolados não equivalem a provas vinculadas ao curso.",
+    "Video_candidate significa seção verificada; não comprova arquivo MP4 nem direitos.",
+    "Sem exportação de gabaritos, tentativas, CPF, matrícula ou progresso.",
+    "Mapeamentos de provas e regras de nota exigem revisão do professor."
+  ],
+  "verified_utc": "2026-10-17T20:22:21.879899+00:00"
+}
