@@ -109,11 +109,22 @@ class EadCurriculumRepository {
       }
       final lessons = <EadLesson>[];
       final name = source['title'] as String;
-      final lower = name.toLowerCase();
+      // Section IDs were cross-checked with all 48 videos in the
+      // 2026-10-17 curriculum manifest. A textual lesson can mention
+      // "vídeo" in its title without actually being a video lesson.
+      const videoSections = <int, Set<int>>{
+        614: {28, 76, 77, 78},
+        1298: {79},
+        1307: {81},
+        1314: {82},
+        1321: {84},
+        1328: {86},
+        1335: {85},
+        1343: {83},
+        1356: {80},
+      };
       final isVideoSection =
-          lower.contains('vídeo') ||
-          lower.contains('video') ||
-          (course.id == 614 && {28, 76, 77, 78}.contains(source['id'] as int));
+          videoSections[course.id]?.contains(source['id']) ?? false;
       for (final item in source['items'] as List) {
         count++;
         if (count > 200 ||

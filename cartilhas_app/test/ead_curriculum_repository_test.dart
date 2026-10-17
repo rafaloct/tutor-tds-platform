@@ -113,6 +113,40 @@ void main() {
     expect(repo.fetch(course), throwsA(isA<EadCurriculumException>()));
   });
 
+  test('título de leitura com a palavra vídeo não vira videoaula', () async {
+    const audiovisual = EadCourse(
+      id: 1314,
+      slug: 'audiovisual',
+      title: 'Audiovisual',
+    );
+    final body = {
+      'id': 1314,
+      'sections': [
+        {
+          'id': 41,
+          'title': 'O Poder do Vídeo',
+          'items': [
+            {'id': 1315, 'title': 'O Poder do Vídeo', 'type': 'lp_lesson'},
+          ],
+        },
+        {
+          'id': 82,
+          'title': 'Assista em vídeo',
+          'items': [
+            {'id': 1432, 'title': 'Aula 01', 'type': 'lp_lesson'},
+          ],
+        },
+      ],
+    };
+    final repo = EadCurriculumRepository(
+      httpGet: (_) async =>
+          http.Response.bytes(utf8.encode(jsonEncode(body)), 200),
+    );
+    final parsed = await repo.fetch(audiovisual);
+    expect(parsed.videoCount, 1);
+    expect(parsed.sections.first.lessons.first.isVideoCandidate, false);
+  });
+
   test('offline, 401 e JSON quebrado não simulam currículo', () async {
     final offline = EadCurriculumRepository(
       httpGet: (_) async => throw const FormatException('offline'),
@@ -133,7 +167,8 @@ void main() {
       'type': 'lp_quiz',
     });
     final repo = EadCurriculumRepository(
-      httpGet: (_) async => http.Response.bytes(utf8.encode(jsonEncode(p)), 200),
+      httpGet: (_) async =>
+          http.Response.bytes(utf8.encode(jsonEncode(p)), 200),
     );
     final result = await repo.fetch(course);
     expect(result.sections.first.lessons.last.type, 'lp_quiz');

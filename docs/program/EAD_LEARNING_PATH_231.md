@@ -11,9 +11,11 @@ O site WordPress/LearnPress publica a grade visível; o Flutter preserva os nove
 ## Evidência de 17/10/2026
 
 - GET público dos 11 cursos no LearnPress: 103 itens de grade, todos `lp_lesson`, nenhum `lp_quiz` ou prova exposta nas grades REST consultadas. Isso não prova inexistência de avaliações fora dessa superfície.
+- A auditoria independente do PR #232 / Issue #230 confirmou 29 posts `lp_quiz` e 282 `lp_question` existentes no WordPress; zero desses quizzes está vinculado às seções dos cursos publicados. O banco de questões existe, mas precisa de curadoria e vinculação editorial antes de aparecer nos percursos.
 - Nove cursos originais: 95 itens do LearnPress, dos quais 48 videoaulas em seções identificadas no manifesto anterior; os nove assets JSON Flutter somam 47 seções e 38 questões de prática.
 - Curso IA (#614) exige exceção: 12 videoaulas em 4 módulos de vídeo, mais 5 lições de cartilha de referência.
 - A API FastAPI já diferencia quiz/exam e administra tentativas. Essas respostas não devem ser copiadas para REST anônimo.
+- Smoke real via `dart run tool/ead_learning_path_probe.dart`: **9 cursos, 95 itens, 48 videoaulas por IDs de seção, PASS**. O teste detectou 50 por heurística textual inicialmente; a seção 41 de Audiovisual contém leitura chamada 'O Poder do Vídeo' e foi falsamente classificada. Correção passou a usar a lista fechada de IDs auditados e ganhou regressão automatizada.
 - Videoaulas ainda não publicadas como 48 `media_assets` no backend; PR #217 depende de upload YouTube, revisão editorial de direitos, associação a módulo/competência e `CourseVersion`.
 
 ## O que entrou neste PR
