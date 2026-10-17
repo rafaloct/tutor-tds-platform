@@ -6,6 +6,7 @@ import '../../../screens/chat_experience_screen.dart';
 import '../../courses/data/course_repository.dart';
 import '../data/ead_catalog_repository.dart';
 import 'ead_curriculum_repository.dart';
+import 'ead_quiz_link_repository.dart';
 
 typedef CurriculumLoader = Future<EadCurriculum> Function(EadCourse course);
 typedef LocalCartilhaLoader = Future<List<Cartilha>> Function();
@@ -18,12 +19,14 @@ class EadLearningPathScreen extends StatefulWidget {
     this.curriculumLoader,
     this.localCartilhaLoader,
     this.openCourse,
+    this.quizUriLoader,
   });
 
   final EadCourse course;
   final CurriculumLoader? curriculumLoader;
   final LocalCartilhaLoader? localCartilhaLoader;
   final Future<bool> Function(Uri uri)? openCourse;
+  final Future<Uri> Function(int quizId)? quizUriLoader;
 
   @override
   State<EadLearningPathScreen> createState() => _EadLearningPathScreenState();
@@ -78,6 +81,26 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
           content: Text('Não foi possível abrir o EAD. Tente novamente.'),
         ),
       );
+    }
+  }
+
+  Future<void> _openQuiz(EadLesson lesson) async {
+    try {
+      // Always re-check publication and canonical permalink after every edit
+      // in LearnPress. Do not retrieve questions, keys or assessment attempts.
+      final uri =
+          await (widget.quizUriLoader ??
+              EadQuizLinkRepository().publishedQuizUri)(lesson.id);
+      final opened =
+          await (widget.openCourse?.call(uri) ??
+              launchUrl(uri, mode: LaunchMode.externalApplication));
+      if (!opened && mounted) _info('Não foi possível abrir o quiz no EAD.');
+    } on Object {
+      if (mounted) {
+        _info(
+          'Quiz não está disponível no EAD. Confira a publicação e a inscrição.',
+        );
+      }
     }
   }
 
@@ -211,9 +234,15 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
                                 : Icons.menu_book_outlined,
                           ),
                           title: Text(lesson.title),
+                          onTap: lesson.type == 'lp_quiz'
+                              ? () => _openQuiz(lesson)
+                              : null,
+                          trailing: lesson.type == 'lp_quiz'
+                              ? const Icon(Icons.open_in_new)
+                              : null,
                           subtitle: Text(
                             lesson.type == 'lp_quiz'
-                                ? 'Quiz no LearnPress, sem transferência de nota'
+                                ? 'Abrir quiz publicado no EAD (sem transferir nota)'
                                 : lesson.isVideoCandidate
                                 ? 'Videoaula do EAD'
                                 : 'Leitura ou atividade do EAD',
