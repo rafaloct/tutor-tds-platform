@@ -1,0 +1,19 @@
+{
+  "_schema": "EadAccountReadSnapshot/v1",
+  "wpUserId": 2,
+  "environmentId": "wp-lp-mysql-qa-sandbox",
+  "observedAt": "2026-10-18T17:31:28.502831+00:00",
+  "authenticatedLearnPressOrigin": true,
+  "courses": [
+    {
+      "wpCourseId": 11,
+      "title": "SAF – Curso sintético para QA",
+      "enrollment": "completed",
+      "progressPercent": 100,
+      "nextLesson": null,
+      "resumeAuthorized": false
+    }
+  ],
+  "_provenance": "OBSERVED",
+  "_evidence": "f3c R08 (student-A, status=finished, result=100, itens locked)"
+}

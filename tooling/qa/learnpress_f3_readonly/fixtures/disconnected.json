@@ -1,0 +1,6 @@
+{
+  "_label": "synthetic target",
+  "_supporting_observation": "guest courses/{id} → course_data vazio (status='', count_items=0); users/* → 401. Sem escopo autenticado não há snapshot.",
+  "linkState": "disconnected",
+  "courses": null
+}

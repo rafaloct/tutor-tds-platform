@@ -1,0 +1,10 @@
+{
+  "_schema": "EadAccountReadSnapshot/v1",
+  "wpUserId": 5,
+  "environmentId": "wp-lp-mysql-qa-sandbox",
+  "observedAt": "2026-10-18T17:31:28.502831+00:00",
+  "authenticatedLearnPressOrigin": true,
+  "courses": [],
+  "_provenance": "OBSERVED",
+  "_evidence": "f3c R07+R10 (student-C: users/5 200, course_data.status vazio)"
+}

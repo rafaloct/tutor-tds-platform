@@ -1,5 +1,24 @@
 # CURRENT STATE
 
+## 2026-10-18 — F3c leitura autenticada LearnPress / #268
+
+OBSERVED: inventário read-only do contrato Minha Área (`EadMyAreaReader` /
+`EadAccountReadSnapshot`, PR #266) executado no sandbox MariaDB 10.11 do dfd627
+(`127.0.0.1:18732`), 30 PASS / 0 FAIL, `wp_learnpress_user_items` idêntico
+antes/depois. Fonte de verdade de matrícula/progresso = `GET courses/{id}` com
+`course_data` por usuário (`status` enrolled/finished, `result.result`,
+`completed_items`, itens `status/locked/graduation`); não existe GET "meus
+cursos" e `users/{id}.tabs.courses.enrolled` vem vazio até para inscritos.
+Guest recebe 200 com `course_data` vazio → matrícula só comprova com origem
+autenticada. Achado: `section-items/items/{id}` vaza `name` de item draft para
+guests. `locked` varia por audiência (B=false, C=true, guest=false, A pós-finish
+=true) — exige contexto de matrícula. `nextLesson`/`resumeAuthorized` são
+derivados, nunca nativos. Fixtures OBSERVED (enrolled/finished/no-enrollments)
++ synthetic targets emitidas em `tooling/qa/learnpress_f3_readonly/fixtures/`.
+UNKNOWN: última lição visitada, progresso por item parcial, `evaluate_type`
+alternativos, falha 5xx. Relatório: `docs/qa/ead-f3-read-contract/README.md`.
+PR draft; MERGE_ALLOWED=NO.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no

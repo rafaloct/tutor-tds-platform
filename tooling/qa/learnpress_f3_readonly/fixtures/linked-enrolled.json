@@ -1,0 +1,20 @@
+{
+  "_schema": "EadAccountReadSnapshot/v1",
+  "wpUserId": 3,
+  "environmentId": "wp-lp-mysql-qa-sandbox",
+  "observedAt": "2026-10-18T17:31:28.502831+00:00",
+  "authenticatedLearnPressOrigin": true,
+  "courses": [
+    {
+      "wpCourseId": 11,
+      "title": "SAF – Curso sintético para QA",
+      "enrollment": "enrolled",
+      "progressPercent": 0,
+      "nextLesson": "Aula 01 – Sistemas Agroflorestais (teste)",
+      "resumeAuthorized": true
+    }
+  ],
+  "_provenance": "OBSERVED",
+  "_evidence": "f3c R09 (student-B, course_data.status=enrolled)",
+  "_resume_note": "resumeAuthorized=true exige broker verificando vínculo de identidade + enrollment; derivado de course_data.status=='enrolled' + próximo item não-travado."
+}
