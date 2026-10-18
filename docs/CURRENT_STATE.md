@@ -1,5 +1,21 @@
 # CURRENT STATE
 
+## 2026-10-18 - decisão LearnPress EAD + identidade institucional TDS (#249)
+
+DECISION: LearnPress é autoridade de inscrição na oferta EAD, lições,
+quizzes e progresso LMS. FastAPI permanece autoridade institucional de
+identidade/vínculos, turma, presença, baseline, revisão e certificado
+oficial. Flutter terá Minha Área integrada sem criar novo LMS.
+OBSERVED: 11 cursos LearnPress vs 9 FastAPI; WP #1474/#1709 sem vínculo
+TDS aprovado. /minha-area/ e /certificados/ HTTP 200 publicamente não
+provam sessão de aluno. Endpoint editorial /tds-learning/v1 continua
+HTTP 404 público. PR #248 tem QA/734 Flutter tests, mas não E2E de conta,
+matrícula e progresso autenticados LP↔TDS.
+BLOCKED: federação/SSO segura, clone WP staging, mapeamento CourseVersion,
+Minha Área E2E e release oficial. Aprovação autoriza documentar, não merge
+ou produção. Ler `program/ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md`,
+runbook e matriz de aceite.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no

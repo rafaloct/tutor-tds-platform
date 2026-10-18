@@ -23,6 +23,14 @@ Nunca promover TARGET para OBSERVED apenas porque foi documentado.
 - UI → estado/controller → domínio → repository → API autorizada → persistência.
 - Não duplicar entidades/tabelas sem buscar equivalentes. Migração aditiva,
   compatível, testada do zero e em staging isolado antes de promoção.
+- **EAD LearnPress 18/10/2026:** inscrição e progresso da oferta EAD são
+  autoridade LearnPress. Identidade/vínculos institucionais, turma,
+  frequência e certificado oficial permanecem FastAPI. Para qualquer
+  trabalho de Minha Área, site↔app, login/SSO, certificado ou progresso,
+  ler `docs/program/ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md`,
+  `docs/program/LEARNPRESS_TDS_DELIVERY_RUNBOOK.md` e
+  `docs/program/LEARNPRESS_TDS_ACCEPTANCE_MATRIX.md`. Esta decisão não
+  aprova implementação, merge, produção ou SSO sem teste.
 - IA/eventos não concedem autorização, matrícula, frequência ou certificado.
 - Cada feature possui contrato, offline policy, teste e linha na matriz.
 - Stitch: projeto `3740249934950673416`; cache `.stitch/designs/<screenId>/`

@@ -260,3 +260,24 @@
     WordPress; funcionalidades autenticadas/IA dependem de suas verificações.
     Não rotacionar chaves JWT/CPF nem modificar bancos acadêmicos. Autorização
     não constitui aceite E2E nem permissão de merge. Issue210/PR211.
+
+34. 2026-10-18: responsável do Programa TDS **aprova a separação de autoridades**
+    para convergência EAD-first (Issue #249, Epic #224): LearnPress é autoridade
+    das inscrições em **oferta EAD**, lições, quizzes e progresso da conta EAD.
+    FastAPI/PostgreSQL preserva identidade institucional, vínculos, turmas,
+    baseline, presença/frequência, evidências, revisão humana e certificado
+    oficial TDS (API/Worker/KV). Conta WordPress e conta Tutor são distintas
+    até vinculação voluntária segura com prova de controle das duas contas;
+    não compartilhar senha, JWT ou token administrativo no app. Progresso EAD
+    não é progresso de cartilha nem atestado de presença; inscrição EAD não é
+    matrícula institucional. Flutter deve reunir Minha Área, meus cursos,
+    progresso, lições, quizzes, certificados e suporte sem reconstruir LMS.
+    As duas ofertas LP extras (WP #1474 e #1709) não ganham CourseVersion TDS
+    por título. Esta decisão substitui **somente para fatos EAD** a restrição
+    histórica WordPress-somente-público/editorial. Mantém toda autorização e
+    governança institucional anterior. ADR, runbook e matriz:
+    `program/ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md`,
+    `program/LEARNPRESS_TDS_DELIVERY_RUNBOOK.md` e
+    `program/LEARNPRESS_TDS_ACCEPTANCE_MATRIX.md`.
+    A autorização abrange arquitetura e documentação, não merge, deploy,
+    instalação WP, alteração de dados, SSO implementado ou envio Play.
