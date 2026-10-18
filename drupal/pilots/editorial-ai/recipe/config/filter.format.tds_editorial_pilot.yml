@@ -1,0 +1,16 @@
+langcode: pt-br
+status: true
+dependencies: {  }
+name: 'Editorial TDS — piloto sem IA ativa'
+format: tds_editorial_pilot
+weight: 20
+filters:
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: true
+    weight: -10
+    settings:
+      allowed_html: '<p> <br> <strong> <em> <a href>'
+      filter_html_help: true
+      filter_html_nofollow: true

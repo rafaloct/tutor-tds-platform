@@ -1,5 +1,30 @@
 # CURRENT STATE
 
+## 2026-10-15 — adapter editorial IA desativado / #208
+
+DECISION: reutilizar fornecedor do Tutor se compatível. OBSERVED: PR209 incorpora
+staging b0c39b2 (core11.4.10); resolução oficial dos quatro candidatos em fixture
+isolada PASS, 23 pacotes adicionais e nenhuma versão existente alterada.
+Composer validate strict/audit/install PASS; manifests somente em dependency-audit.
+Revisão de contrib encontrou logging/transporte/acesso incompatíveis com o piloto.
+IMPLEMENTED candidato03dec58: módulo tds_editorial_ai, não habilitado e flagfalse,
+POST com CSRF/permissão/acesso ao node/body, ações e seleção limitadas, transporte
+OpenRouter injetável/fixo sem retries, proposta no-store sem salvar/publicar.
+Quota10 tentativas/editor/hora com check/register sob lock global e lease60s;
+falhas contam. Não há UI/CKEditor integrado ou alteração de config/sync.
+TESTED-LOCAL: 12 testes/249 assertions Unit+Kernel PASS, PHPCS12 arquivos PASS em
+PHP8.3.29/Drupal11.4.8. Mesmo SHA03dec58 PASS12/249 em fixtureVPS isolada,
+PHP8.3.35/Drupal11.4.10, SQLite em memória e networknone. Kernel comprova wiring,
+defaultoff e checks compilados CSRF/acesso com contas/nodes sintéticos, não E2E
+browser ou ownership real. Teste Kernel força SQLite somente no processo isolado,
+sem depender do defaultmysql da suíte. Preparação anterior:25 checksDrupal +10Python.
+Revisão independente: sem bloqueadores para incorporar desativado. BLOCKED para
+ativação: browser seleção/privacidade, quota multiprocesso e perda/expiração lease,
+handler HTTP e deadline total15s, credencial editorial, orçamento/retenção e teste
+real autorizado. Nenhuma chave real lida/gerada, inferência ou ativação de produção.
+Lease não garante exclusão absoluta após pausa longa/perda de lock. PR209 aberto;
+detalhes em `../drupal/web/modules/custom/tds_editorial_ai/README.md`.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
@@ -14,7 +39,7 @@ rota pública ativada, certificado Let's Encrypt válido e18 checks HTTPS PASS
 via VPS e desktop externo com DNS normal. Correção de cache3858607 promovida;
 sequência HTTP interno → HTTPS público PASS sem canonical inseguro.
 Restore isolado PASS:55 tabelas/961 registros/35 arquivos; descriptografia offsite
-ainda UNKNOWN. PR211 draft; merge não autorizado.
+ainda UNKNOWN. PR211 integrado externamente em staging b0c39b2.
 Evidências e limitações: `production/DRUPAL_DOKPLOY_2026-10-15.md`.
 
 ## 2026-10-13 — fonte consolidada para a release

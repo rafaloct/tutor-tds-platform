@@ -1,0 +1,30 @@
+{
+  "status": "DEPENDENCIES_RESOLVED_AND_INSTALLED_IN_ISOLATED_FIXTURE",
+  "sourceBase": "33f57b9",
+  "core": "11.4.10",
+  "packages": {
+    "drupal/ai": "1.5.1",
+    "drupal/ai_ckeditor": "1.4.3",
+    "drupal/key": "1.22.0",
+    "drupal/ai_provider_openrouter": "1.1.6"
+  },
+  "addedPackages": 23,
+  "changedExistingPackageVersions": 0,
+  "composerValidateStrict": "PASS",
+  "composerAuditLocked": "PASS_NO_KNOWN_ADVISORIES",
+  "composerInstallFromLock": "PASS",
+  "manifestSha256": "73e6dbe1f92ae1bbbc79da3b23568fcd76e5b27974cf96696e37752b04aa71b8",
+  "lockSha256": "1c2fc9669401694df910c2c2bb23de31da4304e4c33496053e49ccc0804aee11",
+  "sourceArchiveSha256": "988d51eec14801cb8508f5bc7966b1580d53d8524f94456154d011197f88cf15",
+  "filesSha256": {
+    "ai_provider_openrouter/src/Service/OpenRouterClient.php": "dd107c5f42a814b20ce0067539e6f722a343d408bade6031b4ea720aafe0df51",
+    "ai_provider_openrouter/src/Plugin/AiProvider/OpenRouterProvider.php": "e9ecd3a806eacb8fa10556ea2102b1fa9c4d18e5dca9676d9f10ff769232b235",
+    "ai_ckeditor/ai_ckeditor.routing.yml": "a7cb2d69ca35abe2461cd2e81608f7c317ec6ab77e7d3237dfc21cd56d03f071",
+    "ai_ckeditor/src/Controller/AiRequest.php": "815e8a3d1c680844bab9b435764d52e52d7f8196af8129ae73992fd91ac39462",
+    "key/src/Plugin/KeyProvider/EnvKeyProvider.php": "ee597d54b40c7ce585d40b49f6eed6a39ada4d13d5dc1fcae3b4c81517bf5e5b"
+  },
+  "productionChanged": false,
+  "modulesEnabled": false,
+  "inferenceCalls": 0,
+  "activationReady": false
+}
