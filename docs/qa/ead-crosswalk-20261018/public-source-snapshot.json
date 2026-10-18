@@ -1,0 +1,110 @@
+{
+  "schema_version": "ead-public-catalog-v1",
+  "observed_date": "2026-10-18",
+  "sources": {
+    "learnpress": "https://ead.ipexdesenvolvimento.cloud/wp-json/learnpress/v1/courses?per_page=100",
+    "tds": "https://ead.ipexdesenvolvimento.cloud/tutor-api/public/courses"
+  },
+  "learnpress": [
+    {
+      "id": 614,
+      "name": "Inteligência Artificial e Inclusão Digital"
+    },
+    {
+      "id": 1298,
+      "name": "Agricultura Sustentável"
+    },
+    {
+      "id": 1307,
+      "name": "Atendimento ao Cliente"
+    },
+    {
+      "id": 1314,
+      "name": "Audiovisual para o Dia a Dia"
+    },
+    {
+      "id": 1321,
+      "name": "Cooperativismo e Crédito"
+    },
+    {
+      "id": 1328,
+      "name": "Economia do Lar"
+    },
+    {
+      "id": 1335,
+      "name": "Educação Financeira"
+    },
+    {
+      "id": 1343,
+      "name": "Inspeção e Certificação (SIM/SIMA)"
+    },
+    {
+      "id": 1356,
+      "name": "Sistemas Agroflorestais (SAF)"
+    },
+    {
+      "id": 1474,
+      "name": "Automações com o Celular para o Pequeno Negócio"
+    },
+    {
+      "id": 1709,
+      "name": "IA aplicada a Processos Internos"
+    }
+  ],
+  "tds": [
+    {
+      "slug": "agricultura-sustentavel",
+      "title": "Agricultura Sustentável",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "atendimento-cliente",
+      "title": "Atendimento ao Cliente",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "audiovisual",
+      "title": "Audiovisual para o Dia a Dia",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "cooperativismo",
+      "title": "Cooperativismo e Crédito",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "economia-lar",
+      "title": "Economia do Lar",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "educacao-financeira",
+      "title": "Educação Financeira",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "ia-cartilha",
+      "title": "Inteligência Artificial e Inclusão Digital",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "saf",
+      "title": "Sistemas Agroflorestais (SAF)",
+      "status": "published",
+      "published_version_label": "v1"
+    },
+    {
+      "slug": "sim-sima",
+      "title": "Inspeção e Certificação (SIM/SIMA)",
+      "status": "published",
+      "published_version_label": "v1"
+    }
+  ]
+}
