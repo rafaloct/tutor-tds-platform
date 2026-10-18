@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../data/ead_catalog_repository.dart';
+import '../qa/private_editorial_qa_bridge.dart';
 import 'ead_curriculum_repository.dart';
 
 typedef EadEditorialGet =
@@ -44,12 +45,15 @@ class EadEditorialBridgeRepository {
   final Map<int, ({String etag, EadCurriculum curriculum})> _memory = {};
 
   static Uri curriculumUrl(int id) =>
+      PrivateEditorialQaBridge.curriculumUri(id) ??
       Uri.https(_host, '/wp-json/tds-learning/v1/courses/$id/curriculum');
 
-  static Uri lessonUrl(int courseId, int lessonId) => Uri.https(
-    _host,
-    '/wp-json/tds-learning/v1/courses/$courseId/lessons/$lessonId',
-  );
+  static Uri lessonUrl(int courseId, int lessonId) =>
+      PrivateEditorialQaBridge.lessonUri(courseId, lessonId) ??
+      Uri.https(
+        _host,
+        '/wp-json/tds-learning/v1/courses/$courseId/lessons/$lessonId',
+      );
 
   Future<http.Response> _read(Uri uri, Map<String, String> headers) async {
     try {
@@ -68,6 +72,9 @@ class EadEditorialBridgeRepository {
     final previous = _memory[course.id];
     final response = await _read(curriculumUrl(course.id), {
       'Accept': 'application/json',
+      if (PrivateEditorialQaBridge.enabled &&
+          course.id == PrivateEditorialQaBridge.syntheticCourseId)
+        ...PrivateEditorialQaBridge.headers,
       if (previous != null) 'If-None-Match': previous.etag,
     });
     if (response.statusCode == 404) {
@@ -168,6 +175,9 @@ class EadEditorialBridgeRepository {
     }
     final response = await _read(lessonUrl(course.id, lessonId), {
       'Accept': 'application/json',
+      if (PrivateEditorialQaBridge.enabled &&
+          course.id == PrivateEditorialQaBridge.syntheticCourseId)
+        ...PrivateEditorialQaBridge.headers,
     });
     if (response.statusCode != 200 || response.bodyBytes.length > 512 * 1024) {
       throw const EadCurriculumException(
