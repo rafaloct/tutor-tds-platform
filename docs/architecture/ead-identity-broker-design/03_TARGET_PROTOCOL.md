@@ -48,7 +48,14 @@ implementação futura):
 | Desenho | Como funciona |
 |---|---|
 | **Artefato assinado** | broker emite JWT/opaco com `iss=broker`, `aud=ead-reader`, `scope=read`, `jti` único, `exp≤15min`, `wpUserId` em claim **verificada por assinatura** server-side |
-| **Id opaco + lookup** | app recebe `proof_id` não-autorizador; cada leitura do reader faz `lookup(proof_id)` server-side → valida link ativo, exp e wp_user — nada no cliente é autorizador |
+| **Id opaco + lookup** | app recebe `proof_id`; cada leitura do reader faz `lookup(proof_id)` server-side → valida link ativo, exp, wp_user **e a sessão TDS dona do proof** — nada no cliente é autorizador |
+
+> ⚠️ **Bearer capability (ressalva de revisão):** um `proof_id` opaco *sem*
+> vínculo à sessão autenticada é uma capability — posse + `wpUserId`
+> conhecido bastam para ler. Obrigatório na implementação: token gerado por
+> **CSPRNG** (nunca id incremental), armazenado só como **digest**, associado
+> à sessão TDS (`subject`, `audience`, `environment`, `scope`), **verificação
+> de `tds_user_id` a cada GET**, link ativo e expiração. Nunca em URL/log.
 
 **Vedado:** aceitar `wpUserId`, `environmentId` ou `brokerVerified` vindos do
 cliente como autorização. O reader nunca confia em campos do modelo.
@@ -82,6 +89,7 @@ imediata":
 - [ ] Provider WP auditado com auth-code+PKCE e consentimento explícito
 - [ ] Challenge single-use, TTL≤10min, `state` bound à sessão TDS
 - [ ] `proof_id`/artefato verificável **server-side** por leitura
+- [ ] `proof_id` CSPRNG + digest-only + bound à sessão TDS (subject/aud/env/scope), `tds_user_id` checado a cada GET — bearer capability nunca basta
 - [ ] Revogação: `session_version` bump → proofs antigos morrem na hora
 - [ ] `UNIQUE(env, wp_user_id)` + `UNIQUE(env, tds_user_id)` → 409 colisão
 - [ ] `environment_id` bindado ao issuer do provider — env errado → reject

@@ -145,8 +145,10 @@ class SimSecure:
                             "key": (self.env, wp_user)}
         return pid           # id opaco — NÃO é autorizador por si só
 
-    def read(self, proof_id, requested_wp, now):
-        # reader resolve server-side; o cliente só manda o id (string opaca)
+    def read(self, proof_id, requested_wp, requesting_tds, now):
+        # reader resolve server-side; o cliente só manda o id (string opaca).
+        # O proof_id é bearer capability — DEVE estar vinculado à sessão TDS
+        # autenticada: sem checar requesting_tds, posse do id bastaria.
         if not isinstance(proof_id, str):
             return "reject:unknown-proof"
         p = self.proofs.get(proof_id)
@@ -154,6 +156,8 @@ class SimSecure:
             return "reject:unknown-proof"
         if p["exp"] <= now:
             return "reject:expired"
+        if p["tds"] != requesting_tds:
+            return "reject:wrong-session"
         link = self.links.get(p["key"])
         if not link or link["revoked"]:
             return "reject:revoked"
@@ -211,13 +215,13 @@ def main():
     t("N-03 stale-jwt rejeitado",
       s.link_complete(cid3, 10, stale_jwt, now) == "reject:stale-jwt")
     t("N-03c JWT LP não é proof",
-      s.read(stale_jwt, 400, now) == "reject:unknown-proof")
+      s.read(stale_jwt, 400, 10, now) == "reject:unknown-proof")
 
     # N-04 proof expirado
     pid4 = s.issue_proof(10, 200, now)
-    t("N-04a proof fresco lê", s.read(pid4, 200, now) == "snapshot")
+    t("N-04a proof fresco lê", s.read(pid4, 200, 10, now) == "snapshot")
     t("N-04b proof expirado rejeita",
-      s.read(pid4, 200, now + PROOF_TTL + 1) == "reject:expired")
+      s.read(pid4, 200, 10, now + PROOF_TTL + 1) == "reject:expired")
 
     # N-05 iss errado
     cid5 = s.link_start(10, "sandbox-qa", "n5", 500, now)
@@ -234,18 +238,20 @@ def main():
       s.link_complete(cid7, 99, lp_issue(200, ISS, now), now) == "reject:collision")
 
     # N-08 escopo: proof de 200 não lê 300
-    t("N-08a scope", s.read(pid4, 300, now) == "reject:scope")
+    t("N-08a scope", s.read(pid4, 300, 10, now) == "reject:scope")
     t("N-08b proof_id forjado/inexistente",
-      s.read("proof-forjado", 200, now) == "reject:unknown-proof")
+      s.read("proof-forjado", 200, 10, now) == "reject:unknown-proof")
     t("N-08c dict forjado não é proof_id",
-      s.read({"wpUserId": 200, "brokerVerified": True}, 200, now) == "reject:unknown-proof")
+      s.read({"wpUserId": 200, "brokerVerified": True}, 200, 10, now) == "reject:unknown-proof")
+    t("N-08d proof_id roubado por outra sessão TDS",
+      s.read(pid4, 200, 99, now) == "reject:wrong-session")
 
     # N-09 revogação: novo proof None + proof antigo morre
     pid9 = s.issue_proof(10, 200, now)
     t("N-09a proof emitido", pid9 is not None)
     s.revoke(200)
     t("N-09b proof antigo pós-revogação",
-      s.read(pid9, 200, now) == "reject:revoked")
+      s.read(pid9, 200, 10, now) == "reject:revoked")
     t("N-09c sem proof novo pós-revogação",
       s.issue_proof(10, 200, now) is None)
 
