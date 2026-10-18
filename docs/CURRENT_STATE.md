@@ -2,17 +2,20 @@
 
 ## 2026-10-18 — F0b contrato LearnPress em MySQL sintético / #252
 
-TESTED-LOCAL: contrato EAD do F0 rehomologado em MariaDB 10.11 no sandbox
-dfd627 (`:18732`, instância WP isolada, mesmas contas/plugins/currículo
-sintético). 15 comportamentos em paridade com SQLite: enroll `id`
-não-idempotente, JWT LP separado do WP core (401), ACL de itens 403,
-diretório `/learnpress/v1/users` público, login UI 302+cookie. OBSERVED:
-DDL difere — `learnpress_question_answers.order` (MySQL) vs `ordering`
-(sqlite-integration); fixtures devem detectar dialeto. UNKNOWN: `quiz/start`
-em MySQL retornou `question_ids:[]` apesar da questão linkada — revisar
-linking de questões antes de usar quiz como gate de avaliação. Evidência:
-`docs/qa/ead-f0b-mysql-learnpress/`, runner `f0_run_mysql.sh`. PR #261
-draft; merge não autorizado.
+RUNNER-REPRODUCIBLE: fluxo EAD completo homologado em MariaDB 10.11 no
+sandbox dfd627 (`:18732`, instância WP isolada, contas/currículo
+sintéticos) — enroll `id` não-idempotente (A e B), JWT LP separado do WP
+core (401), ACL de itens 403, IDOR `users/{outro}` 403, diretório público,
+lição concluída, quiz avaliado (result=100, pass=1), `courses/finish`
+"completed the Course", lock pós-finish 403. Contrato novo: lição é
+"started" só via page view autenticado — não há rota REST de start.
+Runner com IDs por env, guarda loopback, asserções HTTP+regex e exit
+não-zero; JWT nunca persistido. OBSERVED: `learnpress_question_answers`
+usa `order` (MySQL) vs `ordering` (sqlite) e `learnpress_quiz_questions`
+exige `question_order` (insert com `params` falha silencioso) — helper
+`lp_question_answers_col.php` detecta o dialeto. `check_answer` segue
+UNKNOWN. Evidência: `docs/qa/ead-f0b-mysql-learnpress/`, runner
+`f0_run_mysql.sh`. PR #261 draft; merge não autorizado.
 
 ## 2026-10-15 — implantação isolada Drupal / #210
 
