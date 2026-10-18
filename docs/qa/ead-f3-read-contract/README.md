@@ -66,7 +66,7 @@ Nenhum endpoint observado redirecionou (`redirect_url` vazio em todos).
 | `enrollment.completed` | `course_data.status == "finished"` | OBSERVED→derivado | |
 | `progressPercent` | `course_data.result.result` (int 0–100) | OBSERVED | só quando `status` não-vazio; `result=0` em "enrolled" é **progresso zero real** (B recém-inscrito), não "desconhecido" — ver UNKNOWN U2 |
 | `nextLesson` | **derivado**: primeiro item `type=="lp_lesson"` de `sections[].items[]` com `status!="completed" && !locked`, na ordem do currículo | derivado | servidor não expõe "next" nativo; se o item pendente for quiz, `nextLesson=null` e o item aparece em `nextPendingItemId/Type` — quiz nunca é reportado como "lição" |
-| `resumeAuthorized` | **derivado**: `enrollment==enrolled && pending_item existe && !pending_item.locked` | derivado | `locked` é por usuário: A (finished) → `true` nos itens; B → `false`; C (não-inscrito authed) → `true`; guest → `false`. Exige broker confirmando vínculo — nunca derivar de catálogo |
+| `resumeAuthorized` | **TARGET**: `false` até o broker TDS↔EAD comprovar vínculo | derivado | elegibilidade OBSERVED (`enrolled && pending_item`) vai como candidato em `_derived.resumeCandidate` — nunca publicar booleano de autorização sem prova de vínculo |
 | `start_time` / `end_time` | `course_data.start_time/end_time` | OBSERVED | ⚠ em respostas de escopo vazio `start_time` = timestamp da requisição (não confiável) |
 
 ### Estados de snapshot/link (contrato PR #266)
@@ -109,7 +109,8 @@ read(link: EadAccountLink) -> EadAccountReadSnapshot
          progressPercent = int(result.result) | null se ausente
          pendingItem     = primeiro sections.item com status!="completed" && !locked
          nextLesson      = pendingItem se type=="lp_lesson" else null
-         resumeAuthorized= enrolled && pendingItem!=null  [+ verificação do broker]
+         resumeAuthorized= false   [sempre, até broker comprovar vínculo]
+         _derived.resumeCandidate = enrolled && pendingItem!=null
   3. authenticatedLearnPressOrigin = (passo 1 == 200)
   4. snapshotState=current | stale/offline derivado de observedAt pelo cliente
 ```

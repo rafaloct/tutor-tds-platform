@@ -39,7 +39,14 @@ def course(rec):
         "enrollment": der["enrollment"],
         "progressPercent": der["progressPercent"],
         "nextLesson": der["nextLessonTitle"],
-        "resumeAuthorized": der["resumeAuthorized"],
+        # Autorização TARGET: false até o broker TDS↔EAD comprovar vínculo.
+        # Elegibilidade OBSERVED do sandbox fica como candidato em _derived.
+        "resumeAuthorized": False,
+        "_derived": {
+            "resumeCandidate": der["resumeAuthorized"],
+            "nextPendingItemId": der["nextPendingItemId"],
+            "nextPendingItemType": der["nextPendingItemType"],
+        },
     }
 
 
@@ -65,9 +72,9 @@ write("linked-enrolled.json", {
     **snapshot(UB, [course(b)]),
     "_provenance": "OBSERVED",
     "_evidence": "f3c R09 (student-B, course_data.status=enrolled)",
-    "_resume_note": "resumeAuthorized=true exige broker verificando vínculo de "
-                    "identidade + enrollment; derivado de course_data.status=="
-                    "'enrolled' + próximo item não-travado.",
+    "_resume_note": "resumeAuthorized=false até broker TDS↔EAD comprovar "
+                    "vínculo; _derived.resumeCandidate=true observa que no "
+                    "sandbox o próximo item está destravado (status=enrolled).",
 })
 
 # OBSERVED — aluno A curso finalizado (lock pós-finish)
@@ -100,8 +107,10 @@ write("linked-enrolled-progress-unknown.json", {
         "title": "<title>",
         "enrollment": "enrolled",
         "progressPercent": None,
-        "nextLesson": "<first unlocked item>",
-        "resumeAuthorized": True,
+        "nextLesson": "<first unlocked lp_lesson>",
+        "resumeAuthorized": False,
+        "_derived": {"resumeCandidate": True, "nextPendingItemId": 12,
+                     "nextPendingItemType": "lp_lesson"},
     }]),
 })
 

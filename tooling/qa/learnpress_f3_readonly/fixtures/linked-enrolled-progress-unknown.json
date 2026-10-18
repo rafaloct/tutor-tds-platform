@@ -4,7 +4,7 @@
   "_schema": "EadAccountReadSnapshot/v1",
   "wpUserId": 3,
   "environmentId": "wp-lp-mysql-qa-sandbox",
-  "observedAt": "2026-10-18T17:31:28.502831+00:00",
+  "observedAt": "2026-10-18T17:45:56.111782+00:00",
   "authenticatedLearnPressOrigin": true,
   "courses": [
     {
@@ -12,8 +12,13 @@
       "title": "<title>",
       "enrollment": "enrolled",
       "progressPercent": null,
-      "nextLesson": "<first unlocked item>",
-      "resumeAuthorized": true
+      "nextLesson": "<first unlocked lp_lesson>",
+      "resumeAuthorized": false,
+      "_derived": {
+        "resumeCandidate": true,
+        "nextPendingItemId": 12,
+        "nextPendingItemType": "lp_lesson"
+      }
     }
   ]
 }

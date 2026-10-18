@@ -1,6 +1,9 @@
 import json, sys
 
 d = json.load(sys.stdin)
+if not d.get("id"):
+    print("ERRO: resposta de quiz sem 'id'", file=sys.stderr)
+    sys.exit(1)
 print(json.dumps({
     "id": d.get("id"),
     "name": d.get("name"),

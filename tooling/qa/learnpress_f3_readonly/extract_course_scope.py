@@ -1,6 +1,9 @@
 import json, sys
 
 d = json.load(sys.stdin)
+if not d.get("id"):
+    print("ERRO: resposta de curso sem 'id'", file=sys.stderr)
+    sys.exit(1)
 cd = d.get("course_data") or {}
 res = cd.get("result") or {}
 

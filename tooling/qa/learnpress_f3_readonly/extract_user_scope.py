@@ -1,6 +1,9 @@
 import json, sys
 
 d = json.load(sys.stdin)
+if not d.get("id"):
+    print("ERRO: resposta de usuário sem 'id'", file=sys.stderr)
+    sys.exit(1)
 out = {"id": d.get("id")}
 
 c = (d.get("tabs") or {}).get("courses", {}).get("content", {})

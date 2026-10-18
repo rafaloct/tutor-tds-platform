@@ -2,7 +2,7 @@
   "_schema": "EadAccountReadSnapshot/v1",
   "wpUserId": 5,
   "environmentId": "wp-lp-mysql-qa-sandbox",
-  "observedAt": "2026-10-18T17:31:28.502831+00:00",
+  "observedAt": "2026-10-18T17:45:56.111782+00:00",
   "authenticatedLearnPressOrigin": true,
   "courses": [],
   "_provenance": "OBSERVED",

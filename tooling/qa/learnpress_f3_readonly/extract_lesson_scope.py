@@ -2,6 +2,9 @@ import json, sys
 from urllib.parse import urlparse
 
 d = json.load(sys.stdin)
+if not d.get("id"):
+    print("ERRO: resposta de lição sem 'id'", file=sys.stderr)
+    sys.exit(1)
 perm = d.get("permalink") or ""
 ph = urlparse(perm).hostname if perm else ""
 print(json.dumps({
