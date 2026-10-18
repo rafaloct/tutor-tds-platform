@@ -2,7 +2,7 @@
 
 **Status:** IMPLEMENTED + TESTED-LOCAL com modelos sintéticos, **não conectado à Home nem ao login EAD real**.
 **Issue:** #262, derivada do PR #260 (política de ações) e da ADR #249/PR #250.
-**Snapshot de decisões:** 18/10/2026. Devin executa F0b em MySQL sintético na máquina dfd627; não depender de resultado antecipado.
+**Snapshot de decisões:** 18/10/2026. F0b foi documentada no PR draft #261 em MariaDB 10.11 sintético no dfd627. A paridade de autenticação e matrícula foi observada; a execução de quiz ainda possui lacunas. Isso não comprova produção.
 
 ## O que esta fatia entrega
 
@@ -36,7 +36,7 @@ Sessão TDS (FastAPI) + conta EAD verificada pelo broker
   -> execução autorizada LP e nova leitura da origem
 ```
 
-**F0b obrigatório** para validar os schemas, duplicações, conclusão de curso, sessão, segurança e respostas **em MySQL sintético**. Os resultados observados em SQLite no PR #254 não autorizam automaticamente o runtime real. A ligação TDS↔WP exige consentimento, escopo, TTL, logout/revogação, defesa IDOR/CSRF, isolamento A/B e revisão de segurança.
+**F0b observada (PR #261):** em MariaDB sintético, os fluxos centrais de sessão, inscrição e permissões replicaram o F0 SQLite do PR #254. O banco apresentou diferença de DDL (order versus ordering na tabela de respostas). Quiz MySQL retornou question_ids vazio apesar da questão vinculada na fixture; o curso não atingiu aprovação nesse caminho. **UNKNOWN/BLOCKED:** associação das questões e conclusão de quiz/curso com nota válida. A ligação TDS↔WP continua exigindo consentimento, escopo, TTL, logout/revogação, defesa IDOR/CSRF, isolamento A/B e revisão de segurança. F0b não equivale a produção.
 
 **Sem avanço automático:** um clique da UI não marca presença, não conclui aula pelo tempo do player, não emite certificado nem alimenta CourseVersion TDS. O mapeamento público 11↔9 do PR #257 continua candidato até curadoria e não autoriza matrícula.
 
@@ -55,11 +55,11 @@ flutter analyze --no-pub lib/features/ead_account test/ead_my_area_preview_test.
 
 Cobertura focal: conta desconectada (sem dados), vinculação pendente, necessidade de login, usuário A vs B, staging vs production, falta de identidade, fonte não verificada, 0/40/null/200% de progresso, lista vazia autenticada, offline/stale sem continuar, loading/error/retry, curso EAD concluído separado de certificado oficial, callback autorizado, callback ausente desabilitado, tema escuro, escala de fonte alta e rolagem 390 px.
 
-**Não testado:** session broker real, dados de aluno, WordPress com MySQL, Flutter Home, Chatwoot real, screenshots Android, integração de certificados e Play. O PR é **TESTED-LOCAL** e não deve ser descrito como `RELEASE_READY` ou `TESTED-ANDROID`.
+**Não testado:** session broker real, dados de aluno, integração Flutter com LearnPress autenticado em MySQL, Flutter Home, Chatwoot real, screenshots Android, integração de certificados e Play. O PR é **TESTED-LOCAL** e não deve ser descrito como `RELEASE_READY` ou `TESTED-ANDROID`.
 
 ## Próximo handoff para humanos/agentes
 
-1. Aguardar recibo F0b MySQL sintético em PR draft separado do Devin.
+1. Revisar F0b MySQL sintético no PR #261, especialmente os IDs vazios de questões e o curso não aprovado; não habilitar conclusão de quiz/curso sem comprovar o contrato.
 2. Revisar segurança/protocolo de autenticação do broker, tokens, rotas WP/LP reais e arquitetura de cache privado, com aprovação humana.
 3. Criar nova Issue para integração adapter/controlador com PR #260 (sem uso de API WP genérica com JWT LP).
 4. Só após E2E com aluno A/B, logout, consentimento, curso/matrícula real e rollback, ligar a tela na Home, revisar assets e executar QA no emulador. Xiaomi reservado para smoke final pré-AAB.
