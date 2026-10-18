@@ -34,7 +34,7 @@ executado no **WordPress + MariaDB sintético isolado** do dfd627
 | `meus-cursos` | 27 | `templates/meus-cursos.php` |
 | `certificados` | 28 | `templates/certificados.php` |
 
-## Resultados OBSERVED (execução manual homologada — 18 sinais)
+## Resultados OBSERVED (execução manual inicial — 18 sinais)
 
 | # | verificação | resultado |
 |---|---|---|
@@ -68,17 +68,42 @@ executado no **WordPress + MariaDB sintético isolado** do dfd627
 ## Como reproduzir
 
 ```bash
-# dentro do sandbox (cwd = raiz onde há wp-cli.phar e wordpress-mysql/)
-source f0_env.sh
-THEME_DIR=<extração de wordpress/tds-child-theme @ PR251 HEAD> \
-BASE_URL=http://127.0.0.1:18732 \
-bash tooling/qa/ead_b0_portal_smoke/b0_run.sh
+# Na VM dfd627: somente WP+MariaDB SINTÉTICO no loopback.
+REPO=/workspace/tds-issue274-chatgpt-qa-20261018
+SBX=/workspace/tds-wp-sandbox-20261017
+THEME_DIR="$SBX/b0-candidate.W2k5wt6C/wordpress/tds-child-theme"
+cd "$SBX"
+source f0_env.sh  # credenciais sintéticas, jamais imprimir conteúdo
+export QA_PASS_A QA_PASS_B
+BASE_URL=http://127.0.0.1:18732 THEME_DIR="$THEME_DIR" \
+  bash "$REPO/tooling/qa/ead_b0_portal_smoke/b0_run.sh"
+THEME_DIR="$THEME_DIR" \
+  bash "$REPO/tooling/qa/ead_b0_portal_smoke/b0_selftest.sh"
 ```
 
 O runner faz snapshot → troca reversível → cria páginas `tds_qa_b0` →
 probes guest/A/B/forjado/logout/redirect → **rollback em trap** (exit 3 se
 o hash divergir). Saída = sinais booleanos + códigos HTTP; sem HTML
 autenticado, JWT, cookie, senha ou títulos de rascunho em evidência.
+
+## Regressão automatizada após transferência de executor (18/10/2026)
+
+No worktree isolado `agent/issue-274-qa-hardening-chatgpt-20261018`,
+o runner passou a tratar explicitamente falhas **antes de concluir o snapshot**:
+nenhuma página ou tema foi alterado nessa fase e o diretório temporário
+é eliminado antes da saída. O autoteste `b0_selftest.sh` verifica:
+
+- **T0:** interrupção injetada antes do snapshot, exit `8`, ausência de
+  diretório temporário remanescente e hash do tema invariável.
+- **T1:** oito URLs não autorizadas rejeitadas sem usar a rede.
+- **T2:** falha injetada depois da primeira página de QA, exit `9`,
+  slugs/metas removidos, tema restaurado e diretório temporário eliminado.
+- **T3:** execução completa do smoke com **33 asserções internas**,
+  rollback final e ausência de novos arquivos `/tmp/b0qa.*`.
+
+Os resultados acima se referem exclusivamente a testes **WordPress sintéticos
+no loopback**. Não são homologação do EAD público, captura Android,
+login institucional ou certificado oficial.
 
 ## Riscos / limites
 
