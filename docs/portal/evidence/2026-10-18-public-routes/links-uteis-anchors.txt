@@ -1,0 +1,97 @@
+Ver caminhos de atendimento social -> #cadastro
+Assistir aos guias das famílias -> #tds-cadastro-e-direitos
+Ver vídeos de CAF, PAA e PNAE -> #tds-agricultura-e-renda
+Abrir cartas de serviço do Tocantins -> #servicos-detalhados
+Ver agricultura e renda -> #renda
+Consultar serviços do Ruraltins -> #to-ruraltins
+Conhecer serviços e oportunidades -> #educacao
+Ver o guia de orçamento e crédito -> #tds-inclusao-digital
+Ver tutoriais de acesso e segurança -> #acessibilidade
+Aprender a utilizar o Tutor TDS -> /tutorial/
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V001_links_uteis.vtt
+MDS / gov.br -> https://www.gov.br/pt-br/servicos/consultar-dados-do-cadastro-unico-cadunico
+MDS / gov.br -> https://www.gov.br/pt-br/servicos/emitir-comprovante-do-cadastro-unico
+MDS / gov.br -> https://www.gov.br/pt-br/servicos/inscrever-se-no-cadastro-unico-para-programas-sociais-do-governo-federal
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V002_links_uteis.vtt
+MDS / gov.br -> https://www.gov.br/pt-br/servicos/acessar-o-cras-centro-de-referencia-da-assistencia-social
+MDS / gov.br -> https://www.gov.br/pt-br/servicos/receber-o-bolsa-familia
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V003_links_uteis.vtt
+MDS -> https://www.gov.br/mds/pt-br/acoes-e-programas/gas-do-povo
+MME -> https://www.gov.br/mme/pt-br/luzdopovo/luzdopovo
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V004_links_uteis.vtt
+Governo do Tocantins / Ruraltins -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=143
+MDA -> https://www.gov.br/mda/pt-br/acesso-a-informacao/acoes-e-programas/programas-projetos-acoes-obras-e-atividades/cadastro-nacional-da-agricultura-familiar/como-obter-o-caf
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V005_links_uteis.vtt
+Governo do Tocantins / Ruraltins -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=7835
+MDS -> https://www.gov.br/mds/pt-br/acoes-e-programas/acesso-a-alimentos-e-a-agua/programa-de-aquisicao-de-alimentos
+Conab -> https://www.gov.br/conab/pt-br/atuacao/agricultura_familiar/conab-paanet/paa/
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V006_links_uteis.vtt
+FNDE -> https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/programas/pnae/agricultura-familiar-no-pnae
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V007_links_uteis.vtt
+MDA -> https://www.gov.br/mda/pt-br/acesso-a-informacao/acoes-e-programas/programas-projetos-acoes-obras-e-atividades/programa-nacional-de-fortalecimento-da-agricultura-familiar-pronaf/como-acessar
+MDA -> https://www.gov.br/mda/pt-br/acesso-a-informacao/acoes-e-programas/programas-projetos-acoes-obras-e-atividades/plano-safra-da-agricultura-familiar
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V008_links_uteis.vtt
+MDS -> https://www.gov.br/mds/pt-br/acoes-e-programas/programa-acredita-no-primeiro-passo/quero-empreender
+Banco Central do Brasil -> https://www.bcb.gov.br/meubc/faqs/p/o-que-e-um-orcamento-pessoal
+Banco Central do Brasil -> https://www.bcb.gov.br/cidadaniafinanceira/cidadania_biblioteca
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V009_links_uteis.vtt
+Embrapa / ATER+ Digital -> https://www.atermaisdigital.cnptia.embrapa.br/web/saf/implantacao
+Embrapa / ATER+ Digital -> https://www.atermaisdigital.cnptia.embrapa.br/web/saf/manejos
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V010_links_uteis.vtt
+MAPA -> https://www.gov.br/agricultura/pt-br/assuntos/defesa-agropecuaria/suasa/perguntas-e-respostas-decreto-12-408-2025-e-o-sisbi/perguntas-e-respostas-sisbi
+MAPA -> https://www.gov.br/agricultura/pt-br/assuntos/defesa-agropecuaria/suasa/sisbi-1/sisbi
+Baixar legendas VTT -> https://pub-a9229a0b258841629d30940c879bbcdb.r2.dev/videos/territorios-v3/V011_links_uteis.vtt
+Governo Digital -> https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/atendimento-gov.br/duvidas-na-conta-gov.br/recuperar-senha-da-conta-gov.br
+Governo Digital -> https://www.gov.br/pt-br/por-dentro-do-govbr/ajuda-para-navegar-o-portal
+Governo Digital -> https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/vlibras/vlibras
+Acessar orientação oficial ↗ -> https://www.gov.br/pt-br/servicos/consultar-dados-do-cadastro-unico-cadunico
+Acessar orientação oficial ↗ -> https://www.gov.br/mds/pt-br/acoes-e-programas/cadastro-unico/paginas/app-cadunico
+Acessar orientação oficial ↗ -> https://www.gov.br/mds/pt-br/acoes-e-programas/bolsa-familia/sobre
+Acessar orientação oficial ↗ -> https://www.gov.br/mds/pt-br/acoes-e-programas/programa-acredita-no-primeiro-passo
+Acessar orientação oficial ↗ -> https://www.gov.br/mda/pt-br/acesso-a-informacao/acoes-e-programas/programas-projetos-acoes-obras-e-atividades/programa-nacional-de-fortalecimento-da-agricultura-familiar-pronaf/como-acessar
+Acessar orientação oficial ↗ -> https://www.gov.br/mda/pt-br/acesso-a-informacao/acoes-e-programas/programas-projetos-acoes-obras-e-atividades/cadastro-nacional-da-agricultura-familiar/como-obter-o-caf
+Acessar orientação oficial ↗ -> https://www.gov.br/mds/pt-br/acoes-e-programas/acesso-a-alimentos-e-a-agua/programa-de-aquisicao-de-alimentos
+Acessar orientação oficial ↗ -> https://www.to.gov.br/ruraltins/
+Acessar orientação oficial ↗ -> https://sebrae.com.br/sites/PortalSebrae/ufs/to
+Acessar orientação oficial ↗ -> https://www.gov.br/mec/pt-br/pe-de-meia
+Acessar orientação oficial ↗ -> https://acessounico.mec.gov.br/
+Acessar orientação oficial ↗ -> https://www.gov.br/cidades/pt-br
+Acessar orientação oficial ↗ -> https://www.gov.br/mme/pt-br/assuntos/noticias/novo-desconto-social-na-conta-de-luz-ja-beneficia-familias-de-baixa-renda-em-todo-o-brasil
+Acessar orientação oficial ↗ -> https://www.to.gov.br/
+Acessar orientação oficial ↗ -> https://www.to.gov.br/detran/
+Acessar orientação oficial ↗ -> https://www.gov.br/pt-br/por-dentro-do-govbr/ajuda-para-navegar-o-portal
+Acessar orientação oficial ↗ -> https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/atendimento-gov.br/duvidas-na-conta-gov.br/recuperar-senha-da-conta-gov.br
+Acessar orientação oficial ↗ -> https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/vlibras/vlibras
+Acessar orientação oficial ↗ -> https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario
+Acessar orientação oficial ↗ -> https://ead.ipexdesenvolvimento.cloud/tutorial/
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/listar_servico.aspx?cod_servico_grupo=15
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=7976
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=8741
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/listar_servico.aspx?orgao=RURALTINS
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=10
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=143
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=7835
+Abrir serviço oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=8253
+Abrir serviço oficial ↗ -> https://www.gov.br/pt-br/orgaos/ministerio-do-desenvolvimento-e-assistencia-social-familia-e-combate-a-fome
+Abrir serviço oficial ↗ -> https://www.gov.br/pt-br/servicos/consultar-dados-do-cadastro-unico-cadunico
+Abrir serviço oficial ↗ -> https://www.gov.br/pt-br/servicos/inscrever-se-no-cadastro-unico-para-programas-sociais-do-governo-federal
+Abrir serviço oficial ↗ -> https://www.gov.br/pt-br/servicos/emitir-comprovante-do-cadastro-unico
+Abrir serviço oficial ↗ -> https://www.gov.br/pt-br/servicos/acessar-o-cras-centro-de-referencia-da-assistencia-social
+Abrir serviço oficial ↗ -> https://www.gov.br/pt-br/servicos/receber-o-bolsa-familia
+Ver a ficha completa no portal oficial ↗ -> https://www.gov.br/pt-br/servicos/consultar-dados-do-cadastro-unico-cadunico
+Ver a ficha completa no portal oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=10
+Ver a ficha completa no portal oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=143
+Ver a ficha completa no portal oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=7835
+Ver a ficha completa no portal oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=8741
+Ver a ficha completa no portal oficial ↗ -> https://servicos.to.gov.br/servico_detalhado.aspx?cod_assunto_documento_tipo=7976
+Cooperativismo e Crédito -> /courses/cooperativismo/
+Agricultura Sustentável -> /courses/agricultura-sustentavel/
+Sistemas Agroflorestais -> /courses/saf/
+Educação Financeira -> /courses/educacao-financeira/
+Economia do Lar -> /courses/economia-lar/
+Atendimento ao Cliente -> /courses/atendimento-cliente/
+Inspeção e Certificação -> /courses/sim-sima/
+Como as formações são organizadas -> /metodologia/
+IA e Inclusão Digital -> /courses/inteligencia-artificial-e-inclusao-digital/
+Automações com o Celular -> /courses/automacoes-celular/
+Contato com a equipe do projeto -> /contato/

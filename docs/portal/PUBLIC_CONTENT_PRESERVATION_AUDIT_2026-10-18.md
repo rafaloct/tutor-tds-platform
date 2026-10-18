@@ -11,7 +11,7 @@ credenciais, sem escrita). Nada em produção foi alterado.
 | `/` | 200 | Home — hero "Formação gratuita nos territórios do Tocantins", cards, CTA app |
 | `/sobre/` | 200 | Missão/visão/valores/princípios completos (texto capturado) |
 | `/metodologia/` | 200 | Princípios + 5 trilhas formativas |
-| `/contato/` | 200 | Formulário funcional (nome, e-mail, telefone/WhatsApp, assunto) |
+| `/contato/` | 200 | Formulário **renderizado** (nome, e-mail, telefone/WhatsApp, assunto) — envio **não exercitado** (UNKNOWN; ver §6) |
 | `/cursos/` | 200 | **Catálogo já conectado à API acadêmica** — "9 cursos publicados na fonte acadêmica oficial", cards com "Abrir curso e aulas →" |
 | `/noticias/` | 200 | Lista de notícias/comunicados (Tudo/Notícias/Visitas/Comunicados/Eventos/Instagram) |
 | `/tutor-tds/` | 200 | Página do app (Google Play, guias) |
@@ -56,6 +56,9 @@ Pontos de conteúdo que NÃO podem se perder na promoção:
 - Contato: formulário + assuntos (Inscrição/Certificado/Acesso/Parceria/Imprensa).
 - Catálogo: vitrine FastAPI (anônima) já funcional — preservar opção `tds_public_api_base_url` configurada.
 - LP course routes (`/courses/<slug>/`) devem continuar resolvendo.
+- Links Úteis: 97 âncoras com URLs externas (gov.br, Ruraltins, Embrapa, BCB,
+  R2/VTT) preservadas em `evidence/2026-10-18-public-routes/links-uteis-anchors.txt`
+  — são os destinos a restaurar na migração.
 
 ## 4. Anomalias encontradas
 
@@ -89,6 +92,11 @@ Pontos de conteúdo que NÃO podem se perder na promoção:
 
 ## 6. Limites
 
+- `/contato/`: o GET anônimo só comprova o formulário renderizado. O envio NÃO
+  foi exercitado (UNKNOWN) — atenção: o handler legado
+  (`wordpress/legacy-runtime/tds-child-theme/functions.php`) reporta sucesso
+  mesmo quando `wp_mail` falha; o checklist pós-promoção precisa de um envio de
+  teste com confirmação real de entrega, não apenas do retorno 200 da página.
 - Conteúdo capturado do render público; `post_content` e opções internas não
   foram lidos (sem acesso admin) — a Issue já os descreve.
 - Backup/restore e escrita em produção: fora de escopo (gate humano).
