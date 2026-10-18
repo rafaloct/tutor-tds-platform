@@ -1,5 +1,19 @@
 # CURRENT STATE
 
+## 2026-10-18 — F0b contrato LearnPress em MySQL sintético / #252
+
+TESTED-LOCAL: contrato EAD do F0 rehomologado em MariaDB 10.11 no sandbox
+dfd627 (`:18732`, instância WP isolada, mesmas contas/plugins/currículo
+sintético). 15 comportamentos em paridade com SQLite: enroll `id`
+não-idempotente, JWT LP separado do WP core (401), ACL de itens 403,
+diretório `/learnpress/v1/users` público, login UI 302+cookie. OBSERVED:
+DDL difere — `learnpress_question_answers.order` (MySQL) vs `ordering`
+(sqlite-integration); fixtures devem detectar dialeto. UNKNOWN: `quiz/start`
+em MySQL retornou `question_ids:[]` apesar da questão linkada — revisar
+linking de questões antes de usar quiz como gate de avaliação. Evidência:
+`docs/qa/ead-f0b-mysql-learnpress/`, runner `f0_run_mysql.sh`. PR #261
+draft; merge não autorizado.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
