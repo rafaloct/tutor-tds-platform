@@ -1,0 +1,6 @@
+{
+  "_label": "synthetic target",
+  "_supporting_observation": "servidor não expõe conceito 'unknown'; estado é exclusivamente do cliente (antes de read()).",
+  "snapshotState": "unknown",
+  "courses": null
+}

@@ -1,0 +1,24 @@
+{
+  "_label": "synthetic target",
+  "_note": "Emitir quando course_data.status==enrolled porém result.result ausente/não-numérico — nunca substituir por 0.",
+  "_schema": "EadAccountReadSnapshot/v1",
+  "wpUserId": 3,
+  "environmentId": "wp-lp-mysql-qa-sandbox",
+  "observedAt": "2026-10-18T17:45:56.111782+00:00",
+  "authenticatedLearnPressOrigin": true,
+  "courses": [
+    {
+      "wpCourseId": 11,
+      "title": "<title>",
+      "enrollment": "enrolled",
+      "progressPercent": null,
+      "nextLesson": "<first unlocked lp_lesson>",
+      "resumeAuthorized": false,
+      "_derived": {
+        "resumeCandidate": true,
+        "nextPendingItemId": 12,
+        "nextPendingItemType": "lp_lesson"
+      }
+    }
+  ]
+}

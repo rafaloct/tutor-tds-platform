@@ -1,0 +1,6 @@
+{
+  "_label": "synthetic target",
+  "_supporting_observation": "TTL definido pelo controller do app (maxFreshAge/maxOfflineAge); servidor não expõe 'staleness' — derivado de observedAt.",
+  "snapshotState": "stale",
+  "courses": "último snapshot verificado do mesmo wpUserId+environmentId"
+}
