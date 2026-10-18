@@ -1,11 +1,30 @@
 <?php
-/** Minha área EAD: conta LearnPress projetada com identidade TDS. Sem autoridade acadêmica. */
+/**
+ * Minha área EAD: casca do portal para a conta WordPress/LearnPress (conta EAD).
+ * Não é a identidade institucional TDS/FastAPI (CPF+senha do app) e não emite
+ * nenhuma autoridade acadêmica — ver ADR_2026-10-18 (Issue #249).
+ */
 
 defined( 'ABSPATH' ) || exit;
 
-/** LearnPress disponível para a área do estudante? */
+/**
+ * LearnPress realmente capaz de renderizar o perfil embutido? O shortcode só
+ * funciona na página configurada em LP Settings > Pages > Profile; sem isso
+ * configurado o do_shortcode renderiza mensagem de erro do próprio LP.
+ */
 function tds_theme_learner_area_available() {
-	return function_exists( 'learn_press_get_current_profile_tab' ) || shortcode_exists( 'learn_press_profile' );
+	return function_exists( 'learn_press_get_page_id' )
+		&& shortcode_exists( 'learn_press_profile' )
+		&& (int) learn_press_get_page_id( 'profile' ) > 0;
+}
+
+/** A página atual é a de perfil configurada no LearnPress? */
+function tds_theme_learner_area_is_profile_page() {
+	if ( ! function_exists( 'learn_press_get_page_id' ) ) {
+		return false;
+	}
+	$profile_id = (int) learn_press_get_page_id( 'profile' );
+	return $profile_id > 0 && get_the_ID() === $profile_id;
 }
 
 function tds_theme_learner_login_url() {
@@ -91,9 +110,16 @@ function tds_theme_learner_area( $args = array() ) {
 	$user = wp_get_current_user();
 	echo '<section class="tds-learner-area" data-tds-component="learner-area" data-tds-state="connected">';
 	tds_theme_learner_area_head( $user );
-	if ( tds_theme_learner_area_available() ) {
+	if ( tds_theme_learner_area_is_profile_page() ) {
 		echo '<div class="tds-learner-area__profile">';
 		echo do_shortcode( '[learn_press_profile]' ); // phpcs:ignore WordPress.Security.EscapeOutput -- saída própria do LMS
+		echo '</div>';
+	} elseif ( tds_theme_learner_area_available() ) {
+		// Perfil configurado em outra página: aponta em vez de embutir (o
+		// shortcode LP é restrito à página de perfil registrada).
+		echo '<div class="tds-learner-area__intro">';
+		echo '<p class="tds-learner-area__text">' . esc_html__( 'Suas inscrições, lições e progresso ficam na sua página de perfil EAD.', 'tds-portal' ) . '</p>';
+		echo '<div class="tds-cluster">' . tds_theme_button( __( 'Abrir meu perfil EAD', 'tds-portal' ), get_permalink( (int) learn_press_get_page_id( 'profile' ) ), 'primary' ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in tds_theme_button
 		echo '</div>';
 	} else {
 		tds_theme_state_notice(
