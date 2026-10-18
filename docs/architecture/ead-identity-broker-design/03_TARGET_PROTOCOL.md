@@ -1,97 +1,91 @@
-# 03 — Protocolo TARGET de vínculo (NOT IMPLEMENTED)
+# 03 — Protocolo TARGET (rev.2 — B1 condicional, BLOCKED)
 
-Alternativa **B**: dois logins explícitos + vínculo por introspecção única do
-JWT LP. Todas as rotas/schemas abaixo são **TARGET** — não existem hoje.
+Este documento registra **o que uma alternativa B1 exigiria** caso exista um
+mecanismo WP auditado de proof/consentimento recente. Nada aqui é
+implementável hoje — a primitiva central não existe no WP/LP.
 
-## Fronteiras de confiança
+## Por que a variante "introspecção de JWT LP" foi rejeitada
 
-```
-[Flutter] --(senha EAD, TLS)--> [EAD WP/LP]        # FastAPI NUNCA vê a senha
-[Flutter] <--(JWT LP 7d)------ [EAD WP/LP]         # JWT fica no device (secure storage)
-[Flutter] --(JWT LP, 1 uso)--> [FastAPI broker]    # verificação transitória, descarte
-[broker]  --(validate+users)--> [EAD WP/LP]        # introspecção + prova de id
-[broker]  --(link row)-->      [DB FastAPI]        # vínculo auditável/revogável
-[Flutter] <--(EadSessionProof)- [broker]           # artefato curto ~15min
-```
+A versão inicial propunha: Flutter posta senha EAD em
+`/learnpress/v1/token`, recebe JWT LP (7d) e o envia ao broker, que valida
+via `token/validate` + `users/{id}` e grava o vínculo. **Três falhas
+fatais**, apontadas na revisão de segurança:
 
-## Fluxo de vínculo (sequence)
+1. **Viola a ADR #249**: captura de senha WP no Flutter/FastAPI é proibida
+   explicitamente. O fluxo exigiria o app digitando a credencial EAD.
+2. **Prova não é recente**: `token/validate` comprova apenas que o JWT é
+   válido e não expirou — um token emitido 6 dias antes (ou roubado)
+   completaria um challenge criado agora. `iat` mais recente é defesa
+   parcial contra tokens velhos, **não** contra token já roubado.
+3. **Logout WP não revoga**: o JWT de 7 dias permanece válido após logout —
+   a "sessão EAD" não pode ser derivada dele.
 
-```
-1. App: usuário já autenticado no TDS (JWT FastAPI 15min + refresh)
-2. App: login EAD direto → WP emite JWT LP (7d) — guardado em secure storage,
-   nunca enviado ao FastAPI nem exposto em URL/log
-3. App → broker: POST /integrations/learnpress/link/start
-   headers: Authorization: Bearer <JWT-TDS>
-   body: { environment_id, nonce_cliente, redirect_uri? }
-   broker gera: challenge {id, tds_user_id, env, nonce, iat, exp=+10min, used=false}
-4. App → broker: POST /integrations/learnpress/link/complete
-   body: { challenge_id, lp_jwt }            # JWT LP, uso único
-   broker (server-side):
-     a. challenge válido? (existe, não usado, não expirado, mesmo user+env)
-     b. decode(claims) sem confiar → extrai data.user.id, iss, exp
-     c. POST EAD /learnpress/v1/token/validate com o JWT → status 200?
-     d. GET  EAD /learnpress/v1/users/{claimed_id} com o JWT → 200 e id bate?
-        (prova IDOR real: o JWT tem que abrir o próprio recurso)
-     e. iss ∈ allowlist de environment? exp razoável (≤ agora+7d)?
-     f. conflito? wp_user_id já vinculado a outro tds_user_id → 409
-     g. OK → grava vínculo {tds_user_id, wp_user_id, env, linked_at,
-        linked_by:"self-consent", revoked_at:null} + marca challenge usado
-        + descarta lp_jwt (nunca persistido)
-5. broker → app: EadSessionProof { wpUserId, environmentId, verifiedAt,
-   expiresAt=+15min, brokerVerified:true }
-```
+Conclusão: sem um endpoint WP de **confirmação recente de posse** (browser
+flow ou provider auditado), **não existe caminho seguro para vínculo** —
+fallback é B0 (dois logins separados).
 
-## Re-emissão de sessão (depois do vínculo)
+## Fronteiras de confiança (B1 hipotético)
 
 ```
-App → broker: POST /integrations/learnpress/session/refresh
-  headers: Bearer <JWT-TDS>
-  body: { environment_id }
-  broker: vínculo existe e não revogado? → introspecção fresca do JWT LP
-          atual do device (relogin EAD se 401) → emite EadSessionProof novo
+[Flutter] --(JWT-TDS)--> [FastAPI]            # já existe
+[browser sistema] <--> [WP consent provider]  # AUSENTE — provider auditado
+[WP provider] --(auth-code/PKCE)--> [broker]  # troca server-side
+[broker] --(link row)--> [DB]                 # vínculo auditável/revogável
+[Flutter] <--(proof_id opaco)-- [broker]      # NUNCA claims do cliente
 ```
 
-## Revogação / unlink
+> Senha WP **nunca** trafega Flutter/FastAPI. JWT LP **nunca** é insumo de
+> vínculo nem chega ao broker — a prova é o code/PKCE do provider, não um
+> token de sessão de 7 dias.
+
+## Artefato de sessão — correção do modelo `EadSessionProof`
+
+A revisão identificou que `EadSessionProof` do Flutter é um **modelo/estado**,
+não um bearer confiável: um dict forjado com `brokerVerified=true` é
+indistinguível para o reader. Dois desenhos válidos (escolher um na
+implementação futura):
+
+| Desenho | Como funciona |
+|---|---|
+| **Artefato assinado** | broker emite JWT/opaco com `iss=broker`, `aud=ead-reader`, `scope=read`, `jti` único, `exp≤15min`, `wpUserId` em claim **verificada por assinatura** server-side |
+| **Id opaco + lookup** | app recebe `proof_id` não-autorizador; cada leitura do reader faz `lookup(proof_id)` server-side → valida link ativo, exp e wp_user — nada no cliente é autorizador |
+
+**Vedado:** aceitar `wpUserId`, `environmentId` ou `brokerVerified` vindos do
+cliente como autorização. O reader nunca confia em campos do modelo.
+
+## Revogação — correção exigida
+
+Proof emitido antes da revogação deve falhar se a política for "revogação
+imediata":
+
+- **Imediata (recomendada):** `read_snapshot` valida no servidor, a cada
+  leitura, link ativo + `session_version` (bump em revoke/unlink/logout) —
+  proof antigo morre mesmo dentro do TTL.
+- **Janela residual (alternativa declarada):** se se aceitar proof residual
+  até `exp`, o limite precisa ser **explícito e aprovado** (ex.: ≤15min) —
+  nunca deixar implícito.
+
+## Fluxo B1 (apenas quando primitiva existir)
 
 ```
-DELETE /integrations/learnpress/link
-  broker: revoked_at=now + invalida proofs futuros
-  Efeito: EadSessionProof deixa de ser emitido; nada é apagado no WP
-  (a conta EAD continua existindo; ADR: deleção TDS não apaga WP)
+1. App (sessão TDS) → broker: POST link/start {env, nonce} → challenge 10min
+2. App abre browser do sistema → provider WP: login+consent (prova recente)
+3. Provider → broker: auth code + PKCE (server-side, uso único, state bound)
+4. Broker: valida code + nonce + env + wp_user recém-autenticado → grava link
+5. Broker → app: proof_id opaco (ou artefato assinado curto)
+6. Reader: a cada leitura, resolve proof_id server-side → link ativo? exp?
+   wp_user == solicitado? → snapshot ou reject
 ```
 
-## Schema do vínculo (TARGET — migration separada)
+## Propriedades exigidas (checklist de implementação futura)
 
-```
-ead_account_links:
-  id, tds_user_id (FK), wp_user_id, environment_id,
-  linked_at, linked_by, revoked_at, revoked_by
-  UNIQUE (environment_id, wp_user_id)          -- um WP só tem um TDS
-  UNIQUE (environment_id, tds_user_id)         -- um TDS só tem um WP
-ead_link_challenges:
-  id, tds_user_id, environment_id, nonce, issued_at, expires_at,
-  used_at NULL                                 -- uso único + TTL 10min
-```
+- [ ] Provider WP auditado com auth-code+PKCE e consentimento explícito
+- [ ] Challenge single-use, TTL≤10min, `state` bound à sessão TDS
+- [ ] `proof_id`/artefato verificável **server-side** por leitura
+- [ ] Revogação: `session_version` bump → proofs antigos morrem na hora
+- [ ] `UNIQUE(env, wp_user_id)` + `UNIQUE(env, tds_user_id)` → 409 colisão
+- [ ] `environment_id` bindado ao issuer do provider — env errado → reject
+- [ ] Consentimento UI com LGPD (finalidade, controlador, revogável)
+- [ ] Nenhum segredo WP em URL, log, analytics ou cliente
 
-## O que cada artefato prova
-
-| Artefato | Prova | NÃO prova |
-|---|---|---|
-| JWT LP 7d (device) | posse atual da conta WP | vínculo TDS, consentimento, escopo |
-| `challenge` | intenção fresca + anti-replay/CSRF | autenticação |
-| `token/validate`=200 | JWT assinado e não-expirado pelo LP | id do usuário (só devolve status+exp) |
-| `users/{id}`=200 | o JWT abre o recurso do id reivindicado | identidade institucional |
-| `ead_account_links` row | vínculo já consentido/auditado | sessão ativa |
-| `EadSessionProof` | broker verificou link+jwt ≤15min atrás | autorização editorial/permanente |
-
-## Propriedades de segurança exigidas
-
-- `state`/`nonce` de uso único por tentativa; replay → reject.
-- TTL challenge 10min; proof ≤15min; `verifiedAt` nunca aceita do cliente.
-- `environment_id` bindado ao `iss` do JWT LP — token de outro ambiente falha.
-- Vínculo único por (env, wp_user) e (env, tds_user) — colisão → 409.
-- A/B no mesmo aparelho: proof carrega `wpUserId` — trocar de conta EAD exige
-  novo challenge; reader rejeita proof cujo wpUserId ≠ link.
-- Nenhum token em URL, log, analytics ou tela; JWT LP nunca chega ao DB.
-- Consentimento explícito na UI TDS antes do `link/start` (LGPD: finalidade,
-  controlador, revogabilidade, dados mínimos — só ids opacos).
+**Status: NOT IMPLEMENTED / BLOCKED até mecanismo de proof recente existir.**

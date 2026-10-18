@@ -1,66 +1,79 @@
-# 02 — Matriz de alternativas de vínculo
+# 02 — Matriz de alternativas de vínculo (rev.2 — pós revisão de segurança)
 
-Avaliação das abordagens realistas contra os requisitos da ADR #249:
-voluntário, único por ambiente, auditável, revogável, sem match por
-CPF/nome/email/telefone, sem SSO caseiro.
+Avaliação contra a ADR #249: voluntário, único por ambiente, auditável,
+revogável, **prova recente das duas contas**, consentimento, sem match por
+CPF/nome/email/telefone, **sem captura de senha WP no Flutter/FastAPI** e sem
+SSO caseiro.
 
 ## Alternativas
 
-### A — Provider OIDC/OAuth2 dedicado no WordPress (TARGET ideal, hoje BLOCKED)
+### B0 — Dois logins separados, SEM vínculo (ÚNICO seguro hoje)
 
-Fluxo OAuth2 Authorization Code + PKCE com o WP como IdP. O usuário
-autentica no browser do sistema, consente, e o broker troca `code` por token.
+Usuário autentica TDS no app (JWT FastAPI existente) e EAD no **navegador do
+sistema** (deep-link para `ead…`). Nenhum JWT/cookie/senha WP entra no
+Flutter ou no FastAPI; nenhuma tabela de vínculo é criada.
 
-- **Pré-requisito ausente:** nenhum provider OIDC/OAuth2 instalado no WP —
-  exige plugin de terceiro (ex.: miniOrange/oauth-server), homologação de
-  segurança e **instalação por humano** em staging→produção.
-- **Status: UNKNOWN/BLOCKED.** Não implementável agora sem gate de provider.
+- ✅ Única opção que hoje atende **todos** os requisitos da ADR.
+- ✅ Zero superfície nova de autenticação.
+- ❌ Não há Minha Área autenticada EAD no app — só deep-link para o site.
+- **Status: IMPLEMENTÁVEL HOJE** (já é o comportamento atual).
 
-### B — Dois logins + vínculo por introspecção LP (RECOMENDADO)
+### B1 — Broker FastAPI com proof WP recente (CONDICIONAL — BLOCKED)
 
-O usuário faz login TDS (FastAPI, já existe) e login EAD **direto no EAD**
-(Flutter → `ead…/wp-json/learnpress/v1/token` via TLS, senha nunca toca o
-FastAPI). Para criar o vínculo, o app envia ao broker **apenas** o JWT LP
-recém-emitido; o broker verifica uma vez (`token/validate` + `users/{id}`) e
-grava o par `tds↔wp`. O JWT é descartado.
+Vínculo auditável `tds↔wp` que só pode existir quando o WP oferecer um
+mecanismo de **confirmação recente de posse/consentimento** mediado por
+browser e provider/endpoint **oficialmente auditado** — por exemplo um
+Authorization Code + PKCE do próprio WP, ou fluxo de confirmação dedicado.
 
-- ✅ Zero plugin novo; usa só endpoints OBSERVED.
-- ✅ Prova de controle das **duas** contas em janela curta.
-- ✅ Credencial WP nunca persiste no TDS (só o id vinculado).
-- ⚠️ Re-autenticação LP a cada 7 dias quando o JWT morre (sem refresh) —
-  UX de "relogin EAD" explícito, não oculto.
-- ⚠️ O broker ainda processa um JWT LP em memória — mitigado por validação
-  imediata + descarte + log sanitizado.
+**Pré-requisitos ausentes (todos BLOCKED hoje):**
 
-### C — Application Password WP (fallback manual)
+| Falta | Por que é necessária |
+|---|---|
+| Endpoint WP de consentimento recente | `token/validate` comprova validade, **não** autenticação fresca: um JWT de 6 dias roubado completaria um challenge novo |
+| Provider auditável | sem ele, provar controle recente exige capturar senha WP no app — **proibido pela ADR** |
+| Fluxo de consentimento browser | prova de posse voluntária, anti-phishing, origem controlada |
 
-Usuário cria Application Password em wp-admin, cola uma vez numa tela de
-consentimento; broker chama `/wp/v2/users/me` com Basic auth, vincula e
-descarta.
+> ⚠️ **Revisão de segurança (PR #273):** a variante original desta alternativa
+> — Flutter enviando senha EAD ao endpoint `/learnpress/v1/token` e o JWT LP ao
+> broker — **viola a ADR #249** (captura de senha WP no cliente) e não prova
+> frescor (JWT de 7 dias ≠ login recente). **Removida.** Checar `iat` do JWT é
+> defesa parcial contra tokens velhos, **não** contra token já roubado — não
+> deve ser apresentada como solução suficiente.
 
-- ❌ `wp_is_application_passwords_available()=no` no sandbox (HTTP).
-- ❌ UX ruim: passos manuais no wp-admin.
-- ✅ Credencial revogável por nome, auditável (last_used/last_ip no usermeta).
-- **Status: fallback documentado**, não recomendado como caminho principal.
+- **Status: BLOCKED** até decisão humana + mecanismo auditado de proof recente.
+
+### A — Provider OIDC/OAuth2 dedicado no WordPress (TARGET ideal, BLOCKED)
+
+Authorization Code + PKCE com o WP como IdP (plugin de terceiro homologado).
+
+- ✅ Atende tudo, se o provider for auditado e instalado por humano.
+- ❌ Nenhum provider instalado; exige plugin + homologação + instalação.
+- **Status: BLOCKED** — depende de decisão + instalação humana.
+
+### C — Application Password WP (fallback manual, degradado)
+
+App-password criada em wp-admin, validada via `/wp/v2/users/me`, descartada.
+
+- ❌ `wp_is_application_passwords_available()=no` no sandbox HTTP.
+- ❌ UX manual fraca; senha de app ainda é credencial colada.
+- **Status: fallback documentado**, não recomendado.
 
 ## Matriz comparativa
 
-| Critério | A: OIDC/OAuth | **B: dois logins + introspecção** | C: App Password |
-|---|---|---|---|
-| Implementável hoje | ❌ plugin ausente | ✅ endpoints existem | ⚠️ degradado (HTTP) |
-| Prova das 2 contas | ✅ | ✅ | ✅ |
-| Consentimento explícito | ✅ tela provider | ✅ tela TDS dedicada | ✅ parcial |
-| Sem segredo WP no app | ✅ | ✅ JWT LP fica no device | ⚠️ senha de app colada |
-| Sem segredo WP no FastAPI | ✅ | ✅ (só JWT transitório) | ⚠️ app-password transitório |
-| Revogação | ✅ | ✅ link + relogin | ✅ por app-password |
-| UX de matrícula | melhor | dois logins claros | pior (manual) |
-| Mobile deep-link | ✅ redirect | ✅ fluxo in-app + browser | ❌ frágil |
-| Custo operacional | alto (provider) | baixo | médio |
-| Risco de SSO caseiro | nenhum | nenhum (sem re-emissão WP) | nenhum |
-| LGPD | consentimento provider | consentimento próprio + descarte | idem |
+| Critério | **B0 dois logins (hoje)** | B1 broker (condicional) | A OIDC | C app-password |
+|---|---|---|---|---|
+| Atende ADR hoje | ✅ | ❌ falta proof recente | ❌ plugin ausente | ⚠️ degradado |
+| Prova recente das 2 contas | n/a (sem vínculo) | ✅ se houver provider | ✅ | ⚠️ parcial |
+| Sem senha WP no app | ✅ | ✅ por definição | ✅ | ❌ |
+| Consentimento browser | n/a | ✅ requerido | ✅ | ❌ |
+| Revogação | n/a | ✅ server-side por leitura | ✅ | ✅ |
+| SSO caseiro | nenhum | nenhum (condicional) | nenhum | nenhum |
+| Custo | zero | alto (provider+auditoria) | alto | médio |
 
-## Recomendação
+## Recomendação rev.2
 
-**B** como caminho curto, mantendo **A** como evolução futura se um provider
-for homologado. C permanece documentado como contingência. Nenhuma opção
-autoriza SSO improvisado nem captura de senha WP no Flutter/FastAPI.
+**B0 agora** — dois logins separados com sessão WP no navegador do sistema,
+**sem vínculo nem verificação de identidade no Flutter**. B1 só volta à mesa
+depois que existir um mecanismo WP auditado de proof/consentimento recente,
+ou quando A/OIDC for homologado — ambos com **decisão humana explícita**,
+pois mudariam a restrição atual da ADR.
