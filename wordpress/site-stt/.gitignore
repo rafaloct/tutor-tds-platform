@@ -1,0 +1,6 @@
+tests/node_modules/
+qa-results/
+**/__pycache__/
+*.pyc
+*.wav
+models/
