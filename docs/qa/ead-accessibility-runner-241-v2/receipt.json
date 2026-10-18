@@ -1,0 +1,50 @@
+{
+  "status": "CAPTURED",
+  "profile": "android35-compact",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r846a2c41d83cd3c4ca3161fd575f698d",
+  "git_sha": "846a2c41d83cd3c4ca3161fd575f698d6618883d",
+  "identity": {
+    "android_api": "35",
+    "avd_serial": "emulator-5554",
+    "device_model": "sdk_gphone64_x86_64",
+    "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:15/AE3A.240806.036/12592187:user/release-keys"
+  },
+  "started_utc": "2026-10-18T22:37:27.452229+00:00",
+  "evidence": [
+    {
+      "file": "01-welcome.png",
+      "sha256": "f8abb443427e3b64b9baa4c13610e8a62ad913196b5ee30f7c4f7eed8f32db0f",
+      "bytes": 113056,
+      "utc": "2026-10-18T22:37:49.705255+00:00"
+    },
+    {
+      "file": "02-ead-catalog.png",
+      "sha256": "65a5a952264e74e7f4752d158fea69af6c6d709963dc9789986b5c0af17a720a",
+      "bytes": 156600,
+      "utc": "2026-10-18T22:37:55.974563+00:00"
+    },
+    {
+      "file": "03-learning-path.png",
+      "sha256": "121d68f6a611476247147755beb1da03e6a01a120afa3ba74e282b795f7aac74",
+      "bytes": 148428,
+      "utc": "2026-10-18T22:38:01.625350+00:00"
+    },
+    {
+      "file": "raw-android-screenrecord.mp4",
+      "sha256": "a41c63dc36789d09dd757b6d0961e827c13b92dc2592f134ee94e2c0c6469ec8",
+      "bytes": 932881,
+      "utc": "2026-10-18T22:39:17.629870+00:00"
+    }
+  ],
+  "events": [
+    "00: botão EAD acessível após primeira renderização",
+    "01: clique em Explorar cursos do EAD sem cadastro",
+    "02: catálogo exibiu contador público de ofertas",
+    "03: tela Percurso de aprendizagem confirmada"
+  ],
+  "notes": [
+    "Vídeo é captura real e não contém áudio do sistema."
+  ],
+  "screenrecord_exit": 0,
+  "finished_utc": "2026-10-18T22:39:23.169618+00:00"
+}
