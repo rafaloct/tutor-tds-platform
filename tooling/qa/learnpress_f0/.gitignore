@@ -1,0 +1,5 @@
+f0_env.sh
+f0-evidence-*/
+*.tok
+*.jar
+*.body
