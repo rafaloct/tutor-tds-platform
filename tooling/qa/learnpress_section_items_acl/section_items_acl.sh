@@ -50,11 +50,11 @@ get_token() { # <user> <pass> -> JWT só em memória
   printf '%s' "$resp" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("token") or "")'
 }
 
-rget() { # <id> <jwt|""> <expect_draft:visible|hidden> <label>
-  local id="$1" jwt="$2" want="$3" label="$4" resp code
+rget() { # <id> <jwt|""> <expect_draft:visible|hidden> <label> [section_id]
+  local id="$1" jwt="$2" want="$3" label="$4" sec="${5:-$SECTION_ID}" resp code
   local a=(-s --noproxy '*' --max-time 20 --max-filesize 262144 -w $'\n%{http_code}')
   [[ -n "$jwt" ]] && a+=(-H "Authorization: Bearer $jwt")
-  resp=$(curl "${a[@]}" "$BASE_URL/wp-json/learnpress/v1/section-items/items/$SECTION_ID")
+  resp=$(curl "${a[@]}" "$BASE_URL/wp-json/learnpress/v1/section-items/items/$sec")
   code="${resp##*$'\n'}"; resp="${resp%$'\n'*}"
   [[ "$code" == 200 ]] || { bad "$id" "HTTP=$code exp=200"; return; }
   printf '%s' "$resp" | DRAFT_ITEM_ID="$DRAFT_ITEM_ID" python3 "$PYDIR/section_items_acl_extract.py" > "$EV/$id.body" \
@@ -93,6 +93,13 @@ else
   # Catálogo público preservado: itens publish continuam listados.
   cnt=$(python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d["visible_items"])' "$EV/A01.body")
   [[ "$cnt" -ge 1 ]] && ok "A06|catálogo público preservado|publish=$cnt" || bad "A06" "publish=$cnt exp>=1"
+  # Negativo de seção órfã: curso pai não resolve como lp_course — draft
+  # fica oculto até para administrador (fail-closed). Opcional: exige que o
+  # setup do sandbox crie ORPHAN_SECTION_ID apontando p/ post não-lp_course.
+  if [[ -n "${ORPHAN_SECTION_ID:-}" ]]; then
+    rget A07 ""       hidden "guest @seção-órfã"        "$ORPHAN_SECTION_ID"
+    rget A08 "$T_ADM" hidden "admin @seção-órfã"        "$ORPHAN_SECTION_ID"
+  fi
 fi
 
 echo "== fim: PASS=$PASS FAIL=$FAIL =="

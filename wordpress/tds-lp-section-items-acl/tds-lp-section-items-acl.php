@@ -29,17 +29,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int $course_id ID do curso dono da seção.
  */
 function tds_lp_can_moderate_course_items( int $course_id ): bool {
+	// Fail-closed: o curso pai precisa resolver como lp_course real ANTES de
+	// qualquer exceção de privilégio. get_post(0) cairia no post global do WP —
+	// id inválido jamais concede acesso editorial.
+	if ( $course_id <= 0 ) {
+		return false;
+	}
+	$course = get_post( $course_id );
+	if ( ! $course instanceof WP_Post || 'lp_course' !== $course->post_type ) {
+		return false;
+	}
 	if ( ! is_user_logged_in() ) {
 		return false;
 	}
 	if ( current_user_can( 'manage_options' ) || current_user_can( 'edit_others_posts' ) ) {
 		return true;
 	}
-	$course = get_post( $course_id );
-	if ( $course && (int) $course->post_author === get_current_user_id() ) {
+	if ( (int) $course->post_author === get_current_user_id() ) {
 		return true;
 	}
-	return $course_id && current_user_can( 'edit_post', $course_id );
+	return current_user_can( 'edit_post', $course_id );
 }
 
 /**
@@ -68,6 +77,11 @@ function tds_lp_section_items_acl_filter( $response, $handler, $request ) {
 
 	$data = $response->get_data();
 	if ( ! is_array( $data ) ) {
+		// Fail-closed: shape inesperado não pode vazar a resposta original para
+		// não-moderadores — nega com conjunto vazio explícito (sem corpo bruto).
+		$response->set_data( array() );
+		$response->header( 'X-WP-Total', 0 );
+		$response->header( 'X-WP-TotalPages', 0 );
 		return $response;
 	}
 

@@ -27,7 +27,7 @@ já omitem itens não-publish.
 ## Correção — camada de extensão (não-vendor)
 
 `wordpress/tds-lp-section-items-acl/tds-lp-section-items-acl.php` — plugin
-single-file, ~90 linhas, hook `rest_request_after_callbacks` restrito ao
+single-file, hook `rest_request_after_callbacks` restrito ao
 route `^/learnpress/v1/section-items/items/\d+$`:
 
 - Para cada item da resposta, confere `get_post($id)->post_status`.
@@ -35,6 +35,13 @@ route `^/learnpress/v1/section-items/items/\d+$`:
   moderar os itens do curso:
   `manage_options` (admin) ∨ `edit_others_posts` (editor) ∨
   `post_author` do curso pai (instrutor) ∨ `edit_post(curso)`.
+- **Fail-closed ×2** (revisão de coordenação):
+  1. o curso pai precisa resolver como `$course_id > 0` + `WP_Post` real com
+     `post_type === 'lp_course'` **antes** de qualquer exceção de privilégio
+     — `get_post(0)` cairia no post global do WP; id inválido nunca concede
+     acesso editorial (nem para admin — seção órfã ⇒ tudo oculto);
+  2. payload não-array em `get_data()` → resposta negada com conjunto vazio
+     explícito para não-moderadores (corpo bruto nunca é repassado).
 - Recalcula `X-WP-Total`/`X-WP-TotalPages` após a filtragem.
 - Não registra rotas, não toca matrícula/progresso, não altera outros
   endpoints — reversível por desativação.
@@ -56,11 +63,16 @@ autoria do curso, não a cap customizada do item.
 
 Re-execuções no sandbox:
 
-- `acl-leak`: **5 PASS / 0 FAIL** (vulnerabilidade reproduzida — teste falha
+- `acl-leak2`: **5 PASS / 0 FAIL** (vulnerabilidade reproduzida — teste falha
   quando a proteção está ausente, conforme exigido)
-- `acl-protected`: **6 PASS / 0 FAIL** (draft oculto p/ não-moderadores,
+- `acl-protected2`: **8 PASS / 0 FAIL** (draft oculto p/ não-moderadores,
   visível p/ moderadores, `X-WP-Total` recalculado, catálogo público com
-  2 itens `publish` preservado)
+  2 itens `publish` preservado, **seção órfã fail-closed** — draft oculto
+  até para admin quando o curso pai não resolve como `lp_course`)
+- `acl_unit_tests.php` via `wp eval-file`: **14 PASS / 0 FAIL** —
+  course_id≤0/não-lp_course/inexistente nega até admin; payload string/
+  objeto → `[]` + `X-WP-Total=0`; lista mista → só publish; moderador
+  passthrough; rota não-relacionada intocada
 - Regressão: `courses/{id}` guest 200, `lessons/{id}` guest 401,
   `users/{id}` guest 401 — inalterados; `wp_learnpress_user_items` sem
   mudança (somente GETs, nenhum permalink de lição chamado)
