@@ -55,7 +55,11 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(EadMobileLessonScreen),
-      matchesGoldenFile('goldens/ead_wp_synthetic_real_http_blue.png'),
+      matchesGoldenFile(
+        Platform.isLinux
+            ? 'goldens/linux/ead_wp_synthetic_real_http_blue.png'
+            : 'goldens/ead_wp_synthetic_real_http_blue.png',
+      ),
     );
   });
 }
