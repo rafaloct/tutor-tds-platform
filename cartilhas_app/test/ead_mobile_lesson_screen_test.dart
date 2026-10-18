@@ -48,6 +48,7 @@ void main() {
             revision: sha,
             youtubeId: 'FG14ksTaMCE',
           ),
+          videoViewFactory: (_, onReady, onError) => const SizedBox.expand(),
           openExternal: (url) async {
             opened = url;
             return true;
@@ -61,10 +62,51 @@ void main() {
     expect(find.text('Material homologado.'), findsOneWidget);
     await tester.tap(find.text('Assistir vídeo aprovado'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(opened, isNull);
+    expect(find.text('Vídeo da aula'), findsOneWidget);
+    expect(find.text('SAF'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Abrir no YouTube'));
+    await tester.pump();
     expect(opened?.host, 'www.youtube.com');
     expect(opened?.queryParameters['v'], 'FG14ksTaMCE');
+    await tester.tap(find.byType(BackButton));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Como plantar'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  for (final youtubeId in <String?>[null, 'invalid', 'FG14ksTaMCE\n']) {
+    testWidgets('aula sem ID autorizado não oferece player: $youtubeId', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: EadMobileLessonScreen(
+            course: course,
+            lessonId: 1425,
+            loader: (_, _) async => EadEditorialLesson(
+              courseId: 1356,
+              lessonId: 1425,
+              title: 'Somente leitura',
+              contentHtml: '<p>Texto autorizado.</p>',
+              revision: sha,
+              youtubeId: youtubeId,
+            ),
+            videoViewFactory: (_, onReady, onError) =>
+                throw StateError('Vídeo não autorizado'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Texto autorizado.'), findsOneWidget);
+      expect(find.text('Assistir vídeo aprovado'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('aula sem autorização exibe bloqueio, não fabrica texto', (
     tester,
