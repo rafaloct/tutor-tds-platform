@@ -215,15 +215,34 @@ class EadMyAreaPreview extends StatelessWidget {
         actionText = 'Entrar novamente no EAD';
         action = onReauthenticate;
       case EadLinkState.linked:
-        title = model.hasVerifiedScope
-            ? 'Conta EAD vinculada'
-            : 'Confirme sua conta EAD novamente';
-        message = model.hasVerifiedScope
-            ? 'As inscrições exibidas vêm da autoridade LearnPress.'
-            : 'A identidade da consulta não corresponde a esta sessão.';
-        actionText = 'Entrar novamente no EAD';
-        action = model.hasVerifiedScope ? null : onReauthenticate;
-        hasAction = !model.hasVerifiedScope;
+        if (model.hasVerifiedScope) {
+          title = 'Conta EAD vinculada';
+          message = 'As inscrições exibidas vêm da autoridade LearnPress.';
+          actionText = '';
+          action = null;
+          hasAction = false;
+        } else if (model.viewerWpUserId != null &&
+            model.snapshotWpUserId == null &&
+            model.snapshotState != EadSnapshotState.current &&
+            model.snapshotState != EadSnapshotState.stale) {
+          // A verified broker session may be awaiting its first LMS read.
+          // Do not falsely imply a lost login or display unverified courses.
+          title = model.snapshotState == EadSnapshotState.loading
+              ? 'Consultando dados da conta EAD'
+              : 'Conta EAD aguardando consulta';
+          message =
+              'A sessão EAD foi fornecida, mas ainda não há '
+              'dados acadêmicos verificados para exibir.';
+          actionText = '';
+          action = null;
+          hasAction = false;
+        } else {
+          title = 'Confirme sua conta EAD novamente';
+          message = 'A identidade ou origem da consulta não foi comprovada.';
+          actionText = 'Entrar novamente no EAD';
+          action = onReauthenticate;
+          hasAction = true;
+        }
     }
     return _panel(
       icon: Icons.verified_user_outlined,
@@ -246,7 +265,12 @@ class EadMyAreaPreview extends StatelessWidget {
           const SizedBox(height: 8),
           const Text('Fonte: LearnPress, inscrição na oferta EAD.'),
           const SizedBox(height: 8),
-          if (!model.hasVerifiedScope)
+          if (!model.hasVerifiedScope &&
+              model.linkState == EadLinkState.linked &&
+              model.viewerWpUserId != null &&
+              model.snapshotWpUserId == null)
+            _statusMessage()
+          else if (!model.hasVerifiedScope)
             const Text(
               'Vincule sua conta para consultar inscrições. '
               'O catálogo público não demonstra matrícula.',
