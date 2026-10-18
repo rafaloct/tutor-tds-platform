@@ -40,3 +40,7 @@
 /phpcs.xml
 /.phpunit.cache/
 /.phpunit.result.cache
+
+# Artefatos operacionais sensiveis (backup/evidencia, Issue #169): o dump do
+# banco do portal NUNCA pode ser commitado.
+/backups/
