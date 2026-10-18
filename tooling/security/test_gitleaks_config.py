@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import json
 import re
 import secrets
@@ -108,6 +110,20 @@ def findings_for(
 def random_alnum(length: int) -> str:
     alphabet = string.ascii_letters + string.digits
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def deterministic_synthetic_value(seed: bytes, *, alphanumeric: bool = False) -> str:
+    """Derive a stable non-secret fixture instead of using random entropy.
+
+    A random positive fixture can intermittently fall below the default
+    generic-api-key entropy threshold. A fixed test seed keeps CI meaningful:
+    the same input must always produce the same expected detection.
+    The assembled secret-shaped value exists only in disposable test repos.
+    """
+    sample = base64.urlsafe_b64encode(hashlib.sha256(seed).digest()).decode("ascii").rstrip("=")
+    if alphanumeric:
+        sample = "".join(char for char in sample if char in string.ascii_letters + string.digits)
+    return sample
 
 
 def detected_case(
@@ -348,7 +364,7 @@ def main() -> int:
         detected_case(
             tmp_root,
             "normal_code_generic_api_key",
-            {"api/app/example_config.py": f'api_key = "{secrets.token_urlsafe(32)}"\n'},
+            {"api/app/example_config.py": f'api_key = "{deterministic_synthetic_value(b"not-real-TDS-regression-generic-positive-A")}"\n'},
             "generic-api-key",
             gitleaks,
             config,
@@ -448,7 +464,12 @@ def main() -> int:
             gitleaks,
             config,
         )
-        fixture_value = f"tds_gitleaks_fixture_{random_alnum(24)}"
+        # Stable suffix must still trigger the default scanner. The
+        # contextual allowlist is the only reason these two cases are clean.
+        fixture_suffix = deterministic_synthetic_value(
+            b"tds-approved-synthetic-fixture-A", alphanumeric=True
+        )[:24]
+        fixture_value = f"tds_gitleaks_fixture_{fixture_suffix}"
         clean_case(
             tmp_root,
             "approved_api_fixture",
@@ -457,7 +478,7 @@ def main() -> int:
             config,
             default_config,
         )
-        fixture_value = f"tds_gitleaks_fixture_{random_alnum(24)}"
+        fixture_value = f"tds_gitleaks_fixture_{fixture_suffix}"
         clean_case(
             tmp_root,
             "approved_flutter_fixture",
