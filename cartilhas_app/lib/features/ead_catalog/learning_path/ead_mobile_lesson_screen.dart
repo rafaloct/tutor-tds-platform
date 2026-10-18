@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/ead_catalog_repository.dart';
 import 'ead_editorial_bridge_repository.dart';
+import 'ead_youtube_player_screen.dart';
 
 typedef EadLessonLoader =
     Future<EadEditorialLesson> Function(EadCourse course, int lessonId);
@@ -16,11 +17,13 @@ class EadMobileLessonScreen extends StatefulWidget {
     required this.lessonId,
     this.loader,
     this.openExternal,
+    this.videoViewFactory,
   });
 
   final EadCourse course;
   final int lessonId;
   final EadLessonLoader? loader;
+  final EadVideoViewFactory? videoViewFactory;
   final Future<bool> Function(Uri url)? openExternal;
 
   @override
@@ -137,13 +140,19 @@ class _EadMobileLessonScreenState extends State<EadMobileLessonScreen> {
                   ),
                 );
               }),
-              if (lesson.youtubeId != null) ...[
+              if (EadYoutubePolicy.validId(lesson.youtubeId)) ...[
                 const SizedBox(height: 8),
                 FilledButton.icon(
-                  onPressed: () => _open(
-                    Uri.https('www.youtube.com', '/watch', {
-                      'v': lesson.youtubeId!,
-                    }),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => EadYoutubePlayerScreen(
+                        videoId: lesson.youtubeId!,
+                        lessonTitle: lesson.title,
+                        courseTitle: widget.course.title,
+                        openExternal: widget.openExternal,
+                        viewFactory: widget.videoViewFactory,
+                      ),
+                    ),
                   ),
                   icon: const Icon(Icons.play_circle_outline),
                   label: const Text('Assistir vídeo aprovado'),
