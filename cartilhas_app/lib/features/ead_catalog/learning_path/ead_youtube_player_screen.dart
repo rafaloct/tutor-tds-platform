@@ -6,15 +6,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 /// Platform seam: only readiness/failure, never playback or academic events.
-typedef EadVideoViewFactory = Widget Function(
-  String videoId,
-  VoidCallback onReady,
-  VoidCallback onError,
-);
+typedef EadVideoViewFactory =
+    Widget Function(String videoId, VoidCallback onReady, VoidCallback onError);
 
 class EadYoutubePolicy {
   static bool validId(String? id) =>
-      id != null && id.length == 11 && RegExp(r'^[A-Za-z0-9_-]{11}$').hasMatch(id);
+      id != null &&
+      id.length == 11 &&
+      RegExp(r'^[A-Za-z0-9_-]{11}$').hasMatch(id);
 
   // Mirrors the existing Android applicationId/build-type suffix; no secret.
   static String get appReferer {
@@ -22,8 +21,8 @@ class EadYoutubePolicy {
     const runId = String.fromEnvironment('DYNAMIC_QA_RUN_ID');
     final suffix = kDebugMode
         ? (isolated && RegExp(r'^[a-f0-9]{32}$').hasMatch(runId)
-            ? '.dev.dynamicqa.r$runId'
-            : '.dev')
+              ? '.dev.dynamicqa.r$runId'
+              : '.dev')
         : '';
     return 'https://com.tutortds_cartilhas$suffix/';
   }
@@ -103,8 +102,9 @@ class _EadYoutubePlayerScreenState extends State<EadYoutubePlayerScreen> {
     var opened = false;
     try {
       final url = EadYoutubePolicy.external(widget.videoId);
-      opened = await (widget.openExternal?.call(url) ??
-          launchUrl(url, mode: LaunchMode.externalApplication));
+      opened =
+          await (widget.openExternal?.call(url) ??
+              launchUrl(url, mode: LaunchMode.externalApplication));
     } on Object {
       opened = false;
     }
@@ -126,14 +126,21 @@ class _EadYoutubePlayerScreenState extends State<EadYoutubePlayerScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(widget.courseTitle, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            widget.courseTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
-          Text(widget.lessonTitle, style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            widget.lessonTitle,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           const SizedBox(height: 16),
           if (valid && !_failed)
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: widget.viewFactory?.call(widget.videoId, _ready, _error) ??
+              child:
+                  widget.viewFactory?.call(widget.videoId, _ready, _error) ??
                   _YoutubeWebView(
                     videoId: widget.videoId,
                     onReady: _ready,
@@ -143,7 +150,7 @@ class _EadYoutubePlayerScreenState extends State<EadYoutubePlayerScreen> {
           if (valid && _loading)
             const LinearProgressIndicator(semanticsLabel: 'Carregando vídeo'),
           if (_failed || !valid)
-            const Semantics(
+            Semantics(
               liveRegion: true,
               child: Text(
                 'Vídeo indisponível. Verifique sua conexão. '
@@ -197,22 +204,24 @@ class _YoutubeWebViewState extends State<_YoutubeWebView> {
     try {
       final controller = WebViewController();
       await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
-      await controller.setNavigationDelegate(NavigationDelegate(
-        onNavigationRequest: (request) =>
-            EadYoutubePolicy.allows(request.url, widget.videoId)
-                ? NavigationDecision.navigate
-                : NavigationDecision.prevent,
-        onPageFinished: (_) {
-          _timeout?.cancel();
-          // Document loaded is not evidence that playback succeeded.
-          widget.onReady();
-        },
-        onWebResourceError: (error) {
-          if (error.isForMainFrame == false) return;
-          _timeout?.cancel();
-          widget.onError();
-        },
-      ));
+      await controller.setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (request) =>
+              EadYoutubePolicy.allows(request.url, widget.videoId)
+              ? NavigationDecision.navigate
+              : NavigationDecision.prevent,
+          onPageFinished: (_) {
+            _timeout?.cancel();
+            // Document loaded is not evidence that playback succeeded.
+            widget.onReady();
+          },
+          onWebResourceError: (error) {
+            if (error.isForMainFrame == false) return;
+            _timeout?.cancel();
+            widget.onError();
+          },
+        ),
+      );
       if (!mounted) return;
       setState(() => _controller = controller);
       await controller.loadRequest(

@@ -93,3 +93,31 @@ Não alterar WP público nem ampliar opt-in para obter evidência.
 What remains unblocked: revisão de código e transferência do commit local.
 Merge/produção seguem proibidos. Rollback: reverter este commit, retomando
 abertura externa anterior, sem dados a migrar.
+
+
+## Validação Flutter no Desktop — 18/10/2026
+
+Esta seção documenta verificações independentes após transferir o commit do
+Codex `b8b1f3dd8980ca21931ddc596f33ec7b1a9cf769` em um Git bundle
+com SHA256 `a5e72c46d1eea16edd33152c726eaa60f78a26a6feb59dc979a67b668ca2e429`.
+
+- Flutter 3.44.9, `flutter pub get --offline`: PASS.
+- `flutter analyze --no-pub` em player, aula e testes: **PASS, zero issues**
+  após retirar um `const` indevido de um widget de acessibilidade.
+- `flutter test --no-pub`, testes de player e aula: **13/13 PASS**.
+  O teste de navegação recebeu um `pump` extra para concluir a transição
+  `MaterialPageRoute` antes de verificar os widgets.
+- Regressão em oito arquivos de aulas, percurso, refresh, currículo,
+  catálogo e golden: **85/85 PASS**, exit 0.
+- Formatação Dart aplicada somente aos arquivos da tarefa.
+- Não existe tráfego real do player no teste de widgets: o WebView
+  foi substituído por `EadVideoViewFactory` sintético. Legenda, áudio,
+  fullscreen e carregamento de YouTube ainda exigem teste em Android.
+- Nenhuma prova de presença, nota, certificado ou evento de visualização
+  foi fabricada. O estado de mídia usa apenas o ID YouTube previamente
+  aprovado pelo adaptador LearnPress.
+- **O player ainda não foi testado no emulador nesta etapa de validação
+  Flutter; não declarar TESTED-ANDROID até gerar APK, screenshots e MP4.**
+
+Merger/release permanecem bloqueados. `MERGE_ALLOWED=NO`;
+`PRODUCTION_ALLOWED=NO`.

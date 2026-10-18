@@ -62,6 +62,7 @@ void main() {
     expect(find.text('Material homologado.'), findsOneWidget);
     await tester.tap(find.text('Assistir vídeo aprovado'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(opened, isNull);
     expect(find.text('Vídeo da aula'), findsOneWidget);
     expect(find.text('SAF'), findsOneWidget);
@@ -81,23 +82,25 @@ void main() {
     testWidgets('aula sem ID autorizado não oferece player: $youtubeId', (
       tester,
     ) async {
-      await tester.pumpWidget(MaterialApp(
-        theme: AppTheme.light(),
-        home: EadMobileLessonScreen(
-          course: course,
-          lessonId: 1425,
-          loader: (_, _) async => EadEditorialLesson(
-            courseId: 1356,
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: EadMobileLessonScreen(
+            course: course,
             lessonId: 1425,
-            title: 'Somente leitura',
-            contentHtml: '<p>Texto autorizado.</p>',
-            revision: sha,
-            youtubeId: youtubeId,
+            loader: (_, _) async => EadEditorialLesson(
+              courseId: 1356,
+              lessonId: 1425,
+              title: 'Somente leitura',
+              contentHtml: '<p>Texto autorizado.</p>',
+              revision: sha,
+              youtubeId: youtubeId,
+            ),
+            videoViewFactory: (_, onReady, onError) =>
+                throw StateError('Vídeo não autorizado'),
           ),
-          videoViewFactory: (_, onReady, onError) =>
-              throw StateError('Vídeo não autorizado'),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       expect(find.text('Texto autorizado.'), findsOneWidget);
       expect(find.text('Assistir vídeo aprovado'), findsNothing);
