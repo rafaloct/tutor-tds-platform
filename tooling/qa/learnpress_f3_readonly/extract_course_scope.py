@@ -22,12 +22,13 @@ for s in d.get("sections") or []:
 
 enrollment = {"enrolled": "enrolled", "finished": "completed"}.get(cd.get("status"))
 
-# nextLesson: primeiro item (ordem do currículo) não-concluído e não travado,
-# derivado apenas quando há matrícula (guest/não-inscrito não tem "próxima").
-next_item = next(
+# Próximo item pendente (qualquer tipo) e próxima LIÇÃO pendente (lp_lesson),
+# derivados apenas quando há matrícula (guest/não-inscrito não tem "próxima").
+pending_item = next(
     (it for it in items if it.get("status") != "completed" and not it.get("locked")),
     None,
 ) if enrollment else None
+next_lesson = pending_item if (pending_item or {}).get("type") == "lp_lesson" else None
 
 print(json.dumps({
     "wpCourseId": d.get("id"),
@@ -50,8 +51,10 @@ print(json.dumps({
     "derived": {
         "enrollment": enrollment,
         "progressPercent": num(res.get("result")) if enrollment else None,
-        "nextLessonId": (next_item or {}).get("id"),
-        "nextLessonTitle": (next_item or {}).get("title"),
-        "resumeAuthorized": bool(enrollment == "enrolled" and next_item),
+        "nextPendingItemId": (pending_item or {}).get("id"),
+        "nextPendingItemType": (pending_item or {}).get("type"),
+        "nextLessonId": (next_lesson or {}).get("id"),
+        "nextLessonTitle": (next_lesson or {}).get("title"),
+        "resumeAuthorized": bool(enrollment == "enrolled" and pending_item),
     },
 }, ensure_ascii=False))

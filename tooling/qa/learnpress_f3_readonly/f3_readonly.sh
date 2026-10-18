@@ -63,9 +63,10 @@ PASS=0; FAIL=0
 
 # get_token <user> <pass> <receipt_id> — token em variável; evidência = stub.
 get_token() {
-  local u="$1" p="$2" rid="$3" resp t
-  resp=$(curl -s --max-time 20 -X POST -H 'Content-Type: application/json' \
-    -d "{\"username\":\"$u\",\"password\":\"$p\"}" \
+  local u="$1" p="$2" rid="$3" resp t payload
+  payload=$(python3 -c 'import json,sys;print(json.dumps({"username":sys.argv[1],"password":sys.argv[2]}))' "$u" "$p")
+  resp=$(curl -s --noproxy '*' --max-time 20 -X POST -H 'Content-Type: application/json' \
+    -d "$payload" \
     --max-filesize 262144 \
     "$BASE_URL/wp-json/learnpress/v1/token")
   printf '{"receipt":"auth body not stored","token":"REDACTED"}' > "$EV/$rid.body"
@@ -78,17 +79,18 @@ get_token() {
 # emite projeção allowlist JSON (única coisa persistida em evidência).
 rget() {
   local id="$1" path="$2" tok="${3:-}" ehttp="$4" ext="$5"
-  local a=(-s --max-time 20 --max-filesize 262144 -w $'\n%{http_code}\t%{redirect_url}')
+  local a=(-s --noproxy '*' --max-time 20 --max-filesize 262144 -w $'\n%{http_code}\t%{redirect_url}')
   [[ -n "$tok" ]] && a+=(-H "Authorization: Bearer $tok")
-  local out resp meta c redir
+  local out resp meta c redir extfail=0
   out=$(curl "${a[@]}" "$BASE_URL$path")
   meta="${out##*$'\n'}"; resp="${out%$'\n'*}"
   c="${meta%%$'\t'*}"; redir="${meta#*$'\t'}"
   printf '%s' "$resp" | python3 "$PYDIR/$ext.py" > "$EV/$id.body" 2>"$EV/$id.err" \
-    || printf '{"extraction_error":true}' > "$EV/$id.body"
+    || { extfail=1; printf '{"extraction_error":true}' > "$EV/$id.body"; }
   local st=PASS
   [[ "$c" == "$ehttp" ]] || st=FAIL
   [[ -n "$redir" ]] && st=FAIL   # leitura não deve redirectar
+  [[ "$extfail" == 1 ]] && st=FAIL   # resposta que não extrai não é evidência válida
   if [[ "$st" == PASS ]]; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); fi
   echo "$id|GET|$path|HTTP=$c(exp=$ehttp)|$st"
 }

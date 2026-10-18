@@ -49,11 +49,20 @@ def write(name, obj):
         fh.write("\n")
 
 
+def require(cond, name, detail):
+    """Fixture OBSERVED só sai quando o recibo comprova o estado esperado."""
+    if not cond:
+        print(f"ERRO: recibo não comprova estado esperado para {name}: {detail}",
+              file=sys.stderr)
+        sys.exit(1)
+
+
 # OBSERVED — aluno B matriculado, progresso 0, próxima lição derivável
 b = load("R09.body")
-b_courses = [course(b)] if b["derived"]["enrollment"] else []
+require(b["derived"]["enrollment"] == "enrolled", "linked-enrolled",
+        f"R09 derived.enrollment={b['derived']['enrollment']!r} (esperado 'enrolled')")
 write("linked-enrolled.json", {
-    **snapshot(UB, b_courses),
+    **snapshot(UB, [course(b)]),
     "_provenance": "OBSERVED",
     "_evidence": "f3c R09 (student-B, course_data.status=enrolled)",
     "_resume_note": "resumeAuthorized=true exige broker verificando vínculo de "
@@ -63,14 +72,18 @@ write("linked-enrolled.json", {
 
 # OBSERVED — aluno A curso finalizado (lock pós-finish)
 a = load("R08.body")
-a_courses = [course(a)] if a["derived"]["enrollment"] else []
+require(a["derived"]["enrollment"] == "completed", "finished",
+        f"R08 derived.enrollment={a['derived']['enrollment']!r} (esperado 'completed')")
 write("finished.json", {
-    **snapshot(UA, a_courses),
+    **snapshot(UA, [course(a)]),
     "_provenance": "OBSERVED",
     "_evidence": "f3c R08 (student-A, status=finished, result=100, itens locked)",
 })
 
 # OBSERVED — aluno C vínculo LP válido sem matrícula
+c = load("R10.body")
+require(c["derived"]["enrollment"] is None, "linked-no-enrollments",
+        f"R10 derived.enrollment={c['derived']['enrollment']!r} (esperado None)")
 write("linked-no-enrollments.json", {
     **snapshot(UC, []),
     "_provenance": "OBSERVED",
