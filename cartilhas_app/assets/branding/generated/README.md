@@ -38,6 +38,22 @@ agricultura familiar, casas simples do interior do Tocantins.
 | `study_tip.jpg` | dica de estudo / tela de pausa |
 | `curiosity_card.jpg` | verso/companion visual dos cartões de curiosidade |
 
+### Leva "assentamento" — público majoritário (5 ilustrações adicionais)
+
+Gerada após feedback de que a primeira leva estava "cerrado genérico".
+Linguagem visual dos assentamentos da reforma agrária no Tocantins.
+
+| arquivo | uso previsto |
+|---|---|
+| `assent_mutirao.jpg` | trabalho coletivo na roça de mandioca — comunidade/ajuda |
+| `assent_casa_farinha.jpg` | casa de farinha — contexto produtivo regional |
+| `assent_feira.jpg` | feira do agricultor familiar — renda/associativismo |
+| `assent_parcela.jpg` | parcela de assentamento vista aérea — território |
+| `assent_mulher.jpg` | mulher agricultora na roça — protagonismo feminino |
+
+`curiosities.json` ganhou 4 itens (c021–c024): assentamento/INCRA, mutirão,
+casa de farinha, feira do agricultor — total 24 cartões.
+
 ## Conformidade de marca
 
 - Ilustrações NÃO contêm a marca TDS — uso da marca segue as regras do manual

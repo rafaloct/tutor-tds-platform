@@ -30,6 +30,8 @@ Texto sempre fora da imagem (nunca sobreposta — legibilidade + i18n).
 | Onboarding 1ª abertura | `onboarding_welcome` | `_banner16x9` | header do carrossel de boas-vindas |
 | Dica de estudo contextual | `study_tip` + item de `curiosities.json` | `_card4x3` | card em home/dashboard, troca a cada abertura |
 | Diálogo de curiosidade ("Você sabia?") | `curiosity_card` + item do JSON | `_spot` 120–160dp | imagem pequena à esquerda do texto |
+| Comunidade/associação | `assent_mutirao`, `assent_feira` | `_banner16x9`/`_card4x3` | headers de seções comunitárias |
+| Contexto produtivo do curso | `assent_casa_farinha`, `assent_parcela`, `assent_mulher` | `_card4x3` | capas/headers de trilhas de agroecologia |
 
 ## Curiosidades — regra de exibição
 
