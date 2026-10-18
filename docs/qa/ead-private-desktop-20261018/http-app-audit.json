@@ -1,0 +1,34 @@
+﻿[
+    {
+        "utc":  "2026-10-18T23:28:09+00:00",
+        "route":  "curriculum_12",
+        "http":  200,
+        "etag":  true,
+        "conditional":  false,
+        "bytes":  552
+    },
+    {
+        "utc":  "2026-10-18T23:28:17+00:00",
+        "route":  "lesson_13",
+        "http":  200,
+        "etag":  true,
+        "conditional":  false,
+        "bytes":  342
+    },
+    {
+        "utc":  "2026-10-18T23:28:29+00:00",
+        "route":  "lesson_13",
+        "http":  200,
+        "etag":  true,
+        "conditional":  false,
+        "bytes":  342
+    },
+    {
+        "utc":  "2026-10-18T23:28:45+00:00",
+        "route":  "curriculum_12",
+        "http":  304,
+        "etag":  true,
+        "conditional":  true,
+        "bytes":  0
+    }
+]

@@ -1,0 +1,54 @@
+{
+  "status": "NAVIGATION_PASS",
+  "started_utc": "2026-10-18T23:27:20+00:00",
+  "apk_package": "com.tutortds_cartilhas.dev.dynamicqa.r00ad5b420ca34272893828e84024326c",
+  "serial": "emulator-5554",
+  "adb_server_port": "5038",
+  "files": [
+    {
+      "name": "01-welcome.png",
+      "size": 98157,
+      "sha256": "3d65aa8570c4df5141b7a1d702703f34086575367280ea00abc93c105dcd5697"
+    },
+    {
+      "name": "02-lab-catalog.png",
+      "size": 132116,
+      "sha256": "cf1d8fd72711a45d7f966a9bdb922165773b2e1daeaa26ff3e91076ae0742f99"
+    },
+    {
+      "name": "03-private-path.png",
+      "size": 135520,
+      "sha256": "8bf3e84e1e709a19c6804a2caee14b23d7ab1bd59ec711f67b2b40db870acc62"
+    },
+    {
+      "name": "04-authorized-lesson.png",
+      "size": 102719,
+      "sha256": "068b63c55b5f829ff8735c54a150762c37c7b5f72d230e764c2a8ca021946a05"
+    },
+    {
+      "name": "05-lesson-refreshed.png",
+      "size": 102719,
+      "sha256": "068b63c55b5f829ff8735c54a150762c37c7b5f72d230e764c2a8ca021946a05"
+    },
+    {
+      "name": "06-curriculum-refreshed.png",
+      "size": 135496,
+      "sha256": "f965a3be1990b742ba3622bc15b15ce53cd4a04e0ddc6dfb63341c0599c7e320"
+    },
+    {
+      "name": "raw-android-screenrecord.mp4",
+      "size": 1140589,
+      "sha256": "195c12feae2b8ec89503f4ab176bde3ec97094cef7b2587890dfd515f9ae7acf"
+    }
+  ],
+  "steps": [
+    "catalog_lab_visible",
+    "private_curriculum_visible",
+    "authorized_lesson_visible",
+    "lesson_refreshed_same_apk",
+    "curriculum_revalidation_requested_same_apk"
+  ],
+  "notes": [],
+  "screenrecord_exit": 0,
+  "finished_utc": "2026-10-18T23:29:07+00:00"
+}
