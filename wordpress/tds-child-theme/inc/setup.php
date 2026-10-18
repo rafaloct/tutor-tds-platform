@@ -53,6 +53,9 @@ add_action(
 		add_shortcode( 'tds_acesso_app', 'tds_theme_shortcode_app_access' );
 		add_shortcode( 'tds_catalogo', 'tds_theme_shortcode_catalog' );
 		add_shortcode( 'tds_estado', 'tds_theme_shortcode_state' );
+		add_shortcode( 'tds_minha_area', 'tds_theme_shortcode_minha_area' );
+		add_shortcode( 'tds_meus_cursos', 'tds_theme_shortcode_meus_cursos' );
+		add_shortcode( 'tds_certificados', 'tds_theme_shortcode_certificados' );
 	}
 );
 
@@ -80,6 +83,9 @@ function tds_theme_page_templates() {
 		'templates/direitos.php'      => array( 'label' => __( 'Direitos e exclusão', 'tds-portal' ), 'eyebrow' => __( 'Seus dados', 'tds-portal' ) ),
 		'templates/acessibilidade.php' => array( 'label' => __( 'Acessibilidade', 'tds-portal' ), 'eyebrow' => __( 'Compromisso', 'tds-portal' ) ),
 		'templates/contato.php'       => array( 'label' => __( 'Contato', 'tds-portal' ), 'eyebrow' => __( 'Fale com o programa', 'tds-portal' ) ),
+		'templates/minha-area.php'    => array( 'label' => __( 'Minha área', 'tds-portal' ), 'eyebrow' => __( 'Conta EAD', 'tds-portal' ) ),
+		'templates/meus-cursos.php'   => array( 'label' => __( 'Meus cursos', 'tds-portal' ), 'eyebrow' => __( 'Conta EAD', 'tds-portal' ) ),
+		'templates/certificados.php'  => array( 'label' => __( 'Certificados', 'tds-portal' ), 'eyebrow' => __( 'Comprovação', 'tds-portal' ) ),
 	);
 }
 

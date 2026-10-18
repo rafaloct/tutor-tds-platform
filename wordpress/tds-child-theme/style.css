@@ -4,7 +4,7 @@ Theme URI: https://github.com/rafaloct/tutor-tds-platform
 Description: Camada visual pública do portal TDS (WP-2). Child theme do Astra; consome somente TDS_Public_Config::get() e a REST pública do tds-portal-core. Sem autoridade acadêmica.
 Author: Programa TDS
 Template: astra
-Version: 0.2.1
+Version: 0.3.0
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -599,4 +599,45 @@ body.tds-portal {
 @media (max-width: 479px) {
 	.tds-home-editorial { padding: var(--tds-space-4); }
 	.tds-journey__item { grid-template-columns: 1fr; }
+}
+
+/* Minha área EAD (conta LearnPress com identidade TDS) */
+.tds-learner-area { display: grid; gap: var(--tds-space-6); }
+.tds-learner-area__intro {
+	padding: var(--tds-space-6);
+	border: 1px solid var(--tds-color-border, #d9d9d9);
+	border-radius: var(--tds-radius-lg);
+	background: var(--tds-color-surface, #fff);
+	text-align: center;
+}
+.tds-learner-area__intro .tds-cluster { justify-content: center; }
+.tds-learner-area__mark { margin-inline: auto; height: auto; }
+.tds-learner-area__title { margin: var(--tds-space-4) 0 var(--tds-space-2); font-size: var(--tds-text-2xl, 1.5rem); }
+.tds-learner-area__text { max-width: 62ch; margin: 0 auto var(--tds-space-4); color: var(--tds-color-muted, #6b6b6b); }
+.tds-learner-area__hint { margin: var(--tds-space-4) 0 0; font-size: var(--tds-text-sm, .875rem); }
+.tds-learner-area__head { display: grid; gap: var(--tds-space-3); }
+.tds-learner-area__links { display: flex; flex-wrap: wrap; gap: var(--tds-space-3); list-style: none; margin: 0; padding: 0; }
+.tds-learner-area__profile {
+	padding: var(--tds-space-5);
+	border: 1px solid var(--tds-color-border, #d9d9d9);
+	border-radius: var(--tds-radius-lg);
+	background: var(--tds-color-surface, #fff);
+}
+/* Perfil LearnPress dentro da casca TDS */
+.tds-learner-area__profile .learnpress-profile__header { border-radius: var(--tds-radius-md, .5rem); }
+.tds-learner-area__profile .lp-button,
+.tds-learner-area__profile button[type="submit"] {
+	min-height: var(--tds-tap-target, 44px);
+	border-radius: var(--tds-radius-sm, .375rem);
+	font-weight: 600;
+}
+.tds-learner-area__profile a:focus-visible,
+.tds-learner-area__profile button:focus-visible,
+.tds-learner-area__profile input:focus-visible {
+	outline: 2px solid var(--tds-color-primary, #093af4);
+	outline-offset: 2px;
+}
+.tds-certificates .tds-prose h2 { margin-top: var(--tds-space-5); }
+@media (max-width: 479px) {
+	.tds-learner-area__intro { padding: var(--tds-space-4); }
 }
