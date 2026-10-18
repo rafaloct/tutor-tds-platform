@@ -945,3 +945,10 @@ OBSERVED (Pixel_8_Pro / emulator-5554 no LARGEO via Tailscale+SSH, APK debug des
 - ATENCAO (relatado ao operador): clipboard do emulador exibia fragmento de
   chave OpenRouter — recomendado rotacionar se a chave foi transitada por ele.
 REMAINING: PR push/review, deploy CI staging no ref, gates de producao.
+
+- F3d (Issue #274): homologacao B0 do tema candidato PR #251 na sandbox
+  WP+MariaDB dfd627:18732 — paginas minha-area/meus-cursos/certificados 200,
+  guest com CTA same-origin, A/B conectados sem vazamento cruzado, cookie
+  forjado -> guest, logout confirm 302 -> guest, rollback provado
+  (hash/contagens restauradas, slugs 404). Runner em
+  tooling/qa/ead_b0_portal_smoke, recibo em docs/qa/ead-b0-portal-smoke.
