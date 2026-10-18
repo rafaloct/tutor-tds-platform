@@ -1,0 +1,7 @@
+name: 'TDS Participant Portal'
+type: module
+description: 'Area web complementar do participante, consumindo somente contratos autenticados da FastAPI.'
+package: 'Tutor TDS'
+core_version_requirement: ^11
+dependencies:
+  - tds_tutor_gateway:tds_tutor_gateway
