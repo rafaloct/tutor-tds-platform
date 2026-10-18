@@ -1,0 +1,70 @@
+{
+    "schema_version":  1,
+    "capture_utc_day":  "2026-10-18",
+    "qa_kind":  "TESTED-EMULATOR_ANDROID35",
+    "git_source_sha":  "b58fffbe43d2b2ab12685749237584a20a543964",
+    "build_apk_sha256":  "181B743E3249C56A75EEC7FAABD43BBDCFFA5B9CCA4A846B4F918136FA825E47",
+    "apk_package":  "com.tutortds_cartilhas.dev.dynamicqa.r00ad5b420ca34272893828e84024326c",
+    "app_build":  "debug_android_x64",
+    "android_api":  35,
+    "emulator":  "tutor_tds_remote_catalog_qa",
+    "origin":  "WordPress 6.7.2 / LearnPress 4.3.6 / MySQL synthetic, private SSH tunnel and adb reverse",
+    "no_production_modifications":  true,
+    "live_revision_with_same_apk":  true,
+    "editorial_revocation_blocked":  true,
+    "original_raw_mp4_locations":  [
+                                       "C:\\Users\\Usuario\\Projects\\tds-issue241-build-evidence\\evidence\\android35-privatewp\\01-raw-android35-qa-navigation.mp4",
+                                       "C:\\Users\\Usuario\\Projects\\tds-issue241-build-evidence\\evidence\\android35-privatewp\\02-raw-android35-live-refresh.mp4"
+                                   ],
+    "note":  "Published preview is cut from genuine Android screenrecord with FFmpeg NVENC, no system audio; source FPS variable, output 30fps CFR may duplicate frames",
+    "files":  [
+                  {
+                      "filename":  "02-welcome-ready.png",
+                      "bytes":  149670,
+                      "sha256":  "C9430387529D7C53AFB8D0E862F667E4918374A1A75857EE5805E0F63A3D2F89",
+                      "kind":  "android_screencap"
+                  },
+                  {
+                      "filename":  "03-ead-catalog.png",
+                      "bytes":  218103,
+                      "sha256":  "F5268A986C118EA01062AF603EAB53592E821AFE7C6EE5D6CC3F732027097C4F",
+                      "kind":  "android_screencap"
+                  },
+                  {
+                      "filename":  "04-private-saf-path.png",
+                      "bytes":  219791,
+                      "sha256":  "794D481FE915520761F9A8D8E6249C81F1EC3BCF1763B10AD8BC9C7FE54FBE35",
+                      "kind":  "android_screencap"
+                  },
+                  {
+                      "filename":  "05-authorized-lesson.png",
+                      "bytes":  139997,
+                      "sha256":  "DE2C32347EBED59B632B07847F5A684E76076625F7D37D638C08BF19DF9A3D3F",
+                      "kind":  "android_screencap"
+                  },
+                  {
+                      "filename":  "06-lesson-updated-without-rebuild.png",
+                      "bytes":  197436,
+                      "sha256":  "819BAB6B2BEC8C0ACF0D1705003D909CBFE6E9DA014B1B9A5EF08AF306CB4B81",
+                      "kind":  "android_screencap"
+                  },
+                  {
+                      "filename":  "07-lesson-revoked-blocked.png",
+                      "bytes":  68523,
+                      "sha256":  "E2CE97230BC86DCA9958B325DD1841C9E19D2AF8CA88114DB61CDD5A7F43E0D3",
+                      "kind":  "android_screencap"
+                  },
+                  {
+                      "filename":  "08-lab-restored.png",
+                      "bytes":  140484,
+                      "sha256":  "4DBAC8E0E3BA7BBEA8CC666FDE9E9B41EDA5784BD8046594038D5E577C6A8623",
+                      "kind":  "android_screencap"
+                  },
+                  {
+                      "filename":  "preview-android35-dynamic-ead-1080x1920.mp4",
+                      "bytes":  1995433,
+                      "sha256":  "1016B815BDEDD16DB3EAD34F787688C30471E5D2A856D4050BC24F1A44394403",
+                      "kind":  "derived_android_screenrecord"
+                  }
+              ]
+}

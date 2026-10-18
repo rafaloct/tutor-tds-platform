@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/ead_catalog_repository.dart';
 import '../learning_path/ead_learning_path_screen.dart';
+import '../qa/private_editorial_qa_bridge.dart';
 
 typedef EadCourseLoader = Future<List<EadCourse>> Function();
 typedef EadCourseOpener = Future<bool> Function(Uri uri);
@@ -89,6 +90,32 @@ class _EadCatalogScreenState extends State<EadCatalogScreen> {
                     'disponíveis neste aplicativo.',
                   ),
                   const SizedBox(height: 20),
+                  if (PrivateEditorialQaBridge.enabled)
+                    Card(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      child: ListTile(
+                        key: const ValueKey('qa-synthetic-learnpress'),
+                        leading: const Icon(Icons.science_outlined),
+                        title: const Text(PrivateEditorialQaBridge.marker),
+                        subtitle: const Text(
+                          'Curso SAF sintético, sem conta, matrícula ou dados reais.',
+                        ),
+                        trailing: const Icon(Icons.route),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => const EadLearningPathScreen(
+                              course: EadCourse(
+                                id: PrivateEditorialQaBridge.syntheticCourseId,
+                                slug: 'saf-qa-sintetico',
+                                title:
+                                    'SAF QA · teste de publicação do LearnPress',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   if (snapshot.connectionState == ConnectionState.waiting)
                     const Center(
                       child: Padding(
