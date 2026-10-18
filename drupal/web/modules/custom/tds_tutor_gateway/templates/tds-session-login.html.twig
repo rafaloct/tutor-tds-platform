@@ -1,0 +1,11 @@
+<section aria-labelledby="tds-login-title">
+  <h1 id="tds-login-title">Entrar no Tutor TDS</h1>
+  <p>Use o CPF e a senha da sua conta no aplicativo.</p>
+  <form data-tds-login data-bootstrap="{{ path('tds_tutor_gateway.bootstrap') }}" data-login="{{ login_url }}" data-destination="{{ destination }}" method="post" action="{{ path('tds_tutor_gateway.browser_login') }}" autocomplete="off">
+    <p><label for="tds-cpf">CPF</label><br><input id="tds-cpf" type="text" inputmode="numeric" autocomplete="off" required maxlength="14"></p>
+    <p><label for="tds-password">Senha</label><br><input id="tds-password" type="password" autocomplete="off" required></p>
+    <button type="submit" disabled>Entrar</button>
+    <p data-tds-login-status role="status" aria-live="polite">Preparando seu acesso…</p>
+  </form>
+  <noscript>Ative o JavaScript para entrar com segurança.</noscript>
+</section>

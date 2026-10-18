@@ -78,6 +78,32 @@ final class TutorApiClient implements TutorApiClientInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function get(string $path, array $query, string $accessToken): array {
+    if ($accessToken === '' || !$this->allowedReadPath($path, $query)) {
+      throw new \LogicException('Endpoint de leitura nao permitido pelo cliente tipado.');
+    }
+    return $this->request('GET', $path, NULL, $accessToken, TRUE, $query);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsGet(string $path, string $accessToken): array {
+    $this->assertOperationsPath('GET', $path);
+    return $this->request('GET', $path, NULL, $accessToken, TRUE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function operationsPost(string $path, array $payload, string $accessToken): array {
+    $this->assertOperationsPath('POST', $path);
+    return $this->request('POST', $path, $payload, $accessToken);
+  }
+
+  /**
    * Executa request com redirect desligado e retry somente para GET seguro.
    *
    * @return array<string, mixed>
@@ -89,9 +115,14 @@ final class TutorApiClient implements TutorApiClientInterface {
     ?array $json = NULL,
     ?string $accessToken = NULL,
     bool $retrySafe = FALSE,
+    array $query = [],
   ): array {
-    $allowed = ['/auth/login', '/auth/refresh', '/auth/me'];
-    if (!in_array($path, $allowed, TRUE)) {
+    $authPath = in_array($path, ['/auth/login', '/auth/refresh', '/auth/me'], TRUE);
+    $operationPath = str_starts_with($path, '/operations/');
+    if ($operationPath) {
+      $this->assertOperationsPath($method, $path);
+    }
+    if (!$authPath && !$operationPath && !($method === 'GET' && $this->allowedReadPath($path, $query))) {
       throw new \LogicException('Endpoint nao permitido pelo cliente tipado.');
     }
     $headers = [
@@ -112,6 +143,9 @@ final class TutorApiClient implements TutorApiClientInterface {
     if ($json !== NULL) {
       $options['json'] = $json;
     }
+    if ($query !== []) {
+      $options['query'] = $query;
+    }
 
     $attempts = $retrySafe && in_array($method, ['GET', 'HEAD'], TRUE) ? 2 : 1;
     for ($attempt = 1; $attempt <= $attempts; $attempt++) {
@@ -131,9 +165,31 @@ final class TutorApiClient implements TutorApiClientInterface {
       if ($attempt < $attempts && in_array($response->getStatusCode(), [502, 503, 504], TRUE)) {
         continue;
       }
-      return $this->decode($response);
+      return $this->decode($response, str_starts_with($path, '/operations/'));
     }
     throw new GatewayException('api_unavailable', 503);
+  }
+
+  /**
+   * Restringe o BFF aos contratos GET usados pela area do participante.
+   *
+   * @param string $path
+   *   Path absoluto candidato.
+   * @param array<string, scalar> $query
+   *   Query da chamada.
+   */
+  private function allowedReadPath(string $path, array $query): bool {
+    if ($path === '/classes') {
+      return $query === ['enrolled_only' => 'true'];
+    }
+    if ($path === '/certificates') {
+      return $query === [];
+    }
+    $id = '[A-Za-z0-9][A-Za-z0-9_-]{0,119}';
+    return $query === [] && preg_match(
+      '#^/classes/' . $id . '/(?:learning-context|course)$#D',
+      $path,
+    ) === 1;
   }
 
   /**
@@ -170,12 +226,14 @@ final class TutorApiClient implements TutorApiClientInterface {
    * @return array<string, mixed>
    *   Objeto JSON.
    */
-  private function decode(ResponseInterface $response): array {
+  private function decode(ResponseInterface $response, bool $operation = FALSE): array {
     $status = $response->getStatusCode();
     if ($status < 200 || $status >= 300) {
       throw match ($status) {
         401 => new GatewayException('invalid_or_expired_session', 401),
         403 => new GatewayException('access_denied', 403),
+        404 => new GatewayException('not_found', 404),
+        409 => new GatewayException($operation ? 'operation_conflict' : 'context_conflict', 409),
         422 => new GatewayException('invalid_request', 422),
         429 => new GatewayException('rate_limited', 429),
         502, 503, 504 => new GatewayException('api_unavailable', 503),
@@ -196,6 +254,18 @@ final class TutorApiClient implements TutorApiClientInterface {
       throw new GatewayException('invalid_api_response', 502);
     }
     return $decoded;
+  }
+
+  /**
+   * Valida metodo e path antes de qualquer request de operacao.
+   */
+  private function assertOperationsPath(string $method, string $path): void {
+    $allowed = $method === 'GET'
+      ? $path === '/operations/scopes'
+      : preg_match('#^/operations/[A-Za-z0-9_-]{1,36}/(?:search|inspect|commands)$#D', $path) === 1;
+    if (!$allowed) {
+      throw new \LogicException('Endpoint operacional nao permitido.');
+    }
   }
 
   /**

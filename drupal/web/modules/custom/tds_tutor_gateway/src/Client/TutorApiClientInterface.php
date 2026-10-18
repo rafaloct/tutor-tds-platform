@@ -35,4 +35,50 @@ interface TutorApiClientInterface {
    */
   public function me(string $accessToken): array;
 
+  /**
+   * Executa GET autenticado em uma rota de leitura explicitamente permitida.
+   *
+   * @param string $path
+   *   Path absoluto allowlisted, nunca uma URL.
+   * @param array<string, scalar> $query
+   *   Query allowlisted para a rota.
+   * @param string $accessToken
+   *   Token mantido exclusivamente no servidor.
+   *
+   * @return array<string, mixed>
+   *   Objeto JSON validado.
+   */
+  public function get(string $path, array $query, string $accessToken): array;
+
+  /**
+   * Executa GET autenticado somente na superficie operacional permitida.
+   *
+   * @param string $path
+   *   Path operacional allowlisted.
+   * @param string $accessToken
+   *   Bearer mantido no servidor.
+   *
+   * @return array<string, mixed>
+   *   Objeto JSON sanitizado.
+   */
+  public function operationsGet(string $path, string $accessToken): array;
+
+  /**
+   * Executa POST autenticado somente na superficie operacional permitida.
+   *
+   * O transporte nunca repete POST automaticamente. Comandos carregam sua
+   * propria chave de idempotencia definida pelo chamador.
+   *
+   * @param string $path
+   *   Path operacional allowlisted.
+   * @param array<string, mixed> $payload
+   *   Corpo JSON.
+   * @param string $accessToken
+   *   Bearer mantido no servidor.
+   *
+   * @return array<string, mixed>
+   *   Objeto JSON sanitizado.
+   */
+  public function operationsPost(string $path, array $payload, string $accessToken): array;
+
 }

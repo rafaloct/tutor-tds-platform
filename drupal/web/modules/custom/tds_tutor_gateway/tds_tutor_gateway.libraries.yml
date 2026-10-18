@@ -1,0 +1,6 @@
+browser-session:
+  js:
+    js/browser-session.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

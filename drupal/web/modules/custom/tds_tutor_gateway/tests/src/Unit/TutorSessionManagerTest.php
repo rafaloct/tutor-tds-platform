@@ -7,12 +7,15 @@ namespace Drupal\Tests\tds_tutor_gateway\Unit;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\tds_tutor_gateway\Client\TutorApiClientInterface;
+use Drupal\tds_tutor_gateway\Event\TutorSessionClearedEvent;
 use Drupal\tds_tutor_gateway\Exception\GatewayException;
 use Drupal\tds_tutor_gateway\Session\TutorSessionManager;
+use Drupal\tds_tutor_gateway\Session\TutorSessionLifecycleInterface;
 use Drupal\tds_tutor_gateway\Storage\TutorTokenStoreInterface;
 use Drupal\tds_tutor_gateway\ValueObject\TutorTokenSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Testa a orquestracao da sessao TDS server-side.
@@ -34,7 +37,11 @@ final class TutorSessionManagerTest extends UnitTestCase {
       'user' => $user,
     ]);
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $lifecycle = $this->createMock(TutorSessionLifecycleInterface::class);
+    $lifecycle->expects(self::once())->method('rotateId')->willReturnCallback(function () use ($store): void {
+      self::assertNull($store->load(), 'New tokens must not be persisted before rotation.');
+    });
+    $manager = new TutorSessionManager($client, $store, $this->time(1000), $this->createMock(EventDispatcherInterface::class), $lifecycle);
     self::assertSame($user, $manager->login('11111111111', 'synthetic-password'));
     self::assertSame(1, $store->clearCount);
     self::assertSame($fresh, $store->load());
@@ -49,7 +56,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
     $client->method('login')
       ->willThrowException(new GatewayException('invalid_credentials', 401));
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     try {
       $manager->login('11111111111', 'invalid-password');
       self::fail('Era esperado login invalido.');
@@ -75,7 +82,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
       'role' => 'student',
     ]);
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     self::assertSame('user-1', $manager->context()['id']);
     self::assertSame($fresh, $store->load());
   }
@@ -97,7 +104,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
       });
     $client->expects(self::once())->method('refresh')->with('refresh-old')->willReturn($fresh);
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     self::assertSame('user-1', $manager->context()['id']);
   }
 
@@ -110,7 +117,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
     $store = new MemoryTutorTokenStore($tokens);
     $client->method('me')->willThrowException(new GatewayException('api_unavailable', 503));
 
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
     try {
       $manager->context();
       self::fail('Era esperado offline.');
@@ -128,7 +135,7 @@ final class TutorSessionManagerTest extends UnitTestCase {
     $client = $this->createMock(TutorApiClientInterface::class);
     $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 1000));
     $client->method('refresh')->willThrowException(new GatewayException('invalid_or_expired_session', 401));
-    $manager = new TutorSessionManager($client, $store, $this->time(1000));
+    $manager = $this->manager($client, $store, 1000);
 
     try {
       $manager->context();
@@ -144,12 +151,173 @@ final class TutorSessionManagerTest extends UnitTestCase {
   }
 
   /**
+   * GET autenticado recebe refresh unico depois de 401 e repete com novo token.
+   */
+  public function testAuthorizedGetRefreshesOnce(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 2000));
+    $fresh = new TutorTokenSet('fresh', 'refresh-fresh', 3000);
+    $calls = 0;
+    $client->expects(self::exactly(2))->method('get')
+      ->with('/classes', ['enrolled_only' => 'true'], self::anything())
+      ->willReturnCallback(function (string $path, array $query, string $token) use (&$calls): array {
+        if ($calls++ === 0) {
+          self::assertSame('old', $token);
+          throw new GatewayException('invalid_or_expired_session', 401);
+        }
+        self::assertSame('fresh', $token);
+        return ['classes' => []];
+      });
+    $client->expects(self::once())->method('refresh')->with('refresh-old')->willReturn($fresh);
+
+    $manager = $this->manager($client, $store, 1000);
+    self::assertSame(['classes' => []], $manager->get('/classes', ['enrolled_only' => 'true']));
+  }
+
+  /**
+   * Logout publica limpeza para caches privados consumidores.
+   */
+  public function testLogoutDispatchesSessionClearedEvent(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 2000));
+    $dispatcher = $this->createMock(EventDispatcherInterface::class);
+    $dispatcher->expects(self::once())
+      ->method('dispatch')
+      ->with(
+        self::isInstanceOf(TutorSessionClearedEvent::class),
+        TutorSessionClearedEvent::NAME,
+      );
+    $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher, $this->createMock(TutorSessionLifecycleInterface::class));
+
+    $manager->logout();
+
+    self::assertNull($store->load());
+  }
+
+  /**
+   * Cria manager com dispatcher sem efeitos externos.
+   */
+  private function manager(
+    TutorApiClientInterface $client,
+    TutorTokenStoreInterface $store,
+    int $requestTime,
+  ): TutorSessionManager {
+    return new TutorSessionManager(
+      $client,
+      $store,
+      $this->time($requestTime),
+      $this->createMock(EventDispatcherInterface::class),
+      $this->createMock(TutorSessionLifecycleInterface::class),
+    );
+  }
+
+  /**
+   * POST operacional repete uma unica vez apos 401 com payload identico.
+   */
+  public function testOperationsPostRefreshesOnceWithIdenticalPayload(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh-old', 2000));
+    $fresh = new TutorTokenSet('fresh', 'refresh-fresh', 3000);
+    $payload = ['id' => 'fixed-command-0001', 'action' => 'assign'];
+    $calls = 0;
+    $client->expects(self::exactly(2))->method('operationsPost')
+      ->with('/operations/class-1/commands', $payload, self::callback(function (string $token) use (&$calls): bool {
+        self::assertSame($calls === 0 ? 'old' : 'fresh', $token);
+        $calls++;
+        return TRUE;
+      }))
+      ->willReturnCallback(function () use (&$calls): array {
+        if ($calls === 1) {
+          throw new GatewayException('invalid_or_expired_session', 401);
+        }
+        return ['revision' => 2];
+      });
+    $client->expects(self::once())->method('refresh')->with('refresh-old')->willReturn($fresh);
+
+    $manager = $this->manager($client, $store, 1000);
+    self::assertSame(['revision' => 2], $manager->operationsPost('/operations/class-1/commands', $payload));
+  }
+
+  /**
+   * Rotation failure never leaves newly issued tokens in the old session.
+   */
+  public function testFailedRotationDoesNotPersistNewTokens(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'old-r', 9999));
+    $client->method('login')->willReturn([
+      'tokens' => new TutorTokenSet('new', 'new-r', 9999),
+      'user' => ['id' => 'new-user'],
+    ]);
+    $lifecycle = $this->createMock(TutorSessionLifecycleInterface::class);
+    $lifecycle->method('rotateId')->willThrowException(new GatewayException('session_rotation_failed', 503));
+    $manager = new TutorSessionManager($client, $store, $this->time(1000), $this->createMock(EventDispatcherInterface::class), $lifecycle);
+    try {
+      $manager->login('synthetic-cpf', 'synthetic-password');
+      self::fail('Rotation failure must fail the login.');
+    }
+    catch (GatewayException $error) {
+      self::assertSame(503, $error->httpStatus());
+      self::assertNull($store->load());
+    }
+  }
+
+  /**
+   * Logout clears Tutor credentials before destroying the old cookie ID.
+   */
+  public function testLogoutClearsBeforeRotation(): void {
+    $client = $this->createMock(TutorApiClientInterface::class);
+    $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'old-r', 9999));
+    $lifecycle = $this->createMock(TutorSessionLifecycleInterface::class);
+    $lifecycle->expects(self::once())->method('rotateId')->willReturnCallback(function () use ($store): void {
+      self::assertNull($store->load());
+    });
+    (new TutorSessionManager($client, $store, $this->time(1000), $this->createMock(EventDispatcherInterface::class), $lifecycle))->logout();
+    self::assertNull($store->load());
+  }
+
+  /**
    * Mock de relogio.
    */
   private function time(int $requestTime): TimeInterface {
     $time = $this->createMock(TimeInterface::class);
     $time->method('getRequestTime')->willReturn($requestTime);
     return $time;
+  }
+
+  /**
+   * A rejected replay clears tokens and private consumers across all surfaces.
+   */
+  public function testRejectedReplayClearsEveryAuthenticatedSurface(): void {
+    foreach (['me', 'get', 'operationsGet', 'operationsPost'] as $method) {
+      foreach ([401, 403] as $status) {
+        $client = $this->createMock(TutorApiClientInterface::class);
+        $store = new MemoryTutorTokenStore(new TutorTokenSet('old', 'refresh', 2000));
+        $calls = 0;
+        $client->expects(self::exactly(2))->method($method)
+          ->willReturnCallback(function () use (&$calls, $status): array {
+            throw new GatewayException('denied', $calls++ === 0 ? 401 : $status);
+          });
+        $client->expects(self::once())->method('refresh')
+          ->willReturn(new TutorTokenSet('new', 'new-refresh', 3000));
+        $dispatcher = $this->createMock(EventDispatcherInterface::class);
+        $dispatcher->expects(self::once())->method('dispatch')
+          ->with(self::isInstanceOf(TutorSessionClearedEvent::class), TutorSessionClearedEvent::NAME);
+        $manager = new TutorSessionManager($client, $store, $this->time(1000), $dispatcher, $this->createMock(TutorSessionLifecycleInterface::class));
+        try {
+          match ($method) {
+            'me' => $manager->context(),
+            'get' => $manager->get('/classes', ['enrolled_only' => 'true']),
+            'operationsGet' => $manager->operationsGet('/operations/scopes'),
+            'operationsPost' => $manager->operationsPost('/operations/class-1/commands', ['id' => 'fixed']),
+          };
+          self::fail('Rejected replay must fail closed.');
+        }
+        catch (GatewayException $error) {
+          self::assertSame($status, $error->httpStatus());
+          self::assertNull($store->load());
+        }
+      }
+    }
   }
 
 }

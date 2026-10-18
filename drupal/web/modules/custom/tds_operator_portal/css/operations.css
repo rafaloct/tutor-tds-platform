@@ -1,0 +1,27 @@
+.tds-operations {
+  margin-inline: auto;
+  max-width: 64rem;
+}
+
+.tds-operations__status {
+  background: #eef5ff;
+  border-inline-start: 0.25rem solid #2764a7;
+  margin-block: 1rem;
+  padding: 1rem;
+}
+
+.tds-operations__history {
+  overflow-x: auto;
+}
+
+.tds-operations__history table {
+  min-width: 36rem;
+  width: 100%;
+}
+
+@media (max-width: 48rem) {
+  .tds-operations .form-actions input {
+    margin-block: 0.35rem;
+    width: 100%;
+  }
+}
