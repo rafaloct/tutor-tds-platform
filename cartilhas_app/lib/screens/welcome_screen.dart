@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/models/auth_session.dart';
 import '../features/auth/presentation/account_login_screen.dart';
+import '../features/ead_catalog/presentation/ead_catalog_screen.dart';
 import '../features/certificates/data/certificate_service.dart';
 import '../features/profile/data/profile_data_store.dart';
 import '../services/privacy_preferences.dart';
@@ -20,10 +21,12 @@ class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
     super.key,
     this.profileDataStore,
+    this.eadCatalogLoader,
     this.skipExistingUserRedirect = false,
   });
 
   final ProfileDataStore? profileDataStore;
+  final EadCourseLoader? eadCatalogLoader;
   final bool skipExistingUserRedirect;
 
   @override
@@ -404,9 +407,28 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Preencha seus dados para começar',
+                                'Explore cursos no EAD ou informe seus dados para usar recursos personalizados do Tutor TDS.',
                                 style: TextStyle(
                                   color: colors.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              OutlinedButton.icon(
+                                key: const ValueKey('ead-public-explore'),
+                                icon: const Icon(Icons.school_outlined),
+                                label: const Text(
+                                  'Explorar cursos do EAD sem cadastro',
+                                ),
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  trackedRoute(
+                                    pageId: 'ead_public_courses',
+                                    resourceId: 'ead_catalog',
+                                    featureId: 'ead_public_discovery',
+                                    builder: (_) => EadCatalogScreen(
+                                      courseLoader: widget.eadCatalogLoader,
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 24),
