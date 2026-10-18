@@ -14,6 +14,10 @@ $root = dirname(__DIR__);
 require $root . '/vendor/autoload.php';
 
 $twig = new Twig\Environment(new Twig\Loader\ArrayLoader());
+// Syntax-only equivalents of Drupal's known Twig symbols. No templates are
+// rendered here; real translation and routing remain Drupal runtime services.
+$twig->addFilter(new Twig\TwigFilter('t', static fn (string $text): string => $text));
+$twig->addFunction(new Twig\TwigFunction('path', static fn (string $route): string => $route));
 
 $files = [];
 foreach (['web/modules/custom', 'web/themes/custom'] as $dir) {

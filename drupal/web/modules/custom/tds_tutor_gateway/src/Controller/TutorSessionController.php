@@ -71,8 +71,13 @@ final class TutorSessionController extends ControllerBase {
    * Descarta imediatamente os tokens server-side da sessao Drupal.
    */
   public function logout(): JsonResponse {
-    $this->sessionManager->logout();
-    return $this->response(['authenticated' => FALSE]);
+    try {
+      $this->sessionManager->logout();
+      return $this->response(['authenticated' => FALSE]);
+    }
+    catch (GatewayException $error) {
+      return $this->error($error);
+    }
   }
 
   /**

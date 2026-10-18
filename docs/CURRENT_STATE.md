@@ -1,5 +1,45 @@
 # CURRENT STATE
 
+## 2026-10-15 — #168: mutex da sessão candidato local
+
+IMPLEMENTED/TESTED-LOCAL: gateway envolve leitura→refresh→persistência com mutex
+MySQL sem lease na mesma conexão primária do SessionHandler padrão. Construção
+lazy; contenção e backend incompatível falham antes do snapshot. 7 testes novos/
+33 assertions; 15 verificações concorrentes com processos MySQL 8.4.11 e 5 HTTP
+Drupal real (API fake) PASS. Inclui perda da conexão, crash do dono e logout sem
+ressurreição. Sem alteração em produção. Contrato: `drupal/DR3_SESSION_LOCKING.md`.
+Reconciliado com staging `b0c39b2` (#211): candidato `5a76db5` validado em fixture
+isolada no VPS com Drupal 11.4.10/PHP 8.3.35, 68 testes/250 assertions e 43 checks
+de configuração PASS; gate acadêmico de produção preservado.
+TESTED-LOCAL posterior (`1c26451`): MariaDB 11.8.9 na imagem do banco do portal,
+fixture sem rede/sem portas públicas, PHP 8.3.35/Drupal 11.4.10. 15 checks
+concorrentes + 5 HTTP + 11 de regeneração/logout nativo Drupal PASS, incluindo
+replay do cookie regenerado revogado (401). API e contas sintéticas.
+IMPLEMENTED candidato posterior: login/logout TDS rotaciona ID com destruição do
+antigo e preserva sessão editorial; 32 testes gateway/115 assertions PASS.
+TESTED-LOCAL no descendente integrado `72e97d6` (PR #212): 112 testes/467
+assertions, 69 checks settings, 15 concorrentes MariaDB, 5 HTTP refresh, 11 core
+e 21 TDS login/logout PASS. Fixture VPS isolada sem rede, PHP 8.3.35/Drupal
+11.4.10/MariaDB 11.8.9, módulos participante/operador/suporte habilitados apenas
+na fixture. Não atribuir esses resultados à revisão isolada `0cfa05c` (32/115).
+BLOCKED: bootstrap anônimo sem CMS, suporte customizado/BigPipe, prova real de
+sinalização entre abas e SDK Chatwoot; implantação autenticada e aceite #170. O
+bloqueador histórico de ordering abaixo recebeu correção local, não aceite #170.
+
+## 2026-10-15 — Drupal DR-7 / #168, candidato local
+
+IMPLEMENTED/TESTED-LOCAL: módulo opt-in `tds_support_certificates` sobre staging
+`207e2128dcbcedec70bf5132b05a7081501480ed`: referências privadas via FastAPI,
+handoff oficial de verificação e suporte com identidade efêmera em sandbox.
+60 testes PHP/201 assertions (35/107 novos), lint completo e 20 verificações
+Chromium com Drupal/SQLite reais e SDK/identidade sintéticos PASS. Correções
+observadas no browser: no-store preservado após resposta Drupal e heartbeat
+reiniciado ao reabrir atendimento. Nenhuma alteração Flutter/API/Worker/produção.
+BLOCKED: ativação autenticada depende de lock no ciclo compartilhado de leitura
+à persistência da sessão (inclusive concorrência dentro deste módulo), integração
+#166/#180 e prova do SDK Chatwoot real. #168 permanece aberta; não é aceite #170.
+Contrato, comandos, limites e rollback: `drupal/DR7_SUPPORT_CERTIFICATES.md`.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
@@ -14,7 +54,7 @@ rota pública ativada, certificado Let's Encrypt válido e18 checks HTTPS PASS
 via VPS e desktop externo com DNS normal. Correção de cache3858607 promovida;
 sequência HTTP interno → HTTPS público PASS sem canonical inseguro.
 Restore isolado PASS:55 tabelas/961 registros/35 arquivos; descriptografia offsite
-ainda UNKNOWN. PR211 draft; merge não autorizado.
+ainda UNKNOWN. PR211 integrado externamente em staging b0c39b2.
 Evidências e limitações: `production/DRUPAL_DOKPLOY_2026-10-15.md`.
 
 ## 2026-10-13 — fonte consolidada para a release
