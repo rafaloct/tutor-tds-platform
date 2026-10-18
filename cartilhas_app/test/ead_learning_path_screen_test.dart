@@ -95,90 +95,87 @@ void main() {
     for (final scale in [1.0, 1.5]) {
       for (final dark in [false, true]) {
         for (final sample in cases) {
-          testWidgets(
-            'percurso ${sample.sections} seções/${sample.items} itens '
-            '$width px escala $scale dark=$dark',
-            (tester) async {
-              tester.view.physicalSize = Size(width, 920);
-              tester.view.devicePixelRatio = 1;
-              addTearDown(tester.view.resetPhysicalSize);
-              addTearDown(tester.view.resetDevicePixelRatio);
-              final data = EadCurriculum(
-                course: course,
-                sections: List.generate(
-                  sample.sections,
-                  (section) => EadSection(
-                    id: section + 1,
-                    title: 'Seção de vídeo ${section + 1}',
-                    lessons: List.generate(
-                      section == 0 ? sample.items : 0,
-                      (item) => EadLesson(
-                        id: item + 1,
-                        title: 'Aula de vídeo ${item + 1}',
-                        type: 'lp_lesson',
-                        isVideoCandidate: true,
-                      ),
+          testWidgets('percurso ${sample.sections} seções/${sample.items} itens '
+              '$width px escala $scale dark=$dark', (tester) async {
+            tester.view.physicalSize = Size(width, 920);
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.resetPhysicalSize);
+            addTearDown(tester.view.resetDevicePixelRatio);
+            final data = EadCurriculum(
+              course: course,
+              sections: List.generate(
+                sample.sections,
+                (section) => EadSection(
+                  id: section + 1,
+                  title: 'Seção de vídeo ${section + 1}',
+                  lessons: List.generate(
+                    section == 0 ? sample.items : 0,
+                    (item) => EadLesson(
+                      id: item + 1,
+                      title: 'Aula de vídeo ${item + 1}',
+                      type: 'lp_lesson',
+                      isVideoCandidate: true,
                     ),
                   ),
                 ),
-              );
-              await tester.pumpWidget(
-                MaterialApp(
-                  theme: dark ? AppTheme.dark() : AppTheme.light(),
-                  builder: (context, child) => MediaQuery(
-                    data: MediaQuery.of(context).copyWith(
-                      textScaler: TextScaler.linear(scale),
-                    ),
-                    child: child!,
-                  ),
-                  home: Builder(
-                    builder: (context) => TextButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => EadLearningPathScreen(
-                            course: course,
-                            curriculumLoader: (_) async => data,
-                          ),
+              ),
+            );
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: dark ? AppTheme.dark() : AppTheme.light(),
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: child!,
+                ),
+                home: Builder(
+                  builder: (context) => TextButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => EadLearningPathScreen(
+                          course: course,
+                          curriculumLoader: (_) async => data,
                         ),
                       ),
-                      child: const Text('Abrir percurso'),
                     ),
+                    child: const Text('Abrir percurso'),
                   ),
                 ),
-              );
-              await tester.tap(find.text('Abrir percurso'));
+              ),
+            );
+            await tester.tap(find.text('Abrir percurso'));
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            expect(find.byType(BackButton), findsOneWidget);
+            expect(find.byTooltip('Atualizar percurso'), findsOneWidget);
+            final title = find.text('Percurso');
+            final paragraph = tester.renderObject<RenderParagraph>(title);
+            expect(paragraph.didExceedMaxLines, isFalse);
+            final titleRect = tester.getRect(title);
+            final toolbarRect = tester.getRect(find.byType(AppBar));
+            expect(toolbarRect.contains(titleRect.topLeft), isTrue);
+            expect(toolbarRect.contains(titleRect.bottomRight), isTrue);
+            expect(find.text(sample.summary), findsOneWidget);
+            if (sample.sections > 0) {
+              final section = find.byKey(const ValueKey('section-1'));
+              await tester.ensureVisible(section);
               await tester.pumpAndSettle();
-              expect(tester.takeException(), isNull);
-              expect(find.byType(BackButton), findsOneWidget);
-              expect(find.byTooltip('Atualizar percurso'), findsOneWidget);
-              final title = find.text('Percurso');
-              final paragraph = tester.renderObject<RenderParagraph>(title);
-              expect(paragraph.didExceedMaxLines, isFalse);
-              final titleRect = tester.getRect(title);
-              final toolbarRect = tester.getRect(find.byType(AppBar));
-              expect(toolbarRect.contains(titleRect.topLeft), isTrue);
-              expect(toolbarRect.contains(titleRect.bottomRight), isTrue);
-              expect(find.text(sample.summary), findsOneWidget);
-              if (sample.sections > 0) {
-                final section = find.byKey(const ValueKey('section-1'));
-                await tester.ensureVisible(section);
-                await tester.pumpAndSettle();
-                expect(
-                  find.descendant(
-                    of: section,
-                    matching: find.text(
-                      sample.items == 1 ? '1 item' : '${sample.items} itens',
-                    ),
+              expect(
+                find.descendant(
+                  of: section,
+                  matching: find.text(
+                    sample.items == 1 ? '1 item' : '${sample.items} itens',
                   ),
-                  findsOneWidget,
-                );
-              }
-              // Scroll through the complete curriculum to lay out lazy children.
-              await tester.drag(find.byType(ListView), const Offset(0, -1600));
-              await tester.pumpAndSettle();
-              expect(tester.takeException(), isNull);
-            },
-          );
+                ),
+                findsOneWidget,
+              );
+            }
+            // Scroll through the complete curriculum to lay out lazy children.
+            await tester.drag(find.byType(ListView), const Offset(0, -1600));
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+          });
         }
       }
     }
