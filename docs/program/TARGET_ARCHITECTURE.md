@@ -4,6 +4,8 @@
 
 A arquitetura alvo mantém o FastAPI/PostgreSQL como núcleo e organiza os demais componentes em superfícies especializadas.
 
+**DECISION 18/10/2026:** o núcleo FastAPI é **institucional**; LearnPress tem autoridade sobre conta EAD, inscrições, aulas/quizzes e progresso LMS. A federação site↔app é TARGET e não comprovada. Ver [ADR](ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md).
+
 Os diagramas e fluxos abaixo são TARGET, salvo evidência explicitamente indicada.
 Checkpoint OBSERVED da consolidação `3fddb09`: Context Core possui aceite em
 staging; catálogo tem evidência física histórica e política posterior #4 validada
@@ -24,7 +26,11 @@ flowchart LR
 
   APP --> API[FastAPI Tutor TDS]
   ADM --> API
-  WEB -->|somente leitura pública| API
+  WEB -->|projeção institucional pública| API
+  WEB --> LMS[LearnPress: ensino e progresso EAD]
+  APP -.->|TARGET: sessão EAD verificada| BRIDGE[Broker/adaptador de identidade e LMS]
+  API -.->|TARGET: vínculo opaco| BRIDGE
+  BRIDGE -.-> LMS
 
   API --> DB[(PostgreSQL)]
   API --> GW[Cloudflare Gateway]
@@ -55,7 +61,7 @@ flowchart LR
 - Admin web: apenas quando existir necessidade operacional que não caiba no app. Deve consumir a mesma API, não criar backend paralelo.
 
 ### 2.2 Domínio
-FastAPI é a fronteira de autorização. O domínio alvo abrange os itens abaixo;
+FastAPI é a fronteira de autorização **institucional TDS**; LearnPress autoriza o acesso e os comandos **EAD**. O domínio TDS alvo abrange os itens abaixo;
 estar nesta lista não comprova implementação ou integração completa:
 - identidade;
 - organização/instituição/programa;
@@ -72,20 +78,20 @@ estar nesta lista não comprova implementação ou integração completa:
 ### 2.3 Persistência
 - PostgreSQL: dados transacionais e auditoria.
 - SQLite/app storage: cache/outbox local, nunca autoridade após sincronização.
-- WordPress DB: conteúdo público/editorial apenas.
+- WordPress DB: conteúdo editorial e fatos **próprios do LMS** (conta EAD, inscrição EAD, lições, quizzes e progresso). Não armazena baseline, presença ou certificado oficial TDS.
 - KV: certificado/verificação conforme contrato existente.
 - R2/Drive: blobs, masters, backup e anexos conforme política.
 
 ## 3. Limites de serviço
 
 ### FastAPI
-Pode decidir autorização. Não deve servir vídeo master nem virar CMS de notícias.
+Pode decidir autorização **institucional TDS**. Não substitui as regras de curso do LearnPress, não serve vídeo master nem vira CMS de notícias.
 
 ### Flutter
 Pode coletar intenção, exibir estado e manter outbox. Não pode possuir segredo servidor, aprovar matrícula ou inventar resultado offline.
 
-### WordPress
-Pode editar notícia, página, agenda e conteúdo público. Não pode receber CPF, senha, baseline, matrícula ou frequência.
+### WordPress / LearnPress
+O portal WordPress edita notícia, página, agenda e conteúdo; o LearnPress opera inscrição na **oferta EAD**, suas lições, quizzes e progresso. A conta EAD possui autenticação WP própria; não deve receber CPF institucional TDS, senha institucional, baseline, matrícula em turma, frequência ou autorização de certificado oficial. Vinculação de contas exige prova segura e gate independente.
 
 ### Chatwoot
 Pode gerir conversa e fila. Não pode ser usado como banco acadêmico.

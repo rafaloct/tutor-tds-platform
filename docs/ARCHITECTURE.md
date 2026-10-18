@@ -4,6 +4,8 @@ Base auditada: `fb50a57`, 2026-09-23. Histórico em
 `maintenance/CURRENT_ARCHITECTURE.md`; suas afirmações de implantação são
 históricas e não substituem verificação do candidato.
 
+**Decisão posterior 18/10/2026:** FastAPI continua autoritativa para identidade, turma, frequência e certificado institucional. **LearnPress** passa a ser explicitamente autoritativo para inscrição na oferta EAD, lições, quizzes e progresso da conta EAD; Flutter apenas projeta por sessão autorizada. SSO não está implementado. Ver `program/ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md` e matriz de aceite.
+
 - Flutter em `cartilhas_app/`: Provider, repositories por feature,
   SharedPreferences/secure storage, SQLite opcional para outbox durável,
   rotas imperativas com `trackedRoute`.

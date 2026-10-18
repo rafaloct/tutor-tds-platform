@@ -2,6 +2,8 @@
 
 Este contrato é alvo de migração, não declaração de implementação concluída.
 
+**DECISION 18/10/2026:** este documento trata dos fatos **institucionais TDS**. Para inscrição em oferta EAD, lições, quizzes e progresso da conta LearnPress, prevalece `program/ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md`. Uma inscrição EAD não cria `class_enrollments`; conclusão EAD não cria frequência nem certificado oficial. Conta WP e User TDS são distintas até vínculo seguro comprovado.
+
 Jornada/certificados: aplicar a decisão posterior de #5 registrada no item 27 de
 `DECISIONS.md` e na matriz `program/JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md`.
 80h formais por curso não são tempo medido. Frequência mínima é 70% dos encontros
@@ -19,8 +21,10 @@ legada e telemetria não comprovam esses requisitos; desconhecidos permanecem nu
 | Membership | cohort_memberships; linhagem program_memberships/class_monitors/classes.teacher_id | migration 0019; vínculo User+Cohort+Role persistido; checks canônicos e legados na transição |
 | Course | courses / Course | preservar catálogo |
 | CourseVersion | course_versions / CourseVersion | publicada imutável; turma fixa edição |
-| Enrollment | class_enrollments.context_id + membership_id + course_version_id; enrollments legado | matrícula contextual persistida; legacy_enrollment_id explícito no novo contexto; endpoints antigos preservados |
-| Progress | StudyProgress local; projeção de learning_events compartilhada pelo resolver/dashboard | projeção canônica por matrícula/versão aprovada na Wave 1, separada da posição local de leitura |
+| Enrollment **institucional** | class_enrollments.context_id + membership_id + course_version_id; enrollments legado | matrícula contextual TDS, com legacy_enrollment_id explícito e endpoints legados preservados; não equivale a inscrição EAD |
+| Enrollment **EAD** | LearnPress, esquema interno a auditar em clone WP | não cria turma nem certificado TDS |
+| Progress **EAD** | LearnPress, lições/quizzes da conta inscrita | estado do LMS, não posição local |
+| Progress **institucional** | StudyProgress local; projeção de learning_events compartilhada pelo resolver/dashboard | projeção TDS por matrícula/versão, separada da leitura local e dos eventos LearnPress |
 | ActivityAttempt | assessment_attempts / AssessmentAttemptRecord | reutilizar; avaliar vínculo contextual antes de ampliar |
 | LearningEvent | learning_events / LearningEventRecord | evidência append-only; event_id idempotente; jamais autorização |
 | Evidence | evidence_items / EvidenceItem | preservar evidência e revisão humana |
@@ -37,8 +41,8 @@ não infere papel a partir de UI, IA, eventos ou seleção local. Professor e mo
 usam vínculo próprio e consultam matrícula do aluno com permissão explícita;
 não recebem uma matrícula de aluno fictícia.
 
-Progresso oficial deve ter a mesma definição, chave e projeção para aluno e
-instrutor. Posição de leitura local não é frequência, carga horária validada
+Progresso **institucional TDS** deve ter a mesma definição, chave e projeção para aluno e
+instrutor. O progresso **EAD LearnPress** é independente e projetado na Minha Área com sua origem. Posição de leitura local não é frequência, carga horária validada
 nem critério autônomo de certificado. Evidências devem ser validadas por comandos
 determinísticos antes de produzir atualização oficial.
 

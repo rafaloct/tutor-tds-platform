@@ -2,6 +2,8 @@
 
 Status: **contrato canônico de planejamento**. Este diretório descreve como o ecossistema Tutor TDS deve evoluir sem criar plataformas paralelas, duplicar fontes de verdade ou depender do conhecimento de uma única pessoa.
 
+**DECISION 18/10/2026, Issue #249:** a [ADR LearnPress×FastAPI](ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md) atribui ao LearnPress as inscrições nas ofertas EAD, lições, quizzes e progresso da conta EAD. FastAPI preserva identidade institucional, turmas, frequência e certificados oficiais. Acompanhar o [runbook](LEARNPRESS_TDS_DELIVERY_RUNBOOK.md) e a [matriz de aceite](LEARNPRESS_TDS_ACCEPTANCE_MATRIX.md). Aprovação documental não implica SSO, deploy ou merge.
+
 Checkpoint META 04: #24/#49/#50 integrados na base `1a577a6`, sem aceite de staging
 ou produção inferido. A reconciliação anterior #24 × #51 não considerou a decisão
 posterior de #5; precedência corrigida em
@@ -45,7 +47,7 @@ Documentos históricos em `docs/maintenance/` e evidências datadas não substit
 1. **Uma entidade, uma autoridade.** Antes de criar tabela, serviço ou cadastro, procurar equivalente existente.
 2. **Eventos não concedem direitos.** Telemetria, chat, IA, clique, tempo de tela e abertura de material não criam matrícula, presença, capacitação, certificado ou mentoria.
 3. **PostgreSQL é transacional.** Google Sheets/Power BI são projeções analíticas.
-4. **WordPress é público/editorial.** Não se torna cadastro de aluno, frequência, certificado, baseline ou autorização.
+4. **WordPress edita; LearnPress opera os cursos EAD.** A conta/sessão LearnPress, inscrição em oferta EAD, lições, quizzes e progresso pertencem ao LMS. WordPress não se torna identidade institucional, baseline, turma, frequência ou emissor oficial de certificados TDS. Ver ADR de 18/10.
 5. **Chatwoot é atendimento.** Estado de conversa não altera jornada acadêmica.
 6. **R2/Drive guardam arquivos.** Não substituem metadados relacionais e autorização.
 7. **Offline é parte do contrato.** Cada feature declara cache, fila, revalidação e comportamento de revogação.
@@ -57,10 +59,16 @@ Documentos históricos em `docs/maintenance/` e evidências datadas não substit
 
 | Domínio | Autoridade | Sistemas que apenas projetam/consomem |
 |---|---|---|
-| Pessoa, autenticação, vínculos | FastAPI/PostgreSQL | Flutter, portal, BI, Chatwoot |
-| Instituição/programa/oferta/turma | FastAPI/PostgreSQL | Flutter, BI, portal público quando aplicável |
-| Curso/edição pedagógica | FastAPI/PostgreSQL + lifecycle editorial | Flutter, portal, BI |
-| Matrícula | FastAPI/PostgreSQL | Flutter, BI, suporte |
+| Identidade e vínculos **institucionais** | FastAPI/PostgreSQL | Flutter, portal, BI, Chatwoot |
+| Conta e autenticação **EAD** | WordPress/LearnPress | Flutter, com federação ainda TARGET |
+| Vínculo de contas EAD↔TDS | Contrato seguro a projetar, sob FastAPI | Flutter, mediante consentimento/prova das duas contas |
+| Instituição/programa/oferta institucional/turma | FastAPI/PostgreSQL | Flutter, BI, portal público quando aplicável |
+| Curso/edição institucional | FastAPI/PostgreSQL + lifecycle | Flutter, portal, BI |
+| Oferta/grade editorial EAD | WordPress/LearnPress | Flutter e portal |
+| Matrícula em turma/programa TDS | FastAPI/PostgreSQL | Flutter, BI, suporte |
+| Inscrição em oferta EAD | LearnPress | Flutter e Minha Área vinculada |
+| Progresso de lições/quizzes EAD | LearnPress | Flutter autenticado, sem simular percentual |
+| Progresso local da cartilha | `StudyProgress` local, eventos TDS autorizados conforme contrato | Flutter, sem confundir com o LMS |
 | Presença/frequência oficial | domínio específico a concluir na Issue #6 | BI, Flutter |
 | Certificado | fluxo API + Worker/KV conforme Issue #5 | Flutter, portal de verificação |
 | Mentoria/evidência | domínio FastAPI com revisão humana | Flutter, BI, Chatwoot |
@@ -79,6 +87,9 @@ Agentes devem **migrar o existente**, não recriar o produto.
 ## 6. Documentos deste programa
 
 - `TARGET_ARCHITECTURE.md`: arquitetura alvo e fronteiras.
+- `ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md`: decisão humana vigente sobre LearnPress e TDS.
+- `LEARNPRESS_TDS_DELIVERY_RUNBOOK.md`: instruções e dependências para pessoas e agentes.
+- `LEARNPRESS_TDS_ACCEPTANCE_MATRIX.md`: mapeamento 11/9 e testes de paridade.
 - `PORTAL_AND_CONTENT.md`: site/WordPress, consulta pública e notícias.
 - `INTEROPERABILITY.md`: contratos entre serviços, eventos e dados.
 - `GOVERNANCE_RACI.md`: papéis, decisões e responsabilidades.
