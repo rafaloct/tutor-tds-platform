@@ -48,6 +48,12 @@ fun validateDebugStagingDefines(defines: Map<String, String>) {
     if (isolatedQa != null && isolatedQa !in setOf("true", "false")) {
         throw GradleException("DYNAMIC_QA_ISOLATED_PACKAGE deve ser true ou false.")
     }
+    val qaEditorialBridge = defines["TDS_EDITORIAL_QA_HTTP_BASE"].orEmpty()
+    if (qaEditorialBridge.isNotBlank() &&
+        (isolatedQa != "true" ||
+            qaEditorialBridge != "http://127.0.0.1:18731")) {
+        throw GradleException("Ponte QA editorial exige pacote isolado e loopback privado.")
+    }
     if (isolatedQa == "true" &&
         (defines["TUTOR_API_URL"] !in approvedStagingApiUrls ||
             !defines["DYNAMIC_QA_RUN_ID"].orEmpty().matches(Regex("^[a-f0-9]{32}$")))) {
