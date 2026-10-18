@@ -78,16 +78,32 @@ export USER_A_ID=2 USER_B_ID=3
 ./tooling/qa/learnpress_f0/f0_run_mysql.sh <evidence_dir>
 ```
 
-O runner parametriza IDs por env (rejeita vazios/não-numéricos), valida que
-`BASE_URL` é loopback antes de qualquer POST, **nunca persiste JWT** (token
-em variável de shell; evidência recebe body com `"token":"REDACTED"`), e
-assertra HTTP + regex por caso com exit não-zero em falha. Credenciais
-sintéticas via `f0_env.sh` local (gitignored) ou env.
+O runner parametriza IDs por env (rejeita vazios/não-numéricos) e assertra
+HTTP + regex por caso com exit não-zero em falha. Salvaguardas (revisão de
+coordenação 2026-10-18):
 
-Evidência da execução 2026-10-18: `http-evidence/f0b-run2/` no dfd627 —
-**33 PASS / 0 FAIL**, incluindo caminho feliz E2E (enroll → page view →
-`completed the lesson` → quiz `result=100 pass=1` → `completed the Course`
-→ lock pós-finish) e negativos A/B (401 guest, 403 não-inscrito, 403 IDOR).
+1. **URL parseada de fato**: `BASE_URL` passa por `urlparse` — rejeita
+   userinfo (`http://127.0.0.1:18732@host`), sufixos, scheme não-http(s),
+   path inesperado e host não-loopback **antes de qualquer POST**.
+2. **Sanitização em memória + allowlist**: corpos de resposta são redigidos
+   (`sed` sobre o payload em memória) **antes** de gravar em evidência;
+   endpoints de auth (`/token`, `/token/validate`, `wp-login.php`) gravam
+   apenas stub `{"receipt":"...not stored","token":"REDACTED"}` — body/token
+   nunca persistidos nem impressos. Cookie jar em `mktemp` com `trap` de
+   limpeza no EXIT (removido mesmo em erro).
+3. **LPERM mesmo-origem**: o permalink da lição vindo da API é validado
+   (mesmo scheme/host/port de `BASE_URL`) antes de enviar o cookie WP;
+   o GET usa `-b JAR` **sem `-L`** — nenhum redirect para host externo
+   carrega o cookie. Verificado em runtime: evidência `f0b-run3` sem
+   nenhum `eyJ`/`wordpress_logged_in`/senha (`grep` → 0 matches).
+
+Credenciais sintéticas via `f0_env.sh` local (gitignored) ou env.
+
+Evidência da execução 2026-10-18 (runner endurecido): `http-evidence/f0b-run3/`
+no dfd627 — **33 PASS / 0 FAIL**, incluindo caminho feliz E2E (enroll →
+page view → `completed the lesson` → quiz `result=100 pass=1` →
+`completed the Course` → lock pós-finish) e negativos A/B (401 guest,
+403 não-inscrito, 403 IDOR).
 
 ## Limites / fora de escopo
 
