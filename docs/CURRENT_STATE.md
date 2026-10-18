@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-18 — F3c-read + ACL section-items / #268 + #270
+
+DECISION: contrato de leitura Minha Área mapeado em sandbox MariaDB sintético
+(`courses/{id}.course_data` = fonte única user-scoped; `resumeAuthorized` é
+TARGET=false até broker). OBSERVED: rota pública `section-items/items/{id}`
+do LP 4.3.6 vaza name/status/type de itens draft a qualquer audiência —
+corrigido por plugin de extensão `tds-lp-section-items-acl` (filtro
+rest_request_after_callbacks; publish-only p/ não-moderadores). TESTED:
+sonda 30 PASS read-only + 20 PASS extratores offline; ACL leak 5 PASS
+(repro) + protected 6 PASS; evidência sem JWT/cookie/HTML/título de draft.
+UNKNOWN: exposição equivalente no EAD público; instalação em produção é
+human gate. Branches devin/ead-f3c-read-contract e devin/ead-section-items-acl.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
