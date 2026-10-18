@@ -21,8 +21,14 @@ function tds_theme_learner_register_url() {
 	return wp_registration_url();
 }
 
+function tds_theme_learner_area_url() {
+	$profile = get_page_by_path( 'minha-area' );
+	return $profile ? get_permalink( $profile ) : home_url( '/minha-area/' );
+}
+
 function tds_theme_learner_courses_url() {
-	// Rota real do LearnPress: <profile>/<usuário>/<tab>/ quando disponível.
+	// Só gera rota de aba quando o LearnPress resolve um link real; caso contrário
+	// aponta para páginas publicadas em vez de adivinhar /minha-area/<user>/courses/.
 	if ( is_user_logged_in() && class_exists( 'LP_Profile' ) ) {
 		try {
 			$link = LP_Profile::instance()->get_tab_link( 'courses' );
@@ -32,9 +38,8 @@ function tds_theme_learner_courses_url() {
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- fallback abaixo
 		}
 	}
-	$profile = get_page_by_path( 'minha-area' );
-	$base = $profile ? get_permalink( $profile ) : home_url( '/minha-area/' );
-	return is_user_logged_in() ? trailingslashit( $base . wp_get_current_user()->user_login . '/courses' ) : $base;
+	$meus_cursos = get_page_by_path( 'meus-cursos' );
+	return $meus_cursos ? get_permalink( $meus_cursos ) : tds_theme_learner_area_url();
 }
 
 /** Estado desconectado: CTA de entrada sem simular sessão nem duplicar cadastro. */
@@ -76,6 +81,9 @@ function tds_theme_learner_area_head( WP_User $user ) {
 
 /** Corpo da Minha área: perfil LearnPress quando ativo; estado honesto quando ausente. */
 function tds_theme_learner_area( $args = array() ) {
+	if ( post_password_required() ) {
+		return;
+	}
 	if ( ! is_user_logged_in() ) {
 		tds_theme_learner_area_guest();
 		return;
@@ -101,6 +109,9 @@ function tds_theme_learner_area( $args = array() ) {
 
 /** Lista somente os cursos inscritos: mesma autoridade LP, atalho para a aba cursos. */
 function tds_theme_learner_courses( $args = array() ) {
+	if ( post_password_required() ) {
+		return;
+	}
 	if ( ! is_user_logged_in() ) {
 		tds_theme_learner_area_guest();
 		return;
@@ -122,6 +133,9 @@ function tds_theme_learner_courses( $args = array() ) {
 
 /** Certificados: origem rotulada, nunca fundir conclusão EAD com certificado oficial TDS. */
 function tds_theme_learner_certificates( $args = array() ) {
+	if ( post_password_required() ) {
+		return;
+	}
 	echo '<section class="tds-certificates" data-tds-component="certificates">';
 	echo '<div class="tds-prose">';
 	echo '<h2>' . esc_html__( 'Certificado oficial do Programa TDS', 'tds-portal' ) . '</h2>';
@@ -129,7 +143,7 @@ function tds_theme_learner_certificates( $args = array() ) {
 	echo '<h2>' . esc_html__( 'Conclusão de curso no EAD', 'tds-portal' ) . '</h2>';
 	echo '<p>' . esc_html__( 'O progresso e a conclusão dos cursos on-line aparecem na sua Minha área. Esses registros pertencem à plataforma de cursos (LearnPress) e não substituem o certificado institucional.', 'tds-portal' ) . '</p>';
 	if ( is_user_logged_in() ) {
-		echo '<p>' . tds_theme_button( __( 'Ir para Minha área', 'tds-portal' ), tds_theme_learner_courses_url(), 'primary' ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in tds_theme_button
+		echo '<p>' . tds_theme_button( __( 'Ir para Minha área', 'tds-portal' ), tds_theme_learner_area_url(), 'primary' ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in tds_theme_button
 	} else {
 		echo '<p>' . tds_theme_button( __( 'Entrar na conta EAD', 'tds-portal' ), tds_theme_learner_login_url(), 'primary' ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in tds_theme_button
 	}

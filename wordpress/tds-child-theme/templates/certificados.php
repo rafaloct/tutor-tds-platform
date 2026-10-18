@@ -13,6 +13,9 @@ get_template_part(
 	array(
 		'eyebrow' => __( 'Comprovação e certificados', 'tds-portal' ),
 		'after'   => static function () {
+			if ( has_shortcode( get_the_content(), 'tds_certificados' ) ) {
+				return;
+			}
 			tds_theme_learner_certificates();
 		},
 	)
