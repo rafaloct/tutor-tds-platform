@@ -1,0 +1,151 @@
+{
+  "schema": "tds.curiosities/v1",
+  "locale": "pt-BR",
+  "usage": "Cartões de curiosidade para telas de espera/loading/offline — texto curto, pergunta + resposta. Fontes de referência indicadas por item (Embrapa/ATER+, MDS, Tocantins).",
+  "items": [
+    {
+      "id": "c001",
+      "question": "O que é agroecologia?",
+      "answer": "É um jeito de produzir que combina práticas agrícolas com sustentabilidade: menos insumos de fora, mais uso do que o território oferece — adubo orgânico, consórcio de culturas e respeito ao ciclo natural.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c002",
+      "question": "Por que o cerrado é chamado de 'berço das águas'?",
+      "answer": "Porque ali nascem as cabeceiras de grandes rios do Brasil — incluindo o Tocantins. O solo do cerrado funciona como uma esponja que recarrega os aquíferos.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c003",
+      "question": "O que é o capim dourado?",
+      "answer": "Uma planta do Jalapão (TO) com brilho dourado natural usada no artesanato. A colheita só é permitida depois que as sementes caem — assim a planta renasce todo ano.",
+      "source": "Embrapa/Jalapão"
+    },
+    {
+      "id": "c004",
+      "question": "O que é um SAF (sistema agroflorestal)?",
+      "answer": "É plantar árvores junto com cultivos e/ou animais na mesma área. As árvores dão sombra, adubo e renda extra enquanto recuperam o solo.",
+      "source": "Embrapa/ATER+ Digital"
+    },
+    {
+      "id": "c005",
+      "question": "Como funciona a adubação verde?",
+      "answer": "Plantas como mucuna e crotalária são semeadas só para enriquecer o solo: fixam nitrogênio, cobrem a terra e viram adubo natural ao serem cortadas.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c006",
+      "question": "O que é a agricultura familiar?",
+      "answer": "Produção gerida pela própria família, que trabalha na terra e vive dela. No Brasil, responde por grande parte dos alimentos que chegam à mesa.",
+      "source": "MDA"
+    },
+    {
+      "id": "c007",
+      "question": "Para que serve o mulching (cobertura morta)?",
+      "answer": "Cobrir o solo com palha, folhas ou capim protege da evaporação — no calor do cerrado, pode reduzir muito a perda de água e ainda vira adubo.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c008",
+      "question": "O que é o CAF?",
+      "answer": "Cadastro Nacional da Agricultura Familiar — o documento que abre acesso a programas como PAA, PNAE e PRONAF para quem produz em pequena propriedade.",
+      "source": "MDA"
+    },
+    {
+      "id": "c009",
+      "question": "PAA e PNAE compram de quem?",
+      "answer": "Do agricultor familiar cadastrado: o PAA compra alimentos para quem precisa e o PNAE garante que parte da merenda escolar venha da produção local.",
+      "source": "Conab/FNDE"
+    },
+    {
+      "id": "c010",
+      "question": "O que é quebra-mato no plantio?",
+      "answer": "Cultivar duas ou mais espécies lado a lado na mesma parcela — como milho com feijão ou mandioca. As plantas se protegem mutuamente e o solo não se esgota.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c011",
+      "question": "Por que queimadas fazem mal à lavoura?",
+      "answer": "O fogo mata a vida do solo: minhocas, fungos e matéria orgânica somem, e a terra fica exposta à erosão. No cerrado há alternativas de preparo sem fogo.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c012",
+      "question": "O que é o buriti?",
+      "answer": "Palmeira do cerrado chamada 'árvore da vida': dá fruto, fibra, óleo e sombra, e marca os veredas — áreas úmidas onde nasce a água.",
+      "source": "Tocantins"
+    },
+    {
+      "id": "c013",
+      "question": "Como guardar sementes crioulas?",
+      "answer": "Escolher as melhores plantas da colheita, secar bem os grãos à sombra e guardar em recipiente seco e fechado — prática que mantém variedades locais vivas.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c014",
+      "question": "O que é o CadÚnico?",
+      "answer": "O cadastro do governo federal que identifica famílias de baixa renda. É a porta de entrada para Bolsa Família e para os cursos gratuitos do TDS.",
+      "source": "MDS"
+    },
+    {
+      "id": "c015",
+      "question": "Compostagem serve para quê?",
+      "answer": "Transformar restos orgânicos (cascas, folhas, esterco) em adubo rico e barato — fecha o ciclo dos nutrientes na propriedade sem gastar.",
+      "source": "Embrapa"
+    },
+    {
+      "id": "c016",
+      "question": "O que são as veredas?",
+      "answer": "Faixas úmidas do cerrado onde corre a água rente ao solo, sempre com buritis. São áreas protegidas: sem elas, o riacho morre.",
+      "source": "Embrapa/Cerrado"
+    },
+    {
+      "id": "c017",
+      "question": "Por que diversificar a produção?",
+      "answer": "Quem tem várias fontes de renda (grãos + frutas + animais + artesanato) não depende de uma safra só — se uma falhar, as outras seguram.",
+      "source": "ATER+"
+    },
+    {
+      "id": "c018",
+      "question": "O que é associativismo?",
+      "answer": "Produtores que se organizam juntos — associação ou cooperativa — para vender melhor, comprar mais barato e acessar programas que sozinho não chegaria.",
+      "source": "MDA/ATER"
+    },
+    {
+      "id": "c019",
+      "question": "Estudar pelo celular funciona offline?",
+      "answer": "Sim — o Tutor TDS foi feito para quem tem internet intermitente: as aulas baixadas ficam disponíveis sem sinal e o progresso sincroniza depois.",
+      "source": "Tutor TDS"
+    },
+    {
+      "id": "c020",
+      "question": "Certificado de curso EAD é o mesmo que certificado TDS?",
+      "answer": "Não — concluir um curso no EAD marca seu progresso online; o certificado oficial do Programa TDS segue critérios institucionais próprios (presença, jornada e validação da coordenação).",
+      "source": "TDS"
+    },
+    {
+      "id": "c021",
+      "question": "O que é um assentamento da reforma agrária?",
+      "answer": "É uma área onde famílias sem terra recebem lotes para morar e produzir, organizados pelo INCRA. Cada parcela é o sustento da família — roça, criação e casa.",
+      "source": "INCRA"
+    },
+    {
+      "id": "c022",
+      "question": "O que é mutirão?",
+      "answer": "Trabalho coletivo em que vizinhos se ajudam nas tarefas pesadas — roçar, plantar, construir. Um dia na roça de cada um, até terminar a de todos.",
+      "source": "ATER/Assentamentos"
+    },
+    {
+      "id": "c023",
+      "question": "Para que serve a casa de farinha?",
+      "answer": "É onde a mandioca vira farinha: ralar, prensar, torrar. No Tocantins é também ponto de encontro da comunidade — trabalho e prosa juntos.",
+      "source": "Tocantins/ATER"
+    },
+    {
+      "id": "c024",
+      "question": "Vender na feira dá mais lucro que vender no atravessador?",
+      "answer": "Em geral sim: na feira o agricultor vende direto a quem consome e fica com o preço cheio — por isso associações organizam feiras da agricultura familiar.",
+      "source": "MDA/ATER"
+    }
+  ]
+}
