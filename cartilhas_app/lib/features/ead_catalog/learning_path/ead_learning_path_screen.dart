@@ -159,7 +159,7 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
     final text = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Percurso de aprendizagem'),
+        title: const Text('Percurso'),
         actions: [
           IconButton(
             tooltip: 'Atualizar percurso',
@@ -205,9 +205,13 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    '${journey.sections.length} seções · '
-                    '${journey.lessonCount} itens de aula · '
-                    '${journey.videoCount} aulas em seções de vídeo',
+                    '${journey.sections.length} '
+                    '${journey.sections.length == 1 ? 'seção' : 'seções'} · '
+                    '${journey.lessonCount} '
+                    '${journey.lessonCount == 1 ? 'item' : 'itens'} de aula · '
+                    '${journey.videoCount} '
+                    '${journey.videoCount == 1 ? 'aula' : 'aulas'} '
+                    'em seções de vídeo',
                   ),
                 ),
               ),
@@ -240,7 +244,10 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
                     key: ValueKey('section-${section.id}'),
                     initiallyExpanded: true,
                     title: Text(section.title),
-                    subtitle: Text('${section.lessons.length} item(ns)'),
+                    subtitle: Text(
+                      '${section.lessons.length} '
+                      '${section.lessons.length == 1 ? 'item' : 'itens'}',
+                    ),
                     children: [
                       for (final lesson in section.lessons)
                         ListTile(
