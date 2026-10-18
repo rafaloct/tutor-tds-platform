@@ -1,0 +1,25 @@
+{
+  "audited_at": "2026-10-18T11:22:52-03:00",
+  "authoritative_links": 0,
+  "candidate_crosswalk_sha256": "C11946AAEDA364F3D4767F03B4E3B6533F5988273167D6DB9F7DE02AE6D8D782",
+  "candidate_matches": 9,
+  "crosswalk": "PASS",
+  "ead_offers": 11,
+  "environment": "LARGeo",
+  "institutional_permissions_granted": 0,
+  "live": "PASS",
+  "merge_allowed": false,
+  "mutations": 0,
+  "production_allowed": false,
+  "scope": "READ_ONLY_PUBLIC_METADATA",
+  "snapshot": "PASS",
+  "source_snapshot_sha256": "3D45756F1A1E72FC2BA132098C31FD6FB4437AAD875792CF472741E0F30F4AF9",
+  "status": "CANDIDATE_ONLY",
+  "tds_courses": 9,
+  "unit_test_status": "PASS",
+  "unit_tests": 32,
+  "unmapped_wp_ids": [
+    1474,
+    1709
+  ]
+}
