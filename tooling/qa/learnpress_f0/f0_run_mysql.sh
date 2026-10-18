@@ -153,8 +153,13 @@ printf '{"receipt":"wp-login response not stored"}' > "$EV/V01.body"
 [[ "$c" == 302 || "$c" == 200 ]] && { echo "V01|POST|/wp-login.php|HTTP=$c|PASS|cookie WP emitido"; PASS=$((PASS+1)); } \
                                 || { echo "V01|POST|/wp-login.php|HTTP=$c|FAIL"; FAIL=$((FAIL+1)); }
 # sem -L: nunca seguir redirect para host externo carregando o cookie
-c=$(curl -s --max-time 25 -b "$JAR" -o "$EV/V02.body" -w '%{http_code}' "$LPERM")
+# página autenticada NÃO é gravada — recibo mínimo: HTTP + sinal allowlist
+out=$(curl -s --max-time 25 -b "$JAR" -w $'\n%{http_code}' "$LPERM")
 rm -f "$JAR"; JAR=""
+c="${out##*$'\n'}"; resp="${out%$'\n'*}"
+sig=""
+printf '%s' "$resp" | grep -qiE 'learnpress|lp-lesson' && sig="learnpress-markup"
+printf '{"receipt":"authenticated page not stored","http":%s,"signal":"%s"}' "$c" "$sig" > "$EV/V02.body"
 [[ "$c" == 200 ]] && { echo "V02|GET|lesson permalink|HTTP=200|PASS|lição marcada started"; PASS=$((PASS+1)); } \
                   || { echo "V02|GET|lesson permalink|HTTP=$c|FAIL"; FAIL=$((FAIL+1)); }
 

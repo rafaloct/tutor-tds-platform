@@ -94,16 +94,21 @@ coordenação 2026-10-18):
 3. **LPERM mesmo-origem**: o permalink da lição vindo da API é validado
    (mesmo scheme/host/port de `BASE_URL`) antes de enviar o cookie WP;
    o GET usa `-b JAR` **sem `-L`** — nenhum redirect para host externo
-   carrega o cookie. Verificado em runtime: evidência `f0b-run3` sem
-   nenhum `eyJ`/`wordpress_logged_in`/senha (`grep` → 0 matches).
+   carrega o cookie.
+4. **Nenhuma página autenticada em evidência**: `V02` grava apenas recibo
+   mínimo `{"http", "signal"}` — o HTML é processado em memória e o sinal
+   extraído por allowlist (`learnpress-markup`); nunca versionar página
+   autenticada (nonces/identificadores/formulários). Verificado em
+   runtime: `f0b-run4` sem `eyJ`/`wordpress_logged_in`/`nonce`/`<form`/
+   senha (`grep` → 0 matches); `V02.body` = 83 bytes.
 
 Credenciais sintéticas via `f0_env.sh` local (gitignored) ou env.
 
-Evidência da execução 2026-10-18 (runner endurecido): `http-evidence/f0b-run3/`
-no dfd627 — **33 PASS / 0 FAIL**, incluindo caminho feliz E2E (enroll →
-page view → `completed the lesson` → quiz `result=100 pass=1` →
-`completed the Course` → lock pós-finish) e negativos A/B (401 guest,
-403 não-inscrito, 403 IDOR).
+Evidência da execução 2026-10-18 (runner endurecido, recibo mínimo):
+`http-evidence/f0b-run4/` no dfd627 — **33 PASS / 0 FAIL**, incluindo
+caminho feliz E2E (enroll → page view → `completed the lesson` → quiz
+`result=100 pass=1` → `completed the Course` → lock pós-finish) e
+negativos A/B (401 guest, 403 não-inscrito, 403 IDOR).
 
 ## Limites / fora de escopo
 
