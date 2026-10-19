@@ -33,7 +33,7 @@ No institutional data was touched.
 
 ## Corrected test boundary and results
 
-The second run used:
+All synthetic runs used:
 `tooling/qa/ead_editorial_wp_runtime/run.sh`, based on the exact source
 plugin from PR #238 at `3856566e97a585c5d30dd8a1b72ca369f1704127`.
 The plugin class SHA256 in the clone was
@@ -42,20 +42,31 @@ The plugin class SHA256 in the clone was
 The runner creates a transient MariaDB clone `tdsqa236_*` and WP
 filesystem clone, listening **only** at `127.0.0.1:18736`. It proves
 five `@qa-synthetic.test` accounts and exact origin
-`tdsqam`/`127.0.0.1:18732` before any clone mutation. It grants those
-three capabilities **only** to the administrator and editor roles in the
-disposable clone, never to subscriber, original QA, public site, or
-staging/production.
+`tdsqam`/`127.0.0.1:18732` before any clone mutation.
 
-**Second run actual results:**
+A read-only institutional role inventory of the active EAD site confirmed
+`administrator` has all three required caps, **`lp_teacher` (LP Instructor)**
+has `edit_lp_lessons` and `edit_published_lp_lessons` but **NOT**
+`edit_others_lp_lessons`, while the generic `editor` role has **none**
+of these LearnPress capabilities. The corrected fixture therefore grants
+the three broad caps **only** to the synthetic administrator, creates
+`lp_teacher` in the clone with the 14 observed institutionally defined
+capabilities and changes synthetic `instructor-QA` to this role.
+Lesson #12 is assigned to that fictional instructor in the clone.
+The test verifies the teacher can edit the **owned** lesson but cannot
+edit a lesson belonging to another author; a normal editor or learner
+remains unauthorized. None of these changes affect the original
+synthetic QA, public WordPress or staging.
+
+**Final corrected synthetic run:**
 
 | Contract | Result | Details |
 | --- | --- | --- |
 | Metadata / media runtime | **18/18 PASS** | Published, public opt-in, 304, YouTube synthetic right flags and revocation, no quiz keys |
-| Lesson editorial RBAC | **22/22 PASS** | Capabilities, browser sessions, editing title/content, revision, draft removal |
+| Lesson editorial RBAC | **25/25 PASS** | Institutional role parity, own/other lesson authorization, browser sessions, content/revision and draft removal |
 | Browser admin/instructor | **PASS** | Synthetic authenticated sessions could load WP lesson editor page |
 | Browser subscriber | **PASS (denied)** | Synthetic learner could not enter the protected lesson editor page |
-| Instructor title/body edit | **PASS (clone WP-CLI)** | Legitimately granted synthetic editor modified the lesson without changing its author |
+| Instructor title/body edit | **PASS (clone WP-CLI)** | Synthetic `lp_teacher` edited its **own** published lesson; author was assigned during clone setup |
 | HTTP revision | **PASS** | Lesson 200; `If-None-Match` 304; text edit invalidated old ETag |
 | Draft withdrawal | **PASS** | Lesson 404 and omitted from public curriculum |
 | Rollback DB | **PASS** | No `tdsqa236_*` database remains |
@@ -64,6 +75,10 @@ staging/production.
 
 The negative role check **uses real WordPress browser session cookies** and
 WordPress admin edit page access, rather than WP-CLI negative writes.
+A privileged CLI operation to assign the synthetic lesson author may
+report a nonzero exit after the database update has happened due to
+LearnPress hooks. The runner asserts the actual author and the
+per-user `current_user_can` policy, not the unreliable CLI exit code.
 Temporary passwords for the **three synthetic QA accounts** existed only
 in process memory/ephemeral clone and were neither printed nor versioned.
 No actual HTTP form submission by an instructor was exercised.
@@ -76,16 +91,21 @@ remained absent there. No production or original QA role mutations.
 
 ## What is proven and what is not
 
-**OBSERVED:** real LearnPress capability mapping and WordPress browser
-authorization, with one synthetic published lesson and editor/instructor,
-student denial; content was edited through WP-CLI **with** the explicit
-synthetic role capabilities, triggering the actual plugin's HTTP projection,
+**OBSERVED:** institutional role names and their capability *sets* were
+read-only inventoried in the connected live WordPress instance;
+real LearnPress capability mapping and WordPress browser authorization
+were then reproduced using fictional accounts, including the difference
+between an `lp_teacher` owning a lesson and another author, as well as
+generic editor/student denial. The fictional instructor edited its own
+lesson through WP-CLI after receiving its real-world role capabilities,
+triggering the actual plugin's HTTP projection,
 ETag changes, and draft protection. This uses a real WordPress stack but
 entirely fictional records, not PHP stubs.
 
 **UNKNOWN:** a real instructor submitting an authenticated WordPress editor
-form to update a lesson; production role mappings; live plugin/theme
-compatibility; authentic user enrollments, identity mapping, approval
+form to update a lesson; which individual live users have the role
+`lp_teacher`; live plugin/theme integration and per-course author
+assignment; authentic user enrollments, identity mapping, approval
 rights for 48 videos, quizzes, grades, certificates or Tutor/RAG.
 The first privileged CLI exception should not be projected onto
 ordinary WordPress HTTP users or treated as proof of production data risk.
@@ -111,8 +131,9 @@ installation** was performed. Before that operation:
    respecting personal data retention/privacy.
 3. Install exact plugin PR #238 only on staging, default all editorial
    opt-in **OFF**, and verify no private lesson or media leaks.
-4. Test normal instructor/editor/learner accounts in staging with
-   real WordPress browser save/nonce, not privileged WP-CLI alone;
+4. Test real institutional `lp_teacher`, administrator and learner
+   roles (including own vs other authors) in staging with
+   browser save/nonce, not privileged WP-CLI alone;
    confirm revocation, ETag, 401/403/404, media rights, and rollback.
 5. Report separately before any production activation, Play/AAB,
    synchronization of enrollment/progress/grades/certificates, or merge.

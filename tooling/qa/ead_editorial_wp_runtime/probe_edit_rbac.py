@@ -83,6 +83,7 @@ def user_caps(user: int) -> dict:
         $caps[$cap] = (int) user_can($u,$cap);
       }
       $caps['edit_lesson12'] = (int) user_can($u,'edit_lp_lesson',12);
+      $caps['edit_lesson13'] = (int) user_can($u,'edit_lp_lesson',13);
       echo json_encode($caps);
     """
     return json.loads(wpeval(code, user=user))
@@ -127,25 +128,58 @@ check("RB05 fixture lesson still has a published, synthetic baseline",
       initial_title.returncode == 0 and initial_title.stdout.strip() != "" and
       wpeval('echo get_post_status(12);') == "publish")
 
-# WordPress role APIs used normally, only in the disposable cloned DB.
-# The orphan author=0 fixture needs edit_others + edit_published capabilities.
+# Mirror the *institutional* role policy observed via read-only WPVibe:
+# administrator owns broad LP edit caps; LP Instructor owns/publishes
+# their lessons but CANNOT edit another author's; generic editor has no LP
+# caps. All role and author changes exist ONLY in the disposable clone.
 grant = wpeval("""
-  foreach (array('administrator','editor') as $roleName) {
-    $role=get_role($roleName);
-    if (!$role) throw new Exception('synthetic role unavailable');
-    foreach (array('edit_lp_lessons','edit_others_lp_lessons',
-                   'edit_published_lp_lessons') as $cap) $role->add_cap($cap);
+  $admin=get_role('administrator');
+  if (!$admin || get_role('lp_teacher')) {
+    throw new Exception('synthetic role fixture diverged');
   }
-  echo 'CLONE_ROLE_CAPS_APPLIED';
+  foreach (array('edit_lp_lessons','edit_others_lp_lessons',
+                 'edit_published_lp_lessons') as $cap) $admin->add_cap($cap);
+  $teacher_caps=array_fill_keys(array(
+    'delete_lp_courses','delete_lp_lessons',
+    'delete_published_lp_courses','delete_published_lp_lessons',
+    'edit_lp_courses','edit_lp_lessons','edit_posts',
+    'edit_published_lp_courses','edit_published_lp_lessons',
+    'publish_lp_lessons','read','read_private_lp_courses',
+    'read_private_lp_lessons','upload_files'), true);
+  add_role('lp_teacher','LP Instructor',$teacher_caps);
+  $instructor=new WP_User(4);
+  $instructor->set_role('lp_teacher');
+  echo 'CLONE_INSTITUTIONAL_ROLE_CAPS_APPLIED';
 """)
-check("RB06 clone-only role capabilities applied", "CLONE_ROLE_CAPS_APPLIED" in grant)
+check("RB06 clone-only institutional role policy installed",
+      "CLONE_INSTITUTIONAL_ROLE_CAPS_APPLIED" in grant)
 
+# Make the synthetic lesson belong to the synthetic instructor rather than
+# orphan author ID 0. Administrator editing rights are checked by WordPress.
+assign = wp("post", "update", "12", "--post_author=4", user=1)
+author = wpeval('echo get_post_field("post_author",12);')
+# WP-CLI is privileged and a late LearnPress post-save exception can make
+# its exit code nonzero AFTER core has applied the change. For fixture author
+# assignment assert stored state, not the command's unreliable exit code.
+check("RB07 synthetic lesson owner assigned to LP Instructor in clone",
+      author == "4")
 admin_after = user_caps(1)
-editor_after = user_caps(4)
+teacher_after = user_caps(4)
 subscriber_after = user_caps(2)
-check("RB07 synthetic admin may edit published orphan LP lesson", admin_after["edit_lesson12"] == 1)
-check("RB08 synthetic editor may edit published orphan LP lesson", editor_after["edit_lesson12"] == 1)
-check("RB09 subscriber remains unauthorized", subscriber_after["edit_lesson12"] == 0)
+generic_editor_lacks_lp = wpeval("""
+  $e=get_role('editor');
+  echo (int) ($e && ! $e->has_cap('edit_lp_lessons'));
+""")
+check("RB08 administrator can edit instructor lesson", admin_after["edit_lesson12"] == 1)
+check("RB09 LP Instructor can edit own published lesson",
+      teacher_after["edit_lesson12"] == 1 and
+      teacher_after["edit_others_lp_lessons"] == 0)
+check("RB10 LP Instructor cannot edit other author's lesson",
+      teacher_after["edit_lesson13"] == 0)
+check("RB11 subscriber remains unauthorized",
+      subscriber_after["edit_lesson12"] == 0)
+check("RB12 generic WordPress editor keeps no LearnPress edit powers",
+      generic_editor_lacks_lp == "1")
 
 # Test the actual browser editing boundary with synthetic WordPress cookies.
 # Privileged WP-CLI is intentionally NOT used for negative writes.
@@ -194,16 +228,16 @@ def browser_edit_access(opener):
 
 
 admin_browser, admin_login_ok = login_synthetic(1, "qa-admin")
-editor_browser, editor_login_ok = login_synthetic(4, "instructor-QA")
+teacher_browser, teacher_login_ok = login_synthetic(4, "instructor-QA")
 subscriber_browser, subscriber_login_ok = login_synthetic(2, "student-A")
-check("RB10 administrator/editor/subscriber synthetic sessions issued",
-      admin_login_ok and editor_login_ok and subscriber_login_ok)
+check("RB13 administrator/instructor/subscriber synthetic sessions issued",
+      admin_login_ok and teacher_login_ok and subscriber_login_ok)
 admin_http = browser_edit_access(admin_browser)
-editor_http = browser_edit_access(editor_browser)
+teacher_http = browser_edit_access(teacher_browser)
 subscriber_http = browser_edit_access(subscriber_browser)
-check("RB11 WP browser edit page restricted to authorized synthetic roles",
+check("RB14 WP browser edit page restricted to authorized synthetic roles",
       admin_http[0] == 200 and admin_http[1] and
-      editor_http[0] == 200 and editor_http[1] and
+      teacher_http[0] == 200 and teacher_http[1] and
       (subscriber_http[0] in (401, 403) or not subscriber_http[1]))
 
 # WordPress editor should legitimately edit title/content (not just postmeta).
@@ -211,42 +245,42 @@ new_title = "Aula QA - Revisor Sintetico 276"
 new_html = "<h2>Revisao real LearnPress</h2><p>Texto sintético de instrutor QA.</p>"
 update = wp("post", "update", "12", "--post_title=" + new_title,
             "--post_content=" + new_html, user=4)
-check("RB12 synthetic instructor WP-CLI lesson edit succeeds", update.returncode == 0)
+check("RB15 synthetic instructor WP-CLI lesson edit succeeds", update.returncode == 0)
 readback = wp("post", "get", "12", "--field=post_title")
-check("RB13 stored lesson title changed", readback.returncode == 0 and
+check("RB16 stored lesson title changed", readback.returncode == 0 and
       readback.stdout.strip() == new_title)
 
 # Turn on public editorial opt-in solely on clone to validate projection.
 optin = wp("post", "meta", "update", "12", "_tds_mobile_public", "1", user=1)
-check("RB14 synthetic opt-in enabled in clone", optin.returncode == 0)
+check("RB17 synthetic opt-in enabled in clone", optin.returncode == 0)
 status, tag, doc = read_http(lesson)
-check("RB15 public lesson reflects authorized instructor title",
+check("RB18 public lesson reflects authorized instructor title",
       status == 200 and isinstance(doc, dict) and doc.get("title") == new_title and
       "Revisao real LearnPress" in doc.get("content_html", ""))
-check("RB16 new lesson returns revision ETag", bool(tag) and
+check("RB19 new lesson returns revision ETag", bool(tag) and
       re.fullmatch(r'"[0-9a-f]{64}"', tag) is not None)
 status, _, _ = read_http(lesson, tag)
-check("RB17 unchanged lesson responds HTTP 304", status == 304)
+check("RB20 unchanged lesson responds HTTP 304", status == 304)
 
 # Edit published content again, keeping same APK compatibility with ETag.
 last_html = "<h2>Revisao adicional 276</h2><p>Segundo texto sintético.</p>"
 second = wp("post", "update", "12", "--post_content=" + last_html, user=4)
-check("RB18 subsequent synthetic body edit succeeds", second.returncode == 0)
+check("RB21 subsequent synthetic body edit succeeds", second.returncode == 0)
 status, newtag, doc = read_http(lesson, tag)
-check("RB19 revision changed HTTP 200 and not old ETag", status == 200 and
+check("RB22 revision changed HTTP 200 and not old ETag", status == 200 and
       bool(newtag) and newtag != tag and isinstance(doc, dict) and
       "Revisao adicional 276" in doc.get("content_html", ""))
 
 # Draft withdrawal must be a 404 and item excluded from public curriculum,
 # regardless of previous ETag.
 draft = wp("post", "update", "12", "--post_status=draft", user=1)
-check("RB20 admin can change synthetic lesson to draft", draft.returncode == 0)
+check("RB23 admin can change synthetic lesson to draft", draft.returncode == 0)
 status, _, _ = read_http(lesson)
-check("RB21 withdrawn lesson returns 404", status == 404)
+check("RB24 withdrawn lesson returns 404", status == 404)
 status, _, course = read_http(curriculum)
 items = [item.get("id") for section in (course or {}).get("sections", [])
          for item in section.get("items", []) if isinstance(item, dict)]
-check("RB22 draft lesson removed from public curriculum",
+check("RB25 draft lesson removed from public curriculum",
       status == 200 and 12 not in items)
 
 # Nothing escapes the disposable clone. External runner removes its DB and
