@@ -100,4 +100,7 @@ done
 echo "WP_REAL_RUNTIME=PASS isolated_mysql_clone=PASS"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 python3 "$SCRIPT_DIR/probe_rights.py" "$BASE" "$WPCLI" "$WORK/site"
-echo "QA_RUN=PASS public_source_untouched=PASS"
+# Recover the missing LearnPress editor capabilities only in the disposable
+# MariaDB fixture. Do not grant permissions in the original or institutional WP.
+python3 "$SCRIPT_DIR/probe_edit_rbac.py" "$WPCLI" "$WORK/site" "$BASE"
+echo "QA_RUN=PASS public_source_untouched=PASS rbac_editor_fixture=PASS"
