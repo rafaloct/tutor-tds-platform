@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cartilhas_app/features/ead_catalog/data/ead_catalog_repository.dart';
 import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_editorial_bridge_repository.dart';
 import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_mobile_lesson_screen.dart';
@@ -45,7 +46,11 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(EadMobileLessonScreen),
-      matchesGoldenFile('goldens/ead_authorized_lesson_blue.png'),
+      matchesGoldenFile(
+        Platform.isLinux
+            ? 'goldens/linux/ead_authorized_lesson_blue.png'
+            : 'goldens/ead_authorized_lesson_blue.png',
+      ),
     );
   });
 }

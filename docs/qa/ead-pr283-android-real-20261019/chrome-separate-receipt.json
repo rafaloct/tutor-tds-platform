@@ -1,0 +1,20 @@
+{
+  "type": "SUPPLEMENTAL_REAL_BROWSER_CLIP_NOT_CONTINUOUS_E2E",
+  "official_url": "https://ead.ipexdesenvolvimento.cloud/courses/agricultura-sustentavel/",
+  "android_api": 35,
+  "screenrecord_exit": 0,
+  "screens": [
+    {
+      "file": "01-real-course-visible.png",
+      "sha256": "f119b286961b18c735f1fcfb139b7a906988c321c1d5a343325359565ded68ec",
+      "bytes": 645597,
+      "utc": "2026-10-19T03:48:56.552248+00:00"
+    }
+  ],
+  "mp4": {
+    "file": "02-real-course-browser.mp4",
+    "bytes": 57559,
+    "sha256": "6f23352301aeb99307bba0640362b41b05faca52f47eb620703f3b8106ef43e0"
+  },
+  "notes": "Public browser page only, no login, no video playback assertion."
+}
