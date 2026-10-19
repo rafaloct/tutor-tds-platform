@@ -73,6 +73,7 @@ a divergência histórica do primeiro M1 no PR #298.
 | Implantação do patch institucional | HUMAN_GATE; não realizada |
 | Adaptador editorial público | BLOCKED: plugin não instalado; não inferir rejeição editorial |
 | Android integrado ao staging nesta rodada | UNKNOWN; evidências anteriores não são novo teste |
+| Novo clone adaptador/Android | BLOCKED por divergência-base posterior; ver ADAPTER_STOP.md |
 | #297 negativas HTTP500 / múltiplos pais | BLOCKED independente; sem novo bypass |
 | Release/assinatura/Play | HUMAN_GATE; AAB anterior NOT_FOR_UPLOAD |
 

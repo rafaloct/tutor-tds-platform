@@ -13,6 +13,11 @@ STOPs históricos preservados; divergência antiga do primeiro M1 não resolvida
 Produção intacta; promoção do patch/adaptador e release continuam HUMAN_GATE.
 Recibo: `qa/ead-registration-resume-20261019/README.md`.
 
+BLOCKED independente posterior: preparação do clone adaptador/Android detectou
+novo hash-base 1ffeecf9 (esperado4dc75881), interrompendo antes de qualquer criação
+ou POST. Diferença somente em opções/cron/transientes; causa exclusiva UNKNOWN.
+Sem aceitar baseline novo nem repetir. Ver `qa/ead-registration-resume-20261019/ADAPTER_STOP.md`.
+
 ## 2026-10-19 — #299, patch institucional e stop da fixture HTTP
 
 IMPLEMENTED/TESTED-LOCAL: patch isolado contra TDS Child2.0.0 real sanitizado,
