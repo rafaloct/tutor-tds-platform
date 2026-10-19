@@ -1,0 +1,64 @@
+PASS source staging identity, internal network and candidate hash
+PASS faithful theme acquisition; one integration token removed; no database/config copied
+PASS Apache UID33 can traverse and read theme/Astra/MU; code group permissions only
+PASS isolated WordPress and MySQL clone started with mirrored institutional capabilities
+Warning: Regenerating a .htaccess file requires special configuration. See usage docs.
+PASS Apache MU load, mail/HTTP short circuit, native theme/template and closed POST gate
+TEMPLATE_PREFLIGHT={"http200": true, "apache_mu": true, "template": true, "registration_action": true, "required_fields": true, "html_template_marker": true}
+PASS actual registration template rendered; no form/nonce published
+REGISTRATION_DIAGNOSTIC={"http": 200, "field_names": ["tds_cadastro_nonce", "_wp_http_referer", "action", "nome", "email", "senha"], "form_count": 2, "template_marker": true}
+PASS registration page uses real institutional template HTTP200
+PASS baseline reproduces missing course hidden field
+PASS baseline login loses course context
+No syntax errors detected in /var/www/html/wp-content/themes/tds-child-theme/functions.php
+No syntax errors detected in /var/www/html/wp-content/themes/tds-child-theme/pages/cadastro.php
+No syntax errors detected in /var/www/html/wp-content/themes/tds-child-theme/includes/tds-registration-course.php
+PASS Apache MU load, mail/HTTP short circuit, native theme/template and closed POST gate
+TEMPLATE_PREFLIGHT={"http200": true, "apache_mu": true, "template": true, "registration_action": true, "required_fields": true, "html_template_marker": true}
+PASS actual registration template rendered; no form/nonce published
+REGISTRATION_DIAGNOSTIC={"http": 200, "field_names": ["tds_cadastro_nonce", "_wp_http_referer", "action", "tds_curso", "nome", "email", "senha"], "form_count": 2, "template_marker": true}
+PASS registration page uses real institutional template HTTP200
+PASS course614 preserved in native form
+PASS existing account native login retains course
+PASS invalid nonce HTTP403 without account creation
+PASS invalid course safe catalog redirect: 99999999
+PASS invalid course safe catalog redirect: 0
+PASS invalid course safe catalog redirect: -614
+PASS invalid course safe catalog redirect: https://evil.invalid/
+PASS invalid course safe catalog redirect: 614x
+PASS invalid course safe catalog redirect: 99999999999999999999999
+PASS invalid course POST has no user side effect
+PASS new public registration HTTP302 to course ignoring hostile redirect
+PASS new account persisted with native session cookie
+PASS registration itself does not grant enrollment
+PASS authenticated official course HTTP200
+PASS native frontend REST nonce present
+PASS native free enrollment first
+PASS native free enrollment duplicate
+PASS native enrollment exactly one persisted row
+PASS enrollment remains in progress without completion/grade
+PASS already enrolled registration entry returns course without duplicate
+PASS expired session native enrollment denied403
+PASS existing account login HTTP302 to requested course
+PASS no-course form has no synthetic course field
+PASS no-course registration preserves Minha Area default
+PASS existing email error preserves course for login
+PASS enrolled lesson available with restricted marker
+PASS visitor cannot read restricted lesson marker
+PASS native logout link present
+PASS native logout HTTP302
+PASS logged-out session cannot access account
+PASS global registration policy unchanged
+HTTP_TOTAL_PASS=32
+a7d67bb7884f967d7ae108abe39f8563fb4e9e8596ba0d6b106fcec693d61c45  /opt/tds-learning-qa-20261017/backups/20261019T233038Z-registration-299-resume/theme.patch
+32b5be5a88f40bcd04759c2266f222dd5ae4d67b477e1c9686318bacfa32b31d  /opt/tds-learning-qa-20261017/backups/20261019T233038Z-registration-299-resume/theme-provenance.json
+ff76a9b26e3ca500372aeb033b85bedd1267a114365fe91d9dc46a33e66f3e3a  /opt/tds-learning-qa-20261017/backups/20261019T233038Z-registration-299-resume/http-after.json
+RESULT=PASS
+ROLLBACK_CONTAINER=PASS
+ROLLBACK_DB=PASS
+ROLLBACK_DB_USER=PASS
+ROLLBACK_FILESYSTEM=PASS
+BASE_DATABASE_UNCHANGED=PASS
+4dc75881fb3f2df0c01a9fa65f1e99973cb231a35ee84ddd0ee34a1ccbc81a16  database
+4dc75881fb3f2df0c01a9fa65f1e99973cb231a35ee84ddd0ee34a1ccbc81a16  database
+EVIDENCE_DIR=/opt/tds-learning-qa-20261017/backups/20261019T233038Z-registration-299-resume

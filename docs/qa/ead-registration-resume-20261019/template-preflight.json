@@ -1,0 +1,8 @@
+{
+  "http200": true,
+  "apache_mu": true,
+  "template": true,
+  "registration_action": true,
+  "required_fields": true,
+  "html_template_marker": true
+}

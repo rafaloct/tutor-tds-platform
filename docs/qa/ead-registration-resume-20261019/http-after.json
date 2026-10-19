@@ -1,0 +1,130 @@
+[
+  {
+    "test": "registration page uses real institutional template HTTP200",
+    "status": "PASS"
+  },
+  {
+    "test": "course614 preserved in native form",
+    "status": "PASS"
+  },
+  {
+    "test": "existing account native login retains course",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid nonce HTTP403 without account creation",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid course safe catalog redirect: 99999999",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid course safe catalog redirect: 0",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid course safe catalog redirect: -614",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid course safe catalog redirect: https://evil.invalid/",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid course safe catalog redirect: 614x",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid course safe catalog redirect: 99999999999999999999999",
+    "status": "PASS"
+  },
+  {
+    "test": "invalid course POST has no user side effect",
+    "status": "PASS"
+  },
+  {
+    "test": "new public registration HTTP302 to course ignoring hostile redirect",
+    "status": "PASS"
+  },
+  {
+    "test": "new account persisted with native session cookie",
+    "status": "PASS"
+  },
+  {
+    "test": "registration itself does not grant enrollment",
+    "status": "PASS"
+  },
+  {
+    "test": "authenticated official course HTTP200",
+    "status": "PASS"
+  },
+  {
+    "test": "native frontend REST nonce present",
+    "status": "PASS"
+  },
+  {
+    "test": "native free enrollment first",
+    "status": "PASS"
+  },
+  {
+    "test": "native free enrollment duplicate",
+    "status": "PASS"
+  },
+  {
+    "test": "native enrollment exactly one persisted row",
+    "status": "PASS"
+  },
+  {
+    "test": "enrollment remains in progress without completion/grade",
+    "status": "PASS"
+  },
+  {
+    "test": "already enrolled registration entry returns course without duplicate",
+    "status": "PASS"
+  },
+  {
+    "test": "expired session native enrollment denied403",
+    "status": "PASS"
+  },
+  {
+    "test": "existing account login HTTP302 to requested course",
+    "status": "PASS"
+  },
+  {
+    "test": "no-course form has no synthetic course field",
+    "status": "PASS"
+  },
+  {
+    "test": "no-course registration preserves Minha Area default",
+    "status": "PASS"
+  },
+  {
+    "test": "existing email error preserves course for login",
+    "status": "PASS"
+  },
+  {
+    "test": "enrolled lesson available with restricted marker",
+    "status": "PASS"
+  },
+  {
+    "test": "visitor cannot read restricted lesson marker",
+    "status": "PASS"
+  },
+  {
+    "test": "native logout link present",
+    "status": "PASS"
+  },
+  {
+    "test": "native logout HTTP302",
+    "status": "PASS"
+  },
+  {
+    "test": "logged-out session cannot access account",
+    "status": "PASS"
+  },
+  {
+    "test": "global registration policy unchanged",
+    "status": "PASS"
+  }
+]

@@ -15,5 +15,8 @@ docs/production/evidence/pre-aab-xiaomi-smoke-20261013-*-ui-sanitized.xml -text
 docs/qa/ead-native-owner-20261019/*.sh text eol=lf
 # Disposable institutional QA scripts and byte-hashed unified diff.
 wordpress/institutional-patches/issue-299/*.sh text eol=lf
+wordpress/institutional-patches/issue-299/qa-resume/*.sh text eol=lf
+wordpress/institutional-patches/issue-299/qa-adapter/*.sh text eol=lf
+docs/qa/ead-registration-resume-20261019/*.json text eol=lf
 # A unified diff represents an empty context line with one space.
 wordpress/institutional-patches/issue-299/theme.patch text eol=lf whitespace=-blank-at-eol
