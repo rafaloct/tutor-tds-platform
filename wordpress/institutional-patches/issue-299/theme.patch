@@ -1,0 +1,70 @@
+--- a/functions.php
++++ b/functions.php
+@@ -333,14 +333,24 @@
+     exit;
+ }
+ 
++require_once get_stylesheet_directory() . '/includes/tds-registration-course.php';
++
+ // Cadastro simplificado — cria conta e faz login automático
+ add_action('admin_post_tds_cadastro',        'tds_handle_cadastro_publico');
+ add_action('admin_post_nopriv_tds_cadastro', 'tds_handle_cadastro_publico');
+ 
+ function tds_handle_cadastro_publico(): void {
++    $context = tds_registration_course_context($_POST);
+     $cadastro_url = home_url('/cadastro/');
++    if ($context['id']) {
++        $cadastro_url = add_query_arg('tds_curso', $context['id'], $cadastro_url);
++    }
+     if (!isset($_POST['tds_cadastro_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['tds_cadastro_nonce'])), 'tds_cadastro')) {
+-        wp_die('Requisição inválida.', 403);
++        wp_die('Requisição inválida.', '', ['response' => 403]);
++    }
++    if ($context['invalid'] || is_user_logged_in()) {
++        wp_safe_redirect($context['url']);
++        exit;
+     }
+     $nome  = sanitize_text_field(wp_unslash($_POST['nome']  ?? ''));
+     $email = sanitize_email(wp_unslash($_POST['email'] ?? ''));
+@@ -378,7 +388,7 @@
+     wp_new_user_notification($user_id, null, 'user');
+     wp_set_current_user($user_id);
+     wp_set_auth_cookie($user_id);
+-    wp_safe_redirect(home_url('/minha-area/?cadastro=ok'));
++    wp_safe_redirect($context['id'] ? $context['url'] : home_url('/minha-area/?cadastro=ok'));
+     exit;
+ }
+ 
+--- a/pages/cadastro.php
++++ b/pages/cadastro.php
+@@ -3,6 +3,11 @@
+  * Template Name: TDS — Cadastro
+  */
+ defined('ABSPATH') || exit;
++$context = tds_registration_course_context($_GET);
++if ($context['invalid'] || ($context['id'] && is_user_logged_in())) {
++    wp_safe_redirect($context['url']);
++    exit;
++}
+ get_header();
+ 
+ if (is_user_logged_in()) {
+@@ -33,6 +38,9 @@
+       <form method="post" action="<?= esc_url(admin_url('admin-post.php')) ?>">
+         <?php wp_nonce_field('tds_cadastro', 'tds_cadastro_nonce'); ?>
+         <input type="hidden" name="action" value="tds_cadastro">
++        <?php if ($context['id']): ?>
++          <input type="hidden" name="tds_curso" value="<?= esc_attr((string) $context['id']) ?>">
++        <?php endif; ?>
+         <div class="tds-form__group">
+           <label class="tds-form__label" for="cad_nome">Nome completo <span class="tds-form__required">*</span></label>
+           <input type="text" id="cad_nome" name="nome" placeholder="Como no seu CadÚnico" required autocomplete="name">
+@@ -48,7 +56,7 @@
+         </div>
+         <button type="submit" class="tds-btn tds-btn--lg" style="width:100%;margin-top:1.5rem">Criar minha conta gratuita</button>
+       </form>
+-      <p style="text-align:center;margin-top:1.25rem;font-size:var(--tds-text-sm)">Já tem conta? <a href="<?= esc_url(wp_login_url(home_url('/minha-area/'))) ?>">Entrar</a></p>
++      <p style="text-align:center;margin-top:1.25rem;font-size:var(--tds-text-sm)">Já tem conta? <a href="<?= esc_url(wp_login_url($context['url'])) ?>">Entrar</a></p>
+     </div>
+   </div>
+ </section>
