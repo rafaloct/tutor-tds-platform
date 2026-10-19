@@ -39,3 +39,9 @@ git diff --check
 Saída final do runtime: `WP_CORE_RUNTIME_QA_PASS` e exit 0. Saída do stub: `PHP_EDITORIAL_CONTRACT_TESTS_PASS=63`. A limpeza/rollback consiste em remover somente o clone temporário `tds-agent290-wp-qa-20261019`, depois de conferir seu caminho absoluto; não há migração, deploy, flag ou alteração no WordPress institucional para reverter.
 
 **Gate seguinte:** executar a mesma prova com LearnPress real em instalação sintética isolada e checar `Range`/`Content-Type` da mídia em ambiente autorizado; obter do #291 recibo Android de áudio e VTT. Instalação institucional ou aprovação editorial das 48 aulas exige HUMAN_GATE separado.
+
+**Gate posterior concluído localmente:** o candidato integrado `c853db0` passou
+76/76 em WordPress 7.1.2 + LearnPress 4.3.6 reais, sem rota LearnPress simulada.
+Ver `../ead-learnpress-real-integrated-20261019/README.md`. Isso supera somente a
+lacuna sintética; instalação institucional e direitos das 48 aulas permanecem
+HUMAN_GATE.

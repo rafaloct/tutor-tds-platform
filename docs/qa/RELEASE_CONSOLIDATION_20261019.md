@@ -54,13 +54,13 @@ antes de uma reprodução limpa. Nenhum merge foi realizado.
 | regressão EAD ancestral | PASS | #293 78/78 e analyze PASS |
 | entrada pública/catálogo/aula | PASS sintético | Welcome → catálogo → curso → curriculum LearnPress sintético → aula no Android |
 | inscrição/login/matrícula E2E novo | UNKNOWN | não afetados pelo diff e não repetidos; aceite histórico não foi promovido a prova deste APK |
-| currículo LearnPress real | UNKNOWN | bridge sintética passou; integração real integral continua não demonstrada |
+| currículo LearnPress real sintético | PASS | WP 7.1.2 + LP 4.3.6; rota nativa/modelos/CURD/hooks; 76/76 em instalação limpa |
 | presença/frequência | PASS de contrato | regra exata de 70% e fallback legado passaram na API; sem operação produtiva |
 | progresso por vídeo | PASS (ausência) | player não chama conclusão, presença, nota ou certificado |
 | conclusão/pedido/aprovação | PASS de contrato | snapshot/idempotência/ordem e gate humano passaram; E2E institucional não repetido |
 | Tutor contextual/conectividade | NOT_AFFECTED | nenhum arquivo/contrato do Tutor mudou; evidência anterior preservada, sem novo claim |
 | regressão acadêmica | PASS | sete testes focais, ambiente lockado; API não alterada pelo #295 |
-| LearnPress real integral | UNKNOWN | #292 comprova WordPress core/fixtures; LearnPress real integral não demonstrado |
+| LearnPress institucional integral | HUMAN_GATE | runtime sintético real passou; site institucional, SSO/matrícula/quiz/notas não demonstrados |
 | preflight Android/release | PASS | 3/3; versão 1.4.0+13; min24/target36/compile36; lock preservado |
 | configuração de produção | PASS | endpoints aprovados; todas as flags de risco false |
 | endpoints/flags dentro de AAB release | PASS | `libapp.so` sem URL local/staging/dynamicqa; endpoints aprovados presentes; config validada |
@@ -90,6 +90,10 @@ registrados no mesmo recibo.
 AAB integrado: `D:\AI-Shared\builds\tutor-tds\release-candidate-c853db021368f4b536521800ed9dc33ef68e3aac\Tutor-TDS-1.4.0+13-c853db0-inspection-unsigned.aab`,
 SHA-256 `F671CC61BDDEB7CD45D3E7953F98CD4A85F44B1A34B274AE0D6E3FA453776ADC`.
 
+LearnPress real sintético: 76/76 PASS em instalação limpa. Log em
+`D:\AI-Shared\test-results\tutor-tds\learnpress-real-c853db0-20261019\learnpress-real-runtime-final.log`,
+SHA-256 `40E949E804342D284047A5A2F7AB7DCCB47388F7F3BBB78FB563464C51CF1D5B`.
+
 ## Estado do AAB e release
 
 Nenhum AAB correspondente a `b05eaa0` foi gerado na primeira worktree. A tentativa usou
@@ -112,7 +116,8 @@ sem assinatura e **NOT_FOR_UPLOAD**; a release ainda não está liberada.
 1. Para fechar acessibilidade, um operador deve dispensar/conceder a permissão do
    Android Accessibility Suite e confirmar anúncio/acionamento TalkBack; para
    áudio acústico, ouvir em hardware/emulador com saída confiável.
-2. Executar a prova com LearnPress real em ambiente sintético isolado.
+2. Homologar o plugin no WordPress/LearnPress institucional somente em staging
+   segregado e autorizado; o runtime sintético real já passou.
 3. Revisar o candidato integrado e decidir a estratégia de landing dos PRs
    stacked; nenhum merge está autorizado por este recibo.
 4. Build oficial com config custodiada, assinatura real, upload e promoção
@@ -120,8 +125,8 @@ sem assinatura e **NOT_FOR_UPLOAD**; a release ainda não está liberada.
 
 ## Estimativa e custo observado
 
-- a partir deste checkpoint: **2–4 horas técnicas** para LearnPress real, revisão
-  da integração e preparação do build oficial; **0,5–1 hora humana** para
+- a partir deste checkpoint: **1–3 horas técnicas** para revisão da integração e
+  preparação do build oficial; **0,5–1 hora humana** para
   TalkBack/áudio e decisões de merge/release.
 - custo incremental monetário observado nesta execução: **R$ 0,00**. Foram usados
   somente CPU, disco e emulador locais; nenhum serviço pago, deploy, upload ou

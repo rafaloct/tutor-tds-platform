@@ -11,9 +11,17 @@ bytes, três ABIs, package de produção 1.4.0+13, SHA-256
 Scan do `libapp.so` sem endpoint local/staging ou flag QA; endpoints aprovados
 presentes. O erro anterior do registrant não se reproduziu em worktree limpa;
 `flutter.bat` local permanece defeituoso e foi contornado pelo mesmo SDK via
-`flutter_tools.snapshot`. UNKNOWN/HUMAN_GATE: LearnPress real, TalkBack falado,
-áudio acústico, config custodiada, assinatura/upload/Play e merge. Recibo:
+`flutter_tools.snapshot`. UNKNOWN/HUMAN_GATE: LearnPress institucional, TalkBack
+falado, áudio acústico, config custodiada, assinatura/upload/Play e merge. Recibo:
 `qa/INTEGRATED_RELEASE_RECEIPT_20261019.md`.
+
+TESTED-LOCAL posterior: WordPress 7.1.2 + LearnPress 4.3.6 reais em SQLite
+descartável, um usuário sintético e rede externa bloqueada passaram 76/76 contra
+os hashes exatos do adaptador de `c853db0`. Foram exercitados rota nativa,
+modelos/CURD, hooks, ETag, opt-in, dois salvamentos MP4/VTT, revogação de
+fingerprint, sem VTT, YouTube e ausência de linha acadêmica. A instalação
+institucional permanece HUMAN_GATE. Recibo:
+`qa/ead-learnpress-real-integrated-20261019/README.md`.
 
 ## 2026-10-19 — Issue #294, homologação Android final do player IPEX
 

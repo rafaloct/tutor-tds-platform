@@ -53,8 +53,8 @@ fail-closed `https://tutor-tds.invalid` continua intencionalmente presente.
 | merge #292 + #295 | PASS, sem conflito |
 | contrato editorial PHP | 63/63 PASS |
 | lint PHP | quatro arquivos PASS |
-| runtime WordPress completo | REUSED do #292; fixture descartável não existe no LARGeo |
-| LearnPress real | UNKNOWN; #292 usa rota curricular simulada |
+| runtime WordPress completo | PASS local; prova #292 reutilizada e nova instalação limpa executada |
+| LearnPress real sintético | 76/76 PASS; WP 7.1.2 + LP 4.3.6, rota/modelos/CURD/hooks reais |
 | Flutter player | 9/9 PASS |
 | analyze focal | PASS, zero issues |
 | preflight estrutural | 3/3 PASS; `structural_pass=true` |
@@ -63,15 +63,19 @@ fail-closed `https://tutor-tds.invalid` continua intencionalmente presente.
 | AAB | PASS para inspeção; não assinado |
 
 O PHP disponível no LARGeo emitiu warnings preexistentes de configuração
-(`mysqli` duplicado e `pdo_firebird` ausente), mas o contrato e os quatro lints
-retornaram exit 0. A prova WordPress core completa do #292 permanece evidência
-reutilizada; não foi promovida a LearnPress real.
+(`mysqli` duplicado e `pdo_firebird` ausente), mas o contrato, os quatro lints e
+a prova final LearnPress retornaram exit 0. A nova prova não registrou rota
+simulada: criou curso/seção/aulas pelos tipos e CURD do LearnPress e consumiu a
+rota nativa. Log SHA-256
+`40E949E804342D284047A5A2F7AB7DCCB47388F7F3BBB78FB563464C51CF1D5B`;
+recibo em `ead-learnpress-real-integrated-20261019/README.md`.
 
 ## Gates restantes
 
 1. revisão humana da cadeia e decisão de manter os PRs stacked ou consolidar;
 2. TalkBack falado e áudio acústico;
-3. prova com LearnPress real em instalação sintética isolada;
+3. homologação institucional do WordPress/LearnPress, sem confundi-la com a
+   instalação sintética já aprovada;
 4. build oficial com `config/production.json` custodiado, assinatura de upload e
    verificador de readiness somente após autorização;
 5. upload em Teste interno/Play e promoção requerem autorização específica.
