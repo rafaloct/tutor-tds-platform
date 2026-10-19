@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cartilhas_app/features/ead_catalog/data/ead_catalog_repository.dart';
 import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_curriculum_repository.dart';
 import 'package:cartilhas_app/features/ead_catalog/learning_path/ead_learning_path_screen.dart';
@@ -74,7 +75,11 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(EadLearningPathScreen),
-      matchesGoldenFile('goldens/ead_saf_learning_path_preview.png'),
+      matchesGoldenFile(
+        Platform.isLinux
+            ? 'goldens/linux/ead_saf_learning_path_preview.png'
+            : 'goldens/ead_saf_learning_path_preview.png',
+      ),
     );
   });
 }

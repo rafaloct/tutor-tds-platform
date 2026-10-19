@@ -1,0 +1,66 @@
+{
+  "status": "CAPTURED",
+  "profile": "android35-compact",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r189cc9e4966da805098a0ddcb4db4ca3",
+  "git_sha": "189cc9e4966da805098a0ddcb4db4ca339dcfae2",
+  "identity": {
+    "android_api": "35",
+    "avd_serial": "emulator-5554",
+    "device_model": "sdk_gphone64_x86_64",
+    "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:15/AE3A.240806.036/12592187:user/release-keys"
+  },
+  "started_utc": "2026-10-19T03:38:31.824300+00:00",
+  "evidence": [
+    {
+      "file": "01-welcome.png",
+      "sha256": "6020d059739fafd0821879ebcfcbb4c7a690dbe1596ee6b81f95f66aa8ee702f",
+      "bytes": 112806,
+      "utc": "2026-10-19T03:38:44.611655+00:00"
+    },
+    {
+      "file": "02-ead-catalog.png",
+      "sha256": "8755334cd685df61ae0f20f24ad86a24b82dc2639cb2c27a0fa7eaf4f7df1836",
+      "bytes": 161974,
+      "utc": "2026-10-19T03:38:49.701280+00:00"
+    },
+    {
+      "file": "03-learning-path.png",
+      "sha256": "6a270126c2eaebe0706d09c47956216d5c2430f5d0565e91e81fc36c0a4bf5c6",
+      "bytes": 141863,
+      "utc": "2026-10-19T03:38:54.491259+00:00"
+    },
+    {
+      "file": "04-fallback-before-tap.png",
+      "sha256": "6a270126c2eaebe0706d09c47956216d5c2430f5d0565e91e81fc36c0a4bf5c6",
+      "bytes": 141863,
+      "utc": "2026-10-19T03:38:56.798883+00:00"
+    },
+    {
+      "file": "05-official-course-browser.png",
+      "sha256": "ece412ab951d4d9ebde468bb72d5ab0e406f0e9ad9ccf92eae8bea2a5ccd95ef",
+      "bytes": 149280,
+      "utc": "2026-10-19T03:39:06.131248+00:00"
+    },
+    {
+      "file": "raw-android-screenrecord.mp4",
+      "sha256": "d811826bf540b5e078a3934c2adfc90c9c3fce3f8c0f989fdf821976636dc995",
+      "bytes": 2316757,
+      "utc": "2026-10-19T03:40:04.436452+00:00"
+    }
+  ],
+  "events": [
+    "00: botão EAD acessível após primeira renderização",
+    "01: clique em Explorar cursos do EAD sem cadastro",
+    "02: catálogo exibiu contador público de ofertas",
+    "03: tela Percurso de aprendizagem confirmada",
+    "04: aula sem opt-in exibiu fallback seguro",
+    "05: ChromeTabbedActivity ativo com URL canonica EAD"
+  ],
+  "notes": [
+    "Vídeo é captura real e não contém áudio do sistema."
+  ],
+  "verified_external_course_url": "https://ead.ipexdesenvolvimento.cloud/courses/agricultura-sustentavel/",
+  "external_browser_verified": true,
+  "screenrecord_exit": 0,
+  "finished_utc": "2026-10-19T03:40:04.826018+00:00"
+}
