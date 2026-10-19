@@ -1,5 +1,13 @@
 # Domínio central — alvo e compatibilidade
 
+Precedência EAD (decisão #249, reafirmada em19/10/2026): WordPress/LearnPress
+é autoridade editorial, de inscrição e progresso de suas ofertas. As entidades
+e matrículas institucionais abaixo permanecem FastAPI/TDS; não são substituídas
+nem sincronizadas implicitamente. Até existir vínculo de identidade homologado,
+o aplicativo encaminha login/inscrição EAD ao portal oficial. Autoria legítima
+curso/aula usa `lp_teacher`; compartilhamento exige autorização em todos os
+cursos pais. Ver `DECISIONS.md` e `qa/ead-native-owner-20261019/README.md`.
+
 Este contrato é alvo de migração, não declaração de implementação concluída.
 
 Jornada/certificados: aplicar a decisão posterior de #5 registrada no item 27 de
