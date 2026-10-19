@@ -26,13 +26,18 @@ final class TDS_LearnPress_Editorial_Admin {
 		$public = get_post_meta( $post->ID, '_tds_mobile_public', true ) === '1';
 		$approved = get_post_meta( $post->ID, '_tds_mobile_rights_approved', true ) === '1';
 		$youtube = (string) get_post_meta( $post->ID, '_tds_mobile_youtube_id', true );
+		if ( '' === $youtube ) {
+			$fingerprint = TDS_LearnPress_Editorial::mp4_source_fingerprint( $post->ID );
+			$approved = $approved && null !== $fingerprint &&
+				hash_equals( $fingerprint, (string) get_post_meta( $post->ID, '_tds_mobile_rights_source_fingerprint', true ) );
+		}
 		$poster = (string) get_post_meta( $post->ID, '_tds_mobile_poster_url', true );
 		$captions = (string) get_post_meta( $post->ID, '_tds_mobile_captions_url', true );
 		echo '<p><label><input type="checkbox" name="tds_mobile_public" value="1" ' . checked( $public, true, false ) . '> Publicar o texto desta aula no app para visitantes, mesmo sem matrícula</label></p>';
 		echo '<p class="description">Desmarcado por padrão. Somente texto revisado e publicado. Não coloque dados pessoais ou materiais exclusivos para matriculados.</p>';
 		echo '<p><label for="tds_mobile_youtube_id">ID de vídeo YouTube aprovado (11 caracteres)</label><input class="widefat" id="tds_mobile_youtube_id" name="tds_mobile_youtube_id" value="' . esc_attr( $youtube ) . '" maxlength="11"></p>';
 		echo '<p><label><input type="checkbox" name="tds_mobile_rights_approved" value="1" ' . checked( $approved, true, false ) . '> Confirmo direitos e liberação editorial deste vídeo</label></p>';
-		echo '<p class="description">Se mudar o ID do vídeo, a liberação é anulada e precisa ser confirmada novamente após salvar.</p>';
+		echo '<p class="description">Se mudar o ID YouTube, o MP4 ou sua legenda VTT, salve a aula e confirme os direitos em um segundo salvamento.</p>';
 		echo '<p><label for="tds_mobile_poster_url">Poster WordPress HTTPS</label><input class="widefat" id="tds_mobile_poster_url" name="tds_mobile_poster_url" value="' . esc_attr( $poster ) . '"></p>';
 		echo '<p><label for="tds_mobile_captions_url">Legenda VTT WordPress HTTPS</label><input class="widefat" id="tds_mobile_captions_url" name="tds_mobile_captions_url" value="' . esc_attr( $captions ) . '"></p>';
 	}
@@ -52,10 +57,12 @@ final class TDS_LearnPress_Editorial_Admin {
 		$public = isset( $_POST['tds_mobile_public'] ) && '1' === $_POST['tds_mobile_public'];
 		$approved = isset( $_POST['tds_mobile_rights_approved'] ) && '1' === $_POST['tds_mobile_rights_approved'];
 		$old_video = (string) get_post_meta( $post_id, '_tds_mobile_youtube_id', true );
+		$pending_source = (string) get_post_meta( $post_id, '_tds_mobile_rights_pending_source_fingerprint', true );
+		$approved_source = (string) get_post_meta( $post_id, '_tds_mobile_rights_source_fingerprint', true );
 		$video = isset( $_POST['tds_mobile_youtube_id'] ) && is_string( $_POST['tds_mobile_youtube_id'] )
 			? sanitize_text_field( wp_unslash( $_POST['tds_mobile_youtube_id'] ) )
 			: '';
-		if ( ! preg_match( '/^[a-zA-Z0-9_-]{11}$/D', $video ) ) {
+		if ( '' !== $video && ! preg_match( '/^[a-zA-Z0-9_-]{11}$/D', $video ) ) {
 			$video = '';
 			$approved = false;
 		}
@@ -65,7 +72,6 @@ final class TDS_LearnPress_Editorial_Admin {
 		}
 		update_post_meta( $post_id, '_tds_mobile_public', $public ? '1' : '0' );
 		update_post_meta( $post_id, '_tds_mobile_youtube_id', $video );
-		update_post_meta( $post_id, '_tds_mobile_rights_approved', $approved ? '1' : '0' );
 		foreach ( array(
 			'tds_mobile_poster_url' => '_tds_mobile_poster_url',
 			'tds_mobile_captions_url' => '_tds_mobile_captions_url',
@@ -74,5 +80,17 @@ final class TDS_LearnPress_Editorial_Admin {
 				? esc_url_raw( wp_unslash( $_POST[ $field ] ), array( 'https' ) ) : '';
 			update_post_meta( $post_id, $meta, $url );
 		}
+		if ( '' === $video ) {
+			$fingerprint = TDS_LearnPress_Editorial::mp4_source_fingerprint( $post_id );
+			$approved = $approved && null !== $fingerprint &&
+				( hash_equals( $pending_source, $fingerprint ) ||
+					( '' !== $approved_source && hash_equals( $approved_source, $fingerprint ) ) );
+			update_post_meta( $post_id, '_tds_mobile_rights_pending_source_fingerprint', $fingerprint ?? '' );
+			update_post_meta( $post_id, '_tds_mobile_rights_source_fingerprint', $approved ? $fingerprint : '' );
+		} else {
+			update_post_meta( $post_id, '_tds_mobile_rights_pending_source_fingerprint', '' );
+			update_post_meta( $post_id, '_tds_mobile_rights_source_fingerprint', '' );
+		}
+		update_post_meta( $post_id, '_tds_mobile_rights_approved', $approved ? '1' : '0' );
 	}
 }

@@ -85,17 +85,39 @@ final class TDS_LearnPress_Editorial {
 			return null;
 		}
 		$result = array( 'provider' => 'ipex_mp4', 'source_url' => $url );
-		if ( preg_match( '#<track\\b[^>]*kind="captions"[^>]*src="([^"]+)"[^>]*>#i', $video[1], $track ) &&
-			preg_match( '/srclang="pt-BR"/i', $track[0] ) ) {
+		if ( preg_match( '#<track\\b[^>]*kind="captions"[^>]*>#i', $video[1] ) ) {
+			if ( ! preg_match( '#<track\\b[^>]*kind="captions"[^>]*src="([^"]+)"[^>]*>#i', $video[1], $track ) ||
+				! preg_match( '/srclang="pt-BR"/i', $track[0] ) ) {
+				return null;
+			}
 			$captions = html_entity_decode( $track[1], ENT_QUOTES, 'UTF-8' );
 			$caption_path = wp_parse_url( $captions, PHP_URL_PATH );
-			if ( self::valid_url( $captions, '/wp-content/uploads/tutor-tds/' ) &&
-				is_string( $caption_path ) && preg_match( '/\\.vtt$/iD', $caption_path ) &&
-				! preg_match( '/%(2e|2f|5c)/i', $caption_path ) ) {
-				$result['captions_url'] = $captions;
+			if ( ! self::valid_url( $captions, '/wp-content/uploads/tutor-tds/' ) ||
+				! is_string( $caption_path ) || ! preg_match( '/\\.vtt$/iD', $caption_path ) ||
+				preg_match( '/%(2e|2f|5c)/i', $caption_path ) ) {
+				return null;
 			}
+			$result['captions_url'] = $captions;
 		}
 		return $result;
+	}
+
+	/** The same validated source is used by the editor and the public projection. */
+	public static function mp4_source_fingerprint( $lesson_id ) {
+		$media = self::ipex_mp4( $lesson_id );
+		if ( null === $media ) {
+			return null;
+		}
+		$captions = get_post_meta( $lesson_id, '_tds_mobile_captions_url', true );
+		if ( '' !== $captions ) {
+			$path = is_string( $captions ) ? wp_parse_url( $captions, PHP_URL_PATH ) : null;
+			if ( ! self::valid_url( $captions, '/wp-content/uploads/' ) ||
+				! is_string( $path ) || ! preg_match( '/\\.vtt$/iD', $path ) ||
+				preg_match( '/%(2e|2f|5c)/i', $path ) ) {
+				return null;
+			}
+		}
+		return hash( 'sha256', wp_json_encode( array( $media, $captions ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 	}
 
 	private static function media( $lesson_id ) {
@@ -110,10 +132,13 @@ final class TDS_LearnPress_Editorial {
 			// All source videos already live in the IPEX LearnPress lesson body.
 			// The YouTube upload quota must not block explicitly approved MP4.
 			// Never export a video merely because its HTML contains <video>.
-			$media = self::ipex_mp4( $lesson_id );
-			if ( null === $media ) {
+			$fingerprint = self::mp4_source_fingerprint( $lesson_id );
+			$stored = get_post_meta( $lesson_id, '_tds_mobile_rights_source_fingerprint', true );
+			if ( null === $fingerprint || ! is_string( $stored ) ||
+				! hash_equals( $fingerprint, $stored ) ) {
 				return null;
 			}
+			$media = self::ipex_mp4( $lesson_id );
 		}
 		foreach ( array( 'poster' => '_tds_mobile_poster_url', 'captions' => '_tds_mobile_captions_url' ) as $key => $meta ) {
 			$url = get_post_meta( $lesson_id, $meta, true );
