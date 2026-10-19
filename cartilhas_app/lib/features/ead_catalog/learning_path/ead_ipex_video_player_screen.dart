@@ -218,6 +218,7 @@ class _IpexWebViewState extends State<_IpexWebView> {
   WebViewController? _controller;
   Timer? _timeout;
   bool _loadingLocalDocument = true;
+  bool _htmlLoadRequested = false;
 
   @override
   void initState() {
@@ -245,7 +246,11 @@ class _IpexWebViewState extends State<_IpexWebView> {
                 ? NavigationDecision.navigate
                 : NavigationDecision.prevent;
           },
-          onPageFinished: (_) {
+          onPageFinished: (url) {
+            if (!_htmlLoadRequested ||
+                url != 'https://ead.ipexdesenvolvimento.cloud/') {
+              return;
+            }
             _loadingLocalDocument = false;
             _timeout?.cancel();
             widget.onReady(); // HTML loaded, NOT proof of playback.
@@ -259,6 +264,7 @@ class _IpexWebViewState extends State<_IpexWebView> {
       );
       if (!mounted) return;
       setState(() => _controller = controller);
+      _htmlLoadRequested = true;
       await controller.loadHtmlString(
         EadIpexVideoPolicy.document(widget.video, widget.captions),
         baseUrl: 'https://ead.ipexdesenvolvimento.cloud/',
