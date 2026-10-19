@@ -22,7 +22,11 @@ const captions =
     'https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/'
     'tutor-tds/v2-20261016/saf/01_saf.vtt';
 
-http.Response syllabus(Object? media, {bool mobile = true}) =>
+http.Response syllabus(
+  Object? media, {
+  bool mobile = true,
+  String currentRevision = revision,
+}) =>
     http.Response.bytes(
       utf8.encode(
         jsonEncode({
@@ -30,7 +34,7 @@ http.Response syllabus(Object? media, {bool mobile = true}) =>
           'authority': 'learnpress',
           'course_id': 1298,
           'title': 'Agricultura Sustentável',
-          'revision': revision,
+          'revision': currentRevision,
           'sections': [
             {
               'id': 80,
@@ -50,7 +54,7 @@ http.Response syllabus(Object? media, {bool mobile = true}) =>
         }),
       ),
       200,
-      headers: {'etag': '"$revision"'},
+      headers: {'etag': '"$currentRevision"'},
     );
 
 http.Response lesson(Object? media) => http.Response.bytes(
@@ -98,6 +102,27 @@ void main() {
       get: (_, _) async => syllabus(media, mobile: false),
     );
     await expectLater(repo.fetch(course), throwsException);
+  });
+
+  test('revogação editorial remove MP4/VTT após revisão da grade', () async {
+    var approved = true;
+    final repo = EadEditorialBridgeRepository(
+      get: (_, _) async => syllabus(
+        approved ? media : null,
+        mobile: approved,
+        currentRevision: approved
+            ? revision
+            : 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      ),
+    );
+    final first = (await repo.fetch(course)).sections.single.lessons.single;
+    expect(first.ipexVideoUrl.toString(), source);
+    approved = false;
+    final revoked = (await repo.fetch(course)).sections.single.lessons.single;
+    expect(revoked.mobileContent, false);
+    expect(revoked.isVideoCandidate, false);
+    expect(revoked.ipexVideoUrl, isNull);
+    expect(revoked.ipexCaptionsUrl, isNull);
   });
 
   test('navegação URL maliciosa não entra no player', () async {
@@ -183,5 +208,9 @@ void main() {
     expect(find.text('Videoaula do IPEX'), findsOneWidget);
     expect(find.text('PLAYER_HTTPS_IPEX'), findsOneWidget);
     expect(find.textContaining('não registra'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Videoaula do IPEX'), findsNothing);
+    expect(find.text('Assistir vídeo no IPEX'), findsOneWidget);
   });
 }

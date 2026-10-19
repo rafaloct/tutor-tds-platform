@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-19 — Issue #291, gate EAD/Android candidato
+
+IMPLEMENTED/TESTED-LOCAL: recorte de teste Flutter para revogação editorial
+MP4/VTT e retorno do player à aula; preflight offline somente leitura de versão,
+Gradle e guardas debug/release com 3 testes Python PASS. O único teste de API
+executável no Python disponível confirmou o default da flag de aprovação de
+certificado (1 PASS). UNKNOWN/BLOCKED: Flutter analyze/testes não executaram
+porque o sandbox nega acesso ao cache do SDK 3.44.9; sete testes acadêmicos
+selecionados não coletaram por `pwdlib`/`alembic` ausentes. Áudio, playback e
+VTT Android seguem UNKNOWN sem recibo original do executor #287. Nenhum AAB,
+assinatura, produção, Play ou emulador foi tocado. Matriz, diagnóstico e gates:
+`qa/ead-release-preflight-20261019/README.md`.
+
 ## 2026-10-15 — implantação isolada Drupal / #210
 
 DECISION: usuário autorizou configuração produtiva via Tailscale/Dokploy, build no
