@@ -1,0 +1,14 @@
+[
+  {
+    "test": "registration page uses real institutional template HTTP200",
+    "status": "PASS"
+  },
+  {
+    "test": "baseline reproduces missing course hidden field",
+    "status": "PASS"
+  },
+  {
+    "test": "baseline login loses course context",
+    "status": "PASS"
+  }
+]

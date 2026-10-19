@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-19 — #299 nova rodada autorizada: HTTP sintético PASS
+
+TESTED-SYNTHETIC: PR #300 base5f833c2, patch de aplicação inalterado; corrigida
+somente preparação da cópia QA. Apache UID33, MU-plugin, bloqueio de e-mail/HTTP
+externo e template real comprovados antes de qualquer POST. Baseline3/3;
+matriz HTTP32/32 PASS, contexto27/27, editorial63/63. Cadastro retorna ao curso,
+login preserva contexto, matrícula nativa confirmada em readback, duplicata
+rejeitada, logout e conteúdo restrito verificados. Política global preservada.
+Teardown de container/DB/usuário MySQL/filesystem PASS; hash-base idêntico.
+STOPs históricos preservados; divergência antiga do primeiro M1 não resolvida.
+Produção intacta; promoção do patch/adaptador e release continuam HUMAN_GATE.
+Recibo: `qa/ead-registration-resume-20261019/README.md`.
+
 ## 2026-10-19 — #299, patch institucional e stop da fixture HTTP
 
 IMPLEMENTED/TESTED-LOCAL: patch isolado contra TDS Child2.0.0 real sanitizado,

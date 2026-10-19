@@ -1,0 +1,19 @@
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+f: /var/www/html/wp-content/themes/tds-child-theme/pages/cadastro.php
+drwxr-xr-x root     root     /
+drwxr-xr-x root     root     var
+drwxr-xr-x root     root     www
+drwx--x--- www-data www-data html
+drwxr-x--- www-data www-data wp-content
+drwxr-x--- www-data www-data themes
+drwxr-x--- root     www-data tds-child-theme
+drwxr-x--- root     www-data pages
+-rw-r----- root     www-data cadastro.php
+f: /var/www/html/wp-content/mu-plugins/qa-isolation.php
+drwxr-xr-x root     root     /
+drwxr-xr-x root     root     var
+drwxr-xr-x root     root     www
+drwx--x--- www-data www-data html
+drwxr-x--- www-data www-data wp-content
+drwxr-x--- root     www-data mu-plugins
+-rw-r----- root     www-data qa-isolation.php

@@ -1,6 +1,11 @@
 # #299 — patch contra TDS Child institucional 2.0.0
 
-**IMPLEMENTED / TESTED-LOCAL; HTTP BLOCKED. Não implantar.**
+**TESTED-SYNTHETIC: HTTP32/32 PASS na nova rodada autorizada. Não implantar.**
+
+Atualização pós-STOP: `qa-resume/run-qa-resume.sh` corrigiu somente permissões da
+cópia e comprovou Apache/MU-plugin/e-mail/template antes dos POSTs. Patch e testes
+originais intactos. Recibo: `docs/qa/ead-registration-resume-20261019/README.md`.
+As seções de STOP abaixo descrevem as tentativas históricas, não o resultado novo.
 
 Este diretório não substitui `wordpress/tds-child-theme` (WP-2) nem altera
 o snapshot legado em quarentena. Contém um patch mínimo contra os arquivos instalados
