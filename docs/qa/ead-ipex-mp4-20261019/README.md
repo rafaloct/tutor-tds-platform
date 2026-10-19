@@ -85,3 +85,14 @@ para aulas que o LearnPress forneça com seu ID.
   suas metas editadas nesta tarefa; o retorno dos vídeos no aplicativo
   depende do novo contrato estar publicado.
 - **MERGE_ALLOWED=NO; PRODUCTION_ALLOWED=NO;** nenhum deploy ou auto-merge.
+
+## Addendum QA-only — Issue #288
+
+OBSERVED no código do PR #287: o formulário exigia ID YouTube para confirmar
+direitos, enquanto o REST consultava o MP4 corrente do HTML apenas com o
+booleano de aprovação. TARGET nesta worktree: revisão explícita em dois
+salvamentos para MP4 válido, com fingerprint de MP4/VTT conferido no editor e
+na projeção REST. A ausência de fingerprint anterior falha fechada e requer
+revisão; `_tds_mobile_public` permanece um gate independente. UNKNOWN até
+staging: comportamento no WordPress conectado e entrega real de mídia após
+instalação. Sem alteração de streaming, Flutter ou WordPress conectado.

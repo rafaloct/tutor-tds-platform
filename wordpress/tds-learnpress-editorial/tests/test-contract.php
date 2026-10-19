@@ -155,14 +155,67 @@ $base = 'https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/qa/'
 $posts[1425]->post_content = '<video controls><source src="' . $base . 'lesson.mp4">'
     . '<track kind="captions" src="' . $base . 'lesson.vtt" srclang="pt-BR"></video>';
 update_post_meta( 1425, '_tds_mobile_youtube_id', '' );
+$mp4_form = array(
+	'tds_mobile_lesson_nonce'=>'validnonce',
+	'tds_mobile_public'=>'1',
+	'tds_mobile_rights_approved'=>'1',
+	'tds_mobile_youtube_id'=>'',
+);
+verify( request_lesson()->get_data()['media'] === null, 'Legacy rights boolean cannot approve MP4' );
+$_POST = $mp4_form;
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'MP4 first save requires review' );
+verify( request_lesson()->get_data()['media'] === null, 'MP4 remains closed before second save' );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '1', 'MP4 second save explicitly approves source' );
 $mp4 = request_lesson()->get_data()['media'];
 verify( $mp4['provider'] === 'ipex_mp4', 'IPEX MP4 alternative to YouTube' );
 verify( $mp4['source_url'] === $base . 'lesson.mp4', 'IPEX video URL scoped' );
 verify( $mp4['captions_url'] === $base . 'lesson.vtt', 'IPEX captions scoped' );
+update_post_meta( 1425, '_tds_mobile_public', '0' );
+verify( request_lesson()->code === 'tds_editorial_lesson_not_authorized', 'MP4 rights do not grant public lesson opt-in' );
+update_post_meta( 1425, '_tds_mobile_public', '1' );
 verify( request_lesson( 1425, request_lesson()->headers['ETag'] )->get_status() === 304, 'MP4 ETag 304' );
-update_post_meta( 1425, '_tds_mobile_rights_approved', '0' );
-verify( request_lesson()->get_data()['media'] === null, 'MP4 requires rights flag' );
-update_post_meta( 1425, '_tds_mobile_rights_approved', '1' );
+$posts[1425]->post_content = str_replace( 'lesson.mp4', 'replacement.mp4', $posts[1425]->post_content );
+verify( request_lesson()->get_data()['media'] === null, 'Importer MP4 swap fails closed' );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'MP4 swap resets approval despite checked box' );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( request_lesson()->get_data()['media']['source_url'] === $base . 'replacement.mp4', 'Re-reviewed MP4 published' );
+$posts[1425]->post_content = str_replace( 'lesson.vtt', 'replacement.vtt', $posts[1425]->post_content );
+verify( request_lesson()->get_data()['media'] === null, 'Importer VTT swap fails closed' );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'VTT swap resets approval' );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( request_lesson()->get_data()['media']['captions_url'] === $base . 'replacement.vtt', 'Re-reviewed VTT published' );
+update_post_meta( 1425, '_tds_mobile_captions_url', $base . 'editorial.vtt' );
+verify( request_lesson()->get_data()['media'] === null, 'External editorial VTT swap fails closed' );
+update_post_meta( 1425, '_tds_mobile_captions_url', '' );
+unset( $_POST['tds_mobile_rights_approved'] );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( request_lesson()->get_data()['media'] === null, 'Explicit revocation removes MP4' );
+$_POST = $mp4_form;
+$posts[1425]->post_content = str_replace( 'ead.ipexdesenvolvimento.cloud', 'example.org', $posts[1425]->post_content );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'Invalid MP4 URI never approved' );
+verify( request_lesson()->get_data()['media'] === null, 'Other host denied' );
+$posts[1425]->post_content = str_replace( 'example.org', 'ead.ipexdesenvolvimento.cloud', $posts[1425]->post_content );
+$posts[1425]->post_content = str_replace( $base . 'replacement.vtt', 'https://example.org/replacement.vtt', $posts[1425]->post_content );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'Invalid VTT URI never approved' );
+foreach ( array(
+	'http://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/qa/replacement.mp4',
+	'https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/other/replacement.mp4',
+	'https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/%2e%2e/replacement.mp4',
+	'https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/qa/replacement.mp4?token=x',
+) as $invalid_source ) {
+	$posts[1425]->post_content = '<video><source src="' . $invalid_source . '"></video>';
+	TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+	TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
+	verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'MP4 URL allowlist denies invalid source' );
+}
 $posts[1425]->post_content = str_replace( 'ead.ipexdesenvolvimento.cloud', 'example.org', $posts[1425]->post_content );
 verify( request_lesson()->get_data()['media'] === null, 'MP4 other host rejected' );
 $posts[1425]->post_content = $original_content;
@@ -187,6 +240,7 @@ TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
 verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '0', 'Changing video resets rights even if checkbox remains checked' );
 TDS_LearnPress_Editorial_Admin::save( 1425, $posts[1425] );
 verify( get_post_meta( 1425, '_tds_mobile_rights_approved' ) === '1', 'Explicit second review can approve same ID' );
+verify( request_lesson()->get_data()['media']['video_id'] === '123456789ab', 'YouTube projection remains available' );
 verify( request_lesson()->get_data()['media']['poster_url'] !== null, 'Approved WordPress poster' );
 $_POST['tds_mobile_lesson_nonce'] = 'invalidnonce';
 $_POST['tds_mobile_public'] = '';
