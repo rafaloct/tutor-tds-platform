@@ -1,0 +1,15 @@
+{
+  "type": "SUPPLEMENTAL_REAL_NATIVE_WEBVIEW_VIDEO_NO_AUDIO",
+  "description": "Captures ongoing YouTube video shown inside Tutor TDS WebView, after manual play.",
+  "file": "06-actual-webview-replay-18s.mp4",
+  "bytes": 1438453,
+  "sha256": "f43b75cc381084b609e3b724ba687139de525af37b3bbde3fb91df10cefbd74a",
+  "screenrecord_exit": 0,
+  "utc": "2026-10-19T12:18:51.739335+00:00",
+  "no_claims": [
+    "system audio",
+    "production media rights",
+    "student grades",
+    "watch time"
+  ]
+}

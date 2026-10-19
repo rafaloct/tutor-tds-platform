@@ -1,0 +1,18 @@
+﻿[
+    {
+        "utc":  "2026-10-19T12:09:51+00:00",
+        "route":  "curriculum_12",
+        "http":  200,
+        "etag":  true,
+        "conditional":  false,
+        "bytes":  552
+    },
+    {
+        "utc":  "2026-10-19T12:09:58+00:00",
+        "route":  "lesson_13",
+        "http":  200,
+        "etag":  true,
+        "conditional":  false,
+        "bytes":  342
+    }
+]
