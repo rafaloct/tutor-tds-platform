@@ -1,0 +1,648 @@
+{
+  "observed_utc": "2026-10-19T23:10:15.861756+00:00",
+  "method": "anonymous GET only",
+  "catalog_http": 200,
+  "catalog_count": 11,
+  "extra_courses": [
+    {
+      "id": 1709,
+      "slug": "ia-processos-internos"
+    },
+    {
+      "id": 1474,
+      "slug": "automacoes-celular"
+    }
+  ],
+  "courses": [
+    {
+      "id": 614,
+      "slug": "inteligencia-artificial-e-inclusao-digital",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/inteligencia-artificial-e-inclusao-digital/",
+      "learnpress_http": 200,
+      "sections": 5,
+      "items": 17,
+      "item_types": {
+        "lp_lesson": 17
+      },
+      "public_preview_items": 17,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1295,
+          "type": "lp_lesson",
+          "title": "Aula 01 — Onde a inteligência artificial já aparece"
+        },
+        {
+          "id": 1396,
+          "type": "lp_lesson",
+          "title": "Aula 02 — Como a inteligência artificial aprende e quais são seus limites"
+        },
+        {
+          "id": 1397,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Inclusão digital: por onde começar a usar IA"
+        },
+        {
+          "id": 1398,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Criar textos e conteúdos de divulgação com IA"
+        },
+        {
+          "id": 1296,
+          "type": "lp_lesson",
+          "title": "Aula 05 — Como fazer uma boa pergunta para a IA"
+        },
+        {
+          "id": 1399,
+          "type": "lp_lesson",
+          "title": "Aula 06 — Criar imagens e materiais visuais com IA"
+        },
+        {
+          "id": 1400,
+          "type": "lp_lesson",
+          "title": "Aula 07 — Atender clientes com WhatsApp Business e ajuda da IA"
+        },
+        {
+          "id": 1401,
+          "type": "lp_lesson",
+          "title": "Aula 08 — Organizar as finanças do negócio com ajuda da IA"
+        },
+        {
+          "id": 1297,
+          "type": "lp_lesson",
+          "title": "Aula 09 — Como pesquisar políticas públicas com ajuda da IA"
+        },
+        {
+          "id": 1402,
+          "type": "lp_lesson",
+          "title": "Aula 10 — Monitorar clima e condições para o plantio"
+        },
+        {
+          "id": 1403,
+          "type": "lp_lesson",
+          "title": "Aula 11 — Cuidados importantes: privacidade, verificação e LGPD"
+        },
+        {
+          "id": 1404,
+          "type": "lp_lesson",
+          "title": "Aula 12 — IA em funcionamento no Tocantins e próximos passos"
+        },
+        {
+          "id": 1351,
+          "type": "lp_lesson",
+          "title": "O que é Inteligência Artificial?"
+        },
+        {
+          "id": 1352,
+          "type": "lp_lesson",
+          "title": "Tipos de IA e como Funcionam"
+        },
+        {
+          "id": 1353,
+          "type": "lp_lesson",
+          "title": "IA no Contexto Tocantinense"
+        },
+        {
+          "id": 1354,
+          "type": "lp_lesson",
+          "title": "Usando IA no Seu Trabalho"
+        },
+        {
+          "id": 1355,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        }
+      ]
+    },
+    {
+      "id": 1298,
+      "slug": "agricultura-sustentavel",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/agricultura-sustentavel/",
+      "learnpress_http": 200,
+      "sections": 8,
+      "items": 13,
+      "item_types": {
+        "lp_lesson": 13
+      },
+      "public_preview_items": 13,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1299,
+          "type": "lp_lesson",
+          "title": "Boas-vindas"
+        },
+        {
+          "id": 1300,
+          "type": "lp_lesson",
+          "title": "Agroecologia no Cerrado"
+        },
+        {
+          "id": 1301,
+          "type": "lp_lesson",
+          "title": "Práticas Agroecológicas"
+        },
+        {
+          "id": 1302,
+          "type": "lp_lesson",
+          "title": "Políticas Públicas e Comercialização"
+        },
+        {
+          "id": 1303,
+          "type": "lp_lesson",
+          "title": "Sistemas Agroflorestais (SAFs)"
+        },
+        {
+          "id": 1304,
+          "type": "lp_lesson",
+          "title": "Irrigação de Baixo Custo"
+        },
+        {
+          "id": 1305,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1420,
+          "type": "lp_lesson",
+          "title": "Aula 01 — Agroecologia no Cerrado tocantinense"
+        },
+        {
+          "id": 1421,
+          "type": "lp_lesson",
+          "title": "Aula 02 — Práticas agroecológicas para a roça"
+        },
+        {
+          "id": 1422,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Políticas públicas e comercialização"
+        },
+        {
+          "id": 1423,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Sistemas Agroflorestais: os SAFs"
+        },
+        {
+          "id": 1424,
+          "type": "lp_lesson",
+          "title": "Aula 05 — Irrigação de baixo custo para a seca"
+        },
+        {
+          "id": 1702,
+          "type": "lp_lesson",
+          "title": "Aula 06 — Perguntas de produtor, respostas da Embrapa"
+        }
+      ]
+    },
+    {
+      "id": 1307,
+      "slug": "atendimento-cliente",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/atendimento-cliente/",
+      "learnpress_http": 200,
+      "sections": 6,
+      "items": 9,
+      "item_types": {
+        "lp_lesson": 9
+      },
+      "public_preview_items": 9,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1308,
+          "type": "lp_lesson",
+          "title": "Por que Atender Bem?"
+        },
+        {
+          "id": 1309,
+          "type": "lp_lesson",
+          "title": "Os Pilares do Bom Atendimento"
+        },
+        {
+          "id": 1310,
+          "type": "lp_lesson",
+          "title": "Momentos Críticos do Atendimento"
+        },
+        {
+          "id": 1311,
+          "type": "lp_lesson",
+          "title": "Compromisso com a Qualidade"
+        },
+        {
+          "id": 1312,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1428,
+          "type": "lp_lesson",
+          "title": "Aula 01 — Por que atender bem faz o negócio crescer"
+        },
+        {
+          "id": 1429,
+          "type": "lp_lesson",
+          "title": "Aula 02 — Os três pilares do bom atendimento"
+        },
+        {
+          "id": 1430,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Momentos críticos: primeiro contato, reclamação e cliente difícil"
+        },
+        {
+          "id": 1431,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Cliente fiel e os direitos do consumidor"
+        }
+      ]
+    },
+    {
+      "id": 1314,
+      "slug": "audiovisual",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/audiovisual/",
+      "learnpress_http": 200,
+      "sections": 6,
+      "items": 9,
+      "item_types": {
+        "lp_lesson": 9
+      },
+      "public_preview_items": 9,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1315,
+          "type": "lp_lesson",
+          "title": "O Poder do Vídeo"
+        },
+        {
+          "id": 1316,
+          "type": "lp_lesson",
+          "title": "Pré-produção: Planejando o Vídeo"
+        },
+        {
+          "id": 1317,
+          "type": "lp_lesson",
+          "title": "Conceitos Técnicos Essenciais"
+        },
+        {
+          "id": 1318,
+          "type": "lp_lesson",
+          "title": "Edição e Publicação"
+        },
+        {
+          "id": 1319,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1432,
+          "type": "lp_lesson",
+          "title": "Aula 01 — O poder do vídeo no dia a dia"
+        },
+        {
+          "id": 1433,
+          "type": "lp_lesson",
+          "title": "Aula 02 — Pré-produção: planejando o vídeo antes de gravar"
+        },
+        {
+          "id": 1434,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Conceitos técnicos: enquadramento, luz, som e movimento"
+        },
+        {
+          "id": 1435,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Edição e publicação: do corte à escolha da plataforma"
+        }
+      ]
+    },
+    {
+      "id": 1321,
+      "slug": "cooperativismo",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/cooperativismo/",
+      "learnpress_http": 200,
+      "sections": 6,
+      "items": 10,
+      "item_types": {
+        "lp_lesson": 10
+      },
+      "public_preview_items": 10,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1322,
+          "type": "lp_lesson",
+          "title": "Trabalhar Junto é mais Forte"
+        },
+        {
+          "id": 1323,
+          "type": "lp_lesson",
+          "title": "O que é uma Cooperativa"
+        },
+        {
+          "id": 1324,
+          "type": "lp_lesson",
+          "title": "Acesso a Mercados Públicos"
+        },
+        {
+          "id": 1325,
+          "type": "lp_lesson",
+          "title": "Como Montar uma Cooperativa"
+        },
+        {
+          "id": 1326,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1440,
+          "type": "lp_lesson",
+          "title": "Aula 01 — Trabalhar junto é mais forte: associativismo e cooperativismo"
+        },
+        {
+          "id": 1441,
+          "type": "lp_lesson",
+          "title": "Aula 02 — O que é uma cooperativa e como ela funciona"
+        },
+        {
+          "id": 1442,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Acesso a mercados públicos: PAA e PNAE"
+        },
+        {
+          "id": 1443,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Como montar uma cooperativa, passo a passo"
+        },
+        {
+          "id": 1704,
+          "type": "lp_lesson",
+          "title": "Aula 05 — Vender junto: perguntas respondidas"
+        }
+      ]
+    },
+    {
+      "id": 1328,
+      "slug": "economia-lar",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/economia-lar/",
+      "learnpress_http": 200,
+      "sections": 6,
+      "items": 9,
+      "item_types": {
+        "lp_lesson": 9
+      },
+      "public_preview_items": 9,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1329,
+          "type": "lp_lesson",
+          "title": "Conforto e Organização em Casa"
+        },
+        {
+          "id": 1330,
+          "type": "lp_lesson",
+          "title": "Orientação Solar e Ventilação"
+        },
+        {
+          "id": 1331,
+          "type": "lp_lesson",
+          "title": "Organização e Soluções Práticas"
+        },
+        {
+          "id": 1332,
+          "type": "lp_lesson",
+          "title": "Economia de Energia e Água"
+        },
+        {
+          "id": 1333,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1449,
+          "type": "lp_lesson",
+          "title": "Aula 01 — Conforto e organização dentro de casa"
+        },
+        {
+          "id": 1450,
+          "type": "lp_lesson",
+          "title": "Aula 02 — Orientação solar e ventilação da casa"
+        },
+        {
+          "id": 1451,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Organização e soluções práticas para a casa"
+        },
+        {
+          "id": 1452,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Economia de energia e água no dia a dia"
+        }
+      ]
+    },
+    {
+      "id": 1335,
+      "slug": "educacao-financeira",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/educacao-financeira/",
+      "learnpress_http": 200,
+      "sections": 7,
+      "items": 11,
+      "item_types": {
+        "lp_lesson": 11
+      },
+      "public_preview_items": 11,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1336,
+          "type": "lp_lesson",
+          "title": "Por que cuidar do dinheiro?"
+        },
+        {
+          "id": 1337,
+          "type": "lp_lesson",
+          "title": "Montando seu Orçamento"
+        },
+        {
+          "id": 1338,
+          "type": "lp_lesson",
+          "title": "Crédito e Juros"
+        },
+        {
+          "id": 1339,
+          "type": "lp_lesson",
+          "title": "Poupança e Metas"
+        },
+        {
+          "id": 1340,
+          "type": "lp_lesson",
+          "title": "Precificação do seu Trabalho"
+        },
+        {
+          "id": 1341,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1444,
+          "type": "lp_lesson",
+          "title": "Aula 01 — Por que cuidar do dinheiro que entra em casa"
+        },
+        {
+          "id": 1445,
+          "type": "lp_lesson",
+          "title": "Aula 02 — Montando o orçamento familiar, passo a passo"
+        },
+        {
+          "id": 1446,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Crédito e juros: usar com responsabilidade"
+        },
+        {
+          "id": 1447,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Poupança e metas: guardar primeiro"
+        },
+        {
+          "id": 1448,
+          "type": "lp_lesson",
+          "title": "Aula 05 — Precificação: o preço justo do seu trabalho"
+        }
+      ]
+    },
+    {
+      "id": 1343,
+      "slug": "sim-sima",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/sim-sima/",
+      "learnpress_http": 200,
+      "sections": 6,
+      "items": 9,
+      "item_types": {
+        "lp_lesson": 9
+      },
+      "public_preview_items": 9,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1344,
+          "type": "lp_lesson",
+          "title": "Por que regularizar sua produção?"
+        },
+        {
+          "id": 1345,
+          "type": "lp_lesson",
+          "title": "O que é o SIM"
+        },
+        {
+          "id": 1346,
+          "type": "lp_lesson",
+          "title": "Boas Práticas de Fabricação"
+        },
+        {
+          "id": 1347,
+          "type": "lp_lesson",
+          "title": "Acessando Mercados Formais"
+        },
+        {
+          "id": 1348,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1436,
+          "type": "lp_lesson",
+          "title": "Aula 01 — Por que regularizar a produção de alimentos"
+        },
+        {
+          "id": 1437,
+          "type": "lp_lesson",
+          "title": "Aula 02 — O que é o SIM, o SIMA e o SISBI"
+        },
+        {
+          "id": 1438,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Boas Práticas de Fabricação: higiene, temperatura e rótulo"
+        },
+        {
+          "id": 1439,
+          "type": "lp_lesson",
+          "title": "Aula 04 — Acessando mercados formais: PNAE, DAP e o passo a passo"
+        }
+      ]
+    },
+    {
+      "id": 1356,
+      "slug": "saf",
+      "url": "https://ead.ipexdesenvolvimento.cloud/courses/saf/",
+      "learnpress_http": 200,
+      "sections": 5,
+      "items": 8,
+      "item_types": {
+        "lp_lesson": 8
+      },
+      "public_preview_items": 8,
+      "editorial_http": 404,
+      "editorial_error": "rest_no_route",
+      "internal_app_content": "UNAVAILABLE_ROUTE_NOT_INSTALLED",
+      "curriculum": [
+        {
+          "id": 1357,
+          "type": "lp_lesson",
+          "title": "O que é um SAF?"
+        },
+        {
+          "id": 1358,
+          "type": "lp_lesson",
+          "title": "Benefícios do SAF"
+        },
+        {
+          "id": 1359,
+          "type": "lp_lesson",
+          "title": "Como Implantar seu SAF"
+        },
+        {
+          "id": 1360,
+          "type": "lp_lesson",
+          "title": "Grupo e Suporte"
+        },
+        {
+          "id": 1425,
+          "type": "lp_lesson",
+          "title": "Aula 01 — O que é um Sistema Agroflorestal"
+        },
+        {
+          "id": 1426,
+          "type": "lp_lesson",
+          "title": "Aula 02 — Benefícios do SAF para a família"
+        },
+        {
+          "id": 1427,
+          "type": "lp_lesson",
+          "title": "Aula 03 — Como implantar seu SAF"
+        },
+        {
+          "id": 1703,
+          "type": "lp_lesson",
+          "title": "Aula 04 — SAF na prática: dúvidas respondidas"
+        }
+      ]
+    }
+  ],
+  "total_curriculum_items": 95,
+  "media_count": "UNKNOWN: curriculum items are not a count of MP4/VTT assets or editorial approvals"
+}

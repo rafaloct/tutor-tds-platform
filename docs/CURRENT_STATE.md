@@ -1,5 +1,20 @@
 # CURRENT STATE
 
+## 2026-10-19 — #299, patch institucional e stop da fixture HTTP
+
+IMPLEMENTED/TESTED-LOCAL: patch isolado contra TDS Child2.0.0 real sanitizado,
+sem substituir WP-2/legado. Contexto de curso27/27, editorial63/63 e três lints
+do tema resultante PASS. BLOCKED: duas execuções GET cadastro200 sem formulário;
+nenhum POST/conta/matrícula de cadastro executado. Cópia de QA root700/600 não
+legível por www-data, confirmado offline; não houve terceira execução.
+Teardown e hash-base antes/depois/final PASS nesta rodada; ressalva histórica
+do primeiro M1 permanece. Público sem mutação/restart, três hashes preservados.
+Nova auditoria: nove currículos LP200, **95** aulas (48 títulos Aula NN), catálogo11;
+adaptador público ausente, nove404 rest_no_route, não rejeições editoriais.
+Plugin do sandbox corresponde ao Git; ZIP de inspeção preparado. Flutter/APK/
+AAB inalterados, sem novo QA Android. #296/#298 draft; #297/#299 abertas.
+Recibo: `qa/ead-registration-context-20261019/README.md`. Release não homologada.
+
 ## 2026-10-19 — autoria nativa e gates finais ainda parciais
 
 DECISION: reutilizar WordPress/LearnPress para conteúdo, inscrição e progresso
