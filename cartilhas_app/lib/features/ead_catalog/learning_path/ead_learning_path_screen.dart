@@ -260,24 +260,25 @@ class _EadLearningPathScreenState extends State<EadLearningPathScreen> {
                                 : Icons.menu_book_outlined,
                           ),
                           title: Text(lesson.title),
+                          // No mobile opt-in means only a public syllabus:
+                          // open the canonical course on the official EAD,
+                          // never attempt to fetch protected lesson HTML.
                           onTap: lesson.type == 'lp_quiz'
                               ? () => _openQuiz(lesson)
                               : lesson.mobileContent
                               ? () => _openMobileLesson(lesson)
-                              : null,
-                          trailing: lesson.type == 'lp_quiz'
+                              : _openPortal,
+                          trailing:
+                              lesson.type == 'lp_quiz' || !lesson.mobileContent
                               ? const Icon(Icons.open_in_new)
-                              : lesson.mobileContent
-                              ? const Icon(Icons.chevron_right)
-                              : null,
+                              : const Icon(Icons.chevron_right),
                           subtitle: Text(
                             lesson.type == 'lp_quiz'
                                 ? 'Abrir quiz publicado no EAD (sem transferir nota)'
                                 : lesson.mobileContent
                                 ? 'Ler conteúdo autorizado no Tutor TDS'
-                                : lesson.isVideoCandidate
-                                ? 'Videoaula do EAD'
-                                : 'Leitura ou atividade do EAD',
+                                : 'Abrir curso no site EAD • '
+                                      'aula não liberada para leitura no app',
                           ),
                         ),
                     ],
