@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../data/ead_catalog_repository.dart';
 import 'ead_editorial_bridge_repository.dart';
 import 'ead_youtube_player_screen.dart';
+import 'ead_ipex_video_player_screen.dart';
 
 typedef EadLessonLoader =
     Future<EadEditorialLesson> Function(EadCourse course, int lessonId);
@@ -18,12 +19,15 @@ class EadMobileLessonScreen extends StatefulWidget {
     this.loader,
     this.openExternal,
     this.videoViewFactory,
+    this.ipexVideoViewFactory,
   });
 
   final EadCourse course;
   final int lessonId;
   final EadLessonLoader? loader;
   final EadVideoViewFactory? videoViewFactory;
+  final Widget Function(Uri, Uri?, VoidCallback, VoidCallback)?
+  ipexVideoViewFactory;
   final Future<bool> Function(Uri url)? openExternal;
 
   @override
@@ -140,6 +144,24 @@ class _EadMobileLessonScreenState extends State<EadMobileLessonScreen> {
                   ),
                 );
               }),
+              if (lesson.ipexVideoUrl != null) ...[
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => EadIpexVideoPlayerScreen(
+                        video: lesson.ipexVideoUrl!,
+                        captions: lesson.ipexCaptionsUrl,
+                        lessonTitle: lesson.title,
+                        openExternal: widget.openExternal,
+                        playerFactory: widget.ipexVideoViewFactory,
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.play_circle_outline),
+                  label: const Text('Assistir vídeo no IPEX'),
+                ),
+              ],
               if (EadYoutubePolicy.validId(lesson.youtubeId)) ...[
                 const SizedBox(height: 8),
                 FilledButton.icon(

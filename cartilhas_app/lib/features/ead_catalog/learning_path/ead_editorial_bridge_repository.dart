@@ -17,6 +17,8 @@ class EadEditorialLesson {
     required this.contentHtml,
     required this.revision,
     this.youtubeId,
+    this.ipexVideoUrl,
+    this.ipexCaptionsUrl,
   });
 
   final int courseId;
@@ -25,6 +27,8 @@ class EadEditorialLesson {
   final String contentHtml;
   final String revision;
   final String? youtubeId;
+  final Uri? ipexVideoUrl;
+  final Uri? ipexCaptionsUrl;
 }
 
 /// Dynamic, opt-in WordPress projection. All requests are anonymous GET.
@@ -139,7 +143,8 @@ class EadEditorialBridgeRepository {
         }
         final mobile = item['mobile_content'] == true;
         final youtube = _videoId(item['media']);
-        if (youtube != null && !mobile) {
+        final hosted = _hosted(item['media']);
+        if ((youtube != null || hosted != null) && !mobile) {
           throw const EadCurriculumException('Vídeo sem autorização de aula.');
         }
         lessons.add(
@@ -147,9 +152,11 @@ class EadEditorialBridgeRepository {
             id: item['id'] as int,
             title: (item['title'] as String).trim(),
             type: item['type'] as String,
-            isVideoCandidate: youtube != null,
+            isVideoCandidate: youtube != null || hosted != null,
             mobileContent: mobile,
             youtubeId: youtube,
+            ipexVideoUrl: hosted?.source,
+            ipexCaptionsUrl: hosted?.captions,
           ),
         );
       }
@@ -206,6 +213,7 @@ class EadEditorialBridgeRepository {
       throw const EadCurriculumException('Conteúdo HTML incompatível.');
     }
     final youtube = _videoId(map['media']);
+    final hosted = _hosted(map['media']);
     return EadEditorialLesson(
       courseId: course.id,
       lessonId: lessonId,
@@ -213,6 +221,8 @@ class EadEditorialBridgeRepository {
       contentHtml: content,
       revision: map['revision'] as String,
       youtubeId: youtube,
+      ipexVideoUrl: hosted?.source,
+      ipexCaptionsUrl: hosted?.captions,
     );
   }
 
@@ -229,8 +239,56 @@ class EadEditorialBridgeRepository {
     throw const EadCurriculumException('Dados editoriais inválidos.');
   }
 
+  static ({Uri source, Uri? captions})? _hosted(Object? raw) {
+    if (raw == null ||
+        (raw is Map<String, dynamic> && raw['provider'] == 'youtube')) {
+      return null;
+    }
+    if (raw is! Map<String, dynamic> || raw['provider'] != 'ipex_mp4') {
+      throw const EadCurriculumException('Provedor de mídia não autorizado.');
+    }
+    final source = _ipexUrl(raw['source_url'], '.mp4');
+    if (source == null) {
+      throw const EadCurriculumException('MP4 do IPEX inválido.');
+    }
+    final captionField = raw['captions_url'];
+    final captions = captionField == null
+        ? null
+        : _ipexUrl(captionField, '.vtt');
+    if (captionField != null && captions == null) {
+      throw const EadCurriculumException('Legenda do IPEX inválida.');
+    }
+    return (source: source, captions: captions);
+  }
+
+  static Uri? _ipexUrl(Object? raw, String extension) {
+    if (raw is! String ||
+        raw.length > 2000 ||
+        raw.contains(RegExp(r'%(2e|2f|5c)', caseSensitive: false))) {
+      return null;
+    }
+    final uri = Uri.tryParse(raw);
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        uri.host != _host ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasPort ||
+        uri.hasQuery ||
+        uri.hasFragment ||
+        !uri.path.startsWith('/wp-content/uploads/tutor-tds/') ||
+        !uri.path.toLowerCase().endsWith(extension) ||
+        uri.path.contains('..') ||
+        uri.path.contains('\\')) {
+      return null;
+    }
+    return uri;
+  }
+
   static String? _videoId(Object? raw) {
     if (raw == null) return null;
+    if (raw is Map<String, dynamic> && raw['provider'] == 'ipex_mp4') {
+      return null;
+    }
     if (raw is! Map<String, dynamic> ||
         raw['provider'] != 'youtube' ||
         raw['video_id'] is! String ||
