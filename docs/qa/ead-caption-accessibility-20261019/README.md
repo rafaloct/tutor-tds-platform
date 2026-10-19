@@ -79,7 +79,7 @@ teste unitário. Não usar `emulator-5554` reservado ao PR #287.
 - Android do novo build, áudio, seleção manual VTT, captura e tráfego: **NOT_RUN**.
 - Suíte completa, AAB assinado, staging/produção: **NOT_RUN**.
 
-Rollback: reverter o commit deste PR na branch de integração, restaurando o
+Rollback: reverter as alterações deste PR na branch de integração, restaurando o
 HTML5 original e JavaScript desabilitado. URLs, MP4/VTT, dados, matrículas e
 serviços não foram alterados. Gate humano: revisão do QA Android novo, da cadeia
 stacked e da segurança de cookies antes de qualquer promoção.
