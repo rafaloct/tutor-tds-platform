@@ -1,5 +1,27 @@
 # Decisões vigentes
 
+## Precedência institucional de 19/10/2026 — LearnPress nativo
+
+A decisão #249 e a missão final de 19/10 prevalecem sobre trechos históricos
+que vedavam qualquer matrícula no WordPress: LearnPress é autoridade de
+inscrição e progresso **da oferta EAD** e do material editorial; FastAPI
+continua autoridade de identidades/vínculos institucionais, turmas, frequência,
+evidências e certificados oficiais. Uma matrícula não comprova a outra.
+
+Reutilizar `lp_course`, `lp_lesson`, papel `lp_teacher` e login/cadastro/matrícula
+nativos. O responsável formal deve ter autoria compatível de curso e aulas.
+Administração/revisão mantém suas atribuições; editor genérico não recebe
+permissão adicional por conveniência. Verificar todos os pais de aula
+compartilhada. Proibidos `edit_others_*` global, elevação temporária, bypass de
+`map_meta_cap` ou mudanças core/vendor. Titularidade dos nove cursos reais
+depende de confirmação institucional; não reatribuir automaticamente.
+
+Sem SSO homologado, o app abre a URL oficial HTTPS no navegador, com identidades
+distintas. Nenhuma sincronização LP→FastAPI inferida, nem matrícula/frequência
+por reprodução. QA sintético autorizado no VPS existente; produção, merge,
+assinatura e Play exigem autorização própria. Provas e limitações de #297 em
+`qa/ead-native-owner-20261019/README.md`; decisão não equivale a gate aprovado.
+
 1. 2026-09-23: contrato do usuário redefine Wave 1 como Context Core. Números
    de ondas em documentos de 19–21/09 são históricos; não significam gate atual.
 2. Reusar `Institution` como Organization e `Classroom` como Cohort; não duplicar

@@ -1,5 +1,29 @@
 # CURRENT STATE
 
+## 2026-10-19 — autoria nativa e gates finais ainda parciais
+
+DECISION: reutilizar WordPress/LearnPress para conteúdo, inscrição e progresso
+EAD, preservando as autoridades institucionais FastAPI (#249). Instrutor deve
+ter vínculo legítimo com curso e aulas; nenhum bypass ou `edit_others_*` global.
+TESTED-SYNTHETIC-STAGING: curso e aula do mesmo `lp_teacher` permitiram POST302
+e readback sem patch. Nas duas fixtures ampliadas, curso foi observado pending
+e REST404; caminho encerrado. Administrador passou17 checkpoints HTTP/editoriais,
+MP4/VTT0→1→0, ETag, nonce e rascunho; matrícula nativa gratuita registrou uma
+linha, rejeitou duplicata e sessão ausente. Contrato PHP63/63. #297 segue aberta:
+GETs negados500 e publicação/integridade de múltiplos pais não homologados.
+
+Android15: APK b05eaa0 reutilizado (árvore lib/lock idêntica a c853db0) abriu
+catálogo11, percurso Agricultura8/13 e URL oficial no Chrome. API LP dos nove
+cursos200; adaptador móvel público404 em todos. Sem opt-in inferido nem novo
+build. AAB histórico permanece unsigned/NOT_FOR_UPLOAD; #296 draft0b06e81.
+Cadastro institucional continua UNKNOWN: clone usa tema padrão e registro
+desativado. #252 concentra o handoff, sem duplicar SSO.
+
+Preservação: clones removidos; execuções finais tiveram hash-base idêntico,
+container-base sem restart. Primeiro ensaio teve hash-base divergente de causa
+não isolada; não declarar preservação integral desse ensaio. Nenhuma mutação
+produtiva. Recibo e matriz: `qa/ead-native-owner-20261019/README.md`.
+
 ## 2026-10-19 — staging institucional isolado do adaptador IPEX
 
 OBSERVED/TESTED-SYNTHETIC-STAGING: com autorização humana, o plugin exato de
