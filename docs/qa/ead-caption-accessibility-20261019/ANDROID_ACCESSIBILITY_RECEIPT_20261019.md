@@ -82,7 +82,7 @@ Esses arquivos estão em
 homologação da integração LearnPress real: essa lacuna permanece explícita no
 PR #292 e não foi promovida a PASS.
 
-## AAB e fronteira responsável
+## AAB inicial e reprodução limpa posterior
 
 **Observed:** `cartilhas_app/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java`
 é ignorado pelo Git, permaneceu com referência a
@@ -99,10 +99,12 @@ sem plugins dev-only antes do Gradle e produzir AAB inspecionável sem chave rea
 **Responsible boundary:** tooling Flutter/Android e `tooling/build_production.ps1`,
 não o componente de legendas.
 
-**Structural fix:** em issue própria, reproduzir pelo junction ASCII exigido,
-tornar explícita e testada a limpeza/regeneração do registrant antes do build,
-então executar o runner com `config/production.json` custodiado. Não editar o
-arquivo gerado manualmente e não repetir o build até isso ser tratado.
+**Reprodução posterior:** a integração limpa #292+#295 em `c853db0…`, usando o
+mesmo Flutter 3.44.9 diretamente pelo `flutter_tools.snapshot`, regenerou o
+registrant e produziu o AAB sem erro. O wrapper `flutter.bat` também travou em
+`pub get` sem filho Dart, confirmando a fronteira de ambiente. Nenhuma edição
+manual no arquivo gerado foi necessária. Ver
+`../INTEGRATED_RELEASE_RECEIPT_20261019.md`.
 
 ## Estado GitHub observado após reautenticação
 
