@@ -17,6 +17,9 @@ BLOCKED independente posterior: preparação do clone adaptador/Android detectou
 novo hash-base 1ffeecf9 (esperado4dc75881), interrompendo antes de qualquer criação
 ou POST. Diferença somente em opções/cron/transientes; causa exclusiva UNKNOWN.
 Sem aceitar baseline novo nem repetir. Ver `qa/ead-registration-resume-20261019/ADAPTER_STOP.md`.
+Android independente: APK histórico F5BD7623 revalidado, sem rebuild; quatro
+checkpoints smoke PASS (entrada pública, catálogo11 após retry, percurso e retorno).
+Não é E2E MP4/staging; ver `qa/ead-registration-resume-20261019/ANDROID.md`.
 
 ## 2026-10-19 — #299, patch institucional e stop da fixture HTTP
 
