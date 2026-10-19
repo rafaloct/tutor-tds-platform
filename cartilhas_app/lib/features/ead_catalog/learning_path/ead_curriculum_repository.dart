@@ -12,6 +12,8 @@ class EadLesson {
     required this.isVideoCandidate,
     this.mobileContent = false,
     this.youtubeId,
+    this.ipexVideoUrl,
+    this.ipexCaptionsUrl,
   });
   final int id;
   final String title;
@@ -23,6 +25,10 @@ class EadLesson {
 
   /// Only present for rights-approved YouTube video IDs.
   final String? youtubeId;
+
+  /// HTTPS video explicitly released by the IPEX editorial adapter.
+  final Uri? ipexVideoUrl;
+  final Uri? ipexCaptionsUrl;
 }
 
 class EadSection {
