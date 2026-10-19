@@ -260,3 +260,12 @@
     WordPress; funcionalidades autenticadas/IA dependem de suas verificações.
     Não rotacionar chaves JWT/CPF nem modificar bancos acadêmicos. Autorização
     não constitui aceite E2E nem permissão de merge. Issue210/PR211.
+
+34. 2026-10-19: usuário autorizou instalar o adaptador WordPress/LearnPress no
+    staging institucional isolado já existente e encerrar somente sessões SSH
+    obsoletas. O portal público não pode ser prejudicado; não contratar ou
+    provisionar nova VM sem necessidade, porque a VM alugada anterior não ficará
+    disponível. A instalação no sandbox Docker interno passou com backup e
+    restore, mas o save real por `lp_teacher` retornou HTTP 500 e ficou bloqueado
+    na Issue #297. A autorização não inclui produção, usuários reais, ativação
+    das 48 aulas, merge, assinatura ou Play Store.

@@ -25,11 +25,13 @@ Branch: `agent/issue-294-caption-accessibility-20261019`.
   draft/OPEN no mesmo HEAD `b05eaa0`, mergeável/CLEAN, sem reviews ou threads e
   com analyze-test, gitleaks e quarentena WordPress SUCCESS. Os HEADs dos PRs
   #238/#284/#287/#289/#292/#293 também não mudaram.
-- **BLOCKED:** AAB de inspeção não foi produzido: uma tentativa
+- **SUPERSEDED:** na worktree inicial, o AAB de inspeção não foi produzido: uma tentativa
   falhou pelo `GeneratedPluginRegistrant.java` ignorado contendo o plugin
   dev-only `integration_test`; a repetição pelo fluxo normal terminou em hang do
   `flutter.bat`, sem compilador-filho e sem artefato. Não repetir sem corrigir a
-  fronteira de geração do registrant no runner.
+  fronteira de geração do registrant no runner. A reprodução posterior em
+  worktree integrada limpa pelo `flutter_tools.snapshot` passou e está registrada
+  em `../INTEGRATED_RELEASE_RECEIPT_20261019.md`.
 
 ## Segurança e contrato
 
@@ -93,8 +95,9 @@ Hashes representativos e relatório ampliado estão em
   HTTPS aprovados e todas as flags de risco `false`.
 - `pubspec.lock` permaneceu com SHA-256
   `3E044DE97EA5EABE70563B12D84345DC685192241185F64AC964A23186DE1BFE`.
-- AAB: **FAIL/BLOCKED**, não gerado nem assinado. O AAB histórico continua
-  `superseded`, `upload_allowed=false` e `matches_current_source=false`.
+- AAB do `b05eaa0`: **NOT_GENERATED** nesta worktree. O candidato integrado
+  posterior `c853db0` gerou AAB não assinado para inspeção; o AAB histórico
+  continua `superseded`, `upload_allowed=false` e `matches_current_source=false`.
 - GitHub: PR #295 no HEAD acima, CI integral **PASS**, draft/mergeável; promoção
   continua dependente de revisão humana e da cadeia stacked.
 
