@@ -1,5 +1,23 @@
 # CURRENT STATE
 
+## 2026-10-19 — Issue #294, homologação Android final do player IPEX
+
+OBSERVED: cadeia local #284→#287→#289→#293→#295 termina em
+`b05eaa058fb4b0c86c5569215652b893c55b517d`; #292 (`e8b60569…`) não está no
+clone e permanece paralelo sobre #289. TESTED-LOCAL: APK QA desse HEAD no
+Android15/API35 reproduziu MP4 IPEX, play/pause, retorno, 35 cues VTT em painel
+separado, Mostrar/Ocultar, ausência de controles sem VTT e alternativa YouTube;
+árvore TalkBack expôs controles/botão/texto. Requisição MP4 HTTP206 não levou
+Cookie/Authorization e o jar observado estava vazio. Flutter focal9/9, analyze,
+preflight3/3, sete regressões acadêmicas e `production.example.json` passaram. Áudio
+técnico AAudio estava iniciado/não mutado; audibilidade e anúncio TalkBack
+seguem UNKNOWN. APK SHA-256 `F5BD7623521E7ACC115E68994F55497862DC78BE9525A3BDFD20E789F4C5596A`.
+BLOCKED: AAB não gerado após falha do registrant dev-only e hang do wrapper;
+produção/Play/assinatura não tocados. Após reautenticação, PR #295 foi confirmado
+no mesmo HEAD, draft/mergeável/CLEAN, CI integral PASS e sem threads/reviews.
+Recibo completo:
+`qa/ead-caption-accessibility-20261019/ANDROID_ACCESSIBILITY_RECEIPT_20261019.md`.
+
 ## 2026-10-19 — Issue #291, gate EAD/Android candidato
 
 IMPLEMENTED/TESTED-LOCAL: recorte de teste Flutter para revogação editorial

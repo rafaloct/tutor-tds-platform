@@ -152,7 +152,7 @@ void main() {
     }
   });
 
-  test('HTML5 source e track pt-BR sem autoplay ou script', () {
+  test('HTML5 mantém MP4 e renderiza legenda fora do vídeo', () {
     final document = EadIpexVideoPolicy.document(
       Uri.parse(source),
       Uri.parse(captions),
@@ -161,14 +161,86 @@ void main() {
     expect(document, contains('kind="captions"'));
     expect(document, contains('srclang="pt-BR"'));
     expect(document, contains('preload="metadata"'));
+    expect(document, contains('controls playsinline'));
     expect(document, isNot(contains('autoplay')));
-    expect(document, isNot(contains('<script')));
+    expect(document, isNot(contains(' default>')));
+    expect(document, contains("item.mode = 'hidden'"));
+    expect(document, contains("track.addEventListener('cuechange', render)"));
+    expect(document, contains('output.textContent = cues'));
+    expect(document, contains('</video><div id="caption-panel">'));
+    expect(document, contains('aria-controls="caption-text"'));
+    expect(document, contains('aria-pressed="true"'));
+    expect(document, contains('Ocultar legendas'));
+    expect(document, contains('Mostrar legendas'));
+    expect(document, contains('aria-live="polite"'));
+    final nonce = RegExp(r'<script nonce="([^"]+)">')
+        .firstMatch(document)
+        ?.group(1);
+    expect(nonce, isNotNull);
+    expect(document, contains('script-src &#39;nonce-$nonce&#39;'));
+    expect(document, isNot(contains('script-src &#39;unsafe-inline&#39;')));
+    expect(
+      document,
+      contains('media-src https://ead.ipexdesenvolvimento.cloud'),
+    );
+    expect(document, contains('connect-src &#39;none&#39;'));
+    expect(document, isNot(contains('http://')));
     expect(
       () => EadIpexVideoPolicy.document(
         Uri.parse('https://evil.example/a.mp4'),
         null,
       ),
       throwsFormatException,
+    );
+  });
+
+  test('sem VTT não injeta controle nem habilita script no documento', () {
+    final document = EadIpexVideoPolicy.document(Uri.parse(source), null);
+    expect(document, isNot(contains('<track')));
+    expect(document, isNot(contains('<button id="caption-toggle"')));
+    expect(document, isNot(contains('<script')));
+    expect(document, contains('script-src &#39;none&#39;'));
+    expect(document, contains('controls playsinline'));
+  });
+
+  test('URLs permitidas são escapadas como atributo, sem HTML remoto', () {
+    final video = Uri.parse(source.replaceFirst('.mp4', '&extra.mp4'));
+    final document = EadIpexVideoPolicy.document(video, Uri.parse(captions));
+    expect(document, contains('FHD&amp;extra.mp4'));
+    expect(document, isNot(contains('FHD&extra.mp4')));
+    final encoded = Uri.parse(
+      source.replaceFirst('.mp4', '%3Cscript%3Ealert(1)%3Cscript%3E.mp4'),
+    );
+    expect(EadIpexVideoPolicy.allows(encoded, '.mp4'), true);
+    expect(
+      EadIpexVideoPolicy.document(encoded, null),
+      isNot(contains('<script>alert(1)')),
+    );
+  });
+
+  testWidgets('área de legenda só amplia o player quando há VTT', (
+    tester,
+  ) async {
+    Future<void> show(Uri? vtt) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EadIpexVideoPlayerScreen(
+            video: Uri.parse(source),
+            captions: vtt,
+            lessonTitle: 'Aula SAF',
+            playerFactory: (_, _, _, _) => const Text('PLAYER'),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    await show(Uri.parse(captions));
+    expect(tester.widget<AspectRatio>(find.byType(AspectRatio)).aspectRatio, 1);
+    await show(null);
+    expect(
+      tester.widget<AspectRatio>(find.byType(AspectRatio)).aspectRatio,
+      16 / 9,
     );
   });
 
