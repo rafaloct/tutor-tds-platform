@@ -2,7 +2,8 @@
 
 Data: 19/10/2026. Executor: LARGeo. Estado: player Android e candidato integrado
 homologados localmente; AAB não assinado aprovado para inspeção; release/Play
-continuam sob gates humanos.
+continuam sob gates humanos. O plugin foi instalado no staging sintético interno
+do VPS institucional; o save real por instrutor está BLOCKED na Issue #297.
 
 ## Origem e candidato
 
@@ -19,6 +20,7 @@ continuam sob gates humanos.
 | #295 local | `b05eaa058fb4b0c86c5569215652b893c55b517d` |
 | recibos #295 | `2d61805a982643c6ec16b4275d6f7f7633baa26b` |
 | candidato integrado #292+#295 | `c853db021368f4b536521800ed9dc33ef68e3aac` |
+| PR de consolidação | #296, HEAD documental auditado `26fac3d34c112d0b4f08d9c5d234e5a857e85fe3` |
 
 Os HEADs remotos acima foram confirmados ao vivo após reautenticação. PRs #238,
 #284, #287, #289, #292, #293 e #295 estão OPEN/draft, mergeáveis/CLEAN; todos
@@ -31,8 +33,9 @@ o comentário de handoff foi publicado após a homologação. A pilha
 
 PRs/issues reutilizados: PRs #238, #284, #287, #289, #292, #293 e #295;
 Issues #290, #291 e #294. A busca de duplicidade encontrou as Issues #3
-(preflight sem AAB) e #197 (release 1.4.0+13); nenhuma issue nova foi criada
-antes de uma reprodução limpa. Nenhum merge foi realizado.
+(preflight sem AAB) e #197 (release 1.4.0+13). Após duas reproduções limpas do
+HTTP 500 no editor, a Issue #297 foi criada com escopo único. Nenhum merge foi
+realizado.
 
 ## Matriz final
 
@@ -60,7 +63,9 @@ antes de uma reprodução limpa. Nenhum merge foi realizado.
 | conclusão/pedido/aprovação | PASS de contrato | snapshot/idempotência/ordem e gate humano passaram; E2E institucional não repetido |
 | Tutor contextual/conectividade | NOT_AFFECTED | nenhum arquivo/contrato do Tutor mudou; evidência anterior preservada, sem novo claim |
 | regressão acadêmica | PASS | sete testes focais, ambiente lockado; API não alterada pelo #295 |
-| LearnPress institucional integral | HUMAN_GATE | runtime sintético real passou; site institucional, SSO/matrícula/quiz/notas não demonstrados |
+| instalação WordPress institucional isolada | PASS sintético | fonte `c853db0`, backup/restore, rede interna, HTTP 200/304/401; sem portal público |
+| save LearnPress por instrutor | **BLOCKED #297** | página/metabox/nonce 200; POST real HTTP 500 em duas tentativas; teardown PASS |
+| LearnPress institucional integral | HUMAN_GATE | instalação sintética passou; usuários/dados reais, SSO/matrícula/quiz/notas não demonstrados |
 | preflight Android/release | PASS | 3/3; versão 1.4.0+13; min24/target36/compile36; lock preservado |
 | configuração de produção | PASS | endpoints aprovados; todas as flags de risco false |
 | endpoints/flags dentro de AAB release | PASS | `libapp.so` sem URL local/staging/dynamicqa; endpoints aprovados presentes; config validada |
@@ -68,7 +73,7 @@ antes de uma reprodução limpa. Nenhum merge foi realizado.
 | assinatura/upload/Play | HUMAN_GATE | `key.properties` ausente; artefato histórico superseded; upload proibido |
 | cadeia #292 + #295 | PASS | merge `c853db0`, ambos os pais preservados e sem conflito |
 | CI/HEADs GitHub | PASS | HEADs inalterados; checks verdes; PRs draft/mergeáveis |
-| handoffs GitHub | PASS | recibo publicado no PR #295 e na Issue #294 |
+| handoffs GitHub | PASS | PR #295/Issue #294 anteriores; complemento em #276/#296 e defeito #297 |
 | merge/deploy/produção | HUMAN_GATE | autorização humana específica não concedida |
 
 ## Evidências e artefatos
@@ -94,6 +99,11 @@ LearnPress real sintético: 76/76 PASS em instalação limpa. Log em
 `D:\AI-Shared\test-results\tutor-tds\learnpress-real-c853db0-20261019\learnpress-real-runtime-final.log`,
 SHA-256 `40E949E804342D284047A5A2F7AB7DCCB47388F7F3BBB78FB563464C51CF1D5B`.
 
+Staging institucional isolado: instalação e GETs PASS; save real por instrutor
+BLOCKED. Recibo, caminhos e hashes em
+`ead-institutional-staging-20261019/README.md`. O banco-base permaneceu idêntico,
+o container não reiniciou e o portal público não foi alterado.
+
 ## Estado do AAB e release
 
 Nenhum AAB correspondente a `b05eaa0` foi gerado na primeira worktree. A tentativa usou
@@ -116,8 +126,8 @@ sem assinatura e **NOT_FOR_UPLOAD**; a release ainda não está liberada.
 1. Para fechar acessibilidade, um operador deve dispensar/conceder a permissão do
    Android Accessibility Suite e confirmar anúncio/acionamento TalkBack; para
    áudio acústico, ouvir em hardware/emulador com saída confiável.
-2. Homologar o plugin no WordPress/LearnPress institucional somente em staging
-   segregado e autorizado; o runtime sintético real já passou.
+2. Corrigir #297 em branch/worktree própria e repetir o POST real, readback,
+   rights em dois saves, nonce inválido e negativas 401/403 no clone segregado.
 3. Revisar o candidato integrado e decidir a estratégia de landing dos PRs
    stacked; nenhum merge está autorizado por este recibo.
 4. Build oficial com config custodiada, assinatura real, upload e promoção
@@ -125,12 +135,13 @@ sem assinatura e **NOT_FOR_UPLOAD**; a release ainda não está liberada.
 
 ## Estimativa e custo observado
 
-- a partir deste checkpoint: **1–3 horas técnicas** para revisão da integração e
-  preparação do build oficial; **0,5–1 hora humana** para
-  TalkBack/áudio e decisões de merge/release.
+- a partir deste checkpoint: **3–6 horas técnicas** para corrigir #297, repetir
+  o gate e revisar a integração, além da preparação do build oficial;
+  **0,5–1 hora humana** para TalkBack/áudio e decisões de merge/release.
 - custo incremental monetário observado nesta execução: **R$ 0,00**. Foram usados
-  somente CPU, disco e emulador locais; nenhum serviço pago, deploy, upload ou
-  mudança institucional foi executado.
+  CPU/disco locais e o VPS institucional já existente; nenhuma VM nova foi
+  contratada. Houve instalação apenas no staging interno, sem deploy público,
+  upload ou mudança no portal atual.
 
 ## Estado da documentação
 

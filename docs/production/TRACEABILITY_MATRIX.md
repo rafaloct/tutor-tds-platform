@@ -41,6 +41,13 @@ Paths Flutter abaixo são relativos a `cartilhas_app/lib/`.
 | Commercial/Entitlements / — | N/A | equipe | direitos | — | — | — | RevenueLedgerEntry | — | API comercial existente, auditar na wave | revenue_ledger | — | — | — | test_media_commercial | pagamentos desligados (histórico) | Wave 10 | PARTIAL |
 | Production hardening / N/A, operação | N/A | operador | release | N/A | N/A | N/A | N/A | N/A | health/live | migrations | operador autorizado | logs operacionais | N/A, operação | test_migrations; test_database; release_readiness_verifier_test; test_verify_production_recovery_evidence; ENVIRONMENT_CONTRACT.md; PRODUCTION_READINESS.md | release_build_allowed=true para build; artifact.upload_allowed=false; PRODUCTION_RELEASE_READY=false; production flags false | Wave 11 | PARTIAL — #197: API601/Flutter625/analyze/config PASS; assinatura validada; backup nativo R2 ↔ dump offsite ↔ restore/upgrade PostgreSQL0030 no OID dc32d081… PASS; AnythingLLM/LanceDB e configurações restaurados, fonte preservada e cleanup PASS; verificador real de proveniência PASS; smoke Xiaomi fresco13/10 PASS em QA separado. Compatibilidade HTTP condicional aos apps suportados/flags false; prepare antigo semversion_id excluído. API promovida0030/compattrue/min11, HTTPS e preservação de credenciais/serviços PASS; complemento73 fontes Git/imagem e metadata447/270/109/16/15 preservada PASS. Freeze/tag e AAB pendentes; upload histórico permanece bloqueado. Drills até30dias e frescor operacional26h preservados |
 
+Complemento IPEX de 19/10/2026: o adaptador exato de `c853db0` foi instalado
+no staging sintético interno do VPS institucional com backup/restore e GETs
+200/304/401. O portal público permaneceu intacto. A página de aula própria para
+`lp_teacher` e o metabox/nonce passaram, mas o POST real retornou HTTP 500 em
+duas tentativas; gate **BLOCKED** na Issue #297. Isso não promove o status para
+produção nem autoriza as 48 aulas.
+
 Nomes sem `.py`/`.dart` são nomes-base dos testes em `api/tests/` ou
 `cartilhas_app/test/`. Linhas posteriores à Wave 1 são inventário, não execução
 de waves. PARTIAL nunca significa aceite de staging ou aprovação visual.

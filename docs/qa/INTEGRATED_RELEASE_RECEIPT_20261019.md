@@ -55,6 +55,9 @@ fail-closed `https://tutor-tds.invalid` continua intencionalmente presente.
 | lint PHP | quatro arquivos PASS |
 | runtime WordPress completo | PASS local; prova #292 reutilizada e nova instalação limpa executada |
 | LearnPress real sintético | 76/76 PASS; WP 7.1.2 + LP 4.3.6, rota/modelos/CURD/hooks reais |
+| instalação no staging sintético institucional | PASS; fonte `c853db0`, rede interna, backup/restore, HTTP 200/304/401 |
+| save real por `lp_teacher` | **BLOCKED #297**; página/metabox 200, POST real HTTP 500 em duas tentativas |
+| preservação do portal público | PASS; sem mutação, restart, usuário real ou publicação |
 | Flutter player | 9/9 PASS |
 | analyze focal | PASS, zero issues |
 | preflight estrutural | 3/3 PASS; `structural_pass=true` |
@@ -74,11 +77,19 @@ recibo em `ead-learnpress-real-integrated-20261019/README.md`.
 
 1. revisão humana da cadeia e decisão de manter os PRs stacked ou consolidar;
 2. TalkBack falado e áudio acústico;
-3. homologação institucional do WordPress/LearnPress, sem confundi-la com a
-   instalação sintética já aprovada;
+3. corrigir a Issue #297 e repetir o save autenticado no staging sintético
+   institucional; a instalação passou, mas o editor por instrutor não;
 4. build oficial com `config/production.json` custodiado, assinatura de upload e
    verificador de readiness somente após autorização;
 5. upload em Teste interno/Play e promoção requerem autorização específica.
 
 O AAB versionado antigo continua superseded. Este AAB não altera
 `release_status.json`, não é candidato de upload e não libera produção.
+
+## Complemento institucional
+
+O staging interno recebeu o plugin exato do SHA funcional acima. O restore drill
+e os GETs públicos passaram, sem tocar o portal atual. A prova de POST real por
+instrutor ficou bloqueada por HTTP 500 e foi registrada na Issue #297. Evidência
+e hashes: `ead-institutional-staging-20261019/README.md`. Este complemento não
+altera os bytes nem a proveniência do AAB de inspeção.

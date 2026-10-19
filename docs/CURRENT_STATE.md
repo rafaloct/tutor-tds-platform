@@ -1,5 +1,24 @@
 # CURRENT STATE
 
+## 2026-10-19 — staging institucional isolado do adaptador IPEX
+
+OBSERVED/TESTED-SYNTHETIC-STAGING: com autorização humana, o plugin exato de
+`c853db021368f4b536521800ed9dc33ef68e3aac` foi instalado somente no sandbox
+Docker interno `tds-learning-qa-20261017` do VPS institucional. Rede
+`internal=true`, sem portas publicadas; WordPress 6.7.2/LearnPress 4.3.6, backup
+restrito e restore drill PASS. Home, currículo e rota LearnPress responderam
+200, ETag 304 e `users/me` anônimo 401. Banco-base antes/depois permaneceu
+idêntico e o container-base não reiniciou. Portal público, usuários reais e
+dados acadêmicos não foram tocados; nenhum VPS novo foi contratado.
+
+BLOCKED: em clone descartável, `lp_teacher` abriu a aula própria e recebeu o
+metabox/nonce, mas o POST real retornou HTTP 500 duas vezes, inclusive com todos
+os hidden fields/nonces do formulário. Acesso indevido permaneceu fechado, mas
+também retornou 500 em vez de 401/403. Teardown removeu container, DB, usuário
+MySQL e filesystem temporários. Issue #297 concentra a correção; produção,
+ativação das 48 aulas, merge e Play continuam fechados. Recibo:
+`qa/ead-institutional-staging-20261019/README.md`.
+
 ## 2026-10-19 — candidato integrado IPEX e AAB de inspeção
 
 OBSERVED/TESTED-LOCAL: merge sem conflito dos PRs #292 e #295 em
@@ -19,9 +38,11 @@ TESTED-LOCAL posterior: WordPress 7.1.2 + LearnPress 4.3.6 reais em SQLite
 descartável, um usuário sintético e rede externa bloqueada passaram 76/76 contra
 os hashes exatos do adaptador de `c853db0`. Foram exercitados rota nativa,
 modelos/CURD, hooks, ETag, opt-in, dois salvamentos MP4/VTT, revogação de
-fingerprint, sem VTT, YouTube e ausência de linha acadêmica. A instalação
-institucional permanece HUMAN_GATE. Recibo:
-`qa/ead-learnpress-real-integrated-20261019/README.md`.
+fingerprint, sem VTT, YouTube e ausência de linha acadêmica. A instalação no
+staging sintético institucional foi executada posteriormente, mas o save HTTP
+por instrutor ficou BLOCKED na Issue #297. Recibos:
+`qa/ead-learnpress-real-integrated-20261019/README.md` e
+`qa/ead-institutional-staging-20261019/README.md`.
 
 ## 2026-10-19 — Issue #294, homologação Android final do player IPEX
 
