@@ -216,4 +216,3 @@ done
 wp eval 'global $wpdb; if((int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}learnpress_user_items")!==0)throw new Exception("Unexpected academic mutation");' >/dev/null
 pass "zero academic rows after editorial/Android"
 printf 'RESULT=PASS\n'
-
