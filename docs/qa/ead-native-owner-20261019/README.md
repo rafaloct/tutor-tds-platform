@@ -147,8 +147,11 @@ SHA256 `F5BD7623521E7ACC115E68994F55497862DC78BE9525A3BDFD20E789F4C5596A`.
 PASS visual: abertura, catálogo11, percurso Agricultura8/13, mensagem de aula
 não liberada internamente e intent HTTPS para curso canônico em Chrome.
 Chrome abriu a página do curso, com diálogo inicial de notificações sobreposto.
-O retorno ao app foi confirmado por `topResumedActivity` e `06-return.png`
-(SHA256 `DE2F278140A970C6E030A013C8DD02BA8F584B8606E94F821BEDEBD1FD882A0F`).
+O retorno à atividade do app foi confirmado por `topResumedActivity`; não foi
+capturado um frame final do app. `06-portal-loaded.png` ainda mostra o portal
+sem o diálogo (SHA256
+`DE2F278140A970C6E030A013C8DD02BA8F584B8606E94F821BEDEBD1FD882A0F`),
+portanto comprova a página carregada, não o retorno visual.
 Emulador desta sessão foi encerrado ao final. O buffer global de crash contém
 falha de PrebuiltBugle; não foi tratado como log limpo nem como crash do Tutor.
 A primeira instalação foi tentada antes do boot completar; a instalação após
