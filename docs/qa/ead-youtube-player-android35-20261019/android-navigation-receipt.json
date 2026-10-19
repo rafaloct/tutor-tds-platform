@@ -1,0 +1,72 @@
+{
+  "status": "PLAYER_SCREEN_OPENED",
+  "started_utc": "2026-10-19T12:08:59.956751+00:00",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.rcd78c06298204eea9a0aa2e8d263614a",
+  "video_id": "FG14ksTaMCE",
+  "account_mode": "none",
+  "source": "synthetic WordPress via GET only",
+  "steps": [
+    "01_qa_welcome_visible",
+    "02_synthetic_lab_visible",
+    "03_synthetic_course_curriculum_loaded",
+    "04_private_lesson13_loaded",
+    "05_native_player_screen_opened",
+    "06_webview_screen_evidence_captured"
+  ],
+  "files": [
+    {
+      "name": "01-qa-welcome.png",
+      "size": 151213,
+      "sha256": "ea2c27f5c6fc9bba700cddc5e911b35f6c0bc8986f2e7f94591afbf999b9bb03"
+    },
+    {
+      "name": "02-lab-synthetic-catalog.png",
+      "size": 219347,
+      "sha256": "3fcf5f0f15a6f1e5ec548e922023672a9e0f3f77eab211800e20b885d663be45"
+    },
+    {
+      "name": "03-private-curriculum.png",
+      "size": 210489,
+      "sha256": "f08cdc6f24a508b19f6f34e7bcb889130b39af7898317f0c3612c90afd74bfde"
+    },
+    {
+      "name": "04-authorized-lesson.png",
+      "size": 140666,
+      "sha256": "a9c21403ad595233d447338e982b081b9bda83ee7ad47abc88470aca45054dd5"
+    },
+    {
+      "name": "05-native-player-after-load.png",
+      "size": 368796,
+      "sha256": "3191f5255f5edaf868bc8dbd539ab66a73669a29e4131f381047e1e271f7c746"
+    },
+    {
+      "name": "06-native-player-after-20s.png",
+      "size": 368796,
+      "sha256": "3191f5255f5edaf868bc8dbd539ab66a73669a29e4131f381047e1e271f7c746"
+    },
+    {
+      "name": "native-youtube-screenrecord.mp4",
+      "bytes": 2011059,
+      "sha256": "d35216b755c50151719fefa2ecade2d90bfb58a0b5b691a0be392a018717ecd1"
+    }
+  ],
+  "notes": [],
+  "player_nodes_at_12s": [
+    "Vídeo da aula",
+    "Play video",
+    "Hide player controls",
+    "Watch on YouTube",
+    "Reprodução online, com controles do YouTube. Legendas dependem das trilhas disponíveis no vídeo. Assistir não registra conclu",
+    "Abrir no YouTube"
+  ],
+  "player_nodes_at_20s": [
+    "Vídeo da aula",
+    "Play video",
+    "Hide player controls",
+    "Watch on YouTube",
+    "Reprodução online, com controles do YouTube. Legendas dependem das trilhas disponíveis no vídeo. Assistir não registra conclu",
+    "Abrir no YouTube"
+  ],
+  "screenrecord_exit": 0,
+  "finished_utc": "2026-10-19T12:11:51.593548+00:00"
+}
