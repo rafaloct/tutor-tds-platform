@@ -1,5 +1,16 @@
 # Decisões vigentes
 
+## Retomada delimitada #303 — 19/10/2026, após STOP
+
+O usuário autorizou nesta sessão somente a menor correção do ETag fraco no
+cliente Flutter, testes focais e novo APK QA/homologação Android, usando PR304
+HEAD `f9260a6d118e7142b0c9ec7f11a14b09440c725a` após conferência remota.
+ETags forte/fraco devem representar exatamente a mesma revisão JSON, mantendo
+autorização, fingerprint, mídia, schema e cache. Homologar primeiro isoladamente;
+reativação produtiva exige teste focal concluído, rollback preparado e aprovação
+específica pós-STOP. Não repetir #299/#302, alterar LearnPress, fazer merge,
+assinatura real ou Play sem os respectivos gates. Ver recibo da #303.
+
 ## Autorização final institucional — 19/10/2026, posterior ao PR302
 
 O responsável autorizou promoção controlada do adaptador e patch299 ao portal

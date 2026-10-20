@@ -1,0 +1,41 @@
+{
+  "issue": 303,
+  "requests": [
+    {
+      "route": "/tds-learning/v1/courses/12/curriculum",
+      "accept_encoding": "gzip",
+      "if_none_match": null,
+      "etag": "W/\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "status": 200,
+      "authorization": null,
+      "cookie": null
+    },
+    {
+      "route": "/tds-learning/v1/courses/12/curriculum",
+      "accept_encoding": "gzip",
+      "if_none_match": "W/\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "etag": "W/\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "status": 304,
+      "authorization": null,
+      "cookie": null
+    },
+    {
+      "route": "/tds-learning/v1/courses/12/curriculum",
+      "accept_encoding": "gzip",
+      "if_none_match": "W/\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "etag": "\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"",
+      "status": 200,
+      "authorization": null,
+      "cookie": null
+    },
+    {
+      "route": "/tds-learning/v1/courses/12/curriculum",
+      "accept_encoding": "gzip",
+      "if_none_match": "\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"",
+      "etag": "\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"",
+      "status": 304,
+      "authorization": null,
+      "cookie": null
+    }
+  ]
+}

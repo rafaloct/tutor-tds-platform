@@ -26,3 +26,6 @@ docs/qa/ead-immutable-source-20261019/** -text whitespace=cr-at-eol
 docs/production/portal-promotion-20261019/** -text whitespace=cr-at-eol
 tooling/portal_promotion_backup.sh text eol=lf
 tooling/portal_restore_retry.sh text eol=lf
+# Exact Android HTTP receipts and their recorded hashes for Issue #303.
+docs/qa/ead-etag-20261019/android-requests.json -text
+docs/qa/ead-etag-20261019/app-http.txt -text
