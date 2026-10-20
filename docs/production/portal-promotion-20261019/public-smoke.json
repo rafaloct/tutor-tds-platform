@@ -1,0 +1,300 @@
+{
+  "base": "https://ead.ipexdesenvolvimento.cloud",
+  "mode": "production-read-only",
+  "checks": [
+    {
+      "test": "curriculum-614",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-614",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-614",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-614",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1298",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1298",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1298",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1298",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1307",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1307",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1307",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1307",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1314",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1314",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1314",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1314",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1321",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1321",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1321",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1321",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1328",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1328",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1328",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1328",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1335",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1335",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1335",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1335",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1343",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1343",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1343",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1343",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "curriculum-1356",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "etag-1356",
+      "status": "PASS",
+      "http": 304
+    },
+    {
+      "test": "public-projection-1356",
+      "status": "PASS"
+    },
+    {
+      "test": "non-opted-in-lesson-1356",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "test": "registration-course-context",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "registration-existing-login",
+      "status": "PASS"
+    },
+    {
+      "test": "registration-default",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "external-redirect-rejected",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "missing-course-rejected",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "test": "anonymous-user-denied",
+      "status": "PASS",
+      "http": 401
+    }
+  ],
+  "courses": [
+    {
+      "course_id": 614,
+      "title": "Inteligência Artificial e Inclusão Digital",
+      "items": 17,
+      "lessons": 17,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "5bcc91586eccd04c15400d01a867517c548bdc07dcbfa91f9f4dd45d20f12307",
+      "etag": "\"78a19244463bd7a8fcdc4a36982154b21c57339ce3dbb092c2dcee46af757b1a\""
+    },
+    {
+      "course_id": 1298,
+      "title": "Agricultura Sustentável",
+      "items": 13,
+      "lessons": 13,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "7c6afa5af230fdce0c847d97ca6039a0285ffe31f4c4d8caf19db410e2a06911",
+      "etag": "\"8de662b34322bba5c3831b61f613a0365816d6ed6d5c74eaa22617ddb0f102a9\""
+    },
+    {
+      "course_id": 1307,
+      "title": "Atendimento ao Cliente",
+      "items": 9,
+      "lessons": 9,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "5fb6a7b99c5ca5dbaf86d99f347d13f7f1d65a357a6ac6b1641db466e9c3b62c",
+      "etag": "\"a5445d494c3101febd83fb80c270f53031a4a89fcc86f5a317404d8975b28eaf\""
+    },
+    {
+      "course_id": 1314,
+      "title": "Audiovisual para o Dia a Dia",
+      "items": 9,
+      "lessons": 9,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "af532b74bf5c1b188f2051d7c098c749a22c4bd67a676cab55614e33f4e5cefa",
+      "etag": "\"c1ce94d3c25a3ab6907c305c41a552b668bcb659696165994efefe94de430b6e\""
+    },
+    {
+      "course_id": 1321,
+      "title": "Cooperativismo e Crédito",
+      "items": 10,
+      "lessons": 10,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "7a97649493e4785dfa2e99042492e22e5a116e14d3f55f594eb1d315ba6a6cda",
+      "etag": "\"53dedb1dad5154b1f864e29c1241d36113409a321c81bad28fb12cffc9fefc1e\""
+    },
+    {
+      "course_id": 1328,
+      "title": "Economia do Lar",
+      "items": 9,
+      "lessons": 9,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "8925395378b361bb32b230cabf4c948bf61fbc0d35e2f74a4427f284d3cc3845",
+      "etag": "\"d1e1626db7a530e7e4b649fd3fa42c99963c7d1b6f4ab72c72b6bc79fbdf29ef\""
+    },
+    {
+      "course_id": 1335,
+      "title": "Educação Financeira",
+      "items": 11,
+      "lessons": 11,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "28c35050eae9edb7d5b693215c9d00c5f1d852b9a78477542d58e460de4b4485",
+      "etag": "\"b2c80460828f5843339e69e54216e7a97970d2d52c1bbce5cc81931494fec0c2\""
+    },
+    {
+      "course_id": 1343,
+      "title": "Inspeção e Certificação (SIM/SIMA)",
+      "items": 9,
+      "lessons": 9,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "18dad60a35166200ef88d2d06d61358477f808d2764c096a8f6acea3a3d09552",
+      "etag": "\"f3cf1ef293a1eb2231e2786d78cb7a20bd478436cae37c502b07e59d4a91dafb\""
+    },
+    {
+      "course_id": 1356,
+      "title": "Sistemas Agroflorestais (SAF)",
+      "items": 8,
+      "lessons": 8,
+      "authorized_lessons": 0,
+      "media": 0,
+      "response_sha256": "fc6df21a8e265bab555b6fe5fb2709e4d045dbee7e60e4b9bc92d842f8231e8b",
+      "etag": "\"b6b03dba4fcda0fc4b9caa48a8f8fa3776b6c32bc615bf31a182b36543d2149d\""
+    }
+  ],
+  "pass": 42,
+  "fail": 0
+}

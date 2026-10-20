@@ -1,0 +1,13 @@
+{
+  "data-integrity.json": "269bb01c3096257306e06d7b3f2d312795f50f99a7b7bb0bb1e21d9ec2958050",
+  "media-checked.json": "ce0a472fdba091b009d6be8c48f26d4332621f02d5bf2c47c01a11bd735721ab",
+  "promotion.json": "e84ef322111ebc017b8101be1fba6fa5980706f4651e1d41c4a2eac9983cb559",
+  "public-smoke.json": "a8586a732b56e8b4345e24a4e56345924203433d1eedc87a49d582d0466493a9",
+  "README.md": "39825254059560d82ebcb40299e19ef0abc76f39d653ed2828d65ab2bed9c1f5",
+  "restore-equivalence.json": "846abcf1876cc210d9dcfe169c9321e53aa0da6d3656da10bee7daa116ef6f5c",
+  "android/catalog.png": "4eec156205d8fe553d1bdbdf8c3f6bcefae437f09cedc9c9d69d1929ac58f87e",
+  "android/catalog.xml": "4b3a8d6031fe67281c4d855a8ad29aafc87fa2b444c020fdec91bc2f004696b2",
+  "android/course-fail.png": "4668227c3be7e6f50ae0f5ec2a11dbae77738bea6ad5c4f5f9ed4c275b9f67cb",
+  "android/course-retry.xml": "61c53d48b679a05426b31e102943f21c9574d03bf18ca4452d759b6db8b5fe3b",
+  "android/course.xml": "61c53d48b679a05426b31e102943f21c9574d03bf18ca4452d759b6db8b5fe3b"
+}

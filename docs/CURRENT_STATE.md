@@ -1,5 +1,22 @@
 # CURRENT STATE
 
+## 2026-10-19 — promoção institucional parcial; STOP Android #303
+
+DECISION: responsável autorizou implantação mínima, nove tutores institucionais,
+conteúdo público com direitos individuais comprovados e assinatura/Play condicionadas
+aos gates. OBSERVED: backup produtivo real/restore offline de73 tabelas concluído;
+dados idênticos,14 diferenças de escrita equivalente de charset documentadas, sem
+aceite de igualdade bruta. Patch299 DEPLOYED-PRODUCTION; GET/contexto/login seguros.
+Adaptador0.1.0 exato ativado:42/42 checks HTTP, nove200/304. Android catálogo11 PASS,
+percurso falhou duas vezes: resposta comprimida tem ETag W/ e cliente exige forte.
+STOP303: plugin desativado por rollback, arquivos mantidos; rota nativa200/editorial404.
+Sem terceira tentativa, Flutter/AAB novos, merge ou upload. #297 independente.
+95 aulas/48MP4/48VTT auditadas;96HEAD200, zero direitos/publicações inferidos.
+29 blocos de dados não vazios preservados; somente wp_options mudou; sem restart
+WP/MySQL/Traefik. HUMAN_GATE: nova rodada303, aliases controlados, direitos individuais,
+Play/certificado/versionCode atuais, Xiaomi/áudio/TalkBack e declarações legais.
+Recibo: `production/portal-promotion-20261019/README.md`.
+
 ## 2026-10-19 — retomada autorizada: fonte offline e adaptador/Android sintéticos PASS
 
 OBSERVED: dumps preservados 4dc75881 e 1ffeecf9 comparados sem tocar a origem.

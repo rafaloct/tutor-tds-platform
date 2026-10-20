@@ -1,5 +1,22 @@
 # Decisões vigentes
 
+## Autorização final institucional — 19/10/2026, posterior ao PR302
+
+O responsável autorizou promoção controlada do adaptador e patch299 ao portal
+ead.ipexdesenvolvimento.cloud, após backup produtivo recuperável/restore isolado;
+criação de nove contas genéricas lp_teacher com e-mails institucionais controlados,
+custódia segura e autoria legítima de curso/aulas sem capabilities globais.
+Conteúdo educacional pode ser público sem matrícula quando direitos individuais
+estiverem comprovados; presença de arquivo não é prova. Identidades LP/FastAPI
+permanecem distintas. Público amplo/gratuito, não exclusivamente adulto; nenhuma
+conformidade infantil ou declaração legal é inferida dessa decisão.
+Uso da chave de upload existente, teste interno e rollout produtivo limitado
+foram autorizados condicionalmente a certificado/versionCode Play atuais, QA,
+Xiaomi/áudio/TalkBack, revisão de dados/políticas e aceite final. Não autoriza
+100%, force-push, auto-merge ou merge genérico. Após duas falhas iguais, parar
+apenas a frente afetada. A execução parcial e STOP303 estão no recibo
+`production/portal-promotion-20261019/README.md`; autorização não significa PASS.
+
 ## Precedência institucional de 19/10/2026 — LearnPress nativo
 
 A decisão #249 e a missão final de 19/10 prevalecem sobre trechos históricos

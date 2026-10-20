@@ -1,0 +1,22 @@
+{
+  "status": "DEPLOYED_PENDING_HTTP",
+  "plugin_version": "0.1.0",
+  "source_sha": "16a57e66303e2b7bea2aef9d179976283c4e933f",
+  "theme_before": {
+    "functions.php": "3f896a20b7d0db98fe20eb6e211ab1785648d7ca322465fd77eb9fc99447c687",
+    "pages/cadastro.php": "67e88421dbd1a0883ef5dbb24cd906b6e3082b6d5026c46461b70030d0a8088f",
+    "includes/admin-cadastro-aluno.php": "f34757104fb3f8b4d2d7491e8b3d144a43ba705c01d0ed42a58e4b16cce20e07"
+  },
+  "theme_after": {
+    "includes/tds-registration-course.php": "7a689746226916f7f9eb82522b4b5914ee3bc70a6309f1418b02e75b76664176",
+    "pages/cadastro.php": "3908ec22f9517d6e59178decaa979a6692090d04579be9204621738ee8231142",
+    "functions.php": "b81056a9f50c2fb5f9ef418024e39790f3ef074508e58bf54bec8e03db3c1409"
+  },
+  "plugin_hashes": {
+    "tds-learnpress-editorial.php": "75d49ccfc105c50c4b70a0dc4926af2477229274b56e7d77ae25caa04799a56b",
+    "includes/class-tds-learnpress-editorial.php": "6d6659bd7a4eb78885c852e4d2357941e75625831fa82a60c77e03aeadd5e154",
+    "includes/class-tds-learnpress-editorial-admin.php": "551734af2a6c6269ac1371dbe569089c200b377fd357ed7f54c77332f3c89e46"
+  },
+  "backup": "/opt/tds-institutional-backups/20261020T003715Z",
+  "no_editorial_authorizations_changed": true
+}
