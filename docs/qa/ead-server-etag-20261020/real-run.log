@@ -1,0 +1,12 @@
+PASS immutable source all hashes; no runtime DB config
+WORDPRESS_IMAGE=sha256:85c7d25eaf9726eeff21adad930aa43d2894bd73e9253ab250737b6d994a1181
+PASS Apache UID33, MU loaded, native mail/HTTP blocked, POST gate closed, private network/no ports
+Warning: Plugin 'tds-learnpress-editorial' is already active.
+PASS real WP/LP HTTP requests=10; academic_rows=0; no public POST
+RESULT=PASS_ETAG_FOCAL
+PASS immutable source all hashes; no runtime DB config
+ROLLBACK_FILESYSTEM=PASS
+ROLLBACK_CONTAINER=PASS
+ROLLBACK_DB_USER=PASS
+FINAL_EXIT=0
+EVIDENCE=/opt/tds-learning-qa-20261017/backups/20261020T093755Z-immutable-editorial

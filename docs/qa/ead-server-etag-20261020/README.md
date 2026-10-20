@@ -74,20 +74,55 @@ WordPress6.7.2/LearnPress4.3.6/Apache reais nem promoção institucional.
 A transformação forte→fraco é simulada explicitamente no router de teste.
 Não instalar nenhum arquivo de tests/ em produção.
 
+## TESTED-STAGING — clone real, após os testes locais
+
+Fonte executada: `9325dfd73e480746c0929fae91d467761cd0a560`.
+O runner existente ganhou modo opt-in `TDS_ETAG_FOCAL_ONLY=1`: mesmo
+isolamento/cleanup, overlay de três arquivos runtime somente na cópia,
+sem repetir os30 checkpoints editoriais nem abrir o gate de POST.
+PHP do candidato em bytes Git/LF:
+`fe83864d4ac082163d493636a88fd044bc54e0529b6e334614986644a8f7ad16`.
+Tar enviado/validado:
+`04faf20b8df59f3c8287369d27bd8c2ba8eee1f218247c15268a21dfbd3eed95`.
+
+VPS Hostinger1533541 revalidado pelo conector e SSH. Fonte sintética imutável
+do PR302 preservou manifesto pinado
+`7c9d4b3771640e63a3df30799a8aebdb97b4bc8b02f96c568d0acb4fbfae2e51`;
+todos os hashes revalidados antes/depois, sem WP-config/cron na origem.
+WordPress6.7.2/LearnPress4.3.6 reais, Apache UID33, rede Docker internal,
+zero portas, MU bloqueando mail/HTTP externo comprovado via Apache.
+Configuração de produção não foi copiada. Fixture de texto foi habilitada
+somente no clone por WP-CLI; isso não é prova de salvamento editorial HTTP.
+
+**10/10 requisições HTTP focais PASS**: currículo/aula200, forte304, fraco304,
+divergente200, aula revogada404. Zero linhas acadêmicas.
+O Apache isolado respondeu identity mesmo com Accept-Encoding:gzip;
+logo este ensaio prova comparação fraca no servidor real, **não** a cadeia
+comprimida institucional. Gzip real continua demonstrado somente no loopback
+simulado, e o smoke produtivo anterior continua FAIL.
+
+Recibos: `real-http.json`, `real-apache-probe.json`, `real-run.log`.
+Cleanup PASS para container, banco, usuário e diretório descartáveis; exit0.
+Logs privados preservados no VPS:
+`/opt/tds-learning-qa-20261017/backups/20261020T093755Z-immutable-editorial`.
+Pacote de teste sem segredos retido em `/opt/tds-issue303-server-etag-9325dfd`.
+Não houve nova execução Android, build ou ativação produtiva.
+
 ## Gates e próximo passo
 
 | Gate | Estado |
 |---|---|
 | Recuperação de handoff/rollback Devin | PASS evidência histórica; inactive reconfirmado |
 | PHP focal e HTTP local | PASS |
-| Runtime WP/LP real com o novo PHP | UNKNOWN |
+| Runtime WP/LP real com o novo PHP | PASS no clone focal;10/10 HTTP |
 | Smoke institucional gzip200/304 + Android editorial | BLOCKED |
 | Promoção do PHP novo após STOP | HUMAN_GATE |
 | Direitos, tutores, #297, Xiaomi, Play | Pendências anteriores preservadas |
 
-Próxima fatia: clone sintético isolado validado, plugin com hash do novo commit,
-HTTP200/304 e autorização negativa; só então promoção controlada especificamente
-aprovada. Preservar backup/hash dos três arquivos antigos. Se a promoção falhar,
+Próxima fatia: promoção controlada especificamente aprovada do arquivo PHP
+corrigido, após conferir backup/hashes e preparar rollback; smoke institucional
+gzip200/304 e Android com APK305 existente. Preservar backup/hash dos três
+arquivos antigos. Se a promoção falhar,
 desativar nativamente apenas o adaptador e confirmar editorial404/LP200,
 sem restaurar banco inteiro nem remover patch299. Reverter o código exige
 restaurar somente o arquivo alterado após hash, com plugin inativo.
