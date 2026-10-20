@@ -1,5 +1,11 @@
 # Traceability matrix
 
+Checkpoint20/10 #308: direitos próprios TDS confirmados pelo responsável.
+Piloto1420 publicou via validador existente, HTTP7/7 PASS; Android frio FAIL,
+quente com reprodução/VTT PASS parcial. Metadados revertidos,30 blocos de dados
+iguais, diferença bruta somente AUTO_INCREMENT. #309 separa a inicialização.
+`media-rights-20261020/README.md`. Não houve liberação em massa ou aceite Play.
+
 Checkpoint20/10 posterior autorizado: PR306 PHP promovido, adaptador ACTIVE.
 HTTP institucional3/3 e Android currículo200/refresh304 PASS com APK305.
 Aula1299 sem direitos404; nenhum opt-in alterado. Banco: somente active_plugins
