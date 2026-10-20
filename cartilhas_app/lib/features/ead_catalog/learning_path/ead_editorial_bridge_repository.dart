@@ -107,7 +107,8 @@ class EadEditorialBridgeRepository {
     }
     final revision = map['revision'] as String;
     final etag = response.headers['etag'];
-    if (etag == null || etag != '"$revision"') {
+    // GET validators may be weakened by HTTP representation compression.
+    if (etag == null || (etag != '"$revision"' && etag != 'W/"$revision"')) {
       throw const EadCurriculumException('Revisão editorial não comprovada.');
     }
     final rows = map['sections'] as List;
