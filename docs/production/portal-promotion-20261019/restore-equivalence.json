@@ -1,0 +1,84 @@
+{
+  "status": "PASS_DATA_AND_SCHEMA_EQUIVALENCE",
+  "byte_identical": false,
+  "raw_dumps_preserved": true,
+  "data_inserts_byte_identical": true,
+  "original_sha256": "d18078c5b646bd592dded73fcbaf4b1c742e7f9e42b32c8ec44a23dc104374ab",
+  "restored_sha256": "2478f9a08790bda9fe638e1072e992772f3156327ce7d02f504bde6f4ad310a5",
+  "schema_changes": [
+    {
+      "line": 623,
+      "table": "wp_tds_interesse",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 624,
+      "table": "wp_tds_interesse",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 625,
+      "table": "wp_tds_interesse",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 626,
+      "table": "wp_tds_interesse",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 627,
+      "table": "wp_tds_interesse",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1559,
+      "table": "wp_wpvibe_audit_log",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1560,
+      "table": "wp_wpvibe_audit_log",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1561,
+      "table": "wp_wpvibe_audit_log",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1562,
+      "table": "wp_wpvibe_audit_log",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1563,
+      "table": "wp_wpvibe_audit_log",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1581,
+      "table": "wp_wpvibe_op_receipts",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1582,
+      "table": "wp_wpvibe_op_receipts",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1583,
+      "table": "wp_wpvibe_op_receipts",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    },
+    {
+      "line": 1585,
+      "table": "wp_wpvibe_op_receipts",
+      "change": "explicit utf8mb4 for unchanged utf8mb4_unicode_520_ci"
+    }
+  ],
+  "tables": 73,
+  "wp_runtime_started": false,
+  "restore_network": "none",
+  "public_ports": 0
+}

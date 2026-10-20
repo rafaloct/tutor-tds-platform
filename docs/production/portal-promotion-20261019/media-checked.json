@@ -1,0 +1,2349 @@
+{
+  "lessons": 95,
+  "numbered_titles": 48,
+  "with_mp4": 48,
+  "with_vtt": 48,
+  "items": [
+    {
+      "title": "Aula 01 — Onde a inteligência artificial já aparece",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1295,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/01_ia_cotidiano_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/01_ia_cotidiano.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/01_ia_cotidiano_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "4e3a26ae018aa55143a39450aecfb854d6d2f495edd1a4ba3273e3840ccb09b3",
+          "bytes": 10808928,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/01_ia_cotidiano.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "afd61c2bddc1a1d6be928a28b22cfdc2ffe9a090f8c5ab52e3676721925ebd05",
+          "bytes": 3545,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 05 — Como fazer uma boa pergunta para a IA",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1296,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/05_perguntas_ia_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/05_perguntas_ia.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/05_perguntas_ia_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "770cc7f3bf11283df5db47342ece9d71847a27e85b8955e81d710c9c79232bd0",
+          "bytes": 11238276,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/05_perguntas_ia.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "d4347c3d382f49e0a5d59b6e4a90898f917b44a166565824d20d07fbf4cbd54a",
+          "bytes": 3876,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 09 — Como pesquisar políticas públicas com ajuda da IA",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1297,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/09_politicas_publicas_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/09_politicas_publicas.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/09_politicas_publicas_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "2c43b7238acc6472648f66e466acabd2945671451ebb3d3973f076f616b28611",
+          "bytes": 11712591,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/09_politicas_publicas.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "5b85563c85ddaf7bd0f80f9235f045cb76a04e26a0fef219934ecdf0773bcc10",
+          "bytes": 3947,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "O que é Inteligência Artificial?",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1351,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Tipos de IA e como Funcionam",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1352,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "IA no Contexto Tocantinense",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1353,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Usando IA no Seu Trabalho",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1354,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1355,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — Como a inteligência artificial aprende e quais são seus limites",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1396,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/02_como_ia_aprende_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/02_como_ia_aprende.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/02_como_ia_aprende_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "2499b33a1574b08351ff98a45d870544c23ab68b1f21f693157444e719bac829",
+          "bytes": 13048920,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/02_como_ia_aprende.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "00a7382954e64cab901419aeb866fe39780543e73b2b268db3034654354cfb30",
+          "bytes": 4500,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Inclusão digital: por onde começar a usar IA",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1397,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/03_primeiro_acesso_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/03_primeiro_acesso.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/03_primeiro_acesso_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "e0bba4ac2a95729803b408a6984934b04a5a0293ef20677a5a54f8b278a09162",
+          "bytes": 11726975,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/03_primeiro_acesso.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "9841be357dc37ad3652c5ec8db39bdc0868bc4a119e1d3275fa40dd09d86a55f",
+          "bytes": 4050,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Criar textos e conteúdos de divulgação com IA",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1398,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/04_textos_divulgacao_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/04_textos_divulgacao.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/04_textos_divulgacao_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "f47d926a556139fc9b33e7d9464d02812608492d28cb3cd98dbffc826a314ed8",
+          "bytes": 13109985,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/04_textos_divulgacao.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "d82edc5f0aec077a207e799f959b7d062303ed22ec882ebd868277276b88fccf",
+          "bytes": 3914,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 06 — Criar imagens e materiais visuais com IA",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1399,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/06_imagens_visuais_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/06_imagens_visuais.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/06_imagens_visuais_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "73070431986f25b2e3006b34390d814fbb70aa6fdc7e780d1dc1981bcc3e996d",
+          "bytes": 11595239,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/06_imagens_visuais.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "d79f1bec016cc84e5068669fc1f21579c8c4163b531e4e585b089f1b781a8197",
+          "bytes": 3892,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 07 — Atender clientes com WhatsApp Business e ajuda da IA",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1400,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/07_whatsapp_atendimento_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/07_whatsapp_atendimento.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/07_whatsapp_atendimento_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "882b33ab3ce464ca0a1e49c35dfa1b917e935afad22d475651262baef4e1c4be",
+          "bytes": 12577508,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/07_whatsapp_atendimento.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "2419464417064fe1f41484167acd8aed403f3ff89b8e2ee691ae6acd4a7f192a",
+          "bytes": 3747,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 08 — Organizar as finanças do negócio com ajuda da IA",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1401,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/08_financas_negocio_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/08_financas_negocio.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/08_financas_negocio_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "cbc1af08d8b0e596cf18859341887a597a727670aabac8dae1bd91fb4010893a",
+          "bytes": 12512356,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/08_financas_negocio.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "68a96a0fcb29d0072fe716a3606d8273628364a9387c1b6eb3751450546352ee",
+          "bytes": 3769,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 10 — Monitorar clima e condições para o plantio",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1402,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/10_clima_plantio_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/10_clima_plantio.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/10_clima_plantio_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "830f615bcf28473b11cce9ca90fa18adc52e4bfcd68e93db07cf602736737310",
+          "bytes": 11093673,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/10_clima_plantio.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "36fd622da60d562ef15b2a3366647a275e3ff595d2d98c7bd0f77f7cd04956f5",
+          "bytes": 3653,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 11 — Cuidados importantes: privacidade, verificação e LGPD",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1403,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/11_cuidados_privacidade_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/11_cuidados_privacidade.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/11_cuidados_privacidade_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "97d5ee2b69d874d4acc187001d12945029bd42f398c7c91c4d95bc8cba1f07ec",
+          "bytes": 11235849,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/11_cuidados_privacidade.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "d30b98dd00fc43618b93567c07b6a5113f7eaad1e333c7c2e8766b26340e9e7f",
+          "bytes": 3624,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 12 — IA em funcionamento no Tocantins e próximos passos",
+      "author": 1,
+      "course_id": 614,
+      "lesson_id": 1404,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/12_experiencias_proximos_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/12_experiencias_proximos.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/12_experiencias_proximos_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "8a9ebb563a46b6724f95d12f7f3ac7acc95e17a97985e0eac2f04ac301cfb238",
+          "bytes": 11699478,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/ia-pilotos/12_experiencias_proximos.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "eee26a5eefbd43c5b8c2ad934e11f98143d7ce22070b292532dd12a0702e210d",
+          "bytes": 3658,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Boas-vindas",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1299,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Agroecologia no Cerrado",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1300,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Práticas Agroecológicas",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1301,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Políticas Públicas e Comercialização",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1302,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Sistemas Agroflorestais (SAFs)",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1303,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Irrigação de Baixo Custo",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1304,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1305,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — Agroecologia no Cerrado tocantinense",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1420,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/01_agroecologia_cerrado_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/01_agroecologia_cerrado.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/01_agroecologia_cerrado_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "8bfcae0f98cd18175399fe5861c96b23b0ad6d523891823adf87fd455d021431",
+          "bytes": 18839434,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/01_agroecologia_cerrado.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "515119b65c4e3c86b00345d075f40efcc54e114157320e1356b8e7254fb9fb42",
+          "bytes": 6282,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — Práticas agroecológicas para a roça",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1421,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/02_praticas_agroecologicas_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/02_praticas_agroecologicas.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/02_praticas_agroecologicas_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "c3ea6e760abcee76d422880d7632abb7cb97421ffa9c64021e160e0d927f38ff",
+          "bytes": 18006449,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/02_praticas_agroecologicas.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "56a8d08d798e7467f9bffa8878ae2cc1acc05b3a02a59353bb2d8ebb19c4954a",
+          "bytes": 6202,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Políticas públicas e comercialização",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1422,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/03_politicas_comercializacao_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/03_politicas_comercializacao.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/03_politicas_comercializacao_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "d00c3c0dff30af11a935821b00c7cc7faeb4b608d0bd0d5b889f09c0d42d0d5d",
+          "bytes": 15442538,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/03_politicas_comercializacao.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "0dad67feca6d97e544b8a04b8a571b00af63c8be006403d1d59ef2a1954005ef",
+          "bytes": 5195,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Sistemas Agroflorestais: os SAFs",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1423,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/04_sistemas_agroflorestais_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/04_sistemas_agroflorestais.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/04_sistemas_agroflorestais_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "b268e3c797802e7b0251b86fb17c7c1ecd714e937c416bb4b578f89c6ca9a2b6",
+          "bytes": 18365309,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/04_sistemas_agroflorestais.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "65b3a51dbd4f1127bae78cf071370e85613302df247672e03f9cfa4cd41fa6e4",
+          "bytes": 5918,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 05 — Irrigação de baixo custo para a seca",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1424,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/05_irrigacao_baixo_custo_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/05_irrigacao_baixo_custo.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/05_irrigacao_baixo_custo_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "e1fd0b2ca36ce37b98e4be02d0dd51e23fad9a2d729d09fe78d22ff56f7514ea",
+          "bytes": 17470503,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/agricultura_sustentavel/05_irrigacao_baixo_custo.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "2b74f595540e1b84e7d21068cda4233a2fbe1b7a4f6657066b8b50b5e851fc36",
+          "bytes": 6256,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 06 — Perguntas de produtor, respostas da Embrapa",
+      "author": 1,
+      "course_id": 1298,
+      "lesson_id": 1702,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/agricultura_sustentavel/06_perguntas_embrapa_v3_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/agricultura_sustentavel/06_perguntas_embrapa_v3.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/agricultura_sustentavel/06_perguntas_embrapa_v3_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "5b1065779115c145b0e0d3daa67735b9eb64e3761630d70939f27643aecbc500",
+          "bytes": 11904670,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/agricultura_sustentavel/06_perguntas_embrapa_v3.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "300c04bc53626f4d5bce17926634b21e4d5d61601ff6369a7c2a786334807e22",
+          "bytes": 3780,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Por que Atender Bem?",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1308,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Os Pilares do Bom Atendimento",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1309,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Momentos Críticos do Atendimento",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1310,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Compromisso com a Qualidade",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1311,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1312,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — Por que atender bem faz o negócio crescer",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1428,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/01_por_que_atender_bem_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/01_por_que_atender_bem.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/01_por_que_atender_bem_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "babcfa7844bccc93fd4e3b832f4f35ef86622c9a25d4a1bce1952884cd8f2a3c",
+          "bytes": 14375909,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/01_por_que_atender_bem.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "16c4b801869481cf6e1d24db9e98786bd9bfa6df6fa37a4b54fac7e90b013a5b",
+          "bytes": 5309,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — Os três pilares do bom atendimento",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1429,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/02_pilares_atendimento_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/02_pilares_atendimento.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/02_pilares_atendimento_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "b9d5bf5c69b7d2b6cf5eced06bf1b07d9097e42ab58e44b5ee94c9d55c25d265",
+          "bytes": 16954882,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/02_pilares_atendimento.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "78a56fbfe859d437c6dd9a1c2827d9a17506b6eab01ecacd29c0ea61265432eb",
+          "bytes": 6592,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Momentos críticos: primeiro contato, reclamação e cliente difícil",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1430,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/03_momentos_criticos_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/03_momentos_criticos.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/03_momentos_criticos_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "b860673f95cbded1f89e3e8dab3c60bd80d55a4b958f88a59b4dc0bc5a51dc7c",
+          "bytes": 17895352,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/03_momentos_criticos.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "f21641b1205a07d39adcd09430e161c524cba956838d065cbde210ee0e458dd9",
+          "bytes": 6813,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Cliente fiel e os direitos do consumidor",
+      "author": 1,
+      "course_id": 1307,
+      "lesson_id": 1431,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/04_compromisso_qualidade_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/04_compromisso_qualidade.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/04_compromisso_qualidade_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "042ddb73fa0ffb935bb107644f8c2486c548917aeb632ac12b119695c5c5175f",
+          "bytes": 17471885,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/atendimento_cliente/04_compromisso_qualidade.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "0079292f3c6439820922bd03accfe7f98af05f0c7787f0189a46a38f6ba8f223",
+          "bytes": 6632,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "O Poder do Vídeo",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1315,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Pré-produção: Planejando o Vídeo",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1316,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Conceitos Técnicos Essenciais",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1317,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Edição e Publicação",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1318,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1319,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — O poder do vídeo no dia a dia",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1432,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/01_poder_do_video_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/01_poder_do_video.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/01_poder_do_video_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "b6f6a0c3a1a961d44a1090412f4c653b00389c250e286a852d06d7c414ba88b3",
+          "bytes": 14493062,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/01_poder_do_video.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "6012def65c25e33e777b140130a51433a60a0887fd027aaf79e178105f89f492",
+          "bytes": 5422,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — Pré-produção: planejando o vídeo antes de gravar",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1433,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/02_pre_producao_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/02_pre_producao.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/02_pre_producao_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "197010909cd3f577e97af490ca9f5f1c1b2fd405e995aab7cf01262e24ce5254",
+          "bytes": 17073893,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/02_pre_producao.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "b408973cb5a78c0b5e69768f596e551bfbfa175cce094fcea88e57e1bd225966",
+          "bytes": 6508,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Conceitos técnicos: enquadramento, luz, som e movimento",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1434,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/03_tecnica_essencial_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/03_tecnica_essencial.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/03_tecnica_essencial_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "72cd5c4149b9d494f75c65db8a1134f66135c3a140ef61b98a7ceb31a11ac6bc",
+          "bytes": 16868240,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/03_tecnica_essencial.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "62fdab057d2f6d2f039a942a26eee91a5bacee518e77e0675eb74fcd2cff8919",
+          "bytes": 6194,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Edição e publicação: do corte à escolha da plataforma",
+      "author": 1,
+      "course_id": 1314,
+      "lesson_id": 1435,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/04_edicao_publicacao_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/04_edicao_publicacao.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/04_edicao_publicacao_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "6b22a8a9694378f68e098e855fd2696959a5767b892e4b9ec421d27cb13e6da7",
+          "bytes": 17432201,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/audiovisual_dia_a_dia/04_edicao_publicacao.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "790d27c9579d9845d86d38b83b7891da3a5f3c8c14b216c7e39a9162dbc75f19",
+          "bytes": 6516,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Trabalhar Junto é mais Forte",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1322,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "O que é uma Cooperativa",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1323,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Acesso a Mercados Públicos",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1324,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Como Montar uma Cooperativa",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1325,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1326,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — Trabalhar junto é mais forte: associativismo e cooperativismo",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1440,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/01_trabalhar_junto_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/01_trabalhar_junto.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/01_trabalhar_junto_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "4a8cc30e3ee30b920177d6eefe3e4cf5793d7f6488d3166eca4c263d60132793",
+          "bytes": 14851354,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/01_trabalhar_junto.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "d3ddcc4c068149a7a75ba5fde5008ef7d5ce93aab3a58178066c22fbfe8ae159",
+          "bytes": 5149,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — O que é uma cooperativa e como ela funciona",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1441,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/02_o_que_e_cooperativa_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/02_o_que_e_cooperativa.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/02_o_que_e_cooperativa_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "cd1a08f6c798eaae0f3a5c7b915af1428266816719f8f021065321b329b67c4a",
+          "bytes": 14900243,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/02_o_que_e_cooperativa.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "266870607aeec7f52e86a7a55805348a2a3ae59f2f009a47452a2c07ebd907b2",
+          "bytes": 5112,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Acesso a mercados públicos: PAA e PNAE",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1442,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/03_mercados_publicos_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/03_mercados_publicos.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/03_mercados_publicos_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "aa59efba6b10917e5f551f090bf2c880c1de059225734a7886448d3adcb7413d",
+          "bytes": 14493488,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/03_mercados_publicos.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "b2a7dd16fc00554ff9003aa3949d18bc7a75626822da540a89aed126c92c7bee",
+          "bytes": 5309,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Como montar uma cooperativa, passo a passo",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1443,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/04_como_montar_cooperativa_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/04_como_montar_cooperativa.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/04_como_montar_cooperativa_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "b9067546062b32fbc3a9b3e29646f1e6eb7da1f05b47d574783b96a487abebaf",
+          "bytes": 14543483,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/cooperativismo_credito/04_como_montar_cooperativa.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "db1baa42256dce03c7f6a382631d73e82fdb2864359752223233f4a26dcdf6b8",
+          "bytes": 5379,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 05 — Vender junto: perguntas respondidas",
+      "author": 1,
+      "course_id": 1321,
+      "lesson_id": 1704,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/cooperativismo_credito/05_perguntas_embrapa_v3_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/cooperativismo_credito/05_perguntas_embrapa_v3.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/cooperativismo_credito/05_perguntas_embrapa_v3_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "8026e0e5b168cc61a982a9a9767999dca200852bff9f341aa1fbbe4902227d75",
+          "bytes": 11959825,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/cooperativismo_credito/05_perguntas_embrapa_v3.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "1f6c3729beb11dd5a8c6a02869bd8a7b7c4d23adb235c1dc9a4854cfe8f78daf",
+          "bytes": 3760,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Conforto e Organização em Casa",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1329,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Orientação Solar e Ventilação",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1330,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Organização e Soluções Práticas",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1331,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Economia de Energia e Água",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1332,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1333,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — Conforto e organização dentro de casa",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1449,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/01_conforto_organizacao_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/01_conforto_organizacao.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/01_conforto_organizacao_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "db30d3bff2868c05b63fcd3f4372fe200ae6adb84c1933e586d41a303962b3af",
+          "bytes": 13882255,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/01_conforto_organizacao.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "b0589b21cdf0266f9fefc377564f1ce1b82465db9a9c2c2fbb703c6f6b7c1d9d",
+          "bytes": 4903,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — Orientação solar e ventilação da casa",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1450,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/02_orientacao_solar_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/02_orientacao_solar.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/02_orientacao_solar_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "2a1ebef8a565181cc821e7cb9c039d9ae290b3e9f511981ad80c55429b32f4cf",
+          "bytes": 13683484,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/02_orientacao_solar.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "2c391b04c746ad7b6f8390e00d247f280c43cc11729d9c84d16f8cd634a86c1f",
+          "bytes": 4862,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Organização e soluções práticas para a casa",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1451,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/03_organizacao_pratica_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/03_organizacao_pratica.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/03_organizacao_pratica_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "354215ea35d983076d12eeb310126dcef255ddd2598f2af0841d2eafb3ba6d7c",
+          "bytes": 14060948,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/03_organizacao_pratica.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "b981dd76d2f42ea02014353ac83e294b1a993bee3d16f23a05e47301f32fb7ce",
+          "bytes": 4995,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Economia de energia e água no dia a dia",
+      "author": 1,
+      "course_id": 1328,
+      "lesson_id": 1452,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/04_energia_agua_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/04_energia_agua.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/04_energia_agua_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "4ecbef3786cdc105851b72ed717d06859c69d736978b0ad945a0a7a2916966cd",
+          "bytes": 13883977,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/economia_lar/04_energia_agua.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "f98745514d64c312c3e299f0933b9e07ccc70b827222ed0d399d7b2c1107e540",
+          "bytes": 5000,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Por que cuidar do dinheiro?",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1336,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Montando seu Orçamento",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1337,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Crédito e Juros",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1338,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Poupança e Metas",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1339,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Precificação do seu Trabalho",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1340,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1341,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — Por que cuidar do dinheiro que entra em casa",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1444,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/01_por_que_cuidar_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/01_por_que_cuidar.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/01_por_que_cuidar_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "94ea702502aa6dd05a183823d8654abac4670c92cc9017c48b2e6e495e08c4c3",
+          "bytes": 13671960,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/01_por_que_cuidar.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "8c7256b4bc2bd7a630b38950e92a023a3c05137acac9c111254a1da0851fada0",
+          "bytes": 5085,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — Montando o orçamento familiar, passo a passo",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1445,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/02_montando_orcamento_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/02_montando_orcamento.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/02_montando_orcamento_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "f4adff1e66f692d1fda1e13079d152091c0665b341670d61dd830af0ac045b7d",
+          "bytes": 17539231,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/02_montando_orcamento.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "d107599962f1caaf027d050013391fd139a88dbf525921e7e07e1d5a85e95c8c",
+          "bytes": 6073,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Crédito e juros: usar com responsabilidade",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1446,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/03_credito_juros_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/03_credito_juros.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/03_credito_juros_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "3b14508580f72a0345a74e822b26b180ca287f77c112d6aecf12f57f12b25217",
+          "bytes": 13971080,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/03_credito_juros.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "b0d02d69f87f27e09f28b204d082718bf0a3994a04276e4157669db20768fb26",
+          "bytes": 5016,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Poupança e metas: guardar primeiro",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1447,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/04_poupanca_metas_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/04_poupanca_metas.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/04_poupanca_metas_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "ae48caa3808c233eb34018f903487d19be3e549eed3b765e4f6c7678bc93154e",
+          "bytes": 13552819,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/04_poupanca_metas.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "d7b1651bd2b7149369799a4c9c91ab2a17baba0071edd9d7f526c17208fa2b9f",
+          "bytes": 5016,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 05 — Precificação: o preço justo do seu trabalho",
+      "author": 1,
+      "course_id": 1335,
+      "lesson_id": 1448,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/05_precificacao_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/05_precificacao.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/05_precificacao_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "25c9334fc0da054a43a2db0d5d9afc5846fe941fb5aafd762a1f0d6b71798260",
+          "bytes": 14634738,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/educacao_financeira/05_precificacao.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "151bcfdf9ba56dc3e2f7d76fe08fa018af674b982bffaff43a8181d3d8840582",
+          "bytes": 4937,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Por que regularizar sua produção?",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1344,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "O que é o SIM",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1345,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Boas Práticas de Fabricação",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1346,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Acessando Mercados Formais",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1347,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1348,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — Por que regularizar a produção de alimentos",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1436,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/01_por_que_regularizar_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/01_por_que_regularizar.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/01_por_que_regularizar_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "103417f3f875e553e3378c91ee7f6ff229a596717bdfced15ad2f55700124159",
+          "bytes": 15058938,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/01_por_que_regularizar.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "34d56c703512c8a49083ede037c11b44d5356ec55fcde6083d6f64df17fd44a5",
+          "bytes": 5392,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — O que é o SIM, o SIMA e o SISBI",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1437,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/02_o_que_e_sim_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/02_o_que_e_sim.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/02_o_que_e_sim_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "93a45bafc6ef94134e42f6f1a73e81edee1077ac4d376ad02fc574399f654bf5",
+          "bytes": 17958155,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/02_o_que_e_sim.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "ca63ed5631150c73ff9875e28ae18492d49f11805c93a87d569e5f053f51b3da",
+          "bytes": 6571,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Boas Práticas de Fabricação: higiene, temperatura e rótulo",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1438,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/03_boas_praticas_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/03_boas_praticas.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/03_boas_praticas_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "91e9c8758583380d5a3cc98a37392e96358653586d5700c97840002d8a687312",
+          "bytes": 17637736,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/03_boas_praticas.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "e89a177300e2c4fdb06ae3a80c6c92c5e44006ac2077c588360504816b1f9329",
+          "bytes": 6569,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — Acessando mercados formais: PNAE, DAP e o passo a passo",
+      "author": 1,
+      "course_id": 1343,
+      "lesson_id": 1439,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/04_mercados_formais_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/04_mercados_formais.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/04_mercados_formais_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "2ae1104c66da490c3aaf123fb3a3e60b1f3fa167173d387c5168cf359eee0a41",
+          "bytes": 18103584,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/inspecao_certificacao/04_mercados_formais.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "6ac3e3ba1299cb5479cac412ba8c84677ab39e5650a7384a1996bef85be87c30",
+          "bytes": 6768,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "O que é um SAF?",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1357,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Benefícios do SAF",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1358,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Como Implantar seu SAF",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1359,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Grupo e Suporte",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1360,
+      "mp4": [],
+      "vtt": [],
+      "numbered_video_title": false,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 01 — O que é um Sistema Agroflorestal",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1425,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/01_o_que_e_saf_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/01_o_que_e_saf.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/01_o_que_e_saf_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "bfe91dcff3f09fb31819ba514c233198e831ada5b24aef57c46b4e18bf44c17d",
+          "bytes": 15459552,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/01_o_que_e_saf.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "b936aae1eb6845eb97f703daaa988d9fbd31ccdb00aa6cdf2140c20f9679ef60",
+          "bytes": 5072,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 02 — Benefícios do SAF para a família",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1426,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/02_beneficios_saf_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/02_beneficios_saf.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/02_beneficios_saf_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "b0e878bb3acc84aaeaa962c7d73e1b96610f605efadd61621edeabcc9cb02d98",
+          "bytes": 17956975,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/02_beneficios_saf.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "b20df5de85796c98d8b3253630b5664c1d4393bc7a26a8c6829377fcd7c96a18",
+          "bytes": 5958,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 03 — Como implantar seu SAF",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1427,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/03_implantar_saf_v2_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/03_implantar_saf.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/03_implantar_saf_v2_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "bc36a5dbfadbfe3ce576dea15d74422d05ee20ed2a49c91f455183fcab224911",
+          "bytes": 16961251,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v2-20261016/sistemas_agroflorestais/03_implantar_saf.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "a42317c25e1c8f557354363a47952f807a6ef64f64b7c57e4211c793c1f5f0ca",
+          "bytes": 6161,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    },
+    {
+      "title": "Aula 04 — SAF na prática: dúvidas respondidas",
+      "author": 1,
+      "course_id": 1356,
+      "lesson_id": 1703,
+      "mp4": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/sistemas_agroflorestais/04_perguntas_embrapa_v3_acessivel_FHD.mp4"
+      ],
+      "vtt": [
+        "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/sistemas_agroflorestais/04_perguntas_embrapa_v3.vtt"
+      ],
+      "numbered_video_title": true,
+      "rights": "UNKNOWN",
+      "mobile_authorized": false,
+      "files": [
+        {
+          "kind": "mp4",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/sistemas_agroflorestais/04_perguntas_embrapa_v3_acessivel_FHD.mp4",
+          "http": 200,
+          "content_type": "video/mp4",
+          "backup_sha256": "249f59cdc57b87fefd7754e20f1d046277f2cf061451f0d2bd806f87362c0baa",
+          "bytes": 12751358,
+          "vtt_header_valid": null
+        },
+        {
+          "kind": "vtt",
+          "url": "https://ead.ipexdesenvolvimento.cloud/wp-content/uploads/tutor-tds/v3-20261017/sistemas_agroflorestais/04_perguntas_embrapa_v3.vtt",
+          "http": 200,
+          "content_type": "text/vtt",
+          "backup_sha256": "da47aba0130b8b883c0977a3c4d28f53fffb88ba2ad0dd50e72e5502a12a5d17",
+          "bytes": 3974,
+          "vtt_header_valid": true
+        }
+      ],
+      "playback_proven": false
+    }
+  ],
+  "http_pass": 96,
+  "http_fail": 0
+}

@@ -23,3 +23,6 @@ wordpress/institutional-patches/issue-299/theme.patch text eol=lf whitespace=-bl
 tooling/run_immutable_editorial_qa.sh text eol=lf
 # Preserve captured receipt bytes (including Windows CRLF) and their SHA256.
 docs/qa/ead-immutable-source-20261019/** -text whitespace=cr-at-eol
+docs/production/portal-promotion-20261019/** -text whitespace=cr-at-eol
+tooling/portal_promotion_backup.sh text eol=lf
+tooling/portal_restore_retry.sh text eol=lf
