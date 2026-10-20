@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-20 — promoção ETag autorizada, smoke institucional PASS
+
+OBSERVED: PHP do PR306 `0b9e2787411596646ddfe3fea9f22c05efce552d`
+promovido e adaptador ACTIVE. Gzip200 → validador fraco literal → 304 passou
+no HTTP institucional e no Android API35 com APK305 existente; aula1299
+sem autorização continua404. Nenhuma autorização editorial foi alterada.
+Integridade: somente `active_plugins` mudou entre dumps; 522 outras opções
+e dados das outras29 tabelas populadas iguais, serviços sem restart.
+DECISION: autorização específica nesta conversa para PHP + smoke, sem merge,
+liberação de aulas, assinatura ou Play. UNKNOWN/HUMAN_GATE: direitos individuais,
+Xiaomi/áudio/TalkBack, identidade/certificado/declarações Play e release integral.
+Recibo: `production/etag-promotion-20261020/README.md`.
+
 ## 2026-10-20 — continuidade goldenrod-argon, servidor ETag #303
 
 OBSERVED: recibos locais recuperados mostram segunda ativação seguida de

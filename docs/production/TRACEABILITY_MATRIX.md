@@ -1,5 +1,12 @@
 # Traceability matrix
 
+Checkpoint20/10 posterior autorizado: PR306 PHP promovido, adaptador ACTIVE.
+HTTP institucional3/3 e Android currículo200/refresh304 PASS com APK305.
+Aula1299 sem direitos404; nenhum opt-in alterado. Banco: somente active_plugins
+mudou; 522 outras opções iguais, 29 outras tabelas populadas iguais.
+Serviços preservados. Release integral não aprovado.
+Recibo: `etag-promotion-20261020/README.md`.
+
 Checkpoint20/10 #303: handoff goldenrod-argon recuperado; produção reverteu
 após200 em vez de304 para If-None-Match fraco. Candidato PHP complementar
 aceita validador único forte/fraco;63+47 verificações e13 HTTP loopback PASS.

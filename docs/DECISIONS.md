@@ -319,3 +319,11 @@ assinatura e Play exigem autorização própria. Provas e limitações de #297 e
     restore, mas o save real por `lp_teacher` retornou HTTP 500 e ficou bloqueado
     na Issue #297. A autorização não inclui produção, usuários reais, ativação
     das 48 aulas, merge, assinatura ou Play Store.
+
+35. 2026-10-20: após proposta focal, usuário respondeu “autorizado” para
+    promover o PHP corrigido do PR306, com backup/hash/rollback e smoke
+    institucional gzip/ETag/Android curso1298 usando APK305 existente.
+    Essa intervenção não inclui publicação de aulas, merge, assinatura ou Play.
+    Promoção e cache institucional passaram; evidência em
+    `production/etag-promotion-20261020/README.md`. Não equivale a aceite
+    integral de lançamento nem resolve a Issue297.
