@@ -20,6 +20,15 @@ class EadIpexVideoPolicy {
   const output = document.getElementById('caption-text');
   const track = video.textTracks[0];
   let enabled = true;
+  const report = event => IpexMediaEvents.postMessage(event);
+  video.addEventListener('loadedmetadata', () => report('mp4_metadata'));
+  video.addEventListener('playing', () => report('mp4_playing'));
+  video.addEventListener('waiting', () => report('mp4_waiting'));
+  video.addEventListener('stalled', () => report('mp4_stalled'));
+  video.addEventListener('pause', () => report('mp4_paused'));
+  video.addEventListener('error', () => report('mp4_error'));
+  trackElement.addEventListener('load', () => report('vtt_loaded'));
+  trackElement.addEventListener('error', () => report('vtt_error'));
 
   function render() {
     // Hidden loads active cues but keeps WebView's native overlay off the image.
@@ -105,6 +114,8 @@ class EadIpexVideoPlayerScreen extends StatefulWidget {
     required this.lessonTitle,
     this.openExternal,
     this.playerFactory,
+    this.onMediaEvent,
+    this.onController,
   });
 
   final Uri video;
@@ -112,6 +123,10 @@ class EadIpexVideoPlayerScreen extends StatefulWidget {
   final String lessonTitle;
   final Future<bool> Function(Uri)? openExternal;
   final Widget Function(Uri, Uri?, VoidCallback, VoidCallback)? playerFactory;
+  @visibleForTesting
+  final ValueChanged<String>? onMediaEvent;
+  @visibleForTesting
+  final ValueChanged<WebViewController>? onController;
 
   @override
   State<EadIpexVideoPlayerScreen> createState() =>
@@ -171,6 +186,8 @@ class _EadIpexVideoPlayerScreenState extends State<EadIpexVideoPlayerScreen> {
                     captions: widget.captions,
                     onReady: () => setState(() => _ready = true),
                     onError: () => setState(() => _failed = true),
+                    onMediaEvent: widget.onMediaEvent,
+                    onController: widget.onController,
                   ),
             ),
           if (valid && !_failed && !_ready)
@@ -179,6 +196,14 @@ class _EadIpexVideoPlayerScreenState extends State<EadIpexVideoPlayerScreen> {
             ),
           if (!valid || _failed)
             const Text('Vídeo indisponível. Você pode tentar pelo site EAD.'),
+          if (valid && _failed)
+            TextButton(
+              onPressed: () => setState(() {
+                _failed = false;
+                _ready = false;
+              }),
+              child: const Text('Tentar novamente'),
+            ),
           const SizedBox(height: 12),
           const Text(
             'Reprodução online. As legendas em português estão disponíveis '
@@ -204,11 +229,15 @@ class _IpexWebView extends StatefulWidget {
     this.captions,
     required this.onReady,
     required this.onError,
+    this.onMediaEvent,
+    this.onController,
   });
   final Uri video;
   final Uri? captions;
   final VoidCallback onReady;
   final VoidCallback onError;
+  final ValueChanged<String>? onMediaEvent;
+  final ValueChanged<WebViewController>? onController;
 
   @override
   State<_IpexWebView> createState() => _IpexWebViewState();
@@ -216,67 +245,140 @@ class _IpexWebView extends StatefulWidget {
 
 class _IpexWebViewState extends State<_IpexWebView> {
   WebViewController? _controller;
-  Timer? _timeout;
+  IpexWebViewDeadline? _timeout;
+  IpexWebViewDeadline? _nativeTimeout;
   bool _loadingLocalDocument = true;
   bool _htmlLoadRequested = false;
+  bool _completed = false;
+  final Stopwatch _elapsed = Stopwatch()..start();
+
+  void _trace(String stage) {
+    // Stage and elapsed time only: never log media URLs or lesson data.
+    debugPrint(
+      'IPEX_WEBVIEW stage=$stage elapsed_ms=${_elapsed.elapsedMilliseconds}',
+    );
+  }
+
+  void _fail(String stage) {
+    if (!mounted || _completed) return;
+    _completed = true;
+    _timeout?.cancel();
+    _nativeTimeout?.cancel();
+    _trace(stage);
+    widget.onError();
+  }
 
   @override
   void initState() {
     super.initState();
-    _timeout = Timer(const Duration(seconds: 20), widget.onError);
+    _trace('native_start');
+    _nativeTimeout = IpexWebViewDeadline(
+      const Duration(minutes: 2),
+      () => _fail('native_setup_timeout'),
+    )..start();
     unawaited(_load());
   }
 
   Future<void> _load() async {
     try {
       final controller = WebViewController();
+      _trace('controller_created');
       await controller.setJavaScriptMode(
         widget.captions == null
             ? JavaScriptMode.disabled
             : JavaScriptMode.unrestricted,
       );
+      _trace('javascript_configured');
+      if (widget.captions != null) {
+        await controller.addJavaScriptChannel(
+          'IpexMediaEvents',
+          onMessageReceived: (message) {
+            switch (message.message) {
+              case 'mp4_metadata':
+              case 'mp4_playing':
+              case 'mp4_waiting':
+              case 'mp4_stalled':
+              case 'mp4_paused':
+              case 'mp4_error':
+              case 'vtt_loaded':
+              case 'vtt_error':
+                _trace(message.message);
+                widget.onMediaEvent?.call(message.message);
+            }
+          },
+        );
+        _trace('media_observer_configured');
+      }
       await controller.setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: (request) {
             // The base URL establishes same-origin MP4/VTT access only during
             // the initial local HTML load. No remote page may replace it.
-            return _loadingLocalDocument &&
-                    (request.url == 'about:blank' ||
-                        request.url == 'https://ead.ipexdesenvolvimento.cloud/')
+            final allowed =
+                _loadingLocalDocument &&
+                (request.url == 'about:blank' ||
+                    request.url == 'https://ead.ipexdesenvolvimento.cloud/');
+            _trace(allowed ? 'navigation_allowed' : 'navigation_blocked');
+            return allowed
                 ? NavigationDecision.navigate
                 : NavigationDecision.prevent;
+          },
+          onPageStarted: (_) => _trace('html_page_started'),
+          onProgress: (progress) {
+            if (progress == 100) _trace('html_progress_100');
           },
           onPageFinished: (url) {
             if (!_htmlLoadRequested ||
                 url != 'https://ead.ipexdesenvolvimento.cloud/') {
+              _trace('html_page_finished_unexpected');
               return;
             }
             _loadingLocalDocument = false;
             _timeout?.cancel();
+            if (!mounted || _completed) return;
+            _completed = true;
+            _trace('html_page_finished');
             widget.onReady(); // HTML loaded, NOT proof of playback.
           },
           onWebResourceError: (error) {
-            if (error.isForMainFrame == false) return;
-            _timeout?.cancel();
-            widget.onError();
+            if (error.isForMainFrame == false) {
+              _trace('subresource_error_${error.errorCode}');
+              return;
+            }
+            _fail('main_frame_error_${error.errorCode}');
           },
+          onHttpError: (_) => _trace('http_error'),
         ),
       );
-      if (!mounted) return;
+      _trace('delegate_configured');
+      _nativeTimeout?.cancel();
+      if (!mounted || _completed) return;
       setState(() => _controller = controller);
+      widget.onController?.call(controller);
       _htmlLoadRequested = true;
+      _trace('html_load_requested');
+      // Native controller startup is a separate phase. Its cold-start latency
+      // must not consume the local document's 20-second load budget.
+      _timeout = IpexWebViewDeadline(
+        const Duration(seconds: 20),
+        () => _fail('html_load_timeout'),
+      )..start();
       await controller.loadHtmlString(
         EadIpexVideoPolicy.document(widget.video, widget.captions),
         baseUrl: 'https://ead.ipexdesenvolvimento.cloud/',
       );
+      _trace('html_load_call_completed');
     } on Object {
-      if (mounted) widget.onError();
+      _fail(
+        _htmlLoadRequested ? 'html_load_exception' : 'native_setup_exception',
+      );
     }
   }
 
   @override
   void dispose() {
     _timeout?.cancel();
+    _nativeTimeout?.cancel();
     super.dispose();
   }
 
@@ -284,4 +386,24 @@ class _IpexWebViewState extends State<_IpexWebView> {
   Widget build(BuildContext context) => _controller == null
       ? const SizedBox.shrink()
       : WebViewWidget(controller: _controller!);
+}
+
+/// The HTML load budget begins only after the native WebView is configured.
+@visibleForTesting
+class IpexWebViewDeadline {
+  IpexWebViewDeadline(this.duration, this.onTimeout);
+
+  final Duration duration;
+  final VoidCallback onTimeout;
+  Timer? _timer;
+
+  void start() {
+    _timer?.cancel();
+    _timer = Timer(duration, onTimeout);
+  }
+
+  void cancel() {
+    _timer?.cancel();
+    _timer = null;
+  }
 }
