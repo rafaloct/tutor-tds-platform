@@ -1,0 +1,86 @@
+[
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/apache-probe.json",
+    "sha256": "52ebc9761b36db4ff82789ebefdc30856944ad2b9312fc440ba091e903dcae0b"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/dump-comparison.json",
+    "sha256": "1eef99ab7a3aad039478020fdb93652ac8446bd1a5403eb1921fbe463f877474"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/editorial-http.json",
+    "sha256": "4c169f66023981c74d8799fff1eb1cc738295e706f988415ddc2181f606522fd"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/README.md",
+    "sha256": "3e937589671d7c0d7babc9c2d043d2ff50092ae3c345abc59dfcca4676e30d76"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/rollback-counts.txt",
+    "sha256": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/run.log",
+    "sha256": "a9dc07da8a463e431ef6729aabb86fffbbe952a59841db8ef6bb0b7895e5429c"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/captions-hidden.jsonl",
+    "sha256": "7004a97fb0dbadb50a84c3fbac0dc3093e976eeb6d2311973130fdfbaa480d1d"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/paused-captions.jsonl",
+    "sha256": "20b6bf9965e7d4c5afbf91323b59a273f2200f99779b32124684d508fbc188ad"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/play-gesture-9s.jsonl",
+    "sha256": "e7d6a4b4c70f3856b3002ac59bf673c0a5096180da9258f35507a357030d4e71"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/play-later.jsonl",
+    "sha256": "5fa030eed208ae7488fc7ab4fe194b6813a9e7258d64cf868cdff84166d52161"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/player-9s.jsonl",
+    "sha256": "a23cc35af1fbfe8cb769b6769a134d0c39a37e33c848055635c6f24dc5c8fcbf"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/player-9s.png",
+    "sha256": "bbd2d4bd6e5df0d05f8aa4fa56773a35d03631296429400c25e9c9f06bb20e38"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/player-initial.jsonl",
+    "sha256": "151946eb07c2a7b2b1bd5703142380b4141b6a1ffaaee8084e92c87bb1d89f8e"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/player-later.png",
+    "sha256": "f6453fb7238c1387a74da994b9b97be33ad7f6abb044acb61a1320b75e5a8e4b"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/player-playing.png",
+    "sha256": "30c57ea372bdc9948dbeac729de04509eea571830ce565499ffcd1b8fe6765d5"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/ui-course.xml",
+    "sha256": "a5ecf42dcd17caecac68dbeae1baa3753c25e8d274b6d078c0ecea7304a575fc"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/ui-lesson.xml",
+    "sha256": "71d0690c5b0539f793f6b9f55c956c4063a5050335daa35e23b0ae72b0640b56"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/ui-player.xml",
+    "sha256": "70741135b90e731e9cd7d263095b1ec1cfeaac1d5767a8c7dfe34a16907df4b8"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/ui-return.xml",
+    "sha256": "17a0a59a0175c12af613301f609e623da6e97cdda7507ee04d15f05b076bbfb4"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/ui-start-summary.txt",
+    "sha256": "5eb4c02dad53c24aca5478a5952476d0e28669e8831dfa345808d01127c858c1"
+  },
+  {
+    "file": "docs/qa/ead-immutable-source-20261019/android/ui-start.xml",
+    "sha256": "4b3a8d6031fe67281c4d855a8ad29aafc87fa2b444c020fdec91bc2f004696b2"
+  }
+]

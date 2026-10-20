@@ -1,0 +1,142 @@
+[
+  {
+    "test": "clone database guard",
+    "status": "PASS"
+  },
+  {
+    "test": "native admin login302",
+    "status": "PASS",
+    "http": 302
+  },
+  {
+    "test": "authorized native form200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "native save rights step 1",
+    "status": "PASS",
+    "http": 302,
+    "rights": "0"
+  },
+  {
+    "test": "REST media gate step 1",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ETag invalidation step 1",
+    "status": "PASS"
+  },
+  {
+    "test": "conditional REST304 step 1",
+    "status": "PASS"
+  },
+  {
+    "test": "authorized native form200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "native save rights step 2",
+    "status": "PASS",
+    "http": 302,
+    "rights": "1"
+  },
+  {
+    "test": "REST media gate step 2",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ETag invalidation step 2",
+    "status": "PASS"
+  },
+  {
+    "test": "conditional REST304 step 2",
+    "status": "PASS"
+  },
+  {
+    "test": "authorized native form200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "native save rights step 3",
+    "status": "PASS",
+    "http": 302,
+    "rights": "0"
+  },
+  {
+    "test": "REST media gate step 3",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "ETag invalidation step 3",
+    "status": "PASS"
+  },
+  {
+    "test": "conditional REST304 step 3",
+    "status": "PASS"
+  },
+  {
+    "test": "authorized native form200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "native invalid nonce403",
+    "status": "PASS",
+    "http": 403
+  },
+  {
+    "test": "authorized native form200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "optout public REST404",
+    "status": "PASS"
+  },
+  {
+    "test": "authorized native form200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Android fixture reviewed rights 0",
+    "status": "PASS"
+  },
+  {
+    "test": "authorized native form200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Android fixture reviewed rights 1",
+    "status": "PASS"
+  },
+  {
+    "test": "Android live curriculum200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Android live curriculum304",
+    "status": "PASS"
+  },
+  {
+    "test": "Android live lesson200",
+    "status": "PASS",
+    "http": 200
+  },
+  {
+    "test": "Android live lesson304",
+    "status": "PASS"
+  },
+  {
+    "test": "zero academic rows",
+    "status": "PASS"
+  }
+]
