@@ -14,6 +14,8 @@ CLONE_USER=qi_$STAMP
 CLONE_DIR="$BASE/immutable-clone-$STAMP"
 EVIDENCE="$BASE/backups/$STAMP-immutable-editorial"
 PACKAGE=$(cd "$(dirname "$0")/.." && pwd)
+ETAG_ONLY=${TDS_ETAG_FOCAL_ONLY:-0}
+[ "$ETAG_ONLY" = 0 ] || [ "$ETAG_ONLY" = 1 ]
 CREATED_DB=0; CREATED_USER=0; CREATED_CONTAINER=0; CREATED_DIR=0
 mkdir -m700 "$EVIDENCE"
 exec > >(tee "$EVIDENCE/run.log") 2>&1
@@ -69,6 +71,13 @@ mkdir -m700 "$CLONE_DIR"; CREATED_DIR=1
 cp -a "$SOURCE/files/wordpress/." "$CLONE_DIR/"
 mkdir -p "$CLONE_DIR/wp-content/mu-plugins"
 cp "$PACKAGE/wordpress/institutional-patches/issue-299/qa-resume/qa-isolation.php" "$CLONE_DIR/wp-content/mu-plugins/qa-isolation.php"
+if [ "$ETAG_ONLY" = 1 ]; then
+  # Overlay only the candidate runtime in the disposable clone, never the source.
+  for file in tds-learnpress-editorial.php includes/class-tds-learnpress-editorial.php includes/class-tds-learnpress-editorial-admin.php; do
+    cp "$PACKAGE/wordpress/tds-learnpress-editorial/$file" "$CLONE_DIR/wp-content/plugins/tds-learnpress-editorial/$file"
+    cmp "$PACKAGE/wordpress/tds-learnpress-editorial/$file" "$CLONE_DIR/wp-content/plugins/tds-learnpress-editorial/$file"
+  done
+fi
 find "$CLONE_DIR" -type d -exec chgrp 33 {} + -exec chmod 0750 {} +
 find "$CLONE_DIR" -type f -exec chgrp 33 {} + -exec chmod 0640 {} +
 chmod 0710 "$CLONE_DIR"
@@ -101,6 +110,13 @@ jq -e '.sapi=="apache2handler" and .mu_loaded and .mail_short_circuit and .http_
 echo 'PASS Apache UID33, MU loaded, native mail/HTTP blocked, POST gate closed, private network/no ports'
 # Canonical media host is only a projection setting in the disposable database.
 wp option update home https://ead.ipexdesenvolvimento.cloud >/dev/null
+if [ "$ETAG_ONLY" = 1 ]; then
+  # GET/cache regression only; no registration or editorial-form replay.
+  wp plugin activate tds-learnpress-editorial >/dev/null
+  python3 "$PACKAGE/tooling/test_real_editorial_etag.py" "$IP" "$TMP" "$EVIDENCE"
+  echo RESULT=PASS_ETAG_FOCAL
+  exit 0
+fi
 docker exec "$TMP" touch /tmp/qa299-posts-enabled
 docker exec "$TMP" chmod 0644 /tmp/qa299-posts-enabled
 python3 "$PACKAGE/wordpress/institutional-patches/issue-299/qa-adapter/test_editorial.py" "$IP" "$TMP" "$EVIDENCE"
