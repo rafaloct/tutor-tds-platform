@@ -1,5 +1,23 @@
 # CURRENT STATE
 
+## 2026-10-19 — Issue #303, retomada focal ETag autorizada
+
+DECISION: usuário autorizou correção Flutter e homologação Android isolada após
+STOP; reativação produtiva exige aprovação específica posterior.
+IMPLEMENTED: `f547720538bfd1024544a0c9bd731b325797fdeb`, sobre PR304
+`f9260a6d118e7142b0c9ec7f11a14b09440c725a`; PR305 draft. Comparação GET aceita
+apenas ETag forte/fraco da mesma revisão JSON e preserva validador/cache.
+TESTED-LOCAL: 40 testes repository/fixtures +5 focais MP4, analyze PASS.
+Android15/API35: tela/repository/transporte padrão contra loopback sintético
+passaram gzip fraco200/304 e nova revisão forte200/304, sem Cookie/Authorization.
+CI do commit de código passou. #299/#302 não reexecutadas; LearnPress,
+fingerprint, mídia, produção, merge, assinatura real e Play preservados.
+APK QA normal `24A1DEF2…` instalado com hash igual, percurso sintético gzip200/304
+PASS; servidor/forward encerrados. APKs e hashes completos estão no recibo.
+UNKNOWN/BLOCKED: smoke institucional após nova aprovação, Xiaomi/áudio/TalkBack,
+direitos por aula e demais gates independentes. Recibo, hashes e rollback:
+`qa/ead-etag-20261019/README.md`.
+
 ## 2026-10-19 — promoção institucional parcial; STOP Android #303
 
 DECISION: responsável autorizou implantação mínima, nove tutores institucionais,
