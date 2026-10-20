@@ -1,5 +1,16 @@
 # Traceability matrix
 
+Checkpoint 20/10 #309: timeout nativo 120 s separado do HTML 20 s, logs
+sanitizados e retry. Analyze e Flutter focal 13/13 PASS. Android API 35 com
+Gradle 3 GiB/768 MiB/2 workers: abertura de processo frio e reabertura quente
+PASS para avanço MP4 com frames, 35 cues VTT, mostrar/ocultar legenda, pausa,
+retomada efetiva e retorno. CDP identificou erro -1 em cancelamento de request
+MP4 (`ERR_ABORTED`, `canceled=true`) seguido de Range 206, também em execuções
+funcionais. Tempo parado em zero de execuções antigas não reproduzido sob CDP;
+causa específica UNKNOWN. Chrome Android direto bloqueado por revisão automática;
+validação física, APK de commit exato e CI pendentes. #308 segue bloqueada para
+publicação progressiva. Ver `../qa/ead-ipex-coldstart-20261020/README.md`.
+
 Checkpoint20/10 #308: direitos próprios TDS confirmados pelo responsável.
 Piloto1420 publicou via validador existente, HTTP7/7 PASS; Android frio FAIL,
 quente com reprodução/VTT PASS parcial. Metadados revertidos,30 blocos de dados

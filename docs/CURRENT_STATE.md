@@ -1,5 +1,24 @@
 # CURRENT STATE
 
+## 2026-10-20 — Issue #309, Android WebView cold start
+
+OBSERVED: o timer de 20 s do player IPEX começava antes da inicialização nativa;
+uma execução Android/API 35 levou 105,869 s só para configurar JavaScript e teve
+SafeBrowsing TimeoutException/ANR. Com Gradle limitado a 3 GiB/768 MiB/2 workers,
+o candidato separou prazo nativo de 120 s e HTML de 20 s. Analyze e 13/13
+testes focais PASS. Teste instrumentado em processo frio e reabertura quente
+PASS: MP4 avançou com frames, 35 cues VTT, mostrar/ocultar legenda, pausa com
+retomada efetiva e retorno à aula. CDP associou erro -1 a request MP4 cancelado
+(`net::ERR_ABORTED`, `canceled=true`) seguido de HTTP 206 Range; esse erro também
+ocorreu em execução funcional. Eventos de underflow recuperaram sem erro de
+decodificador. Duas execuções anteriores com tempo parado em zero não foram
+reproduzidas sob CDP, portanto sua causa continua UNKNOWN. Comparação direta
+no Chrome Android foi rejeitada pela revisão automática do comando ADB. APK de
+commit exato/CI e gate físico/produção pendentes. #308 não está liberada para
+publicação progressiva. GitHub restaurado, PR307 HEAD confirmado na base
+184d7616. Recibo:
+`qa/ead-ipex-coldstart-20261020/README.md`.
+
 ## 2026-10-20 — direitos TDS confirmados, piloto mídia revertido
 
 DECISION: responsável confirmou titularidade TDS e autorização condicionada ao

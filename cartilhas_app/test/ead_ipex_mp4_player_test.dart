@@ -26,36 +26,35 @@ http.Response syllabus(
   Object? media, {
   bool mobile = true,
   String currentRevision = revision,
-}) =>
-    http.Response.bytes(
-      utf8.encode(
-        jsonEncode({
-          'schema_version': 1,
-          'authority': 'learnpress',
-          'course_id': 1298,
-          'title': 'Agricultura Sustentável',
-          'revision': currentRevision,
-          'sections': [
+}) => http.Response.bytes(
+  utf8.encode(
+    jsonEncode({
+      'schema_version': 1,
+      'authority': 'learnpress',
+      'course_id': 1298,
+      'title': 'Agricultura Sustentável',
+      'revision': currentRevision,
+      'sections': [
+        {
+          'id': 80,
+          'title': 'Assista em vídeo',
+          'items': [
             {
-              'id': 80,
-              'title': 'Assista em vídeo',
-              'items': [
-                {
-                  'id': 1299,
-                  'type': 'lp_lesson',
-                  'title': 'Videoaula SAF',
-                  'mobile_content': mobile,
-                  'revision': '2026-10-19 10:00:00',
-                  'media': media,
-                },
-              ],
+              'id': 1299,
+              'type': 'lp_lesson',
+              'title': 'Videoaula SAF',
+              'mobile_content': mobile,
+              'revision': '2026-10-19 10:00:00',
+              'media': media,
             },
           ],
-        }),
-      ),
-      200,
-      headers: {'etag': '"$currentRevision"'},
-    );
+        },
+      ],
+    }),
+  ),
+  200,
+  headers: {'etag': '"$currentRevision"'},
+);
 
 http.Response lesson(Object? media) => http.Response.bytes(
   utf8.encode(
@@ -79,6 +78,82 @@ void main() {
     'source_url': source,
     'captions_url': captions,
   };
+
+  testWidgets('cold native startup does not spend the HTML load budget', (
+    tester,
+  ) async {
+    var timedOut = 0;
+    final deadline = IpexWebViewDeadline(
+      const Duration(seconds: 20),
+      () => timedOut++,
+    );
+    await tester.pump(const Duration(seconds: 25));
+    expect(timedOut, 0);
+    deadline.start();
+    await tester.pump(const Duration(seconds: 19));
+    expect(timedOut, 0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(timedOut, 1);
+    deadline.cancel();
+  });
+
+  testWidgets('finished document cancels timeout', (tester) async {
+    var timedOut = false;
+    final deadline = IpexWebViewDeadline(
+      const Duration(seconds: 20),
+      () => timedOut = true,
+    )..start();
+    await tester.pump(const Duration(seconds: 5));
+    deadline.cancel();
+    await tester.pump(const Duration(seconds: 30));
+    expect(timedOut, false);
+  });
+
+  testWidgets('native setup has an independent two-minute bound', (
+    tester,
+  ) async {
+    var timedOut = false;
+    final native = IpexWebViewDeadline(
+      const Duration(minutes: 2),
+      () => timedOut = true,
+    )..start();
+    await tester.pump(const Duration(seconds: 119));
+    expect(timedOut, false);
+    await tester.pump(const Duration(seconds: 1));
+    expect(timedOut, true);
+    native.cancel();
+  });
+
+  testWidgets('player failure can retry and recover', (tester) async {
+    late VoidCallback fail;
+    late VoidCallback ready;
+    var creations = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EadIpexVideoPlayerScreen(
+          video: Uri.parse(source),
+          captions: Uri.parse(captions),
+          lessonTitle: 'Aula SAF',
+          playerFactory: (_, _, onReady, onError) {
+            creations++;
+            ready = onReady;
+            fail = onError;
+            return const Text('PLAYER');
+          },
+        ),
+      ),
+    );
+    fail();
+    await tester.pump();
+    expect(find.textContaining('Vídeo indisponível'), findsOneWidget);
+    await tester.tap(find.text('Tentar novamente'));
+    await tester.pump();
+    expect(creations, greaterThan(1));
+    ready();
+    await tester.pump();
+    expect(find.textContaining('Vídeo indisponível'), findsNothing);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+  });
 
   test('48 videoaulas podem usar MP4 do IPEX em vez do YouTube', () async {
     final repo = EadEditorialBridgeRepository(
@@ -173,9 +248,9 @@ void main() {
     expect(document, contains('Ocultar legendas'));
     expect(document, contains('Mostrar legendas'));
     expect(document, contains('aria-live="polite"'));
-    final nonce = RegExp(r'<script nonce="([^"]+)">')
-        .firstMatch(document)
-        ?.group(1);
+    final nonce = RegExp(
+      r'<script nonce="([^"]+)">',
+    ).firstMatch(document)?.group(1);
     expect(nonce, isNotNull);
     expect(document, contains('script-src &#39;nonce-$nonce&#39;'));
     expect(document, isNot(contains('script-src &#39;unsafe-inline&#39;')));
