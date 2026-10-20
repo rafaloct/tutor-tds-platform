@@ -1,0 +1,82 @@
+[
+  {
+    "route": "curriculum",
+    "status": 200,
+    "etag": "\"bc8da65164fe973a662ee6b4f47e8f2708b0e7e9c1229abada12413272661462\"",
+    "if_none_match": null,
+    "encoding": null,
+    "body_bytes": 643
+  },
+  {
+    "route": "curriculum",
+    "status": 304,
+    "etag": "\"bc8da65164fe973a662ee6b4f47e8f2708b0e7e9c1229abada12413272661462\"",
+    "if_none_match": "\"bc8da65164fe973a662ee6b4f47e8f2708b0e7e9c1229abada12413272661462\"",
+    "encoding": null,
+    "body_bytes": 0
+  },
+  {
+    "route": "curriculum",
+    "status": 304,
+    "etag": "\"bc8da65164fe973a662ee6b4f47e8f2708b0e7e9c1229abada12413272661462\"",
+    "if_none_match": "W/\"bc8da65164fe973a662ee6b4f47e8f2708b0e7e9c1229abada12413272661462\"",
+    "encoding": null,
+    "body_bytes": 0
+  },
+  {
+    "route": "curriculum",
+    "status": 200,
+    "etag": "\"bc8da65164fe973a662ee6b4f47e8f2708b0e7e9c1229abada12413272661462\"",
+    "if_none_match": "W/\"different\"",
+    "encoding": null,
+    "body_bytes": 643
+  },
+  {
+    "route": "lessons/13",
+    "status": 200,
+    "etag": "\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "if_none_match": null,
+    "encoding": null,
+    "body_bytes": 299
+  },
+  {
+    "route": "lessons/13",
+    "status": 304,
+    "etag": "\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "if_none_match": "\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "encoding": null,
+    "body_bytes": 0
+  },
+  {
+    "route": "lessons/13",
+    "status": 304,
+    "etag": "\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "if_none_match": "W/\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "encoding": null,
+    "body_bytes": 0
+  },
+  {
+    "route": "lessons/13",
+    "status": 200,
+    "etag": "\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "if_none_match": "W/\"different\"",
+    "encoding": null,
+    "body_bytes": 299
+  },
+  {
+    "route": "lessons/13",
+    "status": 200,
+    "etag": "\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "if_none_match": null,
+    "encoding": null,
+    "body_bytes": 299
+  },
+  {
+    "route": "lessons/13",
+    "status": 404,
+    "etag": null,
+    "if_none_match": "\"9044a1c3a8bbf9cd746489b1e935fc4b1b589c706bf2ffdf811d235c39367fdf\"",
+    "encoding": null,
+    "body_bytes": 113
+  }
+]

@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-20 — continuidade goldenrod-argon, servidor ETag #303
+
+OBSERVED: recibos locais recuperados mostram segunda ativação seguida de
+rollback: If-None-Match fraco retornou200 idêntico, não304. Plugin inactive
+reconfirmado por SSH às09:30UTC; nenhuma nova ativação nesta retomada.
+IMPLEMENTED: correção mínima PHP para validador único forte/fraco da mesma
+revisão, sem mudança Flutter ou autorização. TESTED-LOCAL:63 verificações
+existentes+47 focais e13 requisições HTTP loopback PASS, WP/LP simulados.
+TESTED-STAGING: clone imutável WP6.7.2/LP4.3.6 passou10/10 HTTP forte/fraco,
+revogação404 e zero linhas acadêmicas; origem íntegra/cleanup completo.
+Apache isolado respondeu identity; gzip institucional/promoção ainda pendentes. Ver
+`qa/ead-server-etag-20261020/README.md`. Worktree305 preservada.
+
 ## 2026-10-19 — Issue #303, retomada focal ETag autorizada
 
 DECISION: usuário autorizou correção Flutter e homologação Android isolada após

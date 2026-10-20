@@ -29,3 +29,4 @@ tooling/portal_restore_retry.sh text eol=lf
 # Exact Android HTTP receipts and their recorded hashes for Issue #303.
 docs/qa/ead-etag-20261019/android-requests.json -text
 docs/qa/ead-etag-20261019/app-http.txt -text
+docs/qa/ead-server-etag-20261020/** -text whitespace=cr-at-eol
