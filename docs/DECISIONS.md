@@ -327,3 +327,11 @@ assinatura e Play exigem autorização própria. Provas e limitações de #297 e
     Promoção e cache institucional passaram; evidência em
     `production/etag-promotion-20261020/README.md`. Não equivale a aceite
     integral de lançamento nem resolve a Issue297.
+
+36. 2026-10-20: responsável declarou “se tiver funcional ta autorizado, os
+    direitos da midia são do proprio projeto tds”. Titularidade institucional
+    confirmada para as mídias próprias TDS, sem inferir direitos de terceiros.
+    Issue308 vincula cada aprovação à fonte/hash/fingerprint conferidos e
+    publica progressivamente após checks, começando pela aula1420/curso1298.
+    A decisão não comprova playback, áudio, acessibilidade nem declarações Play.
+    Preservar matrícula, autoria, avaliações privadas e demais gates de release.

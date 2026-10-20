@@ -1,5 +1,19 @@
 # CURRENT STATE
 
+## 2026-10-20 — direitos TDS confirmados, piloto mídia revertido
+
+DECISION: responsável confirmou titularidade TDS e autorização condicionada ao
+funcionamento; não reabrir esse gate de direitos para as mídias próprias mapeadas.
+OBSERVED: inventário atual9 cursos/95 aulas/48 pares MP4-VTT, nenhum pai múltiplo.
+Piloto1420/1298 aprovado0→1 via validador editorial administrativo, HTTP7/7 PASS.
+Android APK305: primeira abertura FAIL indisponível; segunda quente reproduziu
+4,712→14,750→43,418s,35 cues, mostrar/ocultar e retorno. Áudio/TalkBack UNKNOWN.
+Rollback metadados PASS,30 tabelas com dados idênticos; só AUTO_INCREMENT mudou.
+Plugin continua ACTIVE, piloto voltou404, demais aulas não liberadas.
+BLOCKED técnico: inicialização do player Issue309, causa exclusiva ainda UNKNOWN;
+não confundir abertura quente com aceite frio. Sem novo APK/AAB/merge/Play.
+Recibo: `production/media-rights-20261020/README.md`; publicação Issue308.
+
 ## 2026-10-20 — promoção ETag autorizada, smoke institucional PASS
 
 OBSERVED: PHP do PR306 `0b9e2787411596646ddfe3fea9f22c05efce552d`
