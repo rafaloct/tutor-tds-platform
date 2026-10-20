@@ -1,5 +1,21 @@
 # CURRENT STATE
 
+## 2026-10-19 — retomada autorizada: fonte offline e adaptador/Android sintéticos PASS
+
+OBSERVED: dumps preservados 4dc75881 e 1ffeecf9 comparados sem tocar a origem.
+26/27 blocos de dados iguais; seis opções e AUTO_INCREMENT de options diferem.
+Autoria da mutação histórica continua UNKNOWN, inclusive M1 anterior.
+DECISION: rodada limitada a QA autorizada após STOP do PR #301 (da74830).
+TESTED-SYNTHETIC: fonte offline reconstruída com SQL retido 4dc75881,
+WP6.7.2 verificado, LP4.3.6 pinado e tema sanitizado com proveniência.
+6.043 hashes fixados e inalterados antes/depois; fonte sem runtime/cron/mount.
+Adaptador HTTP30/30 PASS; Android35 leu currículo/aula do clone por ponte privada,
+reproduziu MP4/VTT, alternou legendas, pausou e retornou à aula. Nenhum rebuild.
+Rollback container/DB/usuário/filesystem PASS; zero registros acadêmicos.
+#299 32/32 é evidência histórica preservada, não repetida; #297 independente.
+HUMAN_GATE: promoção institucional e lançamento não autorizados por este QA.
+Recibo e limites: `qa/ead-immutable-source-20261019/README.md`.
+
 ## 2026-10-19 — #299 nova rodada autorizada: HTTP sintético PASS
 
 TESTED-SYNTHETIC: PR #300 base5f833c2, patch de aplicação inalterado; corrigida

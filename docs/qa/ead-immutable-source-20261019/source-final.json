@@ -1,0 +1,10 @@
+{
+  "manifest_sha256": "7c9d4b3771640e63a3df30799a8aebdb97b4bc8b02f96c568d0acb4fbfae2e51",
+  "database_sha256": "4dc75881fb3f2df0c01a9fa65f1e99973cb231a35ee84ddd0ee34a1ccbc81a16",
+  "files": 6043,
+  "all_file_hashes_match": true,
+  "mounted_by_container": false,
+  "wp_config_exists": false,
+  "source_attributes": "----i---------e-------",
+  "historical_divergence_writer": "UNKNOWN"
+}

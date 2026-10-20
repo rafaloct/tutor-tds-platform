@@ -1,0 +1,43 @@
+PASS immutable source all hashes; no runtime DB config
+WORDPRESS_IMAGE=sha256:85c7d25eaf9726eeff21adad930aa43d2894bd73e9253ab250737b6d994a1181
+PASS Apache UID33, MU loaded, native mail/HTTP blocked, POST gate closed, private network/no ports
+PASS clone database guard
+PASS native admin login302
+PASS authorized native form200
+PASS native save rights step 1
+PASS REST media gate step 1
+PASS ETag invalidation step 1
+PASS conditional REST304 step 1
+PASS authorized native form200
+PASS native save rights step 2
+PASS REST media gate step 2
+PASS ETag invalidation step 2
+PASS conditional REST304 step 2
+PASS authorized native form200
+PASS native save rights step 3
+PASS REST media gate step 3
+PASS ETag invalidation step 3
+PASS conditional REST304 step 3
+PASS authorized native form200
+PASS native invalid nonce403
+PASS authorized native form200
+PASS optout public REST404
+PASS authorized native form200
+PASS Android fixture reviewed rights 0
+PASS authorized native form200
+PASS Android fixture reviewed rights 1
+PASS Android live curriculum200
+PASS Android live curriculum304
+PASS Android live lesson200
+PASS Android live lesson304
+PASS zero academic rows
+EDITORIAL_TOTAL_PASS=30
+ANDROID_READY IP=192.168.16.4 CONTAINER=tds-immutable-editorial-20261019T235832Z EVIDENCE=/opt/tds-learning-qa-20261017/backups/20261019T235832Z-immutable-editorial
+PASS zero academic rows after Android
+RESULT=PASS
+PASS immutable source all hashes; no runtime DB config
+ROLLBACK_FILESYSTEM=PASS
+ROLLBACK_CONTAINER=PASS
+ROLLBACK_DB_USER=PASS
+FINAL_EXIT=0
+EVIDENCE=/opt/tds-learning-qa-20261017/backups/20261019T235832Z-immutable-editorial
