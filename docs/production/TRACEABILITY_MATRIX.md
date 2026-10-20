@@ -1,5 +1,11 @@
 # Traceability matrix
 
+Checkpoint20/10 #303: handoff goldenrod-argon recuperado; produção reverteu
+após200 em vez de304 para If-None-Match fraco. Candidato PHP complementar
+aceita validador único forte/fraco;63+47 verificações e13 HTTP loopback PASS.
+WP/LP são stubs nesse teste; runtime real e promoção ainda não homologados.
+Plugin inactive reconfirmado; recibo `qa/ead-server-etag-20261020/README.md`.
+
 Base `fb50a57`, auditoria 2026-09-23. IDs/títulos Stitch informados pelo usuário;
 screenshot e HTML Classroom inspecionados e armazenados com hashes. Nenhuma
 equivalência visual foi aprovada. Composição 9731628404551462355 também inspecionada; outras telas não auditadas.

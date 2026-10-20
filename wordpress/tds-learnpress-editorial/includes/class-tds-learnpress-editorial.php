@@ -241,7 +241,10 @@ final class TDS_LearnPress_Editorial {
 	private static function respond( $payload, $request ) {
 		$revision = hash( 'sha256', wp_json_encode( $payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 		$etag = '"' . $revision . '"';
-		$unmodified = trim( (string) $request->get_header( 'if-none-match' ) ) === $etag;
+		// GET revalidation uses weak comparison (RFC 9110, 13.1.2).
+		// Match only the complete current validator, never a substring.
+		$validator = trim( (string) $request->get_header( 'if-none-match' ), " \t" );
+		$unmodified = $validator === $etag || $validator === 'W/' . $etag;
 		$response = new WP_REST_Response( $unmodified ? null : array_merge( $payload, array( 'revision' => $revision ) ), $unmodified ? 304 : 200 );
 		$response->header( 'ETag', $etag );
 		$response->header( 'Cache-Control', 'public, max-age=0, must-revalidate' );

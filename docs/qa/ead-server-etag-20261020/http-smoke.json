@@ -1,0 +1,56 @@
+{
+  "utc": "2026-10-20T03:41:23.965333+00:00",
+  "projection": {
+    "revision": "8de662b34322bba5c3831b61f613a0365816d6ed6d5c74eaa22617ddb0f102a9",
+    "sections": 8,
+    "items": 13,
+    "restricted_lessons": 13,
+    "media_exposed": 0,
+    "course_url": "https://ead.ipexdesenvolvimento.cloud/courses/agricultura-sustentavel/"
+  },
+  "status": "FAIL_ROLLED_BACK",
+  "error": "Literal weak If-None-Match did not return HTTP304",
+  "rollback_exit": 0,
+  "rollback_output": "Plugin 'tds-learnpress-editorial' deactivated.\nSuccess: Deactivated 1 of 1 plugins.",
+  "requests": [
+    {
+      "url": "https://ead.ipexdesenvolvimento.cloud/wp-json/tds-learning/v1/courses/1298/curriculum",
+      "final_url": "https://ead.ipexdesenvolvimento.cloud/wp-json/tds-learning/v1/courses/1298/curriculum",
+      "status": 200,
+      "request_headers": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip",
+        "User-Agent": "Dart/3.12 (dart:io)"
+      },
+      "response_headers": {
+        "ETag": "W/\"8de662b34322bba5c3831b61f613a0365816d6ed6d5c74eaa22617ddb0f102a9\"",
+        "Content-Encoding": "gzip",
+        "Content-Type": "application/json; charset=UTF-8",
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      },
+      "wire_bytes": 700,
+      "decoded_bytes": 2752,
+      "decoded_sha256": "7c6afa5af230fdce0c847d97ca6039a0285ffe31f4c4d8caf19db410e2a06911"
+    },
+    {
+      "url": "https://ead.ipexdesenvolvimento.cloud/wp-json/tds-learning/v1/courses/1298/curriculum",
+      "final_url": "https://ead.ipexdesenvolvimento.cloud/wp-json/tds-learning/v1/courses/1298/curriculum",
+      "status": 200,
+      "request_headers": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip",
+        "User-Agent": "Dart/3.12 (dart:io)",
+        "If-None-Match": "W/\"8de662b34322bba5c3831b61f613a0365816d6ed6d5c74eaa22617ddb0f102a9\""
+      },
+      "response_headers": {
+        "ETag": "W/\"8de662b34322bba5c3831b61f613a0365816d6ed6d5c74eaa22617ddb0f102a9\"",
+        "Content-Encoding": "gzip",
+        "Content-Type": "application/json; charset=UTF-8",
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      },
+      "wire_bytes": 700,
+      "decoded_bytes": 2752,
+      "decoded_sha256": "7c6afa5af230fdce0c847d97ca6039a0285ffe31f4c4d8caf19db410e2a06911"
+    }
+  ]
+}

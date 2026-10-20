@@ -31,7 +31,10 @@ jobs:
           php -l wordpress/tds-learnpress-editorial/includes/class-tds-learnpress-editorial-admin.php
           php -l wordpress/tds-learnpress-editorial/tds-learnpress-editorial.php
           php -l wordpress/tds-learnpress-editorial/tests/test-contract.php
+          php -l wordpress/tds-learnpress-editorial/tests/test-etag.php
+          php -l wordpress/tds-learnpress-editorial/tests/etag-http-router.php
       - name: Run isolated policy contract
         run: |
           set -euo pipefail
-          php wordpress/tds-learnpress-editorial/tests/test-contract.php
+          php wordpress/tds-learnpress-editorial/tests/test-etag.php
+          python3 wordpress/tds-learnpress-editorial/tests/test-etag-http.py
