@@ -176,6 +176,7 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
             "Build release bloqueado: schema de release_status.json invalido.",
         )
     }
+    // Proveniencia declarada: a correspondencia com o checkout e um gate humano/CI.
     val sourceVerification = status["source_verification"] as? Map<*, *>
     val sourceCommit = sourceVerification?.get("source_commit") as? String
     val sourceEvidenceSha = sourceVerification?.get("evidence_sha256") as? String

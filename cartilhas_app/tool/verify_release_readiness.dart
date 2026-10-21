@@ -52,6 +52,7 @@ class ReleaseReadinessVerifier {
     _verifyProductionConfig(issues);
     _verifySigning(release, issues);
 
+    // O commit/hash sao proveniencia declarada, nao um diff automatico do HEAD.
     final sourceVerification = _map(status['source_verification']);
     final sourceCommit = sourceVerification?['source_commit'];
     final sourceEvidenceSha = sourceVerification?['evidence_sha256'];

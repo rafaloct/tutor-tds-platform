@@ -58,7 +58,7 @@ void main() {
     expect(result.issues, isEmpty);
   });
 
-  test('build requires evidence for the current source', () {
+  test('build requires a source provenance attestation', () {
     _writeStatus(
       root,
       buildAllowed: true,

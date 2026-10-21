@@ -14,6 +14,7 @@
     "status": "pending",
     "source_commit": null,
     "evidence_sha256": null,
+    "scope": "Commit e hash identificam a evidencia; a correspondencia com os arquivos finais deve ser conferida no gate humano/CI antes de mudar release_build_allowed.",
     "historical": {
       "flutter_tests": "625/625",
       "api_tests": "601 passed, 30 PostgreSQL opt-in skipped, 5 subtests passed",
