@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import ipaddress
 import os
+import re
 from dataclasses import dataclass
 from urllib.parse import unquote, urlsplit
 
@@ -45,6 +47,8 @@ class Settings:
     auth_rate_limit_window_seconds: int = 900
     auth_login_attempt_limit: int = 10
     checkin_code_attempt_limit: int = 8
+    chatwoot_base_url: str | None = None
+    chatwoot_website_token: str | None = None
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -98,6 +102,8 @@ class Settings:
             public_api_base_url=os.getenv("PUBLIC_API_BASE_URL"),
             chatwoot_identity_secret=os.getenv("CHATWOOT_IDENTITY_SECRET"),
             chatwoot_identity_namespace=os.getenv("CHATWOOT_IDENTITY_NAMESPACE"),
+            chatwoot_base_url=os.getenv("CHATWOOT_BASE_URL"),
+            chatwoot_website_token=os.getenv("CHATWOOT_WEBSITE_TOKEN"),
             certificate_approval_required=os.getenv("CERTIFICATE_APPROVAL_REQUIRED", "false").lower() in {"1", "true", "yes"},
             certificate_candidate_enabled=os.getenv("CERTIFICATE_CANDIDATE_ENABLED", "false").lower() in {"1", "true", "yes"},
             certificate_candidate_url=os.getenv("CERTIFICATE_CANDIDATE_URL"),
@@ -141,6 +147,60 @@ class Settings:
             raise RuntimeError("CPF_PEPPER deve ter pelo menos 32 caracteres.")
         self.resolved_public_api_base_url()
         return self.jwt_secret, self.cpf_pepper
+
+    def resolved_chatwoot_widget_config(self) -> tuple[str, str]:
+        """Validate public widget identifiers, without DNS or an outbound request.
+
+        Invalid optional support settings must disable only /support/config;
+        they must not prevent the other API routes from starting.
+        """
+        value = self.chatwoot_base_url
+        token = self.chatwoot_website_token
+        if (
+            not isinstance(value, str)
+            or not isinstance(token, str)
+            or not re.fullmatch(r"[A-Za-z0-9_-]{6,256}", token)
+            or any(character.isspace() or ord(character) < 32 or ord(character) == 127 for character in value)
+            or any(character in value for character in "\\%?#")
+        ):
+            raise ValueError("Invalid public support configuration")
+        try:
+            parsed = urlsplit(value)
+            host = parsed.hostname
+            port = parsed.port
+        except ValueError:
+            raise ValueError("Invalid public support configuration") from None
+        if (
+            parsed.scheme != "https"
+            or not host
+            or len(host) > 253
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.netloc.endswith(":")
+            or (port is not None and not 1 <= port <= 65535)
+            or not re.fullmatch(r"(?:/[A-Za-z0-9._~-]+)*/?", parsed.path)
+            or any(segment in {".", ".."} for segment in parsed.path.split("/"))
+        ):
+            raise ValueError("Invalid public support configuration")
+        try:
+            address = ipaddress.ip_address(host)
+        except ValueError:
+            labels = host.split(".")
+            # A numeric final label may be interpreted by browsers as a
+            # noncanonical IPv4 address (127.1, octal, hex or one integer).
+            if (
+                len(labels) < 2
+                or host == "home.arpa"
+                or host.endswith(".home.arpa")
+                or not re.fullmatch(r"[a-z][a-z0-9-]{1,62}", labels[-1])
+                or any(not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label) for label in labels)
+                or labels[-1] in {"localhost", "local", "localdomain", "internal", "home", "lan", "test", "invalid", "example"}
+            ):
+                raise ValueError("Invalid public support configuration")
+        else:
+            if not address.is_global or address.is_multicast or address.is_reserved:
+                raise ValueError("Invalid public support configuration")
+        return value.rstrip("/"), token
 
     def resolved_public_api_base_url(self) -> str | None:
         """Return a canonical public base without trusting proxy request headers."""
