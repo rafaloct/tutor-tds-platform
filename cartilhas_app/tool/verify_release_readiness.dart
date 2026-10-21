@@ -52,6 +52,22 @@ class ReleaseReadinessVerifier {
     _verifyProductionConfig(issues);
     _verifySigning(release, issues);
 
+    final sourceVerification = _map(status['source_verification']);
+    final sourceCommit = sourceVerification?['source_commit'];
+    final sourceEvidenceSha = sourceVerification?['evidence_sha256'];
+    if (sourceVerification?['status'] != 'passed' ||
+        sourceCommit is! String ||
+        !RegExp(r'^[a-f0-9]{40}$').hasMatch(sourceCommit) ||
+        sourceEvidenceSha is! String ||
+        !RegExp(r'^[a-fA-F0-9]{64}$').hasMatch(sourceEvidenceSha)) {
+      issues.add(
+        const ReleaseVerificationIssue(
+          'source_verification_pending',
+          'Fonte candidata sem commit e evidencia de verificacao rastreaveis.',
+        ),
+      );
+    }
+
     const requiredPhysicalIds = {
       'certificate_human_approval_e2e',
       'classroom_cold_offline_android_e2e',

@@ -176,6 +176,14 @@ fun validateReleaseFreezeState(statusFile: java.io.File) {
             "Build release bloqueado: schema de release_status.json invalido.",
         )
     }
+    val sourceVerification = status["source_verification"] as? Map<*, *>
+    val sourceCommit = sourceVerification?.get("source_commit") as? String
+    val sourceEvidenceSha = sourceVerification?.get("evidence_sha256") as? String
+    if (sourceVerification?.get("status") != "passed" ||
+        sourceCommit?.matches(Regex("^[a-f0-9]{40}$")) != true ||
+        sourceEvidenceSha?.matches(Regex("^[a-fA-F0-9]{64}$")) != true) {
+        throw GradleException("Build release bloqueado: verificacao da fonte candidata pendente ou sem evidencia rastreavel.")
+    }
     if (status["release_build_allowed"] != true) {
         throw GradleException(
             "Build release congelado: conclua os gates em release/release_status.json.",
