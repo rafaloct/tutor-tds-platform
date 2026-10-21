@@ -448,9 +448,10 @@ def main() -> int:
             gitleaks,
             config,
         )
-        # The default rule has an entropy threshold. A 24-character random
-        # fixture can occasionally fall below it and make this guard flaky.
-        fixture_value = f"tds_gitleaks_fixture_{random_alnum(48)}"
+        # This fixed 24-character synthetic value exercises the default
+        # generic-api-key rule and the existing narrow fixture exception.
+        # Random values can fall below the detection entropy threshold.
+        fixture_value = "tds_gitleaks_fixture_KuDV5Ch3RD1FqiXHBrczb1fj"
         clean_case(
             tmp_root,
             "approved_api_fixture",
@@ -459,7 +460,6 @@ def main() -> int:
             config,
             default_config,
         )
-        fixture_value = f"tds_gitleaks_fixture_{random_alnum(48)}"
         clean_case(
             tmp_root,
             "approved_flutter_fixture",
