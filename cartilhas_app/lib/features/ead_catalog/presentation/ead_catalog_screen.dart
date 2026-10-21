@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../data/ead_catalog_repository.dart';
+import '../data/ead_portal_links.dart';
 import '../learning_path/ead_learning_path_screen.dart';
 import '../qa/private_editorial_qa_bridge.dart';
 
@@ -10,10 +10,16 @@ typedef EadCourseOpener = Future<bool> Function(Uri uri);
 
 /// Public LearnPress discovery, separated from bundled Tutor TDS cartilhas.
 class EadCatalogScreen extends StatefulWidget {
-  const EadCatalogScreen({super.key, this.courseLoader, this.openCourse});
+  const EadCatalogScreen({
+    super.key,
+    this.courseLoader,
+    this.openCourse,
+    this.openRegistration,
+  });
 
   final EadCourseLoader? courseLoader;
   final EadCourseOpener? openCourse;
+  final EadCourseOpener? openRegistration;
 
   @override
   State<EadCatalogScreen> createState() => _EadCatalogScreenState();
@@ -39,8 +45,9 @@ class _EadCatalogScreenState extends State<EadCatalogScreen> {
   Future<void> _open(EadCourse course) async {
     final success = await (() async {
       try {
-        return await (widget.openCourse?.call(course.url) ??
-            launchUrl(course.url, mode: LaunchMode.externalApplication));
+        final destination = EadPortalLinks.course(course);
+        return await (widget.openCourse?.call(destination) ??
+            EadPortalLinks.open(destination));
       } on Object {
         return false;
       }
@@ -51,6 +58,25 @@ class _EadCatalogScreenState extends State<EadCatalogScreen> {
           content: Text(
             'Não foi possível abrir o curso. Acesse ead.ipexdesenvolvimento.cloud.',
           ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _register(EadCourse course) async {
+    final destination = EadPortalLinks.registration(courseId: course.id);
+    bool opened;
+    try {
+      opened =
+          await (widget.openRegistration?.call(destination) ??
+              EadPortalLinks.open(destination));
+    } on Object {
+      opened = false;
+    }
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível abrir o cadastro do EAD.'),
         ),
       );
     }
@@ -161,6 +187,17 @@ class _EadCatalogScreenState extends State<EadCatalogScreen> {
                               ),
                               trailing: const Icon(Icons.open_in_new),
                               onTap: () => _open(course),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                key: ValueKey('ead-register-${course.id}'),
+                                onPressed: () => _register(course),
+                                icon: const Icon(Icons.person_add_outlined),
+                                label: const Text(
+                                  'Criar conta para este curso',
+                                ),
+                              ),
                             ),
                             Align(
                               alignment: Alignment.centerRight,
