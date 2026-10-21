@@ -2021,6 +2021,20 @@
       "status": 200
     }
   },
+  "GET /support/config": {
+    "request": {
+      "body": null,
+      "path": "/support/config"
+    },
+    "response": {
+      "body": {
+        "base_url": "qa-example",
+        "website_token": "qa-example"
+      },
+      "note": "Exemplo sintético do modelo de resposta.",
+      "status": 200
+    }
+  },
   "GET /support/identity": {
     "request": {
       "body": null,

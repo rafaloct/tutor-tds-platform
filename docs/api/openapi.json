@@ -5093,6 +5093,25 @@
         "title": "StudentProgress",
         "type": "object"
       },
+      "SupportWidgetConfig": {
+        "additionalProperties": false,
+        "properties": {
+          "base_url": {
+            "title": "Base Url",
+            "type": "string"
+          },
+          "website_token": {
+            "title": "Website Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_url",
+          "website_token"
+        ],
+        "title": "SupportWidgetConfig",
+        "type": "object"
+      },
       "SyncQueueStatus": {
         "properties": {
           "exhausted": {
@@ -13979,6 +13998,31 @@
         "summary": "Public Course",
         "tags": [
           "public"
+        ]
+      }
+    },
+    "/support/config": {
+      "get": {
+        "description": "The website token is public; never return admin/HMAC credentials.",
+        "operationId": "support_config_support_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportWidgetConfig"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "description": "Configuração pública do suporte ausente ou inválida."
+          }
+        },
+        "summary": "Support Config",
+        "tags": [
+          "support"
         ]
       }
     },
