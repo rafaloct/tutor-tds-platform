@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cartilhas_app/features/auth/data/auth_repository.dart';
 import 'package:cartilhas_app/features/auth/data/auth_token_store.dart';
 import 'package:cartilhas_app/features/auth/models/auth_session.dart';
+import 'package:cartilhas_app/features/ead_catalog/data/ead_portal_links.dart';
 import 'package:cartilhas_app/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -34,11 +35,15 @@ String authResponse() => jsonEncode({
   'user': {'id': 'user-1', 'name': 'Aluno Teste', 'role': 'student'},
 });
 
-Future<void> pumpWelcome(WidgetTester tester, AuthRepository repository) async {
+Future<void> pumpWelcome(
+  WidgetTester tester,
+  AuthRepository repository, {
+  EadPortalOpener? eadPortalOpener,
+}) async {
   await tester.pumpWidget(
     Provider<AuthRepository>.value(
       value: repository,
-      child: const MaterialApp(home: WelcomeScreen()),
+      child: MaterialApp(home: WelcomeScreen(eadPortalOpener: eadPortalOpener)),
     ),
   );
   await tester.pumpAndSettle();
@@ -84,6 +89,45 @@ void main() {
     expect(networkCalled, isFalse);
   });
 
+  testWidgets('cadastro e login EAD usam WordPress sem CPF ou conta TDS', (
+    tester,
+  ) async {
+    final visited = <Uri>[];
+    var networkCalled = false;
+    final repository = AuthRepository(
+      apiUrl: '',
+      client: MockClient((_) async {
+        networkCalled = true;
+        return http.Response('{}', 500);
+      }),
+      tokenStore: MemoryTokenStore(),
+    );
+    await pumpWelcome(
+      tester,
+      repository,
+      eadPortalOpener: (uri) async {
+        visited.add(uri);
+        return true;
+      },
+    );
+    final signup = find.byKey(const ValueKey('ead-signup'));
+    await tester.ensureVisible(signup);
+    await tester.tap(signup);
+    await tester.pump();
+    final login = find.byKey(const ValueKey('ead-login'));
+    await tester.ensureVisible(login);
+    await tester.tap(login);
+    await tester.pump();
+    expect(visited.length, 2);
+    expect(visited[0].path, '/cadastro/');
+    expect(visited[1].path, '/wp-login.php');
+    expect(visited[0].queryParameters['utm_source'], 'tutor_tds_app');
+    expect(visited[1].queryParameters['utm_campaign'], 'ead_login');
+    expect(visited.join(' '), isNot(contains('cpf')));
+    expect(networkCalled, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('cria conta com loading e segue para onboarding', (tester) async {
     final release = Completer<void>();
     final store = MemoryTokenStore();
@@ -110,10 +154,6 @@ void main() {
       'senha-segura-2026',
     );
     await tester.enterText(
-      find.byKey(const ValueKey('account-activation-code')),
-      'codigo-ativacao-unico',
-    );
-    await tester.enterText(
       find.byKey(const ValueKey('account-password-confirmation')),
       'senha-segura-2026',
     );
@@ -133,7 +173,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestBody['password'], 'senha-segura-2026');
-    expect(requestBody['activation_token'], 'codigo-ativacao-unico');
+    expect(requestBody.containsKey('activation_token'), isFalse);
     expect(store.value?.accessToken, 'access-token');
     expect(find.text('Aprenda no seu ritmo'), findsOneWidget);
     final prefs = await SharedPreferences.getInstance();
@@ -169,11 +209,7 @@ void main() {
     await tester.tap(find.text('Criar conta'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey('account-activation-code')),
-      findsOneWidget,
-    );
-    expect(find.text('Código de ativação (opcional)'), findsOneWidget);
+    expect(find.byKey(const ValueKey('account-activation-code')), findsNothing);
     await tester.enterText(
       find.byKey(const ValueKey('account-password')),
       'senha-segura-2026',

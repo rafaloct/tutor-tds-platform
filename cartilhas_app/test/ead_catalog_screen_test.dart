@@ -43,10 +43,48 @@ void main() {
     expect(find.text('Automações'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('ead-course-1474')));
     await tester.pump();
-    expect(
-      opened.toString(),
-      'https://ead.ipexdesenvolvimento.cloud/courses/automacoes-celular/',
+    expect(opened!.scheme, 'https');
+    expect(opened!.host, 'ead.ipexdesenvolvimento.cloud');
+    expect(opened!.path, '/courses/automacoes-celular/');
+    expect(opened!.queryParameters['utm_source'], 'tutor_tds_app');
+    expect(opened!.queryParameters['utm_campaign'], 'ead_catalog');
+    expect(opened!.queryParameters['utm_content'], 'course_1474');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('inscrição abre o cadastro WordPress do curso sem CPF no link', (
+    tester,
+  ) async {
+    viewport(tester);
+    Uri? target;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EadCatalogScreen(
+          courseLoader: () async => const [
+            EadCourse(
+              id: 1298,
+              slug: 'agricultura-sustentavel',
+              title: 'Agricultura Sustentável',
+            ),
+          ],
+          openRegistration: (uri) async {
+            target = uri;
+            return true;
+          },
+        ),
+      ),
     );
+    await tester.pumpAndSettle();
+    final button = find.byKey(const ValueKey('ead-register-1298'));
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pump();
+    expect(target, isNotNull);
+    expect(target!.path, '/cadastro/');
+    expect(target!.queryParameters['tds_curso'], '1298');
+    expect(target!.queryParameters['utm_source'], 'tutor_tds_app');
+    expect(target!.queryParameters['utm_campaign'], 'ead_signup');
+    expect(target.toString(), isNot(contains('cpf')));
     expect(tester.takeException(), isNull);
   });
 

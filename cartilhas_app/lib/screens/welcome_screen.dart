@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/models/auth_session.dart';
 import '../features/auth/presentation/account_login_screen.dart';
+import '../features/ead_catalog/data/ead_portal_links.dart';
 import '../features/ead_catalog/presentation/ead_catalog_screen.dart';
 import '../features/certificates/data/certificate_service.dart';
 import '../features/profile/data/profile_data_store.dart';
@@ -22,11 +23,13 @@ class WelcomeScreen extends StatefulWidget {
     super.key,
     this.profileDataStore,
     this.eadCatalogLoader,
+    this.eadPortalOpener,
     this.skipExistingUserRedirect = false,
   });
 
   final ProfileDataStore? profileDataStore;
   final EadCourseLoader? eadCatalogLoader;
+  final EadPortalOpener? eadPortalOpener;
   final bool skipExistingUserRedirect;
 
   @override
@@ -124,12 +127,36 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
+  Future<void> _openEadPortal(Uri destination) async {
+    final bool opened;
+    try {
+      opened =
+          await (widget.eadPortalOpener?.call(destination) ??
+              EadPortalLinks.open(destination));
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível abrir o EAD. Tente novamente.'),
+        ),
+      );
+      return;
+    }
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível abrir o EAD. Tente novamente.'),
+        ),
+      );
+    }
+  }
+
   Future<AuthSession?> _showAccountDialog({required bool register}) async {
     final auth = context.read<AuthRepository>();
     final dialogFormKey = GlobalKey<FormState>();
     var cpfValue = register ? _cpfController.text : '';
     var passwordValue = '';
-    var activationCode = '';
+    const activationCode = '';
     var obscurePassword = true;
     var busy = false;
     String? errorMessage;
@@ -240,22 +267,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       onFieldSubmitted: register ? null : (_) => submit(),
                     ),
                     if (register) ...[
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        key: const ValueKey('account-activation-code'),
-                        obscureText: true,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        autofillHints: null,
-                        decoration: const InputDecoration(
-                          labelText: 'Código de ativação (opcional)',
-                          helperText:
-                              'Preencha apenas se recebeu um convite da instituição.',
-                          prefixIcon: Icon(Icons.verified_user_outlined),
-                        ),
-                        onChanged: (value) => activationCode = value.trim(),
-                        textInputAction: TextInputAction.next,
-                      ),
                       const SizedBox(height: 12),
                       TextFormField(
                         key: const ValueKey('account-password-confirmation'),
@@ -425,9 +436,36 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     featureId: 'ead_public_discovery',
                                     builder: (_) => EadCatalogScreen(
                                       courseLoader: widget.eadCatalogLoader,
+                                      openCourse: widget.eadPortalOpener,
+                                      openRegistration: widget.eadPortalOpener,
                                     ),
                                   ),
                                 ),
+                              ),
+                              const SizedBox(height: 12),
+                              FilledButton.icon(
+                                key: const ValueKey('ead-signup'),
+                                icon: const Icon(
+                                  Icons.person_add_alt_1_outlined,
+                                ),
+                                label: const Text(
+                                  'Criar conta gratuita no EAD',
+                                ),
+                                onPressed: () => _openEadPortal(
+                                  EadPortalLinks.registration(),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              TextButton.icon(
+                                key: const ValueKey('ead-login'),
+                                icon: const Icon(Icons.login_outlined),
+                                label: const Text('Já tenho conta no EAD'),
+                                onPressed: () =>
+                                    _openEadPortal(EadPortalLinks.login()),
+                              ),
+                              const Text(
+                                'Cadastro e login usam o mesmo WordPress do site. '
+                                'A matrícula é confirmada no LearnPress, não automaticamente pelo aplicativo.',
                               ),
                               const SizedBox(height: 24),
                               TextFormField(
@@ -488,7 +526,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                           CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
-                                          'Conta online opcional',
+                                          'Conta TDS para funções internas',
                                           style: Theme.of(context)
                                               .textTheme
                                               .titleMedium
@@ -498,7 +536,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Entre para preparar a sincronização do seu progresso ou continue usando somente este dispositivo.',
+                                          'Este acesso da API TDS é separado da conta do EAD. '
+                                          'Use o cadastro EAD acima para cursos e matrícula; '
+                                          'aqui você acessa recursos internos de sincronização.',
                                           style: TextStyle(
                                             color: colors.onSurfaceVariant,
                                           ),
