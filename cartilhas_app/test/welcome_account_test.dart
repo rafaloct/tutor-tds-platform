@@ -148,6 +148,49 @@ void main() {
     );
   });
 
+  testWidgets('cadastro sem convite não exige nem envia código', (
+    tester,
+  ) async {
+    late Map<String, dynamic> requestBody;
+    final store = MemoryTokenStore();
+    final repository = AuthRepository(
+      apiUrl: 'https://api.example',
+      client: MockClient((request) async {
+        expect(request.url.path, '/auth/register');
+        requestBody = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(authResponse(), 201);
+      }),
+      tokenStore: store,
+    );
+
+    await pumpWelcome(tester, repository);
+    await fillLocalForm(tester);
+    await tester.ensureVisible(find.text('Criar conta'));
+    await tester.tap(find.text('Criar conta'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('account-activation-code')),
+      findsOneWidget,
+    );
+    expect(find.text('Código de ativação (opcional)'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('account-password')),
+      'senha-segura-2026',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('account-password-confirmation')),
+      'senha-segura-2026',
+    );
+    await tester.tap(find.text('Criar conta segura'));
+    await tester.pumpAndSettle();
+
+    expect(requestBody.containsKey('activation_token'), isFalse);
+    expect(store.value?.accessToken, 'access-token');
+    expect(find.text('Aprenda no seu ritmo'), findsOneWidget);
+    repository.dispose();
+  });
+
   testWidgets('login mostra erro genérico sem repetir resposta remota', (
     tester,
   ) async {

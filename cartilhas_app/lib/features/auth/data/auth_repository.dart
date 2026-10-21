@@ -105,7 +105,8 @@ class AuthRepository {
       'cpf': cpf,
       'phone': phone,
       'password': password,
-      'activation_token': activationCode,
+      if (activationCode.trim().isNotEmpty)
+        'activation_token': activationCode.trim(),
     },
     expectedStatus: 201,
   );
