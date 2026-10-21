@@ -7,6 +7,49 @@ defined( 'ABSPATH' ) || exit;
  * Approval is explicit, never inferred from published/preview status.
  */
 final class TDS_LearnPress_Editorial_Admin {
+	/**
+	 * Reject an unauthorized lesson edit before WordPress updates the post.
+	 * LearnPress touches every parent course during save_post, after the core
+	 * post update. A shared lesson must be editable in every parent course.
+	 */
+	public static function guard_editor_request() {
+		if ( ! isset( $_SERVER['SCRIPT_NAME'] ) || 'post.php' !== basename( (string) $_SERVER['SCRIPT_NAME'] ) ) {
+			return;
+		}
+		$action = isset( $_POST['action'] ) && is_string( $_POST['action'] )
+			? sanitize_key( wp_unslash( $_POST['action'] ) )
+			: ( isset( $_GET['action'] ) && is_string( $_GET['action'] )
+				? sanitize_key( wp_unslash( $_GET['action'] ) ) : '' );
+		if ( ! in_array( $action, array( 'edit', 'editpost' ), true ) ) {
+			return;
+		}
+		$id = 'editpost' === $action ? ( $_POST['post_ID'] ?? null ) : ( $_GET['post'] ?? null );
+		if ( ! is_scalar( $id ) || ! ctype_digit( (string) $id ) || (int) $id < 1 ) {
+			return;
+		}
+		$post = get_post( (int) $id );
+		if ( ! $post || 'lp_lesson' !== $post->post_type ) {
+			return;
+		}
+		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+			wp_die( 'You are not allowed to edit this lesson.', '', array( 'response' => 403 ) );
+		}
+		global $wpdb;
+		$parent_ids = $wpdb->get_col( $wpdb->prepare(
+			"SELECT DISTINCT s.section_course_id FROM {$wpdb->prefix}learnpress_section_items i " .
+			"JOIN {$wpdb->prefix}learnpress_sections s ON s.section_id = i.section_id " .
+			'WHERE i.item_id = %d', $post->ID
+		) );
+		if ( $wpdb->last_error ) {
+			wp_die( 'Lesson ownership could not be verified.', '', array( 'response' => 403 ) );
+		}
+		foreach ( $parent_ids as $parent_id ) {
+			if ( ! current_user_can( 'edit_lp_course', (int) $parent_id ) ) {
+				wp_die( 'You are not allowed to edit a parent course of this lesson.', '', array( 'response' => 403 ) );
+			}
+		}
+	}
+
 	public static function register_box() {
 		add_meta_box(
 			'tds-learnpress-mobile',
