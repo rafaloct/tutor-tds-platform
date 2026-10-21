@@ -33,6 +33,11 @@
     "behavior": "Exclui a própria conta e os dados transacionais associados; retorna 204 sem corpo. Vínculo docente, monitor ou equipe/creator ativa exige exclusão assistida e produz 409; agenda remoção da sincronização externa.",
     "flags": []
   },
+  "GET /support/config": {
+    "permission": "Público, sem token Bearer nem identidade acadêmica. Qualquer cliente pode consultar; o pedido não escolhe configuração.",
+    "behavior": "Projeta somente base_url HTTPS e website_token público do widget Chatwoot a partir da configuração opcional do servidor. Não expõe credenciais administrativas, JWT, CPF pepper ou segredo/namespace HMAC. Configuração ausente ou inválida falha de modo fechado com 503 genérico; respostas 200 e 503 usam Cache-Control: no-store e Pragma: no-cache. Não concede matrícula, progresso, frequência ou certificado.",
+    "flags": []
+  },
   "GET /support/identity": {
     "permission": "Token Bearer de conta existente; o papel do token deve coincidir com o papel atual no banco.",
     "behavior": "Assina somente a identidade do titular para Chatwoot; não recebe identidade alvo nem expõe CPF/telefone. Retorna 503 se segredo/namespace do suporte não estão configurados; Cache-Control: no-store.",
