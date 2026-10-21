@@ -58,6 +58,49 @@ void main() {
     expect(result.issues, isEmpty);
   });
 
+  test('build requires a source provenance attestation', () {
+    _writeStatus(
+      root,
+      buildAllowed: true,
+      physicalStatus: 'passed',
+      artifactStatus: 'superseded',
+      uploadAllowed: false,
+      sourceStatus: 'pending',
+    );
+
+    final result = ReleaseReadinessVerifier(
+      root: root,
+      verifySigningIdentity: false,
+    ).verify(ReleaseIntent.build);
+
+    expect(
+      result.issues.map((issue) => issue.code),
+      contains('source_verification_pending'),
+    );
+  });
+
+  test('a passed source requires a commit and evidence digest', () {
+    _writeStatus(
+      root,
+      buildAllowed: true,
+      physicalStatus: 'passed',
+      artifactStatus: 'superseded',
+      uploadAllowed: false,
+      sourceCommit: 'historical',
+      sourceEvidenceSha: 'missing',
+    );
+
+    final result = ReleaseReadinessVerifier(
+      root: root,
+      verifySigningIdentity: false,
+    ).verify(ReleaseIntent.build);
+
+    expect(
+      result.issues.map((issue) => issue.code),
+      contains('source_verification_pending'),
+    );
+  });
+
   test('upload exige candidato liberado e hash exato', () {
     final artifact = File('${root.path}/release/candidate.aab')
       ..createSync(recursive: true)
@@ -315,6 +358,10 @@ void _writeStatus(
   required String physicalStatus,
   required String artifactStatus,
   required bool uploadAllowed,
+  String sourceStatus = 'passed',
+  String sourceCommit = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  String sourceEvidenceSha =
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
   String artifactPath = 'release/old.aab',
   String artifactSha = 'OLD',
 }) {
@@ -333,6 +380,11 @@ void _writeStatus(
         'upload_certificate_sha256': 'AA',
       },
       'release_build_allowed': buildAllowed,
+      'source_verification': {
+        'status': sourceStatus,
+        'source_commit': sourceCommit,
+        'evidence_sha256': sourceEvidenceSha,
+      },
       'artifact': {
         'path': artifactPath,
         'sha256': artifactSha,

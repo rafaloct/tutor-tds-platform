@@ -9,13 +9,19 @@
     "compile_sdk": 36,
     "upload_certificate_sha256": "16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50"
   },
-  "release_build_allowed": true,
+  "release_build_allowed": false,
   "source_verification": {
-    "flutter_tests": "625/625",
-    "api_tests": "601 passed, 30 PostgreSQL opt-in skipped, 5 subtests passed",
-    "observability_tests": "17/17",
-    "dart_analyze": "passed",
-    "verified_at": "2026-10-13"
+    "status": "pending",
+    "source_commit": null,
+    "evidence_sha256": null,
+    "scope": "Commit e hash identificam a evidencia; a correspondencia com os arquivos finais deve ser conferida no gate humano/CI antes de mudar release_build_allowed.",
+    "historical": {
+      "flutter_tests": "625/625",
+      "api_tests": "601 passed, 30 PostgreSQL opt-in skipped, 5 subtests passed",
+      "observability_tests": "17/17",
+      "dart_analyze": "passed",
+      "verified_at": "2026-10-13"
+    }
   },
   "artifact": {
     "path": "release/Tutor-TDS-1.4.0+13-signed.aab",
@@ -68,13 +74,13 @@
     },
     {
       "id": "pre_aab_xiaomi_smoke",
-      "status": "passed",
+      "status": "pending",
       "required_for_release_build": true,
-      "description": "Único gate físico obrigatório: smoke curto no Xiaomi imediatamente antes de liberar a geração do AAB. Não repetir a matriz funcional já coberta em emulador.",
-      "verified_at": "2026-10-13T15:15:17.229588+00:00",
-      "evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-13.json",
-      "evidence_sha256": "df3c783408160b85f0e53f6a790a8d0728ebd60aa16318480ade4214de445747",
-      "scope": "Fresh Xiaomi ZT6HPRHQHATSEQPR (Android15/API35 arm64) isolated debug/staging QA package; cold launch and relaunch in new PID, responsive UI, no crash/ANR, existing production-namespace and DEV packages preserved. App/API runtime trees match d3b1331 candidate; later release metadata/documentation only. This is hardware smoke, not production AAB integration or Play inventory."
+      "description": "Smoke curto no Xiaomi somente no gate pre-AAB da fonte candidata atual; sem repetir a matriz funcional do emulador.",
+      "previous_verified_at": "2026-10-13T15:15:17.229588+00:00",
+      "previous_evidence": "docs/production/evidence/pre-aab-xiaomi-smoke-2026-10-13.json",
+      "previous_evidence_sha256": "df3c783408160b85f0e53f6a790a8d0728ebd60aa16318480ade4214de445747",
+      "scope": "Evidência anterior pertence ao candidato d3b1331 e não libera build da fonte atual. Novo smoke pre-AAB depende da consolidação técnica e gate humano."
     },
     {
       "id": "dynamic_activity_contextual_android_e2e",
