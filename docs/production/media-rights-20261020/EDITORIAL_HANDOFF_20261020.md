@@ -12,9 +12,11 @@ Estado observado em 20/10/2026. Esta nota concilia decisões posteriores da [Iss
 | Decisão pedagógica | **PENDING 48/48**: nove pacotes por curso e fichas por aula preparados; cada instrutor deve registrar decisão individual por versão/hash. A revisão dos 47 pares restantes pode ocorrer em paralelo por curso. |
 | Publicação | **NO 48/48** no readback registrado; aula 1420 revertida, currículo sem mídia e endpoint da aula 404. Nenhuma declaração humana acima altera flags. |
 
+**DECISION — instrutora institucional (21/10/2026):** a conta TDS (`tds_admin`, ID 1, perfil atual de administrador) é o padrão de instrutoria LearnPress. [Readback e escopo na Issue #297](https://github.com/rafaloct/tutor-tds-platform/issues/297#issuecomment-6316973748): os nove cursos principais já pertenciam à conta; 614 e 1709 receberam autoria TDS por REST autenticado e os 11 cursos publicados exibem TDS. O rascunho 616 já pertencia à conta. Não criar nove contas individuais nem alterar autoria dos cursos principais. A aula 1710 de 1709 ainda está sem autor e requer tratamento focal por mecanismo legítimo somente se for necessário editá-la; esta exceção não altera a instrutoria exibida do curso. Atribuição de autoria não representa revisão ou aprovação pedagógica.
+
 ## Handoff da aula piloto 1420
 
-Curso **1298 — Agricultura Sustentável**. No LARGeo, entregar ao instrutor a ficha `D:/AI-Shared/test-results/tutor-tds/issue308-transition-20261020/lesson1420-instructor-approval.md` e a ficha individual `review-packages/1298/aulas/1420.md`, com as fontes de cartilha/roteiro ali indicadas. Revisar as seis cenas e o vídeo completo: afirmações, imagens, narração real, VTT e sincronismo. Registrar nome/função, data, ressalvas por timecode e decisão explícita para estes hashes:
+Curso **1298 — Agricultura Sustentável**, já atribuído à conta institucional TDS, assim como a aula 1420. No LARGeo, entregar à pessoa revisora designada pela TDS a ficha `D:/AI-Shared/test-results/tutor-tds/issue308-transition-20261020/lesson1420-instructor-approval.md` e a ficha individual `review-packages/1298/aulas/1420.md`, com as fontes de cartilha/roteiro ali indicadas. Revisar as seis cenas e o vídeo completo: afirmações, imagens, narração real, VTT e sincronismo. Registrar nome/função, data, ressalvas por timecode e decisão explícita para estes hashes:
 
 - MP4 SHA-256 `8bfcae0f98cd18175399fe5861c96b23b0ad6d523891823adf87fd455d021431`;
 - VTT SHA-256 `515119b65c4e3c86b00345d075f40efcc54e114157320e1356b8e7254fb9fb42` (35 cues);
