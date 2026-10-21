@@ -248,13 +248,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         autocorrect: false,
                         autofillHints: null,
                         decoration: const InputDecoration(
-                          labelText:
-                              'Código de ativação fornecido pela instituição',
+                          labelText: 'Código de ativação (opcional)',
+                          helperText:
+                              'Preencha apenas se recebeu um convite da instituição.',
                           prefixIcon: Icon(Icons.verified_user_outlined),
                         ),
-                        validator: (value) => (value?.trim().isEmpty ?? true)
-                            ? 'Informe o código de ativação'
-                            : null,
                         onChanged: (value) => activationCode = value.trim(),
                         textInputAction: TextInputAction.next,
                       ),

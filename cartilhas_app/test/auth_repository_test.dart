@@ -419,6 +419,35 @@ void main() {
     },
   );
 
+  test('cadastro aberto omite código ausente ou em branco', () async {
+    for (final activationCode in ['', '   ']) {
+      late Map<String, dynamic> sent;
+      final store = MemoryTokenStore();
+      final repository = AuthRepository(
+        apiUrl: 'https://api.example',
+        client: MockClient((request) async {
+          expect(request.url.path, '/auth/register');
+          sent = jsonDecode(request.body) as Map<String, dynamic>;
+          return http.Response(sessionJson(), 201);
+        }),
+        tokenStore: store,
+      );
+
+      final session = await repository.register(
+        name: 'Pessoa de Teste',
+        cpf: '123.456.789-09',
+        phone: '61999990000',
+        password: 'senha-enviada-uma-vez',
+        activationCode: activationCode,
+      );
+
+      expect(sent.containsKey('activation_token'), isFalse);
+      expect(session.user.name, 'Pessoa de Teste');
+      expect(store.value?.accessToken, 'access-new');
+      repository.dispose();
+    }
+  });
+
   test('login com 403 não menciona código de ativação', () async {
     final store = MemoryTokenStore();
     final repository = AuthRepository(
