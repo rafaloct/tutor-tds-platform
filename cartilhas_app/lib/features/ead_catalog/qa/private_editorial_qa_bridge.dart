@@ -48,4 +48,6 @@ class PrivateEditorialQaBridge {
       enabled ? const {'Host': 'tds-learning-qa-wp-20261017'} : const {};
 
   static const marker = 'LABORATÓRIO INTERNO · DADOS FICTÍCIOS';
+
+  static String? get offlineRunId => enabled ? _runId : null;
 }

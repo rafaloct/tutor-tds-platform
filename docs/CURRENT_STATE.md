@@ -1,5 +1,20 @@
 # CURRENT STATE
 
+## 2026-10-22 — Issue #333, candidato offline player
+
+IMPLEMENTED em worktree isolada baseada em `1c23630`: player nativo local,
+download HTTP restrito, store em application support e QA sintético com
+MP4/VTT incluídos. OBSERVED: ponte editorial pública não fornece hash/tamanho
+de bytes nem decisão de direitos independente; download produtivo permanece
+desativado. TESTED-LOCAL: 29/29 testes de manifesto/store/HTTP PASS;
+`flutter analyze --no-pub` PASS sem issues; widget QA falhou em duas rodadas
+e entrou em STOP conforme playbook.
+TARGET: adaptador servidor com proveniência verificável de
+mobile_content, direitos e revisão. UNKNOWN/BLOCKED: QA Android modo avião,
+áudio/TalkBack, autoridade produtiva e gates de distribuição. `MERGE_ALLOWED=NO`,
+`PRODUCTION_ALLOWED=NO`. Contrato e procedimento:
+`architecture/EAD_OFFLINE_PLAYER_333.md`.
+
 ## 2026-10-20 — Issue #309, Android WebView cold start
 
 OBSERVED: o timer de 20 s do player IPEX começava antes da inicialização nativa;

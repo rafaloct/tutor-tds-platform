@@ -161,6 +161,15 @@ class _EadMobileLessonScreenState extends State<EadMobileLessonScreen> {
                   icon: const Icon(Icons.play_circle_outline),
                   label: const Text('Assistir vídeo no IPEX'),
                 ),
+                Tooltip(
+                  message:
+                      'Aguardando manifesto com direitos, revisão e hashes validados pela API.',
+                  child: OutlinedButton.icon(
+                    onPressed: null,
+                    icon: Icon(Icons.download_for_offline_outlined),
+                    label: Text('Preparar offline indisponível'),
+                  ),
+                ),
               ],
               if (EadYoutubePolicy.validId(lesson.youtubeId)) ...[
                 const SizedBox(height: 8),
