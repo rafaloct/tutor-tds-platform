@@ -1,0 +1,29 @@
+name: Authentik lab security contract
+
+on:
+  push:
+    paths:
+      - 'tooling/identity/**'
+      - 'docs/architecture/AUTHENTIK_EAD_IDENTITY_V1.md'
+      - '.github/workflows/identity-authentik-lab-contract.yml'
+  pull_request:
+    paths:
+      - 'tooling/identity/**'
+      - 'docs/architecture/AUTHENTIK_EAD_IDENTITY_V1.md'
+      - '.github/workflows/identity-authentik-lab-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Offline security-policy negative tests
+        run: python -B -m unittest discover -s tooling/identity -p 'test_authentik_lab_policy.py' -v
+      - name: Static bootstrap syntax check
+        run: bash -n tooling/identity/bootstrap_private_lab.sh
