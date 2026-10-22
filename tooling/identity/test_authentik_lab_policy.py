@@ -87,6 +87,32 @@ class LabPolicyTests(unittest.TestCase):
     def test_invalid_root_denied(self):
         self.assertEqual(audit([]), ["unexpected_services"])
 
+    def test_lab_blueprint_uses_public_pkce_client_contract(self):
+        from pathlib import Path
+        text = Path(__file__).with_name("authentik_lab_qa_oidc.yaml").read_text()
+        self.assertIn("client_type: public", text)
+        self.assertIn('client_secret: ""', text)
+        self.assertIn("tds-flutter-qa-20261022", text)
+        self.assertIn("- authorization_code", text)
+        self.assertIn("- refresh_token", text)
+        self.assertIn("matching_mode: strict", text)
+
+    def test_lab_blueprint_limits_issuer_and_redirect(self):
+        from pathlib import Path
+        text = Path(__file__).with_name("authentik_lab_qa_oidc.yaml").read_text()
+        self.assertIn("com.tutortds.qa:/oauth2redirect", text)
+        self.assertNotIn("https://ead.ipexdesenvolvimento.cloud/wp-admin/", text)
+        self.assertIn("default-provider-authorization-explicit-consent", text)
+        self.assertIn("default-provider-invalidation-flow", text)
+        self.assertIn('blueprints.goauthentik.io/instantiate: "false"', text)
+
+    def test_lab_blueprint_has_no_production_server_secret(self):
+        from pathlib import Path
+        text = Path(__file__).with_name("authentik_lab_qa_oidc.yaml").read_text()
+        self.assertNotIn("PG_PASS", text)
+        self.assertNotIn("AUTHENTIK_SECRET_KEY", text)
+        self.assertNotIn("wordpress-prod", text.lower())
+
 
 if __name__ == "__main__":
     unittest.main()

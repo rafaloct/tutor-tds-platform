@@ -1,6 +1,6 @@
 # Tutor TDS — Authentik open source, OIDC e identidade EAD v1
 
-Data da investigação: 22/10/2026. Estado: **LAB instalado e saudável; provedores OIDC e migração ainda não configurados**.
+Data da investigação: 22/10/2026. Estado: **LAB instalado e saudável; um provedor OIDC público SINTÉTICO de QA está configurado; WordPress/FastAPI/Flutter reais e migração ainda não integrados**.
 
 ## DECISION: padrão institucional futuro
 
@@ -16,6 +16,13 @@ Data da investigação: 22/10/2026. Estado: **LAB instalado e saudável; provedo
 - Bindings **somente 127.0.0.1:19200 → 9000 (HTTP)** e **127.0.0.1:19443 → 9443 (HTTPS local)**; sem DNS, rota Cloudflare ou exposição pública. Socket Docker foi explicitamente removido do worker; supervisão via projeto nomeado e override de memória. Os outros serviços do Docker foram preservados.
 - A raiz respondeu HTTP 302, fluxo de autenticação respondeu HTTP 200; nos primeiros minutos o setup inicial retornou 404. É necessário concluir bootstrap seguro do `akadmin` e configurar clientes **somente no laboratório**. Estes testes não são login SSO.
 - Servidor produtivo WordPress `ead.ipexdesenvolvimento.cloud`: inventário read-only do WP-CLI confirma **OpenID Connect Generic não instalado/ativo**. Não instalar plugin nem alterar `users_can_register` no site público nesta issue.
+
+## OBSERVED: primeiro cliente OIDC sintético (LAB somente)
+
+- A credencial inicial de `akadmin` foi gerada e definida **apenas dentro do laboratório**. Permanece no arquivo root-only `/opt/tds-labs/authentik-oidc-20261022/.akadmin-bootstrap-password` modo 0600, fora do Git e sem compartilhamento no chat. Configurar MFA e transferir custódia para cofre de senhas antes de qualquer ampliação.
+- O blueprint declarativo `tooling/identity/authentik_lab_qa_oidc.yaml` foi validado por `ak apply_blueprint --dry-run` (PASS), depois aplicado em `tds_authentik_lab_20261022` (PASS). Cria somente `Tutor TDS Flutter synthetic QA`, cliente público `tds-flutter-qa-20261022`, grant types authorization_code/refresh_token, fluxos de autorização com consentimento explícito e invalidação padrão, redirect URI strict `com.tutortds.qa:/oauth2redirect`, scopes openid/profile/email. O cliente **não guarda segredo no aplicativo**; o consumidor deverá exigir PKCE S256 no fluxo de autorização.
+- `GET http://127.0.0.1:19200/application/o/tds-flutter-synthetic-qa/.well-known/openid-configuration` respondeu com issuer e URLs de authorization/token/JWKS válidos somente no host privado; **LAB_OIDC_DISCOVERY_PASS**. Esse issuer HTTP de loopback é deliberadamente impróprio para autenticação Android real; exige HTTPS canônico de staging antes de testar telefone.
+- Nada foi instalado no WordPress produtivo ou no Flutter. Nenhum aluno, token real, papel acadêmico, matrícula ou certificado foi criado/alterado. A aceitação de descoberta OIDC não comprova troca de authorization code, nonce, PKCE, logout ou vinculação.
 
 ## PROTOCOLO TARGET, NÃO IMPLEMENTADO
 
