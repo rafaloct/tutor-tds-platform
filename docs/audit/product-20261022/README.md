@@ -9,7 +9,9 @@ Preserve the Flutter/FastAPI/WordPress/LearnPress/Worker stack. Use existing
 role, enrollment, edition, receipt and certificate models.
 
 This is a reproducible **first audit increment**, not acceptance of the whole
-product. The base examined is PR #334 `a0db10254642223dad192326f88d676aaba09553`.
+product. The product source base examined is PR #334 `a0db10254642223dad192326f88d676aaba09553`.
+The continuation tests the unchanged #337 plugin at `6e4aab96` in a real
+disposable WordPress/LearnPress/MariaDB runtime; its receipt covers44 assertions.
 The original cloud worktree remains at `b6f3f0f`, clean and untouched. A separate
 writer worktree is `/workspace/tds-product-audit`, branch
 `agent/product-audit-20261022`. Exact remote heads, selected CI and the bounded
@@ -111,9 +113,12 @@ The new route fails closed until a trusted offline preparation record exists
 for the exact approved source/revision, unique parent and current local file
 identity. It projects the existing strict Flutter schema. Preparation streams
 and hashes local bytes; GET checks metadata/stat without hashing a video or
-fetching URLs. Local tests and a real PHP→Dart contract check pass. Live
-WordPress and Android offline E2E remain **NOT_RUN**, and the production download
-UI remains disabled. #335 remains with its existing writer.
+fetching URLs. Local contracts and a real PHP→Dart check pass. The continuation added
+**44/44 actual isolated WordPress/LearnPress/MariaDB assertions** plus3 checks
+parsing that native HTTP payload with the unchanged Dart parser.
+[Runtime evidence and preserved failures](../../qa/ead-offline-manifest-runtime-20261022/README.md).
+Institutional staging and Android offline E2E remain **NOT_RUN**; the production
+download UI remains disabled. G25 records native unpublish/reassociation recovery. #335 remains with its existing writer.
 
 ## Critical path to distribution
 

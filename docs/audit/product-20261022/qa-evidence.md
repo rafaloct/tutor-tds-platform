@@ -11,7 +11,9 @@
 | Existing gzip/identity/ETag HTTP | LARGeo PHP 8.4.6 + Python 3.13, read-only existing #334 source | PASS, 13 real loopback HTTP requests | `test-etag-http.py`; stubs behind actual PHP HTTP, **not real WP**; unchanged class SHA below |
 | Server-generated JSON → real unchanged Dart parser | LARGeo Dart 3.12.2 from Flutter 3.44.9 | PASS, 3 checks | Server payload accepted, round-trip retains revision, unexpected revision JSON key rejected. No Flutter UI/Android |
 | Whitespace and exact-change review | Cloud Git | PASS | `git diff --check`; no API/Flutter production source, release or lockfile changes |
-| Live WP REST/install/editor-save/readback for new route | No live installation attempted | NOT_RUN | Required before staging acceptance; producer source does not publish media |
+| Native WP/LP/DB and actual HTTP manifest/media integration | Disposable cloud WP6.7.2/LP4.3.6/MariaDB11.4/PHP8.3.20 | PASS44/44; cleanup5/5 | `docs/qa/ead-offline-manifest-runtime-20261022/acceptance.json`; synthetic data/bytes, actual engine/hooks/REST, no stubs |
+| Native WP HTTP JSON → unchanged Dart | LARGeo Dart3.12.2 | PASS3/3 | Native payload accepted, roundtrip, strict unknown-field negative; parser SHA unchanged |
+| Institutional staging / browser form / deployment | Not attempted | NOT_RUN | Disposable runtime does not prove institutional theme/proxy/editor UX |
 | Native offline Android cold restart/airplane mode | Existing #335 owner repairing widget fixture | BLOCKED | #334 Flutter CI failure on exact base; no APK claimed or installed here |
 | Full eight-role institutional workflow on final SHA | Not exercised | NOT_RUN | Old source/test receipts do not accept a new composition |
 | AI real-course relevance / data protection / module isolation | Not exercised | NOT_RUN | Historical CourseVersion sentinel is narrower |
@@ -103,3 +105,17 @@ Separate acceptance types:
 A final release suite is warranted on the frozen composition. Repeated broad
 runs before a source change or unresolved failure adds no proof. Preserve
 failed runs and honor the two-failure boundary rule on the affected front.
+
+## Continuation: native runtime and republish finding
+
+[Runtime report](../../qa/ead-offline-manifest-runtime-20261022/README.md) retains
+all failed/diagnostic attempts and the44-case accepted run. The native server
+HTTP payload was additionally checked on LARGeo with the same byte-verified
+Dart parser (3 checks PASS), via
+`D:/AI-Shared/tmp/tds-manifest-contract-cloud-20261022/check-runtime.dart`.
+The committed equivalent is `verify-native-manifest.dart` beside the runtime
+receipt. No Android UI, decoding or institutional staging acceptance is implied.
+G25 records confirmed native LP cleanup of unpublished lesson associations;
+automatic reattachment is forbidden. Recovery used the existing authorized
+LearnPress editor model, not a source-policy bypass. The risk matrix now has34
+rows and the gap register25 items.

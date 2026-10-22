@@ -113,9 +113,18 @@ CI extends the existing focal PHP workflow; no new service/workflow is added.
 See `docs/audit/product-20261022/qa-evidence.md` for the actual environments and
 results, including what has not run.
 
-## Isolated staging acceptance still required
+## Native runtime continuation and remaining institutional staging acceptance
 
-After review, use an authorized disposable WP/LearnPress clone with a synthetic
+A disposable native WordPress6.7.2/LearnPress4.3.6/MariaDB runtime passed44
+assertions with actual HTTP and unchanged plugin source; its native payload also
+passed3 checks with the unchanged Dart parser. See
+`docs/qa/ead-offline-manifest-runtime-20261022/README.md`. Earlier failures were
+retained. Native LP cleanup removes section associations for unpublished posts;
+republished orphans stay denied until an authorized editor explicitly reattaches
+them and remeasures. Never infer that relationship from prior metadata.
+This is TESTED-LOCAL, not institutional staging/browser/Android acceptance.
+
+For institutional acceptance after review, use an authorized disposable WP/LearnPress clone with a synthetic
 course, unique lesson and playable MP4/VTT beneath its local uploads tree and
 canonical fixture origin. Back up its metadata before installing the exact
 plugin source. Set synthetic editorial opt-in/source approval using the existing

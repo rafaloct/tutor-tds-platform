@@ -1,9 +1,9 @@
 case,role,journey,system_state,platform,connectivity,permission,version,test_type,result,evidence_or_gap
 Q01,visitor,first install public discovery,empty cache,Android35,weak,anonymous,public14 to candidate,product acceptance,NOT_RUN,G01/G21
-Q02,visitor,public media manifest,approved measured unique parent,PHP Linux,none,public opt-in,schema1,contract+security,PASS,"393 assertions WP stubs, not live WP"
+Q02,visitor,public media manifest,approved measured unique parent,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,public opt-in,schema1,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
 Q03,student,server manifest parse,valid + unknown field,Dart Windows,none,public manifest,Dart3.12.2 schema1,contract,PASS,3 PHP JSON to unchanged Dart checks
-Q04,visitor,manifest revocation,old ETag + rights revoked,PHP Linux,none,revoked,same source,security regression,PASS,"WP stubs, 404 before conditional"
-Q05,visitor,media revision replacement,mtime size inode links,PHP Linux,none,approved then stale,revision A to B,resilience contract,PASS,"real filesystem, WP stubs"
+Q04,visitor,manifest revocation,old ETag + rights revoked,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,revoked,same source,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
+Q05,visitor,media revision replacement,mtime size inode links,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,approved then stale,revision A to B,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
 Q06,student,download play captions,kill restart airplane mode,Android35,offline,public approved,exact QA APK,end-to-end,BLOCKED,G04 issue335 existing writer
 Q07,student,download recovery,low storage interrupted bytes,Android35,disconnect reconnect,public approved,old to new media,resilience,NOT_RUN,G06
 Q08,student,EAD signup course return,fresh and existing WP account,portal+Android35,online,anonymous to WP user,candidate exact,end-to-end,NOT_RUN,historical326 evidence is narrower
@@ -31,3 +31,5 @@ Q29,all,accessible task traversal,TalkBack large font focus,Android35+POCO,weak,
 Q30,all,app update,preserve session cache receipts,POCO Android,online to offline,legacy user,public1.4.1+14 to RC,distribution acceptance,BLOCKED,G23 no current signed artifact
 Q31,admin,restore and forward upgrade,offsite backup isolated restore,Postgres+WP+Worker,isolated,ops authority,actual deployed schema to RC,recovery integration,NOT_RUN,G23
 Q32,all,cold start and task memory,background kill restart,Android35+POCO,weak,each applicable role,frozen candidate,performance resilience,NOT_RUN,G22
+Q33,admin,republish orphan recovery,native association removed then explicit reattach,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,authorized synthetic admin editor,LP4.3.6 current plugin,native integration,PASS,G25 orphan404 reattach measure200; not browser form
+Q34,teacher,editor recovery workflow,draft republish course continuity,portal browser+Android35,weak,legitimate LP teacher and reviewer,current institutional candidate,product acceptance,NOT_RUN,G25 real browser recovery and downstream learner path

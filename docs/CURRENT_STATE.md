@@ -1,5 +1,20 @@
 # CURRENT STATE
 
+## 2026-10-22 — continuação #336: WordPress/LearnPress real isolado
+
+TESTED-LOCAL:44/44 assertions no WordPress6.7.2/LearnPress4.3.6/MariaDB11.4
+reais, HTTP/HEAD/ETag, bytes MP4/VTT, revisão/revogação, pais/privacidade e
+tabelas acadêmicas inalteradas; cleanup5/5. Payload HTTP nativo passou3 checks
+no Dart3.12.2 do LARGeo com parser inalterado. Fonte plugin #337 `6e4aab96`;
+sem mudança de código produtivo. Falhas/diagnósticos preservados em
+`qa/ead-offline-manifest-runtime-20261022/`. OBSERVED: cleanup nativo LP remove
+associação de aula draft; publicar não restaura pai. Manifesto nega órfã;
+reattach explícito por editor nativo autorizado e nova medição passaram.
+G25 documenta recuperação; browser institucional ainda NOT_RUN. Inventário
+atual:25 lacunas/34 linhas de risco. #335 preservado, Flutter client/UI e
+modo avião continuam pendentes. Sem staging institucional/produção/assinatura/
+Play; versão pública1.4.1+14 e gates fechados preservados.
+
 ## 2026-10-22 — auditoria de produto e manifesto offline #336
 
 OBSERVED: recuperação GitHub/hosts em `audit/product-20261022/`; 24 lacunas,
