@@ -1,0 +1,57 @@
+{
+  "url": "https://ead.ipexdesenvolvimento.cloud/cadastro/?utm_source=tutor_tds_app&utm_medium=app&utm_campaign=ead_signup&utm_content=welcome_signup",
+  "ready": "complete",
+  "visible": "visible",
+  "focus": true,
+  "forms": [
+    {
+      "action": "https://ead.ipexdesenvolvimento.cloud/wp-admin/admin-post.php",
+      "method": "post",
+      "institutional": true,
+      "fields": [
+        {
+          "name": "tds_cadastro_nonce",
+          "type": "hidden",
+          "disabled": false,
+          "visible": false
+        },
+        {
+          "name": "_wp_http_referer",
+          "type": "hidden",
+          "disabled": false,
+          "visible": false
+        },
+        {
+          "name": "action",
+          "type": "hidden",
+          "disabled": false,
+          "visible": false
+        },
+        {
+          "name": "nome",
+          "type": "text",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "name": "senha",
+          "type": "password",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "name": "",
+          "type": "submit",
+          "disabled": false,
+          "visible": true
+        }
+      ]
+    }
+  ]
+}

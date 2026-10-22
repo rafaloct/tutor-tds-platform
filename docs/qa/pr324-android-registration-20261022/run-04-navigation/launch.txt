@@ -1,0 +1,7 @@
+Stopping: com.tutortds_cartilhas.dev.dynamicqa.r5c2e41c87a7af145442d6e7b12fb205c
+Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10008000 cmp=com.tutortds_cartilhas.dev.dynamicqa.r5c2e41c87a7af145442d6e7b12fb205c/com.tutortds_cartilhas.MainActivity }
+Status: timeout
+LaunchState: UNKNOWN (-1)
+Activity: com.tutortds_cartilhas.dev.dynamicqa.r5c2e41c87a7af145442d6e7b12fb205c/com.tutortds_cartilhas.MainActivity
+WaitTime: 11134
+Complete

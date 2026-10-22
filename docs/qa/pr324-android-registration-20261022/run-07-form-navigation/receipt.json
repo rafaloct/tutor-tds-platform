@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "started_utc": "2026-10-22T17:59:17.896669+00:00",
+  "source_commit": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
+  "apk_sha256": "35eead93c801835eb1973ee7b560c5e2428caba43eb6e7adb9ce7c26c4604424",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r5c2e41c87a7af145442d6e7b12fb205c",
+  "serial": "emulator-5554",
+  "adb_port": 5037,
+  "results": {
+    "artifact": "PASS",
+    "device": "PASS",
+    "installed_apk": "PASS",
+    "abi": "PASS",
+    "launch": "PASS",
+    "app_ui": "PASS",
+    "handoff": "PASS",
+    "registration_form": "PASS",
+    "return_to_app": "PASS",
+    "play_preserved": "PASS"
+  },
+  "e2e": "PASS",
+  "gates": {
+    "privacy_ga4": "OPEN",
+    "signature": "OPEN",
+    "release": "OPEN"
+  },
+  "build_performed": false,
+  "form_submitted": false,
+  "flutter_engine_abis": [
+    "arm64-v8a"
+  ],
+  "device_abis": [
+    "x86_64",
+    "arm64-v8a"
+  ],
+  "android_api": "35",
+  "play_before": [],
+  "installed_sha256": "35eead93c801835eb1973ee7b560c5e2428caba43eb6e7adb9ce7c26c4604424",
+  "primary_cpu_abi": "arm64-v8a",
+  "cold_start_requested": false,
+  "am_start_status": "ok",
+  "cta_tap": {
+    "text": "Criar conta gratuita no EAD",
+    "x": 672,
+    "y": 1675,
+    "from": "01-welcome*.xml"
+  },
+  "browser_component": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher",
+  "browser_url": "https://ead.ipexdesenvolvimento.cloud/cadastro/?utm_source=tutor_tds_app&utm_medium=app&utm_campaign=ead_signup&utm_content=welcome_signup",
+  "form_oracle": "focused Chrome DOM + Android screenshot",
+  "uiautomator_exposes_web_form": false,
+  "return_action": "Custom Tab close control from UI tree",
+  "play_after": [],
+  "finished_utc": "2026-10-22T17:59:50.121434+00:00",
+  "evidence_sha256": {
+    "01-welcome-1-activity.txt": "d5151b89fd61cf0a718f90f8628c2d4d6011c332be933f33a5a83d1c19d0721b",
+    "01-welcome-1-dump.txt": "4d2a4e10308956d864fed95eef3d30143f469a7f526b79ab44bba18ef95ce036",
+    "01-welcome-1.png": "9492b8a4db6400662dd290ae73e3c0c4c26ac5ace05552e5bef76d9b385cb224",
+    "01-welcome-1.xml": "3b940ff178dd374321703a797347836643554f91e39a5f8a3d26af6b570a0799",
+    "02-form-activity.txt": "254872d1dd78e18ab0be78beeeb1e4212429216d3202ae9dd660127dbc686162",
+    "02-form-dump.txt": "fc721537d386f17162deb68639fc979122b5bae93652b2460b7a177f7dc1e9ab",
+    "02-form.png": "31f7446ab17c5f2622e4b4214daef52cc120e2585efee6ab44bb682d80752c96",
+    "02-form.xml": "1235c0430e1bb419f31adf524f2ebcd9fe9a6a691e039f1db42a3bcddfa47f06",
+    "03-return-activity.txt": "d5151b89fd61cf0a718f90f8628c2d4d6011c332be933f33a5a83d1c19d0721b",
+    "03-return-dump.txt": "734d1174e7330b285c6c4dd9d18e891ace5227811e20134c2f55b066ebe5684f",
+    "03-return.png": "9492b8a4db6400662dd290ae73e3c0c4c26ac5ace05552e5bef76d9b385cb224",
+    "03-return.xml": "3b940ff178dd374321703a797347836643554f91e39a5f8a3d26af6b570a0799",
+    "browser-target.json": "6316f18997f0335f3e7280372902c1974ed51693d70edf3835e7c2a3d3a23f56",
+    "form-dom.json": "2c2f4ce6f3d70a65867dceb4edcb872d77b9343230e094e168615d8a23573f52",
+    "launch.txt": "52d82f8e962269f62e68f13496c17f9f1ba2b12d2a78f67df3d1b2273e4a60f8"
+  },
+  "packaging": "UTF-8 text line endings normalized to LF; original bytes in ../original-run-bytes.zip. Results and PNG bytes unchanged."
+}

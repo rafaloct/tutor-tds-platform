@@ -1,0 +1,36 @@
+registration_form=FAIL: network error page
+artifact=FAIL: bad artifact
+test_args_override_env (test_e2e_harness.HarnessTest.test_args_override_env) ... ok
+test_certificate_requires_context (test_e2e_harness.HarnessTest.test_certificate_requires_context) ... ok
+test_dart_scenarios_are_fail_closed (test_e2e_harness.HarnessTest.test_dart_scenarios_are_fail_closed) ... ok
+test_dry_run_never_passes_and_hides_secrets (test_e2e_harness.HarnessTest.test_dry_run_never_passes_and_hides_secrets) ... ok
+test_fail_closed_when_missing (test_e2e_harness.HarnessTest.test_fail_closed_when_missing) ... ok
+test_no_hardcoded_production_or_secrets_in_sources (test_e2e_harness.HarnessTest.test_no_hardcoded_production_or_secrets_in_sources) ... ok
+test_rejects_legacy_dev_and_malformed_isolated_package (test_e2e_harness.HarnessTest.test_rejects_legacy_dev_and_malformed_isolated_package) ... ok
+test_rejects_physical_device (test_e2e_harness.HarnessTest.test_rejects_physical_device) ... ok
+test_rejects_production_package_and_host (test_e2e_harness.HarnessTest.test_rejects_production_package_and_host) ... ok
+test_sanitize (test_e2e_harness.HarnessTest.test_sanitize) ... ok
+test_valid_config (test_e2e_harness.HarnessTest.test_valid_config) ... ok
+test_browser_toolbar_and_error_page_cannot_prove_form (test_registration_apk_qa.RegistrationQATest.test_browser_toolbar_and_error_page_cannot_prove_form) ... ok
+test_cta_must_be_exact_enabled_clickable_and_unique (test_registration_apk_qa.RegistrationQATest.test_cta_must_be_exact_enabled_clickable_and_unique) ... ok
+test_dom_probe_does_not_read_values_or_submit (test_registration_apk_qa.RegistrationQATest.test_dom_probe_does_not_read_values_or_submit) ... ok
+test_dom_requires_focused_correct_form_visible_fields_and_post_action (test_registration_apk_qa.RegistrationQATest.test_dom_requires_focused_correct_form_visible_fields_and_post_action) ... ok
+test_empty_bounds_rejected (test_registration_apk_qa.RegistrationQATest.test_empty_bounds_rejected) ... ok
+test_engine_abi_not_inferred_from_plugin_libraries (test_registration_apk_qa.RegistrationQATest.test_engine_abi_not_inferred_from_plugin_libraries) ... ok
+test_failed_dump_does_not_read_stale_file (test_registration_apk_qa.RegistrationQATest.test_failed_dump_does_not_read_stale_file) ... ok
+test_failed_form_cannot_be_e2e_pass (test_registration_apk_qa.RegistrationQATest.test_failed_form_cannot_be_e2e_pass) ... ok
+test_failed_prerequisite_leaves_e2e_not_run_and_nonzero (test_registration_apk_qa.RegistrationQATest.test_failed_prerequisite_leaves_e2e_not_run_and_nonzero) ... ok
+test_form_requires_three_editable_fields_inside_browser_webview (test_registration_apk_qa.RegistrationQATest.test_form_requires_three_editable_fields_inside_browser_webview) ... ok
+test_launcher_from_apk_not_first_installed_package (test_registration_apk_qa.RegistrationQATest.test_launcher_from_apk_not_first_installed_package) ... ok
+test_multiple_resumed_displays_are_ambiguous (test_registration_apk_qa.RegistrationQATest.test_multiple_resumed_displays_are_ambiguous) ... ok
+test_null_malformed_and_wrong_package_never_pass (test_registration_apk_qa.RegistrationQATest.test_null_malformed_and_wrong_package_never_pass) ... ok
+test_resumed_activity_not_historical_task (test_registration_apk_qa.RegistrationQATest.test_resumed_activity_not_historical_task) ... ok
+test_text_evidence_bytes_are_portable_without_crcrlf (test_registration_apk_qa.RegistrationQATest.test_text_evidence_bytes_are_portable_without_crcrlf) ... ok
+test_uiautomator_stderr_failure_is_preserved_even_with_exit_zero (test_registration_apk_qa.RegistrationQATest.test_uiautomator_stderr_failure_is_preserved_even_with_exit_zero) ... ok
+test_url_requires_exact_origin_path_and_campaign_without_extra_data (test_registration_apk_qa.RegistrationQATest.test_url_requires_exact_origin_path_and_campaign_without_extra_data) ... ok
+test_wrong_foreground_prevents_any_ui_inspection (test_registration_apk_qa.RegistrationQATest.test_wrong_foreground_prevents_any_ui_inspection) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 0.027s
+
+OK
