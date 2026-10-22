@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "started_utc": "2026-10-22T17:47:40.760619+00:00",
+  "source_commit": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
+  "apk_sha256": "35eead93c801835eb1973ee7b560c5e2428caba43eb6e7adb9ce7c26c4604424",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r5c2e41c87a7af145442d6e7b12fb205c",
+  "serial": "emulator-5554",
+  "adb_port": 5037,
+  "results": {
+    "artifact": "PASS",
+    "device": "FAIL",
+    "installed_apk": "NOT_RUN",
+    "abi": "NOT_RUN",
+    "launch": "NOT_RUN",
+    "app_ui": "NOT_RUN",
+    "handoff": "NOT_RUN",
+    "registration_form": "NOT_RUN",
+    "return_to_app": "NOT_RUN",
+    "play_preserved": "NOT_RUN"
+  },
+  "e2e": "NOT_RUN",
+  "gates": {
+    "privacy_ga4": "OPEN",
+    "signature": "OPEN",
+    "release": "OPEN"
+  },
+  "build_performed": false,
+  "form_submitted": false,
+  "flutter_engine_abis": [
+    "arm64-v8a"
+  ],
+  "failure": {
+    "step": "device",
+    "reason": "emulator not booted"
+  },
+  "finished_utc": "2026-10-22T17:47:42.095003+00:00",
+  "evidence_sha256": {},
+  "packaging": "UTF-8 text line endings normalized to LF; original bytes in ../original-run-bytes.zip. Results and PNG bytes unchanged."
+}

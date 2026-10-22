@@ -1,5 +1,18 @@
 # CURRENT STATE
 
+## 2026-10-22 — Issue #325, QA cadastro Android do PR #324
+
+OBSERVED: APK5c2e41c inalterado; motor Flutter apenas ARM64 estava instalado como
+x86_64 no AVD, provocando UnsatisfiedLinkError. Reinstalação isolada com ABI
+arm64 corrigiu a incompatibilidade sem rebuild. Runner exige hash instalado,
+pacote/activity exatos e XML novo; DOM focado do Chrome verifica formulário real
+quando a árvore nativa expõe só toolbar. TESTED-LOCAL:29/29 testes runner PASS.
+Android15/API35, app já aberto: CTA → Custom Tab → formulário institucional
+(nome/e-mail/senha/submit) → retorno PASS, sem submissão. Cold start integral,
+Xiaomi, TalkBack e cadastro por curso/login NOT_RUN; gates GA4, assinatura e
+release continuam abertos. Sem merge, AAB, Play ou mudança produtiva. Recibo:
+`qa/pr324-android-registration-20261022/README.md`.
+
 ## 2026-10-20 — Issue #309, Android WebView cold start
 
 OBSERVED: o timer de 20 s do player IPEX começava antes da inicialização nativa;

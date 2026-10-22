@@ -1,0 +1,81 @@
+{
+  "archive_sha256": "839f3546e1997b55bcd24384ffa2877eea3495a20147da3633fedff0042c3530",
+  "changed_text_files": {
+    "run-01/receipt.json": {
+      "original_sha256": "67192ca3229254da1c6560ac98b87ddcfdb4f7fd4c10e8bfe9a21d9e72f19675",
+      "normalized_sha256": "cfc0bd3e8e0494d0f790f3fca96d6906fa39fe55f5207efb8ef027adf8d83b56"
+    },
+    "run-02-abi-negative/receipt.json": {
+      "original_sha256": "e9bcdba44c7dc8a907df1a471cf868ebbf5b695d8d5b8c27cd1aca7c4ff7af13",
+      "normalized_sha256": "69476c852eb47af99dd35c44e9a4cb2164eb637f247a996470543dd423b6ac42"
+    },
+    "run-03-arm64/install.txt": {
+      "original_sha256": "6b2f508969adfb44adbedd2cab5379023c8a08ba1f501043ab37e2d45e74e0c9",
+      "normalized_sha256": "5175e4ebc9b5f6701a4a052bf1b1dee2fa62ecb2fb024020bb2e201eb6e76b09"
+    },
+    "run-03-arm64/launch.txt": {
+      "original_sha256": "39135def5c9ec0e1c20d9e3751b7dfc16cd64ed69341c4ac7e60a2a69a7d9596",
+      "normalized_sha256": "cda40bb42e74fa309fd9a44b736cf3fb159583b971f53578470cd524d75d979d"
+    },
+    "run-03-arm64/receipt.json": {
+      "original_sha256": "c702388da2e1128719f89633119b5eeff6f7428c511bd6ba846be0d099922991",
+      "normalized_sha256": "8c44ffc7ced4ba73936a23ddb145cb9372528ad1dff94bd3a7a64d565bce4dce"
+    },
+    "run-04-navigation/launch.txt": {
+      "original_sha256": "ed10dd5491389d7d4dacc1e7abf662986ecd483cda296fd02334761b5096283a",
+      "normalized_sha256": "52f7a66edb53e61ac88935c95b32bf3a648d99a3bd49ee9375957e9e285ca675"
+    },
+    "run-04-navigation/receipt.json": {
+      "original_sha256": "fc9c94106baeafeab45144ae4f9e8e27a85eedbc270ae781ea00494a5cffbf1e",
+      "normalized_sha256": "edbed8ac1951cc070302b5a951838974ba73dedb2a8657f803b1d3b6cd85bcce"
+    },
+    "run-05-resume/01-welcome-1-activity.txt": {
+      "original_sha256": "5bb0717985ace50df6439589d500e248f43d55fe954822384e6a672870fd1eb0",
+      "normalized_sha256": "d5151b89fd61cf0a718f90f8628c2d4d6011c332be933f33a5a83d1c19d0721b"
+    },
+    "run-05-resume/launch.txt": {
+      "original_sha256": "891605824c831c67195dfe43b9c34a989b512ee3eda99b8e760d89bfa1353998",
+      "normalized_sha256": "52d82f8e962269f62e68f13496c17f9f1ba2b12d2a78f67df3d1b2273e4a60f8"
+    },
+    "run-05-resume/receipt.json": {
+      "original_sha256": "c950cc7b4421a454be4cd3d9845add1a56a12d8576b52519f03ca21d2bd7b2e7",
+      "normalized_sha256": "64875ab95bad5504c55e853e95a229d7ed29ecd7a859498c4efad3610c202830"
+    },
+    "run-06-dom-oracle/receipt.json": {
+      "original_sha256": "725be8617d7b58b195d8c7b98c6d1cd9120a8847c006db3ec732c6d973569e0d",
+      "normalized_sha256": "964cbc81c0309f849563b97a1b70e016d1c285d6476d9a25d649fc74f53f886d"
+    },
+    "run-07-form-navigation/01-welcome-1-activity.txt": {
+      "original_sha256": "5bb0717985ace50df6439589d500e248f43d55fe954822384e6a672870fd1eb0",
+      "normalized_sha256": "d5151b89fd61cf0a718f90f8628c2d4d6011c332be933f33a5a83d1c19d0721b"
+    },
+    "run-07-form-navigation/02-form-activity.txt": {
+      "original_sha256": "80a4143ef13fa05068fe54c4ed8f0149abcf3fbee5f4e364828b8fa880b3c3e6",
+      "normalized_sha256": "254872d1dd78e18ab0be78beeeb1e4212429216d3202ae9dd660127dbc686162"
+    },
+    "run-07-form-navigation/03-return-activity.txt": {
+      "original_sha256": "5bb0717985ace50df6439589d500e248f43d55fe954822384e6a672870fd1eb0",
+      "normalized_sha256": "d5151b89fd61cf0a718f90f8628c2d4d6011c332be933f33a5a83d1c19d0721b"
+    },
+    "run-07-form-navigation/browser-target.json": {
+      "original_sha256": "f1946c16092b979205bed52d84cd050e95229498cc7c29c7be3e4ae4b084c333",
+      "normalized_sha256": "6316f18997f0335f3e7280372902c1974ed51693d70edf3835e7c2a3d3a23f56"
+    },
+    "run-07-form-navigation/form-dom.json": {
+      "original_sha256": "eb44ae37be828e2b588131af8fa9a87a493b857226b18d739441e78423ea6823",
+      "normalized_sha256": "2c2f4ce6f3d70a65867dceb4edcb872d77b9343230e094e168615d8a23573f52"
+    },
+    "run-07-form-navigation/launch.txt": {
+      "original_sha256": "891605824c831c67195dfe43b9c34a989b512ee3eda99b8e760d89bfa1353998",
+      "normalized_sha256": "52d82f8e962269f62e68f13496c17f9f1ba2b12d2a78f67df3d1b2273e4a60f8"
+    },
+    "run-07-form-navigation/receipt.json": {
+      "original_sha256": "63fc8b4dea30a10f470cfbe4a584f33385afea5b912032fb108c4318052b5e6e",
+      "normalized_sha256": "3ec2ad6d02c9decc1b5d291a9955607b7a5dd5dac53c8897ae0830cd5c6c42df"
+    },
+    "observed-abi-crash.txt": {
+      "original_sha256": "3dc060b906550afdb6ef1c553f6650e0db328211e1c6a0a95faa7ec3d47ad8cb",
+      "normalized_sha256": "7cf15d9e0b7e7b321009dc5d0ccc0883bd90de11f65cc84322d16be25da0c93f"
+    }
+  }
+}
