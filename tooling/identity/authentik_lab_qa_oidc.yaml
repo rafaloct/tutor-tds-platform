@@ -1,0 +1,35 @@
+# Authentik 2026.8 QA-only blueprint. Never apply to production Authentik.
+version: 1
+metadata:
+  name: tutor-tds-qa-flutter-oidc
+  labels:
+    blueprints.goauthentik.io/instantiate: "false"
+entries:
+  - model: authentik_providers_oauth2.oauth2provider
+    id: tds_flutter_provider
+    identifiers:
+      name: Tutor TDS Flutter synthetic QA
+    attrs:
+      client_type: public
+      client_id: tds-flutter-qa-20261022
+      client_secret: ""
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-explicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+      redirect_uris:
+        - matching_mode: strict
+          url: "com.tutortds.qa:/oauth2redirect"
+      grant_types:
+        - authorization_code
+        - refresh_token
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+  - model: authentik_core.application
+    identifiers:
+      slug: tds-flutter-synthetic-qa
+    attrs:
+      name: Tutor TDS Flutter QA (private lab only)
+      provider: !KeyOf tds_flutter_provider
+      meta_launch_url: "http://127.0.0.1:19200/"
