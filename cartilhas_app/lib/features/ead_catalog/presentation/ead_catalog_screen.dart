@@ -4,6 +4,7 @@ import '../data/ead_catalog_repository.dart';
 import '../data/ead_portal_links.dart';
 import '../learning_path/ead_learning_path_screen.dart';
 import '../qa/private_editorial_qa_bridge.dart';
+import '../../ead_offline/synthetic_offline_qa_screen.dart';
 
 typedef EadCourseLoader = Future<List<EadCourse>> Function();
 typedef EadCourseOpener = Future<bool> Function(Uri uri);
@@ -116,6 +117,24 @@ class _EadCatalogScreenState extends State<EadCatalogScreen> {
                     'disponíveis neste aplicativo.',
                   ),
                   const SizedBox(height: 20),
+                  if (PrivateEditorialQaBridge.enabled)
+                    Card(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      child: ListTile(
+                        key: const ValueKey('qa-synthetic-offline'),
+                        leading: const Icon(Icons.offline_pin_outlined),
+                        title: const Text('QA offline sintético'),
+                        subtitle: const Text(
+                          'MP4/VTT incluídos no app; sem mídia real.',
+                        ),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => const SyntheticOfflineQaScreen(),
+                          ),
+                        ),
+                      ),
+                    ),
                   if (PrivateEditorialQaBridge.enabled)
                     Card(
                       color: Theme.of(context).colorScheme.secondaryContainer,

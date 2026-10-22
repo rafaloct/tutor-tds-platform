@@ -1,5 +1,9 @@
 # Traceability matrix
 
+| Feature / Stitch screenId | Derivative | Persona | Jornada | Flutter route | Flutter screen/widget | ViewModel/controller | Domain entity | Repository | API endpoint | Database table | Permission | Analytics event | Offline policy | Test | Feature flag | Release | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| EAD offline player / #333; sem Stitch inspecionado | N/A | QA sintético; visitante EAD | baixar/verificar/reproduzir/remover | catálogo QA; aula EAD | SyntheticOfflineQaScreen; OfflineVideoPlayerScreen; botão produção desativado | State local | OfflinePackageManifest v1 | OfflinePackageStore; OfflineHttpDownload | nenhuma API produtiva apta | arquivo privado application support; sem tabela | release check independente obrigatório; default deny | nenhum evento acadêmico | READ verificado sem rede; revogação local; direitos/revisão real exigem servidor | ead_offline_package_test; ead_offline_http_test; ead_offline_qa_widget_test; Android avião pendente | kDebugMode + isolated + run ID + opt-in; produção OFF | MERGE_ALLOWED=NO; PRODUCTION_ALLOWED=NO | IMPLEMENTED; aceite Android pendente |
+
 Checkpoint 20/10 #309: timeout nativo 120 s separado do HTML 20 s, logs
 sanitizados e retry. Analyze e Flutter focal 13/13 PASS. Android API 35 com
 Gradle 3 GiB/768 MiB/2 workers: abertura de processo frio e reabertura quente
