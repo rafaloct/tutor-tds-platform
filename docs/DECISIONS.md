@@ -335,3 +335,15 @@ assinatura e Play exigem autorização própria. Provas e limitações de #297 e
     publica progressivamente após checks, começando pela aula1420/curso1298.
     A decisão não comprova playback, áudio, acessibilidade nem declarações Play.
     Preservar matrícula, autoria, avaliações privadas e demais gates de release.
+
+
+37. 2026-10-22: responsável confirmou aprovação editorial em lote para o corpus
+    audiovisual próprio Tutor TDS já integrante do EAD, finalidade pública,
+    gratuita e não monetizada, inclusive reprodução/download no app. Fonte:
+    Issue #336 comentário 6352212752 e missão de auditoria atual. Supera textos
+    históricos que pediam 48 aprovações individuais; restrição expressa de
+    terceiro deve ser excluída e registrada separadamente. Mantêm-se origem,
+    revisão/fingerprint, tamanho/SHA-256 reais, pai/curso correto, HTTPS,
+    revogação e QA. Não comprova medição/publicação nem abre gates de produção,
+    merge, assinatura ou Play. Candidato read-only/testes #336 não altera
+    metadados reais. Versão pública 1.4.1+14 preservada.

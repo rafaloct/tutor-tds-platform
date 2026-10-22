@@ -1,5 +1,22 @@
 # CURRENT STATE
 
+## 2026-10-22 — auditoria de produto e manifesto offline #336
+
+OBSERVED: recuperação GitHub/hosts em `audit/product-20261022/`; 24 lacunas,
+inventário de capacidades, oito jornadas por papel e cobertura de risco, sem
+aceite integral. Base `a0db1025` (#334); writer cloud isolado, arquivos #335
+modificados no LARGeo preservados. #334 Flutter CI FAIL; #324/#316 checks PASS
+nos SHAs registrados. Autoridade EAD LearnPress e institucional FastAPI distintas.
+DECISION: aprovação editorial de lote das mídias próprias em #336/6352212752;
+não pedir 48 consentimentos. Direitos não substituem integridade dos bytes.
+IMPLEMENTED/TESTED-LOCAL: produtor de manifesto #336 read-only, hashes preparados
+fora de GET, revisão/fingerprint/pai único/stat; 393 assertions com filesystem
+real+WP stubs, 63 editorial, 47 ETag, 13 HTTP stubs e 3 PHP→Dart PASS. Não
+comprova WordPress vivo, UI integrada ou modo avião; estes permanecem NOT_RUN/
+BLOCKED. Contrato `architecture/EAD_OFFLINE_MANIFEST_336.md`. Sem alterações
+API/Flutter runtime, produção, assinatura, metadados de versão ou release gates.
+Versão pública preservada 1.4.1+14; MERGE_ALLOWED=NO; PRODUCTION_ALLOWED=NO.
+
 ## 2026-10-22 — Issue #333, candidato offline player
 
 IMPLEMENTED em worktree isolada baseada em `1c23630`: player nativo local,
