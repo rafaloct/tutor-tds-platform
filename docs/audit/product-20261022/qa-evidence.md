@@ -119,3 +119,10 @@ G25 records confirmed native LP cleanup of unpublished lesson associations;
 automatic reattachment is forbidden. Recovery used the existing authorized
 LearnPress editor model, not a source-policy bypass. The risk matrix now has34
 rows and the gap register25 items.
+
+## 2026-10-23 Flutter reader continuation
+
+TESTED-LOCAL:25 unit/contract tests PASS; focal Dart analyze no issues on
+LARGeo Flutter3.44.9. See `../../qa/ead-offline-reader-20261023/README.md`.
+Mock streams are not real integration. #335 preserved; release authority,
+actual HTTP reader and Android offline journey remain NOT_RUN. Coverage35 rows.

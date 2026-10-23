@@ -33,3 +33,4 @@ Q31,admin,restore and forward upgrade,offsite backup isolated restore,Postgres+W
 Q32,all,cold start and task memory,background kill restart,Android35+POCO,weak,each applicable role,frozen candidate,performance resilience,NOT_RUN,G22
 Q33,admin,republish orphan recovery,native association removed then explicit reattach,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,authorized synthetic admin editor,LP4.3.6 current plugin,native integration,PASS,G25 orphan404 reattach measure200; not browser form
 Q34,teacher,editor recovery workflow,draft republish course continuity,portal browser+Android35,weak,legitimate LP teacher and reviewer,current institutional candidate,product acceptance,NOT_RUN,G25 real browser recovery and downstream learner path
+Q35,visitor,fetch current offline manifest,valid malformed oversized revoked mismatched identity,Flutter3.44.9 Windows,mocked stream,anonymous opt-in,schema1,unit+contract,PASS,25 reader tests; live reader integration NOT_RUN

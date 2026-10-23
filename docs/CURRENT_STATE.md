@@ -1,5 +1,15 @@
 # CURRENT STATE
 
+## 2026-10-23 — leitor Flutter #336
+
+TESTED-LOCAL: leitor HTTP anônimo canônico e limitado a4096 bytes, sem
+redirect/cache, vínculo estrito curso/aula;25 testes PASS e análise focal sem
+problemas no LARGeo Flutter3.44.9. Evidência em
+`qa/ead-offline-reader-20261023/`. Leitor opt-in não concede autorização;
+store deny permanece. #335 e seus dois arquivos modificados preservados.
+HTTP real→leitor, binding/autoridade e Android offline NOT_RUN.25 lacunas/35
+linhas de risco. Gates e versão pública1.4.1+14 preservados.
+
 ## 2026-10-22 — continuação #336: WordPress/LearnPress real isolado
 
 TESTED-LOCAL:44/44 assertions no WordPress6.7.2/LearnPress4.3.6/MariaDB11.4
