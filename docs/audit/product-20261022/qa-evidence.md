@@ -126,3 +126,10 @@ TESTED-LOCAL:25 unit/contract tests PASS; focal Dart analyze no issues on
 LARGeo Flutter3.44.9. See `../../qa/ead-offline-reader-20261023/README.md`.
 Mock streams are not real integration. #335 preserved; release authority,
 actual HTTP reader and Android offline journey remain NOT_RUN. Coverage35 rows.
+
+## 2026-10-23 #335 recovered repair
+
+31 widget/store/HTTP tests PASS after deferred test scheduling and exact-byte
+Windows fixture correction. Original writer work preserved; three failed attempts
+and boundary diagnosis retained in `../../qa/ead-offline-widget-recovery-20261023/`.
+Full current CI and Android synthetic player pending. Matrix37 rows.

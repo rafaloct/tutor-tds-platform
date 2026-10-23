@@ -1,0 +1,82 @@
+[Reading last 79 lines (total: 79 lines)]
+
+Formatted test/ead_offline_qa_widget_test.dart
+Formatted 1 file (1 changed) in 0.06 seconds.
+00:00 +0: loading D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart
+00:00 +0: prepares, resumes without network, exposes captions and revokes
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TimeoutException was thrown while running async test code:
+TimeoutException after 0:00:30.000000: Future not completed
+
+When the exception was thrown, this was the stack:
+<asynchronous suspension>
+<asynchronous suspension>
+#2      main.awaitOperation (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:59:7)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:98:9)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TimeoutException was thrown while running async test code:
+TimeoutException after 0:00:30.000000: Future not completed
+
+When the exception was thrown, this was the stack:
+<asynchronous suspension>
+#1      main.io.<anonymous closure> (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:83:50)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      main.io (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:83:8)
+<asynchronous suspension>
+#4      main.detach (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:86:5)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:171:9)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following _TypeError was thrown running a test:
+Null check operator used on a null value
+
+When the exception was thrown, this was the stack:
+#0      main.io (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:83:65)
+<asynchronous suspension>
+#1      main.detach (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:86:5)
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:171:9)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  prepares, resumes without network, exposes captions and revokes
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (3) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:08 +0 -1: prepares, resumes without network, exposes captions and revokes [E]
+  Test failed. See exception logs above.
+  The test description was: prepares, resumes without network, exposes captions and revokes
+  
+01:08 +0 -1: failed stream reports error and leaves no ready file
+✅ Process completed with exit code 1 (runtime: 135.17s)

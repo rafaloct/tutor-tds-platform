@@ -1,0 +1,38 @@
+[Reading last 35 lines (total: 35 lines)]
+
+Formatted lib/features/ead_offline/synthetic_offline_qa_screen.dart
+Formatted test/ead_offline_qa_widget_test.dart
+Formatted 2 files (2 changed) in 0.25 seconds.
+00:00 +0: loading D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart
+00:00 +0: prepares, resumes without network, exposes captions and revokes
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: contains 'Pronto para modo avião'
+  Actual: 'Falha ao preparar: Offline package: size_mismatch'
+   Which: does not contain 'Pronto para modo avião'
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart:102:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart line 102
+The test description was:
+  prepares, resumes without network, exposes captions and revokes
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:05 +0 -1: prepares, resumes without network, exposes captions and revokes [E]
+  Test failed. See exception logs above.
+  The test description was: prepares, resumes without network, exposes captions and revokes
+  
+00:05 +0 -1: failed stream reports error and leaves no ready file
+00:05 +1 -1: Some tests failed.
+
+Failing tests:
+  D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+✅ Process completed with exit code 1 (runtime: 35.72s)

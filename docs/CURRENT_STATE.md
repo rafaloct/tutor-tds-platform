@@ -1,5 +1,15 @@
 # CURRENT STATE
 
+## 2026-10-23 — recuperação #335 e bytes Windows
+
+TESTED-LOCAL:31 testes widget/store/HTTP PASS; análise focal limpa. Reutilizada
+correção não commitada em cópia, origem preservada. Hook diferido de teste
+inicia I/O fora de fake-async. VTT Windows155bytes por autocrlf corrigido para
+148bytes originais via .gitattributes -text; hashes do manifesto inalterados.
+Falhas anteriores retidas em `qa/ead-offline-widget-recovery-20261023/`.
+CI da composição e QA Android sintético são próximos; API35 emulator-5580
+iniciado.36 casos+nova linha37,25 lacunas. Gates fechados preservados.
+
 ## 2026-10-23 — autoridade editorial atual #336
 
 TESTED-LOCAL: adapter opt-in consulta servidor a cada verificação e compara
