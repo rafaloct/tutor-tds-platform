@@ -7,10 +7,12 @@ on:
       - agent/issue-288-ipex-mp4-approval-20261019
     paths:
       - 'wordpress/tds-learnpress-editorial/**'
+      - 'docs/qa/ead-offline-manifest-runtime-20261022/**'
       - '.github/workflows/ead-php-contract.yml'
   pull_request:
     paths:
       - 'wordpress/tds-learnpress-editorial/**'
+      - 'docs/qa/ead-offline-manifest-runtime-20261022/**'
       - '.github/workflows/ead-php-contract.yml'
 permissions:
   contents: read
@@ -31,10 +33,15 @@ jobs:
           php -l wordpress/tds-learnpress-editorial/includes/class-tds-learnpress-editorial-admin.php
           php -l wordpress/tds-learnpress-editorial/tds-learnpress-editorial.php
           php -l wordpress/tds-learnpress-editorial/tests/test-contract.php
+          php -l wordpress/tds-learnpress-editorial/includes/class-tds-offline-manifest.php
+          php -l wordpress/tds-learnpress-editorial/tests/test-offline-manifest.php
+          php -l docs/qa/ead-offline-manifest-runtime-20261022/fixture.php
+          python3 -m py_compile docs/qa/ead-offline-manifest-runtime-20261022/run.py
           php -l wordpress/tds-learnpress-editorial/tests/test-etag.php
           php -l wordpress/tds-learnpress-editorial/tests/etag-http-router.php
       - name: Run isolated policy contract
         run: |
           set -euo pipefail
+          php wordpress/tds-learnpress-editorial/tests/test-offline-manifest.php
           php wordpress/tds-learnpress-editorial/tests/test-etag.php
           python3 wordpress/tds-learnpress-editorial/tests/test-etag-http.py

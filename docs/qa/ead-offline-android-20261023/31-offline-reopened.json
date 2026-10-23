@@ -1,0 +1,51 @@
+[
+  {
+    "text": "",
+    "content-desc": "Voltar",
+    "bounds": "[8,73][104,169]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "QA offline sintético",
+    "bounds": "[144,91][531,151]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Fixture incluída no app; a preparação copia MP4 e VTT para o armazenamento privado e verifica tamanho e SHA-256. Sem download remoto.",
+    "bounds": "[40,217][680,377]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Pacote sintético verificado neste aparelho. Pronto para modo avião.",
+    "bounds": "[40,409][680,489]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Preparar offline",
+    "bounds": "[40,521][329,617]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Assistir offline",
+    "bounds": "[40,617][317,713]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Remover offline",
+    "bounds": "[40,713][333,809]",
+    "enabled": "true",
+    "clickable": "true"
+  }
+]

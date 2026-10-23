@@ -1,0 +1,36 @@
+[Reading last 33 lines (total: 33 lines)]
+
+00:00 +0: loading D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart
+00:00 +0: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_http_test.dart: rejects hostile URLs before opening a connection
+00:00 +1: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_http_test.dart: rejects redirect without following it
+00:00 +2: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_http_test.dart: rejects missing, oversized and incorrect content length
+00:00 +3: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_http_test.dart: accepts exact anonymous stream
+00:00 +4: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 accepts exact public IPEX assets
+00:00 +5: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies rights false
+00:00 +6: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies mobile false
+00:00 +7: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies HTTP
+00:00 +8: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies userinfo
+00:00 +9: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies another host
+00:00 +10: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies port
+00:00 +11: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies query and fragment
+00:00 +12: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies traversal and encoded separators
+00:00 +13: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies YouTube ID
+00:00 +14: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies duplicate asset
+00:00 +15: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_package_test.dart: manifest v1 denies oversized MP4 and package
+00:00 +16: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:00 +17: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:00 +18: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:00 +19: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:00 +20: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:00 +21: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:00 +22: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:00 +23: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:01 +24: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:01 +25: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:01 +26: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:01 +27: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:01 +28: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:01 +29: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: prepares, resumes without network, exposes captions and revokes
+00:03 +30: D:/AI-Shared/work/tds-issue335-recovery-20261023/cartilhas_app/test/ead_offline_qa_widget_test.dart: failed stream reports error and leaves no ready file
+00:03 +31: All tests passed!
+✅ Process completed with exit code 0 (runtime: 25.35s)

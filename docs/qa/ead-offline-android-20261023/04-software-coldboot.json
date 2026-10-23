@@ -1,0 +1,23 @@
+[
+  {
+    "text": "System UI isn't responding",
+    "content-desc": "",
+    "bounds": "[138,468][582,517]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "Close app",
+    "content-desc": "",
+    "bounds": "[66,562][654,706]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "Wait",
+    "content-desc": "",
+    "bounds": "[66,706][654,850]",
+    "enabled": "true",
+    "clickable": "true"
+  }
+]

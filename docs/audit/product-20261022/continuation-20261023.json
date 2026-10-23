@@ -1,0 +1,139 @@
+{
+  "observed_at_utc": "2026-10-23T17:45:24.439197+00:00",
+  "runtime_sha": "cf997d33eee5335469e0b45e906b83e1dc9304ab",
+  "ci": {
+    "Flutter": {
+      "run": 39993808266,
+      "job": 120552205221,
+      "result": "PASS",
+      "tests": 946,
+      "analyze": "PASS"
+    },
+    "PHP": {
+      "run": 39993808336,
+      "result": "PASS"
+    },
+    "quarantine": {
+      "run": 39993808346,
+      "result": "PASS"
+    },
+    "secrets": {
+      "run": 39993808307,
+      "result": "PASS"
+    }
+  },
+  "android": {
+    "source_sha": "cf997d33eee5335469e0b45e906b83e1dc9304ab",
+    "apk_sha256": "2f70cda56638a16369c428fb9068d54d00905b4b473f5a439a099157e492e14e",
+    "generated_at_utc": "2026-10-23T17:40:25.065072+00:00",
+    "scope": "one actual Android synthetic public-media journey; not real media download or academic integration",
+    "checks": [
+      {
+        "case": "installed APK equals clean corrected-source build",
+        "result": "PASS"
+      },
+      {
+        "case": "fresh empty UI watch disabled",
+        "result": "PASS"
+      },
+      {
+        "case": "first preparation ready without manual mkdir",
+        "result": "PASS"
+      },
+      {
+        "case": "private MP4 exact length and SHA256",
+        "result": "PASS"
+      },
+      {
+        "case": "private VTT exact length and SHA256",
+        "result": "PASS"
+      },
+      {
+        "case": "native player initialized with Portuguese first cue",
+        "result": "PASS"
+      },
+      {
+        "case": "native playback progresses to end and second cue",
+        "result": "PASS"
+      },
+      {
+        "case": "captions can be hidden",
+        "result": "PASS"
+      },
+      {
+        "case": "captions can be restored",
+        "result": "PASS"
+      },
+      {
+        "case": "airplane on WiFi off no default network",
+        "result": "PASS"
+      },
+      {
+        "case": "force stop removes process and relaunch gets distinct PID",
+        "result": "PASS"
+      },
+      {
+        "case": "package reopens verified after process death offline",
+        "result": "PASS"
+      },
+      {
+        "case": "native playback and second caption work offline",
+        "result": "PASS"
+      },
+      {
+        "case": "remove returns empty UI and disables watch/remove",
+        "result": "PASS"
+      },
+      {
+        "case": "remove leaves no package files",
+        "result": "PASS"
+      },
+      {
+        "case": "original radios and active network restored",
+        "result": "PASS"
+      },
+      {
+        "case": "manual catalog refresh recovers eleven public offers",
+        "result": "PASS"
+      },
+      {
+        "case": "original viewport restored and owned emulator stopped",
+        "result": "PASS"
+      }
+    ],
+    "pass": 18,
+    "fail": 0,
+    "limits": [
+      "resume position persistence not accepted",
+      "no production manifest reader/download binding",
+      "no institutional role/academic integration",
+      "emulator resource constraints prevent performance/cold-start acceptance"
+    ]
+  },
+  "gates": {
+    "MERGE_ALLOWED": "NO",
+    "production": "NO",
+    "publication": "NO",
+    "public_version": "1.4.1+14"
+  },
+  "audit": {
+    "identified_gaps": 26,
+    "risk_rows": 46
+  },
+  "source_ancestry": {
+    "316": "817432bc7770198b26e377a8b755090bfb73780f",
+    "324": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
+    "250_reused_docs": "51d485dcb0de3dc2a061579a0e2bd3488f421747"
+  },
+  "institutional_qa": {
+    "source": "f345cc805d04c0e9ca1a1778be9e00f7e52e9002",
+    "receipt": "../qa/institutional-contracts-20261023/receipt.json",
+    "sqlite_contracts_pass": 50,
+    "postgres16_lifecycle_pass": 4,
+    "postgres16_attendance_certificate_pass": 13,
+    "postgres1711_migration_pass": 1,
+    "native_http_scenarios_pass": 3,
+    "integrated_staging_android": "NOT_RUN",
+    "human_action_required": false
+  }
+}

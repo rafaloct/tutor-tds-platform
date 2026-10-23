@@ -1,0 +1,7 @@
+[Reading last 2 lines (total: 2 lines)]
+
+Analyzing offline_manifest_repository.dart, offline_manifest_repository_test.dart...
+No issues found!
+✅ Process completed with exit code 0 (runtime: 67.55s)
+
+[executed on device: LARGeo (469ec10e-fad7-4ad6-86a2-6db0acb6291a)]

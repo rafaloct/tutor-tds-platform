@@ -10,8 +10,10 @@ defined( 'ABSPATH' ) || exit;
 
 require_once __DIR__ . '/includes/class-tds-learnpress-editorial.php';
 require_once __DIR__ . '/includes/class-tds-learnpress-editorial-admin.php';
+require_once __DIR__ . '/includes/class-tds-offline-manifest.php';
 
 add_action( 'rest_api_init', array( 'TDS_LearnPress_Editorial', 'register_routes' ) );
+add_action( 'rest_api_init', array( 'TDS_Offline_Manifest', 'register_routes' ) );
 add_action( 'add_meta_boxes_lp_lesson', array( 'TDS_LearnPress_Editorial_Admin', 'register_box' ) );
 add_action( 'save_post_lp_lesson', array( 'TDS_LearnPress_Editorial_Admin', 'save' ), 10, 2 );
 add_action( 'admin_init', array( 'TDS_LearnPress_Editorial_Admin', 'guard_editor_request' ) );

@@ -1,0 +1,14 @@
+{
+  "source_sha": "cf997d33eee5335469e0b45e906b83e1dc9304ab",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r0598c2ad2ee3470a891fcac41bb6c9ac",
+  "files": {
+    "video.mp4": {
+      "bytes": 9031,
+      "sha256": "b1c2ca035ff63b2070fb0bcf3d70b963d828226b1f03f1014a5b347de2c16ce6"
+    },
+    "captions.vtt": {
+      "bytes": 148,
+      "sha256": "7dd0700f14781baace675332cab287a59bd3156593edde696a5f4c69589df19a"
+    }
+  }
+}

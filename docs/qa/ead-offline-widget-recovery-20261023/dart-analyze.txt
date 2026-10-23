@@ -1,0 +1,5 @@
+[Reading last 2 lines (total: 2 lines)]
+
+Analyzing synthetic_offline_qa_screen.dart, ead_offline_qa_widget_test.dart...
+No issues found!
+✅ Process completed with exit code 0 (runtime: 22.60s)

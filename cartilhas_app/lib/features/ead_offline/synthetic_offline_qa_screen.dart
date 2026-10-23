@@ -54,10 +54,14 @@ class SyntheticOfflineQa {
 }
 
 class SyntheticOfflineQaScreen extends StatefulWidget {
-  const SyntheticOfflineQaScreen({super.key, this.testStore});
+  const SyntheticOfflineQaScreen({super.key, this.testStore, this.onOperation});
 
   @visibleForTesting
   final OfflinePackageStore? testStore;
+
+  /// Lets widget tests start native I/O outside the fake clock and await it.
+  @visibleForTesting
+  final ValueChanged<Future<void> Function()>? onOperation;
 
   @override
   State<SyntheticOfflineQaScreen> createState() =>
@@ -76,10 +80,19 @@ class _SyntheticOfflineQaScreenState extends State<SyntheticOfflineQaScreen> {
     super.initState();
     if (kDebugMode &&
         (PrivateEditorialQaBridge.enabled || widget.testStore != null)) {
-      _open();
+      _track(_open);
     } else {
       _busy = false;
       _status = 'QA indisponível neste build.';
+    }
+  }
+
+  void _track(Future<void> Function() operation) {
+    final runner = widget.onOperation;
+    if (runner != null) {
+      runner(operation);
+    } else {
+      operation();
     }
   }
 
@@ -192,7 +205,7 @@ class _SyntheticOfflineQaScreenState extends State<SyntheticOfflineQaScreen> {
           if (_busy) const LinearProgressIndicator(),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: _busy || _store == null ? null : _prepare,
+            onPressed: _busy || _store == null ? null : () => _track(_prepare),
             child: const Text('Preparar offline'),
           ),
           FilledButton(
@@ -200,7 +213,7 @@ class _SyntheticOfflineQaScreenState extends State<SyntheticOfflineQaScreen> {
             child: const Text('Assistir offline'),
           ),
           OutlinedButton(
-            onPressed: _busy || _video == null ? null : _remove,
+            onPressed: _busy || _video == null ? null : () => _track(_remove),
             child: const Text('Remover offline'),
           ),
         ],

@@ -1,0 +1,241 @@
+{
+  "classification": "TESTED-LOCAL synthetic data; real sockets/auth/Postgres",
+  "source": "f345cc805d04c0e9ca1a1778be9e00f7e52e9002",
+  "scenarios": [
+    {
+      "name": "test_prepare_pins_published_version_separates_territory_and_replays",
+      "result": "PASS",
+      "trace": [
+        {
+          "method": "GET",
+          "path": "/operations/classes/options",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "other",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "other",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "other",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "other",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "teacher",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "monitor",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "outsider",
+          "status": 403
+        }
+      ],
+      "password_logins": 8,
+      "database_removed": true
+    },
+    {
+      "name": "test_plan_team_and_strict_lifecycle_authority",
+      "result": "PASS",
+      "trace": [
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "coordinator",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/plan",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/team",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/classes/c69ca8fe-bb4a-4598-9747-466711593b99/sessions",
+          "actor": "teacher",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/transition",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/transition",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/team",
+          "actor": "other",
+          "status": 403
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/team",
+          "actor": "coordinator",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/readiness",
+          "actor": "coordinator",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/transition",
+          "actor": "other",
+          "status": 409
+        },
+        {
+          "method": "GET",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/readiness",
+          "actor": "coordinator",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/transition",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/classes/c69ca8fe-bb4a-4598-9747-466711593b99/sessions",
+          "actor": "teacher2",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/admin/classes/c69ca8fe-bb4a-4598-9747-466711593b99/sessions",
+          "actor": "admin",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/transition",
+          "actor": "coordinator",
+          "status": 409
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/c69ca8fe-bb4a-4598-9747-466711593b99/plan",
+          "actor": "coordinator",
+          "status": 409
+        }
+      ],
+      "password_logins": 8,
+      "database_removed": true
+    },
+    {
+      "name": "test_capacity_30_warns_without_blocking_scoped_assignments",
+      "result": "PASS",
+      "trace": [
+        {
+          "method": "POST",
+          "path": "/operations/classes",
+          "actor": "coordinator",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/operations/classes/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/transition",
+          "actor": "coordinator",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/classes/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/eligible-students",
+          "actor": "teacher",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/inspect",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/commands",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/commands",
+          "actor": "other",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/operations/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/commands",
+          "actor": "coordinator",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/classes/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/students/overflow3",
+          "actor": "admin",
+          "status": 201
+        },
+        {
+          "method": "PUT",
+          "path": "/classes/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/students/overflow4",
+          "actor": "teacher",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/operations/classes/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/readiness",
+          "actor": "coordinator",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/operations/classes/f6e1425c-85ed-4192-bd8b-f48b9fb8b638/readiness",
+          "actor": "coordinator",
+          "status": 200
+        }
+      ],
+      "password_logins": 8,
+      "database_removed": true
+    }
+  ],
+  "postgres_version": "PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit"
+}

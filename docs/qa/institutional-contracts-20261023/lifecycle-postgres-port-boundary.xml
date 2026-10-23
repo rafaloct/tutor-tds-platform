@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="4" failures="0" skipped="0" tests="4" time="1.104" timestamp="2026-10-23T17:55:56.678865+00:00" hostname="05973e90cf17"><testcase classname="tests.test_class_lifecycle_postgres" name="test_postgres_prepare_receipt_and_territory" time="0.002"><error message="failed on setup with &quot;psycopg.OperationalError: connection failed: connection to server at &quot;127.0.0.1&quot;, port 15438 failed: Connection refused&#10;&#09;Is the server running on that host and accepting TCP/IP connections?&quot;">@pytest.fixture
+    def requests_database_url():
+        admin = os.getenv("TDS_CLASS_LIFECYCLE_PG_ADMIN_URL")
+        if not admin:
+            pytest.skip("Disposable loopback PostgreSQL lifecycle proof is opt-in")
+        parsed = urlsplit(admin)
+        if (
+            parsed.scheme != "postgresql"
+            or parsed.hostname != "127.0.0.1"
+            or parsed.port != 15438
+            or parsed.username != "qa_class_lifecycle"
+            or parsed.password
+            or parsed.path != "/postgres"
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise RuntimeError("Refusing non-disposable lifecycle PostgreSQL target")
+        name = "qa_class_lifecycle_" + uuid4().hex
+&gt;       with psycopg.connect(admin, autocommit=True) as conn:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_class_lifecycle_postgres.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'psycopg.Connection'&gt;
+conninfo = 'user=qa_class_lifecycle dbname=postgres host=127.0.0.1 port=15438 hostaddr=127.0.0.1'
+autocommit = True, prepare_threshold = 5, context = None, row_factory = None
+cursor_factory = None, kwargs = {}
+
+    @classmethod
+    def connect(
+        cls,
+        conninfo: str = "",
+        *,
+        autocommit: bool = False,
+        prepare_threshold: int | None = 5,
+        context: AdaptContext | None = None,
+        row_factory: RowFactory[Row] | None = None,
+        cursor_factory: type[Cursor[Row]] | None = None,
+        **kwargs: ConnParam,
+    ) -&gt; Self:
+        """
+        Connect to a database server and return a new `Connection` instance.
+        """
+    
+        params = cls._get_connection_params(conninfo, **kwargs)
+        timeout = timeout_from_conninfo(params)
+        rv = None
+        attempts = conninfo_attempts(params)
+        conn_errors: list[tuple[e.Error, str]] = []
+        for attempt in attempts:
+            tdescr = (attempt.get("host"), attempt.get("port"), attempt.get("hostaddr"))
+            descr = "host: %r, port: %r, hostaddr: %r" % tdescr
+            logger.debug("connection attempt: %s", descr)
+            try:
+                conninfo = make_conninfo("", **attempt)
+                gen = cls._connect_gen(conninfo)
+                rv = waiting.wait_conn(gen, interval=_WAIT_INTERVAL, timeout=timeout)
+            except e._WaitTimeout:
+                tex = e.ConnectionTimeout("connection timeout expired")
+                logger.debug("connection failed: %s: %s", descr, str(tex))
+                conn_errors.append((tex, descr))
+            except e.Error as ex:
+                logger.debug("connection failed: %s: %s", descr, str(ex))
+                conn_errors.append((ex, descr))
+            except e._NO_TRACEBACK as ex:
+                raise ex.with_traceback(None)
+            else:
+                logger.debug("connection succeeded: %s", descr)
+                break
+    
+        if not rv:
+            last_ex = conn_errors[-1][0]
+            if len(conn_errors) == 1:
+&gt;               raise last_ex.with_traceback(None)
+E               psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 15438 failed: Connection refused
+E               	Is the server running on that host and accepting TCP/IP connections?
+
+.venv/lib/python3.13/site-packages/psycopg/connection.py:126: OperationalError</error></testcase><testcase classname="tests.test_class_lifecycle_postgres" name="test_postgres_soft_capacity_and_scoped_assignments" time="0.001"><error message="failed on setup with &quot;psycopg.OperationalError: connection failed: connection to server at &quot;127.0.0.1&quot;, port 15438 failed: Connection refused&#10;&#09;Is the server running on that host and accepting TCP/IP connections?&quot;">@pytest.fixture
+    def requests_database_url():
+        admin = os.getenv("TDS_CLASS_LIFECYCLE_PG_ADMIN_URL")
+        if not admin:
+            pytest.skip("Disposable loopback PostgreSQL lifecycle proof is opt-in")
+        parsed = urlsplit(admin)
+        if (
+            parsed.scheme != "postgresql"
+            or parsed.hostname != "127.0.0.1"
+            or parsed.port != 15438
+            or parsed.username != "qa_class_lifecycle"
+            or parsed.password
+            or parsed.path != "/postgres"
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise RuntimeError("Refusing non-disposable lifecycle PostgreSQL target")
+        name = "qa_class_lifecycle_" + uuid4().hex
+&gt;       with psycopg.connect(admin, autocommit=True) as conn:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_class_lifecycle_postgres.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'psycopg.Connection'&gt;
+conninfo = 'user=qa_class_lifecycle dbname=postgres host=127.0.0.1 port=15438 hostaddr=127.0.0.1'
+autocommit = True, prepare_threshold = 5, context = None, row_factory = None
+cursor_factory = None, kwargs = {}
+
+    @classmethod
+    def connect(
+        cls,
+        conninfo: str = "",
+        *,
+        autocommit: bool = False,
+        prepare_threshold: int | None = 5,
+        context: AdaptContext | None = None,
+        row_factory: RowFactory[Row] | None = None,
+        cursor_factory: type[Cursor[Row]] | None = None,
+        **kwargs: ConnParam,
+    ) -&gt; Self:
+        """
+        Connect to a database server and return a new `Connection` instance.
+        """
+    
+        params = cls._get_connection_params(conninfo, **kwargs)
+        timeout = timeout_from_conninfo(params)
+        rv = None
+        attempts = conninfo_attempts(params)
+        conn_errors: list[tuple[e.Error, str]] = []
+        for attempt in attempts:
+            tdescr = (attempt.get("host"), attempt.get("port"), attempt.get("hostaddr"))
+            descr = "host: %r, port: %r, hostaddr: %r" % tdescr
+            logger.debug("connection attempt: %s", descr)
+            try:
+                conninfo = make_conninfo("", **attempt)
+                gen = cls._connect_gen(conninfo)
+                rv = waiting.wait_conn(gen, interval=_WAIT_INTERVAL, timeout=timeout)
+            except e._WaitTimeout:
+                tex = e.ConnectionTimeout("connection timeout expired")
+                logger.debug("connection failed: %s: %s", descr, str(tex))
+                conn_errors.append((tex, descr))
+            except e.Error as ex:
+                logger.debug("connection failed: %s: %s", descr, str(ex))
+                conn_errors.append((ex, descr))
+            except e._NO_TRACEBACK as ex:
+                raise ex.with_traceback(None)
+            else:
+                logger.debug("connection succeeded: %s", descr)
+                break
+    
+        if not rv:
+            last_ex = conn_errors[-1][0]
+            if len(conn_errors) == 1:
+&gt;               raise last_ex.with_traceback(None)
+E               psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 15438 failed: Connection refused
+E               	Is the server running on that host and accepting TCP/IP connections?
+
+.venv/lib/python3.13/site-packages/psycopg/connection.py:126: OperationalError</error></testcase><testcase classname="tests.test_class_lifecycle_postgres" name="test_postgres_open_session_blocks_close_other_warnings_do_not" time="0.001"><error message="failed on setup with &quot;psycopg.OperationalError: connection failed: connection to server at &quot;127.0.0.1&quot;, port 15438 failed: Connection refused&#10;&#09;Is the server running on that host and accepting TCP/IP connections?&quot;">@pytest.fixture
+    def requests_database_url():
+        admin = os.getenv("TDS_CLASS_LIFECYCLE_PG_ADMIN_URL")
+        if not admin:
+            pytest.skip("Disposable loopback PostgreSQL lifecycle proof is opt-in")
+        parsed = urlsplit(admin)
+        if (
+            parsed.scheme != "postgresql"
+            or parsed.hostname != "127.0.0.1"
+            or parsed.port != 15438
+            or parsed.username != "qa_class_lifecycle"
+            or parsed.password
+            or parsed.path != "/postgres"
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise RuntimeError("Refusing non-disposable lifecycle PostgreSQL target")
+        name = "qa_class_lifecycle_" + uuid4().hex
+&gt;       with psycopg.connect(admin, autocommit=True) as conn:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_class_lifecycle_postgres.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'psycopg.Connection'&gt;
+conninfo = 'user=qa_class_lifecycle dbname=postgres host=127.0.0.1 port=15438 hostaddr=127.0.0.1'
+autocommit = True, prepare_threshold = 5, context = None, row_factory = None
+cursor_factory = None, kwargs = {}
+
+    @classmethod
+    def connect(
+        cls,
+        conninfo: str = "",
+        *,
+        autocommit: bool = False,
+        prepare_threshold: int | None = 5,
+        context: AdaptContext | None = None,
+        row_factory: RowFactory[Row] | None = None,
+        cursor_factory: type[Cursor[Row]] | None = None,
+        **kwargs: ConnParam,
+    ) -&gt; Self:
+        """
+        Connect to a database server and return a new `Connection` instance.
+        """
+    
+        params = cls._get_connection_params(conninfo, **kwargs)
+        timeout = timeout_from_conninfo(params)
+        rv = None
+        attempts = conninfo_attempts(params)
+        conn_errors: list[tuple[e.Error, str]] = []
+        for attempt in attempts:
+            tdescr = (attempt.get("host"), attempt.get("port"), attempt.get("hostaddr"))
+            descr = "host: %r, port: %r, hostaddr: %r" % tdescr
+            logger.debug("connection attempt: %s", descr)
+            try:
+                conninfo = make_conninfo("", **attempt)
+                gen = cls._connect_gen(conninfo)
+                rv = waiting.wait_conn(gen, interval=_WAIT_INTERVAL, timeout=timeout)
+            except e._WaitTimeout:
+                tex = e.ConnectionTimeout("connection timeout expired")
+                logger.debug("connection failed: %s: %s", descr, str(tex))
+                conn_errors.append((tex, descr))
+            except e.Error as ex:
+                logger.debug("connection failed: %s: %s", descr, str(ex))
+                conn_errors.append((ex, descr))
+            except e._NO_TRACEBACK as ex:
+                raise ex.with_traceback(None)
+            else:
+                logger.debug("connection succeeded: %s", descr)
+                break
+    
+        if not rv:
+            last_ex = conn_errors[-1][0]
+            if len(conn_errors) == 1:
+&gt;               raise last_ex.with_traceback(None)
+E               psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 15438 failed: Connection refused
+E               	Is the server running on that host and accepting TCP/IP connections?
+
+.venv/lib/python3.13/site-packages/psycopg/connection.py:126: OperationalError</error></testcase><testcase classname="tests.test_class_lifecycle_postgres" name="test_postgres_0027_to_0028_constraints_and_downgrade_guards" time="0.001"><error message="failed on setup with &quot;psycopg.OperationalError: connection failed: connection to server at &quot;127.0.0.1&quot;, port 15438 failed: Connection refused&#10;&#09;Is the server running on that host and accepting TCP/IP connections?&quot;">@pytest.fixture
+    def requests_database_url():
+        admin = os.getenv("TDS_CLASS_LIFECYCLE_PG_ADMIN_URL")
+        if not admin:
+            pytest.skip("Disposable loopback PostgreSQL lifecycle proof is opt-in")
+        parsed = urlsplit(admin)
+        if (
+            parsed.scheme != "postgresql"
+            or parsed.hostname != "127.0.0.1"
+            or parsed.port != 15438
+            or parsed.username != "qa_class_lifecycle"
+            or parsed.password
+            or parsed.path != "/postgres"
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise RuntimeError("Refusing non-disposable lifecycle PostgreSQL target")
+        name = "qa_class_lifecycle_" + uuid4().hex
+&gt;       with psycopg.connect(admin, autocommit=True) as conn:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_class_lifecycle_postgres.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'psycopg.Connection'&gt;
+conninfo = 'user=qa_class_lifecycle dbname=postgres host=127.0.0.1 port=15438 hostaddr=127.0.0.1'
+autocommit = True, prepare_threshold = 5, context = None, row_factory = None
+cursor_factory = None, kwargs = {}
+
+    @classmethod
+    def connect(
+        cls,
+        conninfo: str = "",
+        *,
+        autocommit: bool = False,
+        prepare_threshold: int | None = 5,
+        context: AdaptContext | None = None,
+        row_factory: RowFactory[Row] | None = None,
+        cursor_factory: type[Cursor[Row]] | None = None,
+        **kwargs: ConnParam,
+    ) -&gt; Self:
+        """
+        Connect to a database server and return a new `Connection` instance.
+        """
+    
+        params = cls._get_connection_params(conninfo, **kwargs)
+        timeout = timeout_from_conninfo(params)
+        rv = None
+        attempts = conninfo_attempts(params)
+        conn_errors: list[tuple[e.Error, str]] = []
+        for attempt in attempts:
+            tdescr = (attempt.get("host"), attempt.get("port"), attempt.get("hostaddr"))
+            descr = "host: %r, port: %r, hostaddr: %r" % tdescr
+            logger.debug("connection attempt: %s", descr)
+            try:
+                conninfo = make_conninfo("", **attempt)
+                gen = cls._connect_gen(conninfo)
+                rv = waiting.wait_conn(gen, interval=_WAIT_INTERVAL, timeout=timeout)
+            except e._WaitTimeout:
+                tex = e.ConnectionTimeout("connection timeout expired")
+                logger.debug("connection failed: %s: %s", descr, str(tex))
+                conn_errors.append((tex, descr))
+            except e.Error as ex:
+                logger.debug("connection failed: %s: %s", descr, str(ex))
+                conn_errors.append((ex, descr))
+            except e._NO_TRACEBACK as ex:
+                raise ex.with_traceback(None)
+            else:
+                logger.debug("connection succeeded: %s", descr)
+                break
+    
+        if not rv:
+            last_ex = conn_errors[-1][0]
+            if len(conn_errors) == 1:
+&gt;               raise last_ex.with_traceback(None)
+E               psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 15438 failed: Connection refused
+E               	Is the server running on that host and accepting TCP/IP connections?
+
+.venv/lib/python3.13/site-packages/psycopg/connection.py:126: OperationalError</error></testcase></testsuite></testsuites>

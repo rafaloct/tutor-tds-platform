@@ -1,0 +1,47 @@
+case,role,journey,system_state,platform,connectivity,permission,version,test_type,result,evidence_or_gap
+Q01,visitor,first install public discovery,empty cache,Android35,weak,anonymous,public14 to candidate,product acceptance,NOT_RUN,G01/G21
+Q02,visitor,public media manifest,approved measured unique parent,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,public opt-in,schema1,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
+Q03,student,server manifest parse,valid + unknown field,Dart Windows,none,public manifest,Dart3.12.2 schema1,contract,PASS,3 PHP JSON to unchanged Dart checks
+Q04,visitor,manifest revocation,old ETag + rights revoked,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,revoked,same source,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
+Q05,visitor,media revision replacement,mtime size inode links,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,approved then stale,revision A to B,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
+Q06,student,download play captions,kill restart airplane mode,Android35,offline,public approved,exact QA APK,end-to-end,BLOCKED,G03 real server/download UI not integrated; synthetic journey Q40 PASS
+Q07,student,download recovery,low storage interrupted bytes,Android35,disconnect reconnect,public approved,old to new media,resilience,NOT_RUN,G06
+Q08,student,EAD signup course return,fresh and existing WP account,portal+Android35,online,anonymous to WP user,candidate exact,end-to-end,NOT_RUN,historical326 evidence is narrower
+Q09,student,identity link,A B collision PKCE replay,portal+API+Android35,online,two proven accounts,legacy plus Authentik,security integration,BLOCKED,G05 no operational broker
+Q10,student,My Area progress resume,late A response after B login,Android35+LP,reconnect,A then B,LP edition updated,end-to-end security,BLOCKED,G09 reader not integrated
+Q11,student,assessment attempt,cold restart pending answer,Android35+API,offline reconnect,enrolled,fixed CourseVersion A,resilience acceptance,NOT_RUN,G11 official readback needed
+Q12,student,numeric attendance,expired code valid token,Android35+API,online,enrolled,current API candidate,regression,NOT_RUN,G12 reproduce159 before fixing
+Q13,teacher,session attendance review,session open,Android35+API,weak,own cohort,fixed edition,end-to-end,NOT_RUN,G07/G08
+Q14,teacher,LP lesson publication,shared parents different owners,WP clone HTTP,online,one parent only,current plugin,security integration,NOT_RUN,historical297 proof no new WP run
+Q15,monitor,exception follow-up,membership revoked mid-read,Android35+API,reconnect,assigned then revoked,current candidate,security acceptance,NOT_RUN,G13
+Q16,creator,draft review publish,save response lost,Android35+API+WP,weak,own program draft,A published B draft,end-to-end,NOT_RUN,G10/G14
+Q17,coordinator,activate class downstream,teacher monitor student refresh,Android35+API,online,same program,current lifecycle rule,end-to-end,NOT_RUN,G07
+Q18,program_operator,prepare enroll activate,31st participant warning,Android35+API+Postgres,online,active program role,decision32,boundary integration,NOT_RUN,G07 no obsolete hard cap
+Q19,program_operator,close class,open session blocker then closed,Android35+API,weak,active program role,decision32,end-to-end,NOT_RUN,G07
+Q20,program_operator,register assign replay,lost POST reply cold restart,Android35+API+Postgres,disconnect reconnect,scoped operator,same command revision,resilience integration,NOT_RUN,G07 no duplicate user/enrollment
+Q21,finance,statement calculation history,duplicate request other program,API+workspace,online,scoped finance,score rule current,security acceptance,NOT_RUN,G14
+Q22,admin,role and identity maintenance,global admin without membership,Android35+API,online,admin missing program scope,current candidate,security acceptance,NOT_RUN,G05/G14
+Q23,student,official certificate eligibility,missing baseline incomplete threshold,API+Worker+Android35,online,enrolled,policy edition current,product acceptance,NOT_RUN,G08 70 percent and signatures
+Q24,coordinator,certificate sign validity,generated pending teacher signature,API+Worker+Android35,online,coordinator own program,current policy,end-to-end,NOT_RUN,G08 generation is not validity
+Q25,student,Tutor educational question,edition A versus B contradictory sources,Android35+RAG,online,authorized context,real corpus version,product AI acceptance,NOT_RUN,G15 synthetic sentinel insufficient
+Q26,student,Tutor outage recovery,upstream502 no relevant sources,Android35+Worker,weak offline,authorized context,current candidate,resilience accessibility,NOT_RUN,G15 no invented answer
+Q27,student,support logout account switch,inbox unavailable then restored,Android35+Chatwoot,reconnect,A then B,remote config changed,integration,NOT_RUN,G17
+Q28,visitor,analytics consent,absent denied revoked,portal browser,online,no consent,current theme,privacy security,NOT_RUN,G18 no synthetic live claim
+Q29,all,accessible task traversal,TalkBack large font focus,Android35+POCO,weak,each allowed role,frozen candidate,accessibility,NOT_RUN,G21
+Q30,all,app update,preserve session cache receipts,POCO Android,online to offline,legacy user,public1.4.1+14 to RC,distribution acceptance,BLOCKED,G23 no current signed artifact
+Q31,admin,restore and forward upgrade,offsite backup isolated restore,Postgres+WP+Worker,isolated,ops authority,actual deployed schema to RC,recovery integration,NOT_RUN,G23
+Q32,all,cold start and task memory,background kill restart,Android35+POCO,weak,each applicable role,frozen candidate,performance resilience,NOT_RUN,G22
+Q33,admin,republish orphan recovery,native association removed then explicit reattach,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,authorized synthetic admin editor,LP4.3.6 current plugin,native integration,PASS,G25 orphan404 reattach measure200; not browser form
+Q34,teacher,editor recovery workflow,draft republish course continuity,portal browser+Android35,weak,legitimate LP teacher and reviewer,current institutional candidate,product acceptance,NOT_RUN,G25 real browser recovery and downstream learner path
+Q35,visitor,fetch current offline manifest,valid malformed oversized revoked mismatched identity,Flutter3.44.9 Windows,mocked stream,anonymous opt-in,schema1,unit+contract,PASS,25 reader tests; live reader integration NOT_RUN
+Q36,visitor,verify public media release,current revision mismatch revocation outage,Flutter3.44.9 Windows,mocked HTTP,editorial current public release,schema1,unit+store boundary,PASS,17 authority tests plus25 reader; live integration NOT_RUN
+Q37,visitor,synthetic offline prepare reopen captions remove,widget native I/O and Windows autocrlf,Flutter3.44.9 Windows,no network on reopen,synthetic debug only,schema1,widget+filesystem+transport,PASS,31 focal tests; Android decoding separate
+Q38,visitor,Welcome public EAD discovery,fresh isolated namespace then environment recovery,Android35 emulator720x1280,online,anonymous,APK16e30de,real UI+public catalog,PASS,11 real public offers; not role or enrollment acceptance
+Q39,visitor,first synthetic offline prepare,fresh application support missing ead_offline,Android35 emulator,online,synthetic debug authority,APK16e30de,real UI+private filesystem,FAIL,G26 issue338 screenshot12-ready; native playback blocked
+Q40,visitor,synthetic private package lifecycle,first prepare captions play force-stop offline reopen remove reconnect,Android35 emulator720x1280,online-offline-online,isolated QA synthetic authority,APKcf997d3,real native UI+filesystem,PASS,18 checks in one journey; not real media download or academic sync
+Q41,visitor,application-support binding,fresh parent file symlink unsafe namespace default deny,Linux Flutter3.44.9,mocked path provider real filesystem,default deny plus fixture authority,cf997d3,unit+platform boundary,PASS,6 new cases included full946 CI; Windows5 PASS and1 SKIPPED
+Q42,institutional scoped roles,class operations presence attendance,decision32 boundary and permission negatives,FastAPI locked Python3.13,TestClient,dependency override synthetic identity,f345cc8,unit+API contract,PASS,50 SQLite cases; no real authentication or deployed acceptance
+Q43,operator coordinator teacher admin,class lifecycle and migration,prepare replay soft30 open-session closure guard,PostgreSQL16.15,local container namespace,synthetic fixture identity,f345cc8,integration persistence,PASS,4 cases; current Android and staging NOT_RUN
+Q44,institutional scoped roles,attendance and certificate candidate,corrections revocation concurrent candidate and policy,PostgreSQL16.15+Node24.19,loopback,synthetic identity and Worker transport KV substitutes,f345cc8,integration persistence+Worker JS,PASS,13 cases; not real Cloudflare or official issuance
+Q45,administrator,migration upgrade downgrade reupgrade,exact pinned historical gate,PostgreSQL17.11,loopback,owned disposable database,f345cc8,migration integration,PASS,1 case; no production DB upgrade
+Q46,operator coordinator teacher monitor student admin,class prepare activate assignment close,real password JWT replay scope capacity and no credential negatives,Uvicorn+PostgreSQL16.15,actual loopback HTTP,zero identity overrides synthetic seed,f345cc8,native HTTP auth+RBAC+database,PASS,3 scenarios 24 logins 35 business operations 9 unauthenticated negatives; not Android staging or complete role journeys

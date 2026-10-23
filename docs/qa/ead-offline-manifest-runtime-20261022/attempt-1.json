@@ -1,0 +1,20 @@
+{
+  "run": "tds-offline-336-282b5897ee",
+  "source_sha": "6e4aab96c7bc53bad5eba17f10498bc667979188",
+  "images": {
+    "wordpress": "wordpress@sha256:10f35d0dd608ee9f907c22aa3f2bbb9ac64fee72726503e53f2afd298d2a09f1",
+    "database": "mariadb@sha256:250e1609e93c0e6aecf64bfbab2d84d5e89d2481540fe77447ff6c855c3b1873"
+  },
+  "learnpress_commit": "84edad0aea35bcac86018a825d0a42f8188d6ead",
+  "cases": [],
+  "boundary": "Real WordPress/LearnPress/MariaDB, synthetic records/bytes, internal Docker HTTP; no TLS, browser form or Android proof",
+  "result": "FAIL",
+  "cleanup": {
+    "tds-offline-336-282b5897ee-wp": "PASS",
+    "tds-offline-336-282b5897ee-db": "PASS",
+    "tds-offline-336-282b5897ee-wpdata": "PASS",
+    "tds-offline-336-282b5897ee-dbdata": "PASS",
+    "tds-offline-336-282b5897ee": "PASS"
+  },
+  "error": "Command failed (docker, rc=255): [22-Oct-2026 22:58:05 UTC] PHP Warning:  include_once(/var/www/html/wp-content/plugins/learnpress/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/wp-content/plugins/learnpress/learnpress.php on line 275\nWarning: include_once(/var/www/html/wp-content/plugins/learnpress/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/html/wp-content/plugins/learnpress/learnpress.php on line 275\n[22-Oct-2026 22:58:05 UTC] PHP Warning:  include_once(): Failed opening '/var/www/html/wp-content/plugins/learnpress/vendor/autoload.php' for inclusion (include_path='.:/usr/local/lib/php') in /var/www/html/wp-content/plugins/learnpress/learnpress.php on line 275\nWarning: include_once(): Failed opening '/var/www/html/wp-content/plugins/learnpress/vendor/autoload.php' for inclusion (include_path='.:/usr/local/lib/php') in /var/www/html/wp-content/plugins/learnpress/learnpress.php on line 275\n[22-Oct-2026 22:58:05 UTC] PHP Fatal error:  Trait \"LearnPress\\Helpers\\Singleton\" not found in /var/www/html/wp-content/plugins/learnpress/inc/Databases/class-lp-user-db.php on line 13\nFatal error: Trait \"LearnPress\\Helpers\\Singleton\" not found in /var/www/html/wp-content/plugins/learnpress/inc/Databases/class-lp-user-db.php on line 13\n "
+}

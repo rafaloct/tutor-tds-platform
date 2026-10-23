@@ -1,5 +1,117 @@
 # CURRENT STATE
 
+## 2026-10-23 — turmas/frequência/certificação, prova isolada atual
+
+TESTED-LOCAL na composição f345cc8:50 contratos SQLite PASS;4 testes de
+ciclo/migração em PostgreSQL16.15 PASS;13 casos frequência/certificação em
+16.15 PASS;1 gate de migração em17.11 PASS. Três cenários adicionais com
+Uvicorn/socket HTTP+login/senha/JWT reais:24 logins,35 operações,9 negativas
+sem credencial/forja X-User/token inválido PASS. Seeds/estados de fronteira
+são sintéticos; sem override de identidade no servidor HTTP. Não equivale a
+staging/Android nem emissão oficial/Worker remoto. Decisão32 preservada
+(operador ativa/fecha;30 é aviso). Falhas iniciais de infraestrutura retidas,
+sem relaxar guardas ou alterar API/migrações/dependências.
+Evidência: `qa/institutional-contracts-20261023/README.md`. Bancos efêmeros,
+containers próprios e rede própria removidos.26 lacunas/46 linhas de risco;
+G07/G08 permanecem abertos para aceite integrado. Nenhuma decisão humana
+necessária para continuar QA; gates/public1.4.1+14 intactos.
+
+## 2026-10-23 — #338 corrigida e jornada Android real
+
+TESTED-LOCAL: fontecf997d3 passa946 testes/análise no CI39993808266;
+PHP/quarantine/secrets SUCCESS. APK debug limpo2f70cda5... instalado corresponde
+ao build. Jornada Android API35 sintética:18 checks PASS numa jornada real
+(preparar, hashes privados MP4/VTT, decoder/VTT, toggle, force-stop com PID
+novo, modo avião/WiFi off/sem rede, reproduzir, remover, reconectar/catálogo11).
+Falha anterior16e30de preservada. Evidência em
+`qa/ead-offline-android-20261023/CORRECTED_ACCEPTANCE.md`. Ambiente restaurado
+(rede/resolução) e só emulador próprio parado; origem #335 preservada.
+26 lacunas/41 casos; G06 posição e sincronização acadêmica não aceitas.
+Reader→download institucional/UI, oito papéis, IA, SSO, performance/TalkBack/
+POCO/Play ainda pendentes. Default deny/public1.4.1+14/MERGE_ALLOWED=NO intactos.
+
+## 2026-10-23 — Android real revela G26/#338
+
+APK fonte16e30de limpo/debug isolado construído e instalado; hashes de MP4/VTT
+empacotados PASS. Welcome→catálogo público11→QA vazio PASS; preparar FAIL
+por pai ead_offline ausente. Capturas/manifesto em
+`qa/ead-offline-android-20261023/`. Player/modo avião ainda NOT_RUN.
+FIX binding cria/verifica pai privado sem seguir links:22 testes PASS/1 symlink
+SKIPPED Windows; análise focal limpa, Linux CI e novo APK pendentes. Evidência
+`qa/ead-offline-root-20261023/`.26 lacunas/39 linhas de risco.
+Emulador recuperado após SystemUI ANR; performance não aceita. Gates fechados.
+
+## 2026-10-23 — CI completa e autoridade canônica
+
+TESTED-LOCAL: commit16e30de passou940 testes e análise Flutter no CI39989119605;
+PHP39989119715/quarantine39989119564/secrets39989119550 SUCCESS.
+IMPLEMENTED: reutilizados7 documentos exatos do #250/51d485dc para corrigir
+contradição G02 entre programa e DOMAIN_CONTRACT;11 links locais conferidos.
+Sem mudança de autoridade institucional nem promoção de SSO TARGET.
+QA Android debug do commit16e30de em andamento, namespace isolado; não
+recompilar por documentação apenas. Produção/publicação/MERGE_ALLOWED=NO.
+
+## 2026-10-23 — recuperação #335 e bytes Windows
+
+TESTED-LOCAL:31 testes widget/store/HTTP PASS; análise focal limpa. Reutilizada
+correção não commitada em cópia, origem preservada. Hook diferido de teste
+inicia I/O fora de fake-async. VTT Windows155bytes por autocrlf corrigido para
+148bytes originais via .gitattributes -text; hashes do manifesto inalterados.
+Falhas anteriores retidas em `qa/ead-offline-widget-recovery-20261023/`.
+CI da composição e QA Android sintético são próximos; API35 emulator-5580
+iniciado.36 casos+nova linha37,25 lacunas. Gates fechados preservados.
+
+## 2026-10-23 — autoridade editorial atual #336
+
+TESTED-LOCAL: adapter opt-in consulta servidor a cada verificação e compara
+identidade/revisão/assets;17 testes novos+25 leitor PASS42, análise focal limpa
+no LARGeo. Default deny e produção inalterados. Evidência em
+`qa/ead-offline-authority-20261023/`. CI81ec0ed: análise/PHP/quarantine/secrets
+PASS; suíte Flutter921 PASS/2 FAIL na #335. Correção existente será recuperada
+em cópia isolada; origem preservada. HTTP real→adapter/Android NOT_RUN.
+
+## 2026-10-23 — leitor Flutter #336
+
+TESTED-LOCAL: leitor HTTP anônimo canônico e limitado a4096 bytes, sem
+redirect/cache, vínculo estrito curso/aula;25 testes PASS e análise focal sem
+problemas no LARGeo Flutter3.44.9. Evidência em
+`qa/ead-offline-reader-20261023/`. Leitor opt-in não concede autorização;
+store deny permanece. #335 e seus dois arquivos modificados preservados.
+HTTP real→leitor, binding/autoridade e Android offline NOT_RUN.25 lacunas/35
+linhas de risco. Gates e versão pública1.4.1+14 preservados.
+
+## 2026-10-22 — continuação #336: WordPress/LearnPress real isolado
+
+TESTED-LOCAL:44/44 assertions no WordPress6.7.2/LearnPress4.3.6/MariaDB11.4
+reais, HTTP/HEAD/ETag, bytes MP4/VTT, revisão/revogação, pais/privacidade e
+tabelas acadêmicas inalteradas; cleanup5/5. Payload HTTP nativo passou3 checks
+no Dart3.12.2 do LARGeo com parser inalterado. Fonte plugin #337 `6e4aab96`;
+sem mudança de código produtivo. Falhas/diagnósticos preservados em
+`qa/ead-offline-manifest-runtime-20261022/`. OBSERVED: cleanup nativo LP remove
+associação de aula draft; publicar não restaura pai. Manifesto nega órfã;
+reattach explícito por editor nativo autorizado e nova medição passaram.
+G25 documenta recuperação; browser institucional ainda NOT_RUN. Inventário
+atual:25 lacunas/34 linhas de risco. #335 preservado, Flutter client/UI e
+modo avião continuam pendentes. Sem staging institucional/produção/assinatura/
+Play; versão pública1.4.1+14 e gates fechados preservados.
+
+## 2026-10-22 — auditoria de produto e manifesto offline #336
+
+OBSERVED: recuperação GitHub/hosts em `audit/product-20261022/`; 24 lacunas,
+inventário de capacidades, oito jornadas por papel e cobertura de risco, sem
+aceite integral. Base `a0db1025` (#334); writer cloud isolado, arquivos #335
+modificados no LARGeo preservados. #334 Flutter CI FAIL; #324/#316 checks PASS
+nos SHAs registrados. Autoridade EAD LearnPress e institucional FastAPI distintas.
+DECISION: aprovação editorial de lote das mídias próprias em #336/6352212752;
+não pedir 48 consentimentos. Direitos não substituem integridade dos bytes.
+IMPLEMENTED/TESTED-LOCAL: produtor de manifesto #336 read-only, hashes preparados
+fora de GET, revisão/fingerprint/pai único/stat; 393 assertions com filesystem
+real+WP stubs, 63 editorial, 47 ETag, 13 HTTP stubs e 3 PHP→Dart PASS. Não
+comprova WordPress vivo, UI integrada ou modo avião; estes permanecem NOT_RUN/
+BLOCKED. Contrato `architecture/EAD_OFFLINE_MANIFEST_336.md`. Sem alterações
+API/Flutter runtime, produção, assinatura, metadados de versão ou release gates.
+Versão pública preservada 1.4.1+14; MERGE_ALLOWED=NO; PRODUCTION_ALLOWED=NO.
+
 ## 2026-10-22 — Issue #333, candidato offline player
 
 IMPLEMENTED em worktree isolada baseada em `1c23630`: player nativo local,

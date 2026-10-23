@@ -1,0 +1,626 @@
+{
+  "date": "2026-10-22",
+  "timezone": "America/Sao_Paulo",
+  "checkout_original": "b6f3f0f",
+  "implementation_base": "a0db10254642223dad192326f88d676aaba09553",
+  "limits": [
+    "GitHub search bounded to 60 PRs and 100 issues, updated descending; not an exhaustive history.",
+    "No current authenticated live WP/FastAPI/Play or physical-device acceptance in this cycle.",
+    "GitHub Discussions not exposed by connector; issue and PR conversations inspected instead."
+  ],
+  "prs": [
+    {
+      "number": 334,
+      "head": "agent/issue-333-offline-player-20261022",
+      "head_sha": "a0db10254642223dad192326f88d676aaba09553",
+      "base": "agent/issue-329-ead-offline-pack-20261022",
+      "base_sha": "1c23630e81b72920c7cba260eb33cc2b37598df4",
+      "state": "open",
+      "merged": false,
+      "draft": true,
+      "ci": [
+        {
+          "name": "Tutor TDS Flutter app checks",
+          "status": "completed",
+          "conclusion": "failure",
+          "run_id": 39851450214
+        },
+        {
+          "name": "WordPress legacy quarantine",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39851450226
+        },
+        {
+          "name": "Secret scan (new commits)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39851450031
+        }
+      ]
+    },
+    {
+      "number": 324,
+      "head": "agent/issue-299-ead-registration-app-analytics-20261021",
+      "head_sha": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
+      "base": "agent/issue-197-optional-activation-20261021",
+      "base_sha": "c71a419c756373f95895d6362bdfea4a2efd233b",
+      "state": "open",
+      "merged": false,
+      "draft": true,
+      "ci": [
+        {
+          "name": "Tutor TDS Flutter app checks",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39673357654
+        },
+        {
+          "name": "WordPress legacy quarantine",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39673357731
+        },
+        {
+          "name": "Secret scan (new commits)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39673357531
+        }
+      ]
+    },
+    {
+      "number": 316,
+      "head": "agent/release-candidate-integration-20261021",
+      "head_sha": "817432bc7770198b26e377a8b755090bfb73780f",
+      "base": "agent/issue-197-release-gate-source-20261020",
+      "base_sha": "2a83984656f4b494992d69d3e401298e886d3ac3",
+      "state": "open",
+      "merged": false,
+      "draft": true,
+      "ci": [
+        {
+          "name": "EAD PHP editorial contract",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39618313604
+        },
+        {
+          "name": "WordPress legacy quarantine",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39618313590
+        },
+        {
+          "name": "Secret scan (new commits)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39618313493
+        },
+        {
+          "name": "Tutor TDS Flutter app checks",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39618313731
+        }
+      ]
+    },
+    {
+      "number": 317,
+      "head": "agent/issue-197-play-version15-20261021",
+      "head_sha": "0cda01731b19dce479700770d51d262e94c7b7ab",
+      "base": "agent/release-candidate-integration-20261021",
+      "base_sha": "817432bc7770198b26e377a8b755090bfb73780f",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    },
+    {
+      "number": 332,
+      "head": "agent/issue-330-authentik-lab-20261022",
+      "head_sha": "2977c7a635873ba7933b73efbf40690ac8769d9e",
+      "base": "agent/issue-299-ead-registration-app-analytics-20261021",
+      "base_sha": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
+      "state": "open",
+      "merged": false,
+      "draft": true,
+      "ci": [
+        {
+          "name": "Authentik lab security contract",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39850641774
+        },
+        {
+          "name": "WordPress legacy quarantine",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39850641839
+        },
+        {
+          "name": "Secret scan (new commits)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 39850641779
+        }
+      ]
+    },
+    {
+      "number": 326,
+      "head": "agent/issue-325-android-registration-qa-20261022",
+      "head_sha": "a8b7310a8641e3c68b37d8301adcd95bf5357c19",
+      "base": "agent/issue-299-ead-registration-app-analytics-20261021",
+      "base_sha": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    },
+    {
+      "number": 331,
+      "head": "agent/issue-329-ead-offline-pack-20261022",
+      "head_sha": "1c23630e81b72920c7cba260eb33cc2b37598df4",
+      "base": "agent/issue-299-ead-registration-app-analytics-20261021",
+      "base_sha": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    },
+    {
+      "number": 250,
+      "head": "agent/issue-249-ead-authority-docs-20261018",
+      "head_sha": "51d485dcb0de3dc2a061579a0e2bd3488f421747",
+      "base": "staging",
+      "base_sha": "b0c39b24c0e7e71bc38166819db562be9488b8d2",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    },
+    {
+      "number": 266,
+      "head": "agent/issue-265-ead-my-area-controller-20261018",
+      "head_sha": "82da8f5012f617d171b07a5856bb1c7fd098b618",
+      "base": "agent/issue-262-ead-my-area-presentation-20261018",
+      "base_sha": "2ed6ce00195c46c4824aa6cdda84739bbaab056b",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    },
+    {
+      "number": 175,
+      "head": "agent/issue-134-auto-20261007-145057",
+      "head_sha": "4105e304f87507c0b969418bd4ebea009d47a8bb",
+      "base": "staging",
+      "base_sha": "fbb4b6a9c2870234c4e3d3786d510e455a6871f4",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    }
+  ],
+  "open_issue_inventory": [
+    {
+      "number": 336,
+      "title": "[EAD][OFFLINE] Manifesto editorial de MP4/VTT íntegro para download"
+    },
+    {
+      "number": 335,
+      "title": "[QA][EAD] Resolver teste assíncrono do player offline antes do APK"
+    },
+    {
+      "number": 333,
+      "title": "[OFFLINE][E2E] Integrar downloader seguro, player nativo e QA modo avião"
+    },
+    {
+      "number": 330,
+      "title": "[AUTH][EAD] Piloto Authentik OIDC open source isolado, sem mudar login produtivo"
+    },
+    {
+      "number": 329,
+      "title": "[OFFLINE][EAD] Núcleo de pacotes MP4/VTT versionados e íntegros no Flutter"
+    },
+    {
+      "number": 197,
+      "title": "[RELEASE] Preparar produção 1.4.0+13 com analytics existente"
+    },
+    {
+      "number": 327,
+      "title": "[EAD][Analytics] Preparar conversão GA4 de cadastro WP com consentimento e testes fail-closed"
+    },
+    {
+      "number": 325,
+      "title": "[QA][Android] Homologação reproduzível do cadastro WordPress no APK do PR #324"
+    },
+    {
+      "number": 299,
+      "title": "[P0][EAD] Preservar curso no cadastro e retomar matrícula LearnPress"
+    },
+    {
+      "number": 320,
+      "title": "[DOCS][API] Registrar GET /support/config na referência gerada"
+    },
+    {
+      "number": 318,
+      "title": "[RELEASE][APP] Reconciliar paridade Chatwoot/FAQ da 1.4.1 no candidato 1.4.2"
+    },
+    {
+      "number": 308,
+      "title": "[EAD][PROD] Publicação auditável das mídias próprias TDS após confirmação de direitos"
+    },
+    {
+      "number": 297,
+      "title": "[Wave 2][WordPress] Corrigir HTTP 500 no save real de lp_lesson pelo lp_teacher"
+    },
+    {
+      "number": 309,
+      "title": "[Android][EAD] Primeira inicialização WebView exibe indisponível; abertura quente reproduz MP4"
+    },
+    {
+      "number": 303,
+      "title": "[Release][Android] ETag fraco na resposta comprimida bloqueia currículo editorial"
+    },
+    {
+      "number": 252,
+      "title": "[EAD][F0][DEVIN] Homologar Minha Área e progresso LearnPress em QA sintético privado"
+    },
+    {
+      "number": 276,
+      "title": "[EAD][QA] Reproduzir autorização editorial PR #238 em WordPress/MariaDB isolados"
+    },
+    {
+      "number": 290,
+      "title": "test(ead): validação integrada do editor MP4/VTT em WP sintético"
+    },
+    {
+      "number": 294,
+      "title": "fix(android): legendas IPEX fora da animação e controle PT-BR acessível"
+    },
+    {
+      "number": 291,
+      "title": "test(android): gates acadêmicos e preflight do candidato MP4/VTT"
+    },
+    {
+      "number": 288,
+      "title": "[P0][EAD][SECURITY] Vincular aprovação editorial ao MP4 IPEX e permitir opt-in sem YouTube"
+    },
+    {
+      "number": 245,
+      "title": "[CODEX][APP][VIDEO] Player YouTube autorizado dentro da aula LearnPress, sem progresso falso"
+    },
+    {
+      "number": 286,
+      "title": "[EAD] Player MP4 e legendas do IPEX para aulas autorizadas"
+    },
+    {
+      "number": 282,
+      "title": "[APP][EAD] Aulas sem opt-in devem abrir o curso oficial, sem simular acesso interno"
+    },
+    {
+      "number": 281,
+      "title": "[INFRA][INCIDENT] VPS 100% cheia causou 404 no EAD/portal; configurar rotação de logs"
+    },
+    {
+      "number": 224,
+      "title": "[EPIC][PRODUTO] Convergência EAD-first do Tutor TDS, YouTube, IA e campanhas"
+    },
+    {
+      "number": 241,
+      "title": "[ANDROID][QA] APK Tutor TDS ligado ao LearnPress sintético por túnel privado e vídeo real"
+    },
+    {
+      "number": 274,
+      "title": "[EAD][F3d][DEVIN][QA] Homologar páginas Minha Área B0 no WordPress sintético com rollback"
+    },
+    {
+      "number": 249,
+      "title": "[ADR][EAD] Formalizar autoridade LearnPress + FastAPI e handoff de Minha Área unificada"
+    },
+    {
+      "number": 272,
+      "title": "[EAD][F2b][DESIGN][DEVIN] Avaliar vínculo seguro de contas LearnPress ↔ TDS sem SSO improvisado"
+    },
+    {
+      "number": 270,
+      "title": "[P1][SECURITY][EAD] Impedir metadados de aulas em rascunho na rota pública LearnPress"
+    },
+    {
+      "number": 268,
+      "title": "[EAD][F3c][DEVIN] Mapear leitura autenticada Minha Área LearnPress para contrato Flutter #266"
+    },
+    {
+      "number": 264,
+      "title": "[EAD][F0c][QA] Corrigir vínculo quiz→questões e comprovar avaliação em MariaDB sintético"
+    },
+    {
+      "number": 265,
+      "title": "[FLUTTER][F3b] Controlador read-only da Minha Área com isolamento de contas EAD"
+    },
+    {
+      "number": 262,
+      "title": "[FLUTTER][F3a] Minha área: componente de apresentação EAD/TDS sem autenticação simulada"
+    },
+    {
+      "number": 258,
+      "title": "[FLUTTER][F2] Política segura de matrícula, quiz e conclusão LearnPress para Minha Área"
+    },
+    {
+      "number": 253,
+      "title": "[EAD][F1] Validar mapa público 11 LearnPress ↔ 9 cursos TDS, sem conceder direitos"
+    },
+    {
+      "number": 215,
+      "title": "WordPress: preservar conteúdo e rotas existentes na promoção do novo tema"
+    },
+    {
+      "number": 247,
+      "title": "ci(flutter): preservar goldens EAD no Linux e Windows"
+    },
+    {
+      "number": 243,
+      "title": "[CODEX][FLUTTER][QA] Corrigir AppBar e pluralização do percurso EAD no teste Android35"
+    },
+    {
+      "number": 239,
+      "title": "[FLUTTER][EAD] Consumir lições e vídeos públicos do adaptador vivo LearnPress"
+    },
+    {
+      "number": 236,
+      "title": "[WORDPRESS][EAD] Adaptador editorial vivo de lições, mídia e avaliações para Flutter"
+    },
+    {
+      "number": 235,
+      "title": "[APP][EAD] Atualização viva LearnPress: sequência, quizzes e tema Tutor TDS"
+    },
+    {
+      "number": 233,
+      "title": "[APP][SAF] Piloto de trilha aula→vídeo→Tutor com avaliações mapeadas, não presumidas"
+    },
+    {
+      "number": 231,
+      "title": "[APP][PERCURSO] Prévia nativa da sequência LearnPress com prática Flutter e Tutor TDS"
+    },
+    {
+      "number": 230,
+      "title": "[CURRÍCULO][EAD] Espelhar 9 cursos, 48 vídeos e avaliações LearnPress no Tutor TDS"
+    },
+    {
+      "number": 229,
+      "title": "[EAD][APP][PEDAGOGIA] Unificar 9 percursos: cartilha, vídeo, prática, quiz e Tutor contextual"
+    },
+    {
+      "number": 228,
+      "title": "[QA][VIDEO] AVD Android 35/36, gravação real e matriz de clipes Tutor TDS"
+    },
+    {
+      "number": 227,
+      "title": "[P1][YOUTUBE] Recuperar upload órfão e corrigir retry 409 de playlist sem duplicar vídeo"
+    },
+    {
+      "number": 225,
+      "title": "[APP][EAD-FIRST] Catálogo LearnPress público no Flutter com entrada pela Home e QA"
+    },
+    {
+      "number": 218,
+      "title": "[P0][PROD] Restaurar ingress HTTPS: nginx ocupa :80 e bloqueia dokploy-traefik (522)"
+    },
+    {
+      "number": 220,
+      "title": "Portal: ditado por voz STT acessível em pt-BR, separado dos vídeos"
+    },
+    {
+      "number": 219,
+      "title": "Portal: manter traduções LearnPress pt-BR reproduzíveis"
+    },
+    {
+      "number": 216,
+      "title": "feat(media): sincronizar manifesto LearnPress com rascunhos da API em staging"
+    },
+    {
+      "number": 169,
+      "title": "[P1][DRUPAL][DR-8] CI, staging isolado, backup/restore e observabilidade Drupal"
+    },
+    {
+      "number": 161,
+      "title": "[P1][DRUPAL][EPIC] Portal TDS integrado ao FastAPI sem alterar Flutter"
+    },
+    {
+      "number": 213,
+      "title": "WordPress: retomar portal e refinar visual conforme manual TDS"
+    },
+    {
+      "number": 170,
+      "title": "[P1][DRUPAL][DR-9] E2E final, segurança, acessibilidade e gate de substituição do WordPress"
+    },
+    {
+      "number": 166,
+      "title": "[P1][DRUPAL][DR-5] Área do participante consumindo turmas, contexto e certificados"
+    },
+    {
+      "number": 168,
+      "title": "[P1][DRUPAL][DR-7] Integrar certificado público/privado e Chatwoot contextual"
+    },
+    {
+      "number": 167,
+      "title": "[P1][DRUPAL][DR-6] Control plane web para program_operator/coordenador"
+    },
+    {
+      "number": 208,
+      "title": "[P2][DRUPAL] Preparar piloto editorial de IA com revisão humana e ativação opt-in"
+    },
+    {
+      "number": 205,
+      "title": "Chatwoot: configuração remota do widget e atualização Android na Play"
+    },
+    {
+      "number": 202,
+      "title": "Vincular ensaio de upgrade ao backup offsite restaurado"
+    },
+    {
+      "number": 201,
+      "title": "Documentar API completa com contratos e exemplos verificáveis"
+    },
+    {
+      "number": 199,
+      "title": "MCP de criação de usuários por cadastro administrativo canônico"
+    },
+    {
+      "number": 195,
+      "title": "[APP][Analytics] Integrar Google Analytics com consentimento separado e validar promoção"
+    },
+    {
+      "number": 188,
+      "title": "[QA][STAGING] Reconcile authenticated smoke target and fixture boundary"
+    },
+    {
+      "number": 140,
+      "title": "[P0][QA][CLASS] E2E da jornada operacional da turma"
+    },
+    {
+      "number": 139,
+      "title": "[P0][ADMIN][CLASS][APP] Wizard Preparar/Encerrar turma"
+    },
+    {
+      "number": 138,
+      "title": "[P0][ADMIN][CLASS][API] Preparar turma territorial e ciclo de vida"
+    },
+    {
+      "number": 182,
+      "title": "[P0][QA][Android] Alinhar gate de staging ao hostname Worker e à API canônica"
+    },
+    {
+      "number": 183,
+      "title": "[P0][INFRA][ZERO-CONFIG] Segregar Cloudflare Workers e build staging/produção por Git ref"
+    },
+    {
+      "number": 190,
+      "title": "[QA][AVD] Investigate collateral removal of prior isolated QA package"
+    },
+    {
+      "number": 189,
+      "title": "[QA][Windows] Fix class-lifecycle E2E cleanup WinError32 after validated PASS"
+    },
+    {
+      "number": 184,
+      "title": "[QA][AVD] Isolate first-frame ANR before Tutor flow validation"
+    },
+    {
+      "number": 186,
+      "title": "[AI][STAGING] Correlate Tutor Worker 502 without exposing content"
+    },
+    {
+      "number": 187,
+      "title": "[APP][QA] Make student numeric attendance entry discoverable"
+    },
+    {
+      "number": 185,
+      "title": "[APP][A11Y] Prove Tutor error/retry states and Markdown-to-TTS output"
+    },
+    {
+      "number": 129,
+      "title": "[QA][E2E] Persistir estado offline entre fases e capturar screenshot dentro do app"
+    },
+    {
+      "number": 134,
+      "title": "[P0][AI/RAG] Vincular /v1/chat à cartilha, versão, módulo e experiência atuais"
+    },
+    {
+      "number": 159,
+      "title": "[P1][APP] Preserve login after expired check-in challenge"
+    },
+    {
+      "number": 67,
+      "title": "[P1][CHATWOOT][STAGING] Homologar widget/inbox publicado e identidade assinada no app"
+    },
+    {
+      "number": 30,
+      "title": "[P1][ADMIN][READY] Projetar control plane operacional para alunos, matrículas, turmas e equipe"
+    },
+    {
+      "number": 127,
+      "title": "[QA][EXEC] Compor #125 + #126 sobre #122 para E2E no emulador"
+    },
+    {
+      "number": 123,
+      "title": "[QA][E2E] Implementar cenários reais do emulador para candidata #122"
+    },
+    {
+      "number": 124,
+      "title": "[QA][Android] Alinhar dynamic-QA ao endpoint canônico de staging aprovado"
+    },
+    {
+      "number": 119,
+      "title": "[P0][APK] Corrigir jornada do monitor com projeção própria por exceções"
+    },
+    {
+      "number": 117,
+      "title": "[TRACK][APK QA] Compor #116 + #110 + #102 para E2E em emulador"
+    },
+    {
+      "number": 93,
+      "title": "[P0][AGENT] Implantar coordenação GitHub-first para Codex/ChatGPT"
+    },
+    {
+      "number": 97,
+      "title": "[TRACK][PR81] Revalidar RBAC de monitor e preparar staging gate"
+    },
+    {
+      "number": 105,
+      "title": "[TRACK][XIAOMI] Preparar harness ADB seguro para homologação física"
+    },
+    {
+      "number": 103,
+      "title": "[TRACK][REHEARSAL] Preparar preflight 0005→HEAD sem executar migration"
+    },
+    {
+      "number": 101,
+      "title": "[TRACK][E2E] Preparar harness de E2E Android em emulador para a pista do APK"
+    },
+    {
+      "number": 99,
+      "title": "[TRACK][PR82] Adicionar índice aditivo para cpf_activation_tokens.issued_by"
+    },
+    {
+      "number": 66,
+      "title": "[P1][APP][READY] Fundação FCM/push segura e desacoplada no Flutter"
+    },
+    {
+      "number": 28,
+      "title": "[P1][API][READY] Formalizar API pública read-only para portal e integrações públicas"
+    },
+    {
+      "number": 98,
+      "title": "[TRACK][PR79] Revisão estática da ativação CPF Flutter antes do E2E"
+    },
+    {
+      "number": 95,
+      "title": "[P0][ADMIN][APK] Cadastro operacional mínimo de aluno QA para homologação"
+    },
+    {
+      "number": 3,
+      "title": "[P0][EM ANDAMENTO] Preflight de build de produção sem gerar AAB"
+    }
+  ],
+  "devices": [
+    {
+      "name": "LARGeo",
+      "status": "online",
+      "id": "469ec10e-fad7-4ad6-86a2-6db0acb6291a"
+    },
+    {
+      "name": "DESKTOP-8T5DRBS",
+      "status": "online"
+    },
+    {
+      "name": "avellaria",
+      "status": "offline"
+    }
+  ],
+  "ownership": {
+    "issue335": "Windows worktree has uncommitted synthetic_offline_qa_screen.dart and ead_offline_qa_widget_test.dart changes; preserved",
+    "issue336": "cloud worktree /workspace/tds-product-audit, reservation comment 6352420395"
+  },
+  "gates": {
+    "MERGE_ALLOWED": "NO",
+    "PRODUCTION_ALLOWED": "NO",
+    "published_version_preserved": "1.4.1+14",
+    "release_build_allowed": false
+  }
+}

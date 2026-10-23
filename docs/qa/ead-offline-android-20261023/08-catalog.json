@@ -1,0 +1,65 @@
+[
+  {
+    "text": "",
+    "content-desc": "Voltar",
+    "bounds": "[8,64][104,160]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Cursos do EAD",
+    "bounds": "[144,82][438,142]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Atualizar cursos do EAD",
+    "bounds": "[624,64][720,160]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Aprenda também pelo portal EAD",
+    "bounds": "[32,208][688,336]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Veja as ofertas atualizadas do site. A inscrição e as aulas acontecem no EAD; as cartilhas e o Tutor TDS continuam disponíveis neste aplicativo.",
+    "bounds": "[32,352][688,512]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "QA offline sintético\nMP4/VTT incluídos no app; sem mídia real.",
+    "bounds": "[32,552][688,728]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "LABORATÓRIO INTERNO · DADOS FICTÍCIOS\nCurso SAF sintético, sem conta, matrícula ou dados reais.",
+    "bounds": "[32,728][688,992]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Ofertas publicadas: 11",
+    "bounds": "[32,992][688,1032]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Agricultura Sustentável\nVer aulas e inscrição no EAD",
+    "bounds": "[32,1056][688,1232]",
+    "enabled": "true",
+    "clickable": "true"
+  }
+]

@@ -1,0 +1,208 @@
+{
+  "run": "tds-offline-336-e5d654a14d",
+  "source_sha": "6e4aab96c7bc53bad5eba17f10498bc667979188",
+  "harness_sha256": {
+    "run.py": "71d1e946737bf085825bace9dfa2bdb06deaf670efafd9655cec32077c2bc4a5",
+    "fixture.php": "01211188a832e9d94736d708937c4a6094de4584576131aab591df0cd60b17b2"
+  },
+  "learnpress_built_archive_sha256": "56f80d7981611c05723c7b45134f2b6d25d8214c52b07c5b338df86dbae6b441",
+  "learnpress_source_archive_sha256": "79c9607437a81fd85ae2fd2dcf8902c4607b7d4667659421672b5506329cf715",
+  "images": {
+    "wordpress": "wordpress@sha256:10f35d0dd608ee9f907c22aa3f2bbb9ac64fee72726503e53f2afd298d2a09f1",
+    "database": "mariadb@sha256:250e1609e93c0e6aecf64bfbab2d84d5e89d2481540fe77447ff6c855c3b1873"
+  },
+  "learnpress_commit": "84edad0aea35bcac86018a825d0a42f8188d6ead",
+  "cases": [
+    {
+      "case": "Apache user can read copied plugin learnpress",
+      "result": "PASS"
+    },
+    {
+      "case": "Apache user can read copied plugin tds-learnpress-editorial",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tds-learnpress-editorial.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/etag-http-router.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/test-contract.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/test-etag.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/test-offline-manifest.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source includes/class-tds-learnpress-editorial.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source includes/class-tds-learnpress-editorial-admin.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source includes/class-tds-offline-manifest.php",
+      "result": "PASS"
+    },
+    {
+      "case": "real LP save hook source approval persisted",
+      "result": "PASS"
+    },
+    {
+      "case": "no academic records seeded",
+      "result": "PASS"
+    },
+    {
+      "case": "native LearnPress REST curriculum, no stub",
+      "result": "PASS"
+    },
+    {
+      "case": "unmeasured native lesson fails closed",
+      "result": "PASS"
+    },
+    {
+      "case": "local byte preparation persists measured MP4 and VTT",
+      "result": "PASS"
+    },
+    {
+      "case": "anonymous actual HTTP manifest 200",
+      "result": "PASS"
+    },
+    {
+      "case": "exact Flutter JSON keys from real WP",
+      "result": "PASS"
+    },
+    {
+      "case": "native course lesson identity preserved",
+      "result": "PASS"
+    },
+    {
+      "case": "actual MP4 byte digest",
+      "result": "PASS"
+    },
+    {
+      "case": "actual byte lengths",
+      "result": "PASS"
+    },
+    {
+      "case": "response privacy cache headers",
+      "result": "PASS"
+    },
+    {
+      "case": "HEAD no body on real WP transport",
+      "result": "PASS"
+    },
+    {
+      "case": "strong ETag revalidation",
+      "result": "PASS"
+    },
+    {
+      "case": "weak ETag revalidation",
+      "result": "PASS"
+    },
+    {
+      "case": "unknown ETag full response",
+      "result": "PASS"
+    },
+    {
+      "case": "GET HEAD conditional requests do not mutate integrity or academic data",
+      "result": "PASS"
+    },
+    {
+      "case": "revocation beats old ETag",
+      "result": "PASS"
+    },
+    {
+      "case": "restored exact approved source remains readable",
+      "result": "PASS"
+    },
+    {
+      "case": "lesson revision invalidates measured record",
+      "result": "PASS"
+    },
+    {
+      "case": "remeasure revision gives new ETag",
+      "result": "PASS"
+    },
+    {
+      "case": "atomic media replacement invalidates measured record",
+      "result": "PASS"
+    },
+    {
+      "case": "remeasure changed bytes gives new ETag",
+      "result": "PASS"
+    },
+    {
+      "case": "multiple real LP parents denied",
+      "result": "PASS"
+    },
+    {
+      "case": "unique parent restored",
+      "result": "PASS"
+    },
+    {
+      "case": "password-protected course denied",
+      "result": "PASS"
+    },
+    {
+      "case": "unprotected course restored",
+      "result": "PASS"
+    },
+    {
+      "case": "draft lesson denied",
+      "result": "PASS"
+    }
+  ],
+  "boundary": "Real WordPress/LearnPress/MariaDB, synthetic records/bytes, internal Docker HTTP; no TLS, browser form or Android proof",
+  "result": "FAIL",
+  "cleanup": {
+    "tds-offline-336-e5d654a14d-wp": "PASS",
+    "tds-offline-336-e5d654a14d-db": "PASS",
+    "tds-offline-336-e5d654a14d-wpdata": "PASS",
+    "tds-offline-336-e5d654a14d-dbdata": "PASS",
+    "tds-offline-336-e5d654a14d": "PASS"
+  },
+  "plugin_hashes": {
+    "tds-learnpress-editorial.php": "c7d9615f86cf5982bad7815d1cf854bff58a2544603650d49914a960b4396649",
+    "tests/etag-http-router.php": "82b4a5b38596e0262d030bb85170cd324a2efa2c4b6cbac641cb4559a8991dba",
+    "tests/test-contract.php": "eb8a7211c3bc5b5fd0162c84a63b0d845d9443c8b72bf11b806486004f490159",
+    "tests/test-etag.php": "c252c93709c86c7f1c5bacd1d85753b0003431fdc0355ec5d634c8fcd7c9620c",
+    "tests/test-offline-manifest.php": "3ff0e06998e82a682129b0376c80bc7f45d4770743b8c3f1f4b882fe50598585",
+    "includes/class-tds-learnpress-editorial.php": "fe83864d4ac082163d493636a88fd044bc54e0529b6e334614986644a8f7ad16",
+    "includes/class-tds-learnpress-editorial-admin.php": "1fe2c45a817190d83dd2c9d3b9c3c0105afd29d93d576bcea704f6b7ce14e395",
+    "includes/class-tds-offline-manifest.php": "14538074e08e9da4991f5b6c4355b031d425e6d05abf2f011357346be41c87ba"
+  },
+  "versions": {
+    "wordpress": "6.7.2",
+    "learnpress": "4.3.6"
+  },
+  "native_diagnostic": {
+    "status": 200,
+    "headers": {
+      "date": "Thu, 22 Oct 2026 23:05:35 GMT",
+      "server": "Apache/2.4.62 (Debian)",
+      "x-powered-by": "PHP/8.3.20",
+      "set-cookie": "lp_session_guest=g-6ada96c0204ed; expires=Fri, 23 Oct 2026 23:05:36 GMT; Max-Age=86400; path=/; secure; HttpOnly",
+      "x-robots-tag": "noindex",
+      "link": "<https://ead.ipexdesenvolvimento.cloud/wp-json/>; rel=\"https://api.w.org/\"",
+      "x-content-type-options": "nosniff",
+      "access-control-expose-headers": "X-WP-Total, X-WP-TotalPages, Link",
+      "access-control-allow-headers": "Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type",
+      "allow": "GET",
+      "vary": "Origin",
+      "content-length": "1486",
+      "content-type": "application/json; charset=UTF-8"
+    },
+    "body_prefix": "{\"id\":11,\"name\":\"Synthetic offline manifest QA\",\"slug\":\"synthetic-offline-manifest-qa\",\"permalink\":\"https:\\/\\/ead.ipexdesenvolvimento.cloud\\/courses\\/synthetic-offline-manifest-qa\\/\",\"image\":\"https:\\/\\/ead.ipexdesenvolvimento.cloud\\/wp-content\\/plugins\\/learnpress\\/assets\\/images\\/no-image.png\",\"date_created\":\"2026-10-22T23:05:35\",\"date_created_gmt\":\"2026-10-22T23:05:35\",\"date_modified\":\"2026-10-22T23:05:35\",\"date_modified_gmt\":\"2026-10-22T23:05:35\",\"on_sale\":false,\"status\":\"publish\",\"content\":\"\",\"excerpt\":\"\",\"duration\":\"Lifetime\",\"count_students\":0,\"can_finish\":false,\"can_retake\":0,\"ratake_count\":0,\"rataken\":0,\"rating\":false,\"price\":0,\"price_rendered\":\"Free\",\"origin_price\":0,\"origin_price_rendered\":\"$0.00\",\"sale_price\":0,\"sale_price_rendered\":\"$0.00\",\"categories\":[],\"tags\":[],\"instructor\":{\"avatar\":\"https:\\/\\/secure.gravatar.com\\/avatar\\/4309917e04c67da813c137ca4aff7a39?s=250&d=mm&r=g\",\"id\":1,\"name\":\"qa_admin\",\"description\":\"\",\"social\":{\"facebook\":\"\",\"twitter\":\"\",\"youtube\":\"\",\"linkedin\":\"\"}},\"sections\":[{\"id\":1,\"title\":\"Synthetic bytes\",\"course_id\":11,\"description\":\"Disposable integration\",\"order\":1,\"items\":[{\"id\":12,\"type\":\"lp_lesson\",\"title\":\"Synthetic lesson\",\"preview\":false,\"duration\":\"\",\"graduation\":\"\",\"status\":\"\",\"locked\":true}]}],\"course_data\":{\"graduation\":\"\",\"status\":\"\",\"start_time\":\"2026-10-22T23:05:36\",\"end_time\":null,\"expiration_time\":\"\",\"result\":{\"count_items\":0,\"completed_items\":0,\"items\":[],\"evaluate_type\":\"\",\"pass\":0,\"result\":0}},\"meta_data\":[]}"
+  },
+  "error": "Command failed (docker, rc=1): [22-Oct-2026 23:05:43 UTC] PHP Fatal error:  Uncaught RuntimeException: Integrity preparation failed: tds_offline_unavailable in phar:///tmp/wp-cli.phar/vendor/wp-cli/eval-command/src/EvalFile_Command.php(85) : eval()'d code:22\nStack trace:\n#0 phar:///tmp/wp-cli.phar/vendor/wp-cli/eval-command/src/EvalFile_Command.php(85) : eval()'d code(74): qa_prepare(Array)\n#1 phar:///tmp/wp-cli.phar/vendor/wp-cli/eval-command/src/EvalFile_Command.php(85): eval()\n#2 phar:///tmp/wp-cli.phar/vendor/wp-cli/eval-command/src/EvalFile_Command.php(59): EvalFile_Command::execute_eval('/qa/fixture.php', Array, false)\n#3 [internal function]: EvalFile_Command->__invoke(Array, Array)\n#4 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Dispatcher/CommandFactory.php(100): call_user_func(Array, Array, Array)\n#5 [internal function]: WP_CLI\\Dispatcher\\CommandFactory::WP_CLI\\Dispatcher\\{closure}(Array, Array)\n#6 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Dispatcher/Subcommand.php(497): call_user_func(Object(Closure), Array, Array)\n#7 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Runner.php(470): WP_CLI\\Dispatcher\\Subcommand->invoke(Array, Array, Array)\n#8 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Runner.php(493): WP_CLI\\Runner->run_command(Array, Array)\n#9 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Runner.php(136): WP_CLI\\Runner->run_command_and_exit()\n 3 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/wp-cli.php(35): WP_CLI\\bootstrap()\n#14 phar:///tmp/wp-cli.phar/php/boot-phar.php(20): include('phar:///tmp/wp-...')\n#15 /tmp/wp-cli.phar(4): include('phar:///tmp/wp-...')\n#16 {main}\n  thrown in phar:///tmp/wp-cli.phar/vendor/wp-cli/eval-command/src/EvalFile_Command.php(85) : eval()'d code on line 22\nError: There has been a critical error on this website.Learn more about troubleshooting WordPress. There has been a critical error on this website.\n "
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "text": "",
+    "content-desc": "Voltar",
+    "bounds": "[8,73][104,169]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "QA offline · vídeo sintético",
+    "bounds": "[144,91][675,151]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Nenhum conteúdo de aluno ou curso real.",
+    "bounds": "[4,615][716,921]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "3 de 3 segundos, Posição do vídeo",
+    "bounds": "[0,969][720,1065]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "100%",
+    "bounds": "[624,969][720,1065]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Reproduzir vídeo",
+    "bounds": "[135,1065][231,1161]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Ocultar legendas",
+    "bounds": "[231,1065][585,1161]",
+    "enabled": "true",
+    "clickable": "true"
+  }
+]

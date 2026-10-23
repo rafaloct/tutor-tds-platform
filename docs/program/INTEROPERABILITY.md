@@ -37,7 +37,11 @@ Integração é contrato, não “cola”. Cada integração deve registrar:
 | Sheets | Power BI | leitura | BI é projeção |
 | Drive | Media pipeline | asset master | Drive master; API metadados |
 | Media provider/R2 | Flutter | playback/download autorizado | API autoriza |
-| WordPress | Flutter | feed público | WordPress conteúdo editorial |
+| WordPress | Flutter | feed público | WordPress editorial |
+| LearnPress | Flutter | leitura de curso/progresso autenticado via ponte TARGET | LearnPress, fatos EAD |
+| Flutter | LearnPress | comando de inscrição/lição/quiz TARGET com sessão autorizada | LearnPress, nunca token de admin |
+| FastAPI | Ponte EAD | vínculo opaco de contas, revogação TARGET | FastAPI controla apenas o vínculo institucional |
+| Flutter | FastAPI | turma, frequência e certificado TDS | FastAPI + Worker/KV |
 
 ## 3. Envelope recomendado
 
@@ -90,6 +94,8 @@ Todo webhook deve:
 Chave intersistemas preferida: UUID interno ou referência opaca. CPF pode existir no domínio autorizado, mas não é chave de URL, analytics ou Chatwoot.
 
 Não unir registros por nome/telefone.
+
+**DECISION 18/10/2026:** pessoa/conta institucional TDS continua com FastAPI; conta EAD é própria do LearnPress. O vínculo é opaco, revogável, consentido e verificado pelos dois lados, nunca por CPF, nome ou telefone. O desenho de SSO e os caminhos hipotéticos no [runbook](LEARNPRESS_TDS_DELIVERY_RUNBOOK.md) são **TARGET**, não rotas implementadas. Consultar [ADR](ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md); exigir RBAC/IDOR, nonce, TTL, logout, isolamento A/B, falhas e logs sem dados pessoais antes de ativar.
 
 ## 7. Sheets e Power BI
 

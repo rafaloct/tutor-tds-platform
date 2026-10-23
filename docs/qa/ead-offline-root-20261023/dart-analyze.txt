@@ -1,0 +1,5 @@
+[Reading last 2 lines (total: 2 lines)]
+
+Analyzing offline_package_binding.dart, offline_package_binding_test.dart...
+No issues found!
+✅ Process completed with exit code 0 (runtime: 69.83s)

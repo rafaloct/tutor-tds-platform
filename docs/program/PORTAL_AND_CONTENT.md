@@ -2,7 +2,7 @@
 
 ## 1. Papel
 
-O portal é a presença web pública e editorial do Programa TDS. Ele complementa o app, mas não duplica o núcleo transacional.
+O portal público é a presença editorial do Programa TDS, sem duplicar o núcleo institucional. No mesmo host, o **LearnPress** opera conta, inscrição em curso EAD, lições, quizzes e progresso LMS, conforme a [ADR 18/10](ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md). A regra antiga de WordPress somente editorial não se aplica a esses fatos EAD.
 
 O arquivo raiz `pagina_wordpress.html` é **legado de referência**, não especificação atual. Ele contém instruções de APK e versão antigas e deve ser substituído por componentes coerentes com Play Store/API atuais.
 
@@ -52,9 +52,12 @@ O arquivo raiz `pagina_wordpress.html` é **legado de referência**, não especi
 | Conteúdo | Autoridade |
 |---|---|
 | notícias, páginas, agenda, FAQ | WordPress |
-| catálogo/curso publicado | FastAPI; portal consome read-only |
-| inscrição/matrícula | FastAPI em fluxo autenticado/autorizado |
-| progresso/frequência | FastAPI; nunca WordPress |
+| curso/edição TDS institucional | FastAPI; portal consome read-only |
+| oferta/grade EAD | LearnPress; Flutter projeta conteúdo autorizado |
+| inscrição em oferta EAD | LearnPress com permissão do LMS |
+| matrícula em turma/programa TDS | FastAPI com permissão institucional |
+| lições/quizzes e progresso de conta EAD | LearnPress |
+| progresso institucional e frequência | FastAPI, não inferir de clique/vídeo EAD |
 | certificado | Worker/API de verificação |
 | materiais públicos | metadados API/WordPress; arquivo em storage autorizado |
 | suporte | Chatwoot |
@@ -98,14 +101,15 @@ O app mostra título, resumo, data, imagem e link. O app não precisa persistir 
 
 ## 7. Autenticação
 
-Não reutilizar login WordPress para aluno.
+Separar as duas contas sem duplicar a experiência:
 
-- público: sem login;
-- editor WordPress: conta editorial separada;
-- aluno/equipe: autenticação Tutor TDS;
-- painel sensível: API/RBAC Tutor TDS.
+- público: catálogo e material autorizado sem login;
+- aluno EAD: conta WordPress/LearnPress, sessão e regras do LMS para inscrição, lições, quizzes e progresso;
+- aluno/equipe TDS: conta FastAPI, vínculo/turma, frequência, certificado institucional;
+- editor WordPress: permissão editorial, sem papel institucional automático;
+- SSO/vínculo voluntário: **TARGET**, dependerá de federação auditada e prova das duas contas; sem copiar tokens/cookies/senhas entre apps.
 
-SSO futuro deve ser projeto próprio, não improvisação.
+O runbook EAD-TDS descreve Minha Área e o aceite. Painel sensível institucional sempre segue RBAC da API.
 
 ## 8. Conteúdo e workflow editorial
 

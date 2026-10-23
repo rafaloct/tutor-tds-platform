@@ -24,6 +24,7 @@ Nunca promover TARGET para OBSERVED apenas porque foi documentado.
 - Não duplicar entidades/tabelas sem buscar equivalentes. Migração aditiva,
   compatível, testada do zero e em staging isolado antes de promoção.
 - IA/eventos não concedem autorização, matrícula, frequência ou certificado.
+- Para fatos EAD, aplicar `docs/program/ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md`: LearnPress possui conta/inscrição/lição/quiz/progresso EAD; FastAPI preserva autoridade institucional. TARGET de SSO não é funcionalidade comprovada.
 - Cada feature possui contrato, offline policy, teste e linha na matriz.
 - Stitch: projeto `3740249934950673416`; cache `.stitch/designs/<screenId>/`
   com screenshot, HTML, metadata e digest. Reutilizar hash local íntegro;

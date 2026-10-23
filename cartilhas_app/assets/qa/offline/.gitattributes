@@ -1,0 +1,3 @@
+# Manifest digests bind exact fixture bytes; never convert checkout line endings.
+synthetic.mp4 -text
+synthetic.vtt -text

@@ -1,0 +1,2 @@
+# Preserve exact build configuration bytes recorded by artifact SHA-256.
+qa-defines.json -text whitespace=cr-at-eol

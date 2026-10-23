@@ -1,0 +1,63 @@
+{
+  "run": "tds-offline-336-481e9cdc83",
+  "source_sha": "6e4aab96c7bc53bad5eba17f10498bc667979188",
+  "images": {
+    "wordpress": "wordpress@sha256:10f35d0dd608ee9f907c22aa3f2bbb9ac64fee72726503e53f2afd298d2a09f1",
+    "database": "mariadb@sha256:250e1609e93c0e6aecf64bfbab2d84d5e89d2481540fe77447ff6c855c3b1873"
+  },
+  "learnpress_commit": "84edad0aea35bcac86018a825d0a42f8188d6ead",
+  "cases": [
+    {
+      "case": "exact plugin source tds-learnpress-editorial.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/etag-http-router.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/test-contract.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/test-etag.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source tests/test-offline-manifest.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source includes/class-tds-learnpress-editorial.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source includes/class-tds-learnpress-editorial-admin.php",
+      "result": "PASS"
+    },
+    {
+      "case": "exact plugin source includes/class-tds-offline-manifest.php",
+      "result": "PASS"
+    }
+  ],
+  "boundary": "Real WordPress/LearnPress/MariaDB, synthetic records/bytes, internal Docker HTTP; no TLS, browser form or Android proof",
+  "result": "FAIL",
+  "cleanup": {
+    "tds-offline-336-481e9cdc83-wp": "PASS",
+    "tds-offline-336-481e9cdc83-db": "PASS",
+    "tds-offline-336-481e9cdc83-wpdata": "PASS",
+    "tds-offline-336-481e9cdc83-dbdata": "PASS",
+    "tds-offline-336-481e9cdc83": "PASS"
+  },
+  "plugin_hashes": {
+    "tds-learnpress-editorial.php": "c7d9615f86cf5982bad7815d1cf854bff58a2544603650d49914a960b4396649",
+    "tests/etag-http-router.php": "82b4a5b38596e0262d030bb85170cd324a2efa2c4b6cbac641cb4559a8991dba",
+    "tests/test-contract.php": "eb8a7211c3bc5b5fd0162c84a63b0d845d9443c8b72bf11b806486004f490159",
+    "tests/test-etag.php": "c252c93709c86c7f1c5bacd1d85753b0003431fdc0355ec5d634c8fcd7c9620c",
+    "tests/test-offline-manifest.php": "3ff0e06998e82a682129b0376c80bc7f45d4770743b8c3f1f4b882fe50598585",
+    "includes/class-tds-learnpress-editorial.php": "fe83864d4ac082163d493636a88fd044bc54e0529b6e334614986644a8f7ad16",
+    "includes/class-tds-learnpress-editorial-admin.php": "1fe2c45a817190d83dd2c9d3b9c3c0105afd29d93d576bcea704f6b7ce14e395",
+    "includes/class-tds-offline-manifest.php": "14538074e08e9da4991f5b6c4355b031d425e6d05abf2f011357346be41c87ba"
+  },
+  "error": "Command failed (docker, rc=1): eval-command/src/EvalFile_Command.php(59): EvalFile_Command::execute_eval('/qa/fixture.php', Array, false)\n#2 [internal function]: EvalFile_Command->__invoke(Array, Array)\n#3 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Dispatcher/CommandFactory.php(100): call_user_func(Array, Array, Array)\n#4 [internal function]: WP_CLI\\Dispatcher\\CommandFactory::WP_CLI\\Dispatcher\\{closure}(Array, Array)\n#5 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Dispatcher/Subcommand.php(497): call_user_func(Object(Closure), Array, Array)\n#6 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Runner.php(470): WP_CLI\\Dispatcher\\Subcommand->invoke(Array, Array, Array)\n#7 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Runner.php(493): WP_CLI\\Runner->run_command(Array, Array)\n#8 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Runner.php(136): WP_CLI\\Runner->run_command_and_exit()\n#9 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Runner.php(1228): WP_CLI\\Runner->do_early_invoke('before_wp_load')\n#10 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/WP_CLI/Bootstrap/LaunchRunner.php(28): WP_CLI\\Runner->start()\n#11 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/bootstrap.php(84): WP_CLI\\Bootstrap\\LaunchRunner->process(Object(WP_CLI\\Bootstrap\\BootstrapState))\n#12 phar:///tmp/wp-cli.phar/vendor/wp-cli/wp-cli/php/wp-cli.php(35): WP_CLI\\bootstrap()\n#13 phar:///tmp/wp-cli.phar/php/boot-phar.php(20): include('phar:///tmp/wp-...')\n#14 /tmp/wp-cli.phar(4): include('phar:///tmp/wp-...')\n#15 {main}\n  thrown in phar:///tmp/wp-cli.phar/vendor/wp-cli/eval-command/src/EvalFile_Command.php(85) : eval()'d code on line 53\nError: There has been a critical error on this website.Learn more about troubleshooting WordPress. There has been a critical error on this website.\n "
+}
