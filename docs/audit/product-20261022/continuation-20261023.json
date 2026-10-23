@@ -118,11 +118,22 @@
   },
   "audit": {
     "identified_gaps": 26,
-    "risk_rows": 41
+    "risk_rows": 46
   },
   "source_ancestry": {
     "316": "817432bc7770198b26e377a8b755090bfb73780f",
     "324": "5c2e41c87a7af145442d6e7b12fb205c1a081628",
     "250_reused_docs": "51d485dcb0de3dc2a061579a0e2bd3488f421747"
+  },
+  "institutional_qa": {
+    "source": "f345cc805d04c0e9ca1a1778be9e00f7e52e9002",
+    "receipt": "../qa/institutional-contracts-20261023/receipt.json",
+    "sqlite_contracts_pass": 50,
+    "postgres16_lifecycle_pass": 4,
+    "postgres16_attendance_certificate_pass": 13,
+    "postgres1711_migration_pass": 1,
+    "native_http_scenarios_pass": 3,
+    "integrated_staging_android": "NOT_RUN",
+    "human_action_required": false
   }
 }

@@ -143,3 +143,15 @@ verified. See `../../qa/ead-offline-android-20261023/CORRECTED_ACCEPTANCE.md`.
 This does not accept real manifest/download integration, position persistence,
 academic sync, all roles, SSO, performance, TalkBack, physical/Play. Matrix41 rows,
 26 identified gaps. Environment restored; public version and release gates intact.
+
+## 2026-10-23 institutional lifecycle continuation
+
+Current f345cc8:50 SQLite contracts;4 PG16 lifecycle/migration;13 PG16
+attendance/certificate;1 exact PG17.11 migration PASS. Additional native Uvicorn
+HTTP/auth/PG16:3 scenarios PASS,24 real password logins,35 business requests
+and9 unauthenticated/forged identity negatives, zero server identity overrides.
+Synthetic seeds/direct boundary-state changes remain; no current staging,
+Android institutional, remote Worker/KV or official issuance acceptance. See
+`../../qa/institutional-contracts-20261023/README.md`; initial failed environment
+attempts retained and diagnosed. Owned databases/containers/network removed.
+Matrix46 rows,26 gaps; G07/G08 remain open for full integrated journeys.

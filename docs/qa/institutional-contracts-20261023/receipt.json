@@ -1,0 +1,100 @@
+{
+  "source": "f345cc805d04c0e9ca1a1778be9e00f7e52e9002",
+  "runtime_source": "cf997d33eee5335469e0b45e906b83e1dc9304ab",
+  "lock_sha256": "d76252d2f340f9e1cf311b84ed8455c7be35d9711ef5482d28cb30237bee1420",
+  "python_host": "3.13.5",
+  "python_container": "3.13.15",
+  "node_host": "24.19.0",
+  "postgres16": "postgres@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36",
+  "postgres1711": "postgres@sha256:eee6c6e1b0894fa4fe0075eb054af9fd1cf39a35321c2d4110626cfe506411fb",
+  "python_image": "python@sha256:7c61056e61ac89e852de05f3dc6fa51a6dd2181797bceed46aa725dd7cb2cd3b",
+  "runs": {
+    "attendance-postgres16-missing-node.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "3",
+        "skipped": "0",
+        "tests": "14",
+        "time": "9.946",
+        "timestamp": "2026-10-23T18:03:24.623039+00:00",
+        "hostname": "b5852216b20e"
+      }
+    ],
+    "attendance-postgres16.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "13",
+        "time": "13.591",
+        "timestamp": "2026-10-23T18:09:44.603186+00:00",
+        "hostname": "05973e90cf17"
+      }
+    ],
+    "lifecycle-postgres-port-boundary.xml": [
+      {
+        "name": "pytest",
+        "errors": "4",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "4",
+        "time": "1.104",
+        "timestamp": "2026-10-23T17:55:56.678865+00:00",
+        "hostname": "05973e90cf17"
+      }
+    ],
+    "lifecycle-postgres.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "4",
+        "time": "3.874",
+        "timestamp": "2026-10-23T18:02:16.924603+00:00",
+        "hostname": "7b784b6864cb"
+      }
+    ],
+    "migration-postgres1711.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1",
+        "time": "1.480",
+        "timestamp": "2026-10-23T18:13:50.163557+00:00",
+        "hostname": "05973e90cf17"
+      }
+    ],
+    "sqlite-contracts.xml": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "50",
+        "time": "29.283",
+        "timestamp": "2026-10-23T17:54:14.952357+00:00",
+        "hostname": "05973e90cf17"
+      }
+    ]
+  },
+  "native_http": {
+    "scenarios": 3,
+    "password_logins": 24,
+    "business_operations": 35,
+    "negative_unauthenticated_requests": 9,
+    "identity_overrides": 0,
+    "synthetic_seed_and_boundary_states": true,
+    "staging_or_android_acceptance": false
+  },
+  "cleanup": {
+    "owned_fixture_databases_remaining": 0,
+    "owned_containers_remaining": 0,
+    "owned_internal_network_removed": true,
+    "shared_or_production_writes": false
+  }
+}

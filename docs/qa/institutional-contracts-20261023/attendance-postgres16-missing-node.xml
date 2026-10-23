@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="14" time="9.946" timestamp="2026-10-23T18:03:24.623039+00:00" hostname="b5852216b20e"><testcase classname="tests.test_attendance_postgres" name="test_postgres_migration_and_populated_rollback_guard" time="0.793" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_empty_upgrade_downgrade_and_reupgrade" time="0.344"><failure message="AssertionError: assert False&#10; +  where False = &lt;built-in method startswith of str object at 0x7f8cc97eb630&gt;('PostgreSQL 17.11')&#10; +    where &lt;built-in method startswith of str object at 0x7f8cc97eb630&gt; = 'PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit'.startswith&#10; +      where 'PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit' = scalar(&lt;sqlalchemy.sql.elements.TextClause object at 0x7f8cc9c3cbb0&gt;)&#10; +        where scalar = &lt;sqlalchemy.engine.base.Connection object at 0x7f8cc9a9b110&gt;.scalar&#10; +        and   &lt;sqlalchemy.sql.elements.TextClause object at 0x7f8cc9c3cbb0&gt; = text('SELECT version()')">requests_database_url = 'postgresql+psycopg://qa_attendance@127.0.0.1:15406/qa_attendance_53d062b6bf924a54bffed43d58228067'
+
+    def test_postgres_empty_upgrade_downgrade_and_reupgrade(requests_database_url):
+        config = Config("alembic.ini")
+        config.set_main_option("sqlalchemy.url", requests_database_url)
+        command.upgrade(config, "head")
+        engine = create_engine(requests_database_url)
+        try:
+            with engine.connect() as conn:
+&gt;               assert conn.scalar(text("SELECT version()" )).startswith("PostgreSQL 17.11")
+E               AssertionError: assert False
+E                +  where False = &lt;built-in method startswith of str object at 0x7f8cc97eb630&gt;('PostgreSQL 17.11')
+E                +    where &lt;built-in method startswith of str object at 0x7f8cc97eb630&gt; = 'PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit'.startswith
+E                +      where 'PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit' = scalar(&lt;sqlalchemy.sql.elements.TextClause object at 0x7f8cc9c3cbb0&gt;)
+E                +        where scalar = &lt;sqlalchemy.engine.base.Connection object at 0x7f8cc9a9b110&gt;.scalar
+E                +        and   &lt;sqlalchemy.sql.elements.TextClause object at 0x7f8cc9c3cbb0&gt; = text('SELECT version()')
+
+tests/test_certificate_postgres_integration.py:70: AssertionError</failure></testcase><testcase classname="tests.test_attendance_postgres" name="test_postgres_candidate_authorization_holds_request_row_lock" time="0.781" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_concurrent_candidate_sends_at_most_once" time="0.645"><failure message="assert (200 in [503, 503])">candidate = (&lt;starlette.testclient.TestClient object at 0x7f8cc978da90&gt;, Engine(postgresql+psycopg://qa_attendance@127.0.0.1:15406... &lt;test_certificate_emission_candidate.WorkerExchange object at 0x7f8cc96f9590&gt;, 'abf15b73-a210-4832-a8a7-79604cd7e2ce')
+
+    def test_postgres_concurrent_candidate_sends_at_most_once(candidate):
+&gt;       _concurrent(candidate)
+
+tests/test_certificate_postgres_integration.py:369: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+candidate = (&lt;starlette.testclient.TestClient object at 0x7f8cc978da90&gt;, Engine(postgresql+psycopg://qa_attendance@127.0.0.1:15406... &lt;test_certificate_emission_candidate.WorkerExchange object at 0x7f8cc96f9590&gt;, 'abf15b73-a210-4832-a8a7-79604cd7e2ce')
+
+    def test_concurrent_api_reservation_sends_at_most_once(candidate):
+        _, engine, exchange, _ = candidate
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(lambda _: emit(candidate).status_code, range(2)))
+        assert all(status in {200, 503} for status in results)
+&gt;       assert 200 in results and exchange.calls.count("POST") == 1 and exchange.writes == 1
+E       assert (200 in [503, 503])
+
+tests/test_certificate_emission_candidate.py:396: AssertionError</failure></testcase><testcase classname="tests.test_attendance_postgres" name="test_postgres_institutional_policy_generated_capacitado_and_valid_are_distinct" time="0.846"><failure message="AssertionError: {&quot;detail&quot;:&quot;Resultado indeterminado; reconciliar por consulta autenticada, sem reenviar emissão.&quot;}&#10;assert 503 == 200&#10; +  where 503 = &lt;Response [503 Service Unavailable]&gt;.status_code">institutional = (&lt;starlette.testclient.TestClient object at 0x7f8cc9966d70&gt;, Engine(postgresql+psycopg://qa_attendance@127.0.0.1:15406...: 'assessment', 'source_id': 'source-0'}, {'id': 'checkpoint-1', 'kind': 'assessment', 'source_id': 'source-1'}], ...})
+
+    def test_postgres_institutional_policy_generated_capacitado_and_valid_are_distinct(institutional):
+&gt;       _policy_lifecycle(institutional)
+
+tests/test_certificate_postgres_integration.py:381: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_certificate_policy_candidate.py:122: in test_capacitado_is_separate_and_full_document_signatures_lead_to_candidate_valid
+    generate(institutional)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = (&lt;starlette.testclient.TestClient object at 0x7f8cc9966d70&gt;, Engine(postgresql+psycopg://qa_attendance@127.0.0.1:15406...: 'assessment', 'source_id': 'source-0'}, {'id': 'checkpoint-1', 'kind': 'assessment', 'source_id': 'source-1'}], ...})
+
+    def generate(data):
+        assert checkpoint(data, 0).status_code == 200
+        result = checkpoint(data, 1)
+&gt;       assert result.status_code == 200, result.text
+E       AssertionError: {"detail":"Resultado indeterminado; reconciliar por consulta autenticada, sem reenviar emissão."}
+E       assert 503 == 200
+E        +  where 503 = &lt;Response [503 Service Unavailable]&gt;.status_code
+
+tests/test_certificate_policy_candidate.py:63: AssertionError</failure></testcase><testcase classname="tests.test_attendance_postgres" name="test_postgres_populated_0020_upgrade_preserves_context_and_policy_guard" time="0.779" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_makeup" time="0.574" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_threshold" time="0.597" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_privacy" time="0.513" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_actor_erasure" time="0.506" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_contextual_instructor[program]" time="0.684" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_contextual_instructor[cohort]" time="0.460" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_concurrent_decision_replay_once" time="0.452" /><testcase classname="tests.test_attendance_postgres" name="test_postgres_attendance_migration_preserves_data_and_refuses_populated_loss" time="0.645" /></testsuite></testsuites>

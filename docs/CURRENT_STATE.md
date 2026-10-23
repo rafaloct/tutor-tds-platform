@@ -1,5 +1,21 @@
 # CURRENT STATE
 
+## 2026-10-23 — turmas/frequência/certificação, prova isolada atual
+
+TESTED-LOCAL na composição f345cc8:50 contratos SQLite PASS;4 testes de
+ciclo/migração em PostgreSQL16.15 PASS;13 casos frequência/certificação em
+16.15 PASS;1 gate de migração em17.11 PASS. Três cenários adicionais com
+Uvicorn/socket HTTP+login/senha/JWT reais:24 logins,35 operações,9 negativas
+sem credencial/forja X-User/token inválido PASS. Seeds/estados de fronteira
+são sintéticos; sem override de identidade no servidor HTTP. Não equivale a
+staging/Android nem emissão oficial/Worker remoto. Decisão32 preservada
+(operador ativa/fecha;30 é aviso). Falhas iniciais de infraestrutura retidas,
+sem relaxar guardas ou alterar API/migrações/dependências.
+Evidência: `qa/institutional-contracts-20261023/README.md`. Bancos efêmeros,
+containers próprios e rede própria removidos.26 lacunas/46 linhas de risco;
+G07/G08 permanecem abertos para aceite integrado. Nenhuma decisão humana
+necessária para continuar QA; gates/public1.4.1+14 intactos.
+
 ## 2026-10-23 — #338 corrigida e jornada Android real
 
 TESTED-LOCAL: fontecf997d3 passa946 testes/análise no CI39993808266;

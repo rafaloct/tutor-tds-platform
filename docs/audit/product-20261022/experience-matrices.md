@@ -16,7 +16,7 @@ qualifier does not accept today's candidate. Paths are repository-relative.
 | Institutional account, refresh/recovery/logout/privacy | `auth.py`, identity/recovery contracts | API auth/activation/recovery, secure Flutter token store and deletion service | Current deployed A/B lifecycle and cross-browser logout NOT_RUN; #323 invitation path candidate | REUSE + FIX if reproduced |
 | Link existing WP and institutional accounts safely | #249, #330 | Authentik lab blueprint/policy #332; separate-account notice #324 | Discovery proof only; PKCE/code exchange/link/recovery BLOCKED pending adapter/staging | INTEGRATE |
 | EAD Minha Área: courses, resume, progress, history | #250/#262/#265 | Separate #260 action policy, #263 UI, #266 controller | #266 reports 152 combined tests but explicitly no HTTP reader/Home wiring; integrated journey BLOCKED | INTEGRATE existing components |
-| Cohort planning, scheduling, activation, closure | `class_lifecycle.py`, contract #138 | API, Flutter prepare/activate/close screens, pending prepare receipt | H: 05/10 E2E; 12/10 new-policy Android build blocked; current path NOT_RUN | REUSE + INTEGRATE |
+| Cohort planning, scheduling, activation, closure | `class_lifecycle.py`, contract #138 | API, Flutter prepare/activate/close screens, pending prepare receipt | Current isolated PostgreSQL16 lifecycle4 PASS plus3 native HTTP/password/JWT scenarios PASS; synthetic boundary seeds; current Android/staging path NOT_RUN | REUSE + INTEGRATE |
 | Participant enrollment, assignment, capacity | operator/classroom contracts | `operator_operations.py`, `classroom_policy.py`, Flutter operations | 30 is advisory under decision 32; older hard-cap assertions superseded; downstream all-role acceptance NOT_RUN | REUSE |
 | Teacher/monitor student progress and follow-up | dashboard/context contracts | Scoped classroom dashboards; learning context and follow-up endpoints | Monitor own projection and exclusions require exact-current proof (#119/#97); NOT_RUN | REUSE + FIX if reproduced |
 | Editorial unpublish/republish recovery | Native LP course/lesson authority | LP cleanup can remove draft lesson section membership; publishing alone does not restore it | Current actual native recovery PASS only after authorized explicit reattachment; browser editor task NOT_RUN (G25) | REUSE + INTEGRATE |
@@ -49,8 +49,7 @@ not automatic equivalents of program roles.
 
 Each row follows **entry → authentication → home → work → monitor → completion
 → history → exit**. All rows need negative direct API/ID access, expired-session
-recovery, account/role switch and cross-system origin labels. Every integrated
-row is **NOT_RUN on this increment's candidate**, even where older proofs exist.
+recovery, account/role switch and cross-system origin labels. Every complete role UI journey remains **NOT_RUN on this increment's candidate**. Current isolated institutional HTTP/auth/PostgreSQL proof covers selected backend transitions only; see the dated QA receipt.
 
 | Role | Full intended journey / implementation anchors | Verifiable acceptance criteria | Highest-risk states / current gap |
 |---|---|---|---|
