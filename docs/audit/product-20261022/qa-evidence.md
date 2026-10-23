@@ -133,3 +133,13 @@ actual HTTP reader and Android offline journey remain NOT_RUN. Coverage35 rows.
 Windows fixture correction. Original writer work preserved; three failed attempts
 and boundary diagnosis retained in `../../qa/ead-offline-widget-recovery-20261023/`.
 Full current CI and Android synthetic player pending. Matrix37 rows.
+
+## 2026-10-23 corrected native acceptance
+
+Sourcecf997d3: full946 tests/analyze CI PASS; actual API35 synthetic journey18
+checks PASS, old failing source retained. Private asset bytes, installed APK hash,
+VTT native play, process death/offline/no default network, removal and restoration
+verified. See `../../qa/ead-offline-android-20261023/CORRECTED_ACCEPTANCE.md`.
+This does not accept real manifest/download integration, position persistence,
+academic sync, all roles, SSO, performance, TalkBack, physical/Play. Matrix41 rows,
+26 identified gaps. Environment restored; public version and release gates intact.

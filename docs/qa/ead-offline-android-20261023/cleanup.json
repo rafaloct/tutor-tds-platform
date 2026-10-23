@@ -1,0 +1,11 @@
+{
+  "viewport_size": "Physical size: 1344x2992",
+  "viewport_density": "Physical density: 480",
+  "radio_restored": {
+    "airplane_mode_on": "0",
+    "wifi_on": "1"
+  },
+  "emulator_stop_response": "OK: killing emulator, bye bye\r\r\nOK",
+  "emulator_absent_from_adb": true,
+  "other_device_commands": "none (read-only device listings only)"
+}

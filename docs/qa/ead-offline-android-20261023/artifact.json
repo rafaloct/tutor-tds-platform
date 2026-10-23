@@ -1,7 +1,7 @@
 {
   "source_sha": "16e30de7bf7ace60f34ecc5458e4a0a728240984",
   "source_status": "",
-  "apk": "D:\\AI-Shared\\work\\tds-offline-android-20261023\\cartilhas_app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+  "apk": "D:/AI-Shared/tmp/tds-offline-android-20261023/failing-16e30de.apk",
   "bytes": 93614921,
   "sha256": "5cd76b664dcdb4f9f27fb9ec0052a481c40b06a459b79ebec3bce4e8a5e75814",
   "config_sha256": "47ffc848046ebfe6b62edd99dbff4f77ff797ecf19ace08426a98ce8deae01ab",
@@ -17,5 +17,6 @@
     }
   },
   "type": "debug-x64-synthetic-only",
-  "device": "emulator-5580 API35"
+  "device": "emulator-5580 API35",
+  "original_build_output": "D:/AI-Shared/work/tds-offline-android-20261023/cartilhas_app/build/app/outputs/flutter-apk/app-debug.apk"
 }

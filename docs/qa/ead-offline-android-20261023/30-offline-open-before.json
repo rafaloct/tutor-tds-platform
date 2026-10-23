@@ -1,0 +1,58 @@
+[
+  {
+    "text": "",
+    "content-desc": "Voltar",
+    "bounds": "[8,73][104,169]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Cursos do EAD",
+    "bounds": "[144,91][438,151]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Atualizar cursos do EAD",
+    "bounds": "[624,73][720,169]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Aprenda também pelo portal EAD",
+    "bounds": "[32,217][688,345]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Veja as ofertas atualizadas do site. A inscrição e as aulas acontecem no EAD; as cartilhas e o Tutor TDS continuam disponíveis neste aplicativo.",
+    "bounds": "[32,361][688,521]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "QA offline sintético\nMP4/VTT incluídos no app; sem mídia real.",
+    "bounds": "[32,561][688,737]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "LABORATÓRIO INTERNO · DADOS FICTÍCIOS\nCurso SAF sintético, sem conta, matrícula ou dados reais.",
+    "bounds": "[32,737][688,1001]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Não foi possível carregar os cursos do EAD. Suas cartilhas do aplicativo continuam disponíveis.",
+    "bounds": "[32,1001][688,1232]",
+    "enabled": "true",
+    "clickable": "false"
+  }
+]

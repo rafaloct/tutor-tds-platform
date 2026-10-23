@@ -27,3 +27,15 @@ elif sys.argv[1]=='tap':
     x1,y1,x2,y2=map(int,re.findall(r'\d+',nodes[0].get('bounds')))
     print('UI-tree target center', (x1+x2)//2,(y1+y2)//2)
     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+elif sys.argv[1]=='seek':
+    tree=capture(sys.argv[2]+'-before')
+    sliders=[n for n in tree.iter('node') if 'Posição do vídeo' in n.get('content-desc','')]
+    thumbs=[n for n in tree.iter('node') if n.get('content-desc','').endswith('%')]
+    assert len(sliders)==1 and len(thumbs)==1
+    x1,y1,x2,y2=map(int,re.findall(r'\d+',sliders[0].get('bounds')))
+    a,b,c,d=map(int,re.findall(r'\d+',thumbs[0].get('bounds')))
+    fraction=float(sys.argv[3]); assert 0<=fraction<=1
+    target=int(x1+(x2-x1)*fraction)
+    print('UI-tree seek',[(a+c)//2,(b+d)//2,target,(y1+y2)//2])
+    adb('shell','input','swipe',str((a+c)//2),str((b+d)//2),str(target),str((y1+y2)//2),'500')
+    capture(sys.argv[2]+'-after')

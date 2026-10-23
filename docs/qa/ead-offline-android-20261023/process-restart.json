@@ -1,0 +1,7 @@
+{
+  "old_pid": "2524",
+  "after_force_stop": "",
+  "new_pid": "4689",
+  "launch": "Starting: Intent { cmp=com.tutortds_cartilhas.dev.dynamicqa.r0598c2ad2ee3470a891fcac41bb6c9ac/com.tutortds_cartilhas.MainActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: com.tutortds_cartilhas.dev.dynamicqa.r0598c2ad2ee3470a891fcac41bb6c9ac/com.tutortds_cartilhas.MainActivity\r\nTotalTime: 9532\r\nWaitTime: 9537\r\nComplete\r\n",
+  "different_process": true
+}

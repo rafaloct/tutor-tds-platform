@@ -1,4 +1,6 @@
-# Native Android QA — observed failure #338
+# Native Android QA — original failure #338
+
+Corrected source acceptance: [CORRECTED_ACCEPTANCE.md](CORRECTED_ACCEPTANCE.md). Original results below remain historical.
 
 Runtime source16e30de7bf7ace60f34ecc5458e4a0a728240984, clean worktree. Full940-test/analyze CI PASS; this native journey deliberately remains separate. Later48e0c2b is documentation only; no rebuild for documentation.
 
@@ -7,7 +9,7 @@ Runtime source16e30de7bf7ace60f34ecc5458e4a0a728240984, clean worktree. Full940-
 LARGeo Flutter3.44.9/Dart3.12.2. Build command from cartilhas_app:
 `flutter build apk --debug --target-platform android-x64 --dart-define-from-file=<retained qa-defines.json>`.
 Build730.3s PASS; install107.46s PASS on emulator-5580/API35 only.
-APK93614921 bytes SHA2565cd76b664dcdb4f9f27fb9ec0052a481c40b06a459b79ebec3bce4e8a5e75814. Retained at D:/AI-Shared/work/tds-offline-android-20261023/cartilhas_app/build/app/outputs/flutter-apk/app-debug.apk (not committed).
+APK93614921 bytes SHA2565cd76b664dcdb4f9f27fb9ec0052a481c40b06a459b79ebec3bce4e8a5e75814. Retained at D:/AI-Shared/tmp/tds-offline-android-20261023/failing-16e30de.apk (not committed).
 Android Debug signer SHA2566af6c35e5ede92952c97861129900eabd297d006ca50db952cb60880deddc4f8; apksigner verify PASS.
 AAPT: minSdk24,target/compileSdk36; candidate1.4.2-dev/versionCode15 inherited from branch; public1.4.1+14 untouched. Target build flag x64; bundled native-code list includes arm64-v8a/armeabi-v7a/x86_64 due native dependencies. Not a production artifact.
 Both bundled fixture lengths/digests checked from ZIP: MP49031,VTT148; artifact.json records exact hashes/config/source/namespace. No real media, accounts, academic data or production writes.

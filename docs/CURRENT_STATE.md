@@ -1,5 +1,19 @@
 # CURRENT STATE
 
+## 2026-10-23 — #338 corrigida e jornada Android real
+
+TESTED-LOCAL: fontecf997d3 passa946 testes/análise no CI39993808266;
+PHP/quarantine/secrets SUCCESS. APK debug limpo2f70cda5... instalado corresponde
+ao build. Jornada Android API35 sintética:18 checks PASS numa jornada real
+(preparar, hashes privados MP4/VTT, decoder/VTT, toggle, force-stop com PID
+novo, modo avião/WiFi off/sem rede, reproduzir, remover, reconectar/catálogo11).
+Falha anterior16e30de preservada. Evidência em
+`qa/ead-offline-android-20261023/CORRECTED_ACCEPTANCE.md`. Ambiente restaurado
+(rede/resolução) e só emulador próprio parado; origem #335 preservada.
+26 lacunas/41 casos; G06 posição e sincronização acadêmica não aceitas.
+Reader→download institucional/UI, oito papéis, IA, SSO, performance/TalkBack/
+POCO/Play ainda pendentes. Default deny/public1.4.1+14/MERGE_ALLOWED=NO intactos.
+
 ## 2026-10-23 — Android real revela G26/#338
 
 APK fonte16e30de limpo/debug isolado construído e instalado; hashes de MP4/VTT

@@ -4,7 +4,7 @@ Q02,visitor,public media manifest,approved measured unique parent,WordPress6.7.2
 Q03,student,server manifest parse,valid + unknown field,Dart Windows,none,public manifest,Dart3.12.2 schema1,contract,PASS,3 PHP JSON to unchanged Dart checks
 Q04,visitor,manifest revocation,old ETag + rights revoked,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,revoked,same source,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
 Q05,visitor,media revision replacement,mtime size inode links,WordPress6.7.2+LP4.3.6+MariaDB,internal HTTP,approved then stale,revision A to B,native integration+security,PASS,"44-check real runtime receipt; synthetic data, no Android"
-Q06,student,download play captions,kill restart airplane mode,Android35,offline,public approved,exact QA APK,end-to-end,BLOCKED,G04 issue335 existing writer
+Q06,student,download play captions,kill restart airplane mode,Android35,offline,public approved,exact QA APK,end-to-end,BLOCKED,G03 real server/download UI not integrated; synthetic journey Q40 PASS
 Q07,student,download recovery,low storage interrupted bytes,Android35,disconnect reconnect,public approved,old to new media,resilience,NOT_RUN,G06
 Q08,student,EAD signup course return,fresh and existing WP account,portal+Android35,online,anonymous to WP user,candidate exact,end-to-end,NOT_RUN,historical326 evidence is narrower
 Q09,student,identity link,A B collision PKCE replay,portal+API+Android35,online,two proven accounts,legacy plus Authentik,security integration,BLOCKED,G05 no operational broker
@@ -38,3 +38,5 @@ Q36,visitor,verify public media release,current revision mismatch revocation out
 Q37,visitor,synthetic offline prepare reopen captions remove,widget native I/O and Windows autocrlf,Flutter3.44.9 Windows,no network on reopen,synthetic debug only,schema1,widget+filesystem+transport,PASS,31 focal tests; Android decoding separate
 Q38,visitor,Welcome public EAD discovery,fresh isolated namespace then environment recovery,Android35 emulator720x1280,online,anonymous,APK16e30de,real UI+public catalog,PASS,11 real public offers; not role or enrollment acceptance
 Q39,visitor,first synthetic offline prepare,fresh application support missing ead_offline,Android35 emulator,online,synthetic debug authority,APK16e30de,real UI+private filesystem,FAIL,G26 issue338 screenshot12-ready; native playback blocked
+Q40,visitor,synthetic private package lifecycle,first prepare captions play force-stop offline reopen remove reconnect,Android35 emulator720x1280,online-offline-online,isolated QA synthetic authority,APKcf997d3,real native UI+filesystem,PASS,18 checks in one journey; not real media download or academic sync
+Q41,visitor,application-support binding,fresh parent file symlink unsafe namespace default deny,Linux Flutter3.44.9,mocked path provider real filesystem,default deny plus fixture authority,cf997d3,unit+platform boundary,PASS,6 new cases included full946 CI; Windows5 PASS and1 SKIPPED

@@ -181,3 +181,14 @@ PASS locally; mock streams remain separate from live integration. Matrix37 rows,
 25 gaps. G02 reconciled by reusing seven exact #250 documents, not a new design.
 Exact-source synthetic Android QA underway; no institutional/full-role or release
 acceptance inferred. See newer CURRENT_STATE and dated QA directories.
+
+## Latest 2026-10-23 native result
+
+#335 async/Windows byte fixes and #338 first-parent fix implemented. Runtime
+cf997d3 full946-test/analyze CI PASS; exact installed APK passes18 checks within
+one real Android synthetic journey. Original failure preserved; real institutional
+manifest/download UI and full-role release acceptance remain NOT_RUN. Audit now
+26 identified gaps/41 risk rows. G02 reuses existing #250 authority reconciliation;
+no new domain/SSO authority. Next front is explicitly gated real lesson→manifest→
+download acceptance in isolated staging, preserving the broader role/AI/identity
+critical path and all production/merge/publication gates.

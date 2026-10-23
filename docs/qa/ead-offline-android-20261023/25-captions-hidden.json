@@ -1,0 +1,44 @@
+[
+  {
+    "text": "",
+    "content-desc": "Voltar",
+    "bounds": "[8,73][104,169]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "QA offline · vídeo sintético",
+    "bounds": "[144,91][675,151]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "3 de 3 segundos, Posição do vídeo",
+    "bounds": "[0,969][720,1065]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "100%",
+    "bounds": "[624,969][720,1065]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Reproduzir vídeo",
+    "bounds": "[133,1065][229,1161]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Mostrar legendas",
+    "bounds": "[229,1065][587,1161]",
+    "enabled": "true",
+    "clickable": "true"
+  }
+]
