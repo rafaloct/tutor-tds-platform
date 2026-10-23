@@ -118,7 +118,7 @@ fetching URLs. Local contracts and a real PHP→Dart check pass. The continuatio
 parsing that native HTTP payload with the unchanged Dart parser.
 [Runtime evidence and preserved failures](../../qa/ead-offline-manifest-runtime-20261022/README.md).
 Institutional staging and Android offline E2E remain **NOT_RUN**; the production
-download UI remains disabled. G25 records native unpublish/reassociation recovery. #335 remains with its existing writer.
+download UI remains disabled. G25 records native unpublish/reassociation recovery. #335 original work was later recovered in isolated copies; see continuation below.
 
 ## Critical path to distribution
 
@@ -172,3 +172,12 @@ third-party asset, privacy/retention disclosures across both account controllers
 and any proposed exclusion of an intended role from a distribution scope.
 None blocks the source/testing work selected here. Do not ask for production
 credentials to perform synthetic contract tests.
+
+## 2026-10-23 continuation
+
+Current runtime source16e30de: full940 Flutter tests/analyze and PHP/quarantine/
+secrets CI PASS. Reader25+authority17 focal contracts and #335 widget/store/HTTP31
+PASS locally; mock streams remain separate from live integration. Matrix37 rows,
+25 gaps. G02 reconciled by reusing seven exact #250 documents, not a new design.
+Exact-source synthetic Android QA underway; no institutional/full-role or release
+acceptance inferred. See newer CURRENT_STATE and dated QA directories.

@@ -40,3 +40,5 @@ reutilizar CourseVersion/editor e preservar o núcleo aprovado.
 Reversão: desativar flag e voltar ao caminho legado; preservar colunas/dados
 aditivos. Migração deve suportar base vazia e cópia staging restaurada, detectar
 ambiguidades antes de backfill e ter forward recovery documentado.
+
+Precedência de autoridade EAD: [ADR LearnPress/TDS](program/ADR_2026-10-18_LEARNPRESS_FASTAPI_AUTHORITY.md), decisão #249, documentação reutilizada do #250 `51d485dc`. Não inferir SSO/implantação a partir da decisão.

@@ -1,5 +1,15 @@
 # CURRENT STATE
 
+## 2026-10-23 — CI completa e autoridade canônica
+
+TESTED-LOCAL: commit16e30de passou940 testes e análise Flutter no CI39989119605;
+PHP39989119715/quarantine39989119564/secrets39989119550 SUCCESS.
+IMPLEMENTED: reutilizados7 documentos exatos do #250/51d485dc para corrigir
+contradição G02 entre programa e DOMAIN_CONTRACT;11 links locais conferidos.
+Sem mudança de autoridade institucional nem promoção de SSO TARGET.
+QA Android debug do commit16e30de em andamento, namespace isolado; não
+recompilar por documentação apenas. Produção/publicação/MERGE_ALLOWED=NO.
+
 ## 2026-10-23 — recuperação #335 e bytes Windows
 
 TESTED-LOCAL:31 testes widget/store/HTTP PASS; análise focal limpa. Reutilizada
