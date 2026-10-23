@@ -1,0 +1,2 @@
+# Preserve raw JUnit traceback bytes including diagnostic trailing spaces.
+*.xml -text whitespace=-blank-at-eol

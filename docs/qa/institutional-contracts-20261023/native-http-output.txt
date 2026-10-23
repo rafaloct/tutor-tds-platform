@@ -1,0 +1,96 @@
+/workspace/tds-institutional-qa/api/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20260920_0001, initial Tutor TDS foundation
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0001 -> 20260920_0002, add authentication credentials
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0002 -> 20260920_0003, connect institutions, programs, courses, users and enrollments
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0003 -> 20260920_0004, add classroom hierarchy
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0004 -> 20260920_0005, add planned and validated learning time
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0005 -> 20260920_0006, add reliable sync worker state
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0006 -> 20260920_0007, add certificate academic lineage snapshots
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0007 -> 20260920_0008, add creator media, score and simulated ledger
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0008 -> 20260920_0009, add classroom evidence engine
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0009 -> 20260920_0011, add auditable Sheets purge requests
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0011 -> 20260920_0012, add versioned assessment attempt sync
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0012 -> 20260920_0013, add media editorial audit and explicit ratings
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0013 -> 20260920_0014, add immutable assessment content for cross-device hydration
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0014 -> 20260921_0015, Version existing courses in place and pin classroom snapshots.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0015 -> 20260921_0016, Private, version-specific certificate requests and human decision history.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0016 -> 20260921_0017, Human session presence, immutable association and append-only decisions.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0017 -> 20260921_0018, Human baseline references and scoped mentorship; no source answers imported.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0018 -> 20260923_0019, Persist contextual membership and reuse class_enrollments as versioned enrollment.
+INFO  [alembic.runtime.migration] Running upgrade 20260923_0019 -> 20261001_0020, Reserve an explicitly reviewed BI inscription using existing source records.
+INFO  [alembic.runtime.migration] Running upgrade 20261001_0020 -> 20261003_0021, Add transport reservation and optional reference lineage; preserve legacy data.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0021 -> 20261003_0022, Add opt-in offering policy and candidate lifecycle without legacy backfill.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0022 -> 20261003_0023, Add isolated operator command receipts after certificate policy.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0023 -> 20261003_0024, Append-only official attendance corrections and explicit makeup decisions.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0024 -> 20261003_0025, Add one-time verified CPF activation tokens.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0025 -> 20261003_0026, Add shared authentication rate-limit buckets.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0026 -> 20261005_0027, Index CPF activation token issuer references.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_0027 -> 20261005_0028, Add territorial classroom lifecycle state and audit receipts.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_0028 -> 20261006_0029, Add the short numeric check-in code digest to class sessions.
+INFO  [alembic.runtime.migration] Running upgrade 20261006_0029 -> 20261007_0030, Add complete published-block lineage to existing assessment attempts.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20260920_0001, initial Tutor TDS foundation
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0001 -> 20260920_0002, add authentication credentials
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0002 -> 20260920_0003, connect institutions, programs, courses, users and enrollments
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0003 -> 20260920_0004, add classroom hierarchy
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0004 -> 20260920_0005, add planned and validated learning time
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0005 -> 20260920_0006, add reliable sync worker state
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0006 -> 20260920_0007, add certificate academic lineage snapshots
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0007 -> 20260920_0008, add creator media, score and simulated ledger
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0008 -> 20260920_0009, add classroom evidence engine
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0009 -> 20260920_0011, add auditable Sheets purge requests
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0011 -> 20260920_0012, add versioned assessment attempt sync
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0012 -> 20260920_0013, add media editorial audit and explicit ratings
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0013 -> 20260920_0014, add immutable assessment content for cross-device hydration
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0014 -> 20260921_0015, Version existing courses in place and pin classroom snapshots.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0015 -> 20260921_0016, Private, version-specific certificate requests and human decision history.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0016 -> 20260921_0017, Human session presence, immutable association and append-only decisions.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0017 -> 20260921_0018, Human baseline references and scoped mentorship; no source answers imported.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0018 -> 20260923_0019, Persist contextual membership and reuse class_enrollments as versioned enrollment.
+INFO  [alembic.runtime.migration] Running upgrade 20260923_0019 -> 20261001_0020, Reserve an explicitly reviewed BI inscription using existing source records.
+INFO  [alembic.runtime.migration] Running upgrade 20261001_0020 -> 20261003_0021, Add transport reservation and optional reference lineage; preserve legacy data.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0021 -> 20261003_0022, Add opt-in offering policy and candidate lifecycle without legacy backfill.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0022 -> 20261003_0023, Add isolated operator command receipts after certificate policy.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0023 -> 20261003_0024, Append-only official attendance corrections and explicit makeup decisions.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0024 -> 20261003_0025, Add one-time verified CPF activation tokens.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0025 -> 20261003_0026, Add shared authentication rate-limit buckets.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0026 -> 20261005_0027, Index CPF activation token issuer references.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_0027 -> 20261005_0028, Add territorial classroom lifecycle state and audit receipts.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_0028 -> 20261006_0029, Add the short numeric check-in code digest to class sessions.
+INFO  [alembic.runtime.migration] Running upgrade 20261006_0029 -> 20261007_0030, Add complete published-block lineage to existing assessment attempts.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20260920_0001, initial Tutor TDS foundation
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0001 -> 20260920_0002, add authentication credentials
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0002 -> 20260920_0003, connect institutions, programs, courses, users and enrollments
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0003 -> 20260920_0004, add classroom hierarchy
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0004 -> 20260920_0005, add planned and validated learning time
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0005 -> 20260920_0006, add reliable sync worker state
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0006 -> 20260920_0007, add certificate academic lineage snapshots
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0007 -> 20260920_0008, add creator media, score and simulated ledger
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0008 -> 20260920_0009, add classroom evidence engine
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0009 -> 20260920_0011, add auditable Sheets purge requests
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0011 -> 20260920_0012, add versioned assessment attempt sync
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0012 -> 20260920_0013, add media editorial audit and explicit ratings
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0013 -> 20260920_0014, add immutable assessment content for cross-device hydration
+INFO  [alembic.runtime.migration] Running upgrade 20260920_0014 -> 20260921_0015, Version existing courses in place and pin classroom snapshots.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0015 -> 20260921_0016, Private, version-specific certificate requests and human decision history.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0016 -> 20260921_0017, Human session presence, immutable association and append-only decisions.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0017 -> 20260921_0018, Human baseline references and scoped mentorship; no source answers imported.
+INFO  [alembic.runtime.migration] Running upgrade 20260921_0018 -> 20260923_0019, Persist contextual membership and reuse class_enrollments as versioned enrollment.
+INFO  [alembic.runtime.migration] Running upgrade 20260923_0019 -> 20261001_0020, Reserve an explicitly reviewed BI inscription using existing source records.
+INFO  [alembic.runtime.migration] Running upgrade 20261001_0020 -> 20261003_0021, Add transport reservation and optional reference lineage; preserve legacy data.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0021 -> 20261003_0022, Add opt-in offering policy and candidate lifecycle without legacy backfill.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0022 -> 20261003_0023, Add isolated operator command receipts after certificate policy.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0023 -> 20261003_0024, Append-only official attendance corrections and explicit makeup decisions.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0024 -> 20261003_0025, Add one-time verified CPF activation tokens.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0025 -> 20261003_0026, Add shared authentication rate-limit buckets.
+INFO  [alembic.runtime.migration] Running upgrade 20261003_0026 -> 20261005_0027, Index CPF activation token issuer references.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_0027 -> 20261005_0028, Add territorial classroom lifecycle state and audit receipts.
+INFO  [alembic.runtime.migration] Running upgrade 20261005_0028 -> 20261006_0029, Add the short numeric check-in code digest to class sessions.
+INFO  [alembic.runtime.migration] Running upgrade 20261006_0029 -> 20261007_0030, Add complete published-block lineage to existing assessment attempts.
+PASS: 3 isolated native HTTP/auth/Postgres scenarios; no identity overrides

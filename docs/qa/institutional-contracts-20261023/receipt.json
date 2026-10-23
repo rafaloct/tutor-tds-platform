@@ -96,5 +96,16 @@
     "owned_containers_remaining": 0,
     "owned_internal_network_removed": true,
     "shared_or_production_writes": false
+  },
+  "evidence_sha256": {
+    "attendance-postgres16-missing-node.xml": "aa92b68fe28d14e5ccd28068fe3b2f2d208619ac8b85ac34e4b5fa8c4ecacfb8",
+    "attendance-postgres16.xml": "9d55be09c7c4ae1cbb3addb0d4f59ee592a2c712f9ed11b4428eb5cb361a58ac",
+    "cleanup.txt": "1edd7572f5eb4f62a3bb6aacd1a730ba4af34e7319e6b63a0a55fe2ebd40c32e",
+    "lifecycle-postgres-port-boundary.xml": "32defcb0514d6e60a628a46731dbacc18a803e4de3e847eada77dd57661205f3",
+    "lifecycle-postgres.xml": "4b211547d48fb5847b83664d79d1e9522311ee156c089b3835e72b11b4c21308",
+    "migration-postgres1711.xml": "a9e79bb4c25f9bab3218e5bfd0beff028d72d0853a05a13cd44a6b208c73b04a",
+    "native-http-output.txt": "0801687f7c323ff098bba2d0b409677213c5fbc93a49c9186e8b63e3ac427265",
+    "native-http.json": "b28e1955ae76875a1cb236ccf6631e6f332cf40264748705f81e16e8f9d8c8b3",
+    "sqlite-contracts.xml": "f98d1a185774293321ec9ddd85a101f43b27da81795f4778a2b5855ea71bd779"
   }
 }

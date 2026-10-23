@@ -16,7 +16,7 @@ remain. No older test expectation was restored.
 | `lifecycle-postgres.xml` | PASS4 | Real16.15 persistence, prepare receipt/replay, advisory capacity, scoped assignment, open-session guard,0027→0028 migration/downgrade guard |
 | `attendance-postgres16.xml` | PASS13 | Real16.15 attendance/certificate candidate and policy, concurrency, migration lineage; identity override |
 | `migration-postgres1711.xml` | PASS1 | Exact historic17.11 empty upgrade/downgrade/re-upgrade gate to0030 |
-| `native-http.json` / `.log` | PASS3 scenarios | Real Uvicorn sockets, password verification, JWT validation, contextual RBAC and PostgreSQL16.15; no server identity override |
+| `native-http.json` / `native-http-output.txt` | PASS3 scenarios | Real Uvicorn sockets, password verification, JWT validation, contextual RBAC and PostgreSQL16.15; no server identity override |
 
 Native HTTP reuses the existing lifecycle seeds/assertions, removes the fixture
 auth override before serving, and logs in each of8 seeded identities in each

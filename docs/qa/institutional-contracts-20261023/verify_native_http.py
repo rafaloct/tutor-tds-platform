@@ -1,6 +1,6 @@
 """Isolated real HTTP/auth/Postgres proof; synthetic fixture data, never staging.
 
-Run from api with its locked Python. No configurable remote targets or credentials.
+Run from api with its locked Python; capture stdout/stderr to native-http-output.txt. No configurable remote targets or credentials.
 Existing test seeds/assertions are reused; identity overrides are removed before
 the socket server starts. X-User is translated only in this client, never sent.
 """
