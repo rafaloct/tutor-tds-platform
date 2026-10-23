@@ -1,5 +1,16 @@
 # CURRENT STATE
 
+## 2026-10-23 — Android real revela G26/#338
+
+APK fonte16e30de limpo/debug isolado construído e instalado; hashes de MP4/VTT
+empacotados PASS. Welcome→catálogo público11→QA vazio PASS; preparar FAIL
+por pai ead_offline ausente. Capturas/manifesto em
+`qa/ead-offline-android-20261023/`. Player/modo avião ainda NOT_RUN.
+FIX binding cria/verifica pai privado sem seguir links:22 testes PASS/1 symlink
+SKIPPED Windows; análise focal limpa, Linux CI e novo APK pendentes. Evidência
+`qa/ead-offline-root-20261023/`.26 lacunas/39 linhas de risco.
+Emulador recuperado após SystemUI ANR; performance não aceita. Gates fechados.
+
 ## 2026-10-23 — CI completa e autoridade canônica
 
 TESTED-LOCAL: commit16e30de passou940 testes e análise Flutter no CI39989119605;

@@ -29,10 +29,20 @@ Future<OfflinePackageStore> applicationOfflinePackageStore({
     throw ArgumentError.value(namespace, 'namespace');
   }
   final support = await getApplicationSupportDirectory();
-  final root = Directory(
-    '${support.path}${Platform.pathSeparator}ead_offline'
-    '${Platform.pathSeparator}$namespace',
+  final parent = Directory(
+    '${support.path}${Platform.pathSeparator}ead_offline',
   );
+  // The store creates its namespace non-recursively to reject unsafe paths.
+  // Its application-owned parent must exist on a fresh installation first.
+  if (await FileSystemEntity.type(parent.path, followLinks: false) ==
+      FileSystemEntityType.notFound) {
+    await parent.create();
+  }
+  if (await FileSystemEntity.type(parent.path, followLinks: false) !=
+      FileSystemEntityType.directory) {
+    throw const OfflinePackageException('unsafe_path');
+  }
+  final root = Directory('${parent.path}${Platform.pathSeparator}$namespace');
   return OfflinePackageStore(
     root: root,
     authorize: authority.verify,
