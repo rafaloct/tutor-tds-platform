@@ -1,0 +1,51 @@
+[
+  {
+    "text": "",
+    "content-desc": "Voltar",
+    "bounds": "[8,64][104,160]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "QA offline sintético",
+    "bounds": "[144,82][531,142]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Fixture incluída no app; a preparação copia MP4 e VTT para o armazenamento privado e verifica tamanho e SHA-256. Sem download remoto.",
+    "bounds": "[40,208][680,368]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Falha ao preparar: PathNotFoundException: Creation failed, path = '/data/user/0/com.tutortds_cartilhas.dev.dynamicqa.r0598c2ad2ee3470a891fcac41bb6c9ac/files/ead_offline/qa_0598c2ad2ee3470a891fcac41bb6c9ac' (OS Error: No such file or directory, errno = 2)",
+    "bounds": "[40,400][680,680]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Preparar offline",
+    "bounds": "[40,712][329,808]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Assistir offline",
+    "bounds": "[40,808][317,904]",
+    "enabled": "false",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Remover offline",
+    "bounds": "[40,904][333,1000]",
+    "enabled": "false",
+    "clickable": "false"
+  }
+]

@@ -1,0 +1,19 @@
+﻿{
+    "TUTOR_ENVIRONMENT":  "staging",
+    "TUTOR_STAGING_API_URL":  "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+    "TUTOR_API_URL":  "https://ead.ipexdesenvolvimento.cloud/tutor-staging-api",
+    "TUTOR_STAGING_GATEWAY_URL":  "",
+    "TUTOR_GATEWAY_URL":  "",
+    "PRIVACY_POLICY_URL":  "https://cartilhas.ipexdesenvolvimento.cloud/privacy.html",
+    "ACCOUNT_DELETION_URL":  "https://cartilhas.ipexdesenvolvimento.cloud/account-deletion.html",
+    "OPERATOR_OPERATIONS_ENABLED":  true,
+    "REMOTE_CATALOG_ENABLED":  true,
+    "LEARNING_CONTEXT_ENABLED":  false,
+    "DURABLE_LEARNING_OUTBOX_ENABLED":  false,
+    "JOURNEY_TRACEABILITY_ENABLED":  false,
+    "DYNAMIC_ACTIVITY_ENABLED":  false,
+    "SIGNED_SUPPORT_IDENTITY":  false,
+    "DYNAMIC_QA_ISOLATED_PACKAGE":  true,
+    "DYNAMIC_QA_RUN_ID":  "0598c2ad2ee3470a891fcac41bb6c9ac",
+    "TDS_EDITORIAL_QA_HTTP_BASE":  "http://127.0.0.1:18731"
+}

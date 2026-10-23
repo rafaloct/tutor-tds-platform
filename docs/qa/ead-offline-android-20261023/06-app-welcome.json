@@ -1,0 +1,44 @@
+[
+  {
+    "text": "",
+    "content-desc": "Aprenda, pratique e avance",
+    "bounds": "[72,438][648,550]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Conteúdo TDS e ferramentas de estudo em um só lugar.",
+    "bounds": "[72,562][648,642]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Bem-vindo ao TDS",
+    "bounds": "[72,762][648,826]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Explore cursos no EAD ou informe seus dados para usar recursos personalizados do Tutor TDS.",
+    "bounds": "[72,834][648,954]",
+    "enabled": "true",
+    "clickable": "false"
+  },
+  {
+    "text": "",
+    "content-desc": "Explorar cursos do EAD sem cadastro",
+    "bounds": "[72,990][648,1086]",
+    "enabled": "true",
+    "clickable": "true"
+  },
+  {
+    "text": "",
+    "content-desc": "Criar conta gratuita no EAD",
+    "bounds": "[72,1110][648,1206]",
+    "enabled": "true",
+    "clickable": "true"
+  }
+]

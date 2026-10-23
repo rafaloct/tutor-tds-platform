@@ -1,0 +1,21 @@
+{
+  "source_sha": "16e30de7bf7ace60f34ecc5458e4a0a728240984",
+  "source_status": "",
+  "apk": "D:\\AI-Shared\\work\\tds-offline-android-20261023\\cartilhas_app\\build\\app\\outputs\\flutter-apk\\app-debug.apk",
+  "bytes": 93614921,
+  "sha256": "5cd76b664dcdb4f9f27fb9ec0052a481c40b06a459b79ebec3bce4e8a5e75814",
+  "config_sha256": "47ffc848046ebfe6b62edd99dbff4f77ff797ecf19ace08426a98ce8deae01ab",
+  "package": "com.tutortds_cartilhas.dev.dynamicqa.r0598c2ad2ee3470a891fcac41bb6c9ac",
+  "assets": {
+    "synthetic.mp4": {
+      "bytes": 9031,
+      "sha256": "b1c2ca035ff63b2070fb0bcf3d70b963d828226b1f03f1014a5b347de2c16ce6"
+    },
+    "synthetic.vtt": {
+      "bytes": 148,
+      "sha256": "7dd0700f14781baace675332cab287a59bd3156593edde696a5f4c69589df19a"
+    }
+  },
+  "type": "debug-x64-synthetic-only",
+  "device": "emulator-5580 API35"
+}
