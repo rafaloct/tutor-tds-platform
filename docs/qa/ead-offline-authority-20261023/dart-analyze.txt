@@ -1,0 +1,7 @@
+[Reading last 2 lines (total: 2 lines)]
+
+Analyzing editorial_offline_release_authority.dart, offline_package_binding.dart, editorial_offline_release_authority_test.dart...
+No issues found!
+✅ Process completed with exit code 0 (runtime: 43.25s)
+
+[executed on device: LARGeo (469ec10e-fad7-4ad6-86a2-6db0acb6291a)]

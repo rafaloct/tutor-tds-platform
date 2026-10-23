@@ -7,8 +7,8 @@ import 'offline_package_manifest.dart';
 import 'offline_package_store.dart';
 
 /// The server adapter must verify all three facts independently: mobile
-/// publication, rights and exact revision/asset metadata. No production
-/// adapter currently implements this contract, so the default denies release.
+/// publication, rights and exact revision/asset metadata against current server
+/// state. The application default denies release; adapters require opt-in.
 abstract class VerifiedOfflineReleaseAuthority {
   Future<bool> verify(OfflinePackageManifest manifest);
 }

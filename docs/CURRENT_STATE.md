@@ -1,5 +1,14 @@
 # CURRENT STATE
 
+## 2026-10-23 — autoridade editorial atual #336
+
+TESTED-LOCAL: adapter opt-in consulta servidor a cada verificação e compara
+identidade/revisão/assets;17 testes novos+25 leitor PASS42, análise focal limpa
+no LARGeo. Default deny e produção inalterados. Evidência em
+`qa/ead-offline-authority-20261023/`. CI81ec0ed: análise/PHP/quarantine/secrets
+PASS; suíte Flutter921 PASS/2 FAIL na #335. Correção existente será recuperada
+em cópia isolada; origem preservada. HTTP real→adapter/Android NOT_RUN.
+
 ## 2026-10-23 — leitor Flutter #336
 
 TESTED-LOCAL: leitor HTTP anônimo canônico e limitado a4096 bytes, sem
