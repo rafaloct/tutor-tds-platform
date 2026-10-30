@@ -44,7 +44,7 @@ select{font-size:16px;padding:6px;background:#262626;color:white;border:1px soli
 </style></head><body><div id="stage">$body$controls</div>
 <script>
 function notify(type,position,duration){
-  if(window.TutorVideo){TutorVideo.postMessage(JSON.stringify({type:type,position:Math.floor(position||0),duration:Math.floor(duration||0)}));}
+  const m=JSON.stringify({type:type,position:Math.floor(position||0),duration:Math.floor(duration||0)});if(window.TutorVideo){TutorVideo.postMessage(m);}else if(window.parent&&window.parent!==window){window.parent.postMessage(m,'*');}
 }
 </script></body></html>''';
 }
