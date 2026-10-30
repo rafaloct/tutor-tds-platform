@@ -1,5 +1,24 @@
 # CURRENT STATE
 
+## 2026-10-30 — republicação web do app em cartilhas.ipexdesenvolvimento.cloud
+
+Domínio real é `cartilhas.ipexdesenvolvimento.cloud` (Cloudflare → Traefik →
+container `compose-copy-redundant-alarm-18gsr7-cartilhas-web-1`, bind-mount
+`/opt/cartilhas-tds/web`); `cartilhas.eadipexdesenvolvimento.cloud` não existe no
+DNS e não recebeu deploy. A versão web Flutter 1.0.0+1 (junho) foi substituída
+pela build 1.4.0+13 gerada com `flutter build web --release --base-href /
+--dart-define-from-file=config/production.json` (gateway/API produtivos;
+flags de risco desligadas conforme contrato). `/app/` (manual/APK) e
+`privacy-policy.html` preservados; backup pré-deploy em
+`/opt/cartilhas-tds/backups/web-v1.0.0-20261030-203755.tar.gz`. Correção de
+identidade do shell PWA (verde → azul #093AF4, splash) e no-store para
+entrypoints sem hash commitados em `agent/cartilhas-web-deploy-20261030`
+(9adf55f), aguardando merge. Cloudflare servia `main.dart.js`/`flutter_bootstrap.js`
+antigos por cache de 1 ano; contornado nesta publicação com nomes versionados
+(`flutter_bootstrap-1.4.0.13.js`, `main-1.4.0.13.dart.js`). Três logos de
+parceiros (cdr/fapto/ipex) permanecem obsoletos no edge até expiração ou purge
+manual na conta Cloudflare — credencial de API não existe na VPS.
+
 ## Integração META 05 — 03/10/2026
 
 Base integrada neste candidato: `aa6fb88050aa864726e197187487819de303ac65`,
