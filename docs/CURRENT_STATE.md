@@ -46,6 +46,25 @@ UNKNOWN/BLOCKED: publicação na Play Store exige keystore + conta Play
 Console — não disponível neste ambiente; permanece ação humana. Sitemap não
 submetido ao Google Search Console — requer acesso à conta.
 
+## 2026-10-31 — Play Store: keystore localizada e pipeline pronto; release congelado por gate próprio
+
+OBSERVED (desktop `DESKTOP-8T5DRBS`): keystore real localizado em
+`Downloads\Cartilhas (Versão Chatbot)\...\cartilhas_app\android\` —
+`upload-keystore.jks` + `key.properties` funcional, cert SHA256
+`16:44:39:F5…` idêntico ao `upload_certificate.pem` do repo (mesma chave
+registrada no Play App Signing). Build pipeline verificado até o gate:
+worktree em `tds-release-14013-build`, patch da release aplicado, pub get +
+Gradle OK. BLOCKED: `build appbundle --release` falha no gate intencional do
+projeto — `release_build_allowed: false` em `release/release_status.json`
+com 2 evidências físicas pendentes (`certificate_human_approval_e2e`,
+`evidence_offline_xiaomi`). O AAB antigo está `superseded/upload_allowed=false`.
+Não contornável — é controle de governança. Roteiros E2E executáveis em
+`docs/production/RELEASE_EVIDENCE_RUNBOOKS_2026-10-31.md`; script de build
+pronto no desktop (`tds-build-aab.ps1`); senhas copiadas em runtime sem
+exposição. Patch de release removido do diretório público após uso.
+Search Console: página aberta no Chrome do desktop aguardando verificação
+da propriedade (método arquivo HTML disponível).
+
 ## 2026-10-30 — republicação web do app em cartilhas.ipexdesenvolvimento.cloud
 
 Domínio real é `cartilhas.ipexdesenvolvimento.cloud` (Cloudflare → Traefik →
