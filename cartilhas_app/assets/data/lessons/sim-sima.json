@@ -10,7 +10,7 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Olá! Você produz queijo, mel, carne, ovos, geleias ou outros alimentos de origem animal? Sabia que para vender legalmente esses produtos você precisa de um SELO DE INSPEÇÃO? Sem ele, você pode ser multado e ter a produção apreendida."
+          "content": "Olá! Você produz queijo, mel, carne ou ovos? Sabia que para vender legalmente produtos de ORIGEM ANIMAL você precisa de um SELO DE INSPEÇÃO? Sem ele, você pode ser multado e ter a produção apreendida. Atenção: geleias, doces e outros produtos de origem VEGETAL seguem outro caminho — a Vigilância Sanitária (RDC 49/2013 da Anvisa), não o SIM."
         },
         {
           "type": "bot",
@@ -44,7 +44,7 @@
         },
         {
           "type": "bot",
-          "content": "SIMA — Sistema Municipal de Inspeção Articulado: integra vários municípios para padronizar a inspeção. Com o SIMA, você pode vender para outros municípios do estado. É como uma 'aliança' entre prefeituras que amplia o mercado disponível para o pequeno produtor."
+          "content": "SIMA — Sistema Municipal de Inspeção Articulado: integra vários municípios para padronizar a inspeção. Quando seu município adere a um SIMA/consórcio, o selo pode valer para outros municípios participantes — confirme com a Prefeitura ou a ADAPEC-TO a cobertura vigente no seu caso. É como uma 'aliança' entre prefeituras que amplia o mercado disponível para o pequeno produtor."
         },
         {
           "type": "bot",
@@ -62,7 +62,7 @@
             {
               "label": "SIMA — Sistema Municipal Articulado",
               "value": "b",
-              "feedback": "O SIMA é o passo seguinte ao SIM! Enquanto o SIM permite vender no próprio município, o SIMA — que integra vários municípios — permite ampliar a área de comercialização para outros municípios do estado. Comece pelo SIM e evolua para o SIMA quando estiver pronto."
+              "feedback": "O SIMA é o passo seguinte ao SIM! Enquanto o SIM permite vender no próprio município, o SIMA — que integra vários municípios — pode ampliar a área de comercialização para os municípios participantes (confirme a cobertura com a Prefeitura ou a ADAPEC-TO). Comece pelo SIM e evolua para o SIMA quando estiver pronto."
             }
           ]
         }
@@ -108,25 +108,25 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Com o SIM regularizado, você pode acessar: Feiras livres municipais, Mercados e minimercados locais, Programas institucionais como PNAE (escolas) e PAA. O PNAE é especialmente importante — garante compra regular a preço justo. Para acessar, é preciso ter DAP (Declaração de Aptidão ao Pronaf) e estar registrado na prefeitura."
+          "content": "Com o SIM regularizado, você pode acessar: Feiras livres municipais, Mercados e minimercados locais, Programas institucionais como PNAE (escolas) e PAA. O PNAE é especialmente importante — garante compra regular a preço justo, e hoje exige que no mínimo 45% dos recursos sejam usados na compra da agricultura familiar (Lei 15.226/2025). Para acessar, é preciso ter CAF (Cadastro Nacional da Agricultura Familiar — substituiu a antiga DAP, é gratuito e vale 3 anos) e estar registrado na prefeitura."
         },
         {
           "type": "bot",
-          "content": "COMO SE ORGANIZAR: (1) Reúna a documentação necessária (RG, CPF, comprovante de endereço, DAP). (2) Procure a Secretaria de Agricultura do seu município. (3) Solicite orientação técnica para adequar sua instalação. (4) Inscreva-se no processo de regularização. (5) Após aprovação, emita seu primeiro lote com o selo oficial."
+          "content": "COMO SE ORGANIZAR: (1) Reúna a documentação necessária (RG, CPF, comprovante de endereço, CAF). (2) Procure a Secretaria de Agricultura do seu município. (3) Solicite orientação técnica para adequar sua instalação. (4) Inscreva-se no processo de regularização. (5) Após aprovação, emita seu primeiro lote com o selo oficial."
         },
         {
           "type": "question",
           "content": "Qual documento é necessário para um produtor familiar acessar o PNAE?",
           "options": [
             {
-              "label": "DAP — Declaração de Aptidão ao Pronaf",
+              "label": "CAF — Cadastro Nacional da Agricultura Familiar",
               "value": "a",
-              "feedback": "EXATO! A DAP comprova que você é agricultor familiar e é o documento base para acessar vários programas públicos, incluindo o PNAE. Para obter a DAP, procure o sindicato rural, a EMATER ou a Secretaria de Agricultura do seu município."
+              "feedback": "EXATO! O CAF (que substituiu a antiga DAP) comprova que você é agricultor familiar e é o documento base para acessar vários programas públicos, incluindo o PNAE. É gratuito, tem validade de 3 anos e pode ser obtido no sindicato rural, na RURALTINS/EMATER ou na Secretaria de Agricultura do seu município."
             },
             {
               "label": "Contrato social de empresa",
               "value": "b",
-              "feedback": "Não — o produtor familiar não precisa ser empresa. O documento necessário é a DAP (Declaração de Aptidão ao Pronaf), que comprova que você é agricultor familiar. É gratuita e pode ser obtida no sindicato rural, na EMATER ou na Secretaria de Agricultura."
+              "feedback": "Não — o produtor familiar não precisa ser empresa. O documento necessário é o CAF (Cadastro Nacional da Agricultura Familiar, que substituiu a antiga DAP), que comprova que você é agricultor familiar. É gratuito e pode ser obtido no sindicato rural, na RURALTINS/EMATER ou na Secretaria de Agricultura."
             }
           ]
         }
