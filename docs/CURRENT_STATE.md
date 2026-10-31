@@ -1,5 +1,31 @@
 # CURRENT STATE
 
+## 2026-10-31 — sessão filha (EAD/WordPress): 3 commits locais em checkout separado
+
+OBSERVED (checkout `/root/tutor-tds-platform`, branch
+`codex/onda-0-consolidacao`, commits `bf1b24e`, `fd990fa`, `ae6686f` —
+locais, **não empurrados**): sessão paralela sincronizou
+`wordpress/legacy-runtime/tds-lms-core` **da produção EAD para o repo**
+(produção era fonte viva; 5 arquivos divergiam por edição direta no
+servidor). Mudanças já aplicadas ao vivo: guarda de rota
+`mp-subscription-callback` (POST sem key → 403 verificado ao vivo),
+minimização de PII em `/user-by-phone` (resposta padrão só
+`found`+`user_id`; contato exige `?internal=1`; acesso logado) e rótulo
+"Comprar agora" no botão externo LearnPress de cursos pagos. Auditoria
+read-only das rotas `tds/v1` + frente comercial em
+`docs/audit-2026-10-31-ead-apis-commercial.md` — mapa EAD com 12 cursos
+(9 cartilhas + 2 IA + PRISMA comercial), coexistência de duas
+implementações LMS (`tds-portal-core` repo × `tds-lms-core` EAD) e
+mu-plugins não versionados como riscos declarados. Recorte disjunto de
+Flutter/API: nenhum arquivo de `cartilhas_app/` ou `api/` tocado;
+sintaxe `php -l` limpa nos 5 arquivos. UNKNOWN/BLOCKED: P0 pendente —
+rotacionar `TDS_API_KEY` (hardcoded no loader mu-plugin de produção),
+restringir escopo de `/user-by-phone`/`/progress`, versionar mu-plugins
+EAD; push dos 3 commits aguarda credencial. Nota: diretriz SESSÃO-02 em
+`/root/tds-diretrizes/` descreve auditoria de hook pós-commit → deploy
+Dokploy (commit `c7c40f0`, branch `claude/brainstorm-debug-jfxk1`) —
+relatório não localizado neste host; escopo de outra sessão.
+
 ## 2026-10-31 — suíte Flutter revalidada no Linux: 476/476 + analyze limpo
 
 OBSERVED (host Linux, Flutter 3.44.9/Dart 3.12.2 — mesma versão pinada no CI e
