@@ -11,9 +11,11 @@
   },
   "release_build_allowed": false,
   "source_verification": {
-    "flutter_tests": "290/290",
+    "flutter_tests": "476/476",
     "dart_analyze": "passed",
-    "verified_at": "2026-09-21"
+    "verified_at": "2026-10-31",
+    "verified_on": "agent/web-1.4.0-c07",
+    "sdk": "flutter 3.44.9 / dart 3.12.2"
   },
   "artifact": {
     "path": "release/Tutor-TDS-1.4.0+13-signed.aab",

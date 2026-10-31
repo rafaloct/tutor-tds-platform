@@ -109,7 +109,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Vídeo de cooperativismo'),
       500,
-      scrollable: find.byType(Scrollable).last,
+      scrollable: find.byType(Scrollable).first,
     );
 
     expect(find.text('Vídeo de cooperativismo'), findsOneWidget);

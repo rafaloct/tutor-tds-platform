@@ -1,5 +1,28 @@
 # CURRENT STATE
 
+## 2026-10-31 — suíte Flutter revalidada no Linux: 476/476 + analyze limpo
+
+OBSERVED (host Linux, Flutter 3.44.9/Dart 3.12.2 — mesma versão pinada no CI e
+no SDK histórico do desktop): `flutter pub get`, `flutter analyze` (0 issues) e
+`flutter test` completos em `agent/web-1.4.0-c07` — **476/476 testes**. Sete
+falhas iniciais corrigidas: 4 eram de ambiente (`dart` fora do PATH nos testes
+`validate_production_config`); `media_catalog_screen` 200% rolava o Scrollable
+errado (`.last` passou a resolver o TextField de busca de 7d600d5 — agora
+`.first`); `secure_media_embed_test` e `learning_event_sync_service_test`
+estavam desatualizados frente ao commit e72a557 (remoção deliberada do host
+youtube-nocookie por quebra de postMessage em srcdoc; descarte de 422/404/409
+da fila legada não-durável contra head-of-line blocking). Teste 5xx adicionado
+preservando a garantia de parada do lote em falha transitória. `dart:html`
+deprecado migrado para `package:web` + `dart:js_interop` em
+`media_embed_view_web.dart` (`web` promovida a dep direta, lock 1.1.1
+inalterado). `release_status.json` `source_verification` atualizado para
+476/476 de hoje; `release_build_allowed` permanece **false** — os 2 gates
+físicos (certificate_human_approval_e2e, evidence_offline_xiaomi) seguem
+pendentes de execução no Xiaomi + host com ADB, roteiros em
+`docs/production/RELEASE_EVIDENCE_RUNBOOKS_2026-10-31.md`. UNKNOWN/BLOCKED:
+desktop Windows não alcançável por SSH a partir deste host (timeout); execução
+dos gates físicos e geração do AAB continuam ação humana no desktop.
+
 ## 2026-10-31 — F3 operação de atendimento Chatwoot (funil CadÚnico)
 
 Configuração observada em produção (`kreativ-chatwoot`, account "TDS Tocantins"),

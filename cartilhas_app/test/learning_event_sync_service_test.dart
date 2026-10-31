@@ -272,7 +272,7 @@ void main() {
     expect(await queue.pending(), isEmpty);
   });
 
-  test('409 não é sucesso, preserva a fila e interrompe o lote', () async {
+  test('409 é rejeição definitiva na fila legada: descarta e segue o lote', () async {
     await queue.enqueue(event('sessao-1', LearningEventType.lessonStarted));
     await queue.enqueue(event('sessao-2', LearningEventType.lessonStarted));
     var requests = 0;
@@ -283,6 +283,26 @@ void main() {
       client: MockClient((_) async {
         requests++;
         return http.Response('{}', 409);
+      }),
+      consentChecker: () async => true,
+    );
+
+    expect(await service.flush(), 0);
+    expect(requests, 2);
+    expect(await queue.pending(), isEmpty);
+  });
+
+  test('5xx preserva a fila legada e interrompe o lote', () async {
+    await queue.enqueue(event('sessao-1', LearningEventType.lessonStarted));
+    await queue.enqueue(event('sessao-2', LearningEventType.lessonStarted));
+    var requests = 0;
+    final service = LearningEventSyncService(
+      apiUrl: 'https://api.example',
+      authRepository: auth(),
+      queue: queue,
+      client: MockClient((_) async {
+        requests++;
+        return http.Response('{}', 503);
       }),
       consentChecker: () async => true,
     );
