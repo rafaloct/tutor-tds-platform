@@ -187,7 +187,10 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
           durationSeconds: duration,
         );
         if (type == 'ended') {
-          await _tracker?.completed(positionSeconds: position);
+          await _tracker?.completed(
+            positionSeconds: position,
+            durationSeconds: duration,
+          );
         }
         if ((position - _lastPersistedSecond).abs() >= 5 || type == 'ended') {
           _lastPersistedSecond = position;
@@ -261,6 +264,7 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
       _ratingIssue = null;
     });
     try {
+      await _tracker?.syncService.flush();
       final rating = await widget.repository.rate(widget.media.id, value);
       if (mounted) {
         setState(() {

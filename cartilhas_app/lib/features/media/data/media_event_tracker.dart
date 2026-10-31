@@ -24,6 +24,19 @@ class MediaEventTracker {
   final Set<int> _checkpoints = {};
   bool _started = false;
   bool _completed = false;
+  int _lastCheckpointPosition = 0;
+  DateTime? _lastOccurredAt;
+
+  DateTime _nextOccurredAt() {
+    final now = DateTime.now().toUtc();
+    final baseline = now.subtract(const Duration(milliseconds: 200));
+    final prev = _lastOccurredAt;
+    final next = prev == null
+        ? baseline
+        : prev.add(const Duration(milliseconds: 20));
+    _lastOccurredAt = next.isAfter(now) ? now : next;
+    return _lastOccurredAt!;
+  }
 
   Future<void> started() async {
     if (_started) return;
@@ -35,27 +48,77 @@ class MediaEventTracker {
     required int positionSeconds,
     required int durationSeconds,
   }) async {
-    if (durationSeconds <= 0 || positionSeconds < 0) return;
+    final effectiveDuration = durationSeconds > 0
+        ? durationSeconds
+        : media.durationSeconds;
+    if (effectiveDuration <= 0 || positionSeconds < 0) return;
     await started();
-    final fraction = positionSeconds / durationSeconds;
+    final clampedPos = positionSeconds.clamp(0, effectiveDuration);
+    final fraction = clampedPos / effectiveDuration;
     for (final checkpoint in const [25, 50, 75]) {
       if (fraction >= checkpoint / 100 && _checkpoints.add(checkpoint)) {
+        final targetPos = ((effectiveDuration * checkpoint) / 100).ceil();
+        var cpPos = targetPos < clampedPos ? targetPos : clampedPos;
+        if (cpPos <= _lastCheckpointPosition) {
+          cpPos = _lastCheckpointPosition + 1;
+        }
+        _lastCheckpointPosition = cpPos;
         await _enqueue(
           LearningEventType.videoCheckpoint,
           checkpoint: checkpoint,
-          positionSeconds: positionSeconds,
+          positionSeconds: cpPos,
         );
       }
     }
-    if (fraction >= 0.9) await completed(positionSeconds: positionSeconds);
+    if (fraction >= 0.9) {
+      await completed(
+        positionSeconds: clampedPos,
+        durationSeconds: effectiveDuration,
+      );
+    }
   }
 
-  Future<void> completed({required int positionSeconds}) async {
+  Future<void> completed({
+    required int positionSeconds,
+    int? durationSeconds,
+  }) async {
     if (_completed) return;
+    final effectiveDuration = (durationSeconds != null && durationSeconds > 0)
+        ? durationSeconds
+        : media.durationSeconds;
+    if (effectiveDuration > 0) {
+      await started();
+      for (final checkpoint in const [25, 50, 75]) {
+        if (_checkpoints.add(checkpoint)) {
+          var cpPos = ((effectiveDuration * checkpoint) / 100).ceil();
+          if (cpPos <= _lastCheckpointPosition) {
+            cpPos = _lastCheckpointPosition + 1;
+          }
+          _lastCheckpointPosition = cpPos;
+          await _enqueue(
+            LearningEventType.videoCheckpoint,
+            checkpoint: checkpoint,
+            positionSeconds: cpPos,
+          );
+        }
+      }
+    }
     _completed = true;
+    final minCompleted = effectiveDuration > 0
+        ? (effectiveDuration * 0.9).ceil()
+        : positionSeconds;
+    var finalPos = positionSeconds < minCompleted
+        ? minCompleted
+        : (effectiveDuration > 0 && positionSeconds > effectiveDuration
+              ? effectiveDuration
+              : positionSeconds);
+    if (finalPos <= _lastCheckpointPosition && effectiveDuration > 0) {
+      finalPos = (_lastCheckpointPosition + 1).clamp(0, effectiveDuration + 5);
+    }
     await _enqueue(
       LearningEventType.videoCompleted,
-      positionSeconds: positionSeconds,
+      positionSeconds: finalPos,
+      waitForFlush: true,
     );
   }
 
@@ -69,6 +132,7 @@ class MediaEventTracker {
     int? checkpoint,
     int? positionSeconds,
     String? followupType,
+    bool waitForFlush = false,
   }) async {
     var event = LearningEvent.video(
       type: type,
@@ -79,12 +143,17 @@ class MediaEventTracker {
       checkpoint: checkpoint,
       positionSeconds: positionSeconds,
       followupType: followupType,
+      occurredAt: _nextOccurredAt(),
     );
     final owner = await _owner;
     if (owner != null) {
       event = event.forLocalOwner(userId: owner, apiUrl: syncService.apiUrl);
     }
     await queue.enqueue(event);
-    unawaited(syncService.flush());
+    if (waitForFlush) {
+      await syncService.flush();
+    } else {
+      unawaited(syncService.flush());
+    }
   }
 }

@@ -51,11 +51,16 @@ function notify(type,position,duration){
 
 String _youtube(MediaItem media, int initialPosition) {
   final videoId = jsonEncode(media.providerAssetId);
+  final fallbackDuration = media.durationSeconds;
   return '''<div id="player" class="player"></div>
 <script src="https://www.youtube.com/iframe_api"></script><script>
-let player; function onYouTubeIframeAPIReady(){player=new YT.Player('player',{host:'https://www.youtube-nocookie.com',videoId:$videoId,playerVars:{rel:0,playsinline:1,start:$initialPosition,cc_load_policy:1},events:{onStateChange:onState,onError:()=>notify('error',0,0)}});}
-function onState(e){if(e.data===YT.PlayerState.PLAYING){notify('play',player.getCurrentTime(),player.getDuration());}if(e.data===YT.PlayerState.ENDED){notify('ended',player.getDuration(),player.getDuration());}}
-setInterval(()=>{if(player&&player.getCurrentTime){notify('progress',player.getCurrentTime(),player.getDuration());}},5000);
+let player;
+const fallbackDuration=$fallbackDuration;
+function dur(){return (player&&player.getDuration&&player.getDuration()>0)?player.getDuration():fallbackDuration;}
+function pos(){return (player&&player.getCurrentTime)?player.getCurrentTime():0;}
+function onYouTubeIframeAPIReady(){player=new YT.Player('player',{videoId:$videoId,playerVars:{rel:0,playsinline:1,start:$initialPosition,cc_load_policy:1},events:{onStateChange:onState,onError:()=>notify('error',0,0)}});}
+function onState(e){if(e.data===YT.PlayerState.PLAYING){notify('play',pos(),dur());}if(e.data===YT.PlayerState.ENDED){notify('ended',dur(),dur());}}
+setInterval(()=>{if(player&&player.getCurrentTime){notify('progress',pos(),dur());}},5000);
 window.addEventListener('DOMContentLoaded',()=>document.getElementById('speed').addEventListener('change',e=>{if(player&&player.setPlaybackRate)player.setPlaybackRate(Number(e.target.value));}));
 </script>''';
 }
