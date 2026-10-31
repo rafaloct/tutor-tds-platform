@@ -197,12 +197,15 @@ class RestController {
             ));
         }
         if (!$user_id) return new \WP_REST_Response(['found' => false], 404);
-        $user = get_user_by('id', $user_id);
-        return new \WP_REST_Response([
-            'found'        => true,
-            'user_id'      => (int) $user_id,
-            'display_name' => $user->display_name,
-            'email'        => $user->user_email,
-        ], 200);
+        // Minimização de PII: resposta padrão devolve apenas existência + id.
+        // Campos de contato exigem flag interna (consumidor legado explícito).
+        $resp = ['found' => true, 'user_id' => (int) $user_id];
+        if ($req->get_param('internal') === '1') {
+            $user = get_user_by('id', $user_id);
+            $resp['display_name'] = $user->display_name;
+            $resp['email']        = $user->user_email;
+        }
+        error_log('tds-api: user-by-phone lookup user_id=' . (int) $user_id);
+        return new \WP_REST_Response($resp, 200);
     }
 }

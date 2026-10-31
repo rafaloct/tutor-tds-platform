@@ -55,3 +55,7 @@ Execução read-only sobre diagnóstico do Antigravity (BPM Designer). Sem alter
 - Rotacionar `TDS_API_KEY` para env (hoje hardcoded no loader mu-plugin de produção)
 - Restringir escopo de `/user-by-phone` e `/progress` (por usuário autenticado ou rate-limit)
 - Versionar os mu-plugins EAD no repo (hoje vivem só no container)
+
+## P0 — minimização de PII (2026-10-31)
+- [x] `/user-by-phone` endurecido: resposta padrão devolve só `found`+`user_id` (email/display_name exigem flag `?internal=1`); acesso logado via error_log. Produção patcheada + sincronizada ao repo.
+- Consumidores externos do endpoint: nenhum comprovado no repo — impacto esperado baixo; se algum consumidor precisar de nome/email deve passar `internal=1` (legado explícito) ou migrar para auth por usuário na fatia de identidade.
