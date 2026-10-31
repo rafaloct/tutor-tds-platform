@@ -409,3 +409,18 @@ humana/governança, não automação).
 `LEARNPRESS_SYNC_ENABLED`, matrículas nessa janela nunca entram na outbox
 (`_enqueue_sync` retorna cedo). Ordem de ativação ou backfill deve entrar no
 runbook de ativação das flags.
+
+### Auditoria de integração — fechamento de lacunas (2026-10-31)
+
+**PASS adicionais:** router self-enrollment wired em `main.py`;
+`/open-classes` e `/self-enroll` exigem `access_claims` + flag (401 sem
+token, 404 com flag off); WP `/register` coberto por `permission_callback`
+X-API-Key igual às demais rotas (`/verify` é a única pública, por design);
+modelo `ExternalSyncRequest` × migração 0025 consistentes (13 colunas,
+`uq_external_sync_subject` dedup natural, `ix_external_sync_claim`).
+
+**Entregável novo:** `docs/production/SELF_ENROLLMENT_ACTIVATION_RUNBOOK.md`
+— 5 gates humanos (re-pin staging-migrate, mapeamento course_id↔post_name
+LP, deploy register no WP, ordem das flags/backfill, smoke staging) +
+rollback + template de evidência. Auditoria Flutter↔API↔WP↔LP fechada no
+nível de código; lacunas restantes são todas de acesso/ambiente.
