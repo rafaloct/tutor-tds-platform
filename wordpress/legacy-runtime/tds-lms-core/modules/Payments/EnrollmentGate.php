@@ -35,6 +35,16 @@ class EnrollmentGate {
 
         // Preserve independent payment-based enrollment (if enabled later).
         add_action('woocommerce_payment_complete', [$this, 'enroll_after_payment'], 10, 1);
+        add_filter('learn-press/course/html-button-external', [$this, 'label_external_buy_button'], 10, 2);
+    }
+
+    public function label_external_buy_button(string $content, $courseModel): string {
+        $cid = is_object($courseModel) && method_exists($courseModel, 'get_id') ? (int) $courseModel->get_id() : 0;
+        $price = $cid > 0 ? (float) get_post_meta($cid, '_lp_price', true) : 0.0;
+        if ($price > 0.0) {
+            return (string) preg_replace('/>([^<]+)<\/a>$/', '>Comprar agora</a>', $content);
+        }
+        return $content;
     }
 
     private function valid_course(int $course_id): bool {
