@@ -387,3 +387,25 @@ is inferred. Flag default, production, enrollment/progress and assets preserved.
 **Auditoria Flutter↔API↔WP↔LP:** contratos de payload compatíveis (`user_id` em user-by-phone/register; `course_slug` em enroll). UNKNOWN registrado: `courses.id` canônico deve coincidir com `post_name` LP por curso — gate de ativação explícito no contrato; falha 404 cairia em retry→`failed`→reconciliação (caminho seguro).
 
 **Integridade histórico:** 6 commits verificados (8c0959b…99b438c), local≡remote, push b2ec4c9 limpo.
+
+### Auditoria de integração — continuação (2026-10-31, HEAD c271e7e)
+
+**Flutter CI (observado):** `workflow_dispatch` run 41202773069 no branch →
+analyze-test **success**; log confirma `+484: All tests passed!` — suíte agora
+tem evidência CI real (antes só local).
+
+**Worker learnpress_sync (auditado):** claim `FOR UPDATE SKIP LOCKED`;
+reclama pending + failed-com-backoff-vencido + processing-com-lease-vencido
+(recuperação de crash); backoff `min(600, 2^attempts*5)`; attempts esgotados →
+`failed` permanente p/ reconciliação. Detalhe: attempt é consumido no claim —
+crash-loop pode esgotar 5 tentativas sem entrega real (bounded, por design).
+
+**BLOCKED novo:** `staging-alembic-migrate.yml` está pinado em
+`EXPECTED_ALEMBIC_HEAD: 20261003_0024` + ref fixo `89624132…` — não aplica
+0025 por construção. Aplicar 0025 em staging exige re-pin revisado (ação
+humana/governança, não automação).
+
+**Gap de ativação (registrar):** se `SELF_ENROLLMENT_ENABLED` ligar antes de
+`LEARNPRESS_SYNC_ENABLED`, matrículas nessa janela nunca entram na outbox
+(`_enqueue_sync` retorna cedo). Ordem de ativação ou backfill deve entrar no
+runbook de ativação das flags.
