@@ -24,6 +24,7 @@ Após cada execução aprovada, preencher `verified_at`, `evidence` e
 |---|---|
 | Dispositivo | Xiaomi `2311DRK48G` (o mesmo dos gates anteriores) ou equivalente físico |
 | Host | `DESKTOP-8T5DRBS` com ADB no PATH (`flutter-3.44.9` validado) |
+| Conexão | **ADB via WiFi** — aparelho e host na mesma rede; ver §0.1 |
 | API | **staging** `https://tutor-tds-staging.fastapicloud.dev` — nunca produção |
 | Pacote QA | debug, `applicationIdSuffix=.dev.dynamicqa.r<run_id>` (mesmo padrão dos gates aprovados) |
 | Contas | contas QA sintéticas do staging (7 preservadas); instrutor + aluno |
@@ -39,6 +40,31 @@ C:\Users\Usuario\flutter-3.44.9\bin\flutter.bat build apk --debug `
 
 Instalar: `adb install -r build\app\outputs\flutter-apk\app-debug.apk`
 Registrar `apk_sha256` (ver `sha256sum` / `Get-FileHash`) no JSON final.
+
+### 0.1 Conexão ADB via WiFi (sem cabo permanente)
+
+O aparelho pode ficar remoto — basta mesma rede WiFi. Script pronto:
+`C:\Users\Usuario\tds-wifi-adb.ps1 <IP-do-aparelho> [porta-pareamento] [codigo-pareamento]`.
+
+**Primeiro pareamento (Android 11+, MIUI incluída):**
+1. Aparelho: Opções de desenvolvedor → **Depuração sem fio** → ativar → tocar
+   em *"Parear dispositivo com código de pareamento"* → anota IP:porta + código de 6 dígitos.
+2. Host: `powershell -File C:\Users\Usuario\tds-wifi-adb.ps1 -IP 192.168.x.y -PairPort 3xxxx -Code 123456`
+   — o script faz `adb pair`, descobre a porta de conexão (diferente da de
+   pareamento) e `adb connect`.
+3. Conferir: `adb devices` deve listar `IP:porta  device`.
+
+**Reconexão (depois de já pareado):**
+`powershell -File C:\Users\Usuario\tds-wifi-adb.ps1 -IP 192.168.x.y -ConnectPort 5555`
+(Depuração sem fio ativa escuta na porta exibida na tela do aparelho —
+normalmente a mesma porta da opção, não a de pareamento.)
+
+Notas operacionais:
+- O aparelho precisa estar **na mesma rede/rota** que o host — WiFi do
+  escritório; se o aparelho estiver em 4G/celular, tether no notebook.
+- Se o MIUI reiniciar a porta, repetir a fase de pareamento (a porta muda).
+- Todos os comandos ADB dos roteiros funcionam igual por WiFi — sem diferença
+  nos passos das fases; só `adb install` fica um pouco mais lento.
 
 **Regra de ouro:** nenhum passo pode tocar produção, conta real ou dados de
 aluno real. Cada fase precisa de artefato capturado (screenshot +
