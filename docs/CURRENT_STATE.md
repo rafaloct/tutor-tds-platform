@@ -29,6 +29,23 @@ comprovado: conversa QA sintética na inbox 1 com "quero agricultura" recebeu
 label `interesse-curso` e team `bolsistas de graduação` (contato/conversa
 removidos após o teste).
 
+## 2026-10-31 — camada SEO pública do portal de cursos
+
+OBSERVED: `/cursos/` + 9 páginas estáticas `/cursos/<slug>/` publicadas em
+produção (200 OK), com OG/Twitter meta, canonical, JSON-LD `Course` +
+`ItemList` (oferta price=0 BRL, categoria CadÚnico), CTA "Quero participar"
+via `wa.me/556393010823?text=quero%20<slug>` (mesmo número da instância
+`whatsapp_chatwoot` ligada à inbox 1 — a automação id 10 roteia para
+`bolsistas`), links para app web `/` e download `/app/`. `robots.txt` e
+`sitemap.xml` criados. `index.html` do shell Flutter ganhou meta OG/Twitter,
+canonical e JSON-LD `WebSite` — aplicado no deploy e no fonte
+(`cartilhas_app/web/index.html`, commit `e2ee6db`). O app web 1.4.0+13 já
+carrega todas as funcionalidades (catálogo, vídeo, progresso, avaliação,
+suporte); as páginas estáticas são a camada indexável de descoberta.
+UNKNOWN/BLOCKED: publicação na Play Store exige keystore + conta Play
+Console — não disponível neste ambiente; permanece ação humana. Sitemap não
+submetido ao Google Search Console — requer acesso à conta.
+
 ## 2026-10-30 — republicação web do app em cartilhas.ipexdesenvolvimento.cloud
 
 Domínio real é `cartilhas.ipexdesenvolvimento.cloud` (Cloudflare → Traefik →
