@@ -30,7 +30,11 @@ import '../widgets/tds_wait_experience.dart';
 import '../widgets/tds_brand_stripe.dart';
 import '../features/analytics/telemetry_route.dart';
 import '../features/auth/data/auth_repository.dart';
+import '../features/auth/presentation/account_login_dialog.dart';
 import '../features/classrooms/data/classroom_repository.dart';
+import '../features/classrooms/data/self_enrollment_repository.dart';
+import '../features/learning_context/learning_context_controller.dart';
+import '../features/learning_context/learning_context_repository.dart';
 import '../features/classrooms/application/team_capability.dart';
 import '../features/classrooms/presentation/classroom_dashboard_screen.dart';
 import '../features/classrooms/presentation/learner_classrooms_screen.dart';
@@ -46,12 +50,18 @@ class HomeScreen extends StatefulWidget {
     this.courseLoader,
     this.learningHomeController,
     this.editorGatewayFactory,
+    this.selfEnrollmentGateway,
+    this.learningContextRepository,
+    this.classroomGateway,
   });
 
   final LearningHomeController? learningHomeController;
 
   final Future<List<Cartilha>> Function()? courseLoader;
   final CourseEditorGateway Function()? editorGatewayFactory;
+  final SelfEnrollmentGateway? selfEnrollmentGateway;
+  final LearningContextRepository? learningContextRepository;
+  final LearnerClassroomGateway? classroomGateway;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -67,6 +77,23 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Cartilha>> _cartilhas;
   bool _catalogLoading = false;
   bool _catalogReloadQueued = false;
+  String? _enrollingCourseId;
+  RemoteSelfEnrollmentRepository? _ownedSelfEnrollment;
+  SelfEnrollmentGateway? _selfEnrollment;
+  ClassroomRepository? _ownedClassroomGateway;
+  LearnerClassroomGateway? _classroomGateway;
+  RemoteLearningContextRepository? _ownedContextRepository;
+  LearningContextRepository? _contextRepository;
+  LearningContextController? _contextController;
+
+  @override
+  void dispose() {
+    _ownedSelfEnrollment?.dispose();
+    _ownedClassroomGateway?.dispose();
+    _ownedContextRepository?.dispose();
+    _contextController?.dispose();
+    super.dispose();
+  }
 
   bool get _hasManagementAccess =>
       _operationScopeCount > 0 ||
@@ -173,6 +200,160 @@ class _HomeScreenState extends State<HomeScreen> {
         // applies: remote -> local cache (SharedPreferences) -> bundled assets.
         apiUrl: AppConfig.tutorApiUrl,
       ).fetchAll();
+
+  bool get _selfEnrollmentActive =>
+      widget.selfEnrollmentGateway != null ||
+      (AppConfig.selfEnrollmentEnabled &&
+          AppConfig.tutorApiUrl.trim().isNotEmpty);
+
+  SelfEnrollmentGateway get _selfEnrollmentGateway =>
+      _selfEnrollment ??= widget.selfEnrollmentGateway ??
+      (_ownedSelfEnrollment = RemoteSelfEnrollmentRepository(
+        apiUrl: AppConfig.tutorApiUrl,
+        auth: context.read<AuthRepository>(),
+      ));
+
+  LearnerClassroomGateway get _learnerGateway =>
+      _classroomGateway ??= widget.classroomGateway ??
+      (_ownedClassroomGateway = ClassroomRepository(
+        apiUrl: AppConfig.tutorApiUrl,
+        authRepository: context.read<AuthRepository>(),
+      ));
+
+  LearningContextRepository get _learningContextRepository =>
+      _contextRepository ??= widget.learningContextRepository ??
+      (_ownedContextRepository = RemoteLearningContextRepository(
+        apiUrl: AppConfig.tutorApiUrl,
+        auth: context.read<AuthRepository>(),
+      ));
+
+  bool get _usesLearningContext =>
+      widget.learningContextRepository != null ||
+      AppConfig.learningContextEnabled;
+
+  /// First-touch enrollment: with the flag on and a session, tapping a public
+  /// course creates the canonical enrollment server-side and opens the pinned
+  /// class edition. Failure never blocks the public read-only path.
+  Future<void> _openCartilha(Cartilha cartilha) async {
+    if (_enrollingCourseId != null) return;
+    if (!_selfEnrollmentActive) {
+      await _openPublicCourse(cartilha);
+      return;
+    }
+    // Probe the live session instead of the UI flag: enrollment is a server
+    // operation and must not depend on a possibly stale capability refresh.
+    if (!await _hasLiveSession()) {
+      final loggedIn = await _promptAccountForEnrollment();
+      if (!mounted || !loggedIn || !await _hasLiveSession()) {
+        if (mounted) await _openPublicCourse(cartilha);
+        return;
+      }
+      _refreshSessionState();
+    }
+    setState(() => _enrollingCourseId = cartilha.id);
+    try {
+      final snapshot = await _selfEnrollmentGateway.selfEnroll(cartilha.id);
+      if (!mounted) return;
+      var gate = snapshot;
+      LearningContextController? controller;
+      if (_usesLearningContext) {
+        controller = _contextController ??= LearningContextController(
+          _learningContextRepository,
+        );
+        final resolved = await controller.load(snapshot.context.cohortId);
+        if (!mounted) return;
+        if (resolved == null ||
+            resolved.context.userId != snapshot.context.userId) {
+          throw const ClassroomException(
+            'Contexto da matrícula indisponível.',
+          );
+        }
+        gate = resolved;
+      }
+      final course = await _learnerGateway.course(snapshot.context.cohortId);
+      if (!mounted) return;
+      if (!gate.context.matchesCourse(course)) {
+        throw const ClassroomException(
+          'A edição não corresponde à matrícula.',
+        );
+      }
+      await Navigator.push(
+        context,
+        trackedRoute(
+          pageId: 'classroom_course',
+          courseId: course.id,
+          resourceId: 'course_content',
+          featureId: 'classroom_learning',
+          builder: (_) => ChatExperienceScreen(
+            cartilha: course,
+            progressOwnerId: gate.context.userId,
+            learningContextController: controller,
+          ),
+        ),
+      );
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Não foi possível criar sua matrícula agora. O conteúdo abre sem vínculo; tente novamente para registrar progresso.',
+            ),
+          ),
+        );
+        await _openPublicCourse(cartilha);
+      }
+    } finally {
+      if (mounted) setState(() => _enrollingCourseId = null);
+    }
+  }
+
+  Future<bool> _hasLiveSession() async {
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    if (auth == null) return false;
+    try {
+      return await auth.hasSession();
+    } on Object {
+      return false;
+    }
+  }
+
+  Future<bool> _promptAccountForEnrollment() async {
+    final auth = Provider.of<AuthRepository?>(context, listen: false);
+    if (auth == null) return false;
+    final wantsAccount = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Criar sua matrícula'),
+        content: const Text(
+          'Entre com sua conta TDS para registrar progresso e certificado neste curso. Sem conta, o conteúdo continua aberto neste aparelho.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Continuar sem conta'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Entrar na conta'),
+          ),
+        ],
+      ),
+    );
+    if (wantsAccount != true || !mounted) return false;
+    final session = await showAccountLoginDialog(context);
+    return session != null;
+  }
+
+  Future<void> _openPublicCourse(Cartilha cartilha) => Navigator.push(
+    context,
+    trackedRoute(
+      pageId: 'guided_lesson',
+      courseId: cartilha.id,
+      resourceId: 'course_content',
+      featureId: 'guided_learning',
+      builder: (_) => ChatExperienceScreen(cartilha: cartilha),
+    ),
+  );
 
   Future<void> _openProfile() => Navigator.push(
     context,
@@ -520,7 +701,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-          _CartilhaList(cartilhas: cartilhas),
+          _CartilhaList(
+            cartilhas: cartilhas,
+            onOpen: _openCartilha,
+            enrollingCourseId: _enrollingCourseId,
+          ),
           const _SupportersBanner(),
         ],
       );
@@ -987,7 +1172,13 @@ class _LearningHeaderState extends State<_LearningHeader> {
 
 class _CartilhaList extends StatelessWidget {
   final List<Cartilha> cartilhas;
-  const _CartilhaList({required this.cartilhas});
+  final Future<void> Function(Cartilha cartilha) onOpen;
+  final String? enrollingCourseId;
+  const _CartilhaList({
+    required this.cartilhas,
+    required this.onOpen,
+    this.enrollingCourseId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1010,8 +1201,11 @@ class _CartilhaList extends StatelessWidget {
               childAspectRatio: 3.2,
             ),
             itemCount: cartilhas.length,
-            itemBuilder: (context, index) =>
-                _CartilhaCard(cartilha: cartilhas[index]),
+            itemBuilder: (context, index) => _CartilhaCard(
+              cartilha: cartilhas[index],
+              onOpen: onOpen,
+              enrolling: enrollingCourseId == cartilhas[index].id,
+            ),
           ),
         ),
       );
@@ -1022,15 +1216,24 @@ class _CartilhaList extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       itemCount: cartilhas.length,
-      itemBuilder: (context, index) =>
-          _CartilhaCard(cartilha: cartilhas[index]),
+      itemBuilder: (context, index) => _CartilhaCard(
+        cartilha: cartilhas[index],
+        onOpen: onOpen,
+        enrolling: enrollingCourseId == cartilhas[index].id,
+      ),
     );
   }
 }
 
 class _CartilhaCard extends StatelessWidget {
   final Cartilha cartilha;
-  const _CartilhaCard({required this.cartilha});
+  final Future<void> Function(Cartilha cartilha) onOpen;
+  final bool enrolling;
+  const _CartilhaCard({
+    required this.cartilha,
+    required this.onOpen,
+    this.enrolling = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1040,16 +1243,7 @@ class _CartilhaCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => Navigator.push(
-          context,
-          trackedRoute(
-            pageId: 'guided_lesson',
-            courseId: cartilha.id,
-            resourceId: 'course_content',
-            featureId: 'guided_learning',
-            builder: (_) => ChatExperienceScreen(cartilha: cartilha),
-          ),
-        ),
+        onTap: enrolling ? null : () => onOpen(cartilha),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -1085,11 +1279,17 @@ class _CartilhaCard extends StatelessWidget {
                       course: cartilha,
                     ),
                   const SizedBox(height: 6),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 14,
-                    color: Colors.grey,
-                  ),
+                  enrolling
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                 ],
               ),
             ],

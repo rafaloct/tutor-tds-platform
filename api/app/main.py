@@ -28,6 +28,7 @@ from .events import router as events_router
 from .evidence import router as evidence_router
 from .presence import router as presence_router
 from .public_api import router as public_router
+from .self_enrollment import router as self_enrollment_router
 from .student_followup import router as student_followup_router
 from .hours import router as hours_router
 from .learning_context import router as learning_context_router
@@ -76,6 +77,7 @@ def create_app(
     application.include_router(evidence_router)
     application.include_router(presence_router)
     application.include_router(public_router)
+    application.include_router(self_enrollment_router)
     application.include_router(student_followup_router)
     application.include_router(organizations_router)
     application.include_router(operator_operations_router)

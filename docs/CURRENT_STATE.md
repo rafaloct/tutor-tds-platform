@@ -1,5 +1,34 @@
 # CURRENT STATE
 
+## 2026-10-31 — fatia self-enrollment: contrato + implementação flag-off
+
+OBSERVED (checkout `/root/tutor-tds-platform-1`): candidato de matrícula
+espontânea implementado atrás de flags desligadas, cobrindo API + WP legado +
+Flutter, com testes locais do recorte. API: migração aditiva
+`20261031_0025` (`classes.enrollment_policy`, índice único parcial de uma
+turma aberta não encerrada por curso, tabela `external_sync_requests`);
+`POST /courses/{course_id}/self-enroll` cria membership→enrollment→
+class_enrollment→bind_student(contexto v2)+OperatorCommandReceipt na mesma
+transação e provisiona a turma aberta de forma determinística e idempotente;
+`GET /open-classes` lista turmas abertas com `viewer_enrolled`. Worker
+`learnpress_sync` (claim/lease/backoff) projeta no legado via
+`user-by-phone`→`register`→`enroll` sem bloquear a matrícula canônica. WP:
+`POST /tds/v1/register` adicionado ao `RestController.php` (X-API-Key,
+idempotente por telefone, subscriber) — código no monorepo, **não
+implantado**. Flutter: flag `SELF_ENROLLMENT_ENABLED` (dart-define, default
+false), `SelfEnrollmentRepository` online-only, seção "Cursos abertos" em
+`LearnerClassroomsScreen` e primeiro toque na Home que matricula e abre a
+edição fixada; sem sessão oferece login e preserva acesso público; falha de
+matrícula nunca bloqueia o catálogo. Evidência local: `test_self_enrollment`
+11/11 + regressão do recorte 48/48 (SQLite, env travado), Flutter
+`self_enrollment_test` 8/8 + suíte relacionada 59/59, `dart analyze` limpo
+nos arquivos alterados. Pins de head de migration nos testes Postgres
+atualizados para `20261031_0025`. UNKNOWN/BLOCKED: sem prova de staging,
+produção ou integração WP real; reconciliação com a sessão irmã que trabalha
+a raiz identidade-matrícula pendente (possível colisão de head de migração);
+gates de ativação no contrato. Contrato:
+`production/SELF_ENROLLMENT_CONTRACT.md`; decisão: item 29 de DECISIONS.
+
 ## 2026-10-31 — sessão filha (EAD/WordPress): 3 commits locais em checkout separado
 
 OBSERVED (checkout `/root/tutor-tds-platform`, branch

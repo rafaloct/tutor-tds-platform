@@ -13,6 +13,11 @@ class AppConfig {
   static const learningContextEnabled = bool.fromEnvironment(
     'LEARNING_CONTEXT_ENABLED',
   );
+  /// Enable with the matching API flag only after the self-enrollment
+  /// staging gate. When off, course taps keep the public read-only path.
+  static const selfEnrollmentEnabled = bool.fromEnvironment(
+    'SELF_ENROLLMENT_ENABLED',
+  );
   static const durableLearningOutboxEnabled = bool.fromEnvironment(
     'DURABLE_LEARNING_OUTBOX_ENABLED',
   );
