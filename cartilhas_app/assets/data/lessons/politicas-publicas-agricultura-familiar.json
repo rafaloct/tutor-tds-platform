@@ -1,0 +1,187 @@
+{
+  "id": "politicas-publicas-agricultura-familiar",
+  "title": "Agricultura Familiar e Políticas Públicas (CAF, PAA, PNAE, PRONAF)",
+  "author": "TDS 2026",
+  "sections": [
+    {
+      "id": "introducao",
+      "title": "Agricultura Familiar: Quem é e o Poder do CAF",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Olá, vizinho! Você já ouviu falar que escola pública, hospital e quartel podem comprar direto da sua roça, sem licitação? Pois é verdade! Mas para isso existe um 'documento-chave': o CAF — Cadastro Nacional da Agricultura Familiar. Ele substituiu a antiga DAP, é GRATUITO e vale por 3 anos."
+        },
+        {
+          "type": "bot",
+          "content": "Pela Lei 11.326/2006, é agricultor familiar quem explora a terra com trabalho da própria família, numa área pequena conforme a região, tirando a maior parte da renda dessa atividade. Também entram povos e comunidades tradicionais: quilombolas, extrativistas, pescadores artesanais e agricultores indígenas. Se é o seu caso, o CAF é o seu passaporte para os programas do governo."
+        },
+        {
+          "type": "question",
+          "content": "O que é o CAF?",
+          "options": [
+            {
+              "label": "O cadastro que comprova que você é agricultor familiar — substituiu a antiga DAP",
+              "value": "a",
+              "feedback": "EXATO! O CAF (Cadastro Nacional da Agricultura Familiar) é o documento oficial que identifica o agricultor familiar e povos/comunidades tradicionais. É gratuito, tem validade de 3 anos e dá acesso ao PNAE, PAA, PRONAF e outros programas."
+            },
+            {
+              "label": "Um registro pago que só grandes empresas podem ter",
+              "value": "b",
+              "feedback": "Não! O CAF é gratuito e foi criado justamente para o pequeno produtor. Ele substituiu a antiga DAP e é emitido com apoio da RURALTINS, do sindicato rural ou da Secretaria de Agricultura do seu município."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "caf",
+      "title": "Passo a Passo para Emitir o CAF",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "DOCUMENTOS BÁSICOS (pessoa física): RG, CPF, comprovante de residência e comprovante da atividade agrícola — contrato de compra/venda, comprovante de posse ou de assentamento. Para quilombolas, assentados e extrativistas, o próprio órgão emissor orienta quais papéis servem como comprovante."
+        },
+        {
+          "type": "bot",
+          "content": "ONDE EMITIR: procure a RURALTINS (a Emater do Tocantins), o sindicato rural dos trabalhadores ou a Secretaria de Agricultura do seu município. A emissão pode ser feita presencialmente com o técnico ou pela internet, mas o primeiro cadastro vale muito mais a pena fazer com orientação — o técnico confere os dados e evita recusa do cadastro."
+        },
+        {
+          "type": "bot",
+          "content": "CAF JURÍDICO: a sua associação ou cooperativa também pode ter um CAF próprio (o CAF da pessoa jurídica). Com ele, o grupo vende para PNAE e PAA como organização formal. Requisito básico: a maioria dos membros precisa ser de agricultores familiares — confirme os critérios vigentes com o técnico, pois as regras podem mudar."
+        },
+        {
+          "type": "question",
+          "content": "Quanto tempo vale o CAF e quanto custa?",
+          "options": [
+            {
+              "label": "3 anos e é gratuito",
+              "value": "a",
+              "feedback": "CORRETO! O CAF tem validade de 3 anos e não custa nada — desconfie de quem cobrar para 'fazer seu CAF'. Antes do vencimento, basta renovar com a RURALTINS ou sindicato."
+            },
+            {
+              "label": "1 ano, com taxa anual",
+              "value": "b",
+              "feedback": "A resposta certa é: 3 anos e gratuito! O CAF não tem taxa. Se alguém cobrar para emitir, procure a RURALTINS ou a Secretaria de Agricultura e denuncie."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pnae",
+      "title": "Vendendo para a Merenda Escolar (PNAE 45%)",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "O PNAE (Programa Nacional de Alimentação Escolar) é o programa que alimenta os estudantes das escolas públicas. Pela regra ATUALIZADA (Lei 15.226/2025), no mínimo 45% do dinheiro federal da merenda deve comprar alimentos da agricultura familiar — quase a metade do orçamento da comida escolar vai para produtores como você!"
+        },
+        {
+          "type": "bot",
+          "content": "COMO FUNCIONA: a prefeitura ou o estado publica uma CHAMADA PÚBLICA — não precisa de licitação! Você pode concorrer como produtor individual (com CAF físico) ou em grupo/associação (CAF jurídico), e grupos informais também têm espaço. Os itens pedidos vêm na chamada: produto, quantidade, preço de referência e calendário de entrega."
+        },
+        {
+          "type": "bot",
+          "content": "DICAS DE OURO: (1) Produtos orgânicos ou agroecológicos podem receber bonificação de até 30% sobre o preço — se você tem OCS ou selo orgânico, anote isso na proposta. (2) Entregue sempre com documento fiscal do produtor. (3) Só se comprometa com a quantidade que consegue entregar no prazo — faltar à entrega sem justificativa pode excluir você das próximas chamadas."
+        },
+        {
+          "type": "question",
+          "content": "Qual é o percentual mínimo da merenda escolar que deve vir da agricultura familiar?",
+          "options": [
+            {
+              "label": "45%",
+              "value": "a",
+              "feedback": "CORRETO! A Lei 15.226/2025 elevou para no mínimo 45% os recursos federais do FNDE que devem comprar da agricultura familiar, com prioridade para assentados, quilombolas, indígenas, comunidades tradicionais, mulheres e juventude rural."
+            },
+            {
+              "label": "30%",
+              "value": "b",
+              "feedback": "Essa era a regra ANTIGA! Desde janeiro de 2026, a Lei 15.226/2025 aumentou o mínimo para 45%. Mais da metade do caminho é da agricultura familiar — uma oportunidade enorme para você e sua organização."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "paa",
+      "title": "PAA e Outros Mercados Institucionais",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "O PAA (Programa de Aquisição de Alimentos) é o programa federal que compra alimentos da agricultura familiar para abastecer a rede de assistência e programas sociais. São 6 modalidades, cada uma com um objetivo: Compra com Doação Simultânea, Compra Direta, PAA Leite, Formação de Estoque, Sementes e Compra Institucional."
+        },
+        {
+          "type": "bot",
+          "content": "NA PRÁTICA: na 'Compra com Doação Simultânea', o governo compra de você e já repassa os alimentos para entidades assistenciais da sua região — creches, asilos, cozinhas comunitárias. Na 'Compra Institucional', quartéis, hospitais e universidades federais (como a UFT) compram direto da agricultura familiar. Cada modalidade tem limite anual por CAF — confirme os valores vigentes com a CONAB ou com o técnico da ATER."
+        },
+        {
+          "type": "bot",
+          "content": "PARA PARTICIPAR: mantenha o CAF em dia, organize a produção em lote (quantidade e qualidade homogêneas) e fique atento aos editais e chamadas da CONAB e do seu estado. Cooperativas e associações com CAF jurídico conseguem atender volumes maiores — mais um motivo para se organizar em grupo."
+        },
+        {
+          "type": "question",
+          "content": "O que o PAA compra da agricultura familiar?",
+          "options": [
+            {
+              "label": "Alimentos para a rede assistencial, estoques públicos, leite, sementes e compras de instituições federais",
+              "value": "a",
+              "feedback": "EXATO! São as 6 modalidades do PAA. O programa é ponte entre a sua produção e quem mais precisa de comida de qualidade — e paga preço justo por isso."
+            },
+            {
+              "label": "Apenas soja e milho em grandes volumes",
+              "value": "b",
+              "feedback": "Não! O PAA foi feito para a agricultura familiar: frutas, hortaliças, farinha, mel, leite e derivados, sementes crioulas e muito mais. Grandes volumes de commodity seguem outros programas — no PAA, a prioridade é você."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pronaf",
+      "title": "Crédito Rural Consciente (PRONAF)",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "O PRONAF é o programa de crédito rural da agricultura familiar — empréstimo com juros menores que os de mercado, para investir na produção. Para acessar, você precisa do CAF e de um projeto técnico elaborado com a ATER (RURALTINS). Cada safra, o Plano Safra define as linhas e condições do ano — confirme sempre os juros e prazos vigentes antes de assinar."
+        },
+        {
+          "type": "bot",
+          "content": "LINHAS PARA FICAR DE OLHO (Plano Safra da Agricultura Familiar): Pronaf B (microcrédito para custeio), Pronaf Mulher (crédito para mulheres agricultoras), Pronaf Jovem (para a juventude rural), Pronaf Bioeconomia/Agroecologia/Floresta (para sistemas sustentáveis, SAFs e produtos do Cerrado) e linhas de investimento e industrialização. Quem paga em dia pode receber bônus de adimplência — desconto no valor da parcela."
+        },
+        {
+          "type": "bot",
+          "content": "CRÉDITO CONSCIENTE: crédito não é dinheiro grátis — é compromisso. Só peça o valor que o projeto precisa, aplique no que foi planejado e guarde os comprovantes. O técnico da ATER ajuda a montar o projeto com orçamento realista. Dívida mal planejada vira armadilha; bem planejada, vira escada para a renda da família."
+        },
+        {
+          "type": "question",
+          "content": "O que é necessário para acessar o PRONAF?",
+          "options": [
+            {
+              "label": "CAF em dia e projeto técnico elaborado com a ATER",
+              "value": "a",
+              "feedback": "CORRETO! O CAF comprova que você é agricultor familiar e o projeto técnico — feito com o extensionista da RURALTINS — mostra como o dinheiro vai ser investido e pago. Sem esses dois, o banco não libera o crédito."
+            },
+            {
+              "label": "Apenas apresentar o CPF no banco",
+              "value": "b",
+              "feedback": "Não é tão simples — mas também não é um bicho de sete cabeças! Você precisa do CAF (gratuito, 3 anos) e de um projeto técnico feito com a ATER. O técnico te acompanha de graça nesse processo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "links",
+      "title": "Onde Buscar Ajuda",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "PRÓXIMO PASSO PRÁTICO: reúna RG, CPF e comprovantes, e marque uma visita na RURALTINS, no sindicato rural ou na Secretaria de Agricultura do seu município para emitir ou renovar seu CAF. Com o CAF em mãos, peça para acompanhar as chamadas do PNAE e do PAA da sua região."
+        },
+        {
+          "type": "bot",
+          "content": "Se tiver dúvida sobre como começar, fale com o SUPORTE TDS: wa.me/5563993010823"
+        }
+      ]
+    }
+  ]
+}

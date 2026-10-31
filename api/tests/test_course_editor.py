@@ -310,7 +310,7 @@ def test_backfill_real_catalog_preserves_courses_and_snapshot_ids(tmp_path):
     with Session(engine) as session:
         versions = session.scalars(select(CourseVersion)).all()
         courses = session.scalars(select(Course)).all()
-        assert len(versions) == len(courses) == len(originals) == 9
+        assert len(versions) == len(courses) == len(originals) == 10
         for course in courses:
             original = originals[course.id]
             version = session.get(CourseVersion, legacy_version_id(course.id))

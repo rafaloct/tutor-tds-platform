@@ -50,7 +50,7 @@ def run(run_id):
     assert call("GET", "/auth/me", token=tokens["student"])["id"] == "staging-qa-student"
     real_catalog = call("GET", "/courses")["courses"]
     real_ids = [row["id"] for row in real_catalog if not row["id"].startswith("staging-")]
-    assert len(real_ids) == 9
+    assert len(real_ids) == 10
     for course_id in real_ids:
         call("POST", f"/admin/programs/{PROGRAM}/courses/{course_id}", token=tokens["admin"], expected=(201, 409))
     course_id = "staging-editor-" + run_id
