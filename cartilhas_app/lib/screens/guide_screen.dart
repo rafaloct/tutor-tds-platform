@@ -107,7 +107,7 @@ class GuideScreen extends StatelessWidget {
                 title: 'Glossário de Termos',
                 body:
                     'Toque no ícone 📖 no topo da tela para acessar o Glossário com mais de '
-                    '130 termos oficiais extraídos das 9 cartilhas. Filtre por cartilha, '
+                    '128 termos oficiais extraídos das 10 cartilhas. Filtre por cartilha, '
                     'busque qualquer palavra e aprofunde com o Tutor de IA.',
               ),
               _Section(

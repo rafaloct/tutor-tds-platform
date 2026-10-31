@@ -25,6 +25,7 @@ const _cFin = Color(0xFF093AF4); // Educação Financeira
 const _cIA = Color(0xFF283593); // IA
 const _cSAF = Color(0xFF4E342E); // SAF
 const _cSIM = Color(0xFF00695C); // SIM e SIMA
+const _cPol = Color(0xFF5D4037); // Políticas Públicas
 
 const _terms = [
   // ── AGRICULTURA SUSTENTÁVEL ──────────────────────────────────
@@ -802,6 +803,141 @@ const _terms = [
     color: _cSIM,
     definition:
         'Controle térmico necessário para manter a qualidade e segurança dos alimentos, especialmente os perecíveis.',
+  ),
+
+  // ── POLÍTICAS PÚBLICAS (T03) ─────────────────────────────────
+  GlossaryTerm(
+    term: 'ATER',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Assistência Técnica e Extensão Rural — o técnico que acompanha o produtor de graça, como o da RURALTINS.',
+  ),
+  GlossaryTerm(
+    term: 'Agricultura Familiar',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Quem produz na terra com o trabalho da própria família, em área pequena, tirando a maior parte da renda dessa atividade (Lei 11.326/2006).',
+  ),
+  GlossaryTerm(
+    term: 'Bônus de Adimplência',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Desconto que o produtor pode receber no valor da parcela do crédito rural por pagar em dia.',
+  ),
+  GlossaryTerm(
+    term: 'CAF',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Cadastro Nacional da Agricultura Familiar — documento gratuito, válido por 3 anos, que comprova que você é agricultor familiar. Substituiu a antiga DAP.',
+  ),
+  GlossaryTerm(
+    term: 'CAF Jurídico',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'O CAF da associação ou cooperativa, que permite ao grupo vender para PNAE e PAA como organização formal.',
+  ),
+  GlossaryTerm(
+    term: 'Chamada Pública',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'A forma como prefeitura ou estado anuncia que vai comprar da agricultura familiar — sem licitação, direto pelo PNAE ou PAA.',
+  ),
+  GlossaryTerm(
+    term: 'Compra Institucional',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Modalidade do PAA em que quartéis, hospitais e universidades federais (como a UFT) compram direto da agricultura familiar.',
+  ),
+  GlossaryTerm(
+    term: 'CONAB',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Companhia Nacional de Abastecimento — empresa federal que executa as compras do PAA.',
+  ),
+  GlossaryTerm(
+    term: 'DAP',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Antiga Declaração de Aptidão ao Pronaf — o documento que identificava o agricultor familiar antes do CAF.',
+  ),
+  GlossaryTerm(
+    term: 'FNDE',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Fundo Nacional de Desenvolvimento da Educação — o órgão que repassa o dinheiro da merenda escolar (PNAE).',
+  ),
+  GlossaryTerm(
+    term: 'Modalidades do PAA',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'As 6 formas de compra do programa: Doação Simultânea, Compra Direta, PAA Leite, Formação de Estoque, Sementes e Compra Institucional.',
+  ),
+  GlossaryTerm(
+    term: 'PAA',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Programa de Aquisição de Alimentos — programa federal que compra da agricultura familiar para abastecer a rede de assistência social.',
+  ),
+  GlossaryTerm(
+    term: 'Plano Safra',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'O plano anual do governo que define as linhas de crédito, juros e prazos do PRONAF para cada safra.',
+  ),
+  GlossaryTerm(
+    term: 'PNAE',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Programa Nacional de Alimentação Escolar — alimenta os estudantes e deve comprar no mínimo 45% da agricultura familiar (Lei 15.226/2025).',
+  ),
+  GlossaryTerm(
+    term: 'Povos e Comunidades Tradicionais',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Quilombolas, indígenas, extrativistas e pescadores artesanais — também têm direito ao CAF e aos programas da agricultura familiar.',
+  ),
+  GlossaryTerm(
+    term: 'PRONAF',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Programa de crédito rural da agricultura familiar — empréstimo com juros menores para investir na produção.',
+  ),
+  GlossaryTerm(
+    term: 'Projeto de Venda',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'O documento em que o produtor ou a organização informa à chamada pública o que vai vender, quanto e quando entrega.',
+  ),
+  GlossaryTerm(
+    term: 'Projeto Técnico',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'Documento feito com o técnico da ATER mostrando como o dinheiro do crédito vai ser investido e pago.',
+  ),
+  GlossaryTerm(
+    term: 'RURALTINS',
+    cartilha: 'Políticas Públicas',
+    color: _cPol,
+    definition:
+        'A empresa de assistência técnica do Tocantins (a Emater do estado) — ajuda a emitir o CAF e a montar projetos.',
   ),
 ];
 
