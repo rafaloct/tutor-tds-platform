@@ -28,11 +28,11 @@ produção ou integração WP real; reconciliação com a sessão irmã que trab
 a raiz identidade-matrícula pendente (possível colisão de head de migração);
 gates de ativação no contrato. Contrato:
 `production/SELF_ENROLLMENT_CONTRACT.md`; decisão: item 29 de DECISIONS.
-RECONCILE: `/register` foi adicionado sobre a versão **antiga** de
-`RestController.php` neste checkout; o checkout filho (`ae6686f`) tem a
-versão sincronizada de produção (progress via SQL, PII, botão LP) sem
-`/register`. No merge das duas frentes, portar `/register` para o arquivo
-prod-synced — não reverter o sync.
+RECONCILE (đã xử): `/register` đã được merge lên bản `RestController.php`
+prod-synced — 3 commit EAD của session filh (`bf1b24e`, `fd990fa`,
+`ae6686f`) merge vào branch này qua ort không-conflict; file hiện có đủ
+`/register` + `user-by-phone` PII-minimized + progress SQL + "Comprar
+agora" + guard 403 mp-callback, `php -l` sạch.
 
 ## 2026-10-31 — sessão filha (EAD/WordPress): 3 commits locais em checkout separado
 
