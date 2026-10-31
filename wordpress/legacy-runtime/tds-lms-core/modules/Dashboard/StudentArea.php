@@ -8,13 +8,20 @@ class StudentArea {
     }
 
     public function enqueue_assets(): void {
-        if (!has_shortcode(get_post()?->post_content ?? '', 'tds_minha_area')) return;
+        $tpl = get_post_meta(get_the_ID() ?: 0, '_wp_page_template', true);
+        if (!has_shortcode(get_post()?->post_content ?? '', 'tds_minha_area') && $tpl !== 'pages/minha-area.php') return;
         wp_enqueue_style('tds-dashboard', get_stylesheet_directory_uri() . '/assets/dashboard.css', [], '1.0');
     }
 
     public function render(): string {
         if (!is_user_logged_in()) {
-            return '<p>Faça <a href="' . esc_url(wp_login_url(get_permalink())) . '">login</a> para acessar sua área.</p>';
+            $login = esc_url(wp_login_url(get_permalink()));
+            $reg   = esc_url(wp_registration_url());
+            return '<div class="tds-dashboard"><div class="tds-dashboard__header">'
+                . '<h2>Acesse sua área</h2>'
+                . '<p>Faça <a href="' . $login . '">login</a> para ver seus cursos e progresso. '
+                . 'Ainda não tem conta? <a href="' . $reg . '">Cadastre-se gratuitamente</a>.</p>'
+                . '</div></div>';
         }
 
         $user_id = get_current_user_id();
