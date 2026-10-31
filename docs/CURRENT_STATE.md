@@ -374,3 +374,16 @@ Candidate removes the union/empty fallback and rejects malformed snapshots as
 failures, not withdrawals. Details and limits: production/ISSUE4_CATALOG_POLICY.md.
 Targeted test evidence belongs on the PR; no physical E2E or release acceptance
 is inferred. Flag default, production, enrollment/progress and assets preserved.
+
+### Auditoria de integração pós-push (2026-10-31, agent/web-1.4.0-c07 @ b2ec4c9)
+
+**GitHub Actions (observado):**
+- `99b438c`: Tutor TDS API CI **success** (test+build 4m32s; `deploy-staging` skipped — exige `refs/heads/staging`, correto).
+- `99b438c`: WP legacy quarantine **failure** — manifest stale vs 5 arquivos do sync EAD; rebaseline revisado em `b2ec4c9` → quarantine **success** (56/56, provenance no campo `rebaseline`).
+- Flutter workflow não roda neste branch (paths: pull_request + codex/*) — suíte 484/484 é evidência local.
+
+**Migration `20261031_0025` (verificado local):** head único, cadeia linear, upgrade base vazia OK (47 tabelas, `enrollment_policy` NOT NULL default `managed`, índice parcial `uq_classes_open_course`, `external_sync_requests` 13 colunas). Aplicação em staging: workflow `staging-alembic-migrate.yml` (guards: env=staging, sslmode, host aprovado) — **não executado**.
+
+**Auditoria Flutter↔API↔WP↔LP:** contratos de payload compatíveis (`user_id` em user-by-phone/register; `course_slug` em enroll). UNKNOWN registrado: `courses.id` canônico deve coincidir com `post_name` LP por curso — gate de ativação explícito no contrato; falha 404 cairia em retry→`failed`→reconciliação (caminho seguro).
+
+**Integridade histórico:** 6 commits verificados (8c0959b…99b438c), local≡remote, push b2ec4c9 limpo.
