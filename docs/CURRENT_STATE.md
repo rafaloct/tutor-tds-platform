@@ -28,6 +28,11 @@ produção ou integração WP real; reconciliação com a sessão irmã que trab
 a raiz identidade-matrícula pendente (possível colisão de head de migração);
 gates de ativação no contrato. Contrato:
 `production/SELF_ENROLLMENT_CONTRACT.md`; decisão: item 29 de DECISIONS.
+RECONCILE: `/register` foi adicionado sobre a versão **antiga** de
+`RestController.php` neste checkout; o checkout filho (`ae6686f`) tem a
+versão sincronizada de produção (progress via SQL, PII, botão LP) sem
+`/register`. No merge das duas frentes, portar `/register` para o arquivo
+prod-synced — não reverter o sync.
 
 ## 2026-10-31 — sessão filha (EAD/WordPress): 3 commits locais em checkout separado
 
