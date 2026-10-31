@@ -1,5 +1,34 @@
 # CURRENT STATE
 
+## 2026-10-31 — F3 operação de atendimento Chatwoot (funil CadÚnico)
+
+Configuração observada em produção (`kreativ-chatwoot`, account "TDS Tocantins"),
+aplicada via Rails console e reversível. OBSERVED: team `tds | bolsistas de
+graduação` recebeu os 10 agentes não-admin; inbox `WhatsApp TDS` (id 1, ligada ao
+Evolution `evolution.ipexdesenvolvimento.cloud`) passou de 3 para 12 membros;
+inbox `Tutor TDS — Site` (id 7) saiu de 0 para 10 membros. Teams `coordenação
+geral` e `coordenação técnica e supervisão` receberam `coordenacao@` e `rafael@`
+como alvos de escalonamento (antes vazias — regras antigas caíam no vazio).
+11 labels do funil criadas (42 total): `faq-resolvido`, `duvida-pedagogica`,
+`duvida-tecnica-rural`, `embrapa-encaminhamento`, `suporte-app`,
+`matricula-coordenacao`, `certificacao-coordenacao`, `retorno-pendente`,
+`elegibilidade-cadunico`, `interesse-curso`, `lead-acesso-liberado`. Team
+`bot-rag` criada vazia (aguarda F4/AnythingLLM+n8n). Automação id 10 ativa:
+mensagem WhatsApp (inbox 1) contendo "quero" → label `interesse-curso` +
+atribuição a `bolsistas`. Widget do app já aponta para inbox `TDS | Atendimento
+UFT/IPEX` (13), monitorada por todos os agentes. UNKNOWN/BLOCKED: inbox WhatsApp
+id 19 órfã (sem membros/webhook) — confirmar antes de remover; teams
+`coordenação local`, `logística`, `apoio técnico`, `pesquisa e extensão`,
+`mobilização local`, `apoio digital` vazias — regras antigas que atribuem a
+elas ainda caem no vazio até o usuário indicar responsáveis; canned responses
+bloqueadas na revisão pedagógica dos FAQs (`docs/operations/faq-rag/`,
+status NÃO PUBLICAR). Chatwoot nunca concede matrícula/frequência/certificado —
+estagiários fazem triagem e encaminham à coordenação. Proposta:
+`docs/operations/funil-cadunico-chatwoot-rag.md`. Teste da automação
+comprovado: conversa QA sintética na inbox 1 com "quero agricultura" recebeu
+label `interesse-curso` e team `bolsistas de graduação` (contato/conversa
+removidos após o teste).
+
 ## 2026-10-30 — republicação web do app em cartilhas.ipexdesenvolvimento.cloud
 
 Domínio real é `cartilhas.ipexdesenvolvimento.cloud` (Cloudflare → Traefik →
