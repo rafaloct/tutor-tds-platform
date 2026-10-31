@@ -63,21 +63,22 @@ class RestController {
 
     public function get_user_progress(\WP_REST_Request $req): \WP_REST_Response {
         $user_id = (int) $req['user_id'];
-        $lp_user = learn_press_get_user($user_id);
-        $courses = get_posts(['post_type' => 'lp_course', 'posts_per_page' => -1, 'fields' => 'ids']);
-        $data    = [];
-        foreach ($courses as $cid) {
-            if (!$lp_user->has_enrolled_course($cid)) continue;
-            $cd     = $lp_user->get_course_data($cid);
-            $data[] = [
-                'course_id'    => $cid,
-                'course_slug'  => get_post_field('post_name', $cid),
-                'course_title' => get_the_title($cid),
-                'status'       => $cd->get_status(),
-                'graduation'   => $cd->get_graduation(),
-                'progress_pct' => $cd->get_percent_completion(),
-            ];
-        }
+        global $wpdb;
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT ui.item_id, ui.status, ui.graduation, p.post_name, p.post_title
+             FROM {$wpdb->prefix}learnpress_user_items ui
+             JOIN {$wpdb->posts} p ON p.ID = ui.item_id AND p.post_status = 'publish'
+             WHERE ui.user_id = %d AND ui.item_type = %s",
+            $user_id, LP_COURSE_CPT
+        ));
+        $data = array_map(fn($r) => [
+            'course_id'    => (int) $r->item_id,
+            'course_slug'  => $r->post_name,
+            'course_title' => $r->post_title,
+            'status'       => $r->status,
+            'graduation'   => $r->graduation,
+            'progress_pct' => null,
+        ], $rows ?: []);
         return new \WP_REST_Response($data, 200);
     }
 
@@ -87,33 +88,27 @@ class RestController {
         $course      = get_page_by_path($course_slug, OBJECT, 'lp_course');
         if (!$course) return new \WP_REST_Response(['error' => 'Course not found'], 404);
 
-        $lp_user = learn_press_get_user($user_id);
-        if (!$lp_user->has_enrolled_course($course->ID)) {
+        global $wpdb;
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT status, graduation, start_time
+             FROM {$wpdb->prefix}learnpress_user_items
+             WHERE user_id = %d AND item_id = %d AND item_type = %s
+             ORDER BY user_item_id DESC LIMIT 1",
+            $user_id, $course->ID, LP_COURSE_CPT
+        ));
+        if (!$row) {
             return new \WP_REST_Response(['error' => 'User not enrolled'], 403);
         }
-
-        $cd      = $lp_user->get_course_data($course->ID);
-        $items   = $cd->get_items();
-        $current = null;
-        foreach ($items as $item) {
-            $id        = $item->id ?? $item->get_id();
-            $item_data = $lp_user->get_item_data($id, $course->ID);
-            if ($item_data && $item_data->get_status() !== 'completed') {
-                $current = ['id' => $id, 'title' => get_the_title($id), 'type' => get_post_type($id)];
-                break;
-            }
-        }
-
         return new \WP_REST_Response([
             'user_id'        => $user_id,
             'course_id'      => $course->ID,
             'course_slug'    => $course_slug,
             'course_title'   => get_the_title($course->ID),
-            'status'         => $cd->get_status(),
-            'graduation'     => $cd->get_graduation(),
-            'progress_pct'   => $cd->get_percent_completion(),
-            'current_lesson' => $current,
-            'enrolled_at'    => $cd->get_start_time(),
+            'status'         => $row->status,
+            'graduation'     => $row->graduation,
+            'progress_pct'   => null,
+            'current_lesson' => null,
+            'enrolled_at'    => $row->start_time,
         ], 200);
     }
 
