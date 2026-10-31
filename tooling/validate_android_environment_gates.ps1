@@ -98,8 +98,8 @@ Invoke-GateCase -Name 'debug rejeita QA isolado sem run valido' `
 $isolated.DYNAMIC_QA_RUN_ID = '11111111111111111111111111111111'
 $isolated.TUTOR_API_URL = $staging.TUTOR_API_URL
 $isolated.TUTOR_STAGING_API_URL = $staging.TUTOR_API_URL
-Invoke-GateCase -Name 'debug rejeita QA isolado fora do Cloud autorizado' `
-    -Task ':app:preDebugBuild' -Defines $isolated -ShouldPass $false
+Invoke-GateCase -Name 'debug aceita QA isolado no staging EAD aprovado' `
+    -Task ':app:preDebugBuild' -Defines $isolated -ShouldPass $true
 
 $unapproved = [ordered]@{}
 foreach ($entry in $cloudStaging.GetEnumerator()) {

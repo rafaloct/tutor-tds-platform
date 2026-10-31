@@ -424,3 +424,17 @@ modelo `ExternalSyncRequest` × migração 0025 consistentes (13 colunas,
 LP, deploy register no WP, ordem das flags/backfill, smoke staging) +
 rollback + template de evidência. Auditoria Flutter↔API↔WP↔LP fechada no
 nível de código; lacunas restantes são todas de acesso/ambiente.
+
+### Cloud staging fora / decisão EAD staging (2026-10-31)
+
+**OBSERVED:** `tutor-tds-staging.fastapicloud.dev` UP mas todo endpoint com
+DB → 500; `lgtphbbpgqnzduhtyate.supabase.co` → NXDOMAIN (projeto não
+resolve; pausado ainda resolveria — provável exclusão). EAD staging
+(`ead.ipexdesenvolvimento.cloud/tutor-staging-api`) saudável: /health ok,
+/courses 200, `CERTIFICATE_CANDIDATE_ENABLED=true`, seeds preservados.
+
+**DECISION (humana, 2026-10-31):** executar os gates físicos contra o EAD
+staging aprovado. Implementação: guard Gradle de QA isolado relaxado para
+aceitar qualquer URI em `approvedApiUris` (as duas rotas de staging seguem
+pinadas; `DYNAMIC_QA_RUN_ID` continua obrigatório). Build do APK QA
+reproduzível a partir deste commit.
