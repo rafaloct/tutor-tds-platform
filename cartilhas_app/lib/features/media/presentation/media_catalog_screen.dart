@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../config/app_config.dart';
+import '../../../models/cartilha.dart';
+import '../../../screens/chat_experience_screen.dart';
 import '../../analytics/telemetry_route.dart';
+import '../../courses/data/course_repository.dart';
+import '../../study_ai/presentation/study_hub_screen.dart';
 import '../data/media_repository.dart';
 import '../models/media_models.dart';
 import 'media_player_screen.dart';
@@ -21,6 +26,8 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
   String _query = '';
   String? _catalogWarning;
   bool _usingCachedData = false;
+  Map<String, Cartilha> _cartilhasById = {};
+  List<Cartilha> _cartilhas = const [];
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -62,6 +69,22 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
         _moduleFilter = null;
       }
     });
+    _loadCartilhas();
+  }
+
+  Future<void> _loadCartilhas() async {
+    try {
+      final cartilhas = await CourseRepository.forCatalog(
+        apiUrl: AppConfig.tutorApiUrl,
+      ).fetchAll();
+      if (!mounted) return;
+      setState(() {
+        _cartilhas = cartilhas;
+        _cartilhasById = {for (final c in cartilhas) c.id: c};
+      });
+    } on Object {
+      // Links de estudo ficam ocultos quando a cartilha não pôde carregar.
+    }
   }
 
   bool _matches(MediaItem item) {
@@ -73,6 +96,73 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
         '${item.title} ${item.description} ${item.courseId} ${item.moduleId}'
             .toLowerCase();
     return haystack.contains(q);
+  }
+
+  // Rearranjo: agrupa por curso; cada seção conecta vídeo → cartilha →
+  // trilha de estudo do app (flashcards, resumos, avaliação).
+  List<Widget> _grouped(List<MediaItem> visible) {
+    final byCourse = <String, List<MediaItem>>{};
+    for (final item in visible) {
+      byCourse.putIfAbsent(item.courseId, () => []).add(item);
+    }
+    final sections = <Widget>[];
+    for (final courseId in byCourse.keys.toList()..sort()) {
+      final items = byCourse[courseId]!
+        ..sort((a, b) => a.moduleId.compareTo(b.moduleId));
+      final cartilha = _cartilhasById[courseId];
+      sections.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  cartilha?.title ?? courseId,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Text(
+                '${items.length} vídeo${items.length == 1 ? '' : 's'}',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (cartilha != null)
+                TextButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    trackedRoute(
+                      pageId: 'guided_lesson',
+                      courseId: courseId,
+                      resourceId: 'course_content',
+                      featureId: 'guided_learning',
+                      builder: (_) => ChatExperienceScreen(cartilha: cartilha),
+                    ),
+                  ),
+                  icon: const Icon(Icons.menu_book_outlined, size: 18),
+                  label: const Text('Abrir cartilha'),
+                ),
+            ],
+          ),
+        ),
+      );
+      for (final media in items) {
+        sections.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _MediaCard(
+              media: media,
+              repository: widget.repository,
+              cartilha: _cartilhasById[media.courseId],
+              cartilhas: _cartilhas,
+            ),
+          ),
+        );
+      }
+    }
+    return sections;
   }
 
   @override
@@ -248,15 +338,7 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
                             ? _EmptyCatalog(onRetry: _load)
                             : _CatalogError(onRetry: _load))
                   else
-                    ...visible.map(
-                      (media) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _MediaCard(
-                          media: media,
-                          repository: widget.repository,
-                        ),
-                      ),
-                    ),
+                    ..._grouped(visible),
                 ],
               ),
       ),
@@ -265,9 +347,16 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
 }
 
 class _MediaCard extends StatelessWidget {
-  const _MediaCard({required this.media, required this.repository});
+  const _MediaCard({
+    required this.media,
+    required this.repository,
+    this.cartilha,
+    this.cartilhas = const [],
+  });
   final MediaItem media;
   final MediaRepository repository;
+  final Cartilha? cartilha;
+  final List<Cartilha> cartilhas;
 
   @override
   Widget build(BuildContext context) {
@@ -378,6 +467,57 @@ class _MediaCard extends StatelessWidget {
                         Icon(Icons.cloud_off_outlined, size: 18),
                         SizedBox(width: 6),
                         Expanded(child: Text('Conecte-se para reproduzir')),
+                      ],
+                    ),
+                  ],
+                  if (cartilha != null || cartilhas.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Como estudar',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (cartilha != null)
+                          ActionChip(
+                            avatar: const Icon(
+                              Icons.menu_book_outlined,
+                              size: 16,
+                            ),
+                            label: const Text('Cartilha'),
+                            onPressed: () => Navigator.push(
+                              context,
+                              trackedRoute(
+                                pageId: 'guided_lesson',
+                                courseId: media.courseId,
+                                resourceId: 'course_content',
+                                featureId: 'guided_learning',
+                                builder: (_) =>
+                                    ChatExperienceScreen(cartilha: cartilha!),
+                              ),
+                            ),
+                          ),
+                        if (cartilhas.isNotEmpty)
+                          ActionChip(
+                            avatar: const Icon(Icons.route_outlined, size: 16),
+                            label: const Text('Trilha de estudo'),
+                            onPressed: () => Navigator.push(
+                              context,
+                              trackedRoute(
+                                pageId: 'study_hub',
+                                courseId: media.courseId,
+                                resourceId: 'study_resources',
+                                featureId: 'study_ai',
+                                builder: (_) =>
+                                    StudyHubScreen(cartilhas: cartilhas),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],
