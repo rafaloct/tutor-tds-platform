@@ -56,6 +56,19 @@ class AppConfig {
     defaultValue: false,
   );
 
+  /// Somente QA: autologin para builds web de staging. Tudo desligado/vazio
+  /// por padrão — apenas `config/staging.qa.web.json` define estes valores.
+  /// Produção nunca os define, então o fluxo manual de login fica intacto.
+  static const qaAutoLogin = bool.fromEnvironment(
+    'TUTOR_QA_AUTOLOGIN',
+    defaultValue: false,
+  );
+  static const qaAutoLoginCpf = String.fromEnvironment('TUTOR_QA_CPF');
+  static const qaAutoLoginPassword = String.fromEnvironment(
+    'TUTOR_QA_PASSWORD',
+  );
+  static const qaAutoLoginOpen = String.fromEnvironment('TUTOR_QA_OPEN');
+
   static const privacyPolicyUrl = String.fromEnvironment(
     'PRIVACY_POLICY_URL',
     defaultValue: 'https://cartilhas.ipexdesenvolvimento.cloud/privacy.html',

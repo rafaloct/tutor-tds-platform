@@ -22,6 +22,16 @@ Future<void> _clearUser() async {
   await prefs.clear();
 }
 
+// Botão de submit do WelcomeScreen: com conta online configurada
+// (TUTOR_API_URL presente) o rótulo é 'Continuar neste dispositivo';
+// sem conta permanece 'Entrar'.
+Finder _submitButton() {
+  final legacy = find.widgetWithText(ElevatedButton, 'Entrar');
+  return legacy.evaluate().isNotEmpty
+      ? legacy
+      : find.widgetWithText(ElevatedButton, 'Continuar neste dispositivo');
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -42,7 +52,7 @@ void main() {
       );
       expect(find.widgetWithText(TextFormField, 'WhatsApp'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'CPF'), findsOneWidget);
-      expect(find.text('Entrar'), findsOneWidget);
+      expect(_submitButton(), findsOneWidget);
     });
 
     testWidgets('[02] validação — Entrar sem dados mostra erro', (
@@ -51,7 +61,9 @@ void main() {
       await tester.pumpWidget(const CartilhasApp());
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      await tester.tap(find.text('Entrar'));
+      await tester.ensureVisible(_submitButton());
+      await tester.pumpAndSettle();
+      await tester.tap(_submitButton());
       await tester.pumpAndSettle();
 
       expect(find.text('Obrigatório'), findsAtLeastNWidgets(1));
@@ -71,14 +83,14 @@ void main() {
       );
       await tester.enterText(
         find.widgetWithText(TextFormField, 'CPF'),
-        '12345678900',
+        '52998224725',
       );
       FocusManager.instance.primaryFocus?.unfocus();
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(Checkbox).first);
       await tester.pumpAndSettle();
-      final enterButton = find.widgetWithText(ElevatedButton, 'Entrar');
+      final enterButton = _submitButton();
       await tester.ensureVisible(enterButton);
       await tester.pumpAndSettle();
       await tester.tap(enterButton);
@@ -190,16 +202,22 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Perguntar à IA').first);
-      for (var attempt = 0; attempt < 40; attempt++) {
-        await tester.pump(const Duration(milliseconds: 250));
-        if (find.byIcon(Icons.volume_up_outlined).evaluate().length >= 2) {
-          break;
-        }
-      }
+      await tester.pumpAndSettle();
 
       expect(find.text('Geral'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.byIcon(Icons.volume_up_outlined), findsAtLeastNWidgets(2));
+
+      // volume_up aparece apenas em respostas do bot (TutorResponseCard);
+      // a saudação não o exibe, então enviamos uma pergunta primeiro.
+      await tester.enterText(find.byType(TextField), 'O que é esse termo?');
+      await tester.tap(find.byIcon(Icons.send));
+      for (var attempt = 0; attempt < 40; attempt++) {
+        await tester.pump(const Duration(milliseconds: 250));
+        if (find.byIcon(Icons.volume_up_outlined).evaluate().isNotEmpty) {
+          break;
+        }
+      }
+      expect(find.byIcon(Icons.volume_up_outlined), findsAtLeastNWidgets(1));
     });
   });
 
@@ -266,11 +284,22 @@ void main() {
       },
     );
 
-    testWidgets('[16] botão volume_up presente nas bolhas do tutor', (
+    testWidgets('[16] resposta do tutor exibe botão volume_up', (
       tester,
     ) async {
       await tester.pumpWidget(tutorApp());
       await tester.pumpAndSettle();
+
+      // Saudação não exibe volume_up — o ícone fica no TutorResponseCard
+      // das respostas do bot. Envia uma pergunta para gerar a resposta.
+      await tester.enterText(find.byType(TextField), 'Pergunta de teste');
+      await tester.tap(find.byIcon(Icons.send));
+      for (var attempt = 0; attempt < 40; attempt++) {
+        await tester.pump(const Duration(milliseconds: 250));
+        if (find.byIcon(Icons.volume_up_outlined).evaluate().isNotEmpty) {
+          break;
+        }
+      }
 
       expect(find.byIcon(Icons.volume_up_outlined), findsAtLeastNWidgets(1));
     });

@@ -3,10 +3,13 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/app_config.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/models/auth_session.dart';
 import '../features/auth/presentation/account_login_screen.dart';
 import '../features/certificates/data/certificate_service.dart';
+import '../features/media/data/media_repository.dart';
+import '../features/media/presentation/media_catalog_screen.dart';
 import '../features/profile/data/profile_data_store.dart';
 import '../services/privacy_preferences.dart';
 import '../widgets/responsive_body.dart';
@@ -65,7 +68,53 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               : const PrivacyConsentScreen(),
         ),
       );
+      if (hasSeenPrivacyNotice) _pushQaVideos();
     }
+    if (mounted && name.isEmpty && AppConfig.qaAutoLogin) {
+      await _qaAutoLogin();
+    }
+  }
+
+  /// QA-only path enabled by `TUTOR_QA_AUTOLOGIN` in staging web builds:
+  /// logs in with the QA account and lands on Home (or Vídeos when
+  /// `TUTOR_QA_OPEN=videos`). Any failure falls back to the normal form.
+  Future<void> _qaAutoLogin() async {
+    if (AppConfig.qaAutoLoginCpf.isEmpty) return;
+    try {
+      final session = await context.read<AuthRepository>().login(
+        cpf: AppConfig.qaAutoLoginCpf,
+        password: AppConfig.qaAutoLoginPassword,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_name', session.user.name);
+      await PrivacyPreferences.saveDecision(consent: true);
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        trackedRoute(pageId: 'home', builder: (_) => const HomeScreen()),
+      );
+      _pushQaVideos();
+    } catch (_) {}
+  }
+
+  /// QA-only: empilha o catálogo de Vídeos quando `TUTOR_QA_OPEN=videos`.
+  /// No-op em qualquer outra config — produção nunca define esse valor.
+  void _pushQaVideos() {
+    if (!mounted || AppConfig.qaAutoLoginOpen != 'videos') return;
+    Navigator.push(
+      context,
+      trackedRoute(
+        pageId: 'videos',
+        resourceId: 'video_catalog',
+        featureId: 'video_learning',
+        builder: (_) => MediaCatalogScreen(
+          repository: MediaRepository(
+            apiUrl: AppConfig.tutorApiUrl,
+            authRepository: context.read<AuthRepository>(),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _saveData() async {

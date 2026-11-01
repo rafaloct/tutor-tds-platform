@@ -1,5 +1,84 @@
 # CURRENT STATE
 
+## 2026-10-31 — Solicitação de certificado em curso bundled (edição legada)
+
+OBSERVED (defeito): em produção `REMOTE_CATALOG_ENABLED=false` → cursos
+vêm dos assets bundled com `course_version_id: null` →
+`CertificateRequestsScreen` só chamava `/certificate-requests/contexts`
+com versão não-nula → aluno nunca via matrícula selecionável nem
+conseguia criar o pedido. Caminho de turma/catálogo remoto não era
+afetado (versão vem serializada).
+IMPLEMENTED: `GET /certificate-requests/contexts` aceita
+`course_version_id` ausente — contexto sem turma resolve a edição legada
+determinística `legacy_version_id(course_id)` (para onde eventos sem
+versão contam, conforme `_eligibility`); contexto de turma resolve a
+edição fixada na `Classroom`. App envia o parâmetro só quando conhecido
+(`contexts()` aceita versão nula; tela consulta contextos sempre que
+`courseId` existe). `POST /certificate-requests` segue exigindo o ID
+resolvido pelo servidor — cliente não inventa edição nem autorização.
+TESTED-LOCAL: `api/tests/test_certificate_requests.py` 21 verdes
+(novo teste cobre resolução legada + pin de turma `v2`);
+`certificate_request_repository_test` + `certificate_requests_screen_test`
++ `certificate_screens_test` 40 verdes (novo teste de tela: bundled sem
+versão consulta contextos). Analyzer limpo.
+BLOCKED: validação em staging depende do container `staging-api`
+crash-loopando por migration ausente `20261030_0033` (problema de
+ambiente, fora deste recorte). Sem claims de staging/produção.
+
+## 2026-10-31 — E2E web headless automatizado (alternativa ao Android)
+
+OBSERVED (host Linux): suíte `integration_test/app_test.dart` roda no
+navegador sem emulador via `tooling/test_web_e2e.sh` — sobe chromedriver,
+`flutter drive -d web-server` e Chrome headless, e derruba tudo ao sair.
+Infra provisionada: Chrome for Testing 156.0.8078.80 + chromedriver casado
+em `/opt/cft/` (Chromium do snap não serve — /tmp isolado quebra o
+DevToolsActivePort), wrappers `/usr/local/bin/chromedriver` e
+`chromium-nosandbox`. Resultado: **18/18 testes web-compatíveis** com
+`config/staging.qa.json` (API staging saudável em /health) —
+`app_test.dart` 17/17 + `genui_test.dart` 1/1 (faltava
+`IntegrationTestWidgetsFlutterBinding.ensureInitialized()`, drive travava
+sem resposta). Configuração via env: `TEST`, `CONFIG`, `WEB_PORT`
+(default 8484), `HEADLESS`. Dos demais arquivos em `integration_test/`,
+seis têm guarda explícita `expect(Platform.isAndroid, isTrue)`
+(classroom_access, context_learning, dynamic_learning, journey_baseline,
+journey_traceability, prebuilt_apk_smoke) e `outbox_persistence_test`
+exige sqflite nativo (sem factory web registrada). Cinco expectativas
+desatualizadas foram corrigidas no `app_test.dart` (não no app): rótulo
+do submit é 'Continuar neste dispositivo' quando `TUTOR_API_URL` está
+configurada; CPF passa por checksum real (`isValidCpf`); ícone volume_up
+migrou para `TutorResponseCard` e só aparece em respostas do bot
+(saudação não exibe; "Perguntar à IA" não auto-envia mensagem).
+UNKNOWN/BLOCKED: cobertura limitada ao que o integration_test web exercita
+— offline nativo (sqflite), push, PDF/Drive e TTS/mic continuam exigindo
+Android físico; falhas seriam as mesmas no Android (teste estava velho,
+não era bug do web).
+
+**CORS diagnosticado e resolvido na origem**: `tutor-staging-api` só
+aceitava `cartilhas.ipexdesenvolvimento.cloud` em `ALLOWED_ORIGINS` →
+browser bloqueava register/login antes de enviar ("não reconhece a
+senha" era erro de rede; cadastro nunca existia no backend). Android não
+tem CORS. Fix aplicado no staging local (`/opt/tutor-tds-staging`,
+compose, não-Dokploy): `STAGING_ALLOWED_ORIGINS` agora inclui
+`http://46.202.150.132:9090`, `localhost|127.0.0.1` nas portas
+9090/8484/8080 e o preview `127.0.0.1:34203` — backup em
+`.env.bak-cors-webqa-20261031`, `api-staging` recriado, preflight 200
+nas novas origens, `/media` 200. Mudança aditiva e reversível.
+
+App web em `http://46.202.150.132:9090` (nginx Docker `cartilhas-web-qa`
++ `tooling/web_proxy.nginx.conf` com proxy `/tutor-staging-api/`→ead,
+mantido como redundância). Rebuild com `staging.qa.json` absoluta —
+`MediaRepository._apiBase()` exige https absoluto, URL relativa quebrava
+a tela Vídeos (cache vazio). LocalStorage é por origem: usar sempre :9090.
+
+Conta QA dedicada criada no staging: **CPF `900.777.123-07`, senha
+`qa-web-senha-2026!`** (student). Novo `integration_test/
+account_qa_test.dart` **3/3**: [A1] registro atinge API (201 ou 409
+"Já existe uma conta"), [A2] login com conta existente chega na Home,
+[A3] senha errada → "CPF ou senha inválidos." — prova persistência
+servidor real. CPFs clássicos (529.982.247-25, 111.444.777-35) já
+existem no staging com senha desconhecida — usar a conta QA acima ou
+CPF inédito.
+
 ## 2026-10-31 — fatia self-enrollment: contrato + implementação flag-off
 
 OBSERVED (checkout `/root/tutor-tds-platform-1`): candidato de matrícula
@@ -438,3 +517,163 @@ staging aprovado. Implementação: guard Gradle de QA isolado relaxado para
 aceitar qualquer URI em `approvedApiUris` (as duas rotas de staging seguem
 pinadas; `DYNAMIC_QA_RUN_ID` continua obrigatório). Build do APK QA
 reproduzível a partir deste commit.
+
+### Macro QA web + autologin QA (2026-10-31)
+
+**OBSERVED:** `tooling/web_qa.sh` roda 4 arquivos e2e web (23 testes) com
+um comando: build release -> nginx app+proxy :9090 -> chromedriver -> PASS
+por arquivo. `app_test` 17/17, `genui` 1/1, `account_qa` 4/4 (registro,
+login, senha errada, tela Videos com catalogo real), `qa_autologin` 1/1.
+Suites Android-only (6 arquivos com guarda `Platform.isAndroid`) fora por
+design. Chrome for Testing 156 + chromedriver casado em uso (snap Chromium
+falha por confinamento de /tmp).
+
+**OBSERVED:** staging CORS ganhou origens de dev (`:9090`, `:8484`,
+`:8080` em localhost/127.0.0.1 e 46.202.150.132) via
+`STAGING_ALLOWED_ORIGINS` no compose local `/opt/tutor-tds-staging`
+(backup `.env.bak-cors-webqa-20261031`, aditivo e reversivel). Sem isso o
+browser bloqueia register/login antes de chegar na API.
+
+**DECISION:** `config/staging.qa.web.json` (novo) = staging.qa.json +
+`TUTOR_QA_AUTOLOGIN/CPF/PASSWORD/OPEN=videos`. O app servido em :9090
+loga a conta QA sozinho e cai direto em Videos; flags ausentes em todo
+outro config -> login manual intacto (producao inclusa). Testes e2e
+continuam com `staging.qa.json` e cobrem o login manual real.
+Conta QA: `900.777.123-07` (sintetica, staging apenas).
+
+### Sincronizacao de conta app -> site WordPress (2026-10-31)
+
+**OBSERVED (causa do sintoma):** conta criada no app nunca chegava ao site.
+`/register` nao existia no plugin deployado (versao antiga; rota retornava
+404) e o endpoint novo criava usuario `alunoXXXXXXXX` com senha aleatoria por
+design ("student authenticates only in the app"). WP usa usermeta
+billing_phone/_tds_phone/tds_telefone + tds_user_id para idempotencia.
+
+**DECISION + implementado (staging):**
+- `tds-lms-core` `register_user`: aceita `cpf` (vira user_login) e
+  `password` (aplicada no create e re-aplicada no match -> senha do site
+  converge com a do app). Lookup: tds_user_id -> phone metas -> login=CPF.
+  Deployado no site EAD (mu-plugin, dir dokploy + /root/tds-wordpress;
+  backup `.bak-wplogin-20261031`). POST /register: 404 -> 201 com chave.
+- API (imagem `tutor-tds-api:staging-wplogin-20261031`, FROM
+  `tutor-tds-candidate:c05-4976eb5` + auth.py/config.py/wp_account_sync.py):
+  `_wordpress_login_provision` best-effort no register E no login —
+  convergencia automatica a cada login bem-sucedido. Gate:
+  `WORDPRESS_LOGIN_SYNC_ENABLED` + `WORDPRESS_BASE_URL` +
+  `WORDPRESS_TDS_API_KEY` (envs do compose api-staging). UA customizado
+  `TutorTDS-Sync/1.0`: Cloudflare bane `Python-urllib/*` (error 1010).
+- Verificado: login QA via API -> WP user `90077712307` religado ao
+  tds_user_id real; `wp_authenticate` no site -> LOGIN OK com a senha do app.
+
+**UNKNOWN/BLOCKED:** producao exige as mesmas 3 envs + imagem equivalente
+na linhagem prod (gate humano). Contas criadas antes convergem no proximo
+login do app; nao ha backfill em massa (senha so existe em transito).
+Repo api/ esta 40 commits atras da linhagem deployada
+(`agent/integration-c01-c03-staging`); mesmas mudancas aplicadas ao repo
+para quando houver merge.
+
+### Certificado bundled — validacao em staging DESBLOQUEADA (2026-10-31)
+
+O BLOCKED anterior (container api-staging crash-loop por migration
+`20261030_0033` ausente) era drift de linhagem: a imagem deployada
+(`tutor-tds-candidate:c05-4976eb5`, branch `agent/integration-c01-c03-staging`)
+tem 33 migrations vs 25 do repo. Resolucao: imagem nova
+`tutor-tds-api:staging-wplogin-20261031` = FROM c05 + patch minimo
+(auth.py, config.py, wp_account_sync.py, certificate_requests.py) —
+mesma linhagem do DB + fix do `contexts` portado identico ao do repo.
+
+**TESTED-STAGING:** `GET /certificate-requests/contexts?course_id=saf`
+sem `course_version_id` -> 200 com contexto resolvido na edicao legada
+`9350c62e-14fd-5340-9408-c73a5b36b399` (enrollment QA `qa-cert-enroll-1`,
+programa `staging-qa-program`, elegibilidade exposta). Regressao: com
+versao explicita -> 200 inalterado; versao inexistente -> contexts vazio
+sem erro. App :9090 rebuildado com o fix do lado Flutter.
+
+### Grafo de cobertura web — caminho minimo EXECUTADO (2026-10-31)
+
+`docs/qa/WEB_COVERAGE_GRAPH.md` modela o grafo Navigator completo
+(vertices/arestas/categorias, Mermaid, DFS vs Carteiro Chines, arestas
+condicionais web-vs-Android). OBSERVED: o app nao tem router de URL —
+vertices sao rotas Navigator/dialogs; F5 e browser-back sao arestas de
+ciclo de vida, nao de deep-link.
+
+**TESTED-STAGING:** `integration_test/web_postman_test.dart` PASSOU no
+web (chrome headless, staging.qa.json). Executa a cadeia de entrada +
+todos os spokes student em uma sessao continua:
+welcome->account_login->privacy_consent->home; home->videos->player->
+catalog; nav Aprender->study_hub->flashcards->resumo; nav Conteudos->
+media_catalog; home->certificate_wallet; home->user_guide; nav Perfil->
+cadunico; menu->support; menu->settings->privacy_policy+onboarding
+review; menu->about; F5->home (sessao persiste via SharedPreferences).
+Defeitos do proprio teste corrigidos: login por keys
+`account-login-cpf`/`account-password`; botoes 'Meus certificados' e
+'Como usar' sao OutlinedButton (nao FilledButton); Home usa scroll lazy
+(scrollUntilVisible); icone menu_book colide com nav Aprender.
+Incluido na suite do `tooling/web_qa.sh` (agora 5 arquivos e2e).
+
+**UNKNOWN/BLOCKED:** vertices de gestao (management_workspace,
+operator_operations, course_editor, classroom_*, evidence_*, student_
+followup, certificate_review) exigem claims de professor/operador —
+nao executados com a conta student QA. Caminho do teste e o passeio
+minimo pratico dos vertices student, nao um otimo formal do CPP
+(pesos de aresta nao medidos). Deep-links de URL e gestao ficam
+registrados como edges condicionais no grafo.
+
+### account_qa_test reestruturado como DFS (2026-10-31)
+
+`integration_test/account_qa_test.dart` virou uma unica travessia DFS do
+grafo de auth (substitui os testes A1-A4 separados): V0 welcome/auth ->
+e1 login-falha (senha errada -> `account-error` -> BackButton retorna
+V0) -> e2 registro (`AlertDialog` -> 409 duplicata ou 201 -> Cancelar
+retorna V0) -> e3 login-sucesso -> V1 privacy_consent -> e4 aceite ->
+home -> e5 videos/catalogo (cards + affordance de midia Image/
+play_circle). PASSOU em web headless contra staging real. Observacao
+estrutural: `account_login` e rota empurrada (`AccountLoginScreen`),
+registro e `AlertDialog` — back-edges distintas (BackButton vs Cancelar).
+
+### learning_qa_test — DFS V2->V3->V4 EXECUTADO (2026-10-31)
+
+`integration_test/learning_qa_test.dart` PASSOU em web headless contra
+staging: catalogo -> Aula 01 -> player (e6) -> 'Salvar' estado+
+persistencia (e7a) -> rating 5 estrelas `PUT /media/:id/rating` (e7b) ->
+retorno (e8) -> Perfil/CadUnico campos Nome/WhatsApp/CPF (e9) -> wallet
+certificados (e10). Adicionado a `tooling/web_qa.sh` (6 arquivos e2e).
+
+**ANOMALIAS web-vs-Android documentadas:**
+- Nao existe botao "Marcar como Concluida": conclusao e evento `ended`
+  via postMessage do embed (iframe no web, webview no Android) — aresta
+  nao dirigivel por UI em nenhuma plataforma; e7 usa arestas reais.
+- e7b OBSERVED: API respondeu `403 Matricula ativa obrigatoria` — video
+  `staging-qa-media` sem matricula QA; o app exibe issue corretamente.
+  Escrita efetiva = aresta condicional de dados (matricula no curso).
+- `shareCertificates` usa dart:io File + SharePlus — quebra no web
+  (sem filesystem). `printCertificates` usa package printing — funciona
+  (dialog de impressao do browser). Arestas de PDF inalcancaveis com QA
+  (wallet vazia) — condicionais a certificado emitido.
+- Player usa ListView lazy: conteudo abaixo da dobra so existe na
+  arvore apos scroll (tecnica de teste, nao bug).
+
+### Certificados no web — vertice condicional RESOLVIDO (2026-10-31)
+
+**FIX IMPLEMENTADO** (recorte certificados, compatibilidade nativa
+preservada):
+- `certificate_repository.dart`: web usa SharedPreferences
+  `certificate_index_v1` p/ o indice JSON (filePath nulo); nativo mantem
+  filesystem inalterado. Antes: getApplicationDocumentsDirectory ->
+  MissingPluginException -> wallet em estado de erro no web.
+- `certificate_service.dart`: `shareCertificates` -> `if (kIsWeb)`
+  `Printing.sharePdf` (download blob); `issue()` pula `pdfService.save`
+  no web (PDF reconstruido sob demanda por build()).
+- `certificate_pdf_service.dart`: `save()` guardado p/ nativo.
+
+**TESTED-STAGING:** `integration_test/wallet_qa_test.dart` PASSOU —
+semeia CertificateRecord (hash sha256 valido) via repository web,
+wallet renderiza card (e11), details com holder+hash+QR (e11b),
+'Compartilhar PDF' -> sharePdf sem excecao (e12a), 'Imprimir' ->
+layoutPdf sem crash (e12b). Adicionado a `tooling/web_qa.sh`
+(7 arquivos e2e). Grafo mermaid atualizado em WEB_COVERAGE_GRAPH.md
+com arestas executadas + erro/retorno + fallbacks web.
+
+**UNKNOWN/BLOCKED:** `Printing.layoutPdf` no headless pode suprimir o
+dialog de impressao do browser — verificado "sem crash", nao "dialog
+aberto". Android inalterado (filesystem + share_plus).
