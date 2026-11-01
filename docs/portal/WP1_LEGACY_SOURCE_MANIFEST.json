@@ -184,8 +184,8 @@
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/API/RestController.php",
-      "sha256": "e2870d7d0392920912e0f87f79f5831f6eff0526c4e617e0645f28e6cc065a2b",
-      "bytes": 12966
+      "sha256": "3ee705f10f1c0c3f85d7fbedf991a985205fb93899bcd1d1b919ceee878d53bd",
+      "bytes": 13900
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Certificates/Generator.php",
@@ -300,16 +300,12 @@
     "reason": "stable across checkout line-ending conversion"
   },
   "rebaseline": {
-    "at_utc": "2026-10-31T12:45:00Z",
-    "reason": "Sanctioned drift: prod->repo sync (bf1b24e) + PII minimize (fd990fa) + LP label (ae6686f) + /register endpoint (a026d6f self-enrollment candidate)",
-    "evidence": "docs/audit-2026-10-31-ead-apis-commercial.md",
+    "at_utc": "2026-11-01T03:00:00Z",
+    "reason": "Sanctioned drift: /register aceita cpf+password para login convergente app->site (1d0814f, PR #339)",
+    "evidence": "https://github.com/rafaloct/tutor-tds-platform/pull/339",
     "changed_files": [
-      "wordpress/legacy-runtime/tds-lms-core/modules/API/RestController.php",
-      "wordpress/legacy-runtime/tds-lms-core/modules/Dashboard/StudentArea.php",
-      "wordpress/legacy-runtime/tds-lms-core/modules/Payments/EnrollmentGate.php",
-      "wordpress/legacy-runtime/tds-lms-core/modules/Subscriptions/PlanManager.php",
-      "wordpress/legacy-runtime/tds-lms-core/tests/bootstrap.php"
+      "wordpress/legacy-runtime/tds-lms-core/modules/API/RestController.php"
     ],
-    "secret_scan": "no hardcoded secrets in changed files; TDS_API_KEY remains define() via env"
+    "secret_scan": "no new literals; bootstrap.php test fixtures unchanged"
   }
 }
