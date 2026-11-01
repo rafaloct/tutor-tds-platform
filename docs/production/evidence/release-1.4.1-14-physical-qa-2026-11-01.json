@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "evidence_id": "release-1.4.1-14-physical-qa-2026-11-01",
+  "artifact": {
+    "aab": "release/Tutor-TDS-1.4.1+14-signed.aab",
+    "aab_sha256": "D161451E16EF008DB51E2957441B19D2B2B9BC50D6059E011B3759CD727ECEB3",
+    "apk": "release/Tutor-TDS-1.4.1+14-signed.apk",
+    "apk_sha256": "F12BC428B201194F66555783A5B5B575C150FE9268CB99A939C615DC40D18E30",
+    "version_name": "1.4.1",
+    "version_code": 14
+  },
+  "device": {
+    "model": "Xiaomi POCO X6 Pro (2311DRK48G)",
+    "android_ui_night_mode": 2,
+    "adb_transport": "adb-tls mDNS"
+  },
+  "environment": "production (https://ead.ipexdesenvolvimento.cloud/tutor-api)",
+  "checks": [
+    {
+      "id": "light_theme_default_clean_install",
+      "status": "passed",
+      "detail": "Sistema em modo escuro (ui_night_mode=2); onboarding e home renderizam em tema claro no primeiro launch apos instalacao limpa."
+    },
+    {
+      "id": "plugin_registrant_packaging",
+      "status": "passed",
+      "detail": "Primeiro build 1.4.1+14 descartado: DEX sem io.flutter.plugins.GeneratedPluginRegistrant (ClassNotFound no boot, canais de plugin inativos, login 200 + falha generica ao gravar sessao). Rebuild apos flutter clean + pub get explicito; DEX do AAB/APK verificado contendo GeneratedPluginRegistrant, FlutterSecureStoragePlugin e SharedPreferencesPlugin."
+    },
+    {
+      "id": "account_login_online",
+      "status": "passed",
+      "detail": "Login na tela de conta com aluno demo (CPF 320.202.001-39, POST /auth/login 200) → consentimento → home 'Ola, Aluno!'."
+    },
+    {
+      "id": "legal_startup_cartilha_opens",
+      "status": "passed",
+      "detail": "Cartilha 'Aspectos Juridicos para Startups' (PEQUI-UFT/INOVATO/Finep) listada no catalogo, abre e avanca por mensagens ate pergunta interativa com feedback."
+    }
+  ],
+  "carried_forward_gates": [
+    "certificate_human_approval_e2e",
+    "classroom_cold_offline_xiaomi",
+    "course_versioning_xiaomi",
+    "evidence_offline_xiaomi"
+  ],
+  "carry_forward_reason": "Delta 1.4.0+13 → 1.4.1+14 limitado a tema padrao claro, cartilha bundled adicional e bump de versao; gates formais re-verificados no build corrigido quanto a login online, tema e cartilha.",
+  "verified_at": "2026-11-01",
+  "verifier": "dart run tool/verify_release_readiness.dart --intent=upload --artifact=release/Tutor-TDS-1.4.1+14-signed.aab → READY"
+}

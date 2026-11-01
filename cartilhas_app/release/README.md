@@ -2,8 +2,17 @@
 
 ## Atual
 
-**Candidato em preparação: `Tutor-TDS-1.4.1+14-signed.aab` (não liberado para
-upload até concluir o QA físico).**
+**Candidato validado: `Tutor-TDS-1.4.1+14-signed.aab`.**
+`verify_release_readiness.dart --intent=upload` reporta READY; o upload no
+Play Console permanece ação humana.
+
+- SHA-256 do candidato:
+  `D161451E16EF008DB51E2957441B19D2B2B9BC50D6059E011B3759CD727ECEB3`.
+
+Nota de ciclo: o primeiro build 1.4.1+14 foi descartado por defeito de
+empacotamento (`GeneratedPluginRegistrant` ausente do DEX, canais de plugin
+inativos). O artefato válido foi reconstruído e o DEX do AAB/APK conferido
+antes do QA físico no Xiaomi.
 
 Mudanças do 1.4.1: cartilha "Aspectos Jurídicos para Startups"
 (PEQUI-UFT / INOVATO / Finep) embarcada no catálogo e tema Claro como padrão

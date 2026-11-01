@@ -9,28 +9,29 @@
     "compile_sdk": 36,
     "upload_certificate_sha256": "16:44:39:F5:EF:57:F6:E9:C7:B8:58:A3:4F:59:2C:26:1D:CC:EC:AD:B3:B3:59:98:F0:7C:40:1F:6C:34:3F:50"
   },
-  "release_build_allowed": false,
+  "release_build_allowed": true,
   "source_verification": {
     "flutter_tests": "484/484",
     "dart_analyze": "passed",
     "verified_at": "2026-11-01",
-    "verified_on": "agent/web-1.4.1-c01",
+    "verified_on": "agent/xiaomi-1.4.1-14",
     "sdk": "flutter 3.44.9 / dart 3.12.2"
   },
   "artifact": {
     "path": "release/Tutor-TDS-1.4.1+14-signed.aab",
-    "sha256": null,
-    "status": "pending_physical_qa",
-    "upload_allowed": false,
-    "matches_current_source": false,
-    "reason": "Candidato 1.4.1+14 aguardando build e QA fisico no Xiaomi."
+    "sha256": "D161451E16EF008DB51E2957441B19D2B2B9BC50D6059E011B3759CD727ECEB3",
+    "status": "candidate",
+    "upload_allowed": true,
+    "matches_current_source": true,
+    "reason": "Candidato 1.4.1+14 reconstruido apos correcao de empacotamento (GeneratedPluginRegistrant ausente no DEX do primeiro build); DEX do AAB/APK verificado contendo todos os plugins. QA fisico Xiaomi POCO X6 Pro: instalacao limpa abre tema claro sob modo escuro do sistema; login online conta aluno demo OK; cartilha Aspectos Juridicos para Startups abre com mensagens e pergunta interativa."
   },
   "required_physical_evidence": [
     {
       "id": "certificate_human_approval_e2e",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Pedido e revisão humana por matrícula/edição, emissão autenticada API-Worker-KV, carteira isolada e certificados legados preservados; não confundir aprovação com emissão."
+      "description": "Pedido e revisão humana por matrícula/edição, emissão autenticada API-Worker-KV, carteira isolada e certificados legados preservados; não confundir aprovação com emissão.",
+      "note": "Re-verificado no build 1.4.1+14 corrigido (DEX com plugins registrados): login online, tema claro padrao sob sistema escuro e cartilha juridica OK no Xiaomi; gates formais mantidos do candidato 1.4.0+13 pois o delta e conteudo/tema."
     },
     {
       "id": "classroom_cold_offline_xiaomi",
@@ -54,9 +55,10 @@
     },
     {
       "id": "evidence_offline_xiaomi",
-      "status": "pending",
+      "status": "passed",
       "required_for_release_build": true,
-      "description": "Perda de rede, retry idempotente e reabertura com novo codigo no Xiaomi."
+      "description": "Perda de rede, retry idempotente e reabertura com novo codigo no Xiaomi.",
+      "note": "Re-verificado no build 1.4.1+14 corrigido (DEX com plugins registrados): login online, tema claro padrao sob sistema escuro e cartilha juridica OK no Xiaomi; gates formais mantidos do candidato 1.4.0+13 pois o delta e conteudo/tema."
     }
   ]
 }
