@@ -2,12 +2,16 @@
 
 ## Atual
 
-**Candidato validado: `Tutor-TDS-1.4.1+14-signed.aab`.**
+**Candidato validado: `Tutor-TDS-1.4.1+15-signed.aab`.**
 `verify_release_readiness.dart --intent=upload` reporta READY; o upload no
 Play Console permanece ação humana.
 
 - SHA-256 do candidato:
-  `D161451E16EF008DB51E2957441B19D2B2B9BC50D6059E011B3759CD727ECEB3`.
+  `2656E26279077999FE458F4AD4170B1996839A78264F251EFBA1FBF5D16B7DA2`.
+
+Nota de upload: o `versionCode 14` já estava utilizado no Play Console por um
+ciclo 1.4.1 anterior; o candidato foi reemitido como código 15 com fonte
+idêntica ao +14 validado nos quatro gates físicos no Xiaomi.
 
 Nota de ciclo: o primeiro build 1.4.1+14 foi descartado por defeito de
 empacotamento (`GeneratedPluginRegistrant` ausente do DEX, canais de plugin

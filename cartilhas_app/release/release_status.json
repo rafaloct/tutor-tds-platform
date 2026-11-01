@@ -19,11 +19,11 @@
   },
   "artifact": {
     "path": "release/Tutor-TDS-1.4.1+15-signed.aab",
-    "sha256": "PENDING_REBUILD",
+    "sha256": "2656E26279077999FE458F4AD4170B1996839A78264F251EFBA1FBF5D16B7DA2",
     "status": "candidate",
     "upload_allowed": true,
     "matches_current_source": true,
-    "reason": "Rebuild de codigo 15 exigido pelo Play Console (versionCode 14 ja utilizado num ciclo v1.4.1 anterior). Fonte identica ao candidato 1.4.1+14 validado nos 4 gates fisicos no Xiaomi; apenas o versionCode muda. SHA-256 preenchido apos o rebuild com DEX verificado."
+    "reason": "Rebuild de codigo 15 exigido pelo Play Console (versionCode 14 ja utilizado num ciclo v1.4.1 anterior). Fonte identica ao candidato 1.4.1+14 validado nos 4 gates fisicos no Xiaomi; apenas o versionCode muda. Registrant verificado antes de compilar; DEX do AAB/APK contem GeneratedPluginRegistrant, FlutterSecureStoragePlugin e SharedPreferencesPlugin. AAB jarsigner-verified. Smoke no POCO X6 Pro: versionCode=15 instalado, MainActivity em foreground, sem ClassNotFound/registrant/channel-error no logcat (display do aparelho estava dormindo; evidencia via dumpsys/logcat)."
   },
   "required_physical_evidence": [
     {
