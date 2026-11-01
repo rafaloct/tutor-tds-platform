@@ -1,0 +1,10 @@
+{
+  "status": "EVIDENCE_OFFLINE_XIAOMI_PHYSICAL_PASSED",
+  "release_gate": "evidence_offline_xiaomi",
+  "verified_at": "2026-11-01T13:41:58.670170+00:00",
+  "device_model": "Xiaomi 2311DRK48G",
+  "app_package": "com.tutortds_cartilhas",
+  "apk_sha256": "D4907F9ACE9E6C9A0E07C2640AAB05D6EF29BE67AAE78B311DEDBA4CAC948663",
+  "aab_sha256": "31B90EEEB030C4D842C3F85BFB491757FA468C45AD644C2D713EB96AABCD05CA",
+  "phases_verified": "all_passed"
+}

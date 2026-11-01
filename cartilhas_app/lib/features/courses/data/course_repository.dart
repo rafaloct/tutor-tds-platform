@@ -31,6 +31,7 @@ class CourseRepository {
 
   static const _assetPaths = [
     'assets/data/lessons/agricultura-sustentavel.json',
+    'assets/data/lessons/aspectos-juridicos-startups.json',
     'assets/data/lessons/atendimento-cliente.json',
     'assets/data/lessons/audiovisual.json',
     'assets/data/lessons/cooperativismo.json',

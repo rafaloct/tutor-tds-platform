@@ -1,0 +1,232 @@
+{
+  "id": "aspectos-juridicos-startups",
+  "title": "Aspectos Jurídicos para Startups: O que proteger desde o primeiro teste",
+  "author": "PEQUI-UFT • INOVATO • Finep (TDS 2026)",
+  "downloadUrl": "https://ead.ipexdesenvolvimento.cloud/courses/aspectos-juridicos-startups/",
+  "sections": [
+    {
+      "id": "ativos-intangiveis",
+      "title": "1. O que a startup já tem a perder antes de faturar?",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "Bem-vindo(a) à cartilha elaborada pelo PEQUI-UFT (Parque de Empreendedorismo, Qualidade Socioambiental e Inovação Tecnológica da Universidade Federal do Tocantins), INOVATO (Agência de Inovação da UFT) e Finep! Aqui você aprende o que proteger no seu negócio desde o primeiro teste."
+        },
+        {
+          "type": "bot",
+          "content": "CASO PRÁTICO — NOSSO TIME: Três fundadores criam uma plataforma de agendamento. Um freelancer fez o MVP, há uma lista de interessados e uma empresa aceitou rodar um piloto. A startup ainda não vendeu nada, mas já tem: (1) uma marca escolhida, (2) um produto em desenvolvimento, (3) uma lista de interessados e (4) uma promessa feita a um parceiro."
+        },
+        {
+          "type": "bot",
+          "content": "ONDE ESTÁ O MAIOR VALOR DO NEGÓCIO? Segundo o estudo Ocean Tomo (Intangible Asset Market Value Study, resultados de 2025), 92% do valor de mercado das empresas do S&P 500 está em ATIVOS INTANGÍVEIS: marca, software, dados, know-how e contratos (em 1975, eram apenas 17%)."
+        },
+        {
+          "type": "bot",
+          "content": "4 MOTIVOS PARA PROTEGER DESDE CEDO: (1) Evitar disputas — titularidade definida evita retrabalho e brigas sobre quem é dono de quê; (2) Licenciar e negociar — direitos claros dão segurança para fechar parcerias; (3) Preservar o diferencial — o que o time criou continua sendo do time; (4) Mostrar ao investidor — a due diligence verifica quais ativos pertencem, de fato, à empresa."
+        },
+        {
+          "type": "question",
+          "content": "Por que uma startup que ainda não faturou já precisa organizar seus ativos jurídicos?",
+          "options": [
+            {
+              "label": "Porque marca, código, dados e contratos já são ativos valiosos e disputáveis desde o MVP",
+              "value": "a",
+              "isCorrect": true,
+              "feedback": "CORRETO! Mesmo sem faturamento, a startup já acumula ativos intangíveis (marca, MVP, base de interessados e relações com parceiros). Definir titularidade e proteção desde o primeiro teste evita perder o nome, o código ou o negócio lá na frente."
+            },
+            {
+              "label": "A proteção jurídica só é necessária depois do primeiro milhão de faturamento",
+              "value": "b",
+              "isCorrect": false,
+              "feedback": "Atenção! Deixar para depois de faturar custa caro: no Brasil, o direito à marca nasce do registro (leva quem deposita primeiro no INPI — Lei 9.279/1996, art. 129) e o código feito sem contrato claro pode gerar disputa de titularidade."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "propriedade-intelectual-marcas",
+      "title": "2. Mapa da Propriedade Intelectual e Registro de Marca no INPI",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "CADA ATIVO PEDE UMA PROTEÇÃO DIFERENTE (Lei 9.279/1996 — LPI e Lei 9.609/1998 — Lei do Software):\n• Marca (nome, logo, slogan): registro no INPI por classe de atividade — 10 anos, renováveis.\n• Software (código-fonte): direito autoral (registro no INPI é opcional) — 50 anos.\n• Patente de invenção (solução técnica nova): INPI, antes de divulgar — 20 anos.\n• Modelo de utilidade (melhoria funcional): INPI — 15 anos.\n• Desenho industrial (forma ornamental): INPI — até 25 anos.\n• Segredo de negócio (algoritmo, base, know-how): contrato + acesso restrito — enquanto sigiloso.\n• Domínio na internet: Registro.br — enquanto renovado."
+        },
+        {
+          "type": "bot",
+          "content": "REGRA IMPORTANTE (LPI, art. 10, V e VIII): Ideia abstrata, sozinha, NÃO recebe proteção jurídica, e o programa de computador 'em si' não é patenteável (exceto quando integra invenção com efeito técnico novo e aplicação industrial)."
+        },
+        {
+          "type": "bot",
+          "content": "PASSO A PASSO DA MARCA NO INPI:\n1. Busca de sinais semelhantes: pesquise não só nomes idênticos, mas tudo o que possa confundir o público no mesmo ramo.\n2. Escolha das classes (NCL): R$ 440 por classe com desconto de 50% para ME, EPP, MEI, Inova Simples, ICT e pessoa física (especificação pré-aprovada); valor integral R$ 880 (Portaria INPI/PR nº 10/2025).\n3. Pedido e acompanhamento: depositar não garante concessão automática; há exame formal, prazo de oposição e exame de mérito."
+        },
+        {
+          "type": "bot",
+          "content": "LIÇÕES DE CASOS REAIS:\n• Meta x Meta: empresa brasileira de TI pediu a marca 'Meta' em 1996 e obteve o registro em 2008; quando o Facebook mudou de nome em 2021, enfrentou ordem judicial no TJ-SP em fev/2024 (suspensa em mar/2024 enquanto segue a disputa). Lição: o registro antigo coloca a pequena empresa à mesa com uma gigante.\n• Gradiente x Apple: Gradiente pediu 'G Gradiente iphone' em 2000 (concedida em 2008); STJ (2018) manteve a marca mista sem exclusividade sobre 'iPhone' isolado e o caso chegou ao STF (RE 1.338.807). Lição: deposite cedo, prefira sinais distintivos e use a marca."
+        },
+        {
+          "type": "question",
+          "content": "Sobre a proteção de ideias, marcas e programas de computador no Brasil, qual afirmação está correta?",
+          "options": [
+            {
+              "label": "A ideia isolada não é protegida; a marca protege-se por registro no INPI e o código-fonte por direito autoral (50 anos)",
+              "value": "a",
+              "isCorrect": true,
+              "feedback": "EXATO! Pelo art. 10 da LPI (Lei 9.279/1996), ideias abstratas não são protegidas. A marca exige depósito e concessão no INPI (10 anos renováveis) e o código-fonte é protegido pelo regime da Lei 9.609/1998 por 50 anos."
+            },
+            {
+              "label": "Basta criar um perfil nas redes sociais para ser dono definitivo da marca em todo o país",
+              "value": "b",
+              "isCorrect": false,
+              "feedback": "Incorreto! Arroba em rede social ou domínio na internet não substitui o registro de marca no INPI. No sistema brasileiro, a propriedade da marca é adquirida pelo registro validamente expedido pelo INPI."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "titularidade-patente-segredo-nda",
+      "title": "3. Titularidade do Código, Patente x Segredo e Acordo de Sigilo (NDA)",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "QUEM É O DONO DO CÓDIGO? Todo software precisa ter titular definido:\n• Fundadores (pré-CNPJ): o que nasceu antes da empresa precisa ser transferido formalmente (cessão de direitos ou integralização ao capital social).\n• Empregado (CLT): a Lei do Software (Lei 9.609/1998, art. 4º) atribui à empresa o que nasce da função contratada, salvo estipulação em contrário — deixe isso escrito.\n• Freelancer ou PJ: recibo de 'desenvolver um app' não basta! Defina cessão patrimonial, entregáveis (código-fonte, documentação, acessos ao repositório) e componentes preexistentes.\n• Universidade / NIT (INOVATO na UFT): se usou laboratório, bolsa ou orientação acadêmica, verifique a política de inovação da ICT (Lei 10.973/2004 e Lei 13.243/2016) e os instrumentos com o NIT."
+        },
+        {
+          "type": "bot",
+          "content": "PATENTE OU SEGREDO DE NEGÓCIO? A decisão precede a divulgação!\n• Patente: proteção técnica e territorial (20 anos); exige novidade, atividade inventiva e aplicação industrial. No Brasil há período de graça de 12 meses (LPI, art. 12), mas ele NÃO vale em todos os países — um pitch público pode revelar mais do que deveria.\n• Segredo de negócio: dura enquanto houver sigilo efetivo; exige NDA, acesso por necessidade (need-to-know) e registro de quem viu; protege contra concorrência desleal (LPI, art. 195, XI), mas não impede criação independente legítima."
+        },
+        {
+          "type": "bot",
+          "content": "CONFIDENCIALIDADE COM FINALIDADE CLARA (NDA): Use com parceiros técnicos, clientes-piloto, mentores, devs e candidatos a sócio.\nO que o NDA precisa prever: (1) Informações protegidas e exceções legítimas; (2) Finalidade de uso; (3) Quem pode acessar (necessidade de saber); (4) Prazo (o sigilo pode sobreviver ao contrato); (5) Devolução ou descarte ao final; (6) Registro e limitação de acessos; (7) Consequências proporcionais e foro.\nATENÇÃO: NDA não transfere PI, não substitui a LGPD e não é proibição genérica de concorrência."
+        },
+        {
+          "type": "question",
+          "content": "No caso do 'Nosso Time', um freelancer desenvolveu o MVP antes da abertura do CNPJ. O que os fundadores precisam fazer?",
+          "options": [
+            {
+              "label": "Assinar termo de cessão patrimonial do código e dos acessos para a empresa, listando entregáveis e bibliotecas usadas",
+              "value": "a",
+              "isCorrect": true,
+              "feedback": "PERFEITO! Para que a startup possa licenciar o software ou passar por uma due diligence de investimento, a cadeia de titularidade precisa estar limpa, com cessão expressa do freelancer e dos fundadores para o CNPJ."
+            },
+            {
+              "label": "Apenas guardar o comprovante do PIX feito ao freelancer, pois isso já transfere toda a propriedade intelectual",
+              "value": "b",
+              "isCorrect": false,
+              "feedback": "Cuidado! Comprovante de pagamento isolado não especifica se houve cessão total de direitos patrimoniais ou mera licença de uso, nem garante a entrega das credenciais de repositório e ausência de código de terceiros incompatível."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lgpd-pequeno-porte-seguranca",
+      "title": "4. LGPD desde o Primeiro Formulário e Regime de Pequeno Porte (ANPD)",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "LGPD DESDE O PRIMEIRO FORMULÁRIO (Lei 13.709/2018, arts. 3º, 5º a 11 e 15 a 18): No 'Nosso Time', o formulário de interesse pedia CPF, data de nascimento e endereço completo, quando o teste precisava apenas de nome e contato. Pelo princípio da NECESSIDADE (minimização), a decisão correta é: retirar campos sem justificativa, informar a finalidade, definir a base legal, fixar prazo de retenção e indicar o canal para direitos do titular."
+        },
+        {
+          "type": "bot",
+          "content": "REGIME DIFERENCIADO DE PEQUENO PORTE (Resolução CD/ANPD nº 2/2022, arts. 6º, 9º, 11, 13 e 14):\n• O que fica mais leve: dispensa de indicar Encarregado/DPO (desde que mantido canal de comunicação com o titular), registro simplificado de operações, prazos em dobro e política de segurança simplificada.\n• O que NÃO muda para nenhum porte: necessidade de base legal para cada finalidade (arts. 7º e 11), atendimento aos direitos dos titulares (art. 18), medidas de segurança (art. 46) e cuidado contratual com fornecedores.\n• ALERTA DE ALTO RISCO: porte e receita sozinhos não bastam! Se o tratamento combinar critério geral (ex.: larga escala) + critério específico (ex.: tecnologia emergente/IA, dados sensíveis ou decisões automatizadas), configura-se ALTO RISCO e a startup não pode usar as dispensas."
+        },
+        {
+          "type": "bot",
+          "content": "PRIVACIDADE NA OPERAÇÃO (LGPD, arts. 5º, 37, 39, 46 e 48; Resolução CD/ANPD nº 15/2024; Guia de Segurança ANPD):\n1. Acessos individuais: login próprio, autenticação forte (MFA) e revogação imediata quando alguém sai.\n2. Inventário e base legal: mapear que dados coleta, para quê, com qual base e por quanto tempo.\n3. Backups testados e sistemas atualizados.\n4. Plano de incidente: em caso de incidente com risco relevante, comunicar à ANPD e aos titulares em 3 dias úteis (ou 6 dias úteis para agentes de pequeno porte).\n5. Fornecedores definidos: nuvem, CRM e meios de pagamento com papéis e responsabilidades em contrato."
+        },
+        {
+          "type": "question",
+          "content": "Qual é a regra da Resolução CD/ANPD nº 2/2022 e nº 15/2024 para startups enquadradas como agentes de tratamento de pequeno porte?",
+          "options": [
+            {
+              "label": "Têm prazos em dobro (6 dias úteis em incidentes) e dispensa de DPO se mantiverem canal ao titular e não realizarem tratamento de alto risco",
+              "value": "a",
+              "isCorrect": true,
+              "feedback": "CORRETO! Agentes de pequeno porte (sem tratamento de alto risco) contam com prazos em dobro — incluindo 6 dias úteis para comunicação de incidente relevante — e dispensa de DPO, mantendo todas as obrigações de base legal, segurança e atendimento ao titular."
+            },
+            {
+              "label": "Startups de pequeno porte estão isentas da LGPD até atingirem R$ 16 milhões de faturamento",
+              "value": "b",
+              "isCorrect": false,
+              "feedback": "Falso! A LGPD aplica-se a qualquer pessoa natural ou jurídica que trate dados pessoais com finalidade econômica (art. 3º). A Resolução CD/ANPD nº 2/2022 flexibiliza procedimentos, mas nunca isenta do cumprimento da lei."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "compliance-socios-contratos",
+      "title": "5. Compliance, Acordo de Sócios e Contratos de Piloto",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "COMPLIANCE NO TAMANHO DA STARTUP (Lei 12.846/2013 — Lei Anticorrupção; Decreto 11.129/2022; Lei 14.133/2021; Diretrizes CGU 2024): A multa da Lei Anticorrupção parte de 0,1% (até 20%) do faturamento bruto e alcança a empresa por responsabilidade objetiva (mesmo sem culpa direta dos sócios). Um programa de integridade efetivo, anterior ao fato, pode reduzir até 5% no cálculo da multa.\nComece respondendo a 4 perguntas: (1) Quem aprova despesas e contratos? (2) Como tratar conflitos de interesse? (3) Quais condutas o time não aceita? (4) Como relatar e corrigir um problema?"
+        },
+        {
+          "type": "bot",
+          "content": "ACORDO DE SÓCIOS — 8 CLÁUSULAS ESSENCIAIS (Código Civil, arts. 1.052 a 1.087; LC 182/2021, art. 5º):\n01. Participação e vesting (quotas conquistadas ao longo do tempo, com cliff).\n02. Dedicação e papéis (quem faz o quê e o que acontece se parar).\n03. Good e bad leaver (regras de recompra de quotas conforme o motivo da saída).\n04. PI na empresa (tudo o que os sócios criam pertence à startup).\n05. Não concorrência e não aliciamento (prazo e escopo razoáveis).\n06. Tag along (direito de vender junto) e drag along (dever de vender junto).\n07. Decisões, vetos e como desempatar impasses.\n08. Novos investidores (diluição, preferência e mútuo conversível)."
+        },
+        {
+          "type": "bot",
+          "content": "10 CLÁUSULAS DE ATENÇÃO NO CONTRATO DE PILOTO / CLIENTE (Código Civil, arts. 421, 421-A e 422; Lei 9.609/1998, art. 9º; LGPD, arts. 39 e 46):\n(1) Partes e poderes; (2) Escopo e entregas (o que está e o que NÃO está incluído); (3) Critérios de aceite; (4) Preço, prazo e mudanças; (5) Piloto (duração, usuários, ambiente e métrica de sucesso); (6) PI e limites de uso — preexistente x melhorias criadas durante o piloto (licença não é cessão!); (7) Sigilo; (8) Dados e segurança; (9) Limites de responsabilidade; (10) Saída, transição e foro."
+        },
+        {
+          "type": "question",
+          "content": "Durante um teste piloto com uma empresa parceira, surge uma funcionalidade nova sugerida pelo cliente. Como evitar perder o produto principal?",
+          "options": [
+            {
+              "label": "Prever em contrato que o software preexistente e as melhorias do core continuam da startup, concedendo licença de uso (e não cessão)",
+              "value": "a",
+              "isCorrect": true,
+              "feedback": "EXCELENTE! Sem cláusula expressa diferenciando PI preexistente/evolutiva de desenvolvimento sob encomenda, o cliente do piloto pode reivindicar exclusividade ou titularidade sobre melhorias vitais do seu produto."
+            },
+            {
+              "label": "Rodar o piloto apenas com um acordo verbal para demonstrar confiança comercial",
+              "value": "b",
+              "isCorrect": false,
+              "feedback": "Muito arriscado! Piloto sem escopo, prazo, critérios de sucesso, limites de responsabilidade e cláusula de PI por escrito é uma das principais causas de litígio e perda de ativos em startups."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "marco-legal-checklist-final",
+      "title": "6. Vantagens do Marco Legal das Startups e Checklist: 10 Passos Antes de Faturar",
+      "messages": [
+        {
+          "type": "bot",
+          "content": "STARTUP TEM VANTAGENS LEGAIS — USE-AS! Pelo Marco Legal das Startups (LC 182/2021, arts. 4º, 13 e 14; Portaria INPI/PR nº 10/2025; Res. CD/ANPD nº 2/2022), enquadra-se como startup quem tem receita bruta de até R$ 16 milhões/ano, até 10 anos de CNPJ e modelo inovador declarado no contrato social ou adesão ao Inova Simples:\n• 50% de desconto nas taxas do INPI para ME, EPP, MEI e Inova Simples.\n• Fila prioritária no INPI para exame de marcas e patentes de startups.\n• LGPD simplificada no regime de pequeno porte da ANPD.\n• Até R$ 1,6 milhão por contrato com o poder público para testar soluções inovadoras via CPS (Contrato Público para Solução Inovadora)."
+        },
+        {
+          "type": "bot",
+          "content": "AS PRÓXIMAS DECISÕES DO TIME (POR MOMENTO):\n• Antes do nome público: Busca de marca + Depósito no INPI.\n• Antes do desenvolvimento: Acordo de sócios + Titularidade e licenças.\n• Antes da divulgação técnica: Avaliar patente ou segredo + NDA pronto.\n• Antes da coleta de dados: Finalidade, base legal, segurança + Aviso e canal do titular.\n• Antes do piloto: Condições por escrito + Contrato com as 10 cláusulas."
+        },
+        {
+          "type": "bot",
+          "content": "CHECKLIST FINAL — 10 PASSOS ANTES DE FATURAR (PEQUI-UFT / INOVATO / Finep):\n1. CNPJ e enquadramento (ME, EPP, Inova Simples)\n2. Acordo de sócios com vesting, assinado\n3. Cessão da PI de fundadores, devs e freelancers\n4. Mapa de dados, aviso de privacidade e canal do titular\n5. Busca e depósito da marca no INPI\n6. Registro do software no INPI\n7. Patente avaliada antes de qualquer divulgação\n8. NDA padrão (mútuo) pronto para usar\n9. Código de conduta e canal de denúncias\n10. Contrato-padrão de cliente/piloto com as 10 cláusulas\nLembre-se: Jurídico não é freio — é o que permite acelerar sem perder o que você construiu!"
+        },
+        {
+          "type": "question",
+          "content": "Qual é o limite por Contrato Público para Solução Inovadora (CPS) previsto no Marco Legal das Startups (LC 182/2021) para testar soluções com o poder público?",
+          "options": [
+            {
+              "label": "Até R$ 1,6 milhão por CPS, além de fila prioritária e 50% de desconto no INPI",
+              "value": "a",
+              "isCorrect": true,
+              "feedback": "PARABÉNS! Você concluiu a cartilha 'Aspectos Jurídicos para Startups' (PEQUI-UFT • INOVATO • Finep). O CPS permite contratos de teste de até R$ 1,6 milhão com a administração pública (LC 182/2021, art. 13), somado aos benefícios no INPI e na ANPD."
+            },
+            {
+              "label": "Startups com menos de 5 anos de CNPJ são proibidas de contratar com órgãos públicos",
+              "value": "b",
+              "isCorrect": false,
+              "feedback": "Pelo contrário! A LC 182/2021 criou justamente uma modalidade especial de licitação e o CPS (até R$ 1,6 milhão por contrato) para facilitar que startups testem e forneçam soluções inovadoras ao setor público."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

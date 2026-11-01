@@ -1,1 +1,1 @@
-Atualização da jornada de estudo com Tutor contextual, flashcards, resumos, quizzes e simulados com salvamento local. Também melhora leitura offline, acessibilidade, login/logout e estabilidade.
+Nova cartilha "Aspectos Jurídicos para Startups" (PEQUI-UFT / INOVATO / Finep) com 6 seções sobre marca, código, LGPD, contratos e Marco Legal das Startups. Novas instalações agora abrem no tema Claro por padrão; a preferência Claro/Escuro/Sistema continua disponível em Configurações.

@@ -282,16 +282,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SegmentedButton<ThemePreference>(
                       segments: const [
                         ButtonSegment(
-                          value: ThemePreference.system,
-                          label: Text('Sistema'),
-                        ),
-                        ButtonSegment(
                           value: ThemePreference.light,
                           label: Text('Claro'),
                         ),
                         ButtonSegment(
                           value: ThemePreference.dark,
                           label: Text('Escuro'),
+                        ),
+                        ButtonSegment(
+                          value: ThemePreference.system,
+                          label: Text('Sistema'),
                         ),
                       ],
                       selected: {themeController.preference},

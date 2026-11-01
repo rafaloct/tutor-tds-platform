@@ -175,4 +175,14 @@ void main() {
     expect(tokenStore.value, isNotNull);
     expect(find.text('Configurações'), findsOneWidget);
   });
+
+  test('nova instalação usa tema Claro como padrão (evita dark mode inicial)', () async {
+    SharedPreferences.setMockInitialValues({});
+    final controller = ThemeController();
+    expect(controller.preference, ThemePreference.light);
+    expect(controller.themeMode, ThemeMode.light);
+    await controller.load();
+    expect(controller.preference, ThemePreference.light);
+    expect(controller.themeMode, ThemeMode.light);
+  });
 }

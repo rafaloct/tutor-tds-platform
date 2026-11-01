@@ -6,7 +6,7 @@ enum ThemePreference { system, light, dark }
 class ThemeController extends ChangeNotifier {
   static const _preferenceKey = 'theme_preference_v1';
 
-  ThemePreference _preference = ThemePreference.system;
+  ThemePreference _preference = ThemePreference.light;
 
   ThemePreference get preference => _preference;
 
@@ -21,7 +21,7 @@ class ThemeController extends ChangeNotifier {
     final saved = prefs.getString(_preferenceKey);
     _preference = ThemePreference.values.firstWhere(
       (value) => value.name == saved,
-      orElse: () => ThemePreference.system,
+      orElse: () => ThemePreference.light,
     );
     notifyListeners();
   }

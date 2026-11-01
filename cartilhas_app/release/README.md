@@ -2,24 +2,23 @@
 
 ## Atual
 
-**Não há AAB atual liberado para upload.**
+**Candidato em preparação: `Tutor-TDS-1.4.1+14-signed.aab` (não liberado para
+upload até concluir o QA físico).**
 
-`Tutor-TDS-1.4.0+13-signed.aab`, hash
-`B93FAD21CE8AE92AB464FCAFE8FB69E66C07C6E712DB0DBFCA0AE580B2844B66`, está
-**superseded e não deve ser enviado à Play Console**. Ele antecede a mudança de
-retomada offline segura do Evidence/check-in, validada no código pela suíte
-Flutter 183/183. Um novo bundle só deve ser gerado depois do reteste físico no
-Xiaomi reconectado.
+Mudanças do 1.4.1: cartilha "Aspectos Jurídicos para Startups"
+(PEQUI-UFT / INOVATO / Finep) embarcada no catálogo e tema Claro como padrão
+em novas instalações (preferência do usuário continua respeitada).
 
-Os dados abaixo são mantidos somente para rastreabilidade do artefato
-superseded:
+`Tutor-TDS-1.4.0+13-signed.aab` permanece registrado como histórico; o hash
+aprovado do ciclo anterior consta em `release_status.json`.
 
-- tamanho: `64.716.303` bytes;
-- SHA-256: `b93fad21ce8ae92ab464fcafe8fb69e66c07c6e712db0dbfca0ae580b2844b66`;
+Os dados abaixo são mantidos somente para rastreabilidade do artefato 1.4.0+13:
+
+- SHA-256 aprovado no ciclo anterior:
+  `31B90EEEB030C4D842C3F85BFB491757FA468C45AD644C2D713EB96AABCD05CA`;
 - pacote: `com.tutortds_cartilhas`;
 - versão: `1.4.0` (`versionCode 13`);
 - target SDK: 36;
-- alinhamento nativo: 16 KB;
 - assinatura: chave de upload correspondente a `android/upload_certificate.pem`.
 
 ## Freeze executável
