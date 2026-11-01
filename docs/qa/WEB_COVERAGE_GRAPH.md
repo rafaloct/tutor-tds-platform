@@ -328,3 +328,20 @@ persistência, e7b rating→API 403 matrícula exigida, e8 retorno)→V4
 documentadas: sem botão "concluir" (conclusão = evento `ended` do
 embed); share-PDF usa dart:io File (não-web); print usa `printing`
 (suportado); edges de PDF condicionais a certificado emitido.
+
+`integration_test/certificate_request_test.dart` — **EXECUTADO
+2026-11-01 — PASSOU**: DFS V4b (pedido de certificado real, API
+staging). e13: `CertificateRequestsScreen(courseId:'saf')` injetada
+via Navigator (o FAB `v6→v23` exige `_isCompleted` — aresta
+condicional de módulo concluído); e13a: `GET
+/certificate-requests/contexts` retorna matrícula real
+`qa-cert-enroll-1` → dropdown + evidência ("Tempo validado 0.00 h de
+40.00 h", "Há critérios pendentes"); e13b: "Solicitar análise" →
+dialog de confirmação (LGPD: "não emite nem publica") → `POST
+/certificate-requests` **201** → pedido `f5ee9813` listado
+"Aguardando análise da equipe" (pendente, revisão humana); e13c:
+wallet → icon "Pedidos de certificado" → mesmo pedido visível fora
+do contexto do curso (persistência server-side, sem seed local).
+Limite do contrato: `approved`→emissão é aresta de gestor humano
+(review-queue, claim coordinator/admin) — fora do escopo student;
+o teste prova a jornada student até `pending`, sem dead-end.

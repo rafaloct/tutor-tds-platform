@@ -27,6 +27,7 @@ TESTS=(
   integration_test/account_qa_test.dart
   integration_test/learning_qa_test.dart
   integration_test/wallet_qa_test.dart
+  integration_test/certificate_request_test.dart
   integration_test/web_postman_test.dart
 )
 # Rodam com staging.qa.web.json: mesmo config do app servido em :9090.

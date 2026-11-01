@@ -3,7 +3,7 @@ name: Tutor TDS Flutter Web E2E (staging)
 # Suite E2E do app Flutter Web contra a API de staging real
 # (ead.ipexdesenvolvimento.cloud/tutor-staging-api, endpoint publico).
 # Executa tooling/web_qa.sh: build release -> app+proxy nginx :9090 ->
-# chromedriver headless -> 7 arquivos integration_test.
+# chromedriver headless -> 8 arquivos integration_test.
 # Conta QA e credenciais sao fixtures de teste ja commitadas
 # (defaults dos testes + config/staging.qa.web.json); sem secrets.
 
