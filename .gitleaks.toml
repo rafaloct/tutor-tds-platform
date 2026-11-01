@@ -22,3 +22,10 @@ condition = "AND"
 paths = ['''^api/tests/''', '''^cartilhas_app/(test|integration_test)/''']
 regexTarget = "line"
 regexes = ['''(?i)^\s*(?:const\s+)?(?:synthetic_fixture_api_key|syntheticFixtureApiKey)\s*=\s*["']tds_gitleaks_fixture_[A-Za-z0-9]{24}["']\s*;?\s*(?:#|//)\s*gitleaks:synthetic-fixture\s*$''']
+
+[[rules.allowlists]]
+description = "Synthetic test constants in the quarantined WP legacy test tree"
+condition = "AND"
+paths = ['''^wordpress/legacy-runtime/.*/tests/''']
+regexTarget = "line"
+regexes = ['''define\(\s*'[A-Z_]+'\s*,\s*'test_[a-z0-9_]+'\s*\)''']
