@@ -227,6 +227,23 @@ void main() {
   );
 
   test(
+    'contexts without version omit the parameter for server-side resolution',
+    () async {
+      final repository = _repository((request) async {
+        expect(request.method, 'GET');
+        expect(request.url.path, '/tds/v1/certificate-requests/contexts');
+        expect(request.url.queryParameters, {'course_id': 'course-1'});
+        return _json({
+          'contexts': [_context(classId: null)],
+        });
+      });
+      final contexts = await repository.contexts('course-1', null);
+      expect(contexts.single.classId, isNull);
+      expect(contexts.single.courseVersionId, 'version-1');
+    },
+  );
+
+  test(
     'create sends only server context IDs and explicit nullable class',
     () async {
       for (final classId in [null, 'class-1']) {

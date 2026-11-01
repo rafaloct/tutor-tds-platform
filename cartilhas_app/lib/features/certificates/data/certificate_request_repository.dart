@@ -9,7 +9,7 @@ import '../models/certificate_request.dart';
 abstract interface class CertificateRequestGateway {
   Future<List<CertificateRequestContext>> contexts(
     String courseId,
-    String versionId,
+    String? versionId,
   );
   Future<CertificateRequest> create(CertificateRequestContext context);
   Future<List<CertificateRequest>> ownRequests();
@@ -49,12 +49,15 @@ class CertificateRequestRepository implements CertificateRequestGateway {
   @override
   Future<List<CertificateRequestContext>> contexts(
     String courseId,
-    String versionId,
+    String? versionId,
   ) {
     _requireId(courseId);
-    _requireId(versionId);
+    if (versionId != null) _requireId(versionId);
     final query = Uri(
-      queryParameters: {'course_id': courseId, 'course_version_id': versionId},
+      queryParameters: {
+        'course_id': courseId,
+        'course_version_id': ?versionId,
+      },
     ).query;
     return _request(
       'GET',

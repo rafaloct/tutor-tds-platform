@@ -53,21 +53,26 @@ class RequestsFake implements CertificateRequestGateway {
   int resubmits = 0;
   int? sentRevision;
   String? sentReason;
+  int contextCalls = 0;
   @override
   Future<List<CertificateRequestContext>> contexts(
     String courseId,
-    String versionId,
-  ) async => const [
-    CertificateRequestContext(
-      enrollmentId: 'enrollment',
-      programName: 'Programa TDS',
-      courseVersionId: 'version',
-      courseTitle: 'Meu curso',
-      classId: 'class',
-      className: 'Minha turma',
-      eligibility: notReady,
-    ),
-  ];
+    String? versionId,
+  ) async {
+    contextCalls++;
+    return const [
+      CertificateRequestContext(
+        enrollmentId: 'enrollment',
+        programName: 'Programa TDS',
+        courseVersionId: 'version',
+        courseTitle: 'Meu curso',
+        classId: 'class',
+        className: 'Minha turma',
+        eligibility: notReady,
+      ),
+    ];
+  }
+
   @override
   Future<CertificateRequest> create(CertificateRequestContext context) async {
     creates++;
@@ -162,6 +167,22 @@ Future<void> showRequests(
 }
 
 void main() {
+  testWidgets(
+    'bundled course without version still queries contexts for the request',
+    (tester) async {
+      final gateway = RequestsFake();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CertificateRequestsScreen(gateway: gateway, courseId: 'course'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(gateway.contextCalls, 1);
+      await tester.scrollUntilVisible(find.text('Solicitar análise'), 150);
+      expect(find.text('Solicitar análise'), findsOneWidget);
+    },
+  );
+
   testWidgets('session failure does not expose old rows', (tester) async {
     final gateway = RequestsFake()
       ..rows = [record()]

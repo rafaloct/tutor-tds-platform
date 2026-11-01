@@ -117,6 +117,24 @@ def test_contexts_are_own_active_and_snapshot_request_is_pending_idempotent(requ
         assert len(session.scalars(select(CertificateRequestTransition)).all()) == 1
 
 
+def test_contexts_without_version_resolve_legacy_and_class_pins(requests_api):
+    client, _ = requests_api
+    rows = client.get("/certificate-requests/contexts?course_id=course").json()["contexts"]
+    assert {(row["enrollment_id"], row["class_id"], row["course_version_id"]) for row in rows} == {
+        ("e1", None, ORIGINAL),
+        ("e1", "c1", ORIGINAL),
+        ("e1", "c2", "v2"),
+        ("e2", None, ORIGINAL),
+    }
+    bundled = next(row for row in rows if row["class_id"] is None and row["enrollment_id"] == "e1")
+    created = client.post(
+        "/certificate-requests",
+        json={"enrollment_id": bundled["enrollment_id"], "course_version_id": bundled["course_version_id"], "class_id": None},
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["course_version_id"] == ORIGINAL
+
+
 def test_request_review_roundtrip_persists_decision_and_student_rereads_it(requests_api):
     client, engine = requests_api
     contexts = client.get(f"/certificate-requests/contexts?course_id=course&course_version_id={ORIGINAL}").json()["contexts"]
