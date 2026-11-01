@@ -12,7 +12,7 @@
   "device": {
     "model": "Xiaomi POCO X6 Pro (2311DRK48G)",
     "android_ui_night_mode": 2,
-    "adb_transport": "adb-tls mDNS"
+    "adb_transport": "Wi-Fi ADB 192.168.15.2:35893 (adb-tls)"
   },
   "environment": "production (https://ead.ipexdesenvolvimento.cloud/tutor-api)",
   "checks": [
@@ -29,7 +29,7 @@
     {
       "id": "account_login_online",
       "status": "passed",
-      "detail": "Login na tela de conta com aluno demo (CPF 320.202.001-39, POST /auth/login 200) → consentimento → home 'Ola, Aluno!'."
+      "detail": "Login na tela de conta com aluno demo (CPF 320.202.001-39, POST /auth/login 200) -> consentimento -> home 'Ola, Aluno!'."
     },
     {
       "id": "legal_startup_cartilha_opens",
@@ -37,13 +37,39 @@
       "detail": "Cartilha 'Aspectos Juridicos para Startups' (PEQUI-UFT/INOVATO/Finep) listada no catalogo, abre e avanca por mensagens ate pergunta interativa com feedback."
     }
   ],
-  "carried_forward_gates": [
-    "certificate_human_approval_e2e",
-    "classroom_cold_offline_xiaomi",
-    "course_versioning_xiaomi",
-    "evidence_offline_xiaomi"
+  "physical_gates": [
+    {
+      "id": "certificate_human_approval_e2e",
+      "status": "passed",
+      "executed_on": "1.4.1+14",
+      "screenshot": "evidence-14114/gate_a_request_approved.png",
+      "detail": "Aluno rafael luciono (CPF 060.811.731-51) completou elegibilidade na Turma 2026 Aspectos Juridicos para Startups (PEQUI-UFT) (30x250s study_activity + lesson_completed com course_version_id/class_id; 7500s >= 7200s). Pedido 31e8ef66-1f58-434e-86bf-9fbf1db8a1a3 submetido pelo FAB 'Solicitar certificado' no app, revisado e aprovado pela conta QA admin com justificativa 'Carga horaria validada e conclusao da edicao confirmada. Release 14114.'. Estado final: request status=approved; certificates=0 e certificate_emission_attempts=0 para o contexto; carteira do aluno 'Sua carteira esta vazia'; UI do pedido 'Aprovado - emissao pendente'. Aprovacao distinta de emissao confirmada."
+    },
+    {
+      "id": "evidence_offline_xiaomi",
+      "status": "passed",
+      "executed_on": "1.4.1+14",
+      "screenshot": "evidence-14114/gate_b_saida_confirmada.png",
+      "detail": "Check-in online na turma juridica (evidencia a442cd4b-...). Isolamento via DNS privada dead.invalid.example (preserva Wi-Fi/ADB). Checkout offline gerou draft 'Presenca pendente neste aparelho'; force-stop + cold relaunch restaurou o draft; 2 retries offline com a mesma chave de idempotencia sem duplicar. Restaurada a rede com token rotacionado (v2): 'Saida confirmada' evidencia 2c6b2c9e-d128-4018-86e3-4324328f4da2. Servidor: exatamente 2 class_checkins (1 checkin + 1 checkout) e 2 evidence_items, chaves distintas, sem duplicatas."
+    },
+    {
+      "id": "classroom_cold_offline_xiaomi",
+      "status": "passed",
+      "executed_on": "1.4.1+14",
+      "detail": "Edicao de turma aberta online (versao pinada v1). DNS privada morta + force-stop + cold relaunch: 'Minhas turmas' carregou do cache com 'Sem conexao: exibindo turmas salvas neste aparelho'; conteudo da turma juridica reabriu com 'Conteudo salvo da sua turma. Seu progresso sera enviado quando a conexao voltar.' Conta/sessao, versao pinada e progresso preservados. Fixture de revogacao aplicada nos 3 niveis (enrollment/context): refresh online removeu a turma; reload offline nao expus conteudo revogado; fixture restaurada para active."
+    },
+    {
+      "id": "course_versioning_xiaomi",
+      "status": "passed",
+      "executed_on": "1.4.1+14",
+      "screenshots": [
+        "evidence-14114/gate_d_in_review_publish.png",
+        "evidence-14114/gate_d_v3_published.png"
+      ],
+      "detail": "Baseline: v1 cda36bee-dec2-518b-9aa7-d6c5b03788a6 published, turma 43f48349-f5d1-4e64-a220-bc665d83d2c6 (3 matriculas) pinada nela. Pelo editor do app (conta QA admin): fork v1 -> rascunho v2 5000bf31-e916-4ccf-b780-2ff05f7dd6b6 (source_version_id=v1); modulo 1 renomeado; salvar (rev2) -> 'Enviar para revisao' (rev3, in_review) -> 'Publicar' (rev4). v1 auto-arquivada; v2 published com marcador 'faturar v2' na projecao publica; turma permaneceu pinada em v1 (3/3 matriculas). Restauracao de conteudo: fork v3 9804bafd-3fb5-4520-977a-59c3a239e2a1, titulo do modulo 1 corrigido para '1. O que a startup ja tem a perder antes de faturar?' no rascunho; submit + publish pela UI -> v3 published (rev3). Estado final: v1 archived, v2 archived, v3 published; projecao publica exibe titulo correto sem marcador QA; turma e matriculas ainda pinadas em v1. Auditoria course_version_transitions registrou todas as transicoes (actor_role=admin)."
+    }
   ],
-  "carry_forward_reason": "Delta 1.4.0+13 → 1.4.1+14 limitado a tema padrao claro, cartilha bundled adicional e bump de versao; gates formais re-verificados no build corrigido quanto a login online, tema e cartilha.",
+  "carried_forward_gates": [],
   "verified_at": "2026-11-01",
-  "verifier": "dart run tool/verify_release_readiness.dart --intent=upload --artifact=release/Tutor-TDS-1.4.1+14-signed.aab → READY"
+  "verifier": "dart run tool/verify_release_readiness.dart --intent=upload --artifact=release/Tutor-TDS-1.4.1+14-signed.aab -> READY"
 }
