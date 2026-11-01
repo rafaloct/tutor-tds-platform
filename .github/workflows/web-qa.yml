@@ -9,7 +9,9 @@ name: Tutor TDS Flutter Web E2E (staging)
 
 on:
   pull_request:
-    branches: [main, develop]
+    # Branch de integracao real do repo e codex/onda-0-consolidacao
+    # (HEAD do origin); main/develop listadas para quando existirem.
+    branches: [codex/onda-0-consolidacao, main, develop]
     paths:
       - "cartilhas_app/**"
       - "tooling/**"
