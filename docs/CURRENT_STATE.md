@@ -677,3 +677,12 @@ com arestas executadas + erro/retorno + fallbacks web.
 **UNKNOWN/BLOCKED:** `Printing.layoutPdf` no headless pode suprimir o
 dialog de impressao do browser — verificado "sem crash", nao "dialog
 aberto". Android inalterado (filesystem + share_plus).
+
+**OBSERVED (CI):** `.github/workflows/web-qa.yml` executa
+`./tooling/web_qa.sh` (7 arquivos, suite completa) em PRs contra
+main/develop + workflow_dispatch: Flutter 3.44.9 pinado, wrapper
+chromium-nosandbox sobre o Chrome do runner, chromedriver pareado,
+sem secrets (fixture QA commitada + API staging publica).
+**UNKNOWN:** primeira execucao real no GitHub Actions pendente —
+depende de ead.ipexdesenvolvimento.cloud aceitar trafego de IP de
+runner (Cloudflare); localmente a suite fecha 7/7.
