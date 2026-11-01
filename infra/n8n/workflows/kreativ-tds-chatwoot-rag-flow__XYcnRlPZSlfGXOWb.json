@@ -1,0 +1,820 @@
+{
+  "updatedAt": "2026-04-09T11:40:22.363Z",
+  "createdAt": "2026-04-07T17:52:26.884Z",
+  "id": "XYcnRlPZSlfGXOWb",
+  "name": "Kreativ TDS — Chatwoot RAG Flow",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "node-cw-webhook",
+      "name": "Webhook Chatwoot",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "chatwoot-kreativ",
+      "parameters": {
+        "path": "chatwoot-kreativ",
+        "options": {},
+        "httpMethod": "POST",
+        "isFullPath": true,
+        "responseMode": "onReceived"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "node-cw-filter-extract",
+      "name": "Extrair Dados Chatwoot",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\n\n// Ignorar eventos que não sejam criação de mensagem\nif (body.event && body.event !== 'message_created') {\n  return [];\n}\n\n// Ignorar mensagens do bot ou de agentes humanos\nconst msgType = String(body.message_type ?? body.message?.message_type ?? '');\nif (msgType === 'outgoing' || msgType === '1') return [];\n\nconst senderType = String(body.sender?.type ?? '');\nif (senderType === 'agent_bot' || senderType === 'user') return [];\n\n// Extrair sessionId = número de telefone do contato\nconst sessionId = String(\n  body.meta?.sender?.identifier ||\n  body.sender?.phone_number ||\n  body.conversation?.meta?.sender?.identifier ||\n  body.contact?.phone_number ||\n  ''\n);\n\nconst conversationId = String(body.conversation?.id || '');\nconst accountId      = String(body.conversation?.account_id || '1');\nconst contactName    = String(body.meta?.sender?.name || body.sender?.name || '');\nconst contentType    = String(body.content_type ?? body.message?.content_type ?? 'text');\nconst messageText    = String(body.content || body.message?.content || '').trim();\n\n// Áudio → rota especial\nif (contentType === 'audio' || contentType === 'voice') {\n  return [{ json: { conversationId, accountId, sessionId, contactName, messageText: '', route: 'audio', ragWorkspace: 'tds' } }];\n}\n\n// Imagem / arquivo → redirecionar para portal ou tutor\nif (contentType === 'image' || contentType === 'file' || contentType === 'sticker') {\n  return [{ json: { conversationId, accountId, sessionId, contactName, messageText: '', route: 'media', ragWorkspace: 'tds' } }];\n}\n\n// Lookup telefone->workspace removido (Frappe morto + WORKSPACE_MAP vazio);\n// roteamento por workspace sera decidido na camada de dados quando existir.\nlet ragWorkspace = 'tds';\n\n// Palavras-chave de handoff\nconst handoffPattern = /tutor|prova|exame|humano|operador|atendente|reclama[cç][aã]o|ajuda humana|falar com algu[eé]m|n[aã]o consigo|problema t[eé]cnico/i;\nconst route = handoffPattern.test(messageText) ? 'handoff' : 'rag';\n\nreturn [{ json: { \n  conversationId, accountId, sessionId, contactName, \n  messageText, route, ragWorkspace, studentCourse \n} }];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "node-cw-router",
+      "name": "Roteador de Mensagem",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        750,
+        300
+      ],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "cond-audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "audio"
+                  }
+                ]
+              },
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "cond-media",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "media"
+                  }
+                ]
+              },
+              "outputKey": "media"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "cond-handoff",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "handoff"
+                  }
+                ]
+              },
+              "outputKey": "handoff"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "cond-rag",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "rag"
+                  }
+                ]
+              },
+              "outputKey": "rag"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 3
+        }
+      },
+      "typeVersion": 3
+    },
+    {
+      "id": "node-cw-audio-reply",
+      "name": "Resposta Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1050,
+        100
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/messages",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"content\": \"Oi! Ainda não consigo ouvir áudios, mas você pode digitar sua dúvida que respondo na hora! 😊\", \"message_type\": \"outgoing\" } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-cw-media-reply",
+      "name": "Resposta Midia",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1050,
+        220
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/messages",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"content\": \"Não consigo processar arquivos por aqui. Para enviar documentos, acesse o portal lms.ipexdesenvolvimento.cloud — ou aguarde um tutor humano te ajudar!\", \"message_type\": \"outgoing\" } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-cw-handoff",
+      "name": "Transbordo Humano",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1050,
+        360
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/messages",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"content\": \"Entendido! Vou conectar você com um tutor humano agora. Nosso atendimento humano funciona principalmente à noite nos dias úteis e nas tardes de fim de semana. Em breve alguém vai te responder! 👋\", \"message_type\": \"outgoing\" } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-etiquetar-escalonado",
+      "name": "Etiquetar Escalonado",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1300,
+        360
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/labels",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"labels\": [\"escalonado\"] } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-cw-unassign",
+      "name": "Desatribuir Conversa",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1550,
+        360
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/assignments",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"assignee_id\": null } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-cw-handoff-rag",
+      "name": "Transbordo Humano RAG",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1550,
+        400
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/messages",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"content\": \"Não encontrei informações suficientes para responder com segurança. Vou conectar você com um tutor humano que pode ajudar melhor! 👋\", \"message_type\": \"outgoing\" } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-etiquetar-escalonado-rag",
+      "name": "Etiquetar Escalonado RAG",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1800,
+        400
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/labels",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"labels\": [\"escalonado\"] } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-cw-unassign-rag",
+      "name": "Desatribuir Conversa RAG",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2050,
+        400
+      ],
+      "parameters": {
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/assignments",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"assignee_id\": null } }}",
+        "sendBody": true,
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "w1",
+      "name": "RAG Worker",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        900,
+        460
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "tdsRagWorker001",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "channel": "chatwoot",
+            "user_raw": "={{ $('Extrair Dados Chatwoot').item.json.sessionId }}",
+            "text": "={{ $('Extrair Dados Chatwoot').item.json.messageText }}",
+            "workspace": "={{ $('Extrair Dados Chatwoot').item.json.ragWorkspace }}",
+            "caller": "chatwoot-rag",
+            "conv_id": "={{ $('Extrair Dados Chatwoot').item.json.conversationId }}",
+            "reply_to": "={{ $('Extrair Dados Chatwoot').item.json.conversationId }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "w2",
+      "name": "RAG ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        460
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ok",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "w3",
+      "name": "Confiança RAG",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        360
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "src",
+              "leftValue": "={{ $json.sources }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "w4",
+      "name": "Preparar Resposta",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1560,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c",
+              "name": "content",
+              "type": "string",
+              "value": "={{ $json.reply_text }}"
+            }
+          ]
+        },
+        "includeOtherFields": true
+      }
+    },
+    {
+      "id": "Responder Fallback",
+      "name": "Responder Fallback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1560,
+        560
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/messages",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: \"Estou processando muita informação agora. Pode repetir sua pergunta em um minuto? 🙏\", message_type: \"outgoing\" }) }}",
+        "options": {
+          "timeout": 10000
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "resp_ok_node",
+      "name": "Responder no Chatwoot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1780,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados Chatwoot').item.json.accountId }}/conversations/{{ $('Extrair Dados Chatwoot').item.json.conversationId }}/messages",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: $('Preparar Resposta').item.json.content, message_type: 'outgoing' }) }}",
+        "options": {
+          "timeout": 10000
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Chatwoot": {
+      "main": [
+        [
+          {
+            "node": "Extrair Dados Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Dados Chatwoot": {
+      "main": [
+        [
+          {
+            "node": "Roteador de Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Roteador de Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Resposta Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resposta Midia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Transbordo Humano",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RAG Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transbordo Humano": {
+      "main": [
+        [
+          {
+            "node": "Etiquetar Escalonado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etiquetar Escalonado": {
+      "main": [
+        [
+          {
+            "node": "Desatribuir Conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transbordo Humano RAG": {
+      "main": [
+        [
+          {
+            "node": "Etiquetar Escalonado RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etiquetar Escalonado RAG": {
+      "main": [
+        [
+          {
+            "node": "Desatribuir Conversa RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Worker": {
+      "main": [
+        [
+          {
+            "node": "RAG ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG ok?": {
+      "main": [
+        [
+          {
+            "node": "Confiança RAG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confiança RAG": {
+      "main": [
+        [
+          {
+            "node": "Preparar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Transbordo Humano RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Resposta": {
+      "main": [
+        [
+          {
+            "node": "Responder no Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Fallback": {
+      "main": [
+        [
+          {
+            "node": "Transbordo Humano RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "1de3a98a-52c6-4cb1-8b1c-a7a949a74932",
+  "activeVersionId": "1de3a98a-52c6-4cb1-8b1c-a7a949a74932",
+  "versionCounter": 110,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-11-01T05:47:05.884Z",
+      "createdAt": "2026-11-01T05:47:05.884Z",
+      "role": "workflow:owner",
+      "workflowId": "XYcnRlPZSlfGXOWb",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Kreativ TDS — Chatwoot RAG Flow",
+    "description": null
+  }
+}

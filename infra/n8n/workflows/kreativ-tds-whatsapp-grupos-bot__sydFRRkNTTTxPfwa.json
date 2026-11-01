@@ -1,0 +1,348 @@
+{
+  "updatedAt": "2026-05-30T19:45:15.469Z",
+  "createdAt": "2026-04-10T23:50:57.489Z",
+  "id": "sydFRRkNTTTxPfwa",
+  "name": "Kreativ TDS — WhatsApp Grupos Bot",
+  "description": "Receives Evolution MESSAGES_UPSERT from WhatsApp groups, routes /tds to AnythingLLM RAG and /ajuda to static help text, silently drops all other messages.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "g1",
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        300
+      ],
+      "parameters": {
+        "path": "whatsapp-grupos",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {
+          "noResponseBody": true
+        }
+      }
+    },
+    {
+      "id": "g2",
+      "name": "Extrair Campos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -600,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.item.json.body?.data || {};\nconst key = d.key || {};\nconst remoteJid = key.remoteJid || '';\nconst isGroup = remoteJid.endsWith('@g.us');\nconst txt = d.message?.conversation || d.message?.extendedTextMessage?.text || '';\nconst msgId = key.id || '';\nif (!isGroup || key.fromMe || !txt || !msgId) return [];\nreturn [{ json: { msg_id: 'grp_' + msgId, remoteJid, messageText: txt,\n  instanceName: d.instanceId || $input.item.json.body?.instance || 'tds_suporte_audiovisual' } }];",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "Dedup msg_id",
+      "name": "Dedup msg_id",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -400,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO tds_dedup (msg_id) VALUES ('{{ $json.msg_id }}') ON CONFLICT (msg_id) DO NOTHING RETURNING msg_id"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "wAJovSb9ceHlYden",
+          "name": "PostgreSQL Kreativ"
+        }
+      }
+    },
+    {
+      "id": "Comando?",
+      "name": "Comando?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -180,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.messageText.toLowerCase().startsWith('/tds ') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "RAG Worker",
+      "name": "RAG Worker",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        40,
+        220
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "tdsRagWorker001",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "channel": "grupos",
+            "user_raw": "={{ $json.remoteJid }}",
+            "text": "={{ $json.messageText.replace(/^\\/tds\\s+/i, '') }}",
+            "workspace": "tds-audiovisual-e-conteudo",
+            "caller": "grupos-bot",
+            "conv_id": "={{ $json.msg_id }}",
+            "reply_to": "={{ $json.remoteJid }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "RAG ok?",
+      "name": "RAG ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "Enviar Resposta",
+      "name": "Enviar Resposta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        140
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://evolution.ipexdesenvolvimento.cloud/message/sendText/' + $('Extrair Campos').item.json.instanceName }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.reply_to, text: $json.reply_text.slice(0,4000) }) }}",
+        "options": {
+          "timeout": 10000,
+          "retryOnFail": true,
+          "maxRetries": 2
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsEvoCred001x",
+          "name": "TDS Evolution apikey"
+        }
+      }
+    },
+    {
+      "id": "Enviar Fallback",
+      "name": "Enviar Fallback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://evolution.ipexdesenvolvimento.cloud/message/sendText/' + $('Extrair Campos').item.json.instanceName }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.reply_to, text: \"Estou processando muita informação agora. Pode repetir sua pergunta em um minuto? 🙏\" }) }}",
+        "options": {
+          "timeout": 10000
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsEvoCred001x",
+          "name": "TDS Evolution apikey"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Evolution": {
+      "main": [
+        [
+          {
+            "node": "Extrair Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Campos": {
+      "main": [
+        [
+          {
+            "node": "Dedup msg_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup msg_id": {
+      "main": [
+        [
+          {
+            "node": "Comando?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comando?": {
+      "main": [
+        [
+          {
+            "node": "RAG Worker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "RAG Worker": {
+      "main": [
+        [
+          {
+            "node": "RAG ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG ok?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "84e2bca0-4b2e-493f-b211-4ace1a5442a3",
+  "activeVersionId": "84e2bca0-4b2e-493f-b211-4ace1a5442a3",
+  "versionCounter": 50,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-10T23:50:57.489Z",
+      "createdAt": "2026-04-10T23:50:57.489Z",
+      "role": "workflow:owner",
+      "workflowId": "sydFRRkNTTTxPfwa",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "Kreativ TDS — WhatsApp Grupos Bot",
+    "description": null
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "updatedAt": "2026-05-30T19:45:20.339Z",
+  "createdAt": "2026-04-11T22:23:18.479Z",
+  "id": "eMPfobvYxGqm4t6U",
+  "name": "TDS OTP Send",
+  "description": "Receives phone and code via POST webhook at /otp-send, sends a WhatsApp OTP message via Evolution API, and returns {\"sent\": true}. Continues on Evolution API failure.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "8a89f741-73a6-4119-bb21-71caffb4752f",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "otp-send",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "3f6a6352-c750-4956-b81b-73f234498360"
+    },
+    {
+      "id": "4b76378a-d7b1-44f8-87c8-d8e7e7f7560f",
+      "name": "Send WhatsApp OTP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.ipexdesenvolvimento.cloud/message/sendText/tds_suporte_audiovisual",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\"number\": \"{{ $json.body.phone }}\", \"text\": \"🔐 Seu código TDS: *{{ $json.body.code }}*\\n\\nVálido por 5 minutos. Não compartilhe com ninguém.\"}",
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "continueOnFail": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsEvoCred001x",
+          "name": "TDS Evolution apikey"
+        }
+      }
+    },
+    {
+      "id": "d9a0a836-d892-40cd-b3bb-791359c021bd",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        750,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"sent\": true}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp OTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp OTP": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120,
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "73498749-1c71-4b18-ad5d-c0a02287cf8f",
+  "activeVersionId": "73498749-1c71-4b18-ad5d-c0a02287cf8f",
+  "versionCounter": 50,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-11T22:23:18.479Z",
+      "createdAt": "2026-04-11T22:23:18.479Z",
+      "role": "workflow:owner",
+      "workflowId": "eMPfobvYxGqm4t6U",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS OTP Send",
+    "description": null
+  }
+}

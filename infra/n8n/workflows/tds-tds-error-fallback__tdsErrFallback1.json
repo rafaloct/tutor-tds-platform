@@ -1,0 +1,96 @@
+{
+  "updatedAt": "2026-11-01T05:42:56.065Z",
+  "createdAt": "2026-11-01T05:42:37.071Z",
+  "id": "tdsErrFallback1",
+  "name": "TDS — tds-error-fallback",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "e1",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "Log Falha no PB",
+      "name": "Log Falha no PB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -360,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://pocketbase:8090/api/collections/rag_interactions/records",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ts: new Date().toISOString(), user_hash: 'na', channel: 'worker', workspace: 'tds', route: 'error', outcome: 'fallback_error', latency_ms: 0, chars_in: 0, chars_out: 0, pii_stripped: 0, error: String($json.execution && $json.execution.error ? $json.execution.error.message : 'unknown').slice(0,280), workflow: $json.workflow.name }) }}",
+        "options": {}
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Log Falha no PB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "53005547-2074-4d50-a315-9314eef384fa",
+  "activeVersionId": "53005547-2074-4d50-a315-9314eef384fa",
+  "versionCounter": 13,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-11-01T05:42:37.071Z",
+      "createdAt": "2026-11-01T05:42:37.071Z",
+      "role": "workflow:owner",
+      "workflowId": "tdsErrFallback1",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

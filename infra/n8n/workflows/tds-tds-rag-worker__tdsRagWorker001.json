@@ -1,0 +1,254 @@
+{
+  "updatedAt": "2026-11-01T05:46:17.841Z",
+  "createdAt": "2026-11-01T05:42:48.468Z",
+  "id": "tdsRagWorker001",
+  "name": "TDS — tds-rag-worker",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "t1",
+      "name": "Entrada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        300
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "Sanitizar PII + Hash",
+      "name": "Sanitizar PII",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const i = $input.first().json;\nconst userRaw = String(i.user_raw || 'anon');\nconst digits = userRaw.replace(/\\D/g, '');\nconst userKey = digits || userRaw.replace(/[^a-zA-Z0-9]/g, '') || 'anon';\nlet text = String(i.text || '');\nconst found = [];\ntext = text.replace(/\\b\\d{3}[.\\s]?\\d{3}[.\\s]?\\d{3}[-.\\s]?\\d{2}\\b/g, m => (found.push('cpf'), '[cpf_removido]'));\ntext = text.replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g, m => (found.push('email'), '[email_removido]'));\ntext = text.replace(/\\b\\(?\\d{2}\\)?[.\\s]?9?\\d{4}[-.\\s]?\\d{4}\\b/g, m => (found.push('phone'), '[fone_removido]'));\nconst ws = i.workspace || 'tds';\nreturn [{ json: {\n  sanitized: text.slice(0, 2000),\n  user_key: userKey,\n  channel: i.channel || 'unknown',\n  remote_jid: i.remote_jid || '',\n  instance: i.instance || '',\n  conversation_id: i.conversation_id || null,\n  account_id: i.account_id || null,\n  access_token_used: !!i.access_token_used,\n  workspace: ws,\n  chars_in: String(i.text || '').length,\n  pii_found: [...new Set(found)].join(',') || 'none',\n  t0: Date.now(),\n} }];"
+      }
+    },
+    {
+      "parameters": {
+        "action": "hash",
+        "type": "SHA256",
+        "value": "={{ $json.user_key + ':' + $vars.TDS_SESSION_SALT }}",
+        "dataPropertyName": "session_id",
+        "encoding": "hex"
+      },
+      "id": "h2",
+      "name": "Hash Sessao",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        300
+      ]
+    },
+    {
+      "id": "Consultar AnythingLLM",
+      "name": "Consultar AnythingLLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -128,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://kreativ-rag:3001/api/v1/workspace/{{ $json.workspace }}/chat",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: $json.sanitized, mode: 'chat', sessionId: $json.session_id }) }}",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsAllmCred001",
+          "name": "TDS AnythingLLM Bearer"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "Normalizar",
+      "name": "Normalizar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const it = $input.first().json;\nconst prev = $('Sanitizar PII').item.json;\nconst session_id = $('Hash Sessao').item.json.session_id || 'na';\nconst latency = Date.now() - prev.t0;\nlet ok = false, reply = '', status = it && it.statusCode ? it.statusCode : null, err = null, sources = 0;\nconst metrics = it && it.metrics ? it.metrics : {};\nif (it && it.textResponse) {\n  reply = String(it.textResponse).replace(/<think>[\\s\\S]*?<\\/think>/gi, '').trim();\n  sources = (it.sources || []).length;\n  ok = reply.length > 0;\n  if (!ok) err = 'empty_textResponse';\n} else if (it && it.error) err = String(typeof it.error === 'object' ? (it.error.message || JSON.stringify(it.error)) : it.error).slice(0, 280);\nelse err = 'no_textResponse status=' + status;\nif (it && it.error && it.error.description) err = String(it.error.description).slice(0, 280);\nconst timeout = !!(err && /timeout|ETIMEDOUT|timed out|aborted|abort/i.test(err)) || status === 504 || status === 408;\nreturn [{ json: {\n  ok, reply_text: reply.slice(0, 4096), sources, latency_ms: latency, rag_status: status,\n  tokens_in: metrics.prompt_tokens || 0, tokens_out: metrics.completion_tokens || 0,\n  error: err, timeout, workspace: prev.workspace, channel: prev.channel,\n  remote_jid: prev.remote_jid, instance: prev.instance,\n  conversation_id: prev.conversation_id, account_id: prev.account_id,\n  user_hash: session_id, session_id, pii_stripped: prev.pii_found,\n  chars_in: prev.chars_in, chars_out: reply.length }}];"
+      }
+    },
+    {
+      "id": "Telemetria",
+      "name": "Telemetria",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://pocketbase:8090/api/collections/rag_interactions/records",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ts: new Date().toISOString(), user_hash: $json.user_hash || 'na', channel: $json.channel || 'worker', workspace: $json.workspace || 'tds', route: 'rag', outcome: $json.ok ? ($json.sources > 0 ? 'rag_ok' : 'rag_low_confidence') : ($json.timeout ? 'fallback_timeout' : 'fallback_error'), latency_ms: $json.latency_ms || 0, chars_in: $json.chars_in || 0, chars_out: $json.chars_out || 0, pii_stripped: $json.pii_stripped || 0, tokens_in: $json.tokens_in || 0, tokens_out: $json.tokens_out || 0, error: $json.error || '', workflow: $json.caller || 'tds-rag-worker' }) }}",
+        "options": {}
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "Saida",
+      "name": "Saida",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        300
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: $('Normalizar').item.json }];",
+        "mode": "runOnceForAllItems"
+      }
+    }
+  ],
+  "connections": {
+    "Entrada": {
+      "main": [
+        [
+          {
+            "node": "Sanitizar PII",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitizar PII": {
+      "main": [
+        [
+          {
+            "node": "Hash Sessao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash Sessao": {
+      "main": [
+        [
+          {
+            "node": "Consultar AnythingLLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar AnythingLLM": {
+      "main": [
+        [
+          {
+            "node": "Normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar": {
+      "main": [
+        [
+          {
+            "node": "Telemetria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telemetria": {
+      "main": [
+        [
+          {
+            "node": "Saida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "ac29412a-bc7b-403e-88ff-316c20adb197",
+  "activeVersionId": "ac29412a-bc7b-403e-88ff-316c20adb197",
+  "versionCounter": 23,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-11-01T05:42:48.468Z",
+      "createdAt": "2026-11-01T05:42:48.468Z",
+      "role": "workflow:owner",
+      "workflowId": "tdsRagWorker001",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS — tds-rag-worker",
+    "description": null
+  }
+}

@@ -1,0 +1,250 @@
+{
+  "updatedAt": "2026-05-30T19:45:19.451Z",
+  "createdAt": "2026-04-09T20:38:40.080Z",
+  "id": "F88OgLfIatwMv400",
+  "name": "TDS — Certificate Issuer (Auto)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Webhook Enrollment Complete",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "path": "tds-enrollment-complete",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "a3f6c8e8-18ff-43e2-8654-d902c3434231"
+    },
+    {
+      "id": "n2",
+      "name": "Extrair Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst phone = (body.whatsapp || body.phone || '').replace(/[^0-9]/g, '');\nconst courseSlug = body.course_slug || body.courseSlug || '';\nconst studentName = body.student_name || body.name || 'Aluno';\nif (!phone || !courseSlug) throw new Error('Dados insuficientes');\nreturn [{ json: { phone, courseSlug, studentName } }];"
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Emitir Certificado OPS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-lms.ipexdesenvolvimento.cloud/issue_cert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Admin-Key",
+              "value": "admin-tds-2026"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "whatsapp",
+              "value": "={{ .phone }}"
+            },
+            {
+              "name": "course_slug",
+              "value": "={{ .courseSlug }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "n4",
+      "name": "Montar Mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const cert = $input.first().json;\nconst ex = $(\"Extrair Dados\").first().json;\nconst certId = cert.cert_id || cert.certificate_hash || cert.id || '';\nif (!certId) throw new Error('Cert nao emitido: ' + JSON.stringify(cert));\nconst url = 'https://api-lms.ipexdesenvolvimento.cloud/validate_cert/' + certId;\nconst cn = cert.course_name || cert.course || ex.courseSlug;\nconst msg = '🎓 *Parabens, ' + ex.studentName + '!*\n\nVoce concluiu o curso! 🏅\n\n📘 *Curso:* ' + cn + '\n🔐 *Hash:* ' + certId + '\n\n🔗 *Acesse seu certificado:*\n' + url + '\n\n_Programa TDS_';\nreturn [{ json: { phone: ex.phone, certId, message: msg } }];"
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Notificar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1080,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.ipexdesenvolvimento.cloud/message/sendText/tds_suporte_audiovisual",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ .phone }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ .message }}"
+            },
+            {
+              "name": "linkPreview",
+              "value": false
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsEvoCred001x",
+          "name": "TDS Evolution apikey"
+        }
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Resposta OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\":\"ok\",\"cert_id\":\"{{ $json.certId }}\"}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Enrollment Complete": {
+      "main": [
+        [
+          {
+            "node": "Extrair Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Dados": {
+      "main": [
+        [
+          {
+            "node": "Emitir Certificado OPS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emitir Certificado OPS": {
+      "main": [
+        [
+          {
+            "node": "Montar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Notificar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Resposta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionTimeout": 120,
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "105bf4e7-89c1-4460-bc62-f84cda92d990",
+  "activeVersionId": "105bf4e7-89c1-4460-bc62-f84cda92d990",
+  "versionCounter": 46,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-09T20:38:40.080Z",
+      "createdAt": "2026-04-09T20:38:40.080Z",
+      "role": "workflow:owner",
+      "workflowId": "F88OgLfIatwMv400",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS — Certificate Issuer (Auto)",
+    "description": null
+  }
+}

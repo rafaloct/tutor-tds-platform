@@ -1,0 +1,599 @@
+{
+  "updatedAt": "2026-05-30T19:45:17.709Z",
+  "createdAt": "2026-04-10T18:11:29.969Z",
+  "id": "eCB2vMHb69W3Qgpp",
+  "name": "TDS — Catraca Pedagogica (Supabase Migrated)",
+  "description": "Sub-workflow delivering structured educational content (reading + MCQ) via WhatsApp for 7 TDS courses targeting CadUnico beneficiaries.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "042670fe-768c-4cbb-936c-93445facd8cf",
+      "name": "Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        600
+      ]
+    },
+    {
+      "id": "3b1e6a94-537d-4e0a-9b01-98b24b3c2e34",
+      "name": "ExtractData",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        600
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "course_slug",
+              "value": "={{ $json.keyword.replace(\"/\", \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "message",
+              "value": "={{ $json.message.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "conversation_id",
+              "value": "={{ $json.conversation_id }}",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1b3cacc3-55ce-4048-bbfa-f8936cf6d76c",
+      "name": "GetProfile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        600
+      ],
+      "parameters": {
+        "url": "http://supabase-kong:8000/rest/v1/profiles",
+        "method": "GET",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            },
+            {
+              "name": "Range",
+              "value": "0-0"
+            }
+          ]
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "whatsapp",
+              "value": "eq.{{ $(\"ExtractData\").item.json.phone }}"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "tdsSupaCred001",
+          "name": "TDS Supabase Headers"
+        }
+      }
+    },
+    {
+      "id": "9ee0c7d6-af08-48ef-bb4f-7bdd3a8ff184",
+      "name": "ProfileExists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1020,
+        600
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.length }}",
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              },
+              "rightValue": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "23f6516a-e997-4060-8d49-cb25b426a7fc",
+      "name": "GetCourse",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        500
+      ],
+      "parameters": {
+        "url": "http://supabase-kong:8000/rest/v1/courses",
+        "method": "GET",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "slug",
+              "value": "eq.{{ $(\"ExtractData\").item.json.course_slug }}"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "tdsSupaCred001",
+          "name": "TDS Supabase Headers"
+        }
+      }
+    },
+    {
+      "id": "27391f77-45fc-4b02-9b63-a566a2bd710c",
+      "name": "GetEnrollment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        500
+      ],
+      "parameters": {
+        "url": "http://supabase-kong:8000/rest/v1/enrollments",
+        "method": "GET",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "student_id",
+              "value": "eq.{{ $(\"GetProfile\").item.json[0].id }}"
+            },
+            {
+              "name": "course_id",
+              "value": "eq.{{ $(\"GetCourse\").item.json[0].id }}"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "tdsSupaCred001",
+          "name": "TDS Supabase Headers"
+        }
+      }
+    },
+    {
+      "id": "87d4e166-bb35-4739-9a8f-6fe863c8fd36",
+      "name": "EnrollmentExists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1800,
+        500
+      ],
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.length }}",
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              },
+              "rightValue": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "5def2f0c-e770-4c2c-97f1-bea9f7bd2c4f",
+      "name": "UpdateEnrollment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2060,
+        400
+      ],
+      "parameters": {
+        "url": "http://supabase-kong:8000/rest/v1/enrollments",
+        "method": "PATCH",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "eq.{{ $json[0].id }}"
+            }
+          ]
+        },
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "progress_percent",
+              "value": "={{ $json[0].progress_percent + 10 }}"
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "tdsSupaCred001",
+          "name": "TDS Supabase Headers"
+        }
+      }
+    },
+    {
+      "id": "bbcdce20-3891-4f3a-8c57-0049bf198fda",
+      "name": "LogActivity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2350,
+        500
+      ],
+      "parameters": {
+        "url": "http://supabase-kong:8000/rest/v1/learning_logs",
+        "method": "POST",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "student_id",
+              "value": "={{ $(\"GetProfile\").item.json[0].id }}"
+            },
+            {
+              "name": "type",
+              "value": "progress_update"
+            },
+            {
+              "name": "status",
+              "value": "success"
+            },
+            {
+              "name": "payload",
+              "value": "={{ JSON.stringify($json[0]) }}"
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "tdsSupaCred001",
+          "name": "TDS Supabase Headers"
+        }
+      }
+    },
+    {
+      "id": "00af5aed-5ecf-4c3a-b60b-2b28814c80d3",
+      "name": "CreateEnrollment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        600
+      ],
+      "parameters": {
+        "url": "http://supabase-kong:8000/rest/v1/enrollments",
+        "method": "POST",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "student_id",
+              "value": "={{ $(\"GetProfile\").item.json[0].id }}"
+            },
+            {
+              "name": "course_id",
+              "value": "={{ $(\"GetCourse\").item.json[0].id }}"
+            },
+            {
+              "name": "status",
+              "value": "active"
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "tdsSupaCred001",
+          "name": "TDS Supabase Headers"
+        }
+      }
+    },
+    {
+      "id": "f368c102-2a3c-4825-a72c-01f8b47478da",
+      "name": "NoProfile",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        900,
+        450
+      ]
+    }
+  ],
+  "connections": {
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "ExtractData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtractData": {
+      "main": [
+        [
+          {
+            "node": "GetProfile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetProfile": {
+      "main": [
+        [
+          {
+            "node": "ProfileExists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ProfileExists": {
+      "main": [
+        [
+          {
+            "node": "GetCourse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NoProfile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetCourse": {
+      "main": [
+        [
+          {
+            "node": "GetEnrollment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetEnrollment": {
+      "main": [
+        [
+          {
+            "node": "EnrollmentExists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EnrollmentExists": {
+      "main": [
+        [
+          {
+            "node": "UpdateEnrollment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CreateEnrollment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UpdateEnrollment": {
+      "main": [
+        [
+          {
+            "node": "LogActivity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CreateEnrollment": {
+      "main": [
+        [
+          {
+            "node": "LogActivity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120,
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "afa9c199-4d6e-4251-9250-bafe60ee029f",
+  "activeVersionId": "afa9c199-4d6e-4251-9250-bafe60ee029f",
+  "versionCounter": 60,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-10T18:11:29.969Z",
+      "createdAt": "2026-04-10T18:11:29.969Z",
+      "role": "workflow:owner",
+      "workflowId": "eCB2vMHb69W3Qgpp",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

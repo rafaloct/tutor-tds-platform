@@ -1,0 +1,421 @@
+{
+  "updatedAt": "2026-11-01T05:48:29.534Z",
+  "createdAt": "2026-04-09T21:16:16.834Z",
+  "id": "rtm248NavAiYnzSa",
+  "name": "TDS — Meta WhatsApp Bot (Cloud API)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "mg",
+      "name": "Webhook GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -900,
+        180
+      ],
+      "parameters": {
+        "path": "tds-meta-wa",
+        "httpMethod": "GET",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "ef3c2410-7ce5-4965-9365-07b1545ea613"
+    },
+    {
+      "id": "mp",
+      "name": "Webhook POST",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -900,
+        420
+      ],
+      "parameters": {
+        "path": "tds-meta-wa",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {
+          "noResponseBody": true
+        }
+      },
+      "webhookId": "3a2d4b6c-8c93-44cc-8902-8d87c2495412"
+    },
+    {
+      "id": "v",
+      "name": "Verify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -680,
+        180
+      ],
+      "parameters": {
+        "jsCode": "const qs = $input.first().json.query || {};\nif (qs['hub.mode'] === 'subscribe' && qs['hub.verify_token'] === 'tds_campo_2026') {\n  return [{ json: { challenge: qs['hub.challenge'] || 'ok' } }];\n}\nreturn [{ json: { challenge: '' } }];",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "rv",
+      "name": "Responder Challenge",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        180
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.challenge }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "em",
+      "name": "Extrair Meta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -680,
+        420
+      ],
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || {};\nconst value = body?.entry?.[0]?.changes?.[0]?.value || {};\nconst msgs = value?.messages || [];\nif (!msgs.length) return [];\nconst msg = msgs[0];\nconst wamid = msg?.id || '';\nconst text = msg?.text?.body || '';\nconst from = msg?.from || '';\nif (!text || !from || !wamid) return [];\nreturn [{ json: { msg_id: 'meta_' + wamid, phoneNumber: from, messageText: text, channel:'meta' } }];",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "Dedup wamid",
+      "name": "Dedup wamid",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -460,
+        420
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO tds_dedup (msg_id) VALUES ('{{ $json.msg_id }}') ON CONFLICT (msg_id) DO NOTHING RETURNING msg_id"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "wAJovSb9ceHlYden",
+          "name": "PostgreSQL Kreativ"
+        }
+      }
+    },
+    {
+      "id": "Msg nova?",
+      "name": "Msg nova?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        420
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.msg_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "RAG Worker",
+      "name": "RAG Worker",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -20,
+        340
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "tdsRagWorker001",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "channel": "meta",
+            "user_raw": "={{ $('Extrair Meta').item.json.phoneNumber }}",
+            "text": "={{ $('Extrair Meta').item.json.messageText }}",
+            "workspace": "tds",
+            "caller": "meta-wa-bot",
+            "conv_id": "={{ $('Extrair Meta').item.json.msg_id }}",
+            "reply_to": "={{ $('Extrair Meta').item.json.phoneNumber }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "RAG ok?",
+      "name": "RAG ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        200,
+        340
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "Enviar Resposta",
+      "name": "Enviar Resposta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        260
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v18.0/950152194854331/messages",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: \"whatsapp\", to: $json.reply_to || $(\"Extrair Meta\").item.json.phoneNumber, type: \"text\", text: { body: $json.reply_text.slice(0,4000) } }) }}",
+        "options": {
+          "timeout": 12000,
+          "retryOnFail": true,
+          "maxRetries": 2,
+          "waitBetweenRetries": 2000
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsMetaCred001",
+          "name": "TDS Meta Graph Bearer"
+        }
+      }
+    },
+    {
+      "id": "Enviar Fallback",
+      "name": "Enviar Fallback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        420
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v18.0/950152194854331/messages",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: \"whatsapp\", to: $json.reply_to || $(\"Extrair Meta\").item.json.phoneNumber, type: \"text\", text: { body: 'Estou processando muita informação agora. Pode repetir sua pergunta em um minuto? 🙏' } }) }}",
+        "options": {
+          "timeout": 12000,
+          "retryOnFail": true,
+          "maxRetries": 2,
+          "waitBetweenRetries": 2000
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsMetaCred001",
+          "name": "TDS Meta Graph Bearer"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook GET": {
+      "main": [
+        [
+          {
+            "node": "Verify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify": {
+      "main": [
+        [
+          {
+            "node": "Responder Challenge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook POST": {
+      "main": [
+        [
+          {
+            "node": "Extrair Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Meta": {
+      "main": [
+        [
+          {
+            "node": "Dedup wamid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup wamid": {
+      "main": [
+        [
+          {
+            "node": "Msg nova?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg nova?": {
+      "main": [
+        [
+          {
+            "node": "RAG Worker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "RAG Worker": {
+      "main": [
+        [
+          {
+            "node": "RAG ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG ok?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "5b60144f-b808-458b-a6e6-dd589a30fffc",
+  "activeVersionId": "5b60144f-b808-458b-a6e6-dd589a30fffc",
+  "versionCounter": 50,
+  "triggerCount": 2,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-09T21:16:16.834Z",
+      "createdAt": "2026-04-09T21:16:16.834Z",
+      "role": "workflow:owner",
+      "workflowId": "rtm248NavAiYnzSa",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS — Meta WhatsApp Bot (Cloud API)",
+    "description": null
+  }
+}

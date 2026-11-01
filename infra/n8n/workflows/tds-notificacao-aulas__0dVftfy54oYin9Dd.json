@@ -1,0 +1,253 @@
+{
+  "updatedAt": "2026-05-30T19:45:16.391Z",
+  "createdAt": "2026-04-08T19:28:24.690Z",
+  "id": "0dVftfy54oYin9Dd",
+  "name": "TDS — Notificacao Aulas",
+  "description": "Cron diário às 8h: busca aulas nas próximas 24h, formata lembrete por aluno e envia WhatsApp via Chatwoot API (busca contato + cria conversa).",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "e2b19d60-731b-4c5a-ac3d-76362a75b846",
+      "name": "Cron 8h Diario",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2b480f73-f782-4c14-956c-96f89f70ec38",
+      "name": "Buscar Aulas e Alunos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT a.id AS aula_id, a.titulo, a.data_hora, a.link_meet, t.nome AS turma_nome, t.curso, al.id AS aluno_id, al.nome AS aluno_nome, al.telefone FROM aulas a JOIN turmas t ON t.id = a.turma_id JOIN matriculas m ON m.turma_id = t.id JOIN alunos al ON al.id = m.aluno_id WHERE a.data_hora BETWEEN NOW() + INTERVAL '20 hours' AND NOW() + INTERVAL '26 hours' AND m.status = 'ativa' AND al.telefone IS NOT NULL ORDER BY a.data_hora, al.nome"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "dxU0dZ2Fe1yaJhGg",
+          "name": "PostgreSQL - Kreativ"
+        }
+      }
+    },
+    {
+      "id": "06389264-e1ff-4001-aed8-a79b2b299831",
+      "name": "Formatar Mensagens",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().map(function(item) { var dh = new Date(item.json.data_hora); var dia = dh.toLocaleDateString('pt-BR', { timeZone: 'America/Araguaina', day: '2-digit', month: '2-digit' }); var hora = dh.toLocaleTimeString('pt-BR', { timeZone: 'America/Araguaina', hour: '2-digit', minute: '2-digit' }); var mensagem = 'Olá, ' + item.json.aluno_nome + '!\\n\\nLembrete: sua aula de *' + item.json.curso + '* é amanhã!\\n\\n📅 *Data:* ' + dia + '\\n⏰ *Hora:* ' + hora + '\\n📖 *Aula:* ' + item.json.titulo + '\\n\\n🔗 *Link Meet:* ' + item.json.link_meet + '\\n\\nAté lá! 👋'; return { json: Object.assign({}, item.json, { mensagem: mensagem }) }; });"
+      }
+    },
+    {
+      "id": "bd2635ef-2c2e-4243-8ea4-d2f5da7ba927",
+      "name": "Notificacoes Enviadas",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c2301286-4a86-41f2-ad00-82baed527a34",
+      "name": "Loop Por Aluno",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "enviar-evolution-api-node",
+      "name": "Enviar Evolution API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution.ipexdesenvolvimento.cloud/message/sendText/tds_suporte_audiovisual",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": []
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "keypair",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $json.telefone }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.mensagem }}"
+            },
+            {
+              "name": "delay",
+              "value": 1200
+            },
+            {
+              "name": "linkPreview",
+              "value": true
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsEvoCred001x",
+          "name": "TDS Evolution apikey"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron 8h Diario": {
+      "main": [
+        [
+          {
+            "node": "Buscar Aulas e Alunos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Aulas e Alunos": {
+      "main": [
+        [
+          {
+            "node": "Formatar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Loop Por Aluno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Por Aluno": {
+      "main": [
+        [
+          {
+            "node": "Notificacoes Enviadas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Evolution API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Evolution API": {
+      "main": [
+        [
+          {
+            "node": "Loop Por Aluno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120,
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": {
+    "node:Cron 8h Diario": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "be4dd9ae-eba8-4475-83b1-3a7e923b9db9",
+  "activeVersionId": "be4dd9ae-eba8-4475-83b1-3a7e923b9db9",
+  "versionCounter": 49,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-08T19:28:24.690Z",
+      "createdAt": "2026-04-08T19:28:24.690Z",
+      "role": "workflow:owner",
+      "workflowId": "0dVftfy54oYin9Dd",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS — Notificacao Aulas",
+    "description": null
+  }
+}

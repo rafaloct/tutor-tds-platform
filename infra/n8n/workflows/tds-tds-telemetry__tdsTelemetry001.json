@@ -1,0 +1,129 @@
+{
+  "updatedAt": "2026-11-01T05:44:12.258Z",
+  "createdAt": "2026-11-01T05:42:40.734Z",
+  "id": "tdsTelemetry001",
+  "name": "TDS — tds-telemetry",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "w1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -700,
+        300
+      ],
+      "parameters": {
+        "path": "tds-telemetry",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {
+          "noResponseBody": true
+        }
+      },
+      "webhookId": "41741f32-386d-48e2-abd5-d546165dace0"
+    },
+    {
+      "id": "Preparar",
+      "name": "Preparar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const i = $input.first().json.body || $input.first().json;\nreturn [{ json: {\n  ts: new Date().toISOString(),\n  user_hash: i.user_hash || 'na', channel: i.channel || 'unknown',\n  workspace: i.workspace || 'tds', route: i.route || 'event',\n  outcome: i.outcome || 'rag_ok', latency_ms: i.latency_ms || 0,\n  chars_in: i.chars_in || 0, chars_out: i.chars_out || 0,\n  pii_stripped: i.pii_stripped || 0,\n  error: String(i.error || '').slice(0, 280),\n  workflow: i.workflow || 'unknown' } }];",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "Gravar PB",
+      "name": "Gravar PB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -260,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://pocketbase:8090/api/collections/rag_interactions/records",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Preparar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar": {
+      "main": [
+        [
+          {
+            "node": "Gravar PB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "f1023760-a9c0-418a-b53a-2c4f152e92d8",
+  "activeVersionId": "f1023760-a9c0-418a-b53a-2c4f152e92d8",
+  "versionCounter": 15,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-11-01T05:42:40.734Z",
+      "createdAt": "2026-11-01T05:42:40.734Z",
+      "role": "workflow:owner",
+      "workflowId": "tdsTelemetry001",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}
