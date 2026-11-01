@@ -680,9 +680,17 @@ aberto". Android inalterado (filesystem + share_plus).
 
 **OBSERVED (CI):** `.github/workflows/web-qa.yml` executa
 `./tooling/web_qa.sh` (7 arquivos, suite completa) em PRs contra
-main/develop + workflow_dispatch: Flutter 3.44.9 pinado, wrapper
-chromium-nosandbox sobre o Chrome do runner, chromedriver pareado,
-sem secrets (fixture QA commitada + API staging publica).
-**UNKNOWN:** primeira execucao real no GitHub Actions pendente —
-depende de ead.ipexdesenvolvimento.cloud aceitar trafego de IP de
-runner (Cloudflare); localmente a suite fecha 7/7.
+codex/onda-0-consolidacao + workflow_dispatch: Flutter 3.44.9 pinado,
+wrapper chromium-nosandbox sobre o Chrome do runner, chromedriver
+pareado, sem secrets (fixture QA commitada + API staging publica).
+PR #339: gates rapidos verdes (gitleaks, quarantine, flutter checks,
+API CI); staging API aceita trafego de runner GitHub (Cloudflare ok).
+**OBSERVED (bug CI/local):** run 41271669890 cancelada apos >22min e
+runs locais mortos sem output — causa-raiz: `_reveal()` em
+learning_qa_test.dart recursava incondicionalmente (cadeia infinita
+de Futures saturando isolate em microtasks; deadlock silencioso, nao
+loop de frames nem WebSocket/VM service). Corrigido p/
+`ensureVisible` + timeouts estritos por teste (aac61c0); verde local.
+**UNKNOWN/BLOCKED:** `Printing.layoutPdf` no headless pode suprimir o
+dialog de impressao do browser — verificado "sem crash", nao "dialog
+aberto". Android inalterado (filesystem + share_plus).
