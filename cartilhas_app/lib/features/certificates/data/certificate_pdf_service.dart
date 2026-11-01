@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -33,7 +34,14 @@ class CertificatePdfService {
     return document.save();
   }
 
+  /// Persiste o PDF em disco. Nativo apenas — no web use [build] e
+  /// compartilhe/imprima os bytes via package printing (sem filesystem).
   Future<String> save(CertificateRecord record) async {
+    if (kIsWeb) {
+      throw UnsupportedError(
+        'save() indisponivel no web: use build() + Printing.sharePdf/layoutPdf.',
+      );
+    }
     final directory = await repository.certificatesDirectory();
     final file = File(
       '${directory.path}${Platform.pathSeparator}${_safeFileName(record)}.pdf',
