@@ -41,5 +41,5 @@ void main() {
     expect(find.text('CPF ou senha inválidos.'), findsNothing);
     // Catalogo remoto real (Aula 01 publicada no staging).
     expect(find.textContaining('Aula 01'), findsAtLeastNWidgets(1));
-  });
+  }, timeout: const Timeout(Duration(minutes: 3)));
 }

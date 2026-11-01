@@ -227,5 +227,5 @@ void main() {
       debugPrint('  $step');
     }
     expect(_coverage, hasLength(greaterThanOrEqualTo(5)));
-  });
+  }, timeout: const Timeout(Duration(minutes: 4)));
 }

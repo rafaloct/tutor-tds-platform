@@ -119,7 +119,10 @@ Future<void> _reveal(WidgetTester tester, Finder finder) async {
       } catch (_) {}
     }
   }
-  await _reveal(tester, finder);
+  // Nunca recursar aqui: await _reveal() incondicional tranca o isolate em
+  // microtasks (deadlock silencioso). ensureVisible falha de verdade se o
+  // finder nao existir apos as tentativas de scroll.
+  await tester.ensureVisible(finder);
 }
 
 Future<void> _back(WidgetTester tester) async {
@@ -367,5 +370,5 @@ void main() {
       debugPrint('  $step');
     }
     expect(_coverage, hasLength(greaterThanOrEqualTo(8)));
-  });
+  }, timeout: const Timeout(Duration(minutes: 8)));
 }

@@ -267,5 +267,5 @@ void main() {
     await tester.pumpWidget(const CartilhasApp());
     await tester.pump();
     await _home(tester);
-  });
+  }, timeout: const Timeout(Duration(minutes: 8)));
 }
