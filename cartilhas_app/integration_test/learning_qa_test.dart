@@ -55,14 +55,14 @@ Future<void> _enterHome(WidgetTester tester) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
   await tester.pumpWidget(const CartilhasApp());
-  await tester.pumpAndSettle(const Duration(seconds: 2));
+  await _settle(tester, frames: 16);
 
   final loginLink = find.widgetWithText(TextButton, 'Já tenho conta');
   expect(await _pumpUntil(tester, loginLink), isTrue);
-  await tester.ensureVisible(loginLink);
-  await tester.pumpAndSettle();
+  await _reveal(tester, loginLink);
+  await _settle(tester);
   await tester.tap(loginLink);
-  await tester.pumpAndSettle();
+  await _settle(tester);
 
   expect(
     await _pumpUntil(tester, find.byKey(const ValueKey('account-login-cpf'))),
@@ -78,13 +78,13 @@ Future<void> _enterHome(WidgetTester tester) async {
     _qaPassword,
   );
   FocusManager.instance.primaryFocus?.unfocus();
-  await tester.pumpAndSettle();
+  await _settle(tester);
   await tester.tap(find.widgetWithText(FilledButton, 'Entrar na conta'));
 
   final consent = find.widgetWithText(FilledButton, 'Concordar e continuar');
   expect(await _pumpUntil(tester, consent), isTrue);
   await tester.tap(consent);
-  await tester.pumpAndSettle();
+  await _settle(tester);
   expect(
     await _pumpUntil(tester, find.text('Tutor TDS')),
     isTrue,
@@ -92,14 +92,44 @@ Future<void> _enterHome(WidgetTester tester) async {
   );
 }
 
+/// Settle bounded: pumpAndSettle() pode nunca retornar quando o embed do
+/// player (iframe) ou o catalogo remoto seguem agendando frames — os
+/// _pumpUntil seguintes cuidam da espera real.
+Future<void> _settle(WidgetTester tester, {int frames = 12}) async {
+  for (var i = 0; i < frames; i++) {
+    await tester.pump(const Duration(milliseconds: 250));
+  }
+}
+
+/// ensureVisible tolerante a scroll lazy: se o finder ainda nao existe na
+/// arvore (Home/player constroem sob demanda), rola ate aparecer primeiro.
+Future<void> _reveal(WidgetTester tester, Finder finder) async {
+  if (finder.evaluate().isEmpty) {
+    final scrollables = find.byType(Scrollable);
+    for (var i = 0;
+        i < scrollables.evaluate().length && finder.evaluate().isEmpty;
+        i++) {
+      try {
+        await tester.scrollUntilVisible(
+          finder,
+          300,
+          scrollable: scrollables.at(i),
+          maxScrolls: 25,
+        );
+      } catch (_) {}
+    }
+  }
+  await _reveal(tester, finder);
+}
+
 Future<void> _back(WidgetTester tester) async {
   final back = find.byType(BackButton);
   if (back.evaluate().isNotEmpty) {
     await tester.tap(back.first);
-    await tester.pumpAndSettle();
+    await _settle(tester);
   } else {
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _settle(tester);
   }
 }
 
@@ -115,10 +145,10 @@ void main() {
 
     // ── V2: abre o catalogo de videos ──
     final videos = find.widgetWithText(FilledButton, 'Vídeos');
-    await tester.ensureVisible(videos);
-    await tester.pumpAndSettle();
+    await _reveal(tester, videos);
+    await _settle(tester);
     await tester.tap(videos);
-    await tester.pumpAndSettle();
+    await _settle(tester);
     expect(await _pumpUntil(tester, find.byType(Card)), isTrue);
     expect(find.textContaining('Aula 01'), findsAtLeastNWidgets(1));
     _cover('V2 catalogo');
@@ -129,10 +159,10 @@ void main() {
       matching: find.byType(InkWell),
     );
     expect(aulaInk, findsWidgets, reason: 'e6: card da Aula 01 sem InkWell');
-    await tester.ensureVisible(aulaInk.first);
-    await tester.pumpAndSettle();
+    await _reveal(tester, aulaInk.first);
+    await _settle(tester);
     await tester.tap(aulaInk.first);
-    await tester.pumpAndSettle();
+    await _settle(tester);
     for (final bar in tester.widgetList<AppBar>(find.byType(AppBar))) {
       debugPrint('[e6] AppBar: ${bar.title}');
     }
@@ -182,16 +212,16 @@ void main() {
       );
     }
     expect(saveButton, findsOneWidget, reason: 'e7a: botao Salvar ausente');
-    await tester.ensureVisible(saveButton);
-    await tester.pumpAndSettle();
+    await _reveal(tester, saveButton);
+    await _settle(tester);
     await tester.tap(saveButton);
-    await tester.pumpAndSettle();
+    await _settle(tester);
     expect(
       await _pumpUntil(tester, find.text('Vídeo salvo.'), timeoutSeconds: 15),
       isTrue,
       reason: 'e7a: snackbar de salvo nao apareceu',
     );
-    await tester.pumpAndSettle();
+    await _settle(tester);
     // estado visual: rotulo vira 'Salvo' e icone bookmark preenchido.
     expect(find.widgetWithText(OutlinedButton, 'Salvo'), findsOneWidget);
     expect(find.byIcon(Icons.bookmark), findsWidgets);
@@ -219,7 +249,7 @@ void main() {
       reason: 'e7b: estrelas nao renderizaram',
     );
     await tester.tap(star5.first);
-    await tester.pumpAndSettle();
+    await _settle(tester);
     // API staging pode aceitar (rating registrado) ou exigir conclusao
     // qualificada (issue exibida) — ambas provam que a chamada saiu.
     final rated = find.textContaining('Sua avaliação:');
@@ -266,7 +296,7 @@ void main() {
 
     // ── e9: nav Perfil -> dados do usuario p/ certificado ──
     await tester.tap(find.text('Perfil'));
-    await tester.pumpAndSettle();
+    await _settle(tester);
     expect(
       await _pumpUntil(tester, find.text('Meu Cadastro TDS')),
       isTrue,
@@ -300,10 +330,10 @@ void main() {
     // ── e10: wallet de certificados ──
     final certButton = find.widgetWithText(OutlinedButton, 'Meus certificados');
     expect(certButton, findsOneWidget);
-    await tester.ensureVisible(certButton);
-    await tester.pumpAndSettle();
+    await _reveal(tester, certButton);
+    await _settle(tester);
     await tester.tap(certButton);
-    await tester.pumpAndSettle();
+    await _settle(tester);
     expect(
       await _pumpUntil(tester, find.byTooltip('Pedidos de certificado')),
       isTrue,
