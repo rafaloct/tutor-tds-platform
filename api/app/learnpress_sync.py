@@ -103,6 +103,36 @@ class WordPressTdsClient:
             {"user_id": wp_user_id, "course_slug": course_slug},
         )
 
+    def provision_login(
+        self,
+        *,
+        name: str,
+        phone: str,
+        cpf: str,
+        password: str,
+        tds_user_id: str,
+    ) -> int:
+        """Keeps the site login converged with the app credentials.
+
+        CPF becomes the WordPress username and the app password is applied on
+        create and re-applied on match (the endpoint is idempotent).
+        """
+        _, payload = self._call(
+            "POST",
+            "/register",
+            {
+                "name": name,
+                "phone": re.sub(r"\D", "", phone),
+                "cpf": re.sub(r"\D", "", cpf),
+                "password": password,
+                "tds_user_id": tds_user_id,
+            },
+        )
+        user_id = payload.get("user_id")
+        if not user_id:
+            raise RuntimeError("WordPress não retornou user_id no provisionamento.")
+        return int(user_id)
+
 
 @dataclass(frozen=True)
 class ClaimedItem:

@@ -43,6 +43,7 @@ class Settings:
     learnpress_sync_enabled: bool = False
     wordpress_base_url: str | None = None
     wordpress_tds_api_key: str | None = None
+    wordpress_login_sync_enabled: bool = False
     external_sync_batch_size: int = 50
     external_sync_max_attempts: int = 5
     external_sync_lease_seconds: int = 300
@@ -111,6 +112,7 @@ class Settings:
             learnpress_sync_enabled=os.getenv("LEARNPRESS_SYNC_ENABLED", "false").lower() in {"1", "true", "yes"},
             wordpress_base_url=os.getenv("WORDPRESS_BASE_URL"),
             wordpress_tds_api_key=os.getenv("WORDPRESS_TDS_API_KEY"),
+            wordpress_login_sync_enabled=os.getenv("WORDPRESS_LOGIN_SYNC_ENABLED", "false").lower() in {"1", "true", "yes"},
             external_sync_batch_size=int(os.getenv("EXTERNAL_SYNC_BATCH_SIZE", "50")),
             external_sync_max_attempts=int(os.getenv("EXTERNAL_SYNC_MAX_ATTEMPTS", "5")),
             external_sync_lease_seconds=int(os.getenv("EXTERNAL_SYNC_LEASE_SECONDS", "300")),

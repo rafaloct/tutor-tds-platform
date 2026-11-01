@@ -160,45 +160,65 @@ class RestController {
     }
 
     /**
-     * Provisions a subscriber account for app-originated users (self-enrollment
-     * sync). Idempotent by phone: the same meta keys that /user-by-phone reads
-     * (billing_phone, _tds_phone, tds_telefone). No e-mail — the canonical app
-     * registration does not collect one; password is random and unknown to the
-     * student, who authenticates only in the Tutor TDS app.
+     * Provisions a subscriber account for app-originated users. Idempotent by
+     * tds_user_id, by the same phone meta keys /user-by-phone reads
+     * (billing_phone, _tds_phone, tds_telefone) and by CPF username. No
+     * e-mail — the canonical app registration does not collect one.
+     * When `cpf` is sent it becomes user_login; when `password` is sent it is
+     * applied on create and re-applied on match, keeping the site password
+     * converged with the app password (account sync). Without them the
+     * password stays random and the student authenticates only in the app.
      */
     public function register_user(\WP_REST_Request $req): \WP_REST_Response {
         global $wpdb;
         $name        = sanitize_text_field($req->get_param('name'));
         $phone       = preg_replace('/\D/', '', sanitize_text_field($req->get_param('phone')));
+        $cpf         = preg_replace('/\D/', '', sanitize_text_field($req->get_param('cpf') ?? ''));
+        $password    = (string) ($req->get_param('password') ?? '');
         $tds_user_id = sanitize_text_field($req->get_param('tds_user_id') ?? '');
         if ($name === '' || $phone === '') {
             return new \WP_REST_Response(['error' => 'name and phone are required'], 400);
         }
 
+        $existing = 0;
         if ($tds_user_id !== '') {
             $existing = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = 'tds_user_id' AND meta_value = %s LIMIT 1",
                 $tds_user_id
             ));
-            if ($existing) {
-                return new \WP_REST_Response(['created' => false, 'user_id' => $existing], 200);
+        }
+        if (!$existing) {
+            foreach (['billing_phone', '_tds_phone', 'tds_telefone'] as $meta_key) {
+                $existing = (int) $wpdb->get_var($wpdb->prepare(
+                    "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND REGEXP_REPLACE(meta_value, '[^0-9]', '') = %s LIMIT 1",
+                    $meta_key,
+                    $phone
+                ));
+                if ($existing) {
+                    break;
+                }
             }
         }
-        foreach (['billing_phone', '_tds_phone', 'tds_telefone'] as $meta_key) {
-            $existing = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND REGEXP_REPLACE(meta_value, '[^0-9]', '') = %s LIMIT 1",
-                $meta_key,
-                $phone
-            ));
-            if ($existing) {
-                if ($tds_user_id !== '') {
-                    update_user_meta($existing, 'tds_user_id', $tds_user_id);
-                }
-                return new \WP_REST_Response(['created' => false, 'user_id' => $existing], 200);
+        if (!$existing && $cpf !== '') {
+            $by_login = get_user_by('login', $cpf);
+            if ($by_login) {
+                $existing = (int) $by_login->ID;
             }
+        }
+        if ($existing) {
+            if ($tds_user_id !== '') {
+                update_user_meta($existing, 'tds_user_id', $tds_user_id);
+            }
+            if ($cpf !== '') {
+                update_user_meta($existing, 'tds_cpf', $cpf);
+            }
+            if ($password !== '') {
+                wp_set_password($password, $existing);
+            }
+            return new \WP_REST_Response(['created' => false, 'user_id' => $existing], 200);
         }
 
-        $base     = 'aluno' . substr($phone, -8);
+        $base     = $cpf !== '' ? $cpf : 'aluno' . substr($phone, -8);
         $username = $base;
         $suffix   = 1;
         while (username_exists($username)) {
@@ -206,7 +226,7 @@ class RestController {
         }
         $user_id = wp_insert_user([
             'user_login'   => $username,
-            'user_pass'    => wp_generate_password(24, true),
+            'user_pass'    => $password !== '' ? $password : wp_generate_password(24, true),
             'user_email'   => '',
             'display_name' => $name,
             'first_name'   => $name,
@@ -220,6 +240,9 @@ class RestController {
         update_user_meta($user_id, 'tds_telefone', $phone);
         if ($tds_user_id !== '') {
             update_user_meta($user_id, 'tds_user_id', $tds_user_id);
+        }
+        if ($cpf !== '') {
+            update_user_meta($user_id, 'tds_cpf', $cpf);
         }
         return new \WP_REST_Response(['created' => true, 'user_id' => (int) $user_id], 201);
     }

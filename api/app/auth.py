@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import logging
 import re
 import secrets
 from collections.abc import Callable
@@ -57,6 +58,7 @@ from .models import (
     User,
 )
 
+LOGGER = logging.getLogger("tutor_tds.auth")
 router = APIRouter(prefix="/auth", tags=["auth"])
 password_hash = PasswordHash.recommended()
 dummy_password_digest = password_hash.hash(secrets.token_urlsafe(32))
@@ -351,6 +353,11 @@ class AuthService:
         )
         self.session.add(user)
         self.session.flush()
+        self._wordpress_login_provision(
+            user,
+            cpf=payload.cpf.get_secret_value(),
+            password=password,
+        )
         return user
 
     def authenticate(self, payload: LoginRequest) -> User:
@@ -368,7 +375,38 @@ class AuthService:
             verified = False
         if user is None or not verified:
             raise _unauthorized("Credenciais inválidas.")
+        self._wordpress_login_provision(
+            user,
+            cpf=payload.cpf.get_secret_value(),
+            password=payload.password.get_secret_value(),
+        )
         return user
+
+    def _wordpress_login_provision(
+        self, user: "User", *, cpf: str, password: str
+    ) -> None:
+        """Best-effort account sync: keeps the WordPress/LearnPress site
+        login converged with the app credentials (CPF username + same
+        password). Only runs when WORDPRESS_LOGIN_SYNC_ENABLED is set and
+        WORDPRESS_BASE_URL/TDS_API_KEY are configured. Failures never block
+        app auth — the next successful login retries and converges."""
+        if not self.settings.wordpress_login_sync_enabled:
+            return
+        try:
+            from .learnpress_sync import WordPressTdsClient
+
+            base_url, api_key = self.settings.require_wordpress_sync()
+            WordPressTdsClient(base_url, api_key, timeout=8).provision_login(
+                name=user.name,
+                phone=user.phone or "",
+                cpf=cpf,
+                password=password,
+                tds_user_id=user.id,
+            )
+        except Exception:
+            LOGGER.warning(
+                "wordpress_login_sync_failed user_id=%s", user.id, exc_info=True
+            )
 
     def issue_tokens(self, user: User) -> TokenResponse:
         now = datetime.now(timezone.utc)
