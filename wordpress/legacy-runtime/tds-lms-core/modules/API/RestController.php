@@ -44,6 +44,16 @@ class RestController {
             'callback'            => [$this, 'enroll_user'],
             'permission_callback' => $auth,
         ]);
+        register_rest_route(self::NS, '/register', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'register_user'],
+            'permission_callback' => $auth,
+            'args'                => [
+                'name'        => ['required' => true, 'sanitize_callback' => 'sanitize_text_field'],
+                'phone'       => ['required' => true, 'sanitize_callback' => 'sanitize_text_field'],
+                'tds_user_id' => ['required' => false, 'sanitize_callback' => 'sanitize_text_field'],
+            ],
+        ]);
         register_rest_route(self::NS, '/certificate/(?P<user_id>\d+)/(?P<course_slug>[a-z0-9-]+)', [
             'methods'             => 'GET',
             'callback'            => [$this, 'get_certificate'],
@@ -63,21 +73,22 @@ class RestController {
 
     public function get_user_progress(\WP_REST_Request $req): \WP_REST_Response {
         $user_id = (int) $req['user_id'];
-        $lp_user = learn_press_get_user($user_id);
-        $courses = get_posts(['post_type' => 'lp_course', 'posts_per_page' => -1, 'fields' => 'ids']);
-        $data    = [];
-        foreach ($courses as $cid) {
-            if (!$lp_user->has_enrolled_course($cid)) continue;
-            $cd     = $lp_user->get_course_data($cid);
-            $data[] = [
-                'course_id'    => $cid,
-                'course_slug'  => get_post_field('post_name', $cid),
-                'course_title' => get_the_title($cid),
-                'status'       => $cd->get_status(),
-                'graduation'   => $cd->get_graduation(),
-                'progress_pct' => $cd->get_percent_completion(),
-            ];
-        }
+        global $wpdb;
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT ui.item_id, ui.status, ui.graduation, p.post_name, p.post_title
+             FROM {$wpdb->prefix}learnpress_user_items ui
+             JOIN {$wpdb->posts} p ON p.ID = ui.item_id AND p.post_status = 'publish'
+             WHERE ui.user_id = %d AND ui.item_type = %s",
+            $user_id, LP_COURSE_CPT
+        ));
+        $data = array_map(fn($r) => [
+            'course_id'    => (int) $r->item_id,
+            'course_slug'  => $r->post_name,
+            'course_title' => $r->post_title,
+            'status'       => $r->status,
+            'graduation'   => $r->graduation,
+            'progress_pct' => null,
+        ], $rows ?: []);
         return new \WP_REST_Response($data, 200);
     }
 
@@ -87,33 +98,27 @@ class RestController {
         $course      = get_page_by_path($course_slug, OBJECT, 'lp_course');
         if (!$course) return new \WP_REST_Response(['error' => 'Course not found'], 404);
 
-        $lp_user = learn_press_get_user($user_id);
-        if (!$lp_user->has_enrolled_course($course->ID)) {
+        global $wpdb;
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT status, graduation, start_time
+             FROM {$wpdb->prefix}learnpress_user_items
+             WHERE user_id = %d AND item_id = %d AND item_type = %s
+             ORDER BY user_item_id DESC LIMIT 1",
+            $user_id, $course->ID, LP_COURSE_CPT
+        ));
+        if (!$row) {
             return new \WP_REST_Response(['error' => 'User not enrolled'], 403);
         }
-
-        $cd      = $lp_user->get_course_data($course->ID);
-        $items   = $cd->get_items();
-        $current = null;
-        foreach ($items as $item) {
-            $id        = $item->id ?? $item->get_id();
-            $item_data = $lp_user->get_item_data($id, $course->ID);
-            if ($item_data && $item_data->get_status() !== 'completed') {
-                $current = ['id' => $id, 'title' => get_the_title($id), 'type' => get_post_type($id)];
-                break;
-            }
-        }
-
         return new \WP_REST_Response([
             'user_id'        => $user_id,
             'course_id'      => $course->ID,
             'course_slug'    => $course_slug,
             'course_title'   => get_the_title($course->ID),
-            'status'         => $cd->get_status(),
-            'graduation'     => $cd->get_graduation(),
-            'progress_pct'   => $cd->get_percent_completion(),
-            'current_lesson' => $current,
-            'enrolled_at'    => $cd->get_start_time(),
+            'status'         => $row->status,
+            'graduation'     => $row->graduation,
+            'progress_pct'   => null,
+            'current_lesson' => null,
+            'enrolled_at'    => $row->start_time,
         ], 200);
     }
 
@@ -152,6 +157,94 @@ class RestController {
         $uc->save();
         do_action('learn-press/assigned-course-to-user', $uc);
         return new \WP_REST_Response(['success' => true, 'enrolled_at' => $uc->start_time], 201);
+    }
+
+    /**
+     * Provisions a subscriber account for app-originated users. Idempotent by
+     * tds_user_id, by the same phone meta keys /user-by-phone reads
+     * (billing_phone, _tds_phone, tds_telefone) and by CPF username. No
+     * e-mail — the canonical app registration does not collect one.
+     * When `cpf` is sent it becomes user_login; when `password` is sent it is
+     * applied on create and re-applied on match, keeping the site password
+     * converged with the app password (account sync). Without them the
+     * password stays random and the student authenticates only in the app.
+     */
+    public function register_user(\WP_REST_Request $req): \WP_REST_Response {
+        global $wpdb;
+        $name        = sanitize_text_field($req->get_param('name'));
+        $phone       = preg_replace('/\D/', '', sanitize_text_field($req->get_param('phone')));
+        $cpf         = preg_replace('/\D/', '', sanitize_text_field($req->get_param('cpf') ?? ''));
+        $password    = (string) ($req->get_param('password') ?? '');
+        $tds_user_id = sanitize_text_field($req->get_param('tds_user_id') ?? '');
+        if ($name === '' || $phone === '') {
+            return new \WP_REST_Response(['error' => 'name and phone are required'], 400);
+        }
+
+        $existing = 0;
+        if ($tds_user_id !== '') {
+            $existing = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = 'tds_user_id' AND meta_value = %s LIMIT 1",
+                $tds_user_id
+            ));
+        }
+        if (!$existing) {
+            foreach (['billing_phone', '_tds_phone', 'tds_telefone'] as $meta_key) {
+                $existing = (int) $wpdb->get_var($wpdb->prepare(
+                    "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND REGEXP_REPLACE(meta_value, '[^0-9]', '') = %s LIMIT 1",
+                    $meta_key,
+                    $phone
+                ));
+                if ($existing) {
+                    break;
+                }
+            }
+        }
+        if (!$existing && $cpf !== '') {
+            $by_login = get_user_by('login', $cpf);
+            if ($by_login) {
+                $existing = (int) $by_login->ID;
+            }
+        }
+        if ($existing) {
+            if ($tds_user_id !== '') {
+                update_user_meta($existing, 'tds_user_id', $tds_user_id);
+            }
+            if ($cpf !== '') {
+                update_user_meta($existing, 'tds_cpf', $cpf);
+            }
+            if ($password !== '') {
+                wp_set_password($password, $existing);
+            }
+            return new \WP_REST_Response(['created' => false, 'user_id' => $existing], 200);
+        }
+
+        $base     = $cpf !== '' ? $cpf : 'aluno' . substr($phone, -8);
+        $username = $base;
+        $suffix   = 1;
+        while (username_exists($username)) {
+            $username = $base . $suffix++;
+        }
+        $user_id = wp_insert_user([
+            'user_login'   => $username,
+            'user_pass'    => $password !== '' ? $password : wp_generate_password(24, true),
+            'user_email'   => '',
+            'display_name' => $name,
+            'first_name'   => $name,
+            'role'         => 'subscriber',
+        ]);
+        if (is_wp_error($user_id)) {
+            return new \WP_REST_Response(['error' => $user_id->get_error_message()], 422);
+        }
+        update_user_meta($user_id, 'billing_phone', $phone);
+        update_user_meta($user_id, '_tds_phone', $phone);
+        update_user_meta($user_id, 'tds_telefone', $phone);
+        if ($tds_user_id !== '') {
+            update_user_meta($user_id, 'tds_user_id', $tds_user_id);
+        }
+        if ($cpf !== '') {
+            update_user_meta($user_id, 'tds_cpf', $cpf);
+        }
+        return new \WP_REST_Response(['created' => true, 'user_id' => (int) $user_id], 201);
     }
 
     public function get_certificate(\WP_REST_Request $req): mixed {
@@ -202,12 +295,15 @@ class RestController {
             ));
         }
         if (!$user_id) return new \WP_REST_Response(['found' => false], 404);
-        $user = get_user_by('id', $user_id);
-        return new \WP_REST_Response([
-            'found'        => true,
-            'user_id'      => (int) $user_id,
-            'display_name' => $user->display_name,
-            'email'        => $user->user_email,
-        ], 200);
+        // Minimização de PII: resposta padrão devolve apenas existência + id.
+        // Campos de contato exigem flag interna (consumidor legado explícito).
+        $resp = ['found' => true, 'user_id' => (int) $user_id];
+        if ($req->get_param('internal') === '1') {
+            $user = get_user_by('id', $user_id);
+            $resp['display_name'] = $user->display_name;
+            $resp['email']        = $user->user_email;
+        }
+        error_log('tds-api: user-by-phone lookup user_id=' . (int) $user_id);
+        return new \WP_REST_Response($resp, 200);
     }
 }

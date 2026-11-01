@@ -37,6 +37,7 @@ class CourseRepository {
     'assets/data/lessons/economia-lar.json',
     'assets/data/lessons/educacao-financeira.json',
     'assets/data/lessons/ia-cartilha.json',
+    'assets/data/lessons/politicas-publicas-agricultura-familiar.json',
     'assets/data/lessons/saf.json',
     'assets/data/lessons/sim-sima.json',
   ];

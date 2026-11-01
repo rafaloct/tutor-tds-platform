@@ -13,6 +13,11 @@ class AppConfig {
   static const learningContextEnabled = bool.fromEnvironment(
     'LEARNING_CONTEXT_ENABLED',
   );
+  /// Enable with the matching API flag only after the self-enrollment
+  /// staging gate. When off, course taps keep the public read-only path.
+  static const selfEnrollmentEnabled = bool.fromEnvironment(
+    'SELF_ENROLLMENT_ENABLED',
+  );
   static const durableLearningOutboxEnabled = bool.fromEnvironment(
     'DURABLE_LEARNING_OUTBOX_ENABLED',
   );
@@ -50,6 +55,19 @@ class AppConfig {
     'REMOTE_CATALOG_ENABLED',
     defaultValue: false,
   );
+
+  /// Somente QA: autologin para builds web de staging. Tudo desligado/vazio
+  /// por padrão — apenas `config/staging.qa.web.json` define estes valores.
+  /// Produção nunca os define, então o fluxo manual de login fica intacto.
+  static const qaAutoLogin = bool.fromEnvironment(
+    'TUTOR_QA_AUTOLOGIN',
+    defaultValue: false,
+  );
+  static const qaAutoLoginCpf = String.fromEnvironment('TUTOR_QA_CPF');
+  static const qaAutoLoginPassword = String.fromEnvironment(
+    'TUTOR_QA_PASSWORD',
+  );
+  static const qaAutoLoginOpen = String.fromEnvironment('TUTOR_QA_OPEN');
 
   static const privacyPolicyUrl = String.fromEnvironment(
     'PRIVACY_POLICY_URL',

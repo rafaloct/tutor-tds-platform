@@ -398,9 +398,34 @@ class _ChatExperienceScreenState extends State<ChatExperienceScreen>
     }
   }
 
+  static const _acronyms = {
+    'IA', 'CAF', 'DAP', 'PAA', 'PNAE', 'SIM', 'SIMA', 'SISBI', 'POA',
+    'BPF', 'CDC', 'SPC', 'CNPJ', 'CPF', 'RG', 'LGPD', 'OCS', 'FNDE',
+    'RDC', 'TDS', 'TO', 'UFT', 'PET', 'PVC', 'PLN', 'PBIA', 'ATER',
+    'SAF',
+  };
+
+  String _toSpeech(String text) {
+    var out = text
+        .replaceAll(RegExp(r'https?://\S+|wa\.me/\S+'), 'link enviado')
+        .replaceAll(RegExp(r'R\$\s*(\d+(?:[.,]\d+)?)'), r'$1 reais')
+        .replaceAll(RegExp(r'(\d)\s*%'), r'$1 por cento')
+        .replaceAll(RegExp(r'°\s*C\b'), ' graus Celsius')
+        .replaceAll(RegExp(r'(\d)\s*x\s*(\d)'), r'$1 por $2')
+        .replaceAll(RegExp(r'(\d)\s*:\s*(\d)'), r'$1 por $2')
+        .replaceAll('/', ' ')
+        .replaceAllMapped(
+          RegExp(r'\b([A-ZÁÀÂÃÉÊÍÓÔÕÚ]{2,7})\b'),
+          (m) => _acronyms.contains(m[1]) ? m[1]!.split('').join(' ') : m[1]!,
+        )
+        .replaceAll(RegExp(r'[^\p{L}\p{N}\p{P}\p{Zs}]', unicode: true), '')
+        .replaceAll(RegExp(r'\s+'), ' ');
+    return out.trim();
+  }
+
   Future<void> _speak(String text) async {
     await _tts.stop();
-    await _tts.speak(text);
+    await _tts.speak(_toSpeech(text));
   }
 
   void _displayNextMessage() {

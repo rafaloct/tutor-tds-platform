@@ -1,0 +1,211 @@
+{
+  "updatedAt": "2026-04-09T23:19:35.796Z",
+  "createdAt": "2026-04-09T23:19:35.796Z",
+  "id": "XxzrYcRwQzpfncbJ",
+  "name": "TDS — AI Contextual Helper",
+  "description": "Workflow que serve de API para o Kit de Estudo Ativo, recebendo termos selecionados e retornando explicações contextuais via AnythingLLM.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "474af14c-e95d-4c74-bb94-dcea1cfe6a99",
+      "name": "AI Helper Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {
+        "path": "ai-helper",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "8e8dd878-37a2-407b-94ac-20d5c43e2eac"
+    },
+    {
+      "id": "415f44a4-ec8c-40a4-8f80-644e0b884538",
+      "name": "Prepare Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        350,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "prompt",
+              "name": "prompt",
+              "value": "=Explique brevemente o seguinte termo ou frase: \"{{ $json.body.selection }}\". Considere que estou estudando o tópico: \"{{ $json.body.lessonTitle }}\". Seja didático e direto.",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0f6cf352-e8f8-4b5d-bff1-205436ed4160",
+      "name": "Consultar AnythingLLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://anythingllm:3001/api/v1/workspace/tds-ia-no-meu-bolso/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $json.prompt }}"
+            },
+            {
+              "name": "mode",
+              "value": "chat"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsAllmCred001",
+          "name": "TDS AnythingLLM Bearer"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "a450262b-a664-4cc0-8199-548abefa697f",
+      "name": "Clean AI Thoughts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "for (const item of $input.all()) {\n  const raw = item.json.textResponse || \"\";\n  item.json.explanation = (raw || \"Não consegui consultar a IA agora — tente em instantes.\").replace(/<think>[\\s\\S]*?<\\/think>/gi, \"\").trim();\n}\nreturn $input.all();"
+      }
+    },
+    {
+      "id": "96cb200b-ecba-406c-af69-11c7a9876cfb",
+      "name": "Return Explanation",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "respondWith": "allIncomingItems"
+      }
+    }
+  ],
+  "connections": {
+    "AI Helper Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Prompt": {
+      "main": [
+        [
+          {
+            "node": "Consultar AnythingLLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar AnythingLLM": {
+      "main": [
+        [
+          {
+            "node": "Clean AI Thoughts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean AI Thoughts": {
+      "main": [
+        [
+          {
+            "node": "Return Explanation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "7e8dc814-5c7d-4b08-85de-e1c7f50e6688",
+  "activeVersionId": "7e8dc814-5c7d-4b08-85de-e1c7f50e6688",
+  "versionCounter": 14,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-11-01T05:48:40.703Z",
+      "createdAt": "2026-11-01T05:48:40.703Z",
+      "role": "workflow:owner",
+      "workflowId": "XxzrYcRwQzpfncbJ",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS — AI Contextual Helper",
+    "description": null
+  }
+}

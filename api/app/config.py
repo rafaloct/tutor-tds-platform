@@ -39,6 +39,15 @@ class Settings:
     compatibility_verified: bool = False
     environment: str = "development"
     operator_operations_enabled: bool = False
+    self_enrollment_enabled: bool = False
+    learnpress_sync_enabled: bool = False
+    wordpress_base_url: str | None = None
+    wordpress_tds_api_key: str | None = None
+    wordpress_login_sync_enabled: bool = False
+    external_sync_batch_size: int = 50
+    external_sync_max_attempts: int = 5
+    external_sync_lease_seconds: int = 300
+    external_sync_poll_seconds: int = 30
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -99,6 +108,15 @@ class Settings:
             journey_traceability_enabled=os.getenv("JOURNEY_TRACEABILITY_ENABLED", "false").lower() in {"1", "true", "yes"},
             minimum_supported_app_version=os.getenv("MINIMUM_SUPPORTED_APP_VERSION", "1.2.0+11").strip(),
             compatibility_verified=os.getenv("COMPATIBILITY_VERIFIED", "false").lower() in {"1", "true", "yes"},
+            self_enrollment_enabled=os.getenv("SELF_ENROLLMENT_ENABLED", "false").lower() in {"1", "true", "yes"},
+            learnpress_sync_enabled=os.getenv("LEARNPRESS_SYNC_ENABLED", "false").lower() in {"1", "true", "yes"},
+            wordpress_base_url=os.getenv("WORDPRESS_BASE_URL"),
+            wordpress_tds_api_key=os.getenv("WORDPRESS_TDS_API_KEY"),
+            wordpress_login_sync_enabled=os.getenv("WORDPRESS_LOGIN_SYNC_ENABLED", "false").lower() in {"1", "true", "yes"},
+            external_sync_batch_size=int(os.getenv("EXTERNAL_SYNC_BATCH_SIZE", "50")),
+            external_sync_max_attempts=int(os.getenv("EXTERNAL_SYNC_MAX_ATTEMPTS", "5")),
+            external_sync_lease_seconds=int(os.getenv("EXTERNAL_SYNC_LEASE_SECONDS", "300")),
+            external_sync_poll_seconds=int(os.getenv("EXTERNAL_SYNC_POLL_SECONDS", "30")),
         )
         if not settings.minimum_supported_app_version:
             raise RuntimeError("MINIMUM_SUPPORTED_APP_VERSION não pode ser vazio.")
@@ -163,3 +181,26 @@ class Settings:
                 "credenciais, query, fragmento ou segmentos relativos."
             )
         return value.rstrip("/")
+
+    def require_wordpress_sync(self) -> tuple[str, str]:
+        """Validated WordPress base + API key for outbound projections only."""
+        if not self.learnpress_sync_enabled:
+            raise RuntimeError("LEARNPRESS_SYNC_ENABLED está desligada.")
+        value = (self.wordpress_base_url or "").strip()
+        parsed = urlsplit(value)
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise RuntimeError(
+                "WORDPRESS_BASE_URL deve ser uma base HTTPS canônica, sem "
+                "credenciais, query ou fragmento."
+            )
+        key = (self.wordpress_tds_api_key or "").strip()
+        if len(key) < 16:
+            raise RuntimeError("WORDPRESS_TDS_API_KEY deve ter pelo menos 16 caracteres.")
+        return value.rstrip("/"), key

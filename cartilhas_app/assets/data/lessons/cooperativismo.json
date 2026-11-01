@@ -74,25 +74,25 @@
       "messages": [
         {
           "type": "bot",
-          "content": "PAA (Programa de Aquisição de Alimentos) e PNAE (Programa Nacional de Alimentação Escolar) são programas do governo que compram diretamente de agricultores familiares organizados em cooperativas ou associações. O PNAE exige que 30% dos alimentos das escolas venham da agricultura familiar."
+          "content": "PAA (Programa de Aquisição de Alimentos) e PNAE (Programa Nacional de Alimentação Escolar) são programas do governo que compram diretamente de agricultores familiares organizados em cooperativas ou associações. O PNAE exige que no mínimo 45% dos alimentos das escolas venham da agricultura familiar (regra atualizada pela Lei 15.226/2025)."
         },
         {
           "type": "bot",
-          "content": "Para acessar esses mercados, a cooperativa precisa estar formalizada (CNPJ), com DAP (Declaração de Aptidão ao Pronaf) dos membros, e registrada na prefeitura ou órgão competente. Parece burocrático, mas a cooperativa ajuda cada membro a passar por isso junto."
+          "content": "Para acessar esses mercados, a cooperativa precisa estar formalizada (CNPJ), com CAF (Cadastro Nacional da Agricultura Familiar — o documento que substituiu a antiga DAP) dos membros, e registrada na prefeitura ou órgão competente. Parece burocrático, mas a cooperativa ajuda cada membro a passar por isso junto. O CAF é gratuito e tem validade de 3 anos."
         },
         {
           "type": "question",
-          "content": "Qual programa exige que 30% dos alimentos das escolas públicas venham da agricultura familiar?",
+          "content": "Qual programa exige que 45% dos alimentos das escolas públicas venham da agricultura familiar?",
           "options": [
             {
               "label": "PNAE",
               "value": "a",
-              "feedback": "CORRETO! O PNAE — Programa Nacional de Alimentação Escolar — determina que pelo menos 30% dos recursos devem ser usados na compra de alimentos da agricultura familiar. Cooperativas organizadas têm prioridade nesse processo de compra!"
+              "feedback": "CORRETO! O PNAE — Programa Nacional de Alimentação Escolar — determina que pelo menos 45% dos recursos devem ser usados na compra de alimentos da agricultura familiar (Lei 15.226/2025, vigente desde janeiro de 2026). Cooperativas organizadas têm prioridade nesse processo de compra!"
             },
             {
               "label": "PAA",
               "value": "b",
-              "feedback": "O PAA também é importante, mas a regra dos 30% é do PNAE (Programa Nacional de Alimentação Escolar). Ambos são programas federais que compram de agricultores familiares, e a cooperativa ajuda a acessar os dois."
+              "feedback": "O PAA também é importante, mas a regra dos 45% é do PNAE (Programa Nacional de Alimentação Escolar). Ambos são programas federais que compram de agricultores familiares, e a cooperativa ajuda a acessar os dois."
             }
           ]
         }

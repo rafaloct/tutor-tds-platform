@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -15,6 +16,8 @@ import '../data/media_progress_repository.dart';
 import '../data/media_repository.dart';
 import '../models/media_models.dart';
 import 'secure_media_embed.dart';
+import 'media_embed_view_stub.dart'
+    if (dart.library.html) 'media_embed_view_web.dart';
 
 class MediaPlayerScreen extends StatefulWidget {
   const MediaPlayerScreen({
@@ -32,6 +35,7 @@ class MediaPlayerScreen extends StatefulWidget {
 class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
   static const _progressRepository = MediaProgressRepository();
   WebViewController? _controller;
+  String? _webHtml;
   MediaEventTracker? _tracker;
   MediaProgress? _progress;
   late MediaItem _media;
@@ -81,6 +85,16 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
       }
       if (!mounted) return;
       _media = playable;
+      if (kIsWeb) {
+        _webHtml = buildSecureMediaHtml(
+          playable,
+          initialPositionSeconds:
+              progress?.fraction == 1 ? 0 : progress?.positionSeconds ?? 0,
+        );
+        _playbackState = _PlaybackViewState.ready;
+        if (mounted) setState(() {});
+        return;
+      }
       final controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(const Color(0xFF101012))
@@ -173,7 +187,10 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
           durationSeconds: duration,
         );
         if (type == 'ended') {
-          await _tracker?.completed(positionSeconds: position);
+          await _tracker?.completed(
+            positionSeconds: position,
+            durationSeconds: duration,
+          );
         }
         if ((position - _lastPersistedSecond).abs() >= 5 || type == 'ended') {
           _lastPersistedSecond = position;
@@ -247,6 +264,7 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
       _ratingIssue = null;
     });
     try {
+      await _tracker?.syncService.flush();
       final rating = await widget.repository.rate(widget.media.id, value);
       if (mounted) {
         setState(() {
@@ -304,7 +322,12 @@ class _MediaPlayerScreenState extends State<MediaPlayerScreen> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (_controller != null && media.canPlay)
+                  if (kIsWeb && _webHtml != null && media.canPlay)
+                    MediaEmbedView(
+                      html: _webHtml!,
+                      onMessage: _handlePlayerMessage,
+                    )
+                  else if (_controller != null && media.canPlay)
                     WebViewWidget(controller: _controller!),
                   if (_playbackState == _PlaybackViewState.offline)
                     _PlaybackUnavailable(

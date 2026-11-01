@@ -91,6 +91,13 @@ class LearningEventSyncService {
             now: clock(),
             statusCode: response.statusCode,
           );
+          if (!queue.isDurable &&
+              (response.statusCode == 422 ||
+                  response.statusCode == 404 ||
+                  response.statusCode == 409)) {
+            await queue.removeById(event.eventId);
+            continue;
+          }
           if (queue.isDurable &&
               response.statusCode != 401 &&
               response.statusCode != 403) {

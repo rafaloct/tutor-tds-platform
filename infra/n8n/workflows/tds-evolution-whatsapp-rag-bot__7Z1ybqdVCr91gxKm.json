@@ -1,0 +1,395 @@
+{
+  "updatedAt": "2026-10-30T21:47:12.773Z",
+  "createdAt": "2026-04-08T20:10:04.250Z",
+  "id": "7Z1ybqdVCr91gxKm",
+  "name": "TDS — Evolution WhatsApp RAG Bot",
+  "description": "Escuta webhook do Chatwoot, e quando conversa é marcada como resolvida, reativa o bot: atualiza status no Frappe para \"Bot\" e notifica o aluno via Evolution API.",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -900,
+        300
+      ],
+      "parameters": {
+        "path": "tds-evo-wa",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {
+          "noResponseBody": true
+        }
+      },
+      "webhookId": "3a2d4b6c-8c93-44cc-8902-8d87c2495412"
+    },
+    {
+      "id": "n2",
+      "name": "Extrair Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -700,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body;\nconst data = body?.data;\nconst key = data?.key || {};\nconst remoteJid = key.remoteJid || '';\nconst msgId = key.id || '';\nif (key.fromMe || remoteJid.endsWith('@g.us') || !remoteJid) return [];\nconst msg = data?.message || {};\nconst messageText = msg.conversation || (msg.extendedTextMessage?.text) || '';\nif (!messageText || !msgId) return [];\nreturn [{ json: {\n  msg_id: msgId, phoneNumber: remoteJid, messageText,\n  instance: data?.instanceId || body?.instance || 'tds_suporte_audiovisual'\n}}];",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Dedup msg_id",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -500,
+        300
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO tds_dedup (msg_id) VALUES ('{{ $json.msg_id }}') ON CONFLICT (msg_id) DO NOTHING RETURNING msg_id"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "wAJovSb9ceHlYden",
+          "name": "PostgreSQL Kreativ"
+        }
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Msg nova?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -300,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "dedup",
+              "leftValue": "={{ $json.msg_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "n5",
+      "name": "RAG Worker",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        220
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "tdsRagWorker001",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "channel": "evolution",
+            "user_raw": "={{ $('Extrair Dados').item.json.phoneNumber }}",
+            "text": "={{ $('Extrair Dados').item.json.messageText }}",
+            "workspace": "tds",
+            "caller": "evo-rag-bot",
+            "conv_id": "={{ $('Extrair Dados').item.json.msg_id }}",
+            "reply_to": "={{ $('Extrair Dados').item.json.phoneNumber }}",
+            "remote_jid": "={{ $('Extrair Dados').item.json.phoneNumber }}"
+          },
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "n6",
+      "name": "RAG ok?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        140,
+        220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ok",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "Enviar Resposta",
+      "name": "Enviar Resposta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        140
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://evolution.ipexdesenvolvimento.cloud/message/sendText/{{ $('Extrair Dados').item.json.instance }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Extrair Dados').item.json.phoneNumber.includes(\"@lid\") ? $('Extrair Dados').item.json.phoneNumber : $('Extrair Dados').item.json.phoneNumber.split(\"@\")[0], text: $json.reply_text, delay: 1200 }) }}",
+        "options": {
+          "retryOnFail": true,
+          "maxRetries": 2,
+          "waitBetweenRetries": 2000,
+          "timeout": 10000
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsEvoCred001x",
+          "name": "TDS Evolution apikey"
+        }
+      }
+    },
+    {
+      "id": "Enviar Fallback",
+      "name": "Enviar Fallback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        320
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://evolution.ipexdesenvolvimento.cloud/message/sendText/{{ $('Extrair Dados').item.json.instance }}",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Extrair Dados').item.json.phoneNumber.includes(\"@lid\") ? $('Extrair Dados').item.json.phoneNumber : $('Extrair Dados').item.json.phoneNumber.split(\"@\")[0], text: \"Estou processando muita informação agora. Pode repetir sua pergunta em um minuto?\", delay: 1200 }) }}",
+        "options": {
+          "retryOnFail": true,
+          "maxRetries": 2,
+          "waitBetweenRetries": 2000,
+          "timeout": 10000
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsEvoCred001x",
+          "name": "TDS Evolution apikey"
+        }
+      }
+    },
+    {
+      "id": "Log dedup-skip",
+      "name": "Log dedup-skip",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        560
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/tds-telemetry",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({channel:\"evolution\",user_hash:\"dedup\",outcome:\"dedup_skip\",workflow:\"evo-rag-bot\"}) }}",
+        "options": {
+          "timeout": 5000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Evolution": {
+      "main": [
+        [
+          {
+            "node": "Extrair Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Dados": {
+      "main": [
+        [
+          {
+            "node": "Dedup msg_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup msg_id": {
+      "main": [
+        [
+          {
+            "node": "Msg nova?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg nova?": {
+      "main": [
+        [
+          {
+            "node": "RAG Worker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log dedup-skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Worker": {
+      "main": [
+        [
+          {
+            "node": "RAG ok?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG ok?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true
+  },
+  "pinData": null,
+  "versionId": "3a913203-83fd-445d-91e6-d0c55876507e",
+  "activeVersionId": "3a913203-83fd-445d-91e6-d0c55876507e",
+  "versionCounter": 130,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-08T20:10:04.250Z",
+      "createdAt": "2026-04-08T20:10:04.250Z",
+      "role": "workflow:owner",
+      "workflowId": "7Z1ybqdVCr91gxKm",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS — Evolution WhatsApp RAG Bot",
+    "description": null
+  }
+}

@@ -50,7 +50,12 @@ class PlanManager {
         register_rest_route('tds/v1', '/mp-subscription-callback', [
             'methods'             => 'POST',
             'callback'            => [$this, 'handle_mp_subscription_callback'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => function(\WP_REST_Request $req) {
+                $key = $req->get_header('X-API-Key') ?? $req->get_param('api_key') ?? '';
+                return (defined('TDS_API_KEY') && hash_equals(TDS_API_KEY, $key))
+                    ? true
+                    : new \WP_Error('forbidden', 'Invalid API key', ['status' => 403]);
+            },
         ]);
     }
 

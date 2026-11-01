@@ -143,14 +143,25 @@ def _audit(session: Session, record: CertificateRequest, previous: str | None, u
 
 
 @router.get("/contexts")
-def contexts(request: Request, course_id: str = Query(min_length=1, max_length=120), course_version_id: str = Query(min_length=1, max_length=36), claims=Depends(access_claims)):
+def contexts(request: Request, course_id: str = Query(min_length=1, max_length=120), course_version_id: str | None = Query(default=None, min_length=1, max_length=36), claims=Depends(access_claims)):
     with Session(request.app.state.database.engine) as session:
         result = []
         for enrollment in session.scalars(select(Enrollment).where(Enrollment.user_id == claims["sub"], Enrollment.course_id == course_id, Enrollment.status == "active").order_by(Enrollment.id)):
             classes = session.scalars(select(ClassEnrollment.class_id).where(ClassEnrollment.enrollment_id == enrollment.id, ClassEnrollment.user_id == claims["sub"], ClassEnrollment.status == "active")).all()
             for class_id in [None, *classes]:
+                version_id = course_version_id
+                if version_id is None:
+                    if class_id is None:
+                        # Bundled/legacy study records unversioned events, which
+                        # only bind the deterministic original edition.
+                        version_id = legacy_version_id(course_id)
+                    else:
+                        classroom = session.get(Classroom, class_id)
+                        if classroom is None or classroom.course_version_id is None:
+                            continue
+                        version_id = classroom.course_version_id
                 try:
-                    _, version, classroom, offering, program, _, _ = _context(session, claims["sub"], enrollment.id, course_version_id, class_id)
+                    _, version, classroom, offering, program, _, _ = _context(session, claims["sub"], enrollment.id, version_id, class_id)
                 except HTTPException:
                     continue
                 existing = session.scalar(select(CertificateRequest).where(CertificateRequest.enrollment_id == enrollment.id, CertificateRequest.course_version_id == version.id))

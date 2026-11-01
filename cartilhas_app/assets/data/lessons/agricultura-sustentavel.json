@@ -113,7 +113,7 @@
       "messages": [
         {
           "type": "bot",
-          "content": "Programas públicos como o PAA (Programa de Aquisição de Alimentos) e o PNAE (Programa Nacional de Alimentação Escolar) compram alimentos diretamente de pequenos produtores. O PNAE exige que pelo menos 30% dos alimentos das escolas públicas sejam da agricultura familiar. Isso é uma grande oportunidade!"
+          "content": "Programas públicos como o PAA (Programa de Aquisição de Alimentos) e o PNAE (Programa Nacional de Alimentação Escolar) compram alimentos diretamente de pequenos produtores. O PNAE exige que pelo menos 45% dos alimentos das escolas públicas sejam da agricultura familiar (regra atualizada pela Lei 15.226/2025). Isso é uma grande oportunidade!"
         },
         {
           "type": "bot",
@@ -124,14 +124,14 @@
           "content": "Qual porcentagem mínima dos alimentos das escolas públicas deve vir da agricultura familiar pelo PNAE?",
           "options": [
             {
-              "label": "30%",
+              "label": "45%",
               "value": "a",
-              "feedback": "CORRETO! O PNAE determina que no mínimo 30% dos recursos repassados pelo governo para alimentação escolar devem ser usados na compra de alimentos da agricultura familiar. Isso representa uma grande oportunidade de mercado para você!"
+              "feedback": "CORRETO! O PNAE determina que no mínimo 45% dos recursos repassados pelo governo para alimentação escolar devem ser usados na compra de alimentos da agricultura familiar (Lei 15.226/2025, vigente desde janeiro de 2026). Isso representa uma grande oportunidade de mercado para você!"
             },
             {
               "label": "10%",
               "value": "b",
-              "feedback": "O número certo é 30%! O PNAE obriga que pelo menos 30% dos alimentos das escolas públicas venham da agricultura familiar. Isso é muito mais que 10% e representa uma grande oportunidade de venda garantida."
+              "feedback": "O número certo é 45%! O PNAE obriga que pelo menos 45% dos alimentos das escolas públicas venham da agricultura familiar (regra atualizada pela Lei 15.226/2025). Isso é muito mais que 10% e representa uma grande oportunidade de venda garantida."
             }
           ]
         }

@@ -168,6 +168,11 @@
       "bytes": 56534
     },
     {
+      "path": "wordpress/legacy-runtime/tds-lms-core-loader.php",
+      "sha256": "087bec87201753942a74978932e274d65d119b951412da0687739cc646fa2c40",
+      "bytes": 290
+    },
+    {
       "path": "wordpress/legacy-runtime/tds-lms-core/composer.json",
       "sha256": "4eba010b357c24c0e2c4457eb4052c77d34f8676a788ebb6fcae0faddd278a2d",
       "bytes": 314
@@ -179,8 +184,8 @@
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/API/RestController.php",
-      "sha256": "80e45363f73aea0450bed66ec27c22090b6656f92b7c10116b346c06b47bd883",
-      "bytes": 9402
+      "sha256": "3ee705f10f1c0c3f85d7fbedf991a985205fb93899bcd1d1b919ceee878d53bd",
+      "bytes": 13900
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Certificates/Generator.php",
@@ -204,8 +209,8 @@
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Dashboard/StudentArea.php",
-      "sha256": "e56a9b202930de170442b8fc5b203442d56eb883229201956d7e19cb20da5414",
-      "bytes": 1590
+      "sha256": "b4b89f778636811bf9b14b300d3856c6e8697b437d9f4e383c4bc1c30ac9db48",
+      "bytes": 2052
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Dashboard/views/student-area.php",
@@ -224,8 +229,8 @@
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Payments/EnrollmentGate.php",
-      "sha256": "e2d29b8c2bcdd64dde408a60fbe4eb2a0193a7dd0f810da43193f55bd8d9781e",
-      "bytes": 1832
+      "sha256": "fac15adc360085c6a6273bb12274d00750ab5258fa0833284219e71fee59c92a",
+      "bytes": 11897
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Quiz/AdvancedQuiz.php",
@@ -239,8 +244,8 @@
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Subscriptions/PlanManager.php",
-      "sha256": "f4edac017fe6c485b3d556da5bdffe301a0f88962240e0457ff7c97f7cf3e974",
-      "bytes": 3667
+      "sha256": "b17ad0d752bb230716f783e7cec6ea0e9909eef07baf68e4763f1117165765b4",
+      "bytes": 3986
     },
     {
       "path": "wordpress/legacy-runtime/tds-lms-core/modules/Webhooks/N8nDispatcher.php",
@@ -268,11 +273,6 @@
       "bytes": 326
     },
     {
-      "path": "wordpress/legacy-runtime/tds-lms-core/tests/bootstrap.php",
-      "sha256": "2b5777961355a115d9a5af099053d6fde4856459d4dfd3aad92f9874c85a8744",
-      "bytes": 607
-    },
-    {
       "path": "wordpress/legacy-runtime/tds-lms-core/tests/Certificates/GeneratorTest.php",
       "sha256": "394a2cb797e39db4846d06f22ee41ecba51d9c17a275ee1e3f9149d8241064d2",
       "bytes": 1204
@@ -288,9 +288,9 @@
       "bytes": 1012
     },
     {
-      "path": "wordpress/legacy-runtime/tds-lms-core-loader.php",
-      "sha256": "087bec87201753942a74978932e274d65d119b951412da0687739cc646fa2c40",
-      "bytes": 290
+      "path": "wordpress/legacy-runtime/tds-lms-core/tests/bootstrap.php",
+      "sha256": "d967cd61a8540261c1dfc6ab3e59ce8dee3c3abc0dc22bb81286be96ca707730",
+      "bytes": 602
     }
   ],
   "hash_contract": {
@@ -298,5 +298,14 @@
     "bytes": "git_blob",
     "verification": "git show HEAD:<path> | sha256",
     "reason": "stable across checkout line-ending conversion"
+  },
+  "rebaseline": {
+    "at_utc": "2026-11-01T03:00:00Z",
+    "reason": "Sanctioned drift: /register aceita cpf+password para login convergente app->site (1d0814f, PR #339)",
+    "evidence": "https://github.com/rafaloct/tutor-tds-platform/pull/339",
+    "changed_files": [
+      "wordpress/legacy-runtime/tds-lms-core/modules/API/RestController.php"
+    ],
+    "secret_scan": "no new literals; bootstrap.php test fixtures unchanged"
   }
 }

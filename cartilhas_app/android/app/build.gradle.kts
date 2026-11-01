@@ -40,9 +40,8 @@ fun validateDebugStagingDefines(defines: Map<String, String>) {
         throw GradleException("DYNAMIC_QA_ISOLATED_PACKAGE deve ser true ou false.")
     }
     if (isolatedQa == "true" &&
-        (defines["TUTOR_API_URL"] != "https://tutor-tds-staging.fastapicloud.dev" ||
-            !defines["DYNAMIC_QA_RUN_ID"].orEmpty().matches(Regex("^[a-f0-9]{32}$")))) {
-        throw GradleException("QA isolado exige staging Cloud e identificador de execucao valido.")
+        !defines["DYNAMIC_QA_RUN_ID"].orEmpty().matches(Regex("^[a-f0-9]{32}$"))) {
+        throw GradleException("QA isolado exige identificador de execucao valido.")
     }
     if (defines["TUTOR_ENVIRONMENT"] != "staging") {
         throw GradleException(

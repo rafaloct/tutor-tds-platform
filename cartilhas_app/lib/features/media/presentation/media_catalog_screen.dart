@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../config/app_config.dart';
+import '../../../models/cartilha.dart';
+import '../../../screens/chat_experience_screen.dart';
 import '../../analytics/telemetry_route.dart';
+import '../../courses/data/course_repository.dart';
+import '../../study_ai/presentation/study_hub_screen.dart';
 import '../data/media_repository.dart';
 import '../models/media_models.dart';
 import 'media_player_screen.dart';
@@ -17,8 +22,13 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
   List<MediaItem> _media = const [];
   bool _loading = true;
   String? _courseFilter;
+  String? _moduleFilter;
+  String _query = '';
   String? _catalogWarning;
   bool _usingCachedData = false;
+  Map<String, Cartilha> _cartilhasById = {};
+  List<Cartilha> _cartilhas = const [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -28,6 +38,7 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     widget.repository.dispose();
     super.dispose();
   }
@@ -49,16 +60,126 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
           !media.any((item) => item.courseId == _courseFilter)) {
         _courseFilter = null;
       }
+      if (_moduleFilter != null &&
+          !media.any(
+            (item) =>
+                item.moduleId == _moduleFilter &&
+                (_courseFilter == null || item.courseId == _courseFilter),
+          )) {
+        _moduleFilter = null;
+      }
     });
+    _loadCartilhas();
+  }
+
+  Future<void> _loadCartilhas() async {
+    try {
+      final cartilhas = await CourseRepository.forCatalog(
+        apiUrl: AppConfig.tutorApiUrl,
+      ).fetchAll();
+      if (!mounted) return;
+      setState(() {
+        _cartilhas = cartilhas;
+        _cartilhasById = {for (final c in cartilhas) c.id: c};
+      });
+    } on Object {
+      // Links de estudo ficam ocultos quando a cartilha não pôde carregar.
+    }
+  }
+
+  bool _matches(MediaItem item) {
+    if (_courseFilter != null && item.courseId != _courseFilter) return false;
+    if (_moduleFilter != null && item.moduleId != _moduleFilter) return false;
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    final haystack =
+        '${item.title} ${item.description} ${item.courseId} ${item.moduleId}'
+            .toLowerCase();
+    return haystack.contains(q);
+  }
+
+  // Rearranjo: agrupa por curso; cada seção conecta vídeo → cartilha →
+  // trilha de estudo do app (flashcards, resumos, avaliação).
+  List<Widget> _grouped(List<MediaItem> visible) {
+    final byCourse = <String, List<MediaItem>>{};
+    for (final item in visible) {
+      byCourse.putIfAbsent(item.courseId, () => []).add(item);
+    }
+    final sections = <Widget>[];
+    for (final courseId in byCourse.keys.toList()..sort()) {
+      final items = byCourse[courseId]!
+        ..sort((a, b) => a.moduleId.compareTo(b.moduleId));
+      final cartilha = _cartilhasById[courseId];
+      sections.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  cartilha?.title ?? courseId,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Text(
+                '${items.length} vídeo${items.length == 1 ? '' : 's'}',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (cartilha != null)
+                TextButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    trackedRoute(
+                      pageId: 'guided_lesson',
+                      courseId: courseId,
+                      resourceId: 'course_content',
+                      featureId: 'guided_learning',
+                      builder: (_) => ChatExperienceScreen(cartilha: cartilha),
+                    ),
+                  ),
+                  icon: const Icon(Icons.menu_book_outlined, size: 18),
+                  label: const Text('Abrir cartilha'),
+                ),
+            ],
+          ),
+        ),
+      );
+      for (final media in items) {
+        sections.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _MediaCard(
+              media: media,
+              repository: widget.repository,
+              cartilha: _cartilhasById[media.courseId],
+              cartilhas: _cartilhas,
+            ),
+          ),
+        );
+      }
+    }
+    return sections;
   }
 
   @override
   Widget build(BuildContext context) {
     final courses = _media.map((item) => item.courseId).toSet().toList()
       ..sort();
-    final visible = _courseFilter == null
-        ? _media
-        : _media.where((item) => item.courseId == _courseFilter).toList();
+    final modules =
+        _media
+            .where(
+              (item) =>
+                  _courseFilter == null || item.courseId == _courseFilter,
+            )
+            .map((item) => item.moduleId)
+            .toSet()
+            .toList()
+      ..sort();
+    final visible = _media.where(_matches).toList();
     return Scaffold(
       appBar: AppBar(title: const Text('Vídeos')),
       body: RefreshIndicator(
@@ -82,8 +203,30 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  if (courses.length > 1) ...[
+                  if (_media.isNotEmpty) ...[
                     const SizedBox(height: 16),
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) => setState(() => _query = value),
+                      decoration: InputDecoration(
+                        labelText: 'Buscar vídeo',
+                        hintText: 'Título, assunto ou curso',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _query.isEmpty
+                            ? null
+                            : IconButton(
+                                icon: const Icon(Icons.clear),
+                                tooltip: 'Limpar busca',
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _query = '');
+                                },
+                              ),
+                      ),
+                    ),
+                  ],
+                  if (courses.length > 1) ...[
+                    const SizedBox(height: 12),
                     DropdownButtonFormField<String?>(
                       initialValue: _courseFilter,
                       decoration: const InputDecoration(
@@ -102,8 +245,34 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
                           ),
                         ),
                       ],
-                      onChanged: (value) =>
-                          setState(() => _courseFilter = value),
+                      onChanged: (value) => setState(() {
+                        _courseFilter = value;
+                        _moduleFilter = null;
+                      }),
+                    ),
+                  ],
+                  if (modules.length > 1) ...[
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilterChip(
+                          label: const Text('Todas'),
+                          selected: _moduleFilter == null,
+                          onSelected: (_) =>
+                              setState(() => _moduleFilter = null),
+                        ),
+                        ...modules.map(
+                          (module) => FilterChip(
+                            label: Text(module),
+                            selected: _moduleFilter == module,
+                            onSelected: (selected) => setState(
+                              () => _moduleFilter = selected ? module : null,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                   const SizedBox(height: 16),
@@ -134,19 +303,42 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
                     const SizedBox(height: 12),
                   ],
                   if (visible.isEmpty)
-                    _catalogWarning == null
-                        ? _EmptyCatalog(onRetry: _load)
-                        : _CatalogError(onRetry: _load)
+                    _media.isNotEmpty
+                        ? Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                children: [
+                                  const Icon(
+                                    Icons.search_off,
+                                    size: 44,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    'Nenhum vídeo encontrado',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      setState(() {
+                                        _query = '';
+                                        _courseFilter = null;
+                                        _moduleFilter = null;
+                                      });
+                                    },
+                                    child: const Text('Limpar filtros'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : (_catalogWarning == null
+                            ? _EmptyCatalog(onRetry: _load)
+                            : _CatalogError(onRetry: _load))
                   else
-                    ...visible.map(
-                      (media) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _MediaCard(
-                          media: media,
-                          repository: widget.repository,
-                        ),
-                      ),
-                    ),
+                    ..._grouped(visible),
                 ],
               ),
       ),
@@ -155,9 +347,16 @@ class _MediaCatalogScreenState extends State<MediaCatalogScreen> {
 }
 
 class _MediaCard extends StatelessWidget {
-  const _MediaCard({required this.media, required this.repository});
+  const _MediaCard({
+    required this.media,
+    required this.repository,
+    this.cartilha,
+    this.cartilhas = const [],
+  });
   final MediaItem media;
   final MediaRepository repository;
+  final Cartilha? cartilha;
+  final List<Cartilha> cartilhas;
 
   @override
   Widget build(BuildContext context) {
@@ -268,6 +467,57 @@ class _MediaCard extends StatelessWidget {
                         Icon(Icons.cloud_off_outlined, size: 18),
                         SizedBox(width: 6),
                         Expanded(child: Text('Conecte-se para reproduzir')),
+                      ],
+                    ),
+                  ],
+                  if (cartilha != null || cartilhas.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'Como estudar',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (cartilha != null)
+                          ActionChip(
+                            avatar: const Icon(
+                              Icons.menu_book_outlined,
+                              size: 16,
+                            ),
+                            label: const Text('Cartilha'),
+                            onPressed: () => Navigator.push(
+                              context,
+                              trackedRoute(
+                                pageId: 'guided_lesson',
+                                courseId: media.courseId,
+                                resourceId: 'course_content',
+                                featureId: 'guided_learning',
+                                builder: (_) =>
+                                    ChatExperienceScreen(cartilha: cartilha!),
+                              ),
+                            ),
+                          ),
+                        if (cartilhas.isNotEmpty)
+                          ActionChip(
+                            avatar: const Icon(Icons.route_outlined, size: 16),
+                            label: const Text('Trilha de estudo'),
+                            onPressed: () => Navigator.push(
+                              context,
+                              trackedRoute(
+                                pageId: 'study_hub',
+                                courseId: media.courseId,
+                                resourceId: 'study_resources',
+                                featureId: 'study_ai',
+                                builder: (_) =>
+                                    StudyHubScreen(cartilhas: cartilhas),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ],

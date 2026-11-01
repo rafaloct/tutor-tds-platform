@@ -11,6 +11,7 @@ import '../data/learner_offline_repository.dart';
 import '../models/classroom_models.dart';
 import '../../learning_context/learning_context_controller.dart';
 import '../../learning_context/learning_context_repository.dart';
+import '../data/self_enrollment_repository.dart';
 
 /// Class membership is verified by the API; the public catalog stays separate.
 class LearnerClassroomsScreen extends StatefulWidget {
@@ -19,9 +20,11 @@ class LearnerClassroomsScreen extends StatefulWidget {
     this.gateway,
     this.onOpenCourse,
     this.contextRepository,
+    this.selfEnrollmentGateway,
   });
   final LearnerClassroomGateway? gateway;
   final LearningContextRepository? contextRepository;
+  final SelfEnrollmentGateway? selfEnrollmentGateway;
   final void Function(Cartilha course, String ownerId)? onOpenCourse;
 
   @override
@@ -34,7 +37,10 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
   ClassroomRepository? _ownedRemote;
   RemoteLearningContextRepository? _ownedContextRepository;
   LearningContextController? _contextController;
+  SelfEnrollmentGateway? _selfEnrollment;
+  RemoteSelfEnrollmentRepository? _ownedSelfEnrollment;
   List<ClassroomDetails> _classes = const [];
+  List<OpenClassItem> _openClasses = const [];
   String? _ownerId;
   String? _error;
   bool _loading = true;
@@ -66,6 +72,14 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
       );
       _contextController = LearningContextController(_ownedContextRepository!);
     }
+    _selfEnrollment =
+        widget.selfEnrollmentGateway ??
+        (AppConfig.selfEnrollmentEnabled
+            ? (_ownedSelfEnrollment = RemoteSelfEnrollmentRepository(
+                apiUrl: AppConfig.tutorApiUrl,
+                auth: context.read<AuthRepository>(),
+              ))
+            : null);
     _load();
   }
 
@@ -74,6 +88,7 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
     _ownedRemote?.dispose();
     _contextController?.dispose();
     _ownedContextRepository?.dispose();
+    _ownedSelfEnrollment?.dispose();
     super.dispose();
   }
 
@@ -87,10 +102,24 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
     try {
       final user = await _gateway.currentUser();
       final classes = await _gateway.learnerClassrooms();
+      var openClasses = const <OpenClassItem>[];
+      final selfEnrollment = _selfEnrollment;
+      if (selfEnrollment != null) {
+        try {
+          openClasses = (await selfEnrollment.openClasses())
+              .where((item) => !item.viewerEnrolled)
+              .toList(growable: false);
+        } on Object {
+          // Open-class discovery is additive; its failure must not hide
+          // the learner's existing classes.
+          openClasses = const [];
+        }
+      }
       if (!mounted) return;
       setState(() {
         _ownerId = user.id;
         _classes = classes;
+        _openClasses = openClasses;
       });
     } catch (_) {
       if (mounted) {
@@ -104,20 +133,52 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
     }
   }
 
-  Future<void> _open(ClassroomDetails classroom) async {
-    if (_opening != null || _ownerId == null) return;
+  Future<void> _open(ClassroomDetails classroom) => _openClass(classroom.id);
+
+  Future<void> _enrollAndOpen(OpenClassItem item) async {
+    final selfEnrollment = _selfEnrollment;
+    if (_opening != null || _ownerId == null || selfEnrollment == null) {
+      return;
+    }
     setState(() {
-      _opening = classroom.id;
+      _opening = item.id;
       _error = null;
     });
     try {
-      final snapshot = await _contextController?.load(classroom.id);
+      // The server creates membership -> enrollment -> class enrollment ->
+      // cohort binding atomically and returns the resolved context. The
+      // standard guarded open below re-resolves it so offline caching keeps
+      // a single writer.
+      await selfEnrollment.selfEnroll(item.courseId);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error =
+              'Não foi possível concluir sua matrícula agora. Verifique sua conexão e tente novamente; você não será matriculado duas vezes.',
+        );
+      }
+      return;
+    } finally {
+      if (mounted) setState(() => _opening = null);
+    }
+    await _load();
+    if (mounted && _error == null) await _openClass(item.id);
+  }
+
+  Future<void> _openClass(String classId) async {
+    if (_opening != null || _ownerId == null) return;
+    setState(() {
+      _opening = classId;
+      _error = null;
+    });
+    try {
+      final snapshot = await _contextController?.load(classId);
       if (!mounted) return;
       if (_contextController != null &&
           (snapshot == null || snapshot.context.userId != _ownerId)) {
         throw const ClassroomException('Contexto da matrícula indisponível.');
       }
-      final course = await _gateway.course(classroom.id);
+      final course = await _gateway.course(classId);
       if (!mounted) return;
       if (snapshot != null && !snapshot.context.matchesCourse(course)) {
         throw const ClassroomException('A edição não corresponde à matrícula.');
@@ -214,6 +275,37 @@ class _LearnerClassroomsScreenState extends State<LearnerClassroomsScreen> {
                     onTap: _opening == null ? () => _open(classroom) : null,
                   ),
                 ),
+              if (_openClasses.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'Cursos abertos',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Toque para criar sua matrícula e abrir a edição da turma. O registro do seu progresso fica vinculado à sua conta.',
+                ),
+                const SizedBox(height: 8),
+                for (final item in _openClasses)
+                  Card(
+                    child: ListTile(
+                      key: Key('open-class-${item.id}'),
+                      leading: const Icon(Icons.lock_open_outlined),
+                      title: Text(item.courseTitle),
+                      subtitle: Text('${item.name} • matrícula espontânea'),
+                      trailing: _opening == item.id
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.how_to_reg_outlined),
+                      onTap: _opening == null
+                          ? () => _enrollAndOpen(item)
+                          : null,
+                    ),
+                  ),
+              ],
             ],
           ),
   );

@@ -181,6 +181,29 @@
     reconciliação pelo seu escritor. Plano de Trabalho não examinado, provider
     real e ativação não comprovados. Matriz: program/JOURNEY_CONTRACT_RECONCILIATION_2026-10-03.md.
 
+29. 2026-10-31: usuário autorizou matrícula espontânea (self-enrollment) como
+    solução para cadastros/prévios: catálogo continua exposto e o primeiro
+    toque autenticado cria a matrícula canônica, enquanto outro agente cuida da
+    raiz identidade-matrícula. Decisões registradas: (a) sempre deve existir
+    turma válida aberta por curso elegível — o próprio comando provisiona uma
+    turma `enrollment_policy='open'` de forma determinística e idempotente
+    (curso ativo, edição publicada, oferta e responsável do programa; sem eles
+    falha explícita, nunca inventa turma); (b) aluno sem conta WordPress tem a
+    conta provisionada na sincronização via novo `POST /tds/v1/register` —
+    exceção aprovada ao congelamento do tds-lms-core, somente endpoint
+    operacional, sem regra acadêmica nova no legado; (c) escopo desta fatia é
+    contrato + implementação flag-off. Cadeia canônica preservada
+    (membership→enrollment→class_enrollment→cohort_membership/contexto v2) sem
+    entidade paralela; recibo de operador audita a auto-matrícula com
+    actor=subject=aluno. LearnPress segue projeção via outbox
+    `external_sync_requests` com claim/lease/backoff — nunca autoridade, falha
+    externa não reverte matrícula canônica. Turma aberta é autoestudo: sem
+    encontros configurados não produz CAPACITADO; turmas tutoradas continuam
+    `managed` e exclusivas da equipe. Flags `SELF_ENROLLMENT_ENABLED` e
+    `LEARNPRESS_SYNC_ENABLED` desligadas até staging isolado e aprovação
+    humana; sem promoção de produção. Contrato:
+    production/SELF_ENROLLMENT_CONTRACT.md.
+
 28. 2026-10-03: registro do candidato #39 implementando a decisão direta do
     usuário na Issue #5 comentário5965837795: curso80h formal, presença70% de encontros configurados, baseline
     multiorigem e checkpoints integrais. CAPACITADO e CERTIFICADO_VALIDO são

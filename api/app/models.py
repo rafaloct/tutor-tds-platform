@@ -18,6 +18,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
     false,
+    text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -309,6 +310,10 @@ class Classroom(Base):
             name="fk_classes_teacher_membership",
         ),
         CheckConstraint("end_date >= start_date", name="ck_classes_date_range"),
+        CheckConstraint(
+            "enrollment_policy IN ('managed','open')",
+            name="ck_classes_enrollment_policy",
+        ),
         UniqueConstraint(
             "id", "program_id", name="uq_classes_program_lineage"
         ),
@@ -317,6 +322,17 @@ class Classroom(Base):
             "program_id",
             "course_id",
             name="uq_classes_course_lineage",
+        ),
+        Index(
+            "uq_classes_open_course",
+            "course_id",
+            unique=True,
+            sqlite_where=text(
+                "enrollment_policy = 'open' AND status != 'closed'"
+            ),
+            postgresql_where=text(
+                "enrollment_policy = 'open' AND status != 'closed'"
+            ),
         ),
     )
 
@@ -332,6 +348,9 @@ class Classroom(Base):
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String(24), nullable=False, default="planned")
+    enrollment_policy: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="managed", server_default="managed"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -575,6 +594,43 @@ class SyncDeletionRequest(Base):
     requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_error: Mapped[str | None] = mapped_column(Text)
+
+
+class ExternalSyncRequest(Base):
+    """Outbound projection queue; never an authorization source."""
+
+    __tablename__ = "external_sync_requests"
+    __table_args__ = (
+        UniqueConstraint("kind", "user_id", "course_id", name="uq_external_sync_subject"),
+        CheckConstraint(
+            "status IN ('pending','processing','done','failed')",
+            name="ck_external_sync_status",
+        ),
+        CheckConstraint("attempts >= 0", name="ck_external_sync_attempts"),
+        Index("ix_external_sync_claim", "status", "next_attempt_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    kind: Mapped[str] = mapped_column(String(64), nullable=False)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    class_id: Mapped[str] = mapped_column(
+        ForeignKey("classes.id", ondelete="CASCADE"), nullable=False
+    )
+    course_id: Mapped[str] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE"), nullable=False
+    )
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="pending")
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class MediaAsset(Base):

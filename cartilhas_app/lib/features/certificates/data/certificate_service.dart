@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -113,7 +114,8 @@ class CertificateService {
       throw const CertificateException('O hash do certificado não confere.');
     }
 
-    final filePath = await pdfService.save(certificate);
+    // Web nao tem filesystem: o PDF e reconstruido sob demanda em build().
+    final filePath = kIsWeb ? null : await pdfService.save(certificate);
     final stored = certificate.copyWith(filePath: filePath);
     await repository.upsert(stored);
     return stored;
@@ -151,6 +153,17 @@ class CertificateService {
     bool email = false,
   }) async {
     if (records.isEmpty) throw ArgumentError('Nenhum certificado selecionado.');
+    if (kIsWeb) {
+      // Sem filesystem/SharePlus no web: bytes -> download via browser (blob).
+      final bytes = await pdfService.build(records);
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: records.length == 1
+            ? 'certificado-tds.pdf'
+            : 'certificados-tds.pdf',
+      );
+      return;
+    }
     final files = <XFile>[];
     for (final record in records) {
       var path = record.filePath;

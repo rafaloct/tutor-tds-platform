@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:cartilhas_app/genui/genui_renderer.dart';
 import 'package:cartilhas_app/genui/atui_parser.dart';
 import 'package:cartilhas_app/models/genui_response.dart';
 
 void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets('GenUIRenderer renders text and buttons from GenUI response', (
     WidgetTester tester,
   ) async {

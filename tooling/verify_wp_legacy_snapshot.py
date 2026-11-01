@@ -12,6 +12,7 @@ ALLOWED_LEGACY_REFERENCES = {
     "wordpress/README.md",
     "tooling/verify_wp_legacy_snapshot.py",
     ".github/workflows/wp-legacy-quarantine.yml",
+    ".gitleaks.toml",
 }
 
 

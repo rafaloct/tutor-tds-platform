@@ -75,6 +75,41 @@ class ClassroomDetails {
   }
 }
 
+/// Open class offered for spontaneous enrollment (enrollment_policy='open').
+/// The API still authorizes every enrollment; this list is discovery only.
+class OpenClassItem {
+  const OpenClassItem({
+    required this.id,
+    required this.programId,
+    required this.courseId,
+    required this.courseTitle,
+    required this.name,
+    required this.status,
+    required this.viewerEnrolled,
+    this.courseVersionId,
+  });
+
+  final String id;
+  final String programId;
+  final String courseId;
+  final String courseTitle;
+  final String name;
+  final String status;
+  final bool viewerEnrolled;
+  final String? courseVersionId;
+
+  factory OpenClassItem.fromJson(Map<String, dynamic> json) => OpenClassItem(
+    id: _requiredString(json, 'id'),
+    programId: _requiredString(json, 'program_id'),
+    courseId: _requiredString(json, 'course_id'),
+    courseTitle: _requiredString(json, 'course_title'),
+    name: _requiredString(json, 'name'),
+    status: _requiredString(json, 'status'),
+    viewerEnrolled: json['viewer_enrolled'] == true,
+    courseVersionId: json['course_version_id'] as String?,
+  );
+}
+
 class ClassroomAlert {
   const ClassroomAlert({required this.code});
   final String code;

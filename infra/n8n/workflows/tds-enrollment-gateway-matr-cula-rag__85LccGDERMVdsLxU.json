@@ -1,0 +1,419 @@
+{
+  "updatedAt": "2026-05-30T19:45:12.385Z",
+  "createdAt": "2026-04-09T20:33:11.455Z",
+  "id": "85LccGDERMVdsLxU",
+  "name": "TDS — Enrollment Gateway (Matrícula + RAG)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh-gateway",
+      "name": "Webhook Gateway",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        400
+      ],
+      "webhookId": "tds-gateway-001",
+      "parameters": {
+        "path": "tds-gateway",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "responseData": "noData"
+      }
+    },
+    {
+      "id": "extrair-dados",
+      "name": "Extrair Dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        400
+      ],
+      "parameters": {
+        "jsCode": "\nconst input = $input.first().json;\nconst body = input.body || input;\n\n// Ignorar eventos que não sejam criação de mensagem\nif (body.event && body.event !== 'message_created') return [];\nconst msgType = String(body.message_type ?? body.message?.message_type ?? '');\nif (msgType === 'outgoing' || msgType === '1') return [];\nconst senderType = String(body.sender?.type ?? '');\nif (senderType === 'agent_bot' || senderType === 'user') return [];\n\nconst sessionId = String(\n  body.meta?.sender?.identifier ||\n  body.sender?.phone_number ||\n  body.conversation?.meta?.sender?.identifier ||\n  body.contact?.phone_number || ''\n);\nconst conversationId = String(body.conversation?.id || '');\nconst accountId      = String(body.conversation?.account_id || '1');\nconst contactName    = String(body.meta?.sender?.name || body.sender?.name || '');\nconst contentType    = String(body.content_type ?? body.message?.content_type ?? 'text');\nconst messageText    = String(body.content || body.message?.content || '').trim();\n\n// Normalizar telefone\nconst phoneClean = sessionId.replace(/[^\\d]/g, '');\n\nreturn [{ json: {\n  sessionId, phoneClean, conversationId, accountId, contactName,\n  contentType, messageText,\n  rawBody: body\n}}];\n"
+      }
+    },
+    {
+      "id": "verificar-matricula",
+      "name": "Verificar Matrícula",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        680,
+        400
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT COALESCE((SELECT estado FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1), 'novo') as estado, (SELECT phone FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as phone, (SELECT nome FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as nome, (SELECT cpf FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as cpf, (SELECT municipio FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as municipio, (SELECT renda_familiar FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as renda_familiar, (SELECT curso_escolhido FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as curso_escolhido, (SELECT workspace_slug FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as workspace_slug, (SELECT msg_count FROM enrollment_drafts WHERE phone = '{{ $json.phoneClean }}' LIMIT 1) as msg_count"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "wAJovSb9ceHlYden",
+          "name": "PostgreSQL Kreativ"
+        }
+      }
+    },
+    {
+      "id": "e-matriculado",
+      "name": "É Matriculado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-completo",
+              "leftValue": "={{ $json.estado ?? '' }}",
+              "rightValue": "completo",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "forward-rag",
+      "name": "Forward para RAG",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        260
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.ipexdesenvolvimento.cloud/webhook/chatwoot-kreativ",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($('Webhook Gateway').first().json.body) }}",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "fluxo-matricula",
+      "name": "Fluxo Matrícula",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        540
+      ],
+      "parameters": {
+        "jsCode": "\nconst extrair = $('Extrair Dados').first().json;\nconst { phoneClean, conversationId, accountId, messageText, contactName } = extrair;\n\n// Pegar draft do Postgres\nlet draft = {};\ntry {\n  const pg = $('Verificar Matrícula').first().json;\n  if (pg && pg.phone) draft = pg;\n} catch(e) {}\n\nconst currentState = draft.estado || 'novo';\nconst txt = (messageText || '').trim();\n\nconst CURSOS = [\n  { nome: 'Agricultura Sustentável — Sistemas Agroflorestais', slug: 'tds-agricultura-sustentavel' },\n  { nome: 'Audiovisual e Produção de Conteúdo Digital',        slug: 'tds-audiovisual-e-conteudo' },\n  { nome: 'Finanças e Empreendedorismo',                       slug: 'tds-financas-e-empreendedorismo' },\n  { nome: 'Educação Financeira para a Melhor Idade',           slug: 'tds-educacao-financeira-terceira-idade' },\n  { nome: 'Associativismo e Cooperativismo',                   slug: 'tds-associativismo-e-cooperativismo' },\n  { nome: 'IA no meu Bolso — Inteligência Artificial para o Dia a Dia', slug: 'tds-ia-no-meu-bolso' },\n  { nome: 'SIM — Serviço de Inspeção Municipal para Pequenos Produtores', slug: 'tds-sim' }\n];\n\nlet nextMessage = '';\nlet nextState = currentState;\nlet updates = {};\nlet isComplete = false;\n\nif (currentState === 'novo') {\n  nextState = 'aguarda_nome';\n  const pn = (contactName || '').split(' ')[0];\n  const ola = pn ? `Olá, ${pn}! 👋` : 'Olá! 👋';\n  nextMessage = `${ola}\\n\\nBem-vindo(a) ao *Programa TDS* — Transformação Digital para Inclusão Social! 🌱\\n\\nCursos gratuitos, com certificado, direto no WhatsApp, no seu ritmo.\\n\\nPra garantir sua vaga, preciso de algumas informações rápidas. Pode me dizer seu *nome completo*?`;\n\n} else if (currentState === 'aguarda_nome') {\n  if (txt.length >= 3 && txt.split(' ').length >= 2) {\n    updates.nome = txt;\n    nextState = 'aguarda_cpf';\n    const pn = txt.split(' ')[0];\n    nextMessage = `Prazer, ${pn}! 😊\\n\\nPreciso do seu *CPF* (somente os 11 números).\\n\\n💡 Ele é necessário para emitir o certificado pelo IPEX. Seus dados ficam protegidos e não são compartilhados.`;\n  } else {\n    nextMessage = `Por favor, informe seu *nome completo* (nome e sobrenome):`;\n  }\n\n} else if (currentState === 'aguarda_cpf') {\n  const cpf = txt.replace(/\\D/g, '');\n  if (cpf.length === 11) {\n    updates.cpf = cpf;\n    nextState = 'aguarda_municipio';\n    nextMessage = `✅ CPF registrado!\\n\\nEm qual *município* você mora?`;\n  } else {\n    nextMessage = `O CPF precisa ter 11 dígitos. Por favor, tente novamente (somente números, ex: 12345678901):`;\n  }\n\n} else if (currentState === 'aguarda_municipio') {\n  if (txt.length >= 2) {\n    updates.municipio = txt;\n    nextState = 'aguarda_renda';\n    nextMessage = `📍 *${txt}* — anotado!\\n\\nA FAPTO — entidade que financia o programa — precisa saber a *renda mensal da sua família*. Não afeta sua matrícula!\\n\\n1️⃣ Até R$ 218\\n2️⃣ De R$ 218 a R$ 660\\n3️⃣ De R$ 660 a R$ 2.640\\n4️⃣ Acima de R$ 2.640\\n5️⃣ Prefiro não informar\\n\\nDigite o número:`;\n  } else {\n    nextMessage = `Por favor, informe o nome do *município* onde você mora:`;\n  }\n\n} else if (currentState === 'aguarda_renda') {\n  const rendaMap = {\n    '1':'Até R$ 218 (extrema pobreza)',\n    '2':'De R$ 218 a R$ 660 (pobreza)',\n    '3':'De R$ 660 a R$ 2.640 (baixa renda)',\n    '4':'Acima de R$ 2.640',\n    '5':'Prefiro não informar'\n  };\n  updates.renda_familiar = rendaMap[txt] || txt;\n  nextState = 'aguarda_curso';\n  const menu = CURSOS.map((c, i) => `${i+1}️⃣ ${c.nome}`).join('\\n');\n  nextMessage = `📚 Agora a melhor parte — escolha seu *curso*!\\n\\n${menu}\\n\\nDigite o número da opção:`;\n\n} else if (currentState === 'aguarda_curso') {\n  const idx = parseInt(txt) - 1;\n  if (idx >= 0 && idx < CURSOS.length) {\n    const curso = CURSOS[idx];\n    updates.curso_escolhido = curso.nome;\n    updates.workspace_slug = curso.slug;\n    updates.estado = 'completo';\n    nextState = 'completo';\n    isComplete = true;\n    nextMessage = `🎉 *Matrícula confirmada!*\\n\\n📚 Curso: *${curso.nome}*\\n\\nSeu tutor de IA já está pronto! Pode perguntar qualquer coisa sobre o curso.\\n\\nDica: digite *quiz* quando quiser testar seus conhecimentos e avançar para o certificado! 🏆`;\n  } else {\n    nextMessage = `Por favor, digite um número de 1 a ${CURSOS.length}:`;\n  }\n}\n\n// SQL upsert\nconst phone = phoneClean;\nconst setItems = { ...updates, estado: nextState, updated_at: \"NOW()\" };\nconst setParts = Object.entries(setItems)\n  .map(([k, v]) => v === \"NOW()\" ? `${k} = NOW()` : `${k} = '${String(v).replace(/'/g, \"''\")}'`)\n  .join(', ');\n\nconst upsertSql = `\n  INSERT INTO enrollment_drafts (phone, estado)\n  VALUES ('${phone}', '${nextState}')\n  ON CONFLICT (phone) DO UPDATE SET ${setParts}\n`;\n\n\n// Lógica de Feedback Automático (Tutor Vizinho)\nlet currentCount = parseInt(draft.msg_count || 0) + 1;\nupdates.msg_count = currentCount;\n\nif (currentCount % 3 === 0 && nextState === 'completo') {\n  nextMessage += \"\n\nEssa explicação ficou clara pra você? (Responda SIM ou NÃO)\";\n}\n\nreturn [{ json: { nextMessage, nextState, upsertSql, isComplete, conversationId, accountId, phone }}];\n"
+      }
+    },
+    {
+      "id": "salvar-draft",
+      "name": "Salvar Draft",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        540
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.upsertSql }}"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "wAJovSb9ceHlYden",
+          "name": "PostgreSQL Kreativ"
+        }
+      }
+    },
+    {
+      "id": "resposta-matricula",
+      "name": "Resposta Matrícula",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1560,
+        540
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Fluxo Matrícula').first().json.accountId }}/conversations/{{ $('Fluxo Matrícula').first().json.conversationId }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $('Fluxo Matrícula').first().json.nextMessage }}"
+            },
+            {
+              "name": "message_type",
+              "value": "outgoing"
+            },
+            {
+              "name": "private",
+              "value": false
+            }
+          ]
+        },
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "fallback-draft",
+      "name": "Draft ou Padrão",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ],
+      "parameters": {
+        "jsCode": "\n// Se Verificar Matrícula não retornou linhas (usuário novo), retornar objeto padrão\nconst items = $input.all();\nif (!items || items.length === 0 || !items[0].json || items[0].json.success === true) {\n  return [{ json: { phone: null, estado: 'novo', nome: null } }];\n}\nreturn items;\n"
+      }
+    },
+    {
+      "id": "node-cw-feedback",
+      "name": "Pergunta Feedback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1350,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.ipexdesenvolvimento.cloud/api/v1/accounts/{{ $('Extrair Dados').first().json.accountId }}/conversations/{{ $('Extrair Dados').first().json.conversationId }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "jsonBody": "={\"content\": \"Essa explicação ficou clara pra você? (Responda SIM ou NÃO)\", \"message_type\": \"outgoing\"}",
+        "options": {},
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "tdsCwCred001xx",
+          "name": "TDS Chatwoot Token"
+        }
+      }
+    },
+    {
+      "id": "node-check-feedback",
+      "name": "Hora do Feedback?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-3",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ parseInt($('Fluxo Matrícula').first().json.updates.msg_count) % 3 }}",
+              "rightValue": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Gateway": {
+      "main": [
+        [
+          {
+            "node": "Extrair Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Dados": {
+      "main": [
+        [
+          {
+            "node": "Verificar Matrícula",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Matrícula": {
+      "main": [
+        [
+          {
+            "node": "Draft ou Padrão",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Matriculado?": {
+      "main": [
+        [
+          {
+            "node": "Forward para RAG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fluxo Matrícula",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fluxo Matrícula": {
+      "main": [
+        [
+          {
+            "node": "Salvar Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar Draft": {
+      "main": [
+        [
+          {
+            "node": "Resposta Matrícula",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft ou Padrão": {
+      "main": [
+        [
+          {
+            "node": "É Matriculado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forward para RAG": {
+      "main": [
+        [
+          {
+            "node": "Hora do Feedback?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hora do Feedback?": {
+      "main": [
+        [
+          {
+            "node": "Pergunta Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionTimeout": 120,
+    "errorWorkflow": "tdsErrFallback1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "452dd1ce-0e16-4b79-b0ec-60584180f5e6",
+  "activeVersionId": "452dd1ce-0e16-4b79-b0ec-60584180f5e6",
+  "versionCounter": 57,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-09T20:33:11.455Z",
+      "createdAt": "2026-04-09T20:33:11.455Z",
+      "role": "workflow:owner",
+      "workflowId": "85LccGDERMVdsLxU",
+      "projectId": "wuWCmYpvxv9RzTX6",
+      "project": {
+        "updatedAt": "2026-10-07T17:18:29.247Z",
+        "createdAt": "2026-03-28T22:11:31.815Z",
+        "id": "wuWCmYpvxv9RzTX6",
+        "name": "TDS L <tdsdados@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e0d2dc56-f927-49a3-9a29-0a259177a5eb"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": "TDS — Enrollment Gateway (Matrícula + RAG)",
+    "description": null
+  }
+}

@@ -7,7 +7,11 @@ void main() {
     final html = buildSecureMediaHtml(_media(MediaProvider.youtube));
 
     expect(html, contains('youtube.com/iframe_api'));
-    expect(html, contains("host:'https://www.youtube-nocookie.com'"));
+    expect(
+      html,
+      contains('playerVars:{rel:0,playsinline:1,start:0,cc_load_policy:1}'),
+    );
+    expect(html, contains('const fallbackDuration=100'));
     expect(html, contains('AbCdEf12345'));
     expect(html, contains('setPlaybackRate'));
     expect(html, contains('TutorVideo.postMessage'));

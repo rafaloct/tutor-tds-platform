@@ -69,11 +69,8 @@ class _CertificateRequestsScreenState extends State<CertificateRequestsScreen> {
       final rows = widget.reviewMode
           ? await _gateway.reviewQueue()
           : await _gateway.ownRequests();
-      final contexts =
-          !widget.reviewMode &&
-              widget.courseId != null &&
-              widget.courseVersionId != null
-          ? await _gateway.contexts(widget.courseId!, widget.courseVersionId!)
+      final contexts = !widget.reviewMode && widget.courseId != null
+          ? await _gateway.contexts(widget.courseId!, widget.courseVersionId)
           : <CertificateRequestContext>[];
       if (!mounted) return;
       setState(() {
